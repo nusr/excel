@@ -16,12 +16,12 @@
     "test:coverage": "npm run test -- --coverage",
     "dependencies": "node ./scripts/dependencies.js",
     "check-version": "ncu -u",
-    "ci": "npm run lint && npm run test && npm run build",
-    "deploy": "deploy.cmd"
+    "ci": "npm run lint && npm run test && npm run build && npm run deploy",
+    "deploy": "deploy.sh"
   },
   "husky": {
     "hooks": {
-      "pre-push": "npm run ci && npm run deploy"
+      "pre-push": "npm run ci"
     }
   },
   "repository": {
@@ -31,7 +31,7 @@
   "keywords": [],
   "author": "Steve Xu <1161176156@qq.com>",
   "license": "MIT",
-  "homepage": "https://github.com/nusr/excel",
+  "homepage": "https://nusr.github.io/excel",
   "dependencies": {
     "immer": "^8.0.0",
     "lodash-es": "^4.17.15",

@@ -189,17 +189,20 @@
   "combined-stream": {
     "delayed-stream": "~1.0.0"
   },
-  "concat-stream": {
-    "buffer-from": "^1.0.0",
-    "inherits": "^2.0.3",
-    "readable-stream": "^2.2.2",
-    "typedarray": "^0.0.6"
-  },
   "convert-source-map": {
     "safe-buffer": "~5.1.1"
   },
+  "cosmiconfig": {
+    "@types/parse-json": "^4.0.0",
+    "import-fresh": "^3.2.1",
+    "parse-json": "^5.0.0",
+    "path-type": "^4.0.0",
+    "yaml": "^1.10.0"
+  },
   "cross-spawn": {
-    "lru-cache": "^4.0.1",
+    "nice-try": "^1.0.4",
+    "path-key": "^2.0.1",
+    "semver": "^5.5.0",
     "shebang-command": "^1.2.0",
     "which": "^1.2.9"
   },
@@ -369,6 +372,9 @@
   "find-up": {
     "locate-path": "^5.0.0",
     "path-exists": "^4.0.0"
+  },
+  "find-versions": {
+    "semver-regex": "^2.0.0"
   },
   "flat-cache": {
     "flatted": "^3.1.0",
@@ -558,8 +564,7 @@
     "js-tokens": "^3.0.0 || ^4.0.0"
   },
   "lru-cache": {
-    "pseudomap": "^1.0.2",
-    "yallist": "^2.1.2"
+    "yallist": "^4.0.0"
   },
   "make-dir": {
     "semver": "^6.0.0"
@@ -684,6 +689,9 @@
   "pkg-dir": {
     "find-up": "^4.0.0"
   },
+  "please-upgrade-node": {
+    "semver-compare": "^1.0.0"
+  },
   "pretty-format": {
     "@jest/types": "^26.6.2",
     "ansi-regex": "^5.0.0",
@@ -713,15 +721,6 @@
     "find-up": "^4.1.0",
     "read-pkg": "^5.2.0",
     "type-fest": "^0.8.1"
-  },
-  "readable-stream": {
-    "core-util-is": "~1.0.0",
-    "inherits": "~2.0.3",
-    "isarray": "~1.0.0",
-    "process-nextick-args": "~2.0.0",
-    "safe-buffer": "~5.1.1",
-    "string_decoder": "~1.1.1",
-    "util-deprecate": "~1.0.1"
   },
   "regex-not": {
     "extend-shallow": "^3.0.2",
@@ -860,10 +859,6 @@
     "buffer-from": "^1.0.0",
     "source-map": "^0.6.0"
   },
-  "spawn-sync": {
-    "concat-stream": "^1.4.7",
-    "os-shim": "^0.1.2"
-  },
   "spdx-correct": {
     "spdx-expression-parse": "^3.0.0",
     "spdx-license-ids": "^3.0.0"
@@ -913,9 +908,6 @@
   "string.prototype.trimstart": {
     "call-bind": "^1.0.0",
     "define-properties": "^1.1.3"
-  },
-  "string_decoder": {
-    "safe-buffer": "~5.1.0"
   },
   "strip-ansi": {
     "ansi-regex": "^5.0.0"
