@@ -1,5 +1,6 @@
 # Excel
 
+[online demo](https://nusr.github.io/excel/)
 ## Start
 
 ```bash

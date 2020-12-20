@@ -1,11 +1,13 @@
 import React, { memo, useCallback } from "react";
 import styled from "styled-components";
-import { Button } from "@/components";
+import { Button, Github } from "@/components";
 
 export const ToolbarContainer = styled.div`
   width: 100%;
   padding: 0 20px;
   box-sizing: border-box;
+  height: 40px;
+  line-height: 40px;
 `;
 
 const italicStyle = {
@@ -34,6 +36,7 @@ export const Toolbar = memo(() => {
       <Button style={underlineStyle} onClick={handleUnderline}>
         U
       </Button>
+      <Github />
     </ToolbarContainer>
   );
 });

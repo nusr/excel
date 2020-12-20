@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from "react";
-import styled from "styled-components";
+import styled, { withTheme } from "styled-components";
 import classnames from "classnames";
 import { Button } from "@/components";
 import { useSelector } from "@/store";
@@ -18,14 +18,14 @@ const SheetList = styled.div`
   display: flex;
   align-items: center;
 `;
-const SheetItem = styled.div`
+const SheetItem = withTheme(styled.div`
   padding: 0 10px;
   border-left: 1px solid #808080;
   &.active {
     background-color: #fff;
-    color: green;
+    color: ${({ theme }) => theme.primaryColor};
   }
-`;
+`);
 const AddSheetWrapper = styled.div`
   margin-left: 20px;
 `;

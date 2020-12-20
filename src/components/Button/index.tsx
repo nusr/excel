@@ -4,6 +4,7 @@ import classnames from "classnames";
 
 const ButtonContainer = styled.div`
   padding: 0 5px;
+  min-width: 20px;
   height: 20px;
   line-height: 20px;
   text-align: center;
@@ -14,6 +15,7 @@ const ButtonContainer = styled.div`
   display: inline-block;
   background-color: #fff;
   border-radius: 4px;
+  border: 1px solid transparent;
   & + & {
     margin-left: 8px;
   }
@@ -27,7 +29,7 @@ const ButtonContainer = styled.div`
   &:hover,
   &.active {
     background-color: #c6c6c6;
-    border: 1px solid #808080;
+    border-color: #808080;
   }
 `;
 type ButtonProps = {

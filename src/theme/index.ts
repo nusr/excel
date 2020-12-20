@@ -1,6 +1,7 @@
-import size from './size';
-
+import size from "./size";
+import color from "./color";
 const theme = {
-    ...size,
-}
+  ...size,
+  ...color,
+};
 export default theme;

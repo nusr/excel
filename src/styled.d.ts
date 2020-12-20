@@ -7,5 +7,6 @@ declare module "styled-components" {
     largeFont: string;
     padding: string;
     margin: string;
+    primaryColor: string;
   }
 }
