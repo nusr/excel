@@ -1,4 +1,3 @@
-import { isEmpty } from "lodash-es";
 function handleEvent(data?: any): void {
   console.log(data);
 }

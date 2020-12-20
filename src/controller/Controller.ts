@@ -6,6 +6,7 @@ import { Action, CellPosition, WorkBookJSON } from "@/types";
 import { IWindowSize, eventEmitter, DISPATCH_ACTION } from "@/util";
 
 export interface IController {
+  addSheet(): void;
   reset(): void;
   selectAll(): void;
   loadJSON(json: WorkBookJSON): void;
@@ -26,7 +27,7 @@ export class Controller implements IController {
   private model: Model = new Model();
   constructor(canvas: HTMLCanvasElement) {
     this.draw = new Draw(canvas);
-    this.render();
+    this.addSheet();
   }
   dispatchAction(data: Action): void {
     eventEmitter.emit(DISPATCH_ACTION, data);
@@ -37,14 +38,20 @@ export class Controller implements IController {
     }
     this.model.currentSheetId = id;
     this.render();
+    this.changeActiveCell(0, 0);
+  }
+  addSheet(): void {
+    this.model.addSheet();
+    this.render();
+    this.changeActiveCell(0, 0);
   }
   selectAll(): void {
     console.log("selectAll");
   }
-  selectCol(offsetX: number, offsetY: number): void {
+  selectCol(): void {
     console.log("selectCol");
   }
-  selectRow(offsetX: number, offsetY: number): void {
+  selectRow(): void {
     console.log("selectRow");
   }
   quitEditing(): void {
@@ -63,7 +70,7 @@ export class Controller implements IController {
   }
   changeActiveCell(row: number, col: number): void {
     const { model } = this;
-    const { rowCount, colCount } = model;
+    const { rowCount, colCount } = model.getSheetInfo();
     if (row >= rowCount || col >= colCount) {
       return;
     }
@@ -92,7 +99,6 @@ export class Controller implements IController {
   protected render(): void {
     const { draw, scroll, model } = this;
     draw.render(scroll, model);
-    this.changeActiveCell(10, 10);
   }
   protected clear(): void {
     this.draw.clear();

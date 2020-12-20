@@ -30,6 +30,8 @@ export type WorksheetType = {
   sheetId: string;
   name: string;
   activeCell?: string;
+  rowCount: number;
+  colCount: number;
 };
 
 export type ModelCellType = {

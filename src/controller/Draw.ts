@@ -17,7 +17,7 @@ import {
 import type { ScrollValue } from "./scroll";
 import type { IModelValue } from "./model";
 
-export const HEADER_STYLE = {
+export const HEADER_STYLE: any = {
   textAlign: "center",
   textBaseline: "middle",
   font: `500 ${npx(12)}px 'Source Sans Pro',sans-serif`,
@@ -170,10 +170,10 @@ export class Draw {
     this.renderRowsHeader(scroll, model);
     this.renderColsHeader(scroll, model);
     this.renderTriangle(config);
-    this.renderContent(scroll, model);
+    this.renderContent(model);
     return this;
   }
-  protected renderContent(scroll: ScrollValue, model: IModelValue): this {
+  protected renderContent(model: IModelValue): this {
     const data = model.getCellsContent();
     console.log("renderContent", data);
     if (isEmpty(data)) {
@@ -215,7 +215,7 @@ export class Draw {
 
   protected renderGrid(scroll: ScrollValue, model: IModelValue): void {
     const { rowIndex, colIndex } = scroll;
-    const { rowCount, colCount } = model;
+    const { rowCount, colCount } = model.getSheetInfo();
     const cell = model.queryCell(0, 0);
     const config = model.getRowTitleHeightAndColTitleWidth();
     const { width, height } = this.getDrawSize(config);
@@ -250,7 +250,7 @@ export class Draw {
   }
   protected renderRowsHeader(scroll: ScrollValue, model: IModelValue): void {
     const { rowIndex } = scroll;
-    const { rowCount } = model;
+    const { rowCount } = model.getSheetInfo();
     const config = model.getRowTitleHeightAndColTitleWidth();
     const cell = model.queryCell(0, 0);
     const { height } = this.getDrawSize(config);
@@ -279,7 +279,7 @@ export class Draw {
   }
   protected renderColsHeader(scroll: ScrollValue, model: IModelValue): void {
     const { colIndex } = scroll;
-    const { colCount } = model;
+    const { colCount } = model.getSheetInfo();
     const config = model.getRowTitleHeightAndColTitleWidth();
     const cell = model.queryCell(0, 0);
     const { width } = this.getDrawSize(config);

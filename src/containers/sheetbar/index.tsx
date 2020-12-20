@@ -1,6 +1,7 @@
 import React, { memo, useCallback } from "react";
 import styled from "styled-components";
 import classnames from "classnames";
+import { Button } from "@/components";
 import { useSelector } from "@/store";
 import { getController } from "@/util";
 export const SheetBarContainer = styled.div`
@@ -8,6 +9,8 @@ export const SheetBarContainer = styled.div`
   box-sizing: border-box;
   padding: 0 10px;
   background-color: #c6c6c6;
+  display: flex;
+  align-items: center;
 `;
 const SheetList = styled.div`
   height: 30px;
@@ -23,6 +26,9 @@ const SheetItem = styled.div`
     color: green;
   }
 `;
+const AddSheetWrapper = styled.div`
+  margin-left: 20px;
+`;
 
 export const SheetBar = memo(() => {
   const { currentSheetId, sheetList = [] } = useSelector([
@@ -33,6 +39,10 @@ export const SheetBar = memo(() => {
   const handleClickSheet = useCallback((item) => {
     console.log(item);
     getController().setCurrentSheetId(item.sheetId);
+  }, []);
+  const handleAddSheet = useCallback(() => {
+    console.log("handleAddSheet");
+    getController().addSheet();
   }, []);
   return (
     <SheetBarContainer id="sheet-bar-container">
@@ -47,6 +57,11 @@ export const SheetBar = memo(() => {
           </SheetItem>
         ))}
       </SheetList>
+      <AddSheetWrapper>
+        <Button type="circle" onClick={handleAddSheet}>
+          +
+        </Button>
+      </AddSheetWrapper>
     </SheetBarContainer>
   );
 });

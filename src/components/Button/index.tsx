@@ -13,8 +13,12 @@ const ButtonContainer = styled.div`
   cursor: pointer;
   display: inline-block;
   background-color: #fff;
+  border-radius: 4px;
   & + & {
     margin-left: 8px;
+  }
+  &.circle {
+    border-radius: 50%;
   }
   &.disabled {
     cursor: not-allowed;
@@ -27,6 +31,7 @@ const ButtonContainer = styled.div`
   }
 `;
 type ButtonProps = {
+  type?: "normal" | "circle";
   active?: boolean;
   className?: string;
   disabled?: boolean;
@@ -42,6 +47,7 @@ export const Button: React.FunctionComponent<ButtonProps> = memo((props) => {
     onClick,
     disabled = false,
     active = false,
+    type = "normal",
   } = props;
   return (
     <ButtonContainer
@@ -50,6 +56,7 @@ export const Button: React.FunctionComponent<ButtonProps> = memo((props) => {
       className={classnames(className, {
         disabled,
         active,
+        circle: type === "circle",
       })}
     >
       {children}

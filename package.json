@@ -16,7 +16,7 @@
     "test:coverage": "npm run test -- --coverage",
     "dependencies": "node ./scripts/dependencies.js",
     "check-version": "ncu -u",
-    "ci": "npm run lint && npm run test && npm run build && npm run deploy",
+    "ci": "npm run lint && npm run typecheck && npm run test && npm run build && npm run deploy",
     "deploy": "deploy.sh"
   },
   "husky": {
