@@ -33,14 +33,16 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "dependencies": {
+    "classnames": "^2.2.6",
     "immer": "^8.0.0",
-    "lodash-es": "^4.17.15",
+    "lodash-es": "^4.17.20",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "styled-components": "^5.2.1",
     "use-immer": "^0.4.2"
   },
   "devDependencies": {
+    "@types/classnames": "^2.2.11",
     "@types/jest": "^26.0.19",
     "@types/lodash-es": "^4.17.4",
     "@types/react": "^17.0.0",

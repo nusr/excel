@@ -4,9 +4,11 @@ import {
   COL_TITLE_WIDTH,
   ROW_TITLE_HEIGHT,
   IWindowSize,
+  eventEmitter,
 } from "@/util";
-import { isEmpty, get } from "lodash-es";
-import { CellPosition, CellInfo, WorkBookJSON } from "@/types";
+import { isEmpty, get, isEqual } from "lodash-es";
+import { CellPosition, CellInfo, WorkBookJSON, Action } from "@/types";
+import { DISPATCH_ACTION } from "@/util";
 
 export interface IModelValue {
   rowCount: number;
@@ -36,15 +38,14 @@ export const MOCK_MODEL: WorkBookJSON = {
   worksheets: {
     "1": {
       "0": {
-        "0": [
-          { value: "测试", formula: "SUM(F1:F17)" },
-          {
-            width: 100,
-            height: 50,
-            style: "1",
-          },
-        ],
-        "1": [{ value: "124" }],
+        "0": {
+          value: "测试",
+          formula: "SUM(F1:F17)",
+          width: 100,
+          height: 50,
+          style: "1",
+        },
+        "1": { value: 124, style: "2" },
       },
     },
   },
@@ -59,20 +60,49 @@ export const MOCK_MODEL: WorkBookJSON = {
       horizontalAlign: 0,
       wrapText: 0,
     },
+    "2": {
+      fontColor: "#ff0000",
+      fillColor: "#000000",
+      fontSize: 12,
+      fontFamily: "宋体",
+      format: "0",
+      verticalAlign: 0,
+      horizontalAlign: 0,
+      wrapText: 0,
+    },
   },
 };
-const START_SHEET_ID = 1;
 export class Model implements IModelValue {
   public rowCount = 30;
   public colCount = 30;
-  public currentSheetId = String(START_SHEET_ID);
-  protected workbook: WorkBookJSON["workbook"] = [
-    { sheetId: this.currentSheetId, name: "Sheet1" },
-  ];
+  protected _currentSheetId = "";
+  protected _workbook: WorkBookJSON["workbook"] = [];
   protected worksheets: WorkBookJSON["worksheets"] = {};
   protected styles: WorkBookJSON["styles"] = {};
   get sheetList(): WorkBookJSON["workbook"] {
-    return this.workbook;
+    return this._workbook;
+  }
+  set sheetList(data: WorkBookJSON["workbook"]) {
+    if (isEqual(this._workbook, data)) {
+      return;
+    }
+    console.log("sheetList", data);
+    this._workbook = data;
+    this.dispatchAction({ type: "SET_SHEET_LIST", payload: data });
+  }
+  get currentSheetId(): string {
+    return this._currentSheetId;
+  }
+  set currentSheetId(id: string) {
+    if (isEqual(this._currentSheetId, id)) {
+      return;
+    }
+    this._currentSheetId = id;
+    this.dispatchAction({ type: "SET_CURRENT_SHEET_ID", payload: id });
+  }
+  dispatchAction(data: Action): void {
+    console.log("model-emit-dispatchAction", data);
+    eventEmitter.emit(DISPATCH_ACTION, data);
   }
   protected modelChange(): void {
     const data = this.worksheets[this.currentSheetId];
@@ -97,15 +127,15 @@ export class Model implements IModelValue {
     console.log("fromJSON", json);
     const { worksheets = {}, workbook = [], styles = {} } = json;
     this.worksheets = worksheets;
-    this.workbook = workbook;
+    this.sheetList = workbook;
     this.styles = styles;
     this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
     this.modelChange();
   }
   toJSON(): WorkBookJSON {
-    const { worksheets, styles, workbook } = this;
+    const { worksheets, styles, sheetList } = this;
     return {
-      workbook,
+      workbook: sheetList,
       styles,
       worksheets,
     };
@@ -120,9 +150,9 @@ export class Model implements IModelValue {
       sheetData[row] = {};
     }
     if (isEmpty(sheetData[row][col])) {
-      sheetData[row][col] = [{ value }];
+      sheetData[row][col] = { value };
     } else {
-      sheetData[row][col][0].value = value;
+      sheetData[row][col].value = value;
     }
     this.modelChange();
     return this;
@@ -156,7 +186,7 @@ export class Model implements IModelValue {
     return {
       width: CELL_WIDTH,
       height: CELL_HEIGHT,
-      value: get(cellData, "[0].value", ""),
+      value: get(cellData, "value", ""),
       top: resultY,
       left: resultX,
       row,

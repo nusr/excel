@@ -21,6 +21,10 @@ export type StyleType = {
   horizontalAlign: EHorizontalAlign;
   wrapText: EWrap;
   format: string;
+  isUnderline: boolean;
+  isItalic: boolean;
+  isBold: boolean;
+  isCrossOut: boolean;
 };
 export type WorksheetType = {
   sheetId: string;
@@ -31,14 +35,11 @@ export type WorksheetType = {
 export type ModelCellType = {
   value: string | number;
   formula?: string;
-};
-export type ModelCellStyle = {
   width?: number;
   height?: number;
   style?: string;
 };
-export type ModelColConfig = [value: ModelCellType, style?: ModelCellStyle]
-export type ModelColType = Record<string, ModelColConfig>
+export type ModelColType = Record<string, ModelCellType>
 export type ModelRowType = Record<string,ModelColType>
 export type WorkBookJSON = {
   workbook: WorksheetType[];

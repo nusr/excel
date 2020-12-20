@@ -5,3 +5,8 @@ export function getWidthHeight(): IWindowSize {
     height: document.documentElement.clientHeight,
   };
 }
+export function isNumber(value: string | number): boolean {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  return parseFloat(value) == value;
+}

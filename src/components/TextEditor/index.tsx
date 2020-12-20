@@ -5,11 +5,11 @@ const commonStyle = css`
   height: 100%;
   width: 100%;
 `;
-export const TextEditorWrapper = styled.div`
+const TextEditorWrapper = styled.div`
   ${commonStyle};
 `;
 
-export const TextEditorContent = styled.input`
+const TextEditorContent = styled.input`
   ${commonStyle};
   padding: 0;
   margin: 0;

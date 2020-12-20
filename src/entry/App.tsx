@@ -1,7 +1,5 @@
 import React from "react";
-import { CanvasContainer } from "@/containers/canvas";
-import { Toolbar } from "@/containers/toolbar";
-import { SheetBar } from "@/containers/sheetBar";
+import { CanvasContainer, Toolbar, SheetBar } from "@/containers";
 import styled, { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "./GlobalStyle";
 import theme from "@/theme";

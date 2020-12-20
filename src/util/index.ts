@@ -10,3 +10,5 @@ export type { IWindowSize } from "./interface";
 const eventEmitter = new EventEmitter();
 export { eventEmitter, EventEmitter };
 export * from "./interaction";
+export * from "./constant";
+export * from './controller';

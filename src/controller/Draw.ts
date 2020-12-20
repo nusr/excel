@@ -12,6 +12,7 @@ import {
   dpr,
   npxLine,
   intToColumnName,
+  isNumber,
 } from "@/util";
 import type { ScrollValue } from "./scroll";
 import type { IModelValue } from "./model";
@@ -184,8 +185,10 @@ export class Draw {
       font: `500 ${npx(12)}px 'Source Sans Pro',sans-serif`,
     });
     for (const item of data) {
-      const { value, left, top, height } = item;
-      this.fillText(value, left, top + height / 2);
+      const { value, left, top, height, width } = item;
+      const isNum = isNumber(value);
+      this.setAttributes({ textAlign: isNum ? "right" : "left" });
+      this.fillText(value, left + (isNum ? width : 0), top + height / 2);
     }
     this.restore();
     return this;

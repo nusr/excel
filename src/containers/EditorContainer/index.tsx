@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import styled from "styled-components";
-import { TextEditor, CommonProps } from "@/components/TextEditor";
-import { useControllerState } from "@/store";
+import { TextEditor, CommonProps } from "@/components";
+import { useSelector } from "@/store";
 import { CELL_HEIGHT, CELL_WIDTH } from "@/util";
 export const EditorWrapper = styled.div`
   position: absolute;
@@ -16,7 +16,7 @@ export const EditorWrapper = styled.div`
 `;
 
 export const EditorContainer = memo((props: CommonProps) => {
-  const { activeCell, isCellEditing } = useControllerState([
+  const { activeCell, isCellEditing } = useSelector([
     "activeCell",
     "isCellEditing",
   ]);

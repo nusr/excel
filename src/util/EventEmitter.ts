@@ -1,19 +1,20 @@
-function handleEvent(data: any): void {
+import { isEmpty } from "lodash-es";
+function handleEvent(data?: any): void {
   console.log(data);
 }
 type HandleEvent = typeof handleEvent;
 export class EventEmitter {
   protected event: Record<string, HandleEvent[]> = {};
-  on<T>(name: string, callback: (data: T) => void): this {
+  on(name: string, callback: HandleEvent): HandleEvent {
     if (!this.event[name]) {
       this.event[name] = [];
     }
     this.event[name].push(callback);
-    return this;
+    return () => this.off(name, callback);
   }
-  emit<T>(name: string, data?: T): this {
+  emit(name: string, data?: unknown): this {
     const list = this.event[name];
-    if (!list) {
+    if (!list || list.length <= 0) {
       return this;
     }
     for (const item of list) {
@@ -21,7 +22,7 @@ export class EventEmitter {
     }
     return this;
   }
-  off<T>(name: string, callback?: (data: T) => void): this {
+  off(name: string, callback?: HandleEvent): this {
     const list = this.event[name];
     if (list) {
       if (callback) {
@@ -36,8 +37,8 @@ export class EventEmitter {
     this.event = {};
     return this;
   }
-  once<T>(name: string, callback: (data: T) => void): this {
-    const listener = (data: T) => {
+  once(name: string, callback: HandleEvent): HandleEvent {
+    const listener: HandleEvent = (data) => {
       this.off(name, listener);
       callback(data);
     };

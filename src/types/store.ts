@@ -1,3 +1,5 @@
+import { WorkBookJSON } from "./model";
+
 export type CellType = "text";
 export type CanvasOverlayPosition = {
   top: number;
@@ -15,14 +17,13 @@ export type CellPosition = {
 };
 
 export type CellInfo = EditorContainerPosition & CellPosition;
-export type ControllerState = {
+export type State = {
   initOver: boolean;
   activeCell: CellInfo;
   isCellEditing: boolean;
   overlayPosition: CanvasOverlayPosition;
-};
-export type State = {
-  controller: ControllerState;
+  currentSheetId: string;
+  sheetList: WorkBookJSON["workbook"];
 };
 
 export type Action =
@@ -31,6 +32,8 @@ export type Action =
   | { type: "RESET" }
   | { type: "WINDOW_RESIZE"; payload: CanvasOverlayPosition }
   | { type: "ENTER_EDITING" }
-  | { type: "QUIT_EDITING" };
+  | { type: "QUIT_EDITING" }
+  | { type: "SET_CURRENT_SHEET_ID"; payload: string }
+  | { type: "SET_SHEET_LIST"; payload: WorkBookJSON["workbook"] };
 
 export type Reducer = (state: State, action: Action) => State;

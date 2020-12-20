@@ -2,7 +2,7 @@ import React, { memo, useContext, FunctionComponent, Dispatch } from "react";
 import { pick } from "lodash-es";
 import { useImmerReducer } from "use-immer";
 import { reducer, initialState } from "./reducer";
-import { Action, ControllerState, State } from "@/types";
+import { Action, State } from "@/types";
 const storeContext = React.createContext(initialState);
 const dispatchContext = React.createContext((() => 0) as Dispatch<Action>);
 type Props = {
@@ -26,9 +26,9 @@ StoreProvider.displayName = "StoreProvider";
 export const useDispatch = (): Dispatch<Action> => {
   return useContext(dispatchContext);
 };
-export function useControllerState<k extends keyof ControllerState>(
+export function useSelector<k extends keyof State>(
   pickStr: Array<k>
-): Pick<ControllerState, k> {
+): Pick<State, k> {
   const cache = useContext(storeContext);
-  return pick(cache.controller, pickStr);
+  return pick(cache, pickStr);
 }

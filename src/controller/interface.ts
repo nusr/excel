@@ -19,7 +19,22 @@ export type CanvasOption = {
   fillStyle: string;
   lineWidth: number;
   strokeStyle: string;
-  textAlign: string;
-  textBaseline: string;
-  font: string;
-}
+  textAlign: "left" | "right" | "center" | "start" | "end";
+  textBaseline:
+    | "top"
+    | "hanging"
+    | "middle"
+    | "alphabetic"
+    | "ideographic"
+    | "bottom";
+  /**
+   * font-style:  none | normal | italic | oblique
+   * font-variant none | normal | small-caps // 作用不大
+   * font-weight  none | normal | bold | 数字
+   * font-size 
+   * line-height
+   * font-family
+   */
+  font: string; // italic bold 14px/16px sans-serif;
+  direction: "ltr" | "rtl" | "inherit";
+};

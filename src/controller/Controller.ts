@@ -1,8 +1,9 @@
+import { isEqual } from "lodash-es";
 import { Draw } from "./Draw";
 import { Model } from "./Model";
 import { Scroll } from "./Scroll";
 import { Action, CellPosition, WorkBookJSON } from "@/types";
-import { IWindowSize, EventEmitter } from "@/util";
+import { IWindowSize, eventEmitter, DISPATCH_ACTION } from "@/util";
 
 export interface IController {
   reset(): void;
@@ -14,19 +15,27 @@ export interface IController {
   quitEditing(): void;
   enterEditing(): void;
   windowResize(): void;
+  setCurrentSheetId(id: string): void;
   setCellValue(row: number, col: number, value: string): this;
   clickPositionToCell(offsetX: number, offsetY: number): CellPosition;
 }
 
-export class Controller extends EventEmitter implements IController {
+export class Controller implements IController {
   private draw: Draw;
   private scroll: Scroll = new Scroll();
   private model: Model = new Model();
-  private dispatch: (value: Action) => void;
-  constructor(canvas: HTMLCanvasElement, dispatch: (value: Action) => void) {
-    super();
+  constructor(canvas: HTMLCanvasElement) {
     this.draw = new Draw(canvas);
-    this.dispatch = dispatch;
+    this.render();
+  }
+  dispatchAction(data: Action): void {
+    eventEmitter.emit(DISPATCH_ACTION, data);
+  }
+  setCurrentSheetId(id: string): void {
+    if (isEqual(id, this.model.currentSheetId)) {
+      return;
+    }
+    this.model.currentSheetId = id;
     this.render();
   }
   selectAll(): void {
@@ -39,7 +48,7 @@ export class Controller extends EventEmitter implements IController {
     console.log("selectRow");
   }
   quitEditing(): void {
-    this.dispatch({ type: "QUIT_EDITING" });
+    this.dispatchAction({ type: "QUIT_EDITING" });
   }
   loadJSON(json: WorkBookJSON): void {
     console.log("loadJSON", json);
@@ -47,7 +56,7 @@ export class Controller extends EventEmitter implements IController {
     this.render();
   }
   enterEditing(): void {
-    this.dispatch({ type: "ENTER_EDITING" });
+    this.dispatchAction({ type: "ENTER_EDITING" });
   }
   clickPositionToCell(offsetX: number, offsetY: number): CellPosition {
     return this.model.clickPositionToCell(offsetX, offsetY);
@@ -63,7 +72,7 @@ export class Controller extends EventEmitter implements IController {
     if (cell.top >= size.height || cell.left >= size.width) {
       return;
     }
-    this.dispatch({
+    this.dispatchAction({
       type: "CHANGE_ACTIVE_CELL",
       payload: cell,
     });
