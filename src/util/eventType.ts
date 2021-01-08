@@ -1,1 +1,1 @@
-export const DISPATCH_ACTION = Symbol("dispatchAction");
+export const DISPATCH_ACTION = 'dispatchAction'

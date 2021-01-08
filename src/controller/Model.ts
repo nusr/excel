@@ -4,7 +4,6 @@ import {
   COL_TITLE_WIDTH,
   ROW_TITLE_HEIGHT,
   IWindowSize,
-  eventEmitter,
 } from "@/util";
 import { isEmpty, get } from "lodash-es";
 import {
@@ -13,9 +12,9 @@ import {
   WorkBookJSON,
   Action,
   WorksheetType,
-  IController,
 } from "@/types";
-import { DISPATCH_ACTION, getDefaultSheetInfo, assert } from "@/util";
+import { getDefaultSheetInfo, assert } from "@/util";
+import { Controller } from "./controller";
 
 export interface IModelValue {
   sheetList: WorksheetType[];
@@ -88,8 +87,8 @@ export class Model implements IModelValue {
   protected _workbook: WorksheetType[] = [];
   protected worksheets: WorkBookJSON["worksheets"] = {};
   protected styles: WorkBookJSON["styles"] = {};
-  controller: IController;
-  constructor(controller: IController) {
+  controller: Controller;
+  constructor(controller: Controller) {
     this.controller = controller;
   }
   get sheetList(): WorksheetType[] {
@@ -119,7 +118,7 @@ export class Model implements IModelValue {
   }
   dispatchAction(data: Action): void {
     console.log("model-emit-dispatchAction", data);
-    eventEmitter.emit(DISPATCH_ACTION, data);
+    this.controller.emit("dispatch", data);
   }
   protected modelChange(): void {
     const data = this.worksheets[this.currentSheetId];

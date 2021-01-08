@@ -1,14 +1,25 @@
-import { IEventEmitter, EventHandler } from "@/types";
-export class EventEmitter implements IEventEmitter {
-  protected event: Record<string, Array<EventHandler>> = {};
-  on(name: string, callback: EventHandler): EventHandler {
-    if (!this.event[name]) {
-      this.event[name] = [];
-    }
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+export class EventEmitter<
+  EventType extends Record<string, unknown> = Record<string, unknown>
+> {
+  protected event: Record<string, Array<(...args: unknown[]) => void>> = {};
+  getEventLength<T extends keyof EventType>(name: T): number {
+    // @ts-ignore
+    const temp = this.event[name];
+    return (temp && temp.length) || 0;
+  }
+  on<T extends keyof EventType>(
+    name: T,
+    callback: (data: EventType[T]) => void
+  ): VoidFunction {
+    // @ts-ignore
+    this.event[name] = this.event[name] || [];
+    // @ts-ignore
     this.event[name].push(callback);
     return () => this.off(name, callback);
   }
-  emit(name: string, data?: unknown): void {
+  emitAsync<T extends keyof EventType>(name: T, data: EventType[T]): void {
+    // @ts-ignore
     const list = this.event[name];
     if (!list || list.length <= 0) {
       return;
@@ -19,7 +30,8 @@ export class EventEmitter implements IEventEmitter {
       });
     }
   }
-  emitAsync(name: string, data?: unknown): void {
+  emit<T extends keyof EventType>(name: T, data: EventType[T]): void {
+    // @ts-ignore
     const list = this.event[name];
     if (!list || list.length <= 0) {
       return;
@@ -28,24 +40,40 @@ export class EventEmitter implements IEventEmitter {
       item(data);
     }
   }
-  off(name: string, callback?: EventHandler): void {
-    const list = this.event[name];
-    if (list) {
-      if (callback) {
-        this.event[name] = list.filter((v: EventHandler) => v !== callback);
-      } else {
-        delete this.event[name];
+  off<T extends keyof EventType>(
+    name: T,
+    callback?: (data: EventType[T]) => void
+  ): void {
+    const result = [];
+    // @ts-ignore
+    const events = this.event[name];
+    if (events && callback) {
+      for (const item of events) {
+        if (item !== callback && item._ !== callback) {
+          result.push(item);
+        }
       }
+    }
+    if (result.length) {
+      // @ts-ignore
+      this.event[name] = result;
+    } else {
+      // @ts-ignore
+      delete this.event[name];
     }
   }
   offAll(): void {
     this.event = {};
   }
-  once(name: string, callback: EventHandler): EventHandler {
-    const listener: EventHandler = (data) => {
+  once<T extends keyof EventType>(
+    name: T,
+    callback: (data: EventType[T]) => void
+  ): VoidFunction {
+    const listener = (data: EventType[T]) => {
       this.off(name, listener);
       callback(data);
     };
+    listener._ = callback;
     return this.on(name, listener);
   }
 }

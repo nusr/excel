@@ -3,19 +3,23 @@ import { Draw } from "./Draw";
 import { Model } from "./Model";
 import { Scroll } from "./Scroll";
 import { Action, CellPosition, WorkBookJSON, IController } from "@/types";
-import { IWindowSize, eventEmitter, DISPATCH_ACTION, assert } from "@/util";
+import { IWindowSize, assert, EventEmitter } from "@/util";
 
-export class Controller implements IController {
+type EventType = {
+  dispatch: Action;
+};
+export class Controller extends EventEmitter<EventType> implements IController {
   private draw: Draw;
   private scroll: Scroll = new Scroll(this);
   private model: Model = new Model(this);
   constructor(canvas?: HTMLCanvasElement) {
+    super();
     assert(!!canvas);
     this.draw = new Draw(this, canvas);
     this.addSheet();
   }
   dispatchAction(data: Action): void {
-    eventEmitter.emit(DISPATCH_ACTION, data);
+    this.emit("dispatch", data);
   }
   setCurrentSheetId(id: string): void {
     if (isEqual(id, this.model.currentSheetId)) {

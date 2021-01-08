@@ -2,15 +2,9 @@ import React, { memo, useRef, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "@/store";
 import { EditorContainer } from "../EditorContainer";
-import { MOCK_MODEL, getSingletonController } from "@/controller";
-import {
-  COL_TITLE_WIDTH,
-  ROW_TITLE_HEIGHT,
-  eventEmitter,
-  DOUBLE_CLICK_TIME,
-  DISPATCH_ACTION,
-} from "@/util";
-import { CellPosition, Action, IController } from "@/types";
+import { MOCK_MODEL, getSingletonController, Controller } from "@/controller";
+import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, DOUBLE_CLICK_TIME } from "@/util";
+import { CellPosition } from "@/types";
 
 const ContentContainer = styled.div`
   position: relative;
@@ -45,11 +39,11 @@ export const CanvasContainer = memo(() => {
       return;
     }
     if (offsetX < COL_TITLE_WIDTH) {
-      controller.selectRow(offsetX, offsetY);
+      controller.selectRow();
       return;
     }
     if (offsetY < ROW_TITLE_HEIGHT) {
-      controller.selectCol(offsetX, offsetY);
+      controller.selectCol();
       return;
     }
     const position = controller.clickPositionToCell(offsetX, offsetY);
@@ -82,11 +76,11 @@ export const CanvasContainer = memo(() => {
       return;
     }
     const canvasDom = canvasRef.current;
-    const off = eventEmitter.on(DISPATCH_ACTION, (data: Action) => {
+    const controller: Controller = getSingletonController(canvasDom);
+    const off = controller.on("dispatch", (data) => {
       console.log("on dispatch", data);
       dispatch(data);
     });
-    const controller: IController = getSingletonController(canvasDom);
     dispatch({
       type: "INIT_CONTROLLER",
     });
