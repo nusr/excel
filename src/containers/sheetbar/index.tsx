@@ -3,15 +3,20 @@ import styled, { withTheme } from "styled-components";
 import classnames from "classnames";
 import { Button } from "@/components";
 import { useSelector } from "@/store";
-import { getController } from "@/util";
-export const SheetBarContainer = styled.div`
+import { getSingletonController } from "@/controller";
+import theme from "@/theme";
+const addButtonStyle = {
+  backgroundColor: theme.buttonActive,
+};
+
+export const SheetBarContainer = withTheme(styled.div`
   width: 100%;
   box-sizing: border-box;
   padding: 0 10px;
-  background-color: #c6c6c6;
+  background-color: ${({ theme }) => theme.buttonActive};
   display: flex;
   align-items: center;
-`;
+`);
 const SheetList = styled.div`
   height: 30px;
   line-height: 30px;
@@ -38,11 +43,11 @@ export const SheetBar = memo(() => {
   console.log(currentSheetId, sheetList);
   const handleClickSheet = useCallback((item) => {
     console.log(item);
-    getController().setCurrentSheetId(item.sheetId);
+    getSingletonController().setCurrentSheetId(item.sheetId);
   }, []);
   const handleAddSheet = useCallback(() => {
     console.log("handleAddSheet");
-    getController().addSheet();
+    getSingletonController().addSheet();
   }, []);
   return (
     <SheetBarContainer id="sheet-bar-container">
@@ -58,7 +63,7 @@ export const SheetBar = memo(() => {
         ))}
       </SheetList>
       <AddSheetWrapper>
-        <Button type="circle" onClick={handleAddSheet}>
+        <Button style={addButtonStyle} type="circle" onClick={handleAddSheet}>
           +
         </Button>
       </AddSheetWrapper>

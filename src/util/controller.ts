@@ -1,4 +1,4 @@
-import { IController } from "@/controller";
+import { IController } from "@/types";
 let controller: IController;
 export function setController(c: IController): void {
   controller = c;

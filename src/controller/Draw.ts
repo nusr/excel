@@ -14,6 +14,7 @@ import {
   intToColumnName,
   isNumber,
 } from "@/util";
+import { IController } from "@/types";
 import type { ScrollValue } from "./scroll";
 import type { IModelValue } from "./model";
 
@@ -29,7 +30,9 @@ export const HEADER_STYLE: any = {
 export class Draw {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
-  constructor(canvas: HTMLCanvasElement) {
+  controller: IController;
+  constructor(controller: IController, canvas: HTMLCanvasElement) {
+    this.controller = controller;
     this.canvas = canvas;
     const ctx = canvas.getContext("2d");
     assert(ctx !== null, "[Draw] init canvas context error");

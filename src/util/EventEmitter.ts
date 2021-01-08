@@ -1,43 +1,48 @@
-function handleEvent(data?: any): void {
-  console.log(data);
-}
-type HandleEvent = typeof handleEvent;
-export class EventEmitter {
-  protected event: Record<string, HandleEvent[]> = {};
-  on(name: string, callback: HandleEvent): HandleEvent {
+import { IEventEmitter, EventHandler } from "@/types";
+export class EventEmitter implements IEventEmitter {
+  protected event: Record<string, Array<EventHandler>> = {};
+  on(name: string, callback: EventHandler): EventHandler {
     if (!this.event[name]) {
       this.event[name] = [];
     }
     this.event[name].push(callback);
     return () => this.off(name, callback);
   }
-  emit(name: string, data?: unknown): this {
+  emit(name: string, data?: unknown): void {
     const list = this.event[name];
     if (!list || list.length <= 0) {
-      return this;
+      return;
+    }
+    for (const item of list) {
+      window.requestAnimationFrame(() => {
+        item(data);
+      });
+    }
+  }
+  emitAsync(name: string, data?: unknown): void {
+    const list = this.event[name];
+    if (!list || list.length <= 0) {
+      return;
     }
     for (const item of list) {
       item(data);
     }
-    return this;
   }
-  off(name: string, callback?: HandleEvent): this {
+  off(name: string, callback?: EventHandler): void {
     const list = this.event[name];
     if (list) {
       if (callback) {
-        this.event[name] = list.filter((v) => v !== callback);
+        this.event[name] = list.filter((v: EventHandler) => v !== callback);
       } else {
         delete this.event[name];
       }
     }
-    return this;
   }
-  offAll(): this {
+  offAll(): void {
     this.event = {};
-    return this;
   }
-  once(name: string, callback: HandleEvent): HandleEvent {
-    const listener: HandleEvent = (data) => {
+  once(name: string, callback: EventHandler): EventHandler {
+    const listener: EventHandler = (data) => {
       this.off(name, listener);
       callback(data);
     };

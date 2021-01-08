@@ -1,8 +1,8 @@
 import React, { memo } from "react";
-import styled from "styled-components";
+import styled, { withTheme } from "styled-components";
 import classnames from "classnames";
 
-const ButtonContainer = styled.div`
+const ButtonContainer = withTheme(styled.div`
   padding: 0 5px;
   min-width: 20px;
   height: 20px;
@@ -28,10 +28,10 @@ const ButtonContainer = styled.div`
   }
   &:hover,
   &.active {
-    background-color: #c6c6c6;
+    background-color: ${({ theme }) => theme.buttonActive};
     border-color: #808080;
   }
-`;
+`);
 type ButtonProps = {
   type?: "normal" | "circle";
   active?: boolean;

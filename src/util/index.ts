@@ -12,3 +12,4 @@ export { eventEmitter, EventEmitter };
 export * from "./interaction";
 export * from "./constant";
 export * from './controller';
+export * from './eventType';

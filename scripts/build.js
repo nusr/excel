@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const esBuild = require("esbuild");
 const rimraf = require("rimraf");
-const distDir = path.join(__dirname, "..", "dist");
+const distDir = path.join(process.cwd(), "dist");
 const NODE_ENV = process.env.NODE_ENV || "production";
 const isProd = NODE_ENV === "production";
 
@@ -24,8 +24,8 @@ function copyHtml() {
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir);
   }
-  const sourceFile = path.join(__dirname, "..", "assets/index.html");
-  const targetFile = path.join(__dirname, "..", "dist/index.html");
+  const sourceFile = path.join(process.cwd(), "assets/index.html");
+  const targetFile = path.join(process.cwd(), "dist/index.html");
   fs.copyFileSync(sourceFile, targetFile);
 }
 
@@ -57,7 +57,7 @@ function init() {
   buildJs();
   if (!isProd) {
     require("./server.js");
-    const watchDir = path.join(__dirname, "..", "src");
+    const watchDir = path.join(process.cwd(), "src");
     fileWatch(watchDir, buildJs);
   }
 }

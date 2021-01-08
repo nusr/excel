@@ -2,31 +2,16 @@ import { isEqual } from "lodash-es";
 import { Draw } from "./Draw";
 import { Model } from "./Model";
 import { Scroll } from "./Scroll";
-import { Action, CellPosition, WorkBookJSON } from "@/types";
-import { IWindowSize, eventEmitter, DISPATCH_ACTION } from "@/util";
-
-export interface IController {
-  addSheet(): void;
-  reset(): void;
-  selectAll(): void;
-  loadJSON(json: WorkBookJSON): void;
-  selectRow(offsetX: number, offsetY: number): void;
-  selectCol(offsetX: number, offsetY: number): void;
-  changeActiveCell(offsetX: number, offsetY: number): void;
-  quitEditing(): void;
-  enterEditing(): void;
-  windowResize(): void;
-  setCurrentSheetId(id: string): void;
-  setCellValue(row: number, col: number, value: string): this;
-  clickPositionToCell(offsetX: number, offsetY: number): CellPosition;
-}
+import { Action, CellPosition, WorkBookJSON, IController } from "@/types";
+import { IWindowSize, eventEmitter, DISPATCH_ACTION, assert } from "@/util";
 
 export class Controller implements IController {
   private draw: Draw;
-  private scroll: Scroll = new Scroll();
-  private model: Model = new Model();
-  constructor(canvas: HTMLCanvasElement) {
-    this.draw = new Draw(canvas);
+  private scroll: Scroll = new Scroll(this);
+  private model: Model = new Model(this);
+  constructor(canvas?: HTMLCanvasElement) {
+    assert(!!canvas);
+    this.draw = new Draw(this, canvas);
     this.addSheet();
   }
   dispatchAction(data: Action): void {
@@ -107,3 +92,16 @@ export class Controller implements IController {
     this.clear();
   }
 }
+
+const getSingletonController = (() => {
+  let instance: Controller;
+  return (canvas?: HTMLCanvasElement): Controller => {
+    if (!instance) {
+      instance = new Controller(canvas);
+    }
+    assert(!!instance);
+    return instance;
+  };
+})();
+
+export { getSingletonController };

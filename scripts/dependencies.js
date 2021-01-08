@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs");
 const path = require("path");
-const nodeModules = path.join(__dirname, "../node_modules");
+const nodeModules = path.join(process.cwd(), "node_modules");
 const pkg = require("../package.json");
-const fileName = path.join(__dirname, "../dependencies.json");
+const fileName = path.join(process.cwd(), "dependencies.json");
 const lastDependencies = require(fileName);
 
 function readFileList(dir, filesList = []) {

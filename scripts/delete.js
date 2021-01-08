@@ -5,7 +5,7 @@ const rimraf = require("rimraf");
 function init() {
   const deleteList = ["dist", "package-lock.json", "node_modules"];
   deleteList.forEach((item) => {
-    const deleteDir = path.join(__dirname, "..", item);
+    const deleteDir = path.join(process.cwd(), item);
     rimraf.sync(deleteDir);
   });
 }

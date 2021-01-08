@@ -2,17 +2,15 @@ import React, { memo, useRef, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "@/store";
 import { EditorContainer } from "../EditorContainer";
-import { IController, Controller, MOCK_MODEL } from "@/controller";
+import { MOCK_MODEL, getSingletonController } from "@/controller";
 import {
   COL_TITLE_WIDTH,
   ROW_TITLE_HEIGHT,
   eventEmitter,
   DOUBLE_CLICK_TIME,
   DISPATCH_ACTION,
-  setController,
-  getController,
 } from "@/util";
-import { CellPosition, Action } from "@/types";
+import { CellPosition, Action, IController } from "@/types";
 
 const ContentContainer = styled.div`
   position: relative;
@@ -41,7 +39,7 @@ export const CanvasContainer = memo(() => {
     console.log("handleClick");
     console.log(event);
     const { timeStamp, offsetX, offsetY } = event;
-    const controller = getController();
+    const controller = getSingletonController();
     if (offsetX < COL_TITLE_WIDTH && offsetY < ROW_TITLE_HEIGHT) {
       controller.selectAll();
       return;
@@ -65,7 +63,7 @@ export const CanvasContainer = memo(() => {
   }, []);
   const onInputEnter = useCallback(
     (textValue: string) => {
-      const controller = getController();
+      const controller = getSingletonController();
       controller.setCellValue(activeCell.row, activeCell.col, textValue);
       controller.changeActiveCell(activeCell.row + 1, activeCell.col);
     },
@@ -73,7 +71,7 @@ export const CanvasContainer = memo(() => {
   );
   const onInputTab = useCallback(
     (textValue: string) => {
-      const controller = getController();
+      const controller = getSingletonController();
       controller.setCellValue(activeCell.row, activeCell.col, textValue);
       controller.changeActiveCell(activeCell.row, activeCell.col + 1);
     },
@@ -88,8 +86,7 @@ export const CanvasContainer = memo(() => {
       console.log("on dispatch", data);
       dispatch(data);
     });
-    const controller: IController = new Controller(canvasDom);
-    setController(controller);
+    const controller: IController = getSingletonController(canvasDom);
     dispatch({
       type: "INIT_CONTROLLER",
     });

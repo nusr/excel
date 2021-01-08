@@ -8,5 +8,6 @@ declare module "styled-components" {
     padding: string;
     margin: string;
     primaryColor: string;
+    buttonActive: string;
   }
 }

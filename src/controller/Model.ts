@@ -13,6 +13,7 @@ import {
   WorkBookJSON,
   Action,
   WorksheetType,
+  IController,
 } from "@/types";
 import { DISPATCH_ACTION, getDefaultSheetInfo, assert } from "@/util";
 
@@ -87,6 +88,10 @@ export class Model implements IModelValue {
   protected _workbook: WorksheetType[] = [];
   protected worksheets: WorkBookJSON["worksheets"] = {};
   protected styles: WorkBookJSON["styles"] = {};
+  controller: IController;
+  constructor(controller: IController) {
+    this.controller = controller;
+  }
   get sheetList(): WorksheetType[] {
     return this._workbook;
   }

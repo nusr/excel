@@ -1,3 +1,4 @@
+import { IController } from "@/types";
 export interface ScrollValue {
   x: number;
   y: number;
@@ -9,4 +10,8 @@ export class Scroll implements ScrollValue {
   y = 0;
   rowIndex = 0;
   colIndex = 0;
+  controller: IController;
+  constructor(controller: IController) {
+    this.controller = controller;
+  }
 }
