@@ -1,24 +1,40 @@
 import { isEqual } from "lodash-es";
-import { Draw } from "@/view";
+import { Main } from "@/canvas";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
   Action,
   CellPosition,
   WorkBookJSON,
-  IController,
   EventType,
+  CellInfo,
 } from "@/types";
-import { IWindowSize, assert, EventEmitter, singletonPattern } from "@/util";
-export class Controller extends EventEmitter<EventType> implements IController {
-  protected draw: Draw;
-  protected scroll: Scroll = new Scroll(this);
-  protected model: Model = new Model(this);
+import {
+  IWindowSize,
+  assert,
+  EventEmitter,
+  singletonPattern,
+  getWidthHeight,
+} from "@/util";
+export class Controller extends EventEmitter<EventType> {
+  scroll: Scroll = new Scroll(this);
+  model: Model = new Model(this);
+  protected draw: Main;
+  protected activeCell: CellInfo | null = null;
+  protected canvasSize: IWindowSize | null = null;
   constructor(canvas?: HTMLCanvasElement) {
     super();
+    this.updateCanvasSize();
     assert(!!canvas);
-    this.draw = new Draw(this, canvas);
+    this.draw = new Main(this, canvas);
     this.addSheet();
+  }
+  queryActiveCell(): CellInfo {
+    assert(!!this.activeCell);
+    return this.activeCell;
+  }
+  setActiveCell(row = 0, col = 0): void {
+    this.activeCell = this.model.queryCell(row, col);
   }
   dispatchAction(data: Action): void {
     this.emit("dispatch", data);
@@ -28,13 +44,13 @@ export class Controller extends EventEmitter<EventType> implements IController {
       return;
     }
     this.model.currentSheetId = id;
+    this.setActiveCell();
     this.render();
-    this.setActiveCell(0, 0);
   }
   addSheet(): void {
     this.model.addSheet();
+    this.setActiveCell();
     this.render();
-    this.setActiveCell(0, 0);
   }
   selectAll(): void {
     console.log("selectAll");
@@ -51,8 +67,8 @@ export class Controller extends EventEmitter<EventType> implements IController {
   loadJSON(json: WorkBookJSON): void {
     console.log("loadJSON", json);
     this.model.fromJSON(json);
+    this.setActiveCell();
     this.render();
-    this.setActiveCell(0, 0);
   }
   enterEditing(): void {
     this.dispatchAction({ type: "ENTER_EDITING" });
@@ -60,7 +76,7 @@ export class Controller extends EventEmitter<EventType> implements IController {
   clickPositionToCell(offsetX: number, offsetY: number): CellPosition {
     return this.model.clickPositionToCell(offsetX, offsetY);
   }
-  setActiveCell(row: number, col: number): void {
+  updateSelection(row: number, col: number): void {
     const { model } = this;
     const { rowCount, colCount } = model.getSheetInfo();
     if (row >= rowCount || col >= colCount) {
@@ -71,7 +87,8 @@ export class Controller extends EventEmitter<EventType> implements IController {
     if (cell.top >= size.height || cell.left >= size.width) {
       return;
     }
-    this.draw.setActiveCell(cell);
+    this.activeCell = cell;
+    this.updateSelectionRender();
     this.dispatchAction({
       type: "CHANGE_ACTIVE_CELL",
       payload: cell,
@@ -81,22 +98,41 @@ export class Controller extends EventEmitter<EventType> implements IController {
     console.log("windowResize");
     this.render();
   }
+  updateCanvasSize(): void {
+    const { width, height } = getWidthHeight();
+    const toolbarDom = document.querySelector("#tool-bar-container");
+    const sheetBarDom = document.querySelector("#sheet-bar-container");
+    assert(toolbarDom !== null);
+    assert(sheetBarDom !== null);
+    const toolbarSize = toolbarDom.getBoundingClientRect();
+    const sheetBarSize = sheetBarDom.getBoundingClientRect();
+    this.canvasSize = {
+      width,
+      height: height - toolbarSize.height - sheetBarSize.height,
+    };
+  }
   getCanvasSize(): IWindowSize {
-    return this.draw.getCanvasSize();
+    assert(!!this.canvasSize);
+    return this.canvasSize;
+  }
+  getDrawSize(config: IWindowSize): IWindowSize {
+    const size = this.getCanvasSize();
+    const width = size.width - config.width;
+    const height = size.height - config.height;
+    return {
+      width,
+      height,
+    };
   }
   setCellValue(row: number, col: number, value: string): void {
     this.model.setCellValue(row, col, value);
     this.render();
   }
+  protected updateSelectionRender(): void {
+    this.draw.updateSelection();
+  }
   protected render(): void {
-    const { draw, scroll, model } = this;
-    draw.render(scroll, model);
-  }
-  protected clear(): void {
-    this.draw.clear();
-  }
-  reset(): void {
-    this.clear();
+    this.draw.render();
   }
 }
 

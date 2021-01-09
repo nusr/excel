@@ -48,7 +48,7 @@ export const CanvasContainer = memo(() => {
       return;
     }
     const position = controller.clickPositionToCell(offsetX, offsetY);
-    controller.setActiveCell(position.row, position.col);
+    controller.updateSelection(position.row, position.col);
     const delay = timeStamp - state.current.timeStamp;
     if (delay < DOUBLE_CLICK_TIME) {
       controller.enterEditing();
@@ -60,7 +60,7 @@ export const CanvasContainer = memo(() => {
     (textValue: string) => {
       const controller = getSingletonController();
       controller.setCellValue(activeCell.row, activeCell.col, textValue);
-      controller.setActiveCell(activeCell.row + 1, activeCell.col);
+      controller.updateSelection(activeCell.row + 1, activeCell.col);
     },
     [activeCell]
   );
@@ -68,7 +68,7 @@ export const CanvasContainer = memo(() => {
     (textValue: string) => {
       const controller = getSingletonController();
       controller.setCellValue(activeCell.row, activeCell.col, textValue);
-      controller.setActiveCell(activeCell.row, activeCell.col + 1);
+      controller.updateSelection(activeCell.row, activeCell.col + 1);
     },
     [activeCell]
   );

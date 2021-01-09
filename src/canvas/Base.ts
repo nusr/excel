@@ -1,9 +1,9 @@
 import { EBorderLineType, CanvasOption } from "@/controller/interface";
 import { thinLineWidth, npx, assert, dpr, npxLine } from "@/util";
 
-export class BaseCanvas {
-  protected canvas: HTMLCanvasElement;
-  protected ctx: CanvasRenderingContext2D;
+export class Base {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
   constructor(width: number, height: number) {
     this.canvas = document.createElement("canvas");
     const ctx = this.canvas.getContext("2d");
@@ -52,6 +52,14 @@ export class BaseCanvas {
   }
   fillRect(x: number, y: number, width: number, height: number): void {
     this.ctx.fillRect(npx(x) - 0.5, npx(y) - 0.5, npx(width), npx(height));
+  }
+  strokeRect(
+    x: number,
+    y: number,
+    width: number,
+    height: number
+  ): void {
+    this.ctx.strokeRect(npx(x) - 0.5, npx(y) - 0.5, npx(width), npx(height));
   }
   fillText(text: string | number, x: number, y: number): void {
     this.ctx.fillText(String(text), npx(x), npx(y));

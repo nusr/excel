@@ -1,5 +1,6 @@
 import { WorkBookJSON } from "./model";
 import { CellPosition } from './store';
+import { IWindowSize } from '@/util';
 export interface IController {
   addSheet(): void;
   reset(): void;
@@ -14,4 +15,6 @@ export interface IController {
   setCurrentSheetId(id: string): void;
   setCellValue(row: number, col: number, value: string): void;
   clickPositionToCell(offsetX: number, offsetY: number): CellPosition;
+  getCanvasSize(): IWindowSize;
+  getDrawSize(config: IWindowSize): IWindowSize;
 }

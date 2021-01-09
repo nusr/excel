@@ -2,14 +2,14 @@ import React, { memo, useMemo } from "react";
 import styled, { withTheme } from "styled-components";
 import { TextEditor, CommonProps } from "@/components";
 import { useSelector } from "@/store";
-import { CELL_HEIGHT, CELL_WIDTH } from "@/util";
+import { CELL_HEIGHT, CELL_WIDTH, dpr } from "@/util";
 export const EditorWrapper = withTheme(styled.div`
   position: absolute;
   left: 0;
   top: 0;
   width: ${CELL_WIDTH}px;
   height: ${CELL_HEIGHT}px;
-  border: 2px solid ${({ theme }) => theme.primaryColor};
+  border: 1px solid ${({ theme }) => theme.primaryColor};
   border-radius: 2px;
   background-color: #fff;
   box-sizing: border-box;
