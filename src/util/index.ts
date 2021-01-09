@@ -11,3 +11,4 @@ export * from "./interaction";
 export * from "./constant";
 export * from "./controller";
 export * from "./eventType";
+export * from './designPattern';

@@ -2,12 +2,14 @@ import { isEqual } from "lodash-es";
 import { Draw } from "./Draw";
 import { Model } from "./Model";
 import { Scroll } from "./Scroll";
-import { Action, CellPosition, WorkBookJSON, IController } from "@/types";
-import { IWindowSize, assert, EventEmitter } from "@/util";
-
-type EventType = {
-  dispatch: Action;
-};
+import {
+  Action,
+  CellPosition,
+  WorkBookJSON,
+  IController,
+  EventType,
+} from "@/types";
+import { IWindowSize, assert, EventEmitter, singletonPattern } from "@/util";
 export class Controller extends EventEmitter<EventType> implements IController {
   private draw: Draw;
   private scroll: Scroll = new Scroll(this);
@@ -50,6 +52,7 @@ export class Controller extends EventEmitter<EventType> implements IController {
     console.log("loadJSON", json);
     this.model.fromJSON(json);
     this.render();
+    this.changeActiveCell(0, 0);
   }
   enterEditing(): void {
     this.dispatchAction({ type: "ENTER_EDITING" });
@@ -97,15 +100,9 @@ export class Controller extends EventEmitter<EventType> implements IController {
   }
 }
 
-const getSingletonController = (() => {
-  let instance: Controller;
-  return (canvas?: HTMLCanvasElement): Controller => {
-    if (!instance) {
-      instance = new Controller(canvas);
-    }
-    assert(!!instance);
-    return instance;
-  };
-})();
+const getSingletonController = singletonPattern<
+  Controller,
+  [canvas?: HTMLCanvasElement]
+>(Controller);
 
 export { getSingletonController };

@@ -2,7 +2,7 @@ import React, { memo, useRef, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "@/store";
 import { EditorContainer } from "../EditorContainer";
-import { MOCK_MODEL, getSingletonController, Controller } from "@/controller";
+import { MOCK_MODEL, getSingletonController } from "@/controller";
 import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, DOUBLE_CLICK_TIME } from "@/util";
 import { CellPosition } from "@/types";
 
@@ -76,7 +76,7 @@ export const CanvasContainer = memo(() => {
       return;
     }
     const canvasDom = canvasRef.current;
-    const controller: Controller = getSingletonController(canvasDom);
+    const controller = getSingletonController(canvasDom);
     const off = controller.on("dispatch", (data) => {
       console.log("on dispatch", data);
       dispatch(data);
