@@ -2,9 +2,10 @@ import React, { memo, useRef, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "@/store";
 import { EditorContainer } from "../EditorContainer";
-import { MOCK_MODEL, getSingletonController } from "@/controller";
+import { getSingletonController } from "@/controller";
 import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, DOUBLE_CLICK_TIME } from "@/util";
 import { CellPosition } from "@/types";
+import { MOCK_MODEL } from "@/model";
 
 const ContentContainer = styled.div`
   position: relative;
@@ -47,7 +48,7 @@ export const CanvasContainer = memo(() => {
       return;
     }
     const position = controller.clickPositionToCell(offsetX, offsetY);
-    controller.changeActiveCell(position.row, position.col);
+    controller.setActiveCell(position.row, position.col);
     const delay = timeStamp - state.current.timeStamp;
     if (delay < DOUBLE_CLICK_TIME) {
       controller.enterEditing();
@@ -59,7 +60,7 @@ export const CanvasContainer = memo(() => {
     (textValue: string) => {
       const controller = getSingletonController();
       controller.setCellValue(activeCell.row, activeCell.col, textValue);
-      controller.changeActiveCell(activeCell.row + 1, activeCell.col);
+      controller.setActiveCell(activeCell.row + 1, activeCell.col);
     },
     [activeCell]
   );
@@ -67,7 +68,7 @@ export const CanvasContainer = memo(() => {
     (textValue: string) => {
       const controller = getSingletonController();
       controller.setCellValue(activeCell.row, activeCell.col, textValue);
-      controller.changeActiveCell(activeCell.row, activeCell.col + 1);
+      controller.setActiveCell(activeCell.row, activeCell.col + 1);
     },
     [activeCell]
   );
@@ -91,6 +92,7 @@ export const CanvasContainer = memo(() => {
     window.addEventListener("resize", handleWindowResize);
     canvasDom.addEventListener("mousedown", handleClick);
     return () => {
+      getSingletonController.destroy();
       off();
       window.removeEventListener("resize", handleWindowResize);
       canvasDom.removeEventListener("mousedown", handleClick);

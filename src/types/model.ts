@@ -1,3 +1,5 @@
+import { IWindowSize } from "@/util";
+import { CellPosition, CellInfo } from "./store";
 export enum EVerticalAlign {
   TOP,
   MIDDLE,
@@ -41,10 +43,24 @@ export type ModelCellType = {
   height?: number;
   style?: string;
 };
-export type ModelColType = Record<string, ModelCellType>
-export type ModelRowType = Record<string,ModelColType>
+export type ModelColType = Record<string, ModelCellType>;
+export type ModelRowType = Record<string, ModelColType>;
 export type WorkBookJSON = {
   workbook: WorksheetType[];
   worksheets: Record<string, ModelRowType>;
   styles: Record<string, Partial<StyleType>>;
 };
+
+export interface IModelValue {
+  sheetList: WorksheetType[];
+  currentSheetId: string;
+  addSheet(): void;
+  getCellsContent(): CellInfo[];
+  toJSON(): WorkBookJSON;
+  fromJSON(data: WorkBookJSON): void;
+  getSheetInfo(id?: string): WorksheetType;
+  getRowTitleHeightAndColTitleWidth(): IWindowSize;
+  setCellValue(row: number, col: number, value: string): void;
+  queryCell(row: number, col: number): CellInfo;
+  clickPositionToCell(x: number, y: number, size: IWindowSize): CellPosition;
+}

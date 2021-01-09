@@ -12,23 +12,11 @@ import {
   WorkBookJSON,
   Action,
   WorksheetType,
+  IModelValue,
 } from "@/types";
 import { getDefaultSheetInfo, assert } from "@/util";
-import { Controller } from "./controller";
+import { Controller } from "../controller/controller";
 
-export interface IModelValue {
-  sheetList: WorksheetType[];
-  currentSheetId: string;
-  addSheet(): void;
-  getCellsContent(): CellInfo[];
-  toJSON(): WorkBookJSON;
-  fromJSON(data: WorkBookJSON): void;
-  getSheetInfo(id?: string): WorksheetType;
-  getRowTitleHeightAndColTitleWidth(): IWindowSize;
-  setCellValue(row: number, col: number, value: string): this;
-  queryCell(row: number, col: number): CellInfo;
-  clickPositionToCell(x: number, y: number, size: IWindowSize): CellPosition;
-}
 export const MOCK_MODEL: WorkBookJSON = {
   workbook: [
     {
@@ -87,7 +75,7 @@ export class Model implements IModelValue {
   protected _workbook: WorksheetType[] = [];
   protected worksheets: WorkBookJSON["worksheets"] = {};
   protected styles: WorkBookJSON["styles"] = {};
-  controller: Controller;
+  protected controller: Controller;
   constructor(controller: Controller) {
     this.controller = controller;
   }
@@ -156,7 +144,7 @@ export class Model implements IModelValue {
       worksheets,
     };
   }
-  setCellValue(row: number, col: number, value: string): this {
+  setCellValue(row: number, col: number, value: string): void {
     console.log("setCellValue", row, col, value);
     let sheetData = this.worksheets[this.currentSheetId];
     if (isEmpty(sheetData)) {
@@ -171,7 +159,6 @@ export class Model implements IModelValue {
       sheetData[row][col].value = value;
     }
     this.modelChange();
-    return this;
   }
   getRowTitleHeightAndColTitleWidth(): IWindowSize {
     return {

@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import styled, { withTheme } from "styled-components";
 import { TextEditor, CommonProps } from "@/components";
 import { useSelector } from "@/store";
@@ -20,9 +20,15 @@ export const EditorContainer = memo((props: CommonProps) => {
     "isCellEditing",
   ]);
   const { value, row, col, ...rest } = activeCell;
+  const style = useMemo(() => {
+    return {
+      ...rest,
+      display: isCellEditing ? "inline-block" : "none",
+    };
+  }, [rest, isCellEditing]);
   console.log("EditorContainer", activeCell);
   return (
-    <EditorWrapper style={rest}>
+    <EditorWrapper style={style}>
       <TextEditor {...props} value={value} isCellEditing={isCellEditing} />
     </EditorWrapper>
   );

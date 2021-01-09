@@ -1,5 +1,5 @@
 import { isEmpty } from "lodash-es";
-import { EBorderLineType, CanvasOption } from "./interface";
+import { EBorderLineType, CanvasOption } from "@/controller/interface";
 import {
   EDefaultBackgroundColor,
   thinLineWidth,
@@ -14,11 +14,10 @@ import {
   intToColumnName,
   isNumber,
 } from "@/util";
-import { IController } from "@/types";
-import type { ScrollValue } from "./scroll";
-import type { IModelValue } from "./model";
+import { IController, IModelValue, IScrollValue, CellInfo } from "@/types";
+import { Selection } from "./Selection";
 
-export const HEADER_STYLE: any = {
+export const HEADER_STYLE: Omit<CanvasOption, "direction"> = {
   textAlign: "center",
   textBaseline: "middle",
   font: `500 ${npx(12)}px 'Source Sans Pro',sans-serif`,
@@ -28,81 +27,74 @@ export const HEADER_STYLE: any = {
 };
 
 export class Draw {
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
-  controller: IController;
+  protected canvas: HTMLCanvasElement;
+  protected ctx: CanvasRenderingContext2D;
+  protected controller: IController;
+  protected selection: Selection;
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
     const ctx = canvas.getContext("2d");
-    assert(ctx !== null, "[Draw] init canvas context error");
+    assert(!!ctx);
     this.ctx = ctx;
     const { width, height } = this.getCanvasSize();
+    this.selection = new Selection(width, height);
     this.resize(width, height);
     const size = dpr();
     this.scale(size, size);
   }
-
-  protected resize(width: number, height: number): this {
+  setActiveCell(data: CellInfo): void {
+    this.selection.setActiveCell(data);
+    this.ctx.drawImage(this.selection.canvas, 0, 0);
+  }
+  protected resize(width: number, height: number): void {
     const { canvas } = this;
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     canvas.width = npx(width);
     canvas.height = npx(height);
-    return this;
+    this.selection.resize(width, height);
   }
 
-  protected scale(x: number, y: number): this {
+  protected scale(x: number, y: number): void {
     this.ctx.scale(x, y);
-    return this;
   }
-  clear(): this {
+  clear(): void {
     const { width, height } = this.canvas;
     this.ctx.clearRect(0, 0, width, height);
-    return this;
   }
-  clearRect(x: number, y: number, width: number, height: number): this {
+  clearRect(x: number, y: number, width: number, height: number): void {
     this.ctx.clearRect(x, y, width, height);
-    return this;
   }
-  save(): this {
+  save(): void {
     this.ctx.save();
     this.ctx.beginPath();
-    return this;
   }
-  restore(): this {
+  restore(): void {
     this.ctx.restore();
-    return this;
   }
-  beginPath(): this {
+  beginPath(): void {
     this.ctx.beginPath();
-    return this;
   }
-  stroke(): this {
+  stroke(): void {
     this.ctx.stroke();
-    return this;
   }
-  translate(x: number, y: number): this {
+  translate(x: number, y: number): void {
     this.ctx.translate(npx(x), npx(y));
-    return this;
   }
-  fill(path: Path2D, fillRule: "evenodd" | "nonzero" = "nonzero"): this {
+  fill(path: Path2D, fillRule: "evenodd" | "nonzero" = "nonzero"): void {
     this.ctx.fill(path, fillRule);
-    return this;
   }
-  fillRect(x: number, y: number, width: number, height: number): this {
+  fillRect(x: number, y: number, width: number, height: number): void {
     this.ctx.fillRect(npx(x) - 0.5, npx(y) - 0.5, npx(width), npx(height));
-    return this;
   }
-  fillText(text: string | number, x: number, y: number): this {
+  fillText(text: string | number, x: number, y: number): void {
     this.ctx.fillText(String(text), npx(x), npx(y));
-    return this;
   }
-  setAttributes(options: Partial<CanvasOption>): this {
+  setAttributes(options: Partial<CanvasOption>): void {
     Object.assign(this.ctx, options);
-    return this;
   }
-  border(lineType: EBorderLineType, color: string): this | Error {
+  border(lineType: EBorderLineType, color: string): void {
     const { ctx } = this;
     ctx.lineWidth = thinLineWidth();
     ctx.strokeStyle = color;
@@ -123,15 +115,14 @@ export class Draw {
         ctx.setLineDash([npx(2), 0]);
         break;
       default:
-        return new Error(
+        throw new Error(
           `[border] not found lineType: ${lineType}, color: ${color}`
         );
     }
-    return this;
   }
 
-  line(pointList: Array<Array<number>>): this {
-    assert(pointList?.length > 0);
+  line(pointList: Array<Array<number>> = []): void {
+    assert(pointList.length > 0);
     const { ctx } = this;
     ctx.beginPath();
     for (let i = 0; i < pointList.length; i += 2) {
@@ -141,7 +132,6 @@ export class Draw {
       ctx.lineTo(npxLine(second[0]), npxLine(second[1]));
     }
     ctx.stroke();
-    return this;
   }
   getCanvasSize(): IWindowSize {
     const { width, height } = getWidthHeight();
@@ -165,7 +155,7 @@ export class Draw {
       height,
     };
   }
-  render(scroll: ScrollValue, model: IModelValue): this {
+  render(scroll: IScrollValue, model: IModelValue): void {
     const { width, height } = this.getCanvasSize();
     const config = model.getRowTitleHeightAndColTitleWidth();
     this.resize(width, height);
@@ -174,15 +164,15 @@ export class Draw {
     this.renderColsHeader(scroll, model);
     this.renderTriangle(config);
     this.renderContent(model);
-    return this;
   }
-  protected renderContent(model: IModelValue): this {
+  protected renderContent(model: IModelValue): void {
     const data = model.getCellsContent();
     console.log("renderContent", data);
     if (isEmpty(data)) {
-      return this;
+      return;
     }
-    this.save().setAttributes({
+    this.save();
+    this.setAttributes({
       textAlign: "left",
       textBaseline: "middle",
       font: `500 ${npx(12)}px 'Source Sans Pro',sans-serif`,
@@ -194,42 +184,40 @@ export class Draw {
       this.fillText(value, left + (isNum ? width : 0), top + height / 2);
     }
     this.restore();
-    return this;
   }
-  protected renderTriangle(config: IWindowSize): this {
+  protected renderTriangle(config: IWindowSize): void {
     const offset = 2;
     const path = new Path2D();
     path.moveTo(npx(config.width / 2 - offset), npx(config.height - offset));
     path.lineTo(npx(config.width - offset), npx(config.height - offset));
     path.lineTo(npx(config.width - offset), npx(offset));
 
-    this.save()
-      .setAttributes({
-        fillStyle: EDefaultBackgroundColor.ROW_COL_HEADER,
-      })
-      .fillRect(0, 0, config.width, config.height)
-      .setAttributes({
-        fillStyle: EDefaultFillColor.SELECT_ALL_TRIANGLE,
-      })
-      .fill(path)
-      .restore();
-    return this;
+    this.save();
+    this.setAttributes({
+      fillStyle: EDefaultBackgroundColor.ROW_COL_HEADER,
+    });
+    this.fillRect(0, 0, config.width, config.height);
+    this.setAttributes({
+      fillStyle: EDefaultFillColor.SELECT_ALL_TRIANGLE,
+    });
+    this.fill(path);
+    this.restore();
   }
 
-  protected renderGrid(scroll: ScrollValue, model: IModelValue): void {
+  protected renderGrid(scroll: IScrollValue, model: IModelValue): void {
     const { rowIndex, colIndex } = scroll;
     const { rowCount, colCount } = model.getSheetInfo();
     const cell = model.queryCell(0, 0);
     const config = model.getRowTitleHeightAndColTitleWidth();
     const { width, height } = this.getDrawSize(config);
     const lineWidth = thinLineWidth();
-    this.save()
-      .setAttributes({
-        fillStyle: EDefaultBackgroundColor.CONTENT,
-        lineWidth,
-        strokeStyle: EDefaultStrokeColor.GRID,
-      })
-      .translate(config.width, config.height);
+    this.save();
+    this.setAttributes({
+      fillStyle: EDefaultBackgroundColor.CONTENT,
+      lineWidth,
+      strokeStyle: EDefaultStrokeColor.GRID,
+    });
+    this.translate(config.width, config.height);
     this.clear();
     const pointList = [];
     let y = 0;
@@ -249,18 +237,19 @@ export class Draw {
       }
     }
     pointList.push([0, height], [width, height], [width, 0], [width, height]);
-    this.line(pointList).restore();
+    this.line(pointList);
+    this.restore();
   }
-  protected renderRowsHeader(scroll: ScrollValue, model: IModelValue): void {
+  protected renderRowsHeader(scroll: IScrollValue, model: IModelValue): void {
     const { rowIndex } = scroll;
     const { rowCount } = model.getSheetInfo();
     const config = model.getRowTitleHeightAndColTitleWidth();
     const cell = model.queryCell(0, 0);
     const { height } = this.getDrawSize(config);
-    this.save()
-      .setAttributes({ fillStyle: EDefaultBackgroundColor.ROW_COL_HEADER })
-      .fillRect(0, config.height, config.width, height)
-      .setAttributes(HEADER_STYLE);
+    this.save();
+    this.setAttributes({ fillStyle: EDefaultBackgroundColor.ROW_COL_HEADER });
+    this.fillRect(0, config.height, config.width, height);
+    this.setAttributes(HEADER_STYLE);
     const pointList = [];
     let y = config.height;
     let i = rowIndex;
@@ -278,19 +267,20 @@ export class Draw {
     }
     this.fillText(i + 1, config.width / 2, y + cell.height / 2);
     pointList.push([0, y], [config.width, y], [0, 0], [0, y]);
-    this.line(pointList).restore();
+    this.line(pointList);
+    this.restore();
   }
-  protected renderColsHeader(scroll: ScrollValue, model: IModelValue): void {
+  protected renderColsHeader(scroll: IScrollValue, model: IModelValue): void {
     const { colIndex } = scroll;
     const { colCount } = model.getSheetInfo();
     const config = model.getRowTitleHeightAndColTitleWidth();
     const cell = model.queryCell(0, 0);
     const { width } = this.getDrawSize(config);
     const pointList = [];
-    this.save()
-      .setAttributes({ fillStyle: EDefaultBackgroundColor.ROW_COL_HEADER })
-      .fillRect(config.width, 0, width, config.height)
-      .setAttributes(HEADER_STYLE);
+    this.save();
+    this.setAttributes({ fillStyle: EDefaultBackgroundColor.ROW_COL_HEADER });
+    this.fillRect(config.width, 0, width, config.height);
+    this.setAttributes(HEADER_STYLE);
     let x = config.width;
     let i = colIndex;
     for (; i < colCount; i++) {
@@ -315,6 +305,7 @@ export class Draw {
       config.height / 2 + dpr()
     );
     pointList.push([x, 0], [x, config.height], [0, 0], [x, 0]);
-    this.line(pointList).restore();
+    this.line(pointList);
+    this.restore();
   }
 }

@@ -1,5 +1,5 @@
-export function dpr(): number {
-  return window.devicePixelRatio || 1;
+export function dpr(data = window.devicePixelRatio): number {
+  return Math.max(Math.floor(data || 1), 1);
 }
 
 export function npx(px: number): number {
@@ -11,5 +11,5 @@ export function thinLineWidth(): number {
 }
 export function npxLine(px: number): number {
   const n = npx(px);
-  return n > 0 ? n - 0.5 : 0.5;
+  return Math.max(0.5, n - 0.5);
 }

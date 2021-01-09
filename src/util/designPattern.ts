@@ -1,7 +1,8 @@
 import { assert } from "./assert";
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function singletonPattern<T, D extends Array<unknown>>(
   C: new (...params: D) => T
-): (...params: D) => T {
+) {
   let instance: T | null;
   function getParams(...rest: D): T {
     if (!instance) {

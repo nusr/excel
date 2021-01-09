@@ -1,11 +1,6 @@
-import { IController } from "@/types";
-export interface ScrollValue {
-  x: number;
-  y: number;
-  rowIndex: number;
-  colIndex: number;
-}
-export class Scroll implements ScrollValue {
+import { IController, IScrollValue } from "@/types";
+
+export class Scroll implements IScrollValue {
   x = 0;
   y = 0;
   rowIndex = 0;

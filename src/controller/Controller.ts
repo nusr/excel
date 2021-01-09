@@ -1,6 +1,6 @@
 import { isEqual } from "lodash-es";
-import { Draw } from "./Draw";
-import { Model } from "./Model";
+import { Draw } from "@/view";
+import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
   Action,
@@ -11,9 +11,9 @@ import {
 } from "@/types";
 import { IWindowSize, assert, EventEmitter, singletonPattern } from "@/util";
 export class Controller extends EventEmitter<EventType> implements IController {
-  private draw: Draw;
-  private scroll: Scroll = new Scroll(this);
-  private model: Model = new Model(this);
+  protected draw: Draw;
+  protected scroll: Scroll = new Scroll(this);
+  protected model: Model = new Model(this);
   constructor(canvas?: HTMLCanvasElement) {
     super();
     assert(!!canvas);
@@ -29,12 +29,12 @@ export class Controller extends EventEmitter<EventType> implements IController {
     }
     this.model.currentSheetId = id;
     this.render();
-    this.changeActiveCell(0, 0);
+    this.setActiveCell(0, 0);
   }
   addSheet(): void {
     this.model.addSheet();
     this.render();
-    this.changeActiveCell(0, 0);
+    this.setActiveCell(0, 0);
   }
   selectAll(): void {
     console.log("selectAll");
@@ -52,7 +52,7 @@ export class Controller extends EventEmitter<EventType> implements IController {
     console.log("loadJSON", json);
     this.model.fromJSON(json);
     this.render();
-    this.changeActiveCell(0, 0);
+    this.setActiveCell(0, 0);
   }
   enterEditing(): void {
     this.dispatchAction({ type: "ENTER_EDITING" });
@@ -60,7 +60,7 @@ export class Controller extends EventEmitter<EventType> implements IController {
   clickPositionToCell(offsetX: number, offsetY: number): CellPosition {
     return this.model.clickPositionToCell(offsetX, offsetY);
   }
-  changeActiveCell(row: number, col: number): void {
+  setActiveCell(row: number, col: number): void {
     const { model } = this;
     const { rowCount, colCount } = model.getSheetInfo();
     if (row >= rowCount || col >= colCount) {
@@ -71,6 +71,7 @@ export class Controller extends EventEmitter<EventType> implements IController {
     if (cell.top >= size.height || cell.left >= size.width) {
       return;
     }
+    this.draw.setActiveCell(cell);
     this.dispatchAction({
       type: "CHANGE_ACTIVE_CELL",
       payload: cell,
@@ -83,10 +84,9 @@ export class Controller extends EventEmitter<EventType> implements IController {
   getCanvasSize(): IWindowSize {
     return this.draw.getCanvasSize();
   }
-  setCellValue(row: number, col: number, value: string): this {
+  setCellValue(row: number, col: number, value: string): void {
     this.model.setCellValue(row, col, value);
     this.render();
-    return this;
   }
   protected render(): void {
     const { draw, scroll, model } = this;
