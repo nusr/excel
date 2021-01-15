@@ -3,7 +3,6 @@
 const fs = require("fs");
 const path = require("path");
 const esBuild = require("esbuild");
-const rimraf = require("rimraf");
 const distDir = path.join(process.cwd(), "dist");
 const NODE_ENV = process.env.NODE_ENV || "production";
 const isProd = NODE_ENV === "production";
@@ -53,7 +52,6 @@ function buildJs(type = "", fileName = "") {
 }
 
 function init() {
-  rimraf.sync(distDir);
   buildJs();
   if (!isProd) {
     require("./server.js");
