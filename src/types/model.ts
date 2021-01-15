@@ -43,6 +43,9 @@ export type ModelCellType = {
   height?: number;
   style?: string;
 };
+
+export type ModelCellValue = ModelCellType & { col: number; row: number };
+
 export type ModelColType = Record<string, ModelCellType>;
 export type ModelRowType = Record<string, ModelColType>;
 export type WorkBookJSON = {

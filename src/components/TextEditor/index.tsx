@@ -22,32 +22,26 @@ const TextEditorContent = styled.input`
 export type CommonProps = {
   onInputEnter(value: string): void;
   onInputTab(value: string): void;
+  onBlur(): void;
 };
 type TextEditorProps = {
-  value: string;
+  value: string | number;
   isCellEditing: boolean;
 } & CommonProps;
 
 export const TextEditor = memo((props: TextEditorProps) => {
-  const { value = "", isCellEditing, onInputEnter, onInputTab } = props;
+  const { value = "", isCellEditing, onInputEnter, onInputTab, onBlur } = props;
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const dom = inputRef.current;
     if (dom) {
-      dom.value = value;
-      dom.focus();
+      dom.value = String(value);
+      // dom.focus();
     }
-    return () => {
-      if (dom) {
-        dom.blur();
-      }
-    };
   }, [isCellEditing, value]);
   const handleBlur = useCallback(() => {
-    if (inputRef.current) {
-      inputRef.current.blur();
-    }
-  }, []);
+    onBlur();
+  }, [onBlur]);
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       const { key } = event;

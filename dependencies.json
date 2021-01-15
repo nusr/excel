@@ -1,4 +1,21 @@
 {
+  "@cnakazawa/watch": {
+    "exec-sh": "^0.3.2",
+    "minimist": "^1.2.0"
+  },
+  "@emotion/is-prop-valid": {
+    "@emotion/memoize": "0.7.4"
+  },
+  "globals": {
+    "type-fest": "^0.8.1"
+  },
+  "@istanbuljs/load-nyc-config": {
+    "camelcase": "^5.3.1",
+    "find-up": "^4.1.0",
+    "get-package-type": "^0.1.0",
+    "js-yaml": "^3.13.1",
+    "resolve-from": "^5.0.0"
+  },
   "ansi-styles": {
     "color-convert": "^2.0.1"
   },
@@ -11,20 +28,6 @@
   },
   "supports-color": {
     "has-flag": "^4.0.0"
-  },
-  "@cnakazawa/watch": {
-    "exec-sh": "^0.3.2",
-    "minimist": "^1.2.0"
-  },
-  "@emotion/is-prop-valid": {
-    "@emotion/memoize": "0.7.4"
-  },
-  "@istanbuljs/load-nyc-config": {
-    "camelcase": "^5.3.1",
-    "find-up": "^4.1.0",
-    "get-package-type": "^0.1.0",
-    "js-yaml": "^3.13.1",
-    "resolve-from": "^5.0.0"
   },
   "@nodelib/fs.scandir": {
     "@nodelib/fs.stat": "2.0.4",
@@ -98,8 +101,18 @@
     "@babel/plugin-syntax-top-level-await": "^7.8.3"
   },
   "define-property": {
-    "is-descriptor": "^1.0.2",
-    "isobject": "^3.0.1"
+    "is-descriptor": "^0.1.0"
+  },
+  "is-accessor-descriptor": {
+    "kind-of": "^6.0.0"
+  },
+  "is-data-descriptor": {
+    "kind-of": "^6.0.0"
+  },
+  "is-descriptor": {
+    "is-accessor-descriptor": "^1.0.0",
+    "is-data-descriptor": "^1.0.0",
+    "kind-of": "^6.0.2"
   },
   "base": {
     "cache-base": "^1.0.1",
@@ -148,7 +161,7 @@
   },
   "call-bind": {
     "function-bind": "^1.1.1",
-    "get-intrinsic": "^1.0.0"
+    "get-intrinsic": "^1.0.2"
   },
   "capture-exit": {
     "rsvp": "^4.8.4"
@@ -158,6 +171,11 @@
     "define-property": "^0.2.5",
     "isobject": "^3.0.0",
     "static-extend": "^0.1.1"
+  },
+  "string-width": {
+    "emoji-regex": "^8.0.0",
+    "is-fullwidth-code-point": "^3.0.0",
+    "strip-ansi": "^6.0.0"
   },
   "cliui": {
     "string-width": "^4.2.0",
@@ -205,20 +223,6 @@
   "define-properties": {
     "object-keys": "^1.0.12"
   },
-  "kind-of": {
-    "is-buffer": "^1.1.5"
-  },
-  "is-accessor-descriptor": {
-    "kind-of": "^6.0.0"
-  },
-  "is-data-descriptor": {
-    "kind-of": "^6.0.0"
-  },
-  "is-descriptor": {
-    "is-accessor-descriptor": "^1.0.0",
-    "is-data-descriptor": "^1.0.0",
-    "kind-of": "^6.0.2"
-  },
   "dir-glob": {
     "path-type": "^4.0.0"
   },
@@ -264,18 +268,22 @@
     "type-check": "~0.4.0"
   },
   "optionator": {
-    "prelude-ls": "^1.2.1",
     "deep-is": "^0.1.3",
-    "word-wrap": "^1.2.3",
-    "type-check": "^0.4.0",
+    "fast-levenshtein": "^2.0.6",
     "levn": "^0.4.1",
-    "fast-levenshtein": "^2.0.6"
+    "prelude-ls": "^1.2.1",
+    "type-check": "^0.4.0",
+    "word-wrap": "^1.2.3"
+  },
+  "type-check": {
+    "prelude-ls": "^1.2.1"
   },
   "escodegen": {
+    "esprima": "^4.0.1",
     "estraverse": "^4.2.0",
     "esutils": "^2.0.2",
-    "esprima": "^4.0.1",
-    "optionator": "^0.8.1"
+    "optionator": "^0.8.1",
+    "source-map": "~0.6.1"
   },
   "espree": {
     "acorn": "^7.4.0",
@@ -288,14 +296,25 @@
   "esrecurse": {
     "estraverse": "^5.2.0"
   },
+  "shebang-command": {
+    "shebang-regex": "^3.0.0"
+  },
+  "which": {
+    "isexe": "^2.0.0"
+  },
   "execa": {
-    "cross-spawn": "^6.0.0",
-    "get-stream": "^4.0.0",
-    "is-stream": "^1.1.0",
-    "npm-run-path": "^2.0.0",
-    "p-finally": "^1.0.0",
-    "signal-exit": "^3.0.0",
-    "strip-eof": "^1.0.0"
+    "cross-spawn": "^7.0.0",
+    "get-stream": "^5.0.0",
+    "human-signals": "^1.1.1",
+    "is-stream": "^2.0.0",
+    "merge-stream": "^2.0.0",
+    "npm-run-path": "^4.0.0",
+    "onetime": "^5.1.0",
+    "signal-exit": "^3.0.2",
+    "strip-final-newline": "^2.0.0"
+  },
+  "extend-shallow": {
+    "is-extendable": "^0.1.0"
   },
   "expand-brackets": {
     "debug": "^2.3.3",
@@ -314,9 +333,8 @@
     "jest-message-util": "^26.6.2",
     "jest-regex-util": "^26.0.0"
   },
-  "extend-shallow": {
-    "assign-symbols": "^1.0.0",
-    "is-extendable": "^1.0.1"
+  "is-extendable": {
+    "is-plain-object": "^2.0.4"
   },
   "extglob": {
     "array-unique": "^0.3.2",
@@ -392,9 +410,6 @@
   "glob-parent": {
     "is-glob": "^4.0.1"
   },
-  "globals": {
-    "type-fest": "^0.8.1"
-  },
   "globby": {
     "array-union": "^2.1.0",
     "dir-glob": "^3.0.1",
@@ -415,6 +430,12 @@
     "has-values": "^0.1.4",
     "isobject": "^2.0.0"
   },
+  "kind-of": {
+    "is-buffer": "^1.1.5"
+  },
+  "is-number": {
+    "kind-of": "^3.0.2"
+  },
   "has-values": {
     "is-number": "^3.0.0",
     "kind-of": "^4.0.0"
@@ -427,15 +448,24 @@
     "jsprim": "^1.2.2",
     "sshpk": "^1.7.0"
   },
+  "locate-path": {
+    "p-locate": "^4.1.0"
+  },
+  "p-limit": {
+    "p-try": "^2.0.0"
+  },
+  "p-locate": {
+    "p-limit": "^2.2.0"
+  },
+  "pkg-dir": {
+    "find-up": "^4.0.0"
+  },
   "iconv-lite": {
     "safer-buffer": ">= 2.1.2 < 3"
   },
   "import-fresh": {
     "parent-module": "^1.0.0",
     "resolve-from": "^4.0.0"
-  },
-  "pkg-dir": {
-    "find-up": "^5.0.0"
   },
   "import-local": {
     "pkg-dir": "^4.2.0",
@@ -458,9 +488,6 @@
   },
   "is-glob": {
     "is-extglob": "^2.1.1"
-  },
-  "is-number": {
-    "kind-of": "^3.0.2"
   },
   "is-plain-object": {
     "isobject": "^3.0.1"
@@ -494,13 +521,12 @@
     "html-escaper": "^2.0.0",
     "istanbul-lib-report": "^3.0.0"
   },
+  "npm-run-path": {
+    "path-key": "^2.0.0"
+  },
   "js-yaml": {
     "argparse": "^1.0.7",
     "esprima": "^4.0.0"
-  },
-  "tough-cookie": {
-    "psl": "^1.1.28",
-    "punycode": "^2.1.1"
   },
   "jsdom": {
     "abab": "^2.0.3",
@@ -543,12 +569,6 @@
     "array-includes": "^3.1.2",
     "object.assign": "^4.1.2"
   },
-  "type-check": {
-    "prelude-ls": "~1.1.2"
-  },
-  "locate-path": {
-    "p-locate": "^5.0.0"
-  },
   "loose-envify": {
     "js-tokens": "^3.0.0 || ^4.0.0"
   },
@@ -580,13 +600,10 @@
     "to-regex": "^3.0.2"
   },
   "mime-types": {
-    "mime-db": "1.45.0"
+    "mime-db": "1.44.0"
   },
   "minimatch": {
     "brace-expansion": "^1.1.7"
-  },
-  "is-extendable": {
-    "is-plain-object": "^2.0.4"
   },
   "mixin-deep": {
     "for-in": "^1.0.2",
@@ -618,9 +635,6 @@
     "resolve": "^1.10.0",
     "semver": "2 || 3 || 4 || 5",
     "validate-npm-package-license": "^3.0.1"
-  },
-  "npm-run-path": {
-    "path-key": "^2.0.0"
   },
   "object-copy": {
     "copy-descriptor": "^0.1.0",
@@ -662,12 +676,6 @@
   },
   "onetime": {
     "mimic-fn": "^2.1.0"
-  },
-  "p-limit": {
-    "yocto-queue": "^0.1.0"
-  },
-  "p-locate": {
-    "p-limit": "^3.0.2"
   },
   "parent-module": {
     "callsites": "^3.0.0"
@@ -721,6 +729,11 @@
   "regexp.prototype.flags": {
     "define-properties": "^1.1.3",
     "es-abstract": "^1.17.0-next.1"
+  },
+  "tough-cookie": {
+    "ip-regex": "^2.1.0",
+    "psl": "^1.1.28",
+    "punycode": "^2.1.1"
   },
   "request": {
     "aws-sign2": "~0.7.0",
@@ -778,14 +791,8 @@
   "normalize-path": {
     "remove-trailing-separator": "^1.0.1"
   },
-  "shebang-command": {
-    "shebang-regex": "^3.0.0"
-  },
   "to-regex-range": {
     "is-number": "^7.0.0"
-  },
-  "which": {
-    "isexe": "^2.0.0"
   },
   "sane": {
     "@cnakazawa/watch": "^1.0.3",
@@ -867,13 +874,13 @@
   "sshpk": {
     "asn1": "~0.2.3",
     "assert-plus": "^1.0.0",
+    "bcrypt-pbkdf": "^1.0.0",
     "dashdash": "^1.12.0",
-    "getpass": "^0.1.1",
-    "safer-buffer": "^2.0.2",
-    "jsbn": "~0.1.0",
-    "tweetnacl": "~0.14.0",
     "ecc-jsbn": "~0.1.1",
-    "bcrypt-pbkdf": "^1.0.0"
+    "getpass": "^0.1.1",
+    "jsbn": "~0.1.0",
+    "safer-buffer": "^2.0.2",
+    "tweetnacl": "~0.14.0"
   },
   "stack-utils": {
     "escape-string-regexp": "^2.0.0"
@@ -884,11 +891,6 @@
   },
   "string-length": {
     "char-regex": "^1.0.2",
-    "strip-ansi": "^6.0.0"
-  },
-  "string-width": {
-    "emoji-regex": "^8.0.0",
-    "is-fullwidth-code-point": "^3.0.0",
     "strip-ansi": "^6.0.0"
   },
   "string.prototype.matchall": {

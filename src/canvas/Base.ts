@@ -1,11 +1,13 @@
-import { EBorderLineType, CanvasOption } from "@/controller/interface";
 import { thinLineWidth, npx, assert, dpr, npxLine } from "@/util";
+import { CanvasOption, EBorderLineType } from "@/types";
 
 export class Base {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   constructor(width: number, height: number) {
     this.canvas = document.createElement("canvas");
+    this.canvas.style.display = "none";
+    document.body.appendChild(this.canvas);
     const ctx = this.canvas.getContext("2d");
     assert(!!ctx);
     this.ctx = ctx;
@@ -13,16 +15,18 @@ export class Base {
     const size = dpr();
     this.scale(size, size);
   }
+  scale(x: number, y: number): void {
+    this.ctx.scale(x, y);
+  }
+  getFontConfig(): string {
+    return "";
+  }
   resize(width: number, height: number): void {
     const { canvas } = this;
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     canvas.width = npx(width);
     canvas.height = npx(height);
-  }
-
-  scale(x: number, y: number): void {
-    this.ctx.scale(x, y);
   }
   clear(): void {
     const { width, height } = this.canvas;
@@ -53,12 +57,7 @@ export class Base {
   fillRect(x: number, y: number, width: number, height: number): void {
     this.ctx.fillRect(npx(x) - 0.5, npx(y) - 0.5, npx(width), npx(height));
   }
-  strokeRect(
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  ): void {
+  strokeRect(x: number, y: number, width: number, height: number): void {
     this.ctx.strokeRect(npx(x) - 0.5, npx(y) - 0.5, npx(width), npx(height));
   }
   fillText(text: string | number, x: number, y: number): void {

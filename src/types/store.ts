@@ -8,7 +8,7 @@ export type CanvasOverlayPosition = {
   height: number;
 };
 export type EditorContainerPosition = {
-  value: string;
+  value: string | number;
 } & CanvasOverlayPosition;
 
 export type CellPosition = {

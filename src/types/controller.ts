@@ -1,6 +1,15 @@
 import { WorkBookJSON } from "./model";
 import { CellPosition } from './store';
 import { IWindowSize } from '@/util';
+
+export enum EBorderLineType {
+  MEDIUM,
+  THICK,
+  DASHED,
+  DOTTED,
+  DOUBLE,
+}
+
 export interface IController {
   addSheet(): void;
   reset(): void;

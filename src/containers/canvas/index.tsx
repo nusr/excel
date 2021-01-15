@@ -6,6 +6,7 @@ import { getSingletonController } from "@/controller";
 import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, DOUBLE_CLICK_TIME } from "@/util";
 import { CellPosition } from "@/types";
 import { MOCK_MODEL } from "@/model";
+import { Main } from "@/canvas";
 
 const ContentContainer = styled.div`
   position: relative;
@@ -77,7 +78,9 @@ export const CanvasContainer = memo(() => {
       return;
     }
     const canvasDom = canvasRef.current;
-    const controller = getSingletonController(canvasDom);
+    const controller = getSingletonController();
+    const draw = new Main(controller, canvasDom);
+    console.log(draw);
     const off = controller.on("dispatch", (data) => {
       console.log("on dispatch", data);
       dispatch(data);
@@ -89,6 +92,14 @@ export const CanvasContainer = memo(() => {
     function handleWindowResize() {
       controller.windowResize();
     }
+    controller.on("change", (data) => {
+      const { changeSet } = data;
+      if (changeSet.includes("contentChange")) {
+        const { sheetList, currentSheetId } = controller.model;
+        dispatch({ type: "SET_SHEET_LIST", payload: sheetList });
+        dispatch({ type: "SET_CURRENT_SHEET_ID", payload: currentSheetId });
+      }
+    });
     window.addEventListener("resize", handleWindowResize);
     canvasDom.addEventListener("mousedown", handleClick);
     return () => {
@@ -98,10 +109,17 @@ export const CanvasContainer = memo(() => {
       canvasDom.removeEventListener("mousedown", handleClick);
     };
   }, [dispatch, handleClick]);
+  const onBlur = useCallback(() => {
+    getSingletonController().quitEditing();
+  }, []);
   return (
     <ContentContainer>
       <canvas ref={canvasRef} />
-      <EditorContainer onInputEnter={onInputEnter} onInputTab={onInputTab} />
+      <EditorContainer
+        onInputEnter={onInputEnter}
+        onInputTab={onInputTab}
+        onBlur={onBlur}
+      />
     </ContentContainer>
   );
 });

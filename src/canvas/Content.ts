@@ -1,5 +1,5 @@
 import { isEmpty } from "lodash-es";
-import { CanvasOption } from "@/controller/interface";
+import { CanvasOption } from "@/types";
 import {
   EDefaultBackgroundColor,
   thinLineWidth,
@@ -29,7 +29,6 @@ export class Content extends Base {
     this.controller = controller;
   }
   render(width: number, height: number): void {
-    this.clear();
     this.resize(width, height);
     this.renderGrid();
     this.renderRowsHeader();
@@ -38,7 +37,8 @@ export class Content extends Base {
     this.renderContent();
   }
   protected renderContent(): void {
-    const { model } = this.controller;
+    const { controller } = this;
+    const { model } = controller;
     const data = model.getCellsContent();
     console.log("renderContent", data);
     if (isEmpty(data)) {
@@ -51,7 +51,8 @@ export class Content extends Base {
       font: `500 ${npx(12)}px 'Source Sans Pro',sans-serif`,
     });
     for (const item of data) {
-      const { value, left, top, height, width } = item;
+      const result = controller.queryCell(item.row, item.col);
+      const { value, left, top, height, width } = result;
       const isNum = isNumber(value);
       this.setAttributes({ textAlign: isNum ? "right" : "left" });
       this.fillText(value, left + (isNum ? width : 0), top + height / 2);
@@ -83,7 +84,7 @@ export class Content extends Base {
     const { scroll, model } = this.controller;
     const { rowIndex, colIndex } = scroll;
     const { rowCount, colCount } = model.getSheetInfo();
-    const cell = model.queryCell(0, 0);
+    const cell = this.controller.queryCell(0, 0);
     const config = model.getRowTitleHeightAndColTitleWidth();
     const { width, height } = this.controller.getDrawSize(config);
     const lineWidth = thinLineWidth();
@@ -121,7 +122,7 @@ export class Content extends Base {
     const { rowIndex } = scroll;
     const { rowCount } = model.getSheetInfo();
     const config = model.getRowTitleHeightAndColTitleWidth();
-    const cell = model.queryCell(0, 0);
+    const cell = this.controller.queryCell(0, 0);
     const { height } = this.controller.getDrawSize(config);
     this.save();
     this.setAttributes({ fillStyle: EDefaultBackgroundColor.ROW_COL_HEADER });
@@ -152,7 +153,7 @@ export class Content extends Base {
     const { colIndex } = scroll;
     const { colCount } = model.getSheetInfo();
     const config = model.getRowTitleHeightAndColTitleWidth();
-    const cell = model.queryCell(0, 0);
+    const cell = this.controller.queryCell(0, 0);
     const { width } = this.controller.getDrawSize(config);
     const pointList = [];
     this.save();
