@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { CanvasContainer, Toolbar, SheetBar } from "@/containers";
+import { CanvasContainer, Toolbar, SheetBar, FormulaBar } from "@/containers";
 import styled, { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "./GlobalStyle";
 import theme from "@/theme";
@@ -38,6 +38,7 @@ export const App = React.memo(() => {
       <GlobalStyle />
       <AppContainer id="AppContainer">
         <Toolbar />
+        <FormulaBar />
         <CanvasContainer />
         <SheetBar />
       </AppContainer>

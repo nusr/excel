@@ -1,6 +1,5 @@
-import React, { memo, useCallback, useEffect, useRef } from "react";
+import React, { memo, useRef, useCallback } from "react";
 import styled, { css } from "styled-components";
-import { assert } from "@/util";
 const commonStyle = css`
   height: 100%;
   width: 100%;
@@ -20,9 +19,11 @@ const TextEditorContent = styled.input`
   font: inherit;
 `;
 export type CommonProps = {
-  onInputEnter(value: string): void;
-  onInputTab(value: string): void;
-  onBlur(): void;
+  className?: string;
+  onInputEnter(event: React.KeyboardEvent<HTMLInputElement>): void;
+  onInputTab(event: React.KeyboardEvent<HTMLInputElement>): void;
+  onBlur(event: React.FocusEvent<HTMLInputElement>): void;
+  onChange(event: React.ChangeEvent<HTMLInputElement>): void;
 };
 type TextEditorProps = {
   value: string | number;
@@ -30,40 +31,53 @@ type TextEditorProps = {
 } & CommonProps;
 
 export const TextEditor = memo((props: TextEditorProps) => {
-  const { value = "", isCellEditing, onInputEnter, onInputTab, onBlur } = props;
+  const {
+    value = "",
+    className = "",
+    // isCellEditing,
+    onInputEnter,
+    onInputTab,
+    onBlur,
+    onChange,
+  } = props;
   const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    const dom = inputRef.current;
-    if (dom) {
-      dom.value = String(value);
-      // dom.focus();
-    }
-  }, [isCellEditing, value]);
-  const handleBlur = useCallback(() => {
-    onBlur();
-  }, [onBlur]);
+  // useEffect(() => {
+  //   const dom = inputRef.current;
+  //   if (isCellEditing) {
+  //     dom.focus();
+  //   }
+  // }, [isCellEditing]);
+  const handleBlur = useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      onBlur(event);
+    },
+    [onBlur]
+  );
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       const { key } = event;
-      const dom = inputRef.current;
-      assert(dom !== null);
-      const textValue = dom.value;
       if (key === "Enter") {
-        onInputEnter(textValue);
-        dom.value = "";
+        onInputEnter(event);
       } else if (key === "Tab") {
-        onInputTab(textValue);
-        dom.value = "";
+        onInputTab(event);
       }
     },
     [onInputEnter, onInputTab]
   );
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(event);
+    },
+    [onChange]
+  );
   return (
-    <TextEditorWrapper>
+    <TextEditorWrapper className={className}>
       <TextEditorContent
         ref={inputRef}
+        value={value}
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
+        onChange={handleChange}
       />
     </TextEditorWrapper>
   );

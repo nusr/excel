@@ -7,11 +7,15 @@ export const initialState: State = {
   overlayPosition: { left: 0, top: 0, width: 0, height: 0 },
   currentSheetId: "",
   sheetList: [],
+  editCellValue: "",
 };
 
 export const reducer: Reducer = (state, action) => {
   console.log(`%c action type: ${action.type}`, "color: red;", action);
   switch (action.type) {
+    case "CHANGE_Edit_CELL_VALUE":
+      state.editCellValue = action.payload;
+      break;
     case "CHANGE_ACTIVE_CELL":
       state.activeCell = action.payload;
       break;

@@ -23,10 +23,12 @@ export type State = {
   overlayPosition: CanvasOverlayPosition;
   currentSheetId: string;
   sheetList: WorkBookJSON["workbook"];
+  editCellValue: string;
 };
 
 export type Action =
   | { type: "CHANGE_ACTIVE_CELL"; payload: CellInfo }
+  | { type: "CHANGE_Edit_CELL_VALUE"; payload: string }
   | { type: "RESET" }
   | { type: "WINDOW_RESIZE"; payload: CanvasOverlayPosition }
   | { type: "ENTER_EDITING" }

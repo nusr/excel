@@ -113,6 +113,10 @@ export class Controller extends EventEmitter<EventType> {
       type: "CHANGE_ACTIVE_CELL",
       payload: cell,
     });
+    this.dispatchAction({
+      type: "CHANGE_Edit_CELL_VALUE",
+      payload: String(cell.value || ""),
+    });
     this.emitChange();
   }
   windowResize(): void {
@@ -121,15 +125,22 @@ export class Controller extends EventEmitter<EventType> {
   }
   getCanvasSize(): IWindowSize {
     const { width, height } = getWidthHeight();
-    const toolbarDom = document.querySelector("#tool-bar-container");
-    const sheetBarDom = document.querySelector("#sheet-bar-container");
+    const toolbarDom = document.getElementById("tool-bar-container");
+    const sheetBarDom = document.getElementById("sheet-bar-container");
+    const formulaBarDom = document.getElementById("formula-bar-container");
     assert(toolbarDom !== null);
     assert(sheetBarDom !== null);
+    assert(formulaBarDom !== null);
     const toolbarSize = toolbarDom.getBoundingClientRect();
     const sheetBarSize = sheetBarDom.getBoundingClientRect();
+    const formulaBarSize = sheetBarDom.getBoundingClientRect();
     return {
       width,
-      height: height - toolbarSize.height - sheetBarSize.height,
+      height:
+        height -
+        toolbarSize.height -
+        sheetBarSize.height -
+        formulaBarSize.height,
     };
   }
   getDrawSize(config: IWindowSize): IWindowSize {
