@@ -1,12 +1,18 @@
 export function classnames(
-  className = "",
-  config: Record<string, boolean> = {}
+  ...rest: Array<string | Record<string, unknown>>
 ): string {
-  let result = className || "";
-  for (const key of Object.keys(config)) {
-    if (config[key]) {
-      result += ` ${key}`;
+  let result = "";
+  for (const temp of rest) {
+    if (typeof temp === "string" && temp) {
+      result += `${temp} `;
+    }
+    if (typeof temp === "object") {
+      for (const key of Object.keys(temp)) {
+        if (temp[key]) {
+          result += `${key} `;
+        }
+      }
     }
   }
-  return result;
+  return result.trim();
 }
