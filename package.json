@@ -32,7 +32,6 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "dependencies": {
-    "classnames": "^2.2.6",
     "immer": "^8.0.0",
     "lodash-es": "^4.17.20",
     "react": "^17.0.1",
@@ -41,7 +40,6 @@
     "use-immer": "^0.4.2"
   },
   "devDependencies": {
-    "@types/classnames": "^2.2.11",
     "@types/jest": "^26.0.20",
     "@types/lodash-es": "^4.17.4",
     "@types/react": "^17.0.0",
@@ -50,10 +48,10 @@
     "@typescript-eslint/eslint-plugin": "^4.13.0",
     "@typescript-eslint/parser": "^4.13.0",
     "esbuild": "^0.8.32",
-    "eslint": "^7.17.0",
+    "eslint": "^7.18.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "husky": "^4.3.7",
+    "husky": "^4.3.8",
     "jest": "^26.6.3",
     "svg-parser": "^2.0.4",
     "ts-jest": "^26.4.4",

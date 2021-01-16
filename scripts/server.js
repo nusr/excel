@@ -28,7 +28,6 @@ function getMimeType(ext) {
 function openBrowser(url) {
   let cmd;
   const args = [];
-
   if (process.platform === "darwin") {
     try {
       childProcess.execSync(
@@ -59,7 +58,7 @@ function staticService({
   startPage = "index.html",
   port = 8000,
 } = {}) {
-  root = root.startsWith("/") ? root : path.join(process.cwd(), root);
+  const rootPath = root.startsWith("/") ? root : path.join(process.cwd(), root);
 
   const isRouteRequest = (pathname) => !~pathname.split("/").pop().indexOf(".");
   const utf8 = (file) => Buffer.from(file, "binary").toString("utf8");
@@ -82,7 +81,7 @@ function staticService({
   };
 
   const serveStaticFile = (res, pathname) => {
-    const uri = path.join(root, pathname);
+    const uri = path.join(rootPath, pathname);
     let ext = uri.replace(/^.*[./\\]/, "").toLowerCase();
     if (!fs.existsSync(uri)) return sendError(res, 404);
     fs.readFile(uri, "binary", (err, file) =>
@@ -91,7 +90,7 @@ function staticService({
   };
 
   const serveRoute = (res, pathname) => {
-    const index = path.join(root, startPage);
+    const index = path.join(rootPath, startPage);
     fs.readFile(index, "binary", (err, file) => {
       if (err) return sendError(res, 500);
       const status = pathname === "/" ? 301 : 200;

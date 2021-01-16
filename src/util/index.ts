@@ -10,4 +10,5 @@ export type { IWindowSize } from "./interface";
 export * from "./interaction";
 export * from "./constant";
 export * from "./eventType";
-export * from './designPattern';
+export * from "./designPattern";
+export * from "./classnames";

@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import styled, { withTheme } from "styled-components";
-import classnames from "classnames";
+import { classnames } from "@/util";
 
 const ButtonContainer = withTheme(styled.div`
   padding: 0 5px;

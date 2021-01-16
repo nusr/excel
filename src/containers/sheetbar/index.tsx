@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from "react";
 import styled, { withTheme } from "styled-components";
-import classnames from "classnames";
+import { classnames } from "@/util";
 import { Button } from "@/components";
 import { useSelector } from "@/store";
 import { getSingletonController } from "@/controller";
