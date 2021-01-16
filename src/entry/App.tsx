@@ -1,14 +1,36 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { CanvasContainer, Toolbar, SheetBar } from "@/containers";
 import styled, { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "./GlobalStyle";
 import theme from "@/theme";
+import { useDispatch } from "@/store";
+import { getSingletonController } from "@/controller";
 
 const AppContainer = styled.div`
   overflow: hidden;
   height: 100%;
 `;
 export const App = React.memo(() => {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const controller = getSingletonController();
+    const off = controller.on("dispatch", (data) => {
+      console.log("on dispatch", data);
+      dispatch(data);
+    });
+    controller.on("change", (data) => {
+      const { changeSet } = data;
+      if (changeSet.includes("contentChange")) {
+        const { sheetList, currentSheetId } = controller.model;
+        dispatch({ type: "SET_SHEET_LIST", payload: sheetList });
+        dispatch({ type: "SET_CURRENT_SHEET_ID", payload: currentSheetId });
+      }
+    });
+    return () => {
+      getSingletonController.destroy();
+      off();
+    };
+  }, [dispatch]);
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />

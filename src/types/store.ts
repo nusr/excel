@@ -18,7 +18,6 @@ export type CellPosition = {
 
 export type CellInfo = EditorContainerPosition & CellPosition;
 export type State = {
-  initOver: boolean;
   activeCell: CellInfo;
   isCellEditing: boolean;
   overlayPosition: CanvasOverlayPosition;
@@ -27,7 +26,6 @@ export type State = {
 };
 
 export type Action =
-  | { type: "INIT_CONTROLLER" }
   | { type: "CHANGE_ACTIVE_CELL"; payload: CellInfo }
   | { type: "RESET" }
   | { type: "WINDOW_RESIZE"; payload: CanvasOverlayPosition }

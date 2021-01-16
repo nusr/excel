@@ -26,6 +26,7 @@ export class Main {
       const { changeSet } = data;
       this.render(changeSet);
     });
+    this.render(["contentChange"]);
   }
   resize(width: number, height: number): void {
     const { canvas } = this;

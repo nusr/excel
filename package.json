@@ -20,7 +20,6 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint && npm run typecheck",
       "pre-push": "npm run ci && npm run deploy"
     }
   },

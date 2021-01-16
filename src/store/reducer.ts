@@ -2,7 +2,6 @@ import { State, Reducer } from "@/types";
 import { EDITOR_DEFAULT_POSITION } from "@/util";
 
 export const initialState: State = {
-  initOver: false,
   activeCell: { ...EDITOR_DEFAULT_POSITION },
   isCellEditing: false,
   overlayPosition: { left: 0, top: 0, width: 0, height: 0 },
@@ -13,9 +12,6 @@ export const initialState: State = {
 export const reducer: Reducer = (state, action) => {
   console.log(`%c action type: ${action.type}`, "color: red;", action);
   switch (action.type) {
-    case "INIT_CONTROLLER":
-      state.initOver = true;
-      break;
     case "CHANGE_ACTIVE_CELL":
       state.activeCell = action.payload;
       break;
