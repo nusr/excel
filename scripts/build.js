@@ -3,9 +3,12 @@
 const fs = require("fs");
 const path = require("path");
 const esBuild = require("esbuild");
-const distDir = path.join(process.cwd(), "dist");
+const cwd = process.cwd();
+const distDir = path.join(cwd, "dist");
 const NODE_ENV = process.env.NODE_ENV || "production";
 const isProd = NODE_ENV === "production";
+const { staticService, openBrowser } = require("./server");
+const { handleSVGFiles } = require("./svg");
 
 function fileWatch(watchDir, callback) {
   if (process.platform === "linux") {
@@ -23,8 +26,8 @@ function copyHtml() {
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir);
   }
-  const sourceFile = path.join(process.cwd(), "assets/index.html");
-  const targetFile = path.join(process.cwd(), "dist/index.html");
+  const sourceFile = path.join(cwd, "assets/index.html");
+  const targetFile = path.join(cwd, "dist/index.html");
   fs.copyFileSync(sourceFile, targetFile);
 }
 
@@ -42,10 +45,12 @@ function buildJs(type = "", fileName = "") {
         "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
       },
     };
-    esBuild.buildSync({
-      ...commonConfig,
-    });
-    copyHtml();
+    esBuild
+      .build({
+        ...commonConfig,
+      })
+      .then(copyHtml)
+      .then(handleSVGFiles);
   } catch (error) {
     console.error(error);
   }
@@ -54,9 +59,12 @@ function buildJs(type = "", fileName = "") {
 function init() {
   buildJs();
   if (!isProd) {
-    require("./server.js");
-    const watchDir = path.join(process.cwd(), "src");
-    fileWatch(watchDir, buildJs);
+    const watchList = ["src", "icons"];
+    for (const item of watchList) {
+      fileWatch(path.join(cwd, item), buildJs);
+    }
+    const url = staticService();
+    openBrowser(url);
   }
 }
 

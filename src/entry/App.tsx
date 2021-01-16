@@ -5,6 +5,7 @@ import { GlobalStyle } from "./GlobalStyle";
 import theme from "@/theme";
 import { useDispatch } from "@/store";
 import { getSingletonController } from "@/controller";
+import { MOCK_MODEL } from "@/model";
 
 const AppContainer = styled.div`
   overflow: hidden;
@@ -26,6 +27,7 @@ export const App = React.memo(() => {
         dispatch({ type: "SET_CURRENT_SHEET_ID", payload: currentSheetId });
       }
     });
+    controller.loadJSON(MOCK_MODEL);
     return () => {
       getSingletonController.destroy();
       off();

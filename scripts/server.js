@@ -112,9 +112,7 @@ function staticService({
   return openUrl;
 }
 
-function init() {
-  const url = staticService();
-  openBrowser(url);
-}
-
-init();
+module.exports = {
+  staticService,
+  openBrowser,
+};

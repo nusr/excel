@@ -1,7 +1,6 @@
 import React, { memo, useCallback } from "react";
 import styled from "styled-components";
-import { Button, Github } from "@/components";
-
+import { Button, Github, BaseIcon } from "@/components";
 export const ToolbarContainer = styled.div`
   width: 100%;
   padding: 0 20px;
@@ -29,12 +28,14 @@ export const Toolbar = memo(() => {
   }, []);
   return (
     <ToolbarContainer id="tool-bar-container">
-      <Button onClick={handleBold}>B</Button>
+      <Button onClick={handleBold}>
+        <BaseIcon name="bold" />
+      </Button>
       <Button style={italicStyle} onClick={handleItalic}>
-        I
+        <BaseIcon name="italic" />
       </Button>
       <Button style={underlineStyle} onClick={handleUnderline}>
-        U
+        <BaseIcon name="underline" />
       </Button>
       <Github />
     </ToolbarContainer>
