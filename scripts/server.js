@@ -83,18 +83,25 @@ function staticService({
   const serveStaticFile = (res, pathname) => {
     const uri = path.join(rootPath, pathname);
     let ext = uri.replace(/^.*[./\\]/, "").toLowerCase();
-    if (!fs.existsSync(uri)) return sendError(res, 404);
-    fs.readFile(uri, "binary", (err, file) =>
-      err ? sendError(res, 500) : sendFile(res, 200, file, ext)
-    );
+    if (!fs.existsSync(uri)) {
+      return sendError(res, 404);
+    }
+    fs.readFile(uri, "binary", (error, file) => {
+      if (error) {
+        return sendError(res, 500);
+      }
+      return sendFile(res, 200, file, ext);
+    });
   };
 
   const serveRoute = (res, pathname) => {
     const index = path.join(rootPath, startPage);
-    fs.readFile(index, "binary", (err, file) => {
-      if (err) return sendError(res, 500);
+    fs.readFile(index, "binary", (error, file) => {
+      if (error) {
+        return sendError(error, 500);
+      }
       const status = pathname === "/" ? 301 : 200;
-      sendFile(res, status, file, "html");
+      return sendFile(res, status, file, "html");
     });
   };
 
@@ -102,8 +109,11 @@ function staticService({
     .createServer((req, res) => {
       const pathname = decodeURI(url.parse(req.url).pathname);
       res.setHeader("access-control-allow-origin", "*");
-      if (!isRouteRequest(pathname)) return serveStaticFile(res, pathname);
-      return serveRoute(res, pathname);
+      if (!isRouteRequest(pathname)) {
+        return serveStaticFile(res, pathname);
+      } else {
+        return serveRoute(res, pathname);
+      }
     })
     .listen(port);
   const openUrl = `http://localhost:${port}`;

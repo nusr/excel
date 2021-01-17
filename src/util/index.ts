@@ -12,3 +12,4 @@ export * from "./constant";
 export * from "./eventType";
 export * from "./designPattern";
 export * from "./classnames";
+export * from "./error";

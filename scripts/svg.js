@@ -33,6 +33,8 @@ function parseSVGFile(text, fileName) {
     .join("");
 }
 
+let isOutput = false;
+
 async function handleSVGFiles() {
   const dir = path.join(cwd, "icons");
   const files = fs.readdirSync(dir);
@@ -45,11 +47,14 @@ async function handleSVGFiles() {
     svgList.push(parseSVGFile(text, fileName));
     fileNameList.push(fileName);
   }
-  console.log(
-    `export type BaseIconName = ${fileNameList
-      .map((item) => `"${item}"`)
-      .join(" | ")}`
-  );
+  if (!isOutput) {
+    isOutput = true;
+    console.log(
+      `export type BaseIconName = ${fileNameList
+        .map((item) => `"${item}"`)
+        .join(" | ")}`
+    );
+  }
   const svg = `
     <svg
       xmlns="http://www.w3.org/2000/svg"

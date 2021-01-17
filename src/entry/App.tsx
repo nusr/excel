@@ -6,6 +6,7 @@ import theme from "@/theme";
 import { useDispatch } from "@/store";
 import { getSingletonController } from "@/controller";
 import { MOCK_MODEL } from "@/model";
+import { handleBuildError } from "@/util";
 
 const AppContainer = styled.div`
   overflow: hidden;
@@ -28,6 +29,7 @@ export const App = React.memo(() => {
       }
     });
     controller.loadJSON(MOCK_MODEL);
+    handleBuildError();
     return () => {
       getSingletonController.destroy();
       off();

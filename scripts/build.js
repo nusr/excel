@@ -5,7 +5,8 @@ const path = require("path");
 const esBuild = require("esbuild");
 const cwd = process.cwd();
 const distDir = path.join(cwd, "dist");
-const NODE_ENV = process.env.NODE_ENV || "production";
+const assetsDir = path.join(cwd, "assets");
+const NODE_ENV = (process.env.NODE_ENV || "production").trim();
 const isProd = NODE_ENV === "production";
 const { staticService, openBrowser } = require("./server");
 const { handleSVGFiles } = require("./svg");
@@ -26,12 +27,13 @@ function copyHtml() {
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir);
   }
-  const sourceFile = path.join(cwd, "assets/index.html");
-  const targetFile = path.join(cwd, "dist/index.html");
+  const sourceFile = path.join(assetsDir, "index.html");
+  const targetFile = path.join(distDir, "index.html");
   fs.copyFileSync(sourceFile, targetFile);
 }
 
 function buildJs(type = "", fileName = "") {
+  const errorFilePath = path.join(distDir, "buildError.txt");
   try {
     console.log(`${typeof fileName === "string" ? fileName : ""}: ${type}`);
     const commonConfig = {
@@ -45,14 +47,15 @@ function buildJs(type = "", fileName = "") {
         "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
       },
     };
-    esBuild
-      .build({
-        ...commonConfig,
-      })
-      .then(copyHtml)
-      .then(handleSVGFiles);
+    esBuild.buildSync({
+      ...commonConfig,
+    });
+    copyHtml();
+    handleSVGFiles();
+    fs.writeFileSync(errorFilePath, "");
   } catch (error) {
-    console.error(error);
+    console.log("buildJs error", error);
+    fs.writeFileSync(errorFilePath, `${error.message}\n${error.stack}`);
   }
 }
 

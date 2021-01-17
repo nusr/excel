@@ -108,7 +108,7 @@ export class Controller extends EventEmitter<EventType> {
       return;
     }
     this.activeCell = cell;
-    this.changeSet.add("contentChange");
+    this.changeSet.add("selectionChange");
     this.dispatchAction({
       type: "CHANGE_ACTIVE_CELL",
       payload: cell,

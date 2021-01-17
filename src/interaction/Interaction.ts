@@ -20,8 +20,8 @@ export class Interaction {
     window.removeEventListener("resize", this.resize);
   }
   mouseDown = (event: MouseEvent): void => {
-    console.log("handleClick");
-    console.log(event);
+    // console.log("handleClick");
+    // console.log(event);
     const { controller } = this;
     const { timeStamp, offsetX, offsetY } = event;
     const {
