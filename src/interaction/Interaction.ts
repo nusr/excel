@@ -27,25 +27,27 @@ export class Interaction {
   }
   mouseDown = (event: MouseEvent): void => {
     console.log(event);
-    const { timeStamp, offsetX, offsetY } = event;
+    const { timeStamp, clientX, clientY } = event;
     const { controller } = this;
     const {
       width,
       height,
     } = controller.model.getRowTitleHeightAndColTitleWidth();
-    if (offsetX < width && offsetY < height) {
+    const x = clientX - this.canvasRect.left;
+    const y = clientY - this.canvasRect.top;
+    if (width > x && height > y) {
       controller.selectAll();
       return;
     }
-    if (offsetX < width) {
+    if (width > x && height <= y) {
       controller.selectRow();
       return;
     }
-    if (offsetY < height) {
+    if (width <= x && height > y) {
       controller.selectCol();
       return;
     }
-    const position = controller.clickPositionToCell(offsetX, offsetY);
+    const position = controller.clickPositionToCell(x, y);
     controller.setActiveCell(position.row, position.col);
     const delay = timeStamp - this.lastTimeStamp;
     if (delay < DOUBLE_CLICK_TIME) {
@@ -55,17 +57,18 @@ export class Interaction {
     console.log("mousedown", position);
   };
   mouseMove = (event: MouseEvent): void => {
-    const { offsetX, offsetY } = event;
+    const { clientX, clientY } = event;
     const { controller } = this;
     const {
       width,
       height,
     } = controller.model.getRowTitleHeightAndColTitleWidth();
-    const checkMove =
-      offsetX > width && offsetY > height && event.buttons === 1;
+    const x = clientX - this.canvasRect.left;
+    const y = clientY - this.canvasRect.top;
+    const checkMove = x > width && y > height && event.buttons === 1;
     if (checkMove) {
-      const position = controller.clickPositionToCell(offsetX, offsetY);
-      // console.log("mouseMove", position);
+      const position = controller.clickPositionToCell(x, y);
+      console.log(position);
       controller.updateSelection(position.row, position.col);
     }
   };

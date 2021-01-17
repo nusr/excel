@@ -120,31 +120,6 @@ export class Controller extends EventEmitter<EventType> {
     this.changeSet.add("selectionChange");
     this.emitChange();
   }
-  getSelection(): CellInfo {
-    const { ranges } = this;
-    const [range] = ranges;
-    const startCell = this.queryCell(range.row, range.col);
-    if (range.rowCount === range.colCount && range.rowCount === 0) {
-      return startCell;
-    }
-    const endCell = this.queryCell(
-      range.row + range.rowCount,
-      range.col + range.colCount
-    );
-    const width =
-      endCell.left +
-      (range.colCount > 0 ? endCell.width : -endCell.width) -
-      startCell.left;
-    const height =
-      endCell.top +
-      (range.rowCount > 0 ? endCell.height : -endCell.height) -
-      startCell.top;
-    return {
-      ...startCell,
-      width,
-      height,
-    };
-  }
   windowResize(): void {
     this.changeSet.add("contentChange");
     this.emitChange();

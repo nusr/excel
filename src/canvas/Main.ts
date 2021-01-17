@@ -2,7 +2,7 @@ import { npx, assert, dpr } from "@/util";
 import type { Controller } from "@/controller";
 import { Selection } from "./Selection";
 import { Content } from "./Content";
-import { ChangeEventType } from "@/types";
+import { ChangeEventType, CanvasOverlayPosition } from "@/types";
 
 export class Main {
   protected canvas: HTMLCanvasElement;
@@ -35,16 +35,52 @@ export class Main {
     canvas.width = npx(width);
     canvas.height = npx(height);
   }
+  getSelection(): CanvasOverlayPosition[] {
+    const { controller } = this;
+    const { ranges } = controller;
+    const [range] = ranges;
+    const startCell = controller.queryCell(range.row, range.col);
+    const firstCell = {
+      left: startCell.left,
+      top: startCell.top,
+      width: startCell.width,
+      height: startCell.height,
+    };
+    if (range.rowCount === range.colCount && range.rowCount === 0) {
+      return [firstCell];
+    }
+    const endCell = controller.queryCell(
+      range.row + range.rowCount,
+      range.col + range.colCount
+    );
+    const width =
+      endCell.left +
+      (range.colCount > 0 ? endCell.width : -endCell.width) -
+      startCell.left;
+    const height =
+      endCell.top +
+      (range.rowCount > 0 ? endCell.height : -endCell.height) -
+      startCell.top;
+    return [
+      firstCell,
+      {
+        left: startCell.left,
+        top: startCell.top,
+        width,
+        height,
+      },
+    ];
+  }
   render(changeSet: Array<ChangeEventType> = []): void {
     const { width, height } = this.controller.getCanvasSize();
     this.resize(width, height);
     if (changeSet.includes("contentChange")) {
       this.content.render(width, height);
     }
-    const cell = this.controller.getSelection();
+    const cell = this.getSelection();
     this.selection.render(width, height, cell);
-    this.ctx.drawImage(this.content.canvas, 0, 0);
     this.ctx.drawImage(this.selection.canvas, 0, 0);
+    this.ctx.drawImage(this.content.canvas, 0, 0);
   }
   clear(): void {
     const { width, height } = this.canvas;
