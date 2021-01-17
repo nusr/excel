@@ -13,7 +13,6 @@ const ButtonContainer = withTheme(styled.div`
   box-sizing: border-box;
   cursor: pointer;
   display: inline-block;
-  background-color: #fff;
   border-radius: 4px;
   border: 1px solid transparent;
   & + & {
@@ -28,7 +27,7 @@ const ButtonContainer = withTheme(styled.div`
   }
   &:hover,
   &.active {
-    background-color: ${({ theme }) => theme.buttonActive};
+    background-color: ${({ theme }) => theme.buttonActiveColor};
     border-color: #808080;
   }
 `);

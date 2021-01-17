@@ -1,32 +1,39 @@
 import React, { memo, useMemo } from "react";
-import styled from "styled-components";
+import styled, { withTheme } from "styled-components";
 import { useSelector } from "@/store";
 import { TextEditorContainer } from "../TextEditor";
 import { intToColumnName } from "@/util";
-const FormulaBarContainer = styled.div`
+
+const FormulaBarContainer = withTheme(styled.div`
   width: 100%;
   padding: 0 5px;
   box-sizing: border-box;
-  height: 20px;
-  line-height: 20px;
+  height: 42px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-`;
+  background-color: ${(props) => props.theme.backgroundColor};
+`);
 
-const ActiveCellName = styled.div`
-  border: 1px solid #ccc;
+const ActiveCellName = withTheme(styled.div`
+  border: 1px solid ${(props) => props.theme.gridStrokeColor};
   width: 100px;
+  height: 21px;
+  line-height: 21px;
   margin-right: 10px;
-  border-radius: 4px;
+  border-radius: 2px;
   text-align: center;
-`;
+  background-color: ${(props) => props.theme.white};
+`);
 
-const TextEditorWrapper = styled.div`
-  border: 1px solid #ccc;
+const TextEditorWrapper = withTheme(styled.div`
+  border: 1px solid ${(props) => props.theme.gridStrokeColor};
   flex: 1;
-  border-radius: 4px;
-`;
+  height: 21px;
+  line-height: 21px;
+  border-radius: 2px;
+  background-color: ${(props) => props.theme.white};
+`);
 
 export const FormulaBar = memo(() => {
   const { activeCell } = useSelector(["activeCell"]);

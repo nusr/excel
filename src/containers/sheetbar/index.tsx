@@ -6,28 +6,28 @@ import { useSelector } from "@/store";
 import { getSingletonController } from "@/controller";
 import theme from "@/theme";
 const addButtonStyle = {
-  backgroundColor: theme.buttonActive,
+  backgroundColor: theme.buttonActiveColor,
 };
 
 export const SheetBarContainer = withTheme(styled.div`
   width: 100%;
   box-sizing: border-box;
   padding: 0 10px;
-  background-color: ${({ theme }) => theme.buttonActive};
+  background-color: ${({ theme }) => theme.backgroundColor};
   display: flex;
   align-items: center;
 `);
 const SheetList = styled.div`
-  height: 30px;
-  line-height: 30px;
   display: flex;
   align-items: center;
+  height: 30px;
+  line-height: 30px;
 `;
 const SheetItem = withTheme(styled.div`
   padding: 0 10px;
-  border-left: 1px solid #808080;
+  border-left: 1px solid ${(props) => props.theme.gridStrokeColor};
   &.active {
-    background-color: #fff;
+    background-color: ${(props) => props.theme.white};
     color: ${({ theme }) => theme.primaryColor};
   }
 `);

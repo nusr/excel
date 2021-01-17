@@ -133,7 +133,7 @@ export class Controller extends EventEmitter<EventType> {
     assert(formulaBarDom !== null);
     const toolbarSize = toolbarDom.getBoundingClientRect();
     const sheetBarSize = sheetBarDom.getBoundingClientRect();
-    const formulaBarSize = sheetBarDom.getBoundingClientRect();
+    const formulaBarSize = formulaBarDom.getBoundingClientRect();
     return {
       width,
       height:

@@ -2,9 +2,9 @@ import { createGlobalStyle } from "styled-components";
 
 export const GlobalStyle = createGlobalStyle`
     html {
-        font-size: ${(props) => props.theme.largeFont};
-        color: #333;
-        font-family: "Helvetica Neue",Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Heiti SC","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
+        font-size: ${(props) => props.theme.font};
+        font-family: ${(props) => props.theme.fontFamily};
+        color: ${(props) => props.theme.contentColor};
     }
     body,html { 
         margin: 0;

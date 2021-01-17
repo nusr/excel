@@ -1,13 +1,15 @@
 import React, { memo, useCallback } from "react";
-import styled from "styled-components";
+import styled, { withTheme } from "styled-components";
 import { Button, Github, BaseIcon } from "@/components";
-export const ToolbarContainer = styled.div`
+export const ToolbarContainer = withTheme(styled.div`
   width: 100%;
   padding: 0 20px;
   box-sizing: border-box;
   height: 40px;
   line-height: 40px;
-`;
+  background-color: #f3f3f3;
+  border-bottom: 1px solid ${(props) => props.theme.gridStrokeColor};
+`);
 
 const italicStyle = {
   fontStyle: "italic",

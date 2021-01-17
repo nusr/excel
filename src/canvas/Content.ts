@@ -1,25 +1,26 @@
 import { isEmpty } from "lodash-es";
 import { CanvasOption } from "@/types";
 import {
-  EDefaultBackgroundColor,
   thinLineWidth,
-  EDefaultStrokeColor,
-  EDefaultFillColor,
   npx,
   dpr,
   intToColumnName,
   isNumber,
+  makeFont,
 } from "@/util";
 import { Controller } from "@/controller";
 import { Base } from "./Base";
+import theme from "@/theme";
+
+const DEFAULT_FONT = makeFont(undefined, "500");
 
 export const HEADER_STYLE: Omit<CanvasOption, "direction"> = {
   textAlign: "center",
   textBaseline: "middle",
-  font: `500 ${npx(12)}px 'Source Sans Pro',sans-serif`,
-  fillStyle: EDefaultFillColor.ROW_COL_HEADER,
+  font: DEFAULT_FONT,
+  fillStyle: theme.black,
   lineWidth: thinLineWidth(),
-  strokeStyle: EDefaultStrokeColor.GRID,
+  strokeStyle: theme.gridStrokeColor,
 };
 
 export class Content extends Base {
@@ -48,7 +49,8 @@ export class Content extends Base {
     this.setAttributes({
       textAlign: "left",
       textBaseline: "middle",
-      font: `500 ${npx(12)}px 'Source Sans Pro',sans-serif`,
+      font: DEFAULT_FONT,
+      fillStyle: theme.contentColor,
     });
     for (const item of data) {
       const result = controller.queryCell(item.row, item.col);
@@ -70,11 +72,11 @@ export class Content extends Base {
 
     this.save();
     this.setAttributes({
-      fillStyle: EDefaultBackgroundColor.ROW_COL_HEADER,
+      fillStyle: theme.backgroundColor,
     });
     this.fillRect(0, 0, config.width, config.height);
     this.setAttributes({
-      fillStyle: EDefaultFillColor.SELECT_ALL_TRIANGLE,
+      fillStyle: theme.triangleFillColor,
     });
     this.fill(path);
     this.restore();
@@ -90,9 +92,9 @@ export class Content extends Base {
     const lineWidth = thinLineWidth();
     this.save();
     this.setAttributes({
-      fillStyle: EDefaultBackgroundColor.CONTENT,
+      fillStyle: theme.white,
       lineWidth,
-      strokeStyle: EDefaultStrokeColor.GRID,
+      strokeStyle: theme.gridStrokeColor,
     });
     this.translate(config.width, config.height);
     this.clear();
@@ -125,7 +127,7 @@ export class Content extends Base {
     const cell = this.controller.queryCell(0, 0);
     const { height } = this.controller.getDrawSize(config);
     this.save();
-    this.setAttributes({ fillStyle: EDefaultBackgroundColor.ROW_COL_HEADER });
+    this.setAttributes({ fillStyle: theme.backgroundColor });
     this.fillRect(0, config.height, config.width, height);
     this.setAttributes(HEADER_STYLE);
     const pointList = [];
@@ -157,7 +159,7 @@ export class Content extends Base {
     const { width } = this.controller.getDrawSize(config);
     const pointList = [];
     this.save();
-    this.setAttributes({ fillStyle: EDefaultBackgroundColor.ROW_COL_HEADER });
+    this.setAttributes({ fillStyle: theme.backgroundColor });
     this.fillRect(config.width, 0, width, config.height);
     this.setAttributes(HEADER_STYLE);
     let x = config.width;
