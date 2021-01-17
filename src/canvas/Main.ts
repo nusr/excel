@@ -41,7 +41,7 @@ export class Main {
     if (changeSet.includes("contentChange")) {
       this.content.render(width, height);
     }
-    const cell = this.controller.queryActiveCell();
+    const cell = this.controller.getSelection();
     this.selection.render(width, height, cell);
     this.ctx.drawImage(this.content.canvas, 0, 0);
     this.ctx.drawImage(this.selection.canvas, 0, 0);

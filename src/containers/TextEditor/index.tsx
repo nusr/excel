@@ -9,19 +9,26 @@ export const TextEditorContainer = memo(() => {
     "isCellEditing",
     "editCellValue",
   ]);
+  const value = isCellEditing ? editCellValue : activeCell.value;
   const dispatch = useDispatch();
+
   const onInputEnter = useCallback(() => {
     const controller = getSingletonController();
     controller.setCellValue(activeCell.row, activeCell.col, editCellValue);
-    controller.updateSelection(activeCell.row + 1, activeCell.col);
+    controller.quitEditing();
+    controller.setActiveCell(activeCell.row + 1, activeCell.col);
   }, [activeCell, editCellValue]);
   const onInputTab = useCallback(() => {
     const controller = getSingletonController();
     controller.setCellValue(activeCell.row, activeCell.col, editCellValue);
-    controller.updateSelection(activeCell.row, activeCell.col + 1);
+    controller.quitEditing();
+    controller.setActiveCell(activeCell.row, activeCell.col + 1);
   }, [activeCell, editCellValue]);
   const onBlur = useCallback(() => {
-    getSingletonController().quitEditing();
+    // const controller = getSingletonController();
+    // controller.setCellValue(activeCell.row, activeCell.col, editCellValue);
+    // controller.quitEditing();
+    // dispatch({ type: "QUIT_EDITING" });
   }, []);
   const onChange = useCallback(
     (event) => {
@@ -32,7 +39,7 @@ export const TextEditorContainer = memo(() => {
   );
   return (
     <TextEditor
-      value={editCellValue}
+      value={value}
       isCellEditing={isCellEditing}
       onBlur={onBlur}
       onInputEnter={onInputEnter}

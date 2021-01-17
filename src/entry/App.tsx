@@ -30,6 +30,7 @@ export const App = React.memo(() => {
     });
     controller.loadJSON(MOCK_MODEL);
     handleBuildError();
+    (window as any).controller = controller;
     return () => {
       getSingletonController.destroy();
       off();

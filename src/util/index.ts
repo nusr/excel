@@ -13,3 +13,4 @@ export * from "./eventType";
 export * from "./designPattern";
 export * from "./classnames";
 export * from "./error";
+export * from './range';

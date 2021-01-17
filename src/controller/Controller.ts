@@ -17,11 +17,13 @@ import {
   getWidthHeight,
   CELL_WIDTH,
   CELL_HEIGHT,
+  Range,
 } from "@/util";
 export class Controller extends EventEmitter<EventType> {
   scroll: Scroll = new Scroll(this);
   model: Model = new Model(this);
-  protected activeCell: CellInfo | null = null;
+  ranges: Array<Range> = [];
+  isCellEditing = false;
   private changeSet = new Set<ChangeEventType>();
   constructor() {
     super();
@@ -32,13 +34,21 @@ export class Controller extends EventEmitter<EventType> {
     this.emit("change", { changeSet: data });
     this.changeSet.clear();
   }
-  queryActiveCell(): CellInfo {
-    assert(!!this.activeCell);
-    return this.activeCell;
-  }
   setActiveCell(row = 0, col = 0): void {
-    this.activeCell = this.queryCell(row, col);
+    const cell = this.queryCell(row, col);
     this.changeSet.add("selectionChange");
+    this.dispatchAction({
+      type: "CHANGE_ACTIVE_CELL",
+      payload: cell,
+    });
+    if (this.isCellEditing) {
+      this.dispatchAction({
+        type: "CHANGE_Edit_CELL_VALUE",
+        payload: String(cell.value || ""),
+      });
+    }
+    this.ranges = [new Range(row, col, 0, 0, this.model.currentSheetId)];
+    this.emitChange();
   }
   dispatchAction(data: Action): void {
     this.emit("dispatch", data);
@@ -68,7 +78,12 @@ export class Controller extends EventEmitter<EventType> {
     console.log("selectRow");
   }
   quitEditing(): void {
+    this.isCellEditing = false;
     this.dispatchAction({ type: "QUIT_EDITING" });
+  }
+  enterEditing(): void {
+    this.isCellEditing = true;
+    this.dispatchAction({ type: "ENTER_EDITING" });
   }
   loadJSON(json: WorkBookJSON): void {
     console.log("loadJSON", json);
@@ -76,9 +91,6 @@ export class Controller extends EventEmitter<EventType> {
     this.setActiveCell();
     this.changeSet.add("contentChange");
     this.emitChange();
-  }
-  enterEditing(): void {
-    this.dispatchAction({ type: "ENTER_EDITING" });
   }
   clickPositionToCell(x: number, y: number): CellPosition {
     const config = this.model.getRowTitleHeightAndColTitleWidth();
@@ -97,27 +109,41 @@ export class Controller extends EventEmitter<EventType> {
     return { row, col };
   }
   updateSelection(row: number, col: number): void {
-    const { model } = this;
-    const { rowCount, colCount } = model.getSheetInfo();
-    if (row >= rowCount || col >= colCount) {
-      return;
-    }
-    const size = this.getCanvasSize();
-    const cell = this.queryCell(row, col);
-    if (cell.top >= size.height || cell.left >= size.width) {
-      return;
-    }
-    this.activeCell = cell;
+    const { ranges, model } = this;
+    const [range] = ranges;
+    const rowCount = row - range.row;
+    const colCount = col - range.col;
+    this.ranges = [
+      new Range(range.row, range.col, rowCount, colCount, model.currentSheetId),
+    ];
+    console.log(this.ranges);
     this.changeSet.add("selectionChange");
-    this.dispatchAction({
-      type: "CHANGE_ACTIVE_CELL",
-      payload: cell,
-    });
-    this.dispatchAction({
-      type: "CHANGE_Edit_CELL_VALUE",
-      payload: String(cell.value || ""),
-    });
     this.emitChange();
+  }
+  getSelection(): CellInfo {
+    const { ranges } = this;
+    const [range] = ranges;
+    const startCell = this.queryCell(range.row, range.col);
+    if (range.rowCount === range.colCount && range.rowCount === 0) {
+      return startCell;
+    }
+    const endCell = this.queryCell(
+      range.row + range.rowCount,
+      range.col + range.colCount
+    );
+    const width =
+      endCell.left +
+      (range.colCount > 0 ? endCell.width : -endCell.width) -
+      startCell.left;
+    const height =
+      endCell.top +
+      (range.rowCount > 0 ? endCell.height : -endCell.height) -
+      startCell.top;
+    return {
+      ...startCell,
+      width,
+      height,
+    };
   }
   windowResize(): void {
     this.changeSet.add("contentChange");

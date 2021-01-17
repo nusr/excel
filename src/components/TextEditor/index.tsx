@@ -1,4 +1,4 @@
-import React, { memo, useRef, useCallback } from "react";
+import React, { memo, useRef, useCallback, useEffect } from "react";
 import styled, { css } from "styled-components";
 const commonStyle = css`
   height: 100%;
@@ -10,7 +10,7 @@ const TextEditorWrapper = styled.div`
 
 const TextEditorContent = styled.input`
   ${commonStyle};
-  padding: 0;
+  padding: 0 5px;
   margin: 0;
   border: none;
   background-color: unset;
@@ -34,19 +34,20 @@ export const TextEditor = memo((props: TextEditorProps) => {
   const {
     value = "",
     className = "",
-    // isCellEditing,
+    isCellEditing,
     onInputEnter,
     onInputTab,
     onBlur,
     onChange,
   } = props;
   const inputRef = useRef<HTMLInputElement>(null);
-  // useEffect(() => {
-  //   const dom = inputRef.current;
-  //   if (isCellEditing) {
-  //     dom.focus();
-  //   }
-  // }, [isCellEditing]);
+  useEffect(() => {
+    const dom = inputRef.current;
+    if (isCellEditing && dom) {
+      dom.focus();
+      console.dir(dom);
+    }
+  }, [isCellEditing]);
   const handleBlur = useCallback(
     (event: React.FocusEvent<HTMLInputElement>) => {
       onBlur(event);
