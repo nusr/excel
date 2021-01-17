@@ -72,7 +72,7 @@ export class Interaction {
       controller.updateSelection(position.row, position.col);
     }
   };
-  mouseUp = (event: MouseEvent): void => {
+  mouseUp = (): void => {
     // console.log(event);
   };
   resize = (): void => {
