@@ -1,4 +1,4 @@
-import { isEqual } from "lodash-es";
+import { isEmpty } from "lodash-es";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
@@ -46,7 +46,7 @@ export class Controller extends EventEmitter<EventType> {
     this.emitChange(cell);
   }
   setCurrentSheetId(id: string): void {
-    if (isEqual(id, this.model.currentSheetId)) {
+    if (id === this.model.currentSheetId) {
       return;
     }
     this.model.currentSheetId = id;
@@ -151,8 +151,11 @@ export class Controller extends EventEmitter<EventType> {
     this.changeSet.add("contentChange");
     this.emitChange();
   }
-  setCellStyle(value: Partial<StyleType>, ranges = this.ranges): void {
-    this.model.setCellStyle(ranges, value);
+  setCellStyle(style: Partial<StyleType>, ranges = this.ranges): void {
+    if (isEmpty(style)) {
+      return;
+    }
+    this.model.setCellStyle(ranges, style);
     this.changeSet.add("contentChange");
     this.emitChange();
   }

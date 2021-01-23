@@ -158,7 +158,7 @@ export class Model {
     );
     this.modelChange();
   }
-  setCellStyle(ranges: IRange[], style: StyleType): void {
+  setCellStyle(ranges: IRange[], style: Partial<StyleType>): void {
     const [range] = ranges;
     const { row, col } = range;
     const stylePath = `worksheets[${this.currentSheetId}][${row}][${col}].style`;

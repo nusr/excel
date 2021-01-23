@@ -19,9 +19,9 @@ export const Toolbar = memo(() => {
   const { activeCell } = useSelector(["activeCell"]);
   const { style = {} } = activeCell;
   const { isBold, isUnderline, isItalic } = style;
-  const setCellStyle = function (value: Partial<StyleType>): void {
+  const setCellStyle = useCallback((value: Partial<StyleType>) => {
     getSingletonController().setCellStyle(value);
-  };
+  }, []);
   return (
     <ToolbarContainer id="tool-bar-container">
       <Button active={isBold} onClick={() => setCellStyle({ isBold: !isBold })}>
