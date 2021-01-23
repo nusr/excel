@@ -42,7 +42,7 @@ function process(content, filename, config) {
   const loader =
     options?.loaders && options?.loaders[ext]
       ? options.loaders[ext]
-      : extname(filename).slice(1);
+      : path.extname(filename).slice(1);
 
   const sourcemaps = options?.sourcemap
     ? { sourcemap: true, sourcefile: filename }
