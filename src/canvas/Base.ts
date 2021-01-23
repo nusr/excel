@@ -4,7 +4,7 @@ import { CanvasOption, EBorderLineType } from "@/types";
 export class Base {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
-  constructor(width: number, height: number) {
+  constructor({ width, height }: { width: number; height: number }) {
     this.canvas = document.createElement("canvas");
     this.canvas.style.display = "none";
     document.body.appendChild(this.canvas);
@@ -17,9 +17,6 @@ export class Base {
   }
   scale(x: number, y: number): void {
     this.ctx.scale(x, y);
-  }
-  getFontConfig(): string {
-    return "";
   }
   resize(width: number, height: number): void {
     const { canvas } = this;

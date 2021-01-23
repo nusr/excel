@@ -1,4 +1,4 @@
-import { IWindowSize } from "@/util";
+import { IWindowSize } from "./event";
 import { CellPosition, CellInfo } from "./store";
 export enum EVerticalAlign {
   TOP,

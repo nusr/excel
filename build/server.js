@@ -105,17 +105,16 @@ function staticService({
     });
   };
 
-  http
-    .createServer((req, res) => {
-      const pathname = decodeURI(url.parse(req.url).pathname);
-      res.setHeader("access-control-allow-origin", "*");
-      if (!isRouteRequest(pathname)) {
-        return serveStaticFile(res, pathname);
-      } else {
-        return serveRoute(res, pathname);
-      }
-    })
-    .listen(port);
+  const server = http.createServer((req, res) => {
+    const pathname = decodeURI(url.parse(req.url).pathname);
+    res.setHeader("access-control-allow-origin", "*");
+    if (!isRouteRequest(pathname)) {
+      return serveStaticFile(res, pathname);
+    } else {
+      return serveRoute(res, pathname);
+    }
+  });
+  server.listen(port);
   const openUrl = `http://localhost:${port}`;
   console.log(openUrl);
   return openUrl;

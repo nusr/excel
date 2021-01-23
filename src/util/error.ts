@@ -1,7 +1,5 @@
-export function handleBuildError(): void {
-  if (process.env.NODE_ENV !== "development") {
-    return;
-  }
+const cache = new Set<string>();
+function outputError() {
   fetch("/buildError.txt")
     .then((res) => {
       if (res.status === 404) {
@@ -10,9 +8,26 @@ export function handleBuildError(): void {
       return res.text();
     })
     .then((data) => {
+      if (cache.has(data)) {
+        return;
+      }
       if (data) {
+        cache.add(data);
         console.error(data);
       }
     })
     .catch(console.error);
+}
+export function handleBuildError(): () => void {
+  if (process.env.NODE_ENV !== "development") {
+    return () => {
+      console.log("off");
+    };
+  }
+  outputError();
+  return () => {
+    console.log("off");
+  };
+  // const timer: ReturnType<typeof setInterval> = setInterval(outputError, 2000);
+  // return () => clearInterval(timer);
 }

@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2015",
-    "module": "UMD",
-    "lib": ["dom", "es2015"],
+    "target": "ES2015",
+    "module": "commonjs",
+    "lib": ["dom", "ES2015"],
     "strict": true,
     "noImplicitAny": true,
     "alwaysStrict": true,

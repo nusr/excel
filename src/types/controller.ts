@@ -1,6 +1,6 @@
 import { WorkBookJSON } from "./model";
-import { CellPosition } from './store';
-import { IWindowSize } from '@/util';
+import { CellPosition } from "./store";
+import { IWindowSize } from "./event";
 
 export enum EBorderLineType {
   MEDIUM,

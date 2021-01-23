@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { getWidthHeight, IWindowSize } from "@/util";
+import { getWidthHeight } from "@/util";
+import { IWindowSize } from "@/types";
 
 export const useWindowSize = (): IWindowSize => {
-  const [state, setState] = useState<IWindowSize>(getWidthHeight());
+  const [state, setState] = useState<IWindowSize>(() => getWidthHeight());
   useEffect(() => {
     const handler = () => {
       setState(getWidthHeight());

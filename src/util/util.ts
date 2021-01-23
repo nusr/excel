@@ -1,6 +1,5 @@
-import type { IWindowSize } from "./interface";
 import { START_SHEET_ID, SHEET_NAME_PREFIX } from "./constant";
-import { WorksheetType } from "@/types";
+import type { WorksheetType, IWindowSize } from "@/types";
 
 export function getWidthHeight(): IWindowSize {
   return {

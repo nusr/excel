@@ -1,6 +1,7 @@
-import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, IWindowSize } from "@/util";
+import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT } from "@/util";
 import { isEmpty, get, setWith } from "lodash-es";
 import {
+  IWindowSize,
   WorkBookJSON,
   WorksheetType,
   ModelCellType,

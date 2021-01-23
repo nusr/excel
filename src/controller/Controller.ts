@@ -2,15 +2,14 @@ import { isEqual } from "lodash-es";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
-  Action,
   CellPosition,
   WorkBookJSON,
   EventType,
   CellInfo,
+  IWindowSize,
   ChangeEventType,
 } from "@/types";
 import {
-  IWindowSize,
   assert,
   EventEmitter,
   singletonPattern,
@@ -29,29 +28,16 @@ export class Controller extends EventEmitter<EventType> {
     super();
     this.addSheet();
   }
-  emitChange(): void {
-    const data = Array.from(this.changeSet.values());
-    this.emit("change", { changeSet: data });
+  emitChange(payload?: CellInfo): void {
+    const changeSet = Array.from(this.changeSet.values());
+    this.emit("change", { changeSet, payload });
     this.changeSet.clear();
   }
   setActiveCell(row = 0, col = 0): void {
     const cell = this.queryCell(row, col);
     this.changeSet.add("selectionChange");
-    this.dispatchAction({
-      type: "CHANGE_ACTIVE_CELL",
-      payload: cell,
-    });
-    if (this.isCellEditing) {
-      this.dispatchAction({
-        type: "CHANGE_Edit_CELL_VALUE",
-        payload: String(cell.value || ""),
-      });
-    }
     this.ranges = [new Range(row, col, 0, 0, this.model.currentSheetId)];
-    this.emitChange();
-  }
-  dispatchAction(data: Action): void {
-    this.emit("dispatch", data);
+    this.emitChange(cell);
   }
   setCurrentSheetId(id: string): void {
     if (isEqual(id, this.model.currentSheetId)) {
@@ -79,11 +65,9 @@ export class Controller extends EventEmitter<EventType> {
   }
   quitEditing(): void {
     this.isCellEditing = false;
-    this.dispatchAction({ type: "QUIT_EDITING" });
   }
   enterEditing(): void {
     this.isCellEditing = true;
-    this.dispatchAction({ type: "ENTER_EDITING" });
   }
   loadJSON(json: WorkBookJSON): void {
     console.log("loadJSON", json);
@@ -113,6 +97,9 @@ export class Controller extends EventEmitter<EventType> {
     const [range] = ranges;
     const rowCount = row - range.row;
     const colCount = col - range.col;
+    if (rowCount === colCount && rowCount === 0) {
+      return;
+    }
     this.ranges = [
       new Range(range.row, range.col, rowCount, colCount, model.currentSheetId),
     ];

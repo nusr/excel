@@ -25,11 +25,11 @@ export class Selection extends Base {
       this.renderFillRect(theme.buttonActiveColor, all);
       this.renderFillRect(theme.white, activeCell);
     }
-    const line = all ? all : activeCell;
-    this.setAttributes({
-      strokeStyle: theme.primaryColor,
-      lineWidth: dpr(),
-    });
-    this.strokeRect(line.left, line.top, line.width, line.height);
+    // const line = all ? all : activeCell;
+    // this.setAttributes({
+    //   strokeStyle: theme.primaryColor,
+    //   lineWidth: dpr(),
+    // });
+    // this.strokeRect(line.left, line.top, line.width, line.height);
   }
 }

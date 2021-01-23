@@ -2,38 +2,38 @@ import { npx, assert, dpr } from "@/util";
 import type { Controller } from "@/controller";
 import { Selection } from "./Selection";
 import { Content } from "./Content";
-import { ChangeEventType, CanvasOverlayPosition } from "@/types";
+import { EventType, CanvasOverlayPosition } from "@/types";
+import theme from "@/theme";
+import { Base } from "./Base";
 
-export class Main {
-  protected canvas: HTMLCanvasElement;
-  protected ctx: CanvasRenderingContext2D;
+export class Main extends Base {
+  protected mainCanvas: HTMLCanvasElement;
+  protected mainCtx: CanvasRenderingContext2D;
   protected controller: Controller;
   protected selection: Selection;
   protected content: Content;
   constructor(controller: Controller, canvas: HTMLCanvasElement) {
+    super(controller.getCanvasSize());
+    const { width, height } = controller.getCanvasSize();
     this.controller = controller;
-    this.canvas = canvas;
-    const ctx = canvas.getContext("2d");
-    assert(!!ctx);
-    this.ctx = ctx;
-    const { width, height } = this.controller.getCanvasSize();
-    this.resize(width, height);
+    this.mainCanvas = canvas;
+    const mainCtx = canvas.getContext("2d");
+    assert(!!mainCtx);
+    this.mainCtx = mainCtx;
+    this.resizeMain(width, height);
     const size = dpr();
-    this.ctx.scale(size, size);
-    this.selection = new Selection(width, height);
+    this.mainCtx.scale(size, size);
+    this.selection = new Selection({ width, height });
     this.content = new Content(controller, width, height);
-    this.controller.on("change", (data) => {
-      const { changeSet } = data;
-      this.render(changeSet);
-    });
-    this.render(["contentChange"]);
+    this.controller.on("change", this.render);
+    // this.render(["contentChange"]);
   }
-  resize(width: number, height: number): void {
-    const { canvas } = this;
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-    canvas.width = npx(width);
-    canvas.height = npx(height);
+  resizeMain(width: number, height: number): void {
+    const { mainCanvas } = this;
+    mainCanvas.style.width = width + "px";
+    mainCanvas.style.height = height + "px";
+    mainCanvas.width = npx(width);
+    mainCanvas.height = npx(height);
   }
   getSelection(): CanvasOverlayPosition[] {
     const { controller } = this;
@@ -71,19 +71,27 @@ export class Main {
       },
     ];
   }
-  render(changeSet: Array<ChangeEventType> = []): void {
+  render = ({ changeSet = [] }: EventType["change"]): void => {
     const { width, height } = this.controller.getCanvasSize();
     this.resize(width, height);
     if (changeSet.includes("contentChange")) {
       this.content.render(width, height);
     }
-    const cell = this.getSelection();
-    this.selection.render(width, height, cell);
+    const list = this.getSelection();
+    this.selection.render(width, height, list);
     this.ctx.drawImage(this.selection.canvas, 0, 0);
     this.ctx.drawImage(this.content.canvas, 0, 0);
-  }
-  clear(): void {
-    const { width, height } = this.canvas;
-    this.ctx.clearRect(0, 0, width, height);
+
+    const [activeCell, all] = list;
+    const line = all ? all : activeCell;
+    this.ctx.strokeStyle = theme.primaryColor;
+    this.ctx.lineWidth = dpr();
+    this.strokeRect(line.left, line.top, line.width, line.height);
+
+    this.renderMain(width, height);
+  };
+  renderMain(width: number, height: number): void {
+    this.resizeMain(width, height);
+    this.mainCtx.drawImage(this.canvas, 0, 0);
   }
 }

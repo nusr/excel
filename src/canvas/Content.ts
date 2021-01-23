@@ -26,7 +26,7 @@ export const HEADER_STYLE: Omit<CanvasOption, "direction"> = {
 export class Content extends Base {
   protected controller: Controller;
   constructor(controller: Controller, width: number, height: number) {
-    super(width, height);
+    super({ width, height });
     this.controller = controller;
   }
   render(width: number, height: number): void {
@@ -41,7 +41,7 @@ export class Content extends Base {
     const { controller } = this;
     const { model } = controller;
     const data = model.getCellsContent();
-    console.log("renderContent", data);
+    // console.log("renderContent", data);
     if (isEmpty(data)) {
       return;
     }

@@ -54,9 +54,6 @@ function buildJs(type = "", fileName = "") {
     copyHtml();
     handleSVGFiles();
     fs.writeFileSync(errorFilePath, "");
-
-    const temp = require("../dist");
-    console.log(temp);
   } catch (error) {
     console.log("buildJs error", error);
     fs.writeFileSync(errorFilePath, `${error.message}\n${error.stack}`);
