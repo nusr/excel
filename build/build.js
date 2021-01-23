@@ -7,6 +7,7 @@ const cwd = process.cwd();
 const distDir = path.join(cwd, "dist");
 const assetsDir = path.join(cwd, "assets");
 const NODE_ENV = (process.env.NODE_ENV || "production").trim();
+console.log("NODE_ENV", NODE_ENV);
 const isProd = NODE_ENV === "production";
 const { staticService, openBrowser } = require("./server");
 const { handleSVGFiles } = require("./svg");
@@ -53,6 +54,9 @@ function buildJs(type = "", fileName = "") {
     copyHtml();
     handleSVGFiles();
     fs.writeFileSync(errorFilePath, "");
+
+    const temp = require("../dist");
+    console.log(temp);
   } catch (error) {
     console.log("buildJs error", error);
     fs.writeFileSync(errorFilePath, `${error.message}\n${error.stack}`);

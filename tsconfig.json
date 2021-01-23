@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
+    "target": "es2015",
+    "module": "UMD",
     "lib": ["dom", "es2015"],
     "strict": true,
     "noImplicitAny": true,
@@ -23,7 +23,8 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "outDir": "dist",
-    "removeComments": true
+    "removeComments": true,
+    "declaration": true
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "/node_modules/", "**/*.test.ts"]
