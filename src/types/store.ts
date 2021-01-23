@@ -1,4 +1,4 @@
-import { WorkBookJSON } from "./model";
+import { WorkBookJSON, StyleType } from "./model";
 
 export type CellType = "text";
 export type CanvasOverlayPosition = {
@@ -9,6 +9,8 @@ export type CanvasOverlayPosition = {
 };
 export type EditorContainerPosition = {
   value: string | number;
+  formula?: string;
+  style?: Partial<StyleType>;
 } & CanvasOverlayPosition;
 
 export type CellPosition = {

@@ -27,21 +27,19 @@ export const App = React.memo(() => {
         dispatch({ type: "SET_SHEET_LIST", payload: sheetList });
         dispatch({ type: "SET_CURRENT_SHEET_ID", payload: currentSheetId });
       }
-      if (changeSet.includes("selectionChange")) {
-        const { isCellEditing } = controller;
-        const cell = data.payload;
-        const payload = isCellEditing ? String(cell?.value || "") : "";
-        dispatch({ type: isCellEditing ? "ENTER_EDITING" : "QUIT_EDITING" });
+      const { isCellEditing } = controller;
+      const cell = controller.queryActiveCell();
+      const payload = isCellEditing ? String(cell?.value || "") : "";
+      dispatch({ type: isCellEditing ? "ENTER_EDITING" : "QUIT_EDITING" });
+      dispatch({
+        type: "CHANGE_Edit_CELL_VALUE",
+        payload,
+      });
+      if (cell) {
         dispatch({
-          type: "CHANGE_Edit_CELL_VALUE",
-          payload,
+          type: "CHANGE_ACTIVE_CELL",
+          payload: cell,
         });
-        if (cell) {
-          dispatch({
-            type: "CHANGE_ACTIVE_CELL",
-            payload: cell,
-          });
-        }
       }
     });
     controller.loadJSON(MOCK_MODEL);

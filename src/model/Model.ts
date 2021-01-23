@@ -1,11 +1,13 @@
 import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT } from "@/util";
-import { isEmpty, get, setWith } from "lodash-es";
+import { isEmpty, get, setWith, uniqueId, cloneDeep } from "lodash-es";
 import {
+  StyleType,
+  IRange,
+  QueryCellResult,
   IWindowSize,
   WorkBookJSON,
   WorksheetType,
   ModelCellType,
-  ModelCellValue,
 } from "@/types";
 import { getDefaultSheetInfo, assert } from "@/util";
 import { Controller } from "../controller/controller";
@@ -32,9 +34,12 @@ export const MOCK_MODEL: WorkBookJSON = {
         "0": {
           value: "测试",
           formula: "SUM(F1:F17)",
-          style: "1",
+          // style: "1",
         },
-        "1": { value: 124, style: "2" },
+        "1": {
+          value: 124,
+          // style: "2"
+        },
       },
     },
   },
@@ -65,7 +70,7 @@ export class Model {
   protected _currentSheetId = "";
   protected _workbook: WorksheetType[] = [];
   protected worksheets: WorkBookJSON["worksheets"] = {};
-  protected styles: WorkBookJSON["styles"] = {};
+  styles: WorkBookJSON["styles"] = {};
   protected controller: Controller;
   constructor(controller: Controller) {
     this.controller = controller;
@@ -95,8 +100,9 @@ export class Model {
   protected modelChange(): void {
     const data = this.worksheets[this.currentSheetId];
     console.log("modelChange", data);
+    console.log(this.styles);
   }
-  getCellsContent(): Array<ModelCellValue> {
+  getCellsContent(): Array<QueryCellResult & { row: number; col: number }> {
     const sheetData = this.worksheets[this.currentSheetId];
     if (isEmpty(sheetData)) {
       return [];
@@ -122,7 +128,7 @@ export class Model {
     const { worksheets = {}, workbook = [], styles = {} } = json;
     this.worksheets = worksheets;
     this.sheetList = workbook;
-    this.styles = styles;
+    this.styles = cloneDeep(styles);
     this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
     this.modelChange();
   }
@@ -141,7 +147,9 @@ export class Model {
       height: ROW_TITLE_HEIGHT,
     };
   }
-  setCellValue(row: number, col: number, value = ""): void {
+  setCellValue(ranges: IRange[], value = ""): void {
+    const [range] = ranges;
+    const { row, col } = range;
     setWith(
       this,
       `worksheets[${this.currentSheetId}][${row}][${col}].value`,
@@ -150,12 +158,36 @@ export class Model {
     );
     this.modelChange();
   }
-  queryCell(row: number, col: number): ModelCellType {
-    const cellData = get(
+  setCellStyle(ranges: IRange[], style: StyleType): void {
+    const [range] = ranges;
+    const { row, col } = range;
+    const stylePath = `worksheets[${this.currentSheetId}][${row}][${col}].style`;
+    const oldStyleId = get(this, stylePath, "");
+    if (oldStyleId) {
+      const oldStyle = this.styles[oldStyleId];
+      if (!isEmpty(oldStyle)) {
+        this.styles[oldStyleId] = {
+          ...oldStyle,
+          ...style,
+        };
+      } else {
+        this.styles[oldStyleId] = { ...style };
+      }
+    } else {
+      const styleId = uniqueId("style");
+      this.styles[styleId] = { ...style };
+      setWith(this, stylePath, styleId, Object);
+    }
+    this.modelChange();
+  }
+  queryCell(row: number, col: number): QueryCellResult {
+    const cellData: ModelCellType = get(
       this,
       `worksheets[${this.currentSheetId}][${row}][${col}]`,
       {}
     );
-    return cellData;
+    const { style } = cellData;
+    const temp = style && this.styles[style] ? this.styles[style] : undefined;
+    return { ...cellData, style: temp };
   }
 }

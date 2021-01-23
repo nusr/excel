@@ -41,7 +41,6 @@ export class Content extends Base {
     const { controller } = this;
     const { model } = controller;
     const data = model.getCellsContent();
-    // console.log("renderContent", data);
     if (isEmpty(data)) {
       return;
     }
@@ -54,9 +53,17 @@ export class Content extends Base {
     });
     for (const item of data) {
       const result = controller.queryCell(item.row, item.col);
-      const { value, left, top, height, width } = result;
+      const { value, left, top, height, width, style } = result;
       const isNum = isNumber(value);
-      this.setAttributes({ textAlign: isNum ? "right" : "left" });
+      let font = DEFAULT_FONT;
+      if (!isEmpty(style)) {
+        font = makeFont(
+          style?.isItalic ? "italic" : "normal",
+          style?.isBold ? "bold" : "500"
+        );
+      }
+      console.log(font);
+      this.setAttributes({ textAlign: isNum ? "right" : "left", font });
       this.fillText(value, left + (isNum ? width : 0), top + height / 2);
     }
     this.restore();

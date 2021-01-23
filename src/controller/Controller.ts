@@ -7,6 +7,7 @@ import {
   EventType,
   CellInfo,
   IWindowSize,
+  StyleType,
   ChangeEventType,
 } from "@/types";
 import {
@@ -32,6 +33,11 @@ export class Controller extends EventEmitter<EventType> {
     const changeSet = Array.from(this.changeSet.values());
     this.emit("change", { changeSet, payload });
     this.changeSet.clear();
+  }
+  queryActiveCell(): CellInfo {
+    const [range] = this.ranges;
+    const { row, col } = range;
+    return this.queryCell(row, col);
   }
   setActiveCell(row = 0, col = 0): void {
     const cell = this.queryCell(row, col);
@@ -140,14 +146,19 @@ export class Controller extends EventEmitter<EventType> {
       height,
     };
   }
-  setCellValue(row: number, col: number, value: string): void {
-    this.model.setCellValue(row, col, value);
+  setCellValue(value: string, ranges = this.ranges): void {
+    this.model.setCellValue(ranges, value);
+    this.changeSet.add("contentChange");
+    this.emitChange();
+  }
+  setCellStyle(value: Partial<StyleType>, ranges = this.ranges): void {
+    this.model.setCellStyle(ranges, value);
     this.changeSet.add("contentChange");
     this.emitChange();
   }
   queryCell(row: number, col: number): CellInfo {
     const { model } = this;
-    const { width, height, value } = model.queryCell(row, col);
+    const { width, height, value, formula, style } = model.queryCell(row, col);
     const config = model.getRowTitleHeightAndColTitleWidth();
     let resultX = config.width;
     let resultY = config.height;
@@ -169,6 +180,8 @@ export class Controller extends EventEmitter<EventType> {
       left: resultX,
       row,
       col,
+      formula,
+      style,
     };
   }
 }

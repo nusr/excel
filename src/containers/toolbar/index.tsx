@@ -1,6 +1,10 @@
 import React, { memo, useCallback } from "react";
 import styled, { withTheme } from "styled-components";
 import { Button, Github, BaseIcon } from "@/components";
+import { getSingletonController } from "@/controller";
+import { useSelector } from "@/store";
+import { StyleType } from "@/types";
+
 export const ToolbarContainer = withTheme(styled.div`
   width: 100%;
   padding: 0 20px;
@@ -11,32 +15,28 @@ export const ToolbarContainer = withTheme(styled.div`
   border-bottom: 1px solid ${(props) => props.theme.gridStrokeColor};
 `);
 
-const italicStyle = {
-  fontStyle: "italic",
-};
-const underlineStyle = {
-  textDecoration: "underline",
-};
-
 export const Toolbar = memo(() => {
-  const handleBold = useCallback(() => {
-    console.log("handleBold");
-  }, []);
-  const handleItalic = useCallback(() => {
-    console.log("handleItalic");
-  }, []);
-  const handleUnderline = useCallback(() => {
-    console.log("handleUnderline");
-  }, []);
+  const { activeCell } = useSelector(["activeCell"]);
+  const { style = {} } = activeCell;
+  const { isBold, isUnderline, isItalic } = style;
+  const setCellStyle = function (value: Partial<StyleType>): void {
+    getSingletonController().setCellStyle(value);
+  };
   return (
     <ToolbarContainer id="tool-bar-container">
-      <Button onClick={handleBold}>
+      <Button active={isBold} onClick={() => setCellStyle({ isBold: !isBold })}>
         <BaseIcon name="bold" />
       </Button>
-      <Button style={italicStyle} onClick={handleItalic}>
+      <Button
+        active={isItalic}
+        onClick={() => setCellStyle({ isItalic: !isItalic })}
+      >
         <BaseIcon name="italic" />
       </Button>
-      <Button style={underlineStyle} onClick={handleUnderline}>
+      <Button
+        active={isUnderline}
+        onClick={() => setCellStyle({ isUnderline: !isUnderline })}
+      >
         <BaseIcon name="underline" />
       </Button>
       <Github />

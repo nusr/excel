@@ -37,7 +37,7 @@ type ButtonProps = {
   className?: string;
   disabled?: boolean;
   style?: React.CSSProperties;
-  onClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 };
 
 export const Button: React.FunctionComponent<ButtonProps> = memo((props) => {
@@ -45,7 +45,9 @@ export const Button: React.FunctionComponent<ButtonProps> = memo((props) => {
     children,
     style = {},
     className = "",
-    onClick,
+    onClick = () => {
+      console.log("click");
+    },
     disabled = false,
     active = false,
     type = "normal",

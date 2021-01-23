@@ -44,6 +44,10 @@ export type ModelCellType = {
   style?: string;
 };
 
+export type QueryCellResult = Omit<ModelCellType, "style"> & {
+  style?: Partial<StyleType>;
+};
+
 export type ModelCellValue = ModelCellType & { col: number; row: number };
 
 export type ModelColType = Record<string, ModelCellType>;

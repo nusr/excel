@@ -8,4 +8,5 @@ export const EDITOR_DEFAULT_POSITION: CellInfo = {
   height: CELL_HEIGHT,
   row: 0,
   col: 0,
+  style: {},
 };

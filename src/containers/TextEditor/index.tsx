@@ -14,13 +14,13 @@ export const TextEditorContainer = memo(() => {
 
   const onInputEnter = useCallback(() => {
     const controller = getSingletonController();
-    controller.setCellValue(activeCell.row, activeCell.col, editCellValue);
+    controller.setCellValue(editCellValue);
     controller.quitEditing();
     controller.setActiveCell(activeCell.row + 1, activeCell.col);
   }, [activeCell, editCellValue]);
   const onInputTab = useCallback(() => {
     const controller = getSingletonController();
-    controller.setCellValue(activeCell.row, activeCell.col, editCellValue);
+    controller.setCellValue(editCellValue);
     controller.quitEditing();
     controller.setActiveCell(activeCell.row, activeCell.col + 1);
   }, [activeCell, editCellValue]);
