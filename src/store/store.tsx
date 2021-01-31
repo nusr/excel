@@ -1,8 +1,23 @@
-import React, { memo, useContext, FunctionComponent, Dispatch } from "react";
+import React, {
+  memo,
+  useContext,
+  FunctionComponent,
+  Dispatch,
+  useMemo,
+  useReducer,
+} from "react";
 import { pick } from "lodash-es";
-import { useImmerReducer } from "use-immer";
+import produce, { Draft } from "immer";
 import { reducer, initialState } from "./reducer";
 import { Action, State } from "@/types";
+
+type ImmerReducer = (draftState: Draft<State>, action: Action) => State;
+
+function useImmerReducer(reducer: ImmerReducer, initialState: State) {
+  const cachedReducer = useMemo(() => produce(reducer), [reducer]);
+  return useReducer(cachedReducer, initialState);
+}
+
 const storeContext = React.createContext(initialState);
 const dispatchContext = React.createContext((() => 0) as Dispatch<Action>);
 type Props = {
@@ -10,10 +25,7 @@ type Props = {
 };
 export const StoreProvider: FunctionComponent<Props> = memo((props) => {
   const { children } = props;
-  const [state, dispatch] = useImmerReducer<State, Action>(
-    reducer,
-    initialState
-  );
+  const [state, dispatch] = useImmerReducer(reducer, initialState);
   return (
     <dispatchContext.Provider value={dispatch}>
       <storeContext.Provider value={state}>{children}</storeContext.Provider>

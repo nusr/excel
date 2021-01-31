@@ -7,6 +7,7 @@ import { useDispatch } from "@/store";
 import { getSingletonController } from "@/controller";
 import { MOCK_MODEL } from "@/model";
 import { handleBuildError } from "@/util";
+import { State } from "@/types";
 
 const AppContainer = styled.div`
   overflow: hidden;
@@ -22,29 +23,24 @@ export const App = React.memo(() => {
     });
     controller.on("change", (data) => {
       const { changeSet } = data;
+      const state: Partial<State> = {};
       if (changeSet.includes("contentChange")) {
         const { sheetList, currentSheetId } = controller.model;
-        dispatch({ type: "SET_SHEET_LIST", payload: sheetList });
-        dispatch({ type: "SET_CURRENT_SHEET_ID", payload: currentSheetId });
+        state.sheetList = sheetList;
+        state.currentSheetId = currentSheetId;
       }
       const { isCellEditing } = controller;
       const cell = controller.queryActiveCell();
       const payload = isCellEditing ? String(cell?.value || "") : "";
-      dispatch({ type: isCellEditing ? "ENTER_EDITING" : "QUIT_EDITING" });
-      dispatch({
-        type: "CHANGE_Edit_CELL_VALUE",
-        payload,
-      });
+      state.isCellEditing = isCellEditing;
+      state.editCellValue = payload;
       if (cell) {
-        dispatch({
-          type: "CHANGE_ACTIVE_CELL",
-          payload: cell,
-        });
+        state.activeCell = cell;
       }
+      dispatch({ type: "BATCH", payload: state });
     });
     controller.loadJSON(MOCK_MODEL);
-    const offError = handleBuildError();
-    (window as any).controller = controller;
+    const offError = handleBuildError(controller);
     return () => {
       getSingletonController.destroy();
       off();

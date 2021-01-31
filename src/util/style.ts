@@ -10,14 +10,35 @@
 import { npx } from "./dpr";
 import { CSSProperties } from "react";
 
-export const DEFAULT_SIZE = 12;
+export const DEFAULT_FONT_SIZE = 11;
+export const DEFAULT_FONT_COLOR = "#333333";
 export const MUST_FONT_FAMILY = "sans-serif";
 export const DEFAULT_FONT_FAMILY = "Source Sans Pro";
+
+export const FONT_SIZE_LIST = [
+  6,
+  8,
+  9,
+  10,
+  DEFAULT_FONT_SIZE,
+  12,
+  14,
+  16,
+  18,
+  20,
+  22,
+  24,
+  26,
+  28,
+  36,
+  48,
+  72,
+];
 
 export function makeFont(
   fontStyle: CSSProperties["fontStyle"] = "normal",
   fontWeight = "normal",
-  fontSize: number = DEFAULT_SIZE,
+  fontSize: number = DEFAULT_FONT_SIZE,
   fontFamily: CSSProperties["fontFamily"] = DEFAULT_FONT_FAMILY
 ): string {
   const result = `${fontStyle} ${fontWeight} ${npx(

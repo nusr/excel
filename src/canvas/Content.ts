@@ -7,6 +7,7 @@ import {
   intToColumnName,
   isNumber,
   makeFont,
+  DEFAULT_FONT_COLOR,
 } from "@/util";
 import { Controller } from "@/controller";
 import { Base } from "./Base";
@@ -49,21 +50,27 @@ export class Content extends Base {
       textAlign: "left",
       textBaseline: "middle",
       font: DEFAULT_FONT,
-      fillStyle: theme.contentColor,
+      fillStyle: DEFAULT_FONT_COLOR,
     });
     for (const item of data) {
       const result = controller.queryCell(item.row, item.col);
       const { value, left, top, height, width, style } = result;
       const isNum = isNumber(value);
       let font = DEFAULT_FONT;
+      let fillStyle = DEFAULT_FONT_COLOR;
       if (!isEmpty(style)) {
         font = makeFont(
           style?.isItalic ? "italic" : "normal",
-          style?.isBold ? "bold" : "500"
+          style?.isBold ? "bold" : "500",
+          style?.fontSize ? style.fontSize : undefined
         );
+        fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
       }
-      console.log(font);
-      this.setAttributes({ textAlign: isNum ? "right" : "left", font });
+      this.setAttributes({
+        textAlign: isNum ? "right" : "left",
+        font,
+        fillStyle,
+      });
       this.fillText(value, left + (isNum ? width : 0), top + height / 2);
     }
     this.restore();

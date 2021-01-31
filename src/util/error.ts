@@ -18,12 +18,13 @@ function outputError() {
     })
     .catch(console.error);
 }
-export function handleBuildError(): () => void {
+export function handleBuildError(controller: unknown): () => void {
   if (process.env.NODE_ENV !== "development") {
     return () => {
       console.log("off");
     };
   }
+  (window as any).controller = controller;
   outputError();
   return () => {
     console.log("off");

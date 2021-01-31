@@ -36,6 +36,7 @@ export type Action =
   | { type: "ENTER_EDITING" }
   | { type: "QUIT_EDITING" }
   | { type: "SET_CURRENT_SHEET_ID"; payload: string }
-  | { type: "SET_SHEET_LIST"; payload: WorkBookJSON["workbook"] };
+  | { type: "SET_SHEET_LIST"; payload: WorkBookJSON["workbook"] }
+  | { type: "BATCH"; payload: Partial<State> };
 
 export type Reducer = (state: State, action: Action) => State;

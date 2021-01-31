@@ -37,6 +37,12 @@ export const reducer: Reducer = (state, action) => {
     case "SET_SHEET_LIST":
       state.sheetList = action.payload;
       break;
+    case "BATCH":
+      state = {
+        ...state,
+        ...action.payload,
+      };
+      break;
     default:
       break;
   }
