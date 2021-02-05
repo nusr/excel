@@ -33,31 +33,42 @@ function copyHtml() {
   fs.copyFileSync(sourceFile, targetFile);
 }
 
+let isBuild = false;
+
 function buildJs(type = "", fileName = "") {
-  const errorFilePath = path.join(distDir, "buildError.txt");
-  try {
-    console.log(`${typeof fileName === "string" ? fileName : ""}: ${type}`);
-    const commonConfig = {
-      entryPoints: ["./src/index.tsx"],
-      bundle: true,
-      minify: isProd,
-      sourcemap: true,
-      tsconfig: "./tsconfig.json",
-      outdir: "dist",
-      define: {
-        "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
-      },
-    };
-    esBuild.buildSync({
-      ...commonConfig,
-    });
-    copyHtml();
-    handleSVGFiles();
-    fs.writeFileSync(errorFilePath, "");
-  } catch (error) {
-    console.log("buildJs error", error);
-    fs.writeFileSync(errorFilePath, `${error.message}\n${error.stack}`);
+  if (isBuild) {
+    return;
   }
+  const errorFilePath = path.join(distDir, "buildError.txt");
+  isBuild = true;
+  console.log(`${typeof fileName === "string" ? fileName : ""}: ${type}`);
+  const commonConfig = {
+    entryPoints: ["./src/index.tsx"],
+    bundle: true,
+    minify: isProd,
+    sourcemap: true,
+    tsconfig: "./tsconfig.json",
+    outdir: "dist",
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
+    },
+  };
+  esBuild
+    .build({
+      ...commonConfig,
+    })
+    .then(() => {
+      copyHtml();
+      handleSVGFiles();
+      fs.writeFileSync(errorFilePath, "");
+    })
+    .catch((error) => {
+      console.log("buildJs error", error);
+      fs.writeFileSync(errorFilePath, `${error.message}\n${error.stack}`);
+    })
+    .finally(() => {
+      isBuild = false;
+    });
 }
 
 function init() {

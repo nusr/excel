@@ -1,4 +1,4 @@
-import { isEmpty } from "lodash-es";
+import { isEmpty, isNil } from "lodash-es";
 import { CanvasOption } from "@/types";
 import {
   thinLineWidth,
@@ -55,6 +55,9 @@ export class Content extends Base {
     for (const item of data) {
       const result = controller.queryCell(item.row, item.col);
       const { value, left, top, height, width, style } = result;
+      if (isNil(value)) {
+        continue;
+      }
       const isNum = isNumber(value);
       let font = DEFAULT_FONT;
       let fillStyle = DEFAULT_FONT_COLOR;

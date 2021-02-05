@@ -2,7 +2,7 @@ import ReactDom from "react-dom";
 import React from "react";
 import { App } from "./entry/App";
 import { StoreProvider } from "@/store";
-
+import "./parser";
 ReactDom.render(
   <React.StrictMode>
     <StoreProvider>
