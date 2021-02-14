@@ -3,13 +3,27 @@ import { TextEditor } from "@/components";
 import { useSelector, useDispatch } from "@/store";
 import { getSingletonController } from "@/controller";
 
-export const TextEditorContainer = memo(() => {
+type Props = {
+  isFormulaBar?: boolean;
+};
+
+export const TextEditorContainer = memo<Props>(({ isFormulaBar = false }) => {
   const { activeCell, isCellEditing, editCellValue } = useSelector([
     "activeCell",
     "isCellEditing",
     "editCellValue",
   ]);
-  const value = isCellEditing ? editCellValue : activeCell.value;
+  let value = "";
+  if (isCellEditing) {
+    value = editCellValue;
+  } else {
+    const temp = String(activeCell.value || "");
+    if (isFormulaBar) {
+      value = (activeCell.formula ? `=${activeCell.formula}` : "") || temp;
+    } else {
+      value = temp;
+    }
+  }
   const dispatch = useDispatch();
 
   const onInputEnter = useCallback(() => {

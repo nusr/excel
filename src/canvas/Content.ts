@@ -1,8 +1,9 @@
-import { isEmpty, isNil } from "lodash-es";
+import { isEmpty } from "lodash-es";
 import { CanvasOption } from "@/types";
 import {
   thinLineWidth,
   npx,
+  isNil,
   dpr,
   intToColumnName,
   isNumber,
@@ -54,11 +55,20 @@ export class Content extends Base {
     });
     for (const item of data) {
       const result = controller.queryCell(item.row, item.col);
-      const { value, left, top, height, width, style } = result;
+      const { value, left, top, height, width, style, formula } = result;
       if (isNil(value)) {
         continue;
       }
-      const isNum = isNumber(value);
+      let displayValue = value;
+      if (formula) {
+        const temp = controller.formulaParser.init(
+          formula,
+          controller.convertCell
+        );
+        displayValue = temp.result as string | number;
+      }
+
+      const isNum = isNumber(displayValue);
       let font = DEFAULT_FONT;
       let fillStyle = DEFAULT_FONT_COLOR;
       if (!isEmpty(style)) {
@@ -74,7 +84,11 @@ export class Content extends Base {
         font,
         fillStyle,
       });
-      this.fillText(value, left + (isNum ? width : 0), top + height / 2);
+      this.fillText(
+        String(displayValue),
+        left + (isNum ? width : 0),
+        top + height / 2
+      );
     }
     this.restore();
   }

@@ -45,7 +45,7 @@ export const FormulaBar = memo(() => {
     <FormulaBarContainer id="formula-bar-container">
       <ActiveCellName>{text}</ActiveCellName>
       <TextEditorWrapper>
-        <TextEditorContainer />
+        <TextEditorContainer isFormulaBar />
       </TextEditorWrapper>
     </FormulaBarContainer>
   );

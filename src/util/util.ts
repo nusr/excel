@@ -9,6 +9,20 @@ export function isNil(value?: unknown): boolean {
   return value === null || value === undefined;
 }
 
+export function parseNumber(value: string): number {
+  if (isNil(value)) {
+    return window.NaN;
+  }
+  if (typeof value === "number") {
+    return value;
+  }
+  if (typeof value === "string") {
+    return value.includes(".") ? parseFloat(value) : parseInt(value);
+  }
+  return window.NaN;
+}
+
+
 export function getSheetNameNum(list: WorksheetType[] = []): number {
   const numList = list
     .map((item) => item.name)

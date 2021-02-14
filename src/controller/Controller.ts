@@ -11,6 +11,7 @@ import {
   ChangeEventType,
 } from "@/types";
 import {
+  parseReference,
   assert,
   EventEmitter,
   singletonPattern,
@@ -18,6 +19,7 @@ import {
   CELL_HEIGHT,
   Range,
 } from "@/util";
+import { FormulaParser } from "@/parser";
 
 function getWidthHeight(): IWindowSize {
   return {
@@ -30,6 +32,7 @@ export class Controller extends EventEmitter<EventType> {
   model: Model = new Model(this);
   ranges: Array<Range> = [];
   isCellEditing = false;
+  formulaParser: FormulaParser = new FormulaParser();
   private changeSet = new Set<ChangeEventType>();
   constructor() {
     super();
@@ -165,6 +168,12 @@ export class Controller extends EventEmitter<EventType> {
     this.changeSet.add("contentChange");
     this.emitChange();
   }
+  convertCell = (item: string): string | number => {
+    const { row, col } = parseReference(item);
+    const data = this.queryCell(row, col);
+    console.log(item, row, col);
+    return data.value;
+  };
   queryCell(row: number, col: number): CellInfo {
     const { model } = this;
     const { width, height, value, formula, style } = model.queryCell(row, col);

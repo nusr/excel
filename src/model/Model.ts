@@ -32,13 +32,15 @@ export const MOCK_MODEL: WorkBookJSON = {
     "1": {
       "0": {
         "0": {
-          value: "测试",
-          formula: "SUM(F1:F17)",
+          // value: "测试",
+          value: "",
+          formula: "SUM(F1,F17)",
           // style: "1",
         },
         "1": {
-          value: 124,
-          // style: "2"
+          // value: 124,
+          value: "",
+          formula: "SUM(1,4)",
         },
       },
     },
@@ -150,10 +152,25 @@ export class Model {
   setCellValue(ranges: IRange[], value = ""): void {
     const [range] = ranges;
     const { row, col } = range;
+    let formula = "";
+    let realValue = "";
+    if (value.startsWith("=")) {
+      formula = value.trim().slice(1);
+      realValue = "";
+    } else {
+      realValue = value.trim();
+      formula = "";
+    }
+    setWith(
+      this,
+      `worksheets[${this.currentSheetId}][${row}][${col}].formula`,
+      formula,
+      Object
+    );
     setWith(
       this,
       `worksheets[${this.currentSheetId}][${row}][${col}].value`,
-      value,
+      realValue,
       Object
     );
     this.modelChange();

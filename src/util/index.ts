@@ -11,4 +11,5 @@ export * from "./constant";
 export * from "./designPattern";
 export * from "./classnames";
 export * from "./error";
-export * from './range';
+export * from "./range";
+export * from "./reference";

@@ -1,18 +1,6 @@
-import { isNil } from "@/util";
-function parseNumber(value: string): number {
-  if (isNil(value)) {
-    return window.NaN;
-  }
-  if (typeof value === "number") {
-    return value;
-  }
-  if (typeof value === "string") {
-    return value.includes(".") ? parseFloat(value) : parseInt(value);
-  }
-  return window.NaN;
-}
+import { parseNumber } from "@/util";
 
-export function SUM(...rest: string[]): number {
+export const SUM = (...rest: string[]): number => {
   if (rest.length === 0) {
     throw new Error("error params");
   }
@@ -23,18 +11,12 @@ export function SUM(...rest: string[]): number {
     }
     return temp;
   }
-  let result = undefined;
+  let result = 0;
   for (const item of rest) {
     const temp = parseNumber(item);
     if (!isNaN(temp)) {
-      if (result === undefined) {
-        result = 0;
-      }
       result += temp;
     }
   }
-  if (result === undefined) {
-    throw new Error("error params");
-  }
   return result;
-}
+};
