@@ -7,11 +7,11 @@
  * font-family
  * e.g italic bold 14px/16px sans-serif;
  */
-import { npx } from "./dpr";
 import { CSSProperties } from "react";
 
 export const DEFAULT_FONT_SIZE = 11;
 export const DEFAULT_FONT_COLOR = "#333333";
+export const DEFAULT_FILL_COLOR = "transparent";
 export const MUST_FONT_FAMILY = "sans-serif";
 export const DEFAULT_FONT_FAMILY = "Source Sans Pro";
 
@@ -35,15 +35,21 @@ export const FONT_SIZE_LIST = [
   72,
 ];
 
+export const FONT_FAMILY_LIST = [
+  DEFAULT_FONT_FAMILY,
+  "宋体",
+  "隶书",
+  "楷体",
+  "微软雅黑",
+  "Times New Roman",
+];
+
 export function makeFont(
   fontStyle: CSSProperties["fontStyle"] = "normal",
   fontWeight = "normal",
-  fontSize: number = DEFAULT_FONT_SIZE,
+  fontSize: number,
   fontFamily: CSSProperties["fontFamily"] = DEFAULT_FONT_FAMILY
 ): string {
-  const result = `${fontStyle} ${fontWeight} ${npx(
-    fontSize
-  )}px ${fontFamily},${MUST_FONT_FAMILY}`;
-  console.log(result);
+  const result = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily},${MUST_FONT_FAMILY}`;
   return result;
 }

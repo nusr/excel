@@ -35,12 +35,13 @@ export const MOCK_MODEL: WorkBookJSON = {
           // value: "测试",
           value: "",
           formula: "SUM(F1,F17)",
-          // style: "1",
+          style: "1",
         },
         "1": {
           // value: 124,
           value: "",
           formula: "SUM(1,4)",
+          style: "2",
         },
       },
     },
@@ -48,7 +49,7 @@ export const MOCK_MODEL: WorkBookJSON = {
   styles: {
     "1": {
       fontColor: "#ff0000",
-      fillColor: "#000000",
+      fillColor: "blue",
       fontSize: 12,
       fontFamily: "宋体",
       format: "$0.00",
@@ -57,8 +58,8 @@ export const MOCK_MODEL: WorkBookJSON = {
       wrapText: 0,
     },
     "2": {
-      fontColor: "#ff0000",
-      fillColor: "#000000",
+      fontColor: "white",
+      fillColor: "black",
       fontSize: 12,
       fontFamily: "宋体",
       format: "0",
@@ -182,13 +183,13 @@ export class Model {
     const oldStyleId = get(this, stylePath, "");
     if (oldStyleId) {
       const oldStyle = this.styles[oldStyleId];
-      if (!isEmpty(oldStyle)) {
+      if (isEmpty(oldStyle)) {
+        this.styles[oldStyleId] = { ...style };
+      } else {
         this.styles[oldStyleId] = {
           ...oldStyle,
           ...style,
         };
-      } else {
-        this.styles[oldStyleId] = { ...style };
       }
     } else {
       const styleId = uniqueId("style");
@@ -204,7 +205,10 @@ export class Model {
       {}
     );
     const { style } = cellData;
-    const temp = style && this.styles[style] ? this.styles[style] : undefined;
+    let temp = undefined;
+    if (style && this.styles[style]) {
+      temp = this.styles[style];
+    }
     return { ...cellData, style: temp };
   }
 }

@@ -15,12 +15,13 @@ type OptionItem = {
 
 type Props = {
   value?: ValueType;
+  style?: React.CSSProperties;
   data: Array<ValueType | OptionItem>;
   onChange: (value: string) => void;
 };
 
 export const Select = React.memo((props: Props) => {
-  const { data, value: activeValue, onChange } = props;
+  const { data, value: activeValue, style = {}, onChange } = props;
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       const { value } = event.target;
@@ -29,7 +30,7 @@ export const Select = React.memo((props: Props) => {
     [onChange]
   );
   return (
-    <SelectContainer onChange={handleChange} value={activeValue}>
+    <SelectContainer onChange={handleChange} value={activeValue} style={style}>
       {data.map((item) => {
         const value = typeof item === "object" ? item.value : item;
         const label = typeof item === "object" ? item.label : item;

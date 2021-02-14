@@ -91,6 +91,9 @@ export class Controller extends EventEmitter<EventType> {
     this.changeSet.add("contentChange");
     this.emitChange();
   }
+  toJSON(): WorkBookJSON {
+    return this.model.toJSON();
+  }
   clickPositionToCell(x: number, y: number): CellPosition {
     const config = this.model.getRowTitleHeightAndColTitleWidth();
     let resultX = config.width;
@@ -171,7 +174,6 @@ export class Controller extends EventEmitter<EventType> {
   convertCell = (item: string): string | number => {
     const { row, col } = parseReference(item);
     const data = this.queryCell(row, col);
-    console.log(item, row, col);
     return data.value;
   };
   queryCell(row: number, col: number): CellInfo {

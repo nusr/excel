@@ -1,7 +1,9 @@
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import { TextEditor } from "@/components";
 import { useSelector, useDispatch } from "@/store";
 import { getSingletonController } from "@/controller";
+import { isEmpty } from "lodash-es";
+import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE } from "@/util";
 
 type Props = {
   isFormulaBar?: boolean;
@@ -13,17 +15,34 @@ export const TextEditorContainer = memo<Props>(({ isFormulaBar = false }) => {
     "isCellEditing",
     "editCellValue",
   ]);
-  let value = "";
-  if (isCellEditing) {
-    value = editCellValue;
-  } else {
-    const temp = String(activeCell.value || "");
-    if (isFormulaBar) {
-      value = (activeCell.formula ? `=${activeCell.formula}` : "") || temp;
+  const displayValue = useMemo(() => {
+    if (isCellEditing) {
+      return editCellValue;
     } else {
-      value = temp;
+      const temp = String(activeCell.value || "");
+      if (isFormulaBar) {
+        return (activeCell.formula ? `=${activeCell.formula}` : "") || temp;
+      }
+      return temp;
     }
-  }
+  }, [isCellEditing, isFormulaBar, activeCell, editCellValue]);
+  const style = useMemo(() => {
+    const { style } = activeCell;
+    if (isFormulaBar || isEmpty(style)) {
+      return undefined;
+    }
+    const font = makeFont(
+      style?.isItalic ? "italic" : "normal",
+      style?.isBold ? "bold" : "500",
+      style?.fontSize || DEFAULT_FONT_SIZE,
+      style?.fontFamily
+    );
+    return {
+      backgroundColor: style?.fillColor || "inherit",
+      color: style?.fontColor || DEFAULT_FONT_COLOR,
+      font,
+    };
+  }, [activeCell, isFormulaBar]);
   const dispatch = useDispatch();
 
   const onInputEnter = useCallback(() => {
@@ -53,7 +72,8 @@ export const TextEditorContainer = memo<Props>(({ isFormulaBar = false }) => {
   );
   return (
     <TextEditor
-      value={value}
+      value={displayValue}
+      style={style}
       isCellEditing={isCellEditing}
       onBlur={onBlur}
       onInputEnter={onInputEnter}

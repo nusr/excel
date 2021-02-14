@@ -2,7 +2,7 @@ import { npx, assert, dpr } from "@/util";
 import type { Controller } from "@/controller";
 import { Selection } from "./Selection";
 import { Content } from "./Content";
-import { EventType, CanvasOverlayPosition } from "@/types";
+import { CanvasOverlayPosition } from "@/types";
 import theme from "@/theme";
 import { Base } from "./Base";
 
@@ -26,7 +26,6 @@ export class Main extends Base {
     this.selection = new Selection({ width, height });
     this.content = new Content(controller, width, height);
     this.controller.on("change", this.render);
-    // this.render(["contentChange"]);
   }
   resizeMain(width: number, height: number): void {
     const { mainCanvas } = this;
@@ -71,12 +70,11 @@ export class Main extends Base {
       },
     ];
   }
-  render = ({ changeSet = [] }: EventType["change"]): void => {
+  render = (): void => {
+    // console.log(data);
     const { width, height } = this.controller.getCanvasSize();
     this.resize(width, height);
-    if (changeSet.includes("contentChange")) {
-      this.content.render(width, height);
-    }
+    this.content.render(width, height);
     const list = this.getSelection();
     this.selection.render(width, height, list);
     this.ctx.drawImage(this.selection.canvas, 0, 0);
@@ -93,5 +91,9 @@ export class Main extends Base {
   renderMain(width: number, height: number): void {
     this.resizeMain(width, height);
     this.mainCtx.drawImage(this.canvas, 0, 0);
+  }
+  clearMain(): void {
+    const { width, height } = this.canvas;
+    this.mainCtx.clearRect(0, 0, width, height);
   }
 }

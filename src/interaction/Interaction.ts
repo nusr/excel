@@ -26,7 +26,7 @@ export class Interaction {
     window.removeEventListener("resize", this.resize);
   }
   mouseDown = (event: MouseEvent): void => {
-    console.log(event);
+    // console.log(event);
     const { timeStamp, clientX, clientY } = event;
     const { controller } = this;
     const {
@@ -54,7 +54,7 @@ export class Interaction {
       controller.enterEditing();
     }
     this.lastTimeStamp = timeStamp;
-    console.log("mousedown", position);
+    // console.log("mousedown", position);
   };
   mouseMove = (event: MouseEvent): void => {
     const { clientX, clientY } = event;
@@ -68,7 +68,7 @@ export class Interaction {
     const checkMove = x > width && y > height && event.buttons === 1;
     if (checkMove) {
       const position = controller.clickPositionToCell(x, y);
-      console.log(position);
+      // console.log(position);
       controller.updateSelection(position.row, position.col);
     }
   };

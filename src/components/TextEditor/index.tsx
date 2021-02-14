@@ -6,6 +6,7 @@ const commonStyle = css`
 `;
 const TextEditorWrapper = styled.div`
   ${commonStyle};
+  overflow: hidden;
 `;
 
 const TextEditorContent = styled.input`
@@ -13,7 +14,6 @@ const TextEditorContent = styled.input`
   padding: 0 5px;
   margin: 0;
   border: none;
-  background-color: unset;
   border-radius: unset;
   outline: none;
   font: inherit;
@@ -26,19 +26,21 @@ export type CommonProps = {
   onChange(event: React.ChangeEvent<HTMLInputElement>): void;
 };
 type TextEditorProps = {
+  style?: React.CSSProperties;
   value: string | number;
   isCellEditing: boolean;
 } & CommonProps;
 
 export const TextEditor = memo((props: TextEditorProps) => {
   const {
+    style = {},
     value = "",
     className = "",
     isCellEditing,
-    onInputEnter,
-    onInputTab,
     onBlur,
     onChange,
+    onInputTab,
+    onInputEnter,
   } = props;
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -74,6 +76,7 @@ export const TextEditor = memo((props: TextEditorProps) => {
   return (
     <TextEditorWrapper className={className}>
       <TextEditorContent
+        style={style}
         ref={inputRef}
         value={value}
         onBlur={handleBlur}

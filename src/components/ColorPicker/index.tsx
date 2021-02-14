@@ -37,6 +37,10 @@ const Item = styled.div<{ color: string }>`
   margin-bottom: 5px;
   margin-right: 5px;
   cursor: pointer;
+  border: 1px solid transparent;
+  &:hover {
+    border-color: #ccc;
+  }
 `;
 
 export const COLOR_LIST = [
@@ -78,39 +82,41 @@ export const COLOR_LIST = [
   "#AB149E",
 ];
 
-export const ColorPicker = React.memo((props: Props) => {
-  const { color, style = {}, onChange } = props;
-  const [visible, setVisible] = useState(false);
-  const toggleColorPicker = useCallback(() => {
-    setVisible((v) => !v);
-  }, []);
-  const handleBlur = useCallback(() => {
-    setVisible(false);
-  }, []);
+export const ColorPicker: React.FunctionComponent<Props> = React.memo(
+  (props) => {
+    const { color, style = {}, children, onChange } = props;
+    const [visible, setVisible] = useState(false);
+    const toggleColorPicker = useCallback(() => {
+      setVisible((v) => !v);
+    }, []);
+    const handleBlur = useCallback(() => {
+      setVisible(false);
+    }, []);
 
-  return (
-    <Container onBlur={handleBlur} style={style}>
-      <Content color={color} onClick={toggleColorPicker}>
-        A
-      </Content>
-      {visible ? (
-        <ColorPickerContainer>
-          <List>
-            {COLOR_LIST.map((item) => (
-              <Item
-                color={item}
-                key={item}
-                onClick={() => {
-                  onChange(item);
-                  setVisible(false);
-                }}
-              ></Item>
-            ))}
-          </List>
-        </ColorPickerContainer>
-      ) : null}
-    </Container>
-  );
-});
+    return (
+      <Container onBlur={handleBlur} style={style}>
+        <Content color={color} onClick={toggleColorPicker}>
+          {children}
+        </Content>
+        {visible ? (
+          <ColorPickerContainer>
+            <List>
+              {COLOR_LIST.map((item) => (
+                <Item
+                  color={item}
+                  key={item}
+                  onClick={() => {
+                    onChange(item);
+                    setVisible(false);
+                  }}
+                ></Item>
+              ))}
+            </List>
+          </ColorPickerContainer>
+        ) : null}
+      </Container>
+    );
+  }
+);
 
 ColorPicker.displayName = "ColorPicker";

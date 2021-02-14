@@ -50,7 +50,7 @@ class FormulaLexer {
         result.push(temp);
       }
     }
-    console.log(result);
+    // console.log(result);
     return result;
   }
   isLetter(currentChar: string): boolean {

@@ -1,20 +1,20 @@
 import { isEmpty } from "lodash-es";
-import { CanvasOption } from "@/types";
+import { CanvasOption, CellInfo } from "@/types";
 import {
   thinLineWidth,
   npx,
-  isNil,
   dpr,
   intToColumnName,
   isNumber,
   makeFont,
+  DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
 } from "@/util";
 import { Controller } from "@/controller";
 import { Base } from "./Base";
 import theme from "@/theme";
 
-const DEFAULT_FONT = makeFont(undefined, "500");
+const DEFAULT_FONT = makeFont(undefined, "500", npx(DEFAULT_FONT_SIZE));
 
 export const HEADER_STYLE: Omit<CanvasOption, "direction"> = {
   textAlign: "center",
@@ -48,18 +48,12 @@ export class Content extends Base {
     }
     this.save();
     this.setAttributes({
-      textAlign: "left",
       textBaseline: "middle",
-      font: DEFAULT_FONT,
-      fillStyle: DEFAULT_FONT_COLOR,
     });
     for (const item of data) {
-      const result = controller.queryCell(item.row, item.col);
-      const { value, left, top, height, width, style, formula } = result;
-      if (isNil(value)) {
-        continue;
-      }
-      let displayValue = value;
+      const cellInfo = controller.queryCell(item.row, item.col);
+      const { value, left, top, height, width, style, formula } = cellInfo;
+      let displayValue = value || "";
       if (formula) {
         const temp = controller.formulaParser.init(
           formula,
@@ -72,23 +66,28 @@ export class Content extends Base {
       let font = DEFAULT_FONT;
       let fillStyle = DEFAULT_FONT_COLOR;
       if (!isEmpty(style)) {
+        const fontSize = npx(
+          style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE
+        );
         font = makeFont(
           style?.isItalic ? "italic" : "normal",
           style?.isBold ? "bold" : "500",
-          style?.fontSize ? style.fontSize : undefined
+          fontSize,
+          style?.fontFamily
         );
         fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
+        if (style?.fillColor) {
+          // console.log("cellInfo", cellInfo);
+          this.setAttributes({ fillStyle: style?.fillColor });
+          this.fillRect(left, top, width, height);
+        }
       }
       this.setAttributes({
         textAlign: isNum ? "right" : "left",
         font,
         fillStyle,
       });
-      this.fillText(
-        String(displayValue),
-        left + (isNum ? width : 0),
-        top + height / 2
-      );
+      this.fillText(displayValue, left + (isNum ? width : 0), top + height / 2);
     }
     this.restore();
   }
@@ -128,7 +127,6 @@ export class Content extends Base {
       strokeStyle: theme.gridStrokeColor,
     });
     this.translate(config.width, config.height);
-    this.clear();
     const pointList = [];
     let y = 0;
     let x = 0;
@@ -150,12 +148,43 @@ export class Content extends Base {
     this.line(pointList);
     this.restore();
   }
+  fillRowText(
+    row: number,
+    rowWidth: number,
+    y: number,
+    activeCell: CellInfo
+  ): void {
+    const isActive = activeCell.row === row - 1;
+    const fillStyle = isActive ? theme.primaryColor : theme.black;
+    if (isActive) {
+      this.setAttributes({ fillStyle: theme.buttonActiveColor });
+      this.fillRect(0, activeCell.top, rowWidth, activeCell.height);
+    }
+    this.setAttributes({ fillStyle });
+    this.fillText(row, rowWidth / 2, y);
+  }
+
+  fillColText(
+    colText: string,
+    x: number,
+    colHeight: number,
+    activeCell: CellInfo
+  ): void {
+    const isActive = intToColumnName(activeCell.col + 1) === colText;
+    const fillStyle = isActive ? theme.primaryColor : theme.black;
+    if (isActive) {
+      this.setAttributes({ fillStyle: theme.buttonActiveColor });
+      this.fillRect(activeCell.left, 0, activeCell.width, colHeight);
+    }
+    this.setAttributes({ fillStyle });
+    this.fillText(colText, x, colHeight / 2 + dpr());
+  }
   protected renderRowsHeader(): void {
     const { scroll, model } = this.controller;
     const { rowIndex } = scroll;
     const { rowCount } = model.getSheetInfo();
     const config = model.getRowTitleHeightAndColTitleWidth();
-    const cell = this.controller.queryCell(0, 0);
+    const activeCell = this.controller.queryActiveCell();
     const { height } = this.controller.getDrawSize(config);
     this.save();
     this.setAttributes({ fillStyle: theme.backgroundColor });
@@ -167,16 +196,26 @@ export class Content extends Base {
     for (; i < rowCount; i++) {
       let temp = y;
       if (i === rowIndex) {
-        temp += HEADER_STYLE.lineWidth / 2;
+        temp += thinLineWidth() / 2;
       }
       pointList.push([0, temp], [config.width, temp]);
-      this.fillText(i + 1, config.width / 2, temp + cell.height / 2);
-      y += cell.height;
+      this.fillRowText(
+        i + 1,
+        config.width,
+        temp + activeCell.height / 2,
+        activeCell
+      );
+      y += activeCell.height;
       if (y > height) {
         break;
       }
     }
-    this.fillText(i + 1, config.width / 2, y + cell.height / 2);
+    this.fillRowText(
+      i + 1,
+      config.width,
+      y + activeCell.height / 2,
+      activeCell
+    );
     pointList.push([0, y], [config.width, y], [0, 0], [0, y]);
     this.line(pointList);
     this.restore();
@@ -186,7 +225,7 @@ export class Content extends Base {
     const { colIndex } = scroll;
     const { colCount } = model.getSheetInfo();
     const config = model.getRowTitleHeightAndColTitleWidth();
-    const cell = this.controller.queryCell(0, 0);
+    const activeCell = this.controller.queryActiveCell();
     const { width } = this.controller.getDrawSize(config);
     const pointList = [];
     this.save();
@@ -198,23 +237,25 @@ export class Content extends Base {
     for (; i < colCount; i++) {
       let temp = x;
       if (i === colIndex) {
-        temp += HEADER_STYLE.lineWidth / 2;
+        temp += thinLineWidth() / 2;
       }
       pointList.push([temp, 0], [temp, config.height]);
-      this.fillText(
+      this.fillColText(
         intToColumnName(i + 1),
-        temp + cell.width / 2,
-        config.height / 2 + dpr()
+        temp + activeCell.width / 2,
+        config.height,
+        activeCell
       );
-      x += cell.width;
+      x += activeCell.width;
       if (x > width) {
         break;
       }
     }
-    this.fillText(
+    this.fillColText(
       intToColumnName(i + 1),
-      x + cell.width / 2,
-      config.height / 2 + dpr()
+      x + activeCell.width / 2,
+      config.height,
+      activeCell
     );
     pointList.push([x, 0], [x, config.height], [0, 0], [x, 0]);
     this.line(pointList);
