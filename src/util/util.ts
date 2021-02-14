@@ -1,16 +1,12 @@
 import { START_SHEET_ID, SHEET_NAME_PREFIX } from "./constant";
-import type { WorksheetType, IWindowSize } from "@/types";
-
-export function getWidthHeight(): IWindowSize {
-  return {
-    width: document.documentElement.clientWidth,
-    height: document.documentElement.clientHeight,
-  };
-}
+import type { WorksheetType } from "@/types";
 export function isNumber(value: string | number): boolean {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   return parseFloat(value) == value;
+}
+export function isNil(value?: unknown): boolean {
+  return value === null || value === undefined;
 }
 
 export function getSheetNameNum(list: WorksheetType[] = []): number {

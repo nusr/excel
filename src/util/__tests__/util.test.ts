@@ -1,4 +1,4 @@
-import { getSheetNameNum, getSheetId, getDefaultSheetInfo } from "..";
+import { getSheetNameNum, getSheetId, getDefaultSheetInfo, isNil } from "..";
 
 describe("getSheetNameNum", () => {
   it("should convert empty array to 1", function () {
@@ -17,5 +17,17 @@ describe("getDefaultSheetInfo", () => {
       name: "Sheet1",
       sheetId: "1",
     });
+  });
+});
+
+describe("isNil", () => {
+  it("should convert null to true", function () {
+    expect(isNil(null)).toBeTruthy();
+  });
+  it("should convert undefined to true", function () {
+    expect(isNil()).toBeTruthy();
+  });
+  it("should convert 1 to false", function () {
+    expect(isNil(1)).toBeFalsy();
   });
 });

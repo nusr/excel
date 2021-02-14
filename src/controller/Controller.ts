@@ -14,11 +14,17 @@ import {
   assert,
   EventEmitter,
   singletonPattern,
-  getWidthHeight,
   CELL_WIDTH,
   CELL_HEIGHT,
   Range,
 } from "@/util";
+
+function getWidthHeight(): IWindowSize {
+  return {
+    width: document.documentElement.clientWidth,
+    height: document.documentElement.clientHeight,
+  };
+}
 export class Controller extends EventEmitter<EventType> {
   scroll: Scroll = new Scroll(this);
   model: Model = new Model(this);

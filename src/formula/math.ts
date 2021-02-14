@@ -1,7 +1,4 @@
-// import { isNil } from "lodash-es";
-function isNil(value: unknown): boolean {
-  return value === null || value === undefined;
-}
+import { isNil } from "@/util";
 function parseNumber(value: string): number {
   if (isNil(value)) {
     return window.NaN;
