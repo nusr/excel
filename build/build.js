@@ -6,9 +6,9 @@ const esBuild = require("esbuild");
 const cwd = process.cwd();
 const distDir = path.join(cwd, "dist");
 const assetsDir = path.join(cwd, "assets");
-const NODE_ENV = (process.env.NODE_ENV || "production").trim();
-console.log("NODE_ENV", NODE_ENV);
+const NODE_ENV = process.env.NODE_ENV || "production";
 const isProd = NODE_ENV === "production";
+console.log("NODE_ENV", NODE_ENV, isProd);
 const { staticService, openBrowser } = require("./server");
 const { handleSVGFiles } = require("./svg");
 
