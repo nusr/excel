@@ -10,18 +10,13 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
     "test": "npx jest --config ./unittest/jest.config.js",
-    "postinstall": "npm run check-version",
+    "postinstall": "npm run check-version && husky install",
     "test-coverage": "npm run test -- --coverage",
     "test-watch": "npm run test -- --watch",
     "check-version": "ncu -u",
     "ci": "npm run lint && npm run typecheck && npm run test && npm run build",
     "deploy": "deploy.sh",
     "typecheck": "tsc"
-  },
-  "husky": {
-    "hooks": {
-      "pre-push": "npm run ci && npm run deploy"
-    }
   },
   "repository": {
     "type": "git",
@@ -44,8 +39,8 @@
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.1",
     "@types/styled-components": "^5.1.7",
-    "@typescript-eslint/eslint-plugin": "^4.15.0",
-    "@typescript-eslint/parser": "^4.15.0",
+    "@typescript-eslint/eslint-plugin": "^4.15.1",
+    "@typescript-eslint/parser": "^4.15.1",
     "cross-env": "^7.0.3",
     "esbuild": "^0.8.46",
     "eslint": "^7.20.0",
