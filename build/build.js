@@ -60,11 +60,15 @@ function buildJs(type = "", fileName = "") {
     .then(() => {
       copyHtml();
       handleSVGFiles();
-      fs.writeFileSync(errorFilePath, "");
+      if (!isProd) {
+        fs.writeFileSync(errorFilePath, "");
+      }
     })
     .catch((error) => {
       console.log("buildJs error", error);
-      fs.writeFileSync(errorFilePath, `${error.message}\n${error.stack}`);
+      if (!isProd) {
+        fs.writeFileSync(errorFilePath, `${error.message}\n${error.stack}`);
+      }
     })
     .finally(() => {
       isBuild = false;
