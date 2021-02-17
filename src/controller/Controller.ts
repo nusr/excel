@@ -144,6 +144,7 @@ export class Controller extends EventEmitter<EventType> {
       model.currentSheetId
     );
     this.ranges = [temp];
+    console.log("updateSelection", temp);
     this.changeSet.add("selectionChange");
     this.emitChange();
   }

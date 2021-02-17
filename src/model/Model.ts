@@ -15,7 +15,7 @@ import { Controller } from "../controller/controller";
 export const MOCK_MODEL: WorkBookJSON = {
   workbook: [
     {
-      sheetId: "1",
+      sheetId: "Sheet1",
       name: "Sheet1",
       activeCell: "B2",
       colCount: 30,
@@ -30,7 +30,7 @@ export const MOCK_MODEL: WorkBookJSON = {
     },
   ],
   worksheets: {
-    "1": {
+    Sheet1: {
       "0": {
         "0": {
           // value: "测试",
@@ -43,6 +43,20 @@ export const MOCK_MODEL: WorkBookJSON = {
           value: "",
           formula: "SUM(1,4)",
           style: "2",
+        },
+      },
+      "3": {
+        0: {
+          style: "style1",
+        },
+        1: {
+          style: "style1",
+        },
+        2: {
+          style: "style1",
+        },
+        3: {
+          style: "style1",
         },
       },
     },
@@ -67,6 +81,9 @@ export const MOCK_MODEL: WorkBookJSON = {
       verticalAlign: 0,
       horizontalAlign: 0,
       wrapText: 0,
+    },
+    style1: {
+      fillColor: "red",
     },
   },
 };
@@ -178,23 +195,27 @@ export class Model {
   }
   setCellStyle(ranges: IRange[], style: Partial<StyleType>): void {
     const [range] = ranges;
-    const { row, col } = range;
-    const stylePath = `worksheets[${this.currentSheetId}][${row}][${col}].style`;
-    const oldStyleId = get(this, stylePath, "");
-    if (oldStyleId) {
-      const oldStyle = this.styles[oldStyleId];
-      if (isEmpty(oldStyle)) {
-        this.styles[oldStyleId] = { ...style };
-      } else {
-        this.styles[oldStyleId] = {
-          ...oldStyle,
-          ...style,
-        };
+    const { row, col, rowCount, colCount } = range;
+    for (let r = row; r < rowCount; r++) {
+      for (let c = col; c < colCount; c++) {
+        const stylePath = `worksheets[${this.currentSheetId}][${r}][${c}].style`;
+        const oldStyleId = get(this, stylePath, "");
+        if (oldStyleId) {
+          const oldStyle = this.styles[oldStyleId];
+          if (isEmpty(oldStyle)) {
+            this.styles[oldStyleId] = { ...style };
+          } else {
+            this.styles[oldStyleId] = {
+              ...oldStyle,
+              ...style,
+            };
+          }
+        } else {
+          const styleId = uniqueId("style");
+          this.styles[styleId] = { ...style };
+          setWith(this, stylePath, styleId, Object);
+        }
       }
-    } else {
-      const styleId = uniqueId("style");
-      this.styles[styleId] = { ...style };
-      setWith(this, stylePath, styleId, Object);
     }
     this.modelChange();
   }

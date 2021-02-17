@@ -37,7 +37,7 @@ export type WorksheetType = {
 };
 
 export type ModelCellType = {
-  value: string | number;
+  value?: string | number;
   formula?: string;
   width?: number;
   height?: number;
