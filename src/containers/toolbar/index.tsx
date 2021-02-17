@@ -49,6 +49,9 @@ export const Toolbar = memo(() => {
     },
     [setCellStyle]
   );
+  const getItemStyle = useCallback((value) => {
+    return { fontFamily: value };
+  }, []);
   return (
     <ToolbarContainer id="tool-bar-container">
       <Button active={isBold} onClick={() => setCellStyle({ isBold: !isBold })}>
@@ -64,6 +67,7 @@ export const Toolbar = memo(() => {
         data={FONT_FAMILY_LIST}
         value={fontFamily || DEFAULT_FONT_FAMILY}
         onChange={(item) => setCellStyle({ fontFamily: item })}
+        getItemStyle={getItemStyle}
       />
       <Select
         data={FONT_SIZE_LIST}

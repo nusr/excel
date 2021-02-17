@@ -1,33 +1,76 @@
-import { getSheetNameNum, getSheetId, getDefaultSheetInfo, isNil } from "..";
+import {
+  getSheetNameNum,
+  getSheetId,
+  getDefaultSheetInfo,
+  isNil,
+  isNumber,
+  parseNumber,
+} from "..";
 
-describe("getSheetNameNum", () => {
-  it("should convert empty array to 1", function () {
-    expect(getSheetNameNum()).toEqual(1);
-  });
-});
-describe("getSheetId", () => {
-  it("should convert empty array to 1", function () {
-    expect(getSheetId()).toEqual(1);
-  });
-});
-
-describe("getDefaultSheetInfo", () => {
-  it("should convert empty array to 1", function () {
-    expect(getDefaultSheetInfo()).toMatchObject({
-      name: "Sheet1",
-      sheetId: "1",
+describe("util.test.ts", () => {
+  describe("getSheetNameNum", () => {
+    it("should convert empty array to 1", function () {
+      expect(getSheetNameNum()).toEqual(1);
     });
   });
-});
+  describe("getSheetId", () => {
+    it("should convert empty array to 1", function () {
+      expect(getSheetId()).toEqual(1);
+    });
+  });
 
-describe("isNil", () => {
-  it("should convert null to true", function () {
-    expect(isNil(null)).toBeTruthy();
+  describe("getDefaultSheetInfo", () => {
+    it("should convert empty array to 1", function () {
+      expect(getDefaultSheetInfo()).toMatchObject({
+        name: "Sheet1",
+        sheetId: "1",
+      });
+    });
   });
-  it("should convert undefined to true", function () {
-    expect(isNil()).toBeTruthy();
+
+  describe("isNil", () => {
+    it("should convert null to true", function () {
+      expect(isNil(null)).toBeTruthy();
+    });
+    it("should convert undefined to true", function () {
+      expect(isNil()).toBeTruthy();
+    });
+    it("should convert 1 to false", function () {
+      expect(isNil(1)).toBeFalsy();
+    });
   });
-  it("should convert 1 to false", function () {
-    expect(isNil(1)).toBeFalsy();
+  describe("isNumber", () => {
+    it("should convert null to false", function () {
+      expect(isNumber(null)).toBeFalsy();
+    });
+    it("should convert undefined to false", function () {
+      expect(isNumber(undefined)).toBeFalsy();
+    });
+    it("should convert 1 to true", function () {
+      expect(isNumber(1)).toBeTruthy();
+    });
+    it("should convert '1' to true", function () {
+      expect(isNumber("1")).toBeTruthy();
+    });
+  });
+  describe("parseNumber", () => {
+    it("should convert null to NaN", function () {
+      expect(parseNumber(null)).toBeNaN();
+    });
+    it("should convert undefined to NaN", function () {
+      expect(parseNumber(undefined)).toBeNaN();
+    });
+    it("should convert 1 to 1", function () {
+      expect(parseNumber(1)).toEqual(1);
+    });
+    it("should convert 1.23 to 1.23", function () {
+      expect(parseNumber(1.23)).toEqual(1.23);
+    });
+    it("should convert '1' to 1", function () {
+      expect(parseNumber("1")).toEqual(1);
+    });
+    it("should convert '1.2' to 1.2", function () {
+      expect(parseNumber("1.2")).toEqual(1.2);
+    });
   });
 });

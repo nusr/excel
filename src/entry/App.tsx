@@ -18,15 +18,14 @@ export const App = React.memo(() => {
   useEffect(() => {
     const controller = getSingletonController();
     const off = controller.on("dispatch", (data) => {
-      console.log("on dispatch", data);
       dispatch(data);
     });
     controller.on("change", (data) => {
       const { changeSet } = data;
       const state: Partial<State> = {};
       if (changeSet.includes("contentChange")) {
-        const { sheetList, currentSheetId } = controller.model;
-        state.sheetList = sheetList;
+        const { workbook, currentSheetId } = controller.model;
+        state.sheetList = workbook;
         state.currentSheetId = currentSheetId;
       }
       const { isCellEditing } = controller;

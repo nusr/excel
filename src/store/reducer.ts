@@ -11,7 +11,7 @@ export const initialState: State = {
 };
 
 export const reducer: Reducer = (state, action) => {
-  console.log(`%c action type: ${action.type}`, "color: red;", action);
+  // console.log(`%c action type: ${action.type}`, "color: red;", action);
   switch (action.type) {
     case "CHANGE_Edit_CELL_VALUE":
       state.editCellValue = action.payload;

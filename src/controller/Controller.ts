@@ -36,6 +36,7 @@ export class Controller extends EventEmitter<EventType> {
   private changeSet = new Set<ChangeEventType>();
   constructor() {
     super();
+    console.log("init addSheet");
     this.addSheet();
   }
   emitChange(payload?: CellInfo): void {
@@ -48,10 +49,24 @@ export class Controller extends EventEmitter<EventType> {
     const { row, col } = range;
     return this.queryCell(row, col);
   }
-  setActiveCell(row = 0, col = 0): void {
+  setActiveCell(row = -1, col = -1): void {
+    const { model } = this;
     const cell = this.queryCell(row, col);
     this.changeSet.add("selectionChange");
-    this.ranges = [new Range(row, col, 0, 0, this.model.currentSheetId)];
+    let range = new Range(row, col, 1, 1, model.currentSheetId);
+    const sheetItem = model.workbook.find(
+      (v) => v.sheetId === model.currentSheetId
+    );
+    if (row === col && row === -1) {
+      if (sheetItem && sheetItem.activeCell) {
+        range = parseReference(sheetItem.activeCell, model.currentSheetId);
+      } else {
+        range = new Range(0, 0, 1, 1, model.currentSheetId);
+      }
+    }
+    this.ranges = [range];
+    console.log("setActiveCell", this.ranges);
+    this.model.setActiveCell(range.row, range.col);
     this.emitChange(cell);
   }
   setCurrentSheetId(id: string): void {
@@ -65,7 +80,7 @@ export class Controller extends EventEmitter<EventType> {
   }
   addSheet(): void {
     this.model.addSheet();
-    this.setActiveCell();
+    this.setActiveCell(0, 0);
     this.changeSet.add("contentChange");
     this.emitChange();
   }
@@ -85,8 +100,9 @@ export class Controller extends EventEmitter<EventType> {
     this.isCellEditing = true;
   }
   loadJSON(json: WorkBookJSON): void {
+    const { model } = this;
     console.log("loadJSON", json);
-    this.model.fromJSON(json);
+    model.fromJSON(json);
     this.setActiveCell();
     this.changeSet.add("contentChange");
     this.emitChange();
@@ -113,15 +129,21 @@ export class Controller extends EventEmitter<EventType> {
   updateSelection(row: number, col: number): void {
     const { ranges, model } = this;
     const [range] = ranges;
-    const rowCount = row - range.row;
-    const colCount = col - range.col;
-    if (rowCount === colCount && rowCount === 0) {
+    if (range.row === row && range.col === col) {
       return;
     }
-    this.ranges = [
-      new Range(range.row, range.col, rowCount, colCount, model.currentSheetId),
-    ];
-    console.log(this.ranges);
+    const rowCount =
+      range.row <= row ? row - range.row + 1 : range.row - row + range.rowCount;
+    const colCount =
+      range.col <= col ? col - range.col + 1 : range.col - col + range.colCount;
+    const temp = new Range(
+      Math.min(range.row, row),
+      Math.min(range.col, col),
+      Math.max(rowCount, 1),
+      Math.max(colCount, 1),
+      model.currentSheetId
+    );
+    this.ranges = [temp];
     this.changeSet.add("selectionChange");
     this.emitChange();
   }
@@ -172,7 +194,7 @@ export class Controller extends EventEmitter<EventType> {
     this.emitChange();
   }
   convertCell = (item: string): string | number => {
-    const { row, col } = parseReference(item);
+    const { row, col } = parseReference(item, this.model.currentSheetId);
     const data = this.queryCell(row, col);
     return data.value;
   };

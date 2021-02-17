@@ -5,7 +5,7 @@ const rootDir = path.join(__dirname, "..");
 const transformPath = path.join(__dirname, "transform.js");
 module.exports = {
   rootDir,
-  testEnvironment: "node",
+  testEnvironment: "jsdom",
   testMatch: ["<rootDir>/src/**/*.test.[jt]s?(x)"],
   transform: {
     "^.+\\.tsx?$": transformPath,

@@ -1,5 +1,4 @@
 import { classnames } from "../classnames";
-
 describe("classnames.test.ts", () => {
   describe("classnames", () => {
     it("should convert ('') to ''", function () {

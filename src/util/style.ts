@@ -37,19 +37,26 @@ export const FONT_SIZE_LIST = [
 
 export const FONT_FAMILY_LIST = [
   DEFAULT_FONT_FAMILY,
-  "宋体",
-  "隶书",
-  "楷体",
-  "微软雅黑",
   "Times New Roman",
+  "Arial",
+  "Tahoma",
+  "Verdana",
+  "微软雅黑",
+  "宋体",
+  "黑体",
+  "楷体",
+  "仿宋",
+  "新宋体",
+  "华文新魏",
+  "华文行楷",
+  "华文隶书",
 ];
 
 export function makeFont(
   fontStyle: CSSProperties["fontStyle"] = "normal",
   fontWeight = "normal",
-  fontSize: number,
+  fontSize = 12,
   fontFamily: CSSProperties["fontFamily"] = DEFAULT_FONT_FAMILY
 ): string {
-  const result = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily},${MUST_FONT_FAMILY}`;
-  return result;
+  return `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily},${MUST_FONT_FAMILY}`;
 }

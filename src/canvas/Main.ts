@@ -45,28 +45,23 @@ export class Main extends Base {
       width: startCell.width,
       height: startCell.height,
     };
-    if (range.rowCount === range.colCount && range.rowCount === 0) {
+    if (range.rowCount === range.colCount && range.rowCount <= 1) {
       return [firstCell];
     }
-    const endCell = controller.queryCell(
-      range.row + range.rowCount,
-      range.col + range.colCount
-    );
-    const width =
-      endCell.left +
-      (range.colCount > 0 ? endCell.width : -endCell.width) -
-      startCell.left;
-    const height =
-      endCell.top +
-      (range.rowCount > 0 ? endCell.height : -endCell.height) -
-      startCell.top;
+    const endCellRow = range.row + range.rowCount - 1;
+    const endCellCol = range.col + range.colCount - 1;
+    assert(endCellRow >= 0 && endCellCol >= 0);
+    const endCell = controller.queryCell(endCellRow, endCellCol);
+    const width = endCell.left + endCell.width - startCell.left;
+    const height = endCell.top + endCell.height - startCell.top;
+    assert(width >= 0 && height >= 0);
     return [
       firstCell,
       {
         left: startCell.left,
         top: startCell.top,
-        width,
-        height,
+        width: width,
+        height: height,
       },
     ];
   }

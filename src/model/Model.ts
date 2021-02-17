@@ -1,4 +1,4 @@
-import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT } from "@/util";
+import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, intToColumnName } from "@/util";
 import { isEmpty, get, setWith, uniqueId, cloneDeep } from "lodash-es";
 import {
   StyleType,
@@ -17,7 +17,7 @@ export const MOCK_MODEL: WorkBookJSON = {
     {
       sheetId: "1",
       name: "Sheet1",
-      activeCell: "A1",
+      activeCell: "B2",
       colCount: 30,
       rowCount: 30,
     },
@@ -26,6 +26,7 @@ export const MOCK_MODEL: WorkBookJSON = {
       name: "test",
       colCount: 30,
       rowCount: 30,
+      activeCell: "F5",
     },
   ],
   worksheets: {
@@ -70,33 +71,32 @@ export const MOCK_MODEL: WorkBookJSON = {
   },
 };
 export class Model {
-  protected _currentSheetId = "";
-  protected _workbook: WorksheetType[] = [];
+  public currentSheetId = "";
+  public workbook: WorksheetType[] = [];
   protected worksheets: WorkBookJSON["worksheets"] = {};
-  styles: WorkBookJSON["styles"] = {};
+  public styles: WorkBookJSON["styles"] = {};
   protected controller: Controller;
   constructor(controller: Controller) {
     this.controller = controller;
   }
-  get sheetList(): WorksheetType[] {
-    return this._workbook;
-  }
-  set sheetList(data: WorksheetType[]) {
-    this._workbook = data;
-  }
-  get currentSheetId(): string {
-    return this._currentSheetId;
-  }
-  set currentSheetId(id: string) {
-    this._currentSheetId = id;
+  setActiveCell(row: number, col: number): void {
+    const index = this.workbook.findIndex(
+      (v) => v.sheetId === this.currentSheetId
+    );
+    if (index >= 0) {
+      const tempList = cloneDeep(this.workbook);
+      const activeCell = `${intToColumnName(col + 1)}${row + 1}`;
+      tempList.splice(index, 1, { ...this.workbook[index], activeCell });
+      this.workbook = tempList;
+    }
   }
   addSheet(): void {
-    const item = getDefaultSheetInfo(this.sheetList);
-    this.sheetList = [...this.sheetList, item];
+    const item = getDefaultSheetInfo(this.workbook);
+    this.workbook = [...this.workbook, item];
     this.currentSheetId = item.sheetId;
   }
   getSheetInfo(id: string = this.currentSheetId): WorksheetType {
-    const item = this.sheetList.find((item) => item.sheetId === id);
+    const item = this.workbook.find((item) => item.sheetId === id);
     assert(item !== undefined);
     return item;
   }
@@ -130,15 +130,15 @@ export class Model {
     console.log("fromJSON", json);
     const { worksheets = {}, workbook = [], styles = {} } = json;
     this.worksheets = worksheets;
-    this.sheetList = workbook;
+    this.workbook = workbook;
     this.styles = cloneDeep(styles);
     this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
     this.modelChange();
   }
   toJSON(): WorkBookJSON {
-    const { worksheets, styles, sheetList } = this;
+    const { worksheets, styles, workbook } = this;
     return {
-      workbook: sheetList,
+      workbook,
       styles,
       worksheets,
     };

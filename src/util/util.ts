@@ -9,7 +9,7 @@ export function isNil(value?: unknown): boolean {
   return value === null || value === undefined;
 }
 
-export function parseNumber(value: string): number {
+export function parseNumber(value?: string | number): number {
   if (isNil(value)) {
     return window.NaN;
   }
@@ -21,7 +21,6 @@ export function parseNumber(value: string): number {
   }
   return window.NaN;
 }
-
 
 export function getSheetNameNum(list: WorksheetType[] = []): number {
   const numList = list

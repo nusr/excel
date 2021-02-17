@@ -40,7 +40,7 @@ export const SheetBar = memo(() => {
     "currentSheetId",
     "sheetList",
   ]);
-  console.log(currentSheetId, sheetList);
+  // console.log(currentSheetId, sheetList);
   const handleClickSheet = useCallback((item) => {
     console.log(item);
     getSingletonController().setCurrentSheetId(item.sheetId);
