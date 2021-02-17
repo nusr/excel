@@ -218,7 +218,7 @@ export class Controller extends EventEmitter<EventType> {
     return {
       width: width || CELL_WIDTH,
       height: height || CELL_HEIGHT,
-      value,
+      value: value || '',
       top: resultY,
       left: resultX,
       row,
