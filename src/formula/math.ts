@@ -1,5 +1,4 @@
 import { parseNumber } from "@/util";
-
 export const SUM = (...rest: string[]): number => {
   if (rest.length === 0) {
     throw new Error("error params");

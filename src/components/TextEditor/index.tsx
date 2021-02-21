@@ -47,7 +47,6 @@ export const TextEditor = memo((props: TextEditorProps) => {
     const dom = inputRef.current;
     if (isCellEditing && dom) {
       dom.focus();
-      console.dir(dom);
     }
   }, [isCellEditing]);
   const handleBlur = useCallback(

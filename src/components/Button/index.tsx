@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import styled, { withTheme } from "styled-components";
 import { classnames } from "@/util";
+import { noop } from "lodash";
 
 const ButtonContainer = withTheme(styled.div`
   padding: 0 5px;
@@ -45,9 +46,7 @@ export const Button: React.FunctionComponent<ButtonProps> = memo((props) => {
     children,
     style = {},
     className = "",
-    onClick = () => {
-      console.log("click");
-    },
+    onClick = noop,
     disabled = false,
     active = false,
     type = "normal",

@@ -1,4 +1,4 @@
-import { isEmpty } from "lodash-es";
+import { isEmpty } from "lodash";
 import { CanvasOption, CellInfo } from "@/types";
 import {
   thinLineWidth,
@@ -9,6 +9,7 @@ import {
   makeFont,
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
+  canvasLog,
 } from "@/util";
 import { Controller } from "@/controller";
 import { Base } from "./Base";
@@ -77,7 +78,6 @@ export class Content extends Base {
         );
         fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
         if (style?.fillColor) {
-          // console.log("cellInfo", cellInfo);
           this.setAttributes({ fillStyle: style?.fillColor });
           this.fillRect(left, top, width, height);
         }
@@ -184,7 +184,7 @@ export class Content extends Base {
     const { rowIndex } = scroll;
     const { rowCount } = model.getSheetInfo();
     const config = model.getRowTitleHeightAndColTitleWidth();
-    const activeCell = this.controller.queryActiveCell();
+    const activeCell = this.controller.queryActiveCellInfo();
     const { height } = this.controller.getDrawSize(config);
     this.save();
     this.setAttributes({ fillStyle: theme.backgroundColor });
@@ -225,7 +225,7 @@ export class Content extends Base {
     const { colIndex } = scroll;
     const { colCount } = model.getSheetInfo();
     const config = model.getRowTitleHeightAndColTitleWidth();
-    const activeCell = this.controller.queryActiveCell();
+    const activeCell = this.controller.queryActiveCellInfo();
     const { width } = this.controller.getDrawSize(config);
     const pointList = [];
     this.save();

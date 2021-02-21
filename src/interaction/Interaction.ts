@@ -1,5 +1,5 @@
 import { Controller } from "@/controller";
-import { DOUBLE_CLICK_TIME } from "@/util";
+import { DOUBLE_CLICK_TIME, interactionLog } from "@/util";
 export class Interaction {
   protected canvas: HTMLCanvasElement;
   protected controller: Controller;
@@ -26,7 +26,6 @@ export class Interaction {
     window.removeEventListener("resize", this.resize);
   }
   mouseDown = (event: MouseEvent): void => {
-    // console.log(event);
     const { timeStamp, clientX, clientY } = event;
     const { controller } = this;
     const {
@@ -54,7 +53,7 @@ export class Interaction {
       controller.enterEditing();
     }
     this.lastTimeStamp = timeStamp;
-    // console.log("mousedown", position);
+    interactionLog("mouseDown", position);
   };
   mouseMove = (event: MouseEvent): void => {
     const { clientX, clientY } = event;
@@ -68,7 +67,7 @@ export class Interaction {
     const checkMove = x > width && y > height && event.buttons === 1;
     if (checkMove) {
       const position = controller.clickPositionToCell(x, y);
-      // console.log(position);
+      interactionLog("mouseMove", position);
       controller.updateSelection(position.row, position.col);
     }
   };

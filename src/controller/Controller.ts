@@ -1,4 +1,4 @@
-import { isEmpty } from "lodash-es";
+import { isEmpty } from "lodash";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
@@ -12,12 +12,14 @@ import {
 } from "@/types";
 import {
   parseReference,
+  controllerLog,
   assert,
   EventEmitter,
   singletonPattern,
   CELL_WIDTH,
   CELL_HEIGHT,
   Range,
+  DEFAULT_ACTIVE_CELL,
 } from "@/util";
 import { FormulaParser } from "@/parser";
 
@@ -30,44 +32,46 @@ function getWidthHeight(): IWindowSize {
 export class Controller extends EventEmitter<EventType> {
   scroll: Scroll = new Scroll(this);
   model: Model = new Model(this);
-  ranges: Array<Range> = [];
+  ranges: Array<Range> = [
+    new Range(DEFAULT_ACTIVE_CELL.row, DEFAULT_ACTIVE_CELL.col, 1, 1, ""),
+  ];
   isCellEditing = false;
   formulaParser: FormulaParser = new FormulaParser();
   private changeSet = new Set<ChangeEventType>();
   constructor() {
     super();
-    console.log("init addSheet");
     this.addSheet();
   }
-  emitChange(payload?: CellInfo): void {
+  emitChange(): void {
     const changeSet = Array.from(this.changeSet.values());
-    this.emit("change", { changeSet, payload });
+    this.emit("change", { changeSet });
     this.changeSet.clear();
   }
-  queryActiveCell(): CellInfo {
-    const [range] = this.ranges;
-    const { row, col } = range;
+  queryActiveCell(): CellPosition {
+    const { activeCell } = this.model.getSheetInfo();
+    if (!activeCell) {
+      return { ...DEFAULT_ACTIVE_CELL };
+    }
+    const { row, col } = parseReference(activeCell, this.model.currentSheetId);
+    return { row, col };
+  }
+  queryActiveCellInfo(): CellInfo {
+    const { row, col } = this.queryActiveCell();
     return this.queryCell(row, col);
   }
   setActiveCell(row = -1, col = -1): void {
-    const { model } = this;
-    const cell = this.queryCell(row, col);
     this.changeSet.add("selectionChange");
-    let range = new Range(row, col, 1, 1, model.currentSheetId);
-    const sheetItem = model.workbook.find(
-      (v) => v.sheetId === model.currentSheetId
-    );
+    let position: CellPosition = { ...DEFAULT_ACTIVE_CELL };
     if (row === col && row === -1) {
-      if (sheetItem && sheetItem.activeCell) {
-        range = parseReference(sheetItem.activeCell, model.currentSheetId);
-      } else {
-        range = new Range(0, 0, 1, 1, model.currentSheetId);
-      }
+      position = this.queryActiveCell();
+    } else {
+      position = { row, col };
     }
-    this.ranges = [range];
-    console.log("setActiveCell", this.ranges);
-    this.model.setActiveCell(range.row, range.col);
-    this.emitChange(cell);
+    this.model.setActiveCell(position.row, position.col);
+    this.ranges = [
+      new Range(position.row, position.col, 1, 1, this.model.currentSheetId),
+    ];
+    this.emitChange();
   }
   setCurrentSheetId(id: string): void {
     if (id === this.model.currentSheetId) {
@@ -85,13 +89,13 @@ export class Controller extends EventEmitter<EventType> {
     this.emitChange();
   }
   selectAll(): void {
-    console.log("selectAll");
+    controllerLog("selectAll");
   }
   selectCol(): void {
-    console.log("selectCol");
+    controllerLog("selectCol");
   }
   selectRow(): void {
-    console.log("selectRow");
+    controllerLog("selectRow");
   }
   quitEditing(): void {
     this.isCellEditing = false;
@@ -101,7 +105,7 @@ export class Controller extends EventEmitter<EventType> {
   }
   loadJSON(json: WorkBookJSON): void {
     const { model } = this;
-    console.log("loadJSON", json);
+    controllerLog("loadJSON", json);
     model.fromJSON(json);
     this.setActiveCell();
     this.changeSet.add("contentChange");
@@ -127,24 +131,24 @@ export class Controller extends EventEmitter<EventType> {
     return { row, col };
   }
   updateSelection(row: number, col: number): void {
-    const { ranges, model } = this;
-    const [range] = ranges;
-    if (range.row === row && range.col === col) {
+    const { model } = this;
+    const activeCell = this.queryActiveCell();
+    if (activeCell.row === row && activeCell.col === col) {
       return;
     }
-    const rowCount =
-      range.row <= row ? row - range.row + 1 : range.row - row + range.rowCount;
-    const colCount =
-      range.col <= col ? col - range.col + 1 : range.col - col + range.colCount;
+    const x = col - activeCell.col;
+    const y = row - activeCell.row;
+    const colCount = Math.abs(x) + 1;
+    const rowCount = Math.abs(y) + 1;
     const temp = new Range(
-      Math.min(range.row, row),
-      Math.min(range.col, col),
+      Math.min(activeCell.row, row),
+      Math.min(activeCell.col, col),
       Math.max(rowCount, 1),
       Math.max(colCount, 1),
       model.currentSheetId
     );
     this.ranges = [temp];
-    console.log("updateSelection", temp);
+    controllerLog("updateSelection", temp);
     this.changeSet.add("selectionChange");
     this.emitChange();
   }
@@ -218,7 +222,7 @@ export class Controller extends EventEmitter<EventType> {
     return {
       width: width || CELL_WIDTH,
       height: height || CELL_HEIGHT,
-      value: value || '',
+      value: value || "",
       top: resultY,
       left: resultX,
       row,

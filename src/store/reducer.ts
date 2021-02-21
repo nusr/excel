@@ -1,5 +1,5 @@
 import { State, Reducer } from "@/types";
-import { EDITOR_DEFAULT_POSITION } from "@/util";
+import { EDITOR_DEFAULT_POSITION, storeLog } from "@/util";
 
 export const initialState: State = {
   activeCell: { ...EDITOR_DEFAULT_POSITION },
@@ -11,7 +11,7 @@ export const initialState: State = {
 };
 
 export const reducer: Reducer = (state, action) => {
-  // console.log(`%c action type: ${action.type}`, "color: red;", action);
+  storeLog(action.type, action);
   switch (action.type) {
     case "CHANGE_Edit_CELL_VALUE":
       state.editCellValue = action.payload;

@@ -6,10 +6,10 @@ const esBuild = require("esbuild");
 const cwd = process.cwd();
 const distDir = path.join(cwd, "dist");
 const assetsDir = path.join(cwd, "assets");
-const NODE_ENV = process.env.NODE_ENV || "production";
+const NODE_ENV = (process.env.NODE_ENV || "production").trim();
 const isProd = NODE_ENV === "production";
-console.log("NODE_ENV", NODE_ENV, isProd);
-const { staticService, openBrowser } = require("./server");
+const { staticService, openBrowser, buildLog } = require("./server");
+buildLog("NODE_ENV", NODE_ENV, isProd);
 const { handleSVGFiles } = require("./svg");
 
 function fileWatch(watchDir, callback) {
@@ -41,7 +41,7 @@ function buildJs(type = "", fileName = "") {
   }
   const errorFilePath = path.join(distDir, "buildError.txt");
   isBuild = true;
-  console.log(`${typeof fileName === "string" ? fileName : ""}: ${type}`);
+  buildLog(`${typeof fileName === "string" ? fileName : ""}: ${type}`);
   const commonConfig = {
     entryPoints: ["./src/index.tsx"],
     bundle: true,
@@ -65,7 +65,7 @@ function buildJs(type = "", fileName = "") {
       }
     })
     .catch((error) => {
-      console.log("buildJs error", error);
+      buildLog("buildJs error", error);
       if (!isProd) {
         fs.writeFileSync(errorFilePath, `${error.message}\n${error.stack}`);
       }

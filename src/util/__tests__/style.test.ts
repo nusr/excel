@@ -1,4 +1,4 @@
-import { makeFont } from "..";
+import { makeFont } from "../style";
 
 describe("style.test.ts", () => {
   describe("makeFont", () => {

@@ -39,11 +39,12 @@ export class Main extends Base {
     const { ranges } = controller;
     const [range] = ranges;
     const startCell = controller.queryCell(range.row, range.col);
+    const activeCell = controller.queryActiveCellInfo();
     const firstCell = {
-      left: startCell.left,
-      top: startCell.top,
-      width: startCell.width,
-      height: startCell.height,
+      left: activeCell.left,
+      top: activeCell.top,
+      width: activeCell.width,
+      height: activeCell.height,
     };
     if (range.rowCount === range.colCount && range.rowCount <= 1) {
       return [firstCell];
@@ -66,7 +67,6 @@ export class Main extends Base {
     ];
   }
   render = (): void => {
-    // console.log(data);
     const { width, height } = this.controller.getCanvasSize();
     this.resize(width, height);
     this.content.render(width, height);

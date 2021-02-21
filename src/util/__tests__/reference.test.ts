@@ -1,4 +1,5 @@
-import { parseReference, Range } from "..";
+import { parseReference } from "../reference";
+import { Range } from "../range";
 
 describe("reference.test.ts", () => {
   describe("classnames", () => {

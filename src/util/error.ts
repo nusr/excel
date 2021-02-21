@@ -25,6 +25,10 @@ export function handleBuildError(controller: unknown): () => void {
     };
   }
   (window as any).controller = controller;
+  localStorage.setItem("debug", "*");
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  window.console.debug = null;
   outputError();
   return () => {
     console.log("off");

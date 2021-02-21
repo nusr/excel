@@ -1,5 +1,5 @@
 import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, intToColumnName } from "@/util";
-import { isEmpty, get, setWith, uniqueId, cloneDeep } from "lodash-es";
+import { isEmpty, get, setWith, cloneDeep } from "lodash";
 import {
   StyleType,
   IRange,
@@ -9,7 +9,13 @@ import {
   WorksheetType,
   ModelCellType,
 } from "@/types";
-import { getDefaultSheetInfo, assert } from "@/util";
+import {
+  getDefaultSheetInfo,
+  assert,
+  modelLog,
+  getListMaxNum,
+  STYLE_ID_PREFIX,
+} from "@/util";
 import { Controller } from "../controller/controller";
 
 export const MOCK_MODEL: WorkBookJSON = {
@@ -119,8 +125,7 @@ export class Model {
   }
   protected modelChange(): void {
     const data = this.worksheets[this.currentSheetId];
-    console.log("modelChange", data);
-    console.log(this.styles);
+    modelLog("modelChange", data);
   }
   getCellsContent(): Array<QueryCellResult & { row: number; col: number }> {
     const sheetData = this.worksheets[this.currentSheetId];
@@ -144,7 +149,7 @@ export class Model {
     return result;
   }
   fromJSON(json: WorkBookJSON): void {
-    console.log("fromJSON", json);
+    modelLog("fromJSON", json);
     const { worksheets = {}, workbook = [], styles = {} } = json;
     this.worksheets = worksheets;
     this.workbook = workbook;
@@ -168,8 +173,8 @@ export class Model {
     };
   }
   setCellValue(ranges: IRange[], value = ""): void {
-    const [range] = ranges;
-    const { row, col } = range;
+    const { row, col } = this.controller.queryActiveCell();
+    const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
     let formula = "";
     let realValue = "";
     if (value.startsWith("=")) {
@@ -179,25 +184,15 @@ export class Model {
       realValue = value.trim();
       formula = "";
     }
-    setWith(
-      this,
-      `worksheets[${this.currentSheetId}][${row}][${col}].formula`,
-      formula,
-      Object
-    );
-    setWith(
-      this,
-      `worksheets[${this.currentSheetId}][${row}][${col}].value`,
-      realValue,
-      Object
-    );
+    setWith(this, `${configPath}.formula`, formula, Object);
+    setWith(this, `${configPath}.value`, realValue, Object);
     this.modelChange();
   }
   setCellStyle(ranges: IRange[], style: Partial<StyleType>): void {
     const [range] = ranges;
     const { row, col, rowCount, colCount } = range;
-    for (let r = row; r < rowCount; r++) {
-      for (let c = col; c < colCount; c++) {
+    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+      for (let c = col, endCol = col + colCount; c < endCol; c++) {
         const stylePath = `worksheets[${this.currentSheetId}][${r}][${c}].style`;
         const oldStyleId = get(this, stylePath, "");
         if (oldStyleId) {
@@ -211,7 +206,11 @@ export class Model {
             };
           }
         } else {
-          const styleId = uniqueId("style");
+          const styleNum = getListMaxNum(
+            Object.keys(this.styles),
+            STYLE_ID_PREFIX
+          );
+          const styleId = `${STYLE_ID_PREFIX}${styleNum + 1}`;
           this.styles[styleId] = { ...style };
           setWith(this, stylePath, styleId, Object);
         }

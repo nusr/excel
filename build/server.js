@@ -6,6 +6,9 @@ const path = require("path");
 const http = require("http");
 const zlib = require("zlib");
 const childProcess = require("child_process");
+const buildLog = (message) => {
+  console.log(`build: ${message}`);
+};
 function getMimeType(ext) {
   const types = {
     "application/javascript": ["js", "mjs"],
@@ -56,8 +59,9 @@ function openBrowser(url) {
 function staticService({
   root = "dist",
   startPage = "index.html",
-  port = 8000,
+  port = 9999,
 } = {}) {
+  buildLog("staticService start");
   const rootPath = root.startsWith("/") ? root : path.join(process.cwd(), root);
 
   const isRouteRequest = (pathname) => !~pathname.split("/").pop().indexOf(".");
@@ -104,7 +108,7 @@ function staticService({
       return sendFile(res, status, file, "html");
     });
   };
-
+  buildLog("createServer");
   const server = http.createServer((req, res) => {
     const pathname = decodeURI(url.parse(req.url).pathname);
     res.setHeader("access-control-allow-origin", "*");
@@ -116,11 +120,12 @@ function staticService({
   });
   server.listen(port);
   const openUrl = `http://localhost:${port}`;
-  console.log(openUrl);
+  buildLog(openUrl);
   return openUrl;
 }
 
 module.exports = {
   staticService,
   openBrowser,
+  buildLog,
 };

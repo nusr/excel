@@ -29,7 +29,7 @@ export const App = React.memo(() => {
         state.currentSheetId = currentSheetId;
       }
       const { isCellEditing } = controller;
-      const cell = controller.queryActiveCell();
+      const cell = controller.queryActiveCellInfo();
       const payload = isCellEditing ? String(cell?.value || "") : "";
       state.isCellEditing = isCellEditing;
       state.editCellValue = payload;

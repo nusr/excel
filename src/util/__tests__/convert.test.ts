@@ -1,4 +1,4 @@
-import { columnNameToInt, intToColumnName } from "..";
+import { columnNameToInt, intToColumnName } from "../convert";
 describe("convert.test.ts", () => {
   describe("columnNameToInt", () => {
     it("should convert A, B and C to 1, 2 and 3", function () {
