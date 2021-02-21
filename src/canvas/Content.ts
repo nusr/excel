@@ -1,4 +1,4 @@
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 import { CanvasOption, CellInfo } from "@/types";
 import {
   thinLineWidth,
@@ -9,7 +9,6 @@ import {
   makeFont,
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
-  canvasLog,
 } from "@/util";
 import { Controller } from "@/controller";
 import { Base } from "./Base";

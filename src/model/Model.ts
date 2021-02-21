@@ -1,5 +1,8 @@
 import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, intToColumnName } from "@/util";
-import { isEmpty, get, setWith, cloneDeep } from "lodash";
+import isEmpty from "lodash/isEmpty";
+import get from "lodash/get";
+import setWith from "lodash/setWith";
+import cloneDeep from "lodash/cloneDeep";
 import {
   StyleType,
   IRange,
@@ -172,7 +175,7 @@ export class Model {
       height: ROW_TITLE_HEIGHT,
     };
   }
-  setCellValue(ranges: IRange[], value = ""): void {
+  setCellValue(value = ""): void {
     const { row, col } = this.controller.queryActiveCell();
     const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
     let formula = "";
@@ -188,7 +191,7 @@ export class Model {
     setWith(this, `${configPath}.value`, realValue, Object);
     this.modelChange();
   }
-  setCellStyle(ranges: IRange[], style: Partial<StyleType>): void {
+  setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
     const [range] = ranges;
     const { row, col, rowCount, colCount } = range;
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {

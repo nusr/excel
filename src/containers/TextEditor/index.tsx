@@ -2,7 +2,7 @@ import React, { memo, useCallback, useMemo } from "react";
 import { TextEditor } from "@/components";
 import { useSelector, useDispatch } from "@/store";
 import { getSingletonController } from "@/controller";
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE } from "@/util";
 
 type Props = {

@@ -1,4 +1,5 @@
 const cache = new Set<string>();
+
 function outputError() {
   fetch("/buildError.txt")
     .then((res) => {

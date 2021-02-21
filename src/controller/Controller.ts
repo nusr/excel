@@ -1,4 +1,4 @@
-import { isEmpty } from "lodash";
+import isEmpty from "lodash/isEmpty";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
@@ -185,8 +185,8 @@ export class Controller extends EventEmitter<EventType> {
       height,
     };
   }
-  setCellValue(value: string, ranges = this.ranges): void {
-    this.model.setCellValue(ranges, value);
+  setCellValue(value: string): void {
+    this.model.setCellValue(value);
     this.changeSet.add("contentChange");
     this.emitChange();
   }
@@ -194,7 +194,7 @@ export class Controller extends EventEmitter<EventType> {
     if (isEmpty(style)) {
       return;
     }
-    this.model.setCellStyle(ranges, style);
+    this.model.setCellStyle(style, ranges);
     this.changeSet.add("contentChange");
     this.emitChange();
   }

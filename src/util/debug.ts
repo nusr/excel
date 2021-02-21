@@ -1,4 +1,5 @@
-import { random, noop } from "lodash";
+import random from "lodash/random";
+import noop from "lodash/noop";
 import { assert } from "./assert";
 export const DEBUG_COLOR_LIST = [
   "#0000CC",
