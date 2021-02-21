@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from "react";
 import styled, { withTheme } from "styled-components";
 import { classnames } from "@/util";
-import { Button } from "@/components";
+import { Button, BaseIcon } from "@/components";
 import { useSelector } from "@/store";
 import { getSingletonController } from "@/controller";
 import theme from "@/theme";
@@ -61,7 +61,7 @@ export const SheetBar = memo(() => {
       </SheetList>
       <AddSheetWrapper>
         <Button style={addButtonStyle} type="circle" onClick={handleAddSheet}>
-          +
+          <BaseIcon name="plus" />
         </Button>
       </AddSheetWrapper>
     </SheetBarContainer>

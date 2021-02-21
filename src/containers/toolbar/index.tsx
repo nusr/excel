@@ -65,6 +65,7 @@ export const Toolbar = memo(() => {
       </Button>
       <Select
         data={FONT_FAMILY_LIST}
+        style={colorPickerStyle}
         value={fontFamily || DEFAULT_FONT_FAMILY}
         onChange={(item) => setCellStyle({ fontFamily: item })}
         getItemStyle={getItemStyle}
@@ -80,14 +81,14 @@ export const Toolbar = memo(() => {
         style={colorPickerStyle}
         onChange={(color) => setCellStyle({ fontColor: color })}
       >
-        A
+        <BaseIcon name="fontColor" />
       </ColorPicker>
       <ColorPicker
         color={fillColor || ""}
         style={colorPickerStyle}
         onChange={(color) => setCellStyle({ fillColor: color })}
       >
-        F
+        <BaseIcon name="fillColor" />
       </ColorPicker>
       <Github />
     </ToolbarContainer>

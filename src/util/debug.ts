@@ -113,6 +113,7 @@ debug.colorMap = new Map<string, string>();
 debug.enableMap = new Map<string, boolean>([
   ["model", false],
   ["store", false],
+  ["interaction", false],
 ]);
 
 export const storeLog = debug("store");

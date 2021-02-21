@@ -5,6 +5,7 @@ export const GlobalStyle = createGlobalStyle`
         font-size: ${(props) => props.theme.font};
         font-family: ${(props) => props.theme.fontFamily};
         color: ${(props) => props.theme.contentColor};
+        line-height: ${(props) => props.theme.lineHeight};
     }
     body,html { 
         margin: 0;
@@ -13,6 +14,9 @@ export const GlobalStyle = createGlobalStyle`
     #root {
         height: 100vh;
         overflow: hidden;
+        box-sizing: border-box;
+    }
+    div,span{
         box-sizing: border-box;
     }
 `;

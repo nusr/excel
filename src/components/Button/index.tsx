@@ -4,20 +4,19 @@ import { classnames } from "@/util";
 import noop from "lodash/noop";
 
 const ButtonContainer = withTheme(styled.div`
-  padding: 0 5px;
+  padding: 0 4px;
   min-width: 20px;
   height: 20px;
   line-height: 20px;
   text-align: center;
-  color: #5f5f5f;
   font-weight: bold;
   box-sizing: border-box;
   cursor: pointer;
   display: inline-block;
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.borderRadius};
   border: 1px solid transparent;
   & + & {
-    margin-left: 8px;
+    margin-left: ${({ theme }) => theme.mediumPadding};
   }
   &.circle {
     border-radius: 50%;
@@ -29,7 +28,7 @@ const ButtonContainer = withTheme(styled.div`
   &:hover,
   &.active {
     background-color: ${({ theme }) => theme.buttonActiveColor};
-    border-color: #808080;
+    border-color: ${({ theme }) => theme.activeBorderColor};
   }
 `);
 type ButtonProps = {

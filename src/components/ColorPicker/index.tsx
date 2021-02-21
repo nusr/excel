@@ -10,8 +10,15 @@ const Container = styled.div`
 `;
 const Content = styled.div<{ color: string }>`
   color: ${(props) => props.color};
-  border: 1px solid #ccc;
-  padding: 2px 10px;
+  border: 1px solid ${({ theme }) => theme.borderColor};
+  padding: 0 8px;
+  height: 20px;
+  line-height: 20px;
+  &:hover,
+  &.active {
+    background-color: ${({ theme }) => theme.buttonActiveColor};
+    border-color: ${({ theme }) => theme.activeBorderColor};
+  }
 `;
 
 const ColorPickerContainer = styled.div`
@@ -26,16 +33,16 @@ const List = styled.div`
   display: flex;
   flex-wrap: wrap;
   border: 1px solid #ccc;
-  padding-top: 5px;
-  padding-left: 5px;
+  padding-top: 4px;
+  padding-left: 4px;
   background-color: #fff;
 `;
 const Item = styled.div<{ color: string }>`
   background-color: ${(props) => props.color};
-  width: 15px;
-  height: 15px;
-  margin-bottom: 5px;
-  margin-right: 5px;
+  width: 16px;
+  height: 16px;
+  margin-bottom: 4px;
+  margin-right: 4px;
   cursor: pointer;
   border: 1px solid transparent;
   &:hover {

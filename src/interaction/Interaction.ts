@@ -34,19 +34,19 @@ export class Interaction {
     } = controller.model.getRowTitleHeightAndColTitleWidth();
     const x = clientX - this.canvasRect.left;
     const y = clientY - this.canvasRect.top;
+    const position = controller.clickPositionToCell(x, y);
     if (width > x && height > y) {
-      controller.selectAll();
+      controller.selectAll(position.row, position.col);
       return;
     }
     if (width > x && height <= y) {
-      controller.selectRow();
+      controller.selectRow(position.row, position.col);
       return;
     }
     if (width <= x && height > y) {
-      controller.selectCol();
+      controller.selectCol(position.row, position.col);
       return;
     }
-    const position = controller.clickPositionToCell(x, y);
     controller.setActiveCell(position.row, position.col);
     const delay = timeStamp - this.lastTimeStamp;
     if (delay < DOUBLE_CLICK_TIME) {

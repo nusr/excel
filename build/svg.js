@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs");
 const path = require("path");
+const camelCase = require("lodash/camelCase");
 const assert = require("assert").strict;
 const svgParser = require("svg-parser");
 const cwd = process.cwd();
@@ -10,27 +11,31 @@ const SVG_SYMBOL_TAG = "__SVG_SYMBOL_NODE__";
 function parseSVGFile(text, fileName) {
   assert(text.length > 0);
   const data = svgParser.parse(text);
-  const pathList = data.children[0].children.filter(
-    (v) => v.tagName === "path"
-  );
+  const pathList = data.children[0].children
+    .filter((v) => v.tagName === "path")
+    .map((item) => {
+      return { ...item, properties: { ...item.properties, fill: "" } };
+    });
   assert(pathList && pathList.length > 0, "svg path length should not empty");
-  return pathList
+  const result = pathList
     .map((item) => {
       const { properties, tagName } = item;
       const temp = Object.entries(properties)
         .map((v) => `${v[0]}="${v[1]}"`)
         .join(" ");
-      return `
+      return `<${tagName} ${temp}></${tagName}>`;
+    })
+    .join("\n");
+  return `
     <symbol
       xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
       viewBox="0 0 1024 1024"
       id="icon-${fileName}"
+      version="1.1"
     >
-      <${tagName} ${temp}></${tagName}>
+      ${result}
     </symbol>`;
-    })
-    .join("");
 }
 
 let isOutput = false;
@@ -41,9 +46,10 @@ async function handleSVGFiles() {
   const svgList = [];
   const fileNameList = [];
   for (const item of files) {
-    const [fileName] = item.split(".");
+    const [temp] = item.split(".");
     const filePath = path.join(dir, item);
     const text = await fs.promises.readFile(filePath, ENCODING);
+    const fileName = camelCase(temp);
     svgList.push(parseSVGFile(text, fileName));
     fileNameList.push(fileName);
   }

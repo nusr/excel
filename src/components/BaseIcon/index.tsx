@@ -1,7 +1,12 @@
 import React, { memo } from "react";
 import styled from "styled-components";
-
-export type BaseIconName = "bold" | "italic" | "underline";
+export type BaseIconName =
+  | "bold"
+  | "fillColor"
+  | "fontColor"
+  | "italic"
+  | "plus"
+  | "underline";
 
 const SvgContainer = styled.svg`
   width: 1em;

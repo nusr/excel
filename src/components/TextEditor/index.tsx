@@ -11,7 +11,7 @@ const TextEditorWrapper = styled.div`
 
 const TextEditorContent = styled.input`
   ${commonStyle};
-  padding: 0 5px;
+  padding: 0 4px;
   margin: 0;
   border: none;
   border-radius: unset;

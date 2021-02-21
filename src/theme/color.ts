@@ -8,5 +8,7 @@ const color = {
   gridStrokeColor: "#d4d4d4",
   triangleFillColor: "#b4b4b4",
   contentColor: DEFAULT_FONT_COLOR,
+  borderColor: "#cccccc",
+  activeBorderColor: "#808080",
 };
 export default color;

@@ -6,8 +6,9 @@ declare module "styled-components" {
     font: string;
     largeFont: string;
     padding: string;
+    mediumPadding: string;
+    tinyPadding: string;
     fontFamily: string;
-    margin: string;
     primaryColor: string;
     buttonActiveColor: string;
     backgroundColor: string;
@@ -16,5 +17,9 @@ declare module "styled-components" {
     gridStrokeColor: string;
     triangleFillColor: string;
     contentColor: string;
+    activeBorderColor: string;
+    borderColor: string;
+    lineHeight: number;
+    borderRadius: string;
   }
 }

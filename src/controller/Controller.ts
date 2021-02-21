@@ -59,7 +59,7 @@ export class Controller extends EventEmitter<EventType> {
     const { row, col } = this.queryActiveCell();
     return this.queryCell(row, col);
   }
-  setActiveCell(row = -1, col = -1): void {
+  setActiveCell(row = -1, col = -1, colCount = 1, rowCount = 1): void {
     this.changeSet.add("selectionChange");
     let position: CellPosition = { ...DEFAULT_ACTIVE_CELL };
     if (row === col && row === -1) {
@@ -69,8 +69,15 @@ export class Controller extends EventEmitter<EventType> {
     }
     this.model.setActiveCell(position.row, position.col);
     this.ranges = [
-      new Range(position.row, position.col, 1, 1, this.model.currentSheetId),
+      new Range(
+        position.row,
+        position.col,
+        colCount,
+        rowCount,
+        this.model.currentSheetId
+      ),
     ];
+    controllerLog("selectCol", this.ranges[0]);
     this.emitChange();
   }
   setCurrentSheetId(id: string): void {
@@ -88,13 +95,22 @@ export class Controller extends EventEmitter<EventType> {
     this.changeSet.add("contentChange");
     this.emitChange();
   }
-  selectAll(): void {
+  selectAll(row: number, col: number): void {
+    const { width, height } = getWidthHeight();
+    const position = this.clickPositionToCell(width, height);
+    this.setActiveCell(row, col, position.row + 1, position.col + 1);
     controllerLog("selectAll");
   }
-  selectCol(): void {
+  selectCol(row: number, col: number): void {
+    const { height } = getWidthHeight();
+    const position = this.clickPositionToCell(0, height);
+    this.setActiveCell(row, col, position.row + 1);
     controllerLog("selectCol");
   }
-  selectRow(): void {
+  selectRow(row: number, col: number): void {
+    const { width } = getWidthHeight();
+    const position = this.clickPositionToCell(width, 0);
+    this.setActiveCell(row, col, 1, position.col + 1);
     controllerLog("selectRow");
   }
   quitEditing(): void {
@@ -136,15 +152,13 @@ export class Controller extends EventEmitter<EventType> {
     if (activeCell.row === row && activeCell.col === col) {
       return;
     }
-    const x = col - activeCell.col;
-    const y = row - activeCell.row;
-    const colCount = Math.abs(x) + 1;
-    const rowCount = Math.abs(y) + 1;
+    const colCount = Math.abs(col - activeCell.col) + 1;
+    const rowCount = Math.abs(row - activeCell.row) + 1;
     const temp = new Range(
       Math.min(activeCell.row, row),
       Math.min(activeCell.col, col),
-      Math.max(rowCount, 1),
-      Math.max(colCount, 1),
+      rowCount,
+      colCount,
       model.currentSheetId
     );
     this.ranges = [temp];
