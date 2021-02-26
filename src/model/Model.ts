@@ -9,6 +9,7 @@ import {
   IWindowSize,
   WorkBookJSON,
   WorksheetType,
+  Coordinate,
   ModelCellType,
 } from "@/types";
 import {
@@ -130,7 +131,7 @@ export class Model {
     const data = this.worksheets[this.currentSheetId];
     modelLog("modelChange", data);
   }
-  getCellsContent(): Array<QueryCellResult & { row: number; col: number }> {
+  getCellsContent(): Array<Coordinate> {
     const sheetData = this.worksheets[this.currentSheetId];
     if (isEmpty(sheetData)) {
       return [];
@@ -143,7 +144,6 @@ export class Model {
         const row = Number(rowKey);
         const col = Number(colKey);
         result.push({
-          ...this.queryCell(row, col),
           row,
           col,
         });

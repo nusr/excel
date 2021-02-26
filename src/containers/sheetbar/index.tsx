@@ -26,6 +26,7 @@ const SheetList = styled.div`
 const SheetItem = withTheme(styled.div`
   padding: 0 10px;
   border-left: 1px solid ${(props) => props.theme.gridStrokeColor};
+  user-select: none;
   &.active {
     background-color: ${(props) => props.theme.white};
     color: ${({ theme }) => theme.primaryColor};
@@ -52,7 +53,7 @@ export const SheetBar = memo(() => {
         {sheetList.map((item) => (
           <SheetItem
             key={item.sheetId}
-            onClick={() => handleClickSheet(item)}
+            onMouseDown={() => handleClickSheet(item)}
             className={classnames({ active: currentSheetId === item.sheetId })}
           >
             {item.name}

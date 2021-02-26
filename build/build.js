@@ -81,7 +81,7 @@ function buildJs(type = "", fileName = "") {
 function init() {
   buildJs();
   if (!isProd) {
-    const watchList = ["src", "icons"];
+    const watchList = ["src", "icons", "assets"];
     for (const item of watchList) {
       fileWatch(path.join(cwd, item), buildJs);
     }

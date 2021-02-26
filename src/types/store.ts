@@ -1,4 +1,4 @@
-import { WorkBookJSON, StyleType } from "./model";
+import { WorkBookJSON, QueryCellResult } from "./model";
 
 export type CellType = "text";
 export type CanvasOverlayPosition = {
@@ -7,18 +7,15 @@ export type CanvasOverlayPosition = {
   width: number;
   height: number;
 };
-export type EditorContainerPosition = {
-  value: string | number;
-  formula?: string;
-  style?: Partial<StyleType>;
-} & CanvasOverlayPosition;
 
-export type CellPosition = {
+export interface Coordinate {
   row: number;
   col: number;
-};
+}
 
-export type CellInfo = EditorContainerPosition & CellPosition;
+export type CellInfo = QueryCellResult &
+  CanvasOverlayPosition &
+  Coordinate & { displayValue: string | number };
 export type State = {
   activeCell: CellInfo;
   isCellEditing: boolean;

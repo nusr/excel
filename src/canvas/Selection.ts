@@ -18,12 +18,17 @@ export class Selection extends Base {
     );
     this.restore();
   }
-  render(width: number, height: number, data: CanvasOverlayPosition[]): void {
+  render(
+    width: number,
+    height: number,
+    data: CanvasOverlayPosition[],
+    activeCellFillColor: string
+  ): void {
     this.resize(width, height);
     const [activeCell, all] = data;
     if (all) {
-      this.renderFillRect(theme.buttonActiveColor, all);
-      this.renderFillRect(theme.white, activeCell);
+      this.renderFillRect(theme.selectionColor, all);
+      this.renderFillRect(activeCellFillColor, activeCell);
     }
   }
 }

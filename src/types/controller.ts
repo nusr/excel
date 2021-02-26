@@ -1,5 +1,5 @@
 import { WorkBookJSON } from "./model";
-import { CellPosition } from "./store";
+import { Coordinate } from "./store";
 import { IWindowSize } from "./event";
 
 export enum EBorderLineType {
@@ -23,7 +23,7 @@ export interface IController {
   windowResize(): void;
   setCurrentSheetId(id: string): void;
   setCellValue(row: number, col: number, value: string): void;
-  clickPositionToCell(offsetX: number, offsetY: number): CellPosition;
+  clickPositionToCell(offsetX: number, offsetY: number): Coordinate;
   getCanvasSize(): IWindowSize;
   getDrawSize(config: IWindowSize): IWindowSize;
 }

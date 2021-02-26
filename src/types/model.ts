@@ -1,5 +1,5 @@
 import { IWindowSize } from "./event";
-import { CellPosition, CellInfo } from "./store";
+import { Coordinate, CellInfo } from "./store";
 export enum EVerticalAlign {
   TOP,
   MIDDLE,
@@ -69,5 +69,5 @@ export interface IModelValue {
   getRowTitleHeightAndColTitleWidth(): IWindowSize;
   setCellValue(row: number, col: number, value: string): void;
   queryCell(row: number, col: number): CellInfo;
-  clickPositionToCell(x: number, y: number, size: IWindowSize): CellPosition;
+  clickPositionToCell(x: number, y: number, size: IWindowSize): Coordinate;
 }

@@ -2,6 +2,7 @@ import { DEFAULT_FONT_COLOR } from "@/util/";
 const color = {
   primaryColor: "#217346",
   buttonActiveColor: "#c6c6c6",
+  selectionColor: "rgb(198,198,198,0.6)",
   backgroundColor: "#e6e6e6",
   white: "#ffffff",
   black: "#000000",

@@ -2,7 +2,7 @@ import isEmpty from "lodash/isEmpty";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
-  CellPosition,
+  Coordinate,
   WorkBookJSON,
   EventType,
   CellInfo,
@@ -47,7 +47,7 @@ export class Controller extends EventEmitter<EventType> {
     this.emit("change", { changeSet });
     this.changeSet.clear();
   }
-  queryActiveCell(): CellPosition {
+  queryActiveCell(): Coordinate {
     const { activeCell } = this.model.getSheetInfo();
     if (!activeCell) {
       return { ...DEFAULT_ACTIVE_CELL };
@@ -61,7 +61,7 @@ export class Controller extends EventEmitter<EventType> {
   }
   setActiveCell(row = -1, col = -1, colCount = 1, rowCount = 1): void {
     this.changeSet.add("selectionChange");
-    let position: CellPosition = { ...DEFAULT_ACTIVE_CELL };
+    let position: Coordinate = { ...DEFAULT_ACTIVE_CELL };
     if (row === col && row === -1) {
       position = this.queryActiveCell();
     } else {
@@ -127,7 +127,7 @@ export class Controller extends EventEmitter<EventType> {
   toJSON(): WorkBookJSON {
     return this.model.toJSON();
   }
-  clickPositionToCell(x: number, y: number): CellPosition {
+  clickPositionToCell(x: number, y: number): Coordinate {
     const config = this.model.getRowTitleHeightAndColTitleWidth();
     let resultX = config.width;
     let resultY = config.height;
@@ -211,8 +211,8 @@ export class Controller extends EventEmitter<EventType> {
   }
   convertCell = (item: string): string | number => {
     const { row, col } = parseReference(item, this.model.currentSheetId);
-    const data = this.queryCell(row, col);
-    return data.value;
+    const data = this.model.queryCell(row, col);
+    return data.value || '';
   };
   queryCell(row: number, col: number): CellInfo {
     const { model } = this;
@@ -230,16 +230,23 @@ export class Controller extends EventEmitter<EventType> {
       resultY += CELL_HEIGHT;
       r++;
     }
+    let displayValue = value || "";
+    if (formula) {
+      const temp = this.formulaParser.init(formula, this.convertCell);
+      displayValue = temp.result;
+    }
+
     return {
       width: width || CELL_WIDTH,
       height: height || CELL_HEIGHT,
-      value: value || "",
+      value,
       top: resultY,
       left: resultX,
       row,
       col,
       formula,
       style,
+      displayValue,
     };
   }
 }

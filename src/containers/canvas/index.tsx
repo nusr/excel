@@ -1,12 +1,13 @@
 import React, { memo, useRef, useEffect } from "react";
+import styled from "styled-components";
 import { CellEditor } from "../CellEditor";
 import { controller } from "@/controller";
 import { Main } from "@/canvas";
 import { Interaction } from "@/interaction";
 
-// const ContentContainer = styled.div`
-/* position: relative; */
-// `;
+const ContentContainer = styled.div`
+  position: relative;
+`;
 
 export const CanvasContainer = memo(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,10 +24,10 @@ export const CanvasContainer = memo(() => {
   }, []);
 
   return (
-    <div>
+    <ContentContainer>
       <canvas ref={canvasRef} />
       <CellEditor />
-    </div>
+    </ContentContainer>
   );
 });
 

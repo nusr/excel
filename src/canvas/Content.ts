@@ -52,16 +52,7 @@ export class Content extends Base {
     });
     for (const item of data) {
       const cellInfo = controller.queryCell(item.row, item.col);
-      const { value, left, top, height, width, style, formula } = cellInfo;
-      let displayValue = value || "";
-      if (formula) {
-        const temp = controller.formulaParser.init(
-          formula,
-          controller.convertCell
-        );
-        displayValue = temp.result as string | number;
-      }
-
+      const { left, top, height, width, style, displayValue } = cellInfo;
       const isNum = isNumber(displayValue);
       let font = DEFAULT_FONT;
       let fillStyle = DEFAULT_FONT_COLOR;

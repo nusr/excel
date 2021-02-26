@@ -12,6 +12,7 @@ export class Main extends Base {
   protected controller: Controller;
   protected selection: Selection;
   protected content: Content;
+  private activeCellFillColor = "";
   constructor(controller: Controller, canvas: HTMLCanvasElement) {
     super(controller.getCanvasSize());
     const { width, height } = controller.getCanvasSize();
@@ -40,6 +41,7 @@ export class Main extends Base {
     const [range] = ranges;
     const startCell = controller.queryCell(range.row, range.col);
     const activeCell = controller.queryActiveCellInfo();
+    this.activeCellFillColor = activeCell.style?.fillColor || theme.white;
     const firstCell = {
       left: activeCell.left,
       top: activeCell.top,
@@ -71,9 +73,9 @@ export class Main extends Base {
     this.resize(width, height);
     this.content.render(width, height);
     const list = this.getSelection();
-    this.selection.render(width, height, list);
-    this.ctx.drawImage(this.selection.canvas, 0, 0);
+    this.selection.render(width, height, list, this.activeCellFillColor);
     this.ctx.drawImage(this.content.canvas, 0, 0);
+    this.ctx.drawImage(this.selection.canvas, 0, 0);
 
     const [activeCell, all] = list;
     const line = all ? all : activeCell;

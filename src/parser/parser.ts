@@ -21,7 +21,7 @@ enum TokenType {
 }
 
 type ParseResult = {
-  result: unknown;
+  result: string | number;
   error: ErrorType | null;
 };
 class Token {
