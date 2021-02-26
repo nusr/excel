@@ -3,7 +3,7 @@ import styled, { withTheme } from "styled-components";
 import { classnames } from "@/util";
 import { Button, BaseIcon } from "@/components";
 import { useSelector } from "@/store";
-import { getSingletonController } from "@/controller";
+import { controller } from "@/controller";
 import theme from "@/theme";
 const addButtonStyle = {
   backgroundColor: theme.buttonActiveColor,
@@ -41,10 +41,10 @@ export const SheetBar = memo(() => {
     "sheetList",
   ]);
   const handleClickSheet = useCallback((item) => {
-    getSingletonController().setCurrentSheetId(item.sheetId);
+    controller.setCurrentSheetId(item.sheetId);
   }, []);
   const handleAddSheet = useCallback(() => {
-    getSingletonController().addSheet();
+    controller.addSheet();
   }, []);
   return (
     <SheetBarContainer id="sheet-bar-container">

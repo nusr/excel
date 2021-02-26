@@ -28,9 +28,12 @@ function copyHtml() {
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir);
   }
-  const sourceFile = path.join(assetsDir, "index.html");
-  const targetFile = path.join(distDir, "index.html");
-  fs.copyFileSync(sourceFile, targetFile);
+  const files = fs.readdirSync(assetsDir);
+  for (const item of files) {
+    const sourceFile = path.join(assetsDir, item);
+    const targetFile = path.join(distDir, item);
+    fs.copyFileSync(sourceFile, targetFile);
+  }
 }
 
 let isBuild = false;

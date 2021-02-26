@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from "react";
 import styled, { withTheme } from "styled-components";
 import { Button, Github, BaseIcon, Select, ColorPicker } from "@/components";
-import { getSingletonController } from "@/controller";
+import { controller } from "@/controller";
 import { useSelector } from "@/store";
 import { StyleType } from "@/types";
 import {
@@ -38,7 +38,7 @@ export const Toolbar = memo(() => {
     fontFamily,
   } = style;
   const setCellStyle = useCallback((value: Partial<StyleType>) => {
-    getSingletonController().setCellStyle(value);
+    controller.setCellStyle(value);
   }, []);
   const handleFontSize = useCallback(
     (value) => {

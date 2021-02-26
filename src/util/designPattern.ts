@@ -8,7 +8,7 @@ export function singletonPattern<T, D extends Array<unknown>>(
     if (!instance) {
       instance = new C(...rest);
     }
-    assert(!!instance);
+    assert(!!instance, "singletonPattern");
     return instance;
   }
   getParams.destroy = () => {

@@ -5,7 +5,6 @@ import setWith from "lodash/setWith";
 import cloneDeep from "lodash/cloneDeep";
 import {
   StyleType,
-  IRange,
   QueryCellResult,
   IWindowSize,
   WorkBookJSON,
@@ -16,6 +15,7 @@ import {
   getDefaultSheetInfo,
   assert,
   modelLog,
+  Range,
   getListMaxNum,
   STYLE_ID_PREFIX,
 } from "@/util";
@@ -191,7 +191,7 @@ export class Model {
     setWith(this, `${configPath}.value`, realValue, Object);
     this.modelChange();
   }
-  setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
+  setCellStyle(style: Partial<StyleType>, ranges: Range[]): void {
     const [range] = ranges;
     const { row, col, rowCount, colCount } = range;
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {

@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useMemo } from "react";
 import { TextEditor } from "@/components";
 import { useSelector, useDispatch } from "@/store";
-import { getSingletonController } from "@/controller";
+import { controller } from "@/controller";
 import isEmpty from "lodash/isEmpty";
 import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE } from "@/util";
 
@@ -46,19 +46,16 @@ export const TextEditorContainer = memo<Props>(({ isFormulaBar = false }) => {
   const dispatch = useDispatch();
 
   const onInputEnter = useCallback(() => {
-    const controller = getSingletonController();
     controller.setCellValue(editCellValue);
     controller.quitEditing();
     controller.setActiveCell(activeCell.row + 1, activeCell.col);
   }, [activeCell, editCellValue]);
   const onInputTab = useCallback(() => {
-    const controller = getSingletonController();
     controller.setCellValue(editCellValue);
     controller.quitEditing();
     controller.setActiveCell(activeCell.row, activeCell.col + 1);
   }, [activeCell, editCellValue]);
   const onBlur = useCallback(() => {
-    // const controller = getSingletonController();
     // controller.setCellValue(activeCell.row, activeCell.col, editCellValue);
     // controller.quitEditing();
     // dispatch({ type: "QUIT_EDITING" });

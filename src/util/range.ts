@@ -8,7 +8,7 @@ export function isRow(range: IRange): boolean {
 export function isCol(range: IRange): boolean {
   return range.row === range.colCount && range.colCount === 0;
 }
-export class Range implements IRange {
+export class Range {
   row = 0;
   col = 0;
   colCount = 0;
@@ -32,13 +32,13 @@ export class Range implements IRange {
     return { row, col, rowCount, colCount, sheetId };
   }
   isSheet(): boolean {
-    return isSheet(this.toIRange());
+    return isSheet(this);
   }
   isRow(): boolean {
-    return isRow(this.toIRange());
+    return isRow(this);
   }
   isCol(): boolean {
-    return isCol(this.toIRange());
+    return isCol(this);
   }
   static makeRange(range: IRange): Range {
     return new Range(

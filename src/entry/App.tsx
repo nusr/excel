@@ -4,7 +4,7 @@ import styled, { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "./GlobalStyle";
 import theme from "@/theme";
 import { useDispatch } from "@/store";
-import { getSingletonController } from "@/controller";
+import { controller, getSingletonController } from "@/controller";
 import { MOCK_MODEL } from "@/model";
 import { handleBuildError } from "@/util";
 import { State } from "@/types";
@@ -16,7 +16,6 @@ const AppContainer = styled.div`
 export const App = React.memo(() => {
   const dispatch = useDispatch();
   useEffect(() => {
-    const controller = getSingletonController();
     const off = controller.on("dispatch", (data) => {
       dispatch(data);
     });

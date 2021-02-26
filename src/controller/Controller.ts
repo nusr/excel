@@ -96,21 +96,18 @@ export class Controller extends EventEmitter<EventType> {
     this.emitChange();
   }
   selectAll(row: number, col: number): void {
-    const { width, height } = getWidthHeight();
-    const position = this.clickPositionToCell(width, height);
-    this.setActiveCell(row, col, position.row + 1, position.col + 1);
+    const sheetInfo = this.model.getSheetInfo();
+    this.setActiveCell(row, col, sheetInfo.rowCount, sheetInfo.colCount);
     controllerLog("selectAll");
   }
   selectCol(row: number, col: number): void {
-    const { height } = getWidthHeight();
-    const position = this.clickPositionToCell(0, height);
-    this.setActiveCell(row, col, position.row + 1);
+    const sheetInfo = this.model.getSheetInfo();
+    this.setActiveCell(row, col, sheetInfo.rowCount);
     controllerLog("selectCol");
   }
   selectRow(row: number, col: number): void {
-    const { width } = getWidthHeight();
-    const position = this.clickPositionToCell(width, 0);
-    this.setActiveCell(row, col, 1, position.col + 1);
+    const sheetInfo = this.model.getSheetInfo();
+    this.setActiveCell(row, col, 1, sheetInfo.colCount);
     controllerLog("selectRow");
   }
   quitEditing(): void {
@@ -247,6 +244,8 @@ export class Controller extends EventEmitter<EventType> {
   }
 }
 
-const getSingletonController = singletonPattern<Controller, []>(Controller);
+export const getSingletonController = singletonPattern<Controller, []>(
+  Controller
+);
 
-export { getSingletonController };
+export const controller = getSingletonController();

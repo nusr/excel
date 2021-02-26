@@ -3,5 +3,6 @@ dist
 .vscode
 .idea
 yarn.lock
+package-lock.json
 coverage
 dist
