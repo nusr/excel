@@ -21,7 +21,10 @@ export const App = React.memo(() => {
     });
     controller.on("change", (data) => {
       const { changeSet } = data;
-      const state: Partial<State> = {};
+      const state: Partial<State> = {
+        canRedo: controller.canRedo(),
+        canUndo: controller.canUndo(),
+      };
       if (changeSet.includes("contentChange")) {
         const { workbook, currentSheetId } = controller.model;
         state.sheetList = workbook;

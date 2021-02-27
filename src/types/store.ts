@@ -23,6 +23,8 @@ export type State = {
   currentSheetId: string;
   sheetList: WorkBookJSON["workbook"];
   editCellValue: string;
+  canRedo: boolean;
+  canUndo: boolean;
 };
 
 export type Action =

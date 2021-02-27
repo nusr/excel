@@ -1,6 +1,15 @@
 import random from "lodash/random";
 import noop from "lodash/noop";
 import { assert } from "./assert";
+type NameSpaceType =
+  | "store"
+  | "controller"
+  | "canvas"
+  | "model"
+  | "util"
+  | "interaction"
+  | "containers"
+  | "history";
 export const DEBUG_COLOR_LIST = [
   "#0000CC",
   "#0000FF",
@@ -90,7 +99,7 @@ function checkEnable(storage = window.localStorage) {
   return storage.getItem("debug") === "*";
 }
 
-function debug(namespace: string) {
+function debug(namespace: NameSpaceType) {
   const check = !checkEnable() || debug.enableMap.get(namespace) === false;
   if (check) {
     return noop;
@@ -109,11 +118,12 @@ function debug(namespace: string) {
   }
   return log;
 }
-debug.colorMap = new Map<string, string>();
-debug.enableMap = new Map<string, boolean>([
+debug.colorMap = new Map<NameSpaceType, string>();
+debug.enableMap = new Map<NameSpaceType, boolean>([
   ["model", false],
   ["store", false],
   ["interaction", false],
+  ["history", false],
 ]);
 
 export const storeLog = debug("store");
@@ -123,3 +133,4 @@ export const modelLog = debug("model");
 export const utilLog = debug("util");
 export const interactionLog = debug("interaction");
 export const containersLog = debug("containers");
+export const historyLog = debug("history");

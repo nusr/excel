@@ -1,12 +1,18 @@
 import React, { memo } from "react";
 import styled from "styled-components";
 export type BaseIconName =
+  | "alignCenter"
+  | "alignLeft"
+  | "alignRight"
   | "bold"
   | "fillColor"
   | "fontColor"
   | "italic"
+  | "middleAlign"
   | "plus"
-  | "underline";
+  | "redo"
+  | "underline"
+  | "undo";
 
 const SvgContainer = styled.svg`
   width: 1em;

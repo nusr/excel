@@ -27,7 +27,11 @@ export const ToolbarContainer = withTheme(styled.div`
 const colorPickerStyle = { marginLeft: 8 };
 
 export const Toolbar = memo(() => {
-  const { activeCell } = useSelector(["activeCell"]);
+  const { activeCell, canRedo, canUndo } = useSelector([
+    "activeCell",
+    "canRedo",
+    "canUndo",
+  ]);
   const { style = {} } = activeCell;
   const {
     isBold,
@@ -54,6 +58,12 @@ export const Toolbar = memo(() => {
   }, []);
   return (
     <ToolbarContainer id="tool-bar-container">
+      <Button disabled={!canUndo} onClick={controller.undo}>
+        <BaseIcon name="undo" />
+      </Button>
+      <Button disabled={!canRedo} onClick={controller.redo}>
+        <BaseIcon name="redo" />
+      </Button>
       <Button active={isBold} onClick={() => setCellStyle({ isBold: !isBold })}>
         <BaseIcon name="bold" />
       </Button>

@@ -8,6 +8,8 @@ export const initialState: State = {
   currentSheetId: "",
   sheetList: [],
   editCellValue: "",
+  canRedo: false,
+  canUndo: false,
 };
 
 export const reducer: Reducer = (state, action) => {

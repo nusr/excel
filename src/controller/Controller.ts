@@ -22,6 +22,7 @@ import {
   DEFAULT_ACTIVE_CELL,
 } from "@/util";
 import { FormulaParser } from "@/parser";
+import { History } from "./History";
 
 function getWidthHeight(): IWindowSize {
   return {
@@ -32,14 +33,22 @@ function getWidthHeight(): IWindowSize {
 export class Controller extends EventEmitter<EventType> {
   scroll: Scroll = new Scroll(this);
   model: Model = new Model(this);
-  ranges: Array<Range> = [
-    new Range(DEFAULT_ACTIVE_CELL.row, DEFAULT_ACTIVE_CELL.col, 1, 1, ""),
-  ];
+  ranges: Array<Range> = [];
   isCellEditing = false;
   formulaParser: FormulaParser = new FormulaParser();
   private changeSet = new Set<ChangeEventType>();
+  history = new History();
   constructor() {
     super();
+    this.ranges = [
+      new Range(
+        DEFAULT_ACTIVE_CELL.row,
+        DEFAULT_ACTIVE_CELL.col,
+        1,
+        1,
+        this.model.currentSheetId
+      ),
+    ];
     this.addSheet();
   }
   emitChange(): void {
@@ -77,7 +86,7 @@ export class Controller extends EventEmitter<EventType> {
         this.model.currentSheetId
       ),
     ];
-    controllerLog("selectCol", this.ranges[0]);
+    // controllerLog("setActiveCell", this.ranges[0]);
     this.emitChange();
   }
   setCurrentSheetId(id: string): void {
@@ -212,7 +221,7 @@ export class Controller extends EventEmitter<EventType> {
   convertCell = (item: string): string | number => {
     const { row, col } = parseReference(item, this.model.currentSheetId);
     const data = this.model.queryCell(row, col);
-    return data.value || '';
+    return data.value || "";
   };
   queryCell(row: number, col: number): CellInfo {
     const { model } = this;
@@ -249,6 +258,26 @@ export class Controller extends EventEmitter<EventType> {
       displayValue,
     };
   }
+  canRedo(): boolean {
+    return this.history.canRedo();
+  }
+  canUndo(): boolean {
+    return this.history.canUndo();
+  }
+  undo = async (): Promise<void> => {
+    const result = await this.history.undo(this.model.toJSON());
+    if (result) {
+      this.model.fromJSON(result);
+      this.emitChange();
+    }
+  };
+  redo = async (): Promise<void> => {
+    const result = await this.history.redo(this.model.toJSON());
+    if (result) {
+      this.model.fromJSON(result);
+      this.emitChange();
+    }
+  };
 }
 
 export const getSingletonController = singletonPattern<Controller, []>(

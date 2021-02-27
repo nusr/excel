@@ -43,13 +43,11 @@ export const MOCK_MODEL: WorkBookJSON = {
     Sheet1: {
       "0": {
         "0": {
-          // value: "测试",
           value: "",
           formula: "SUM(F1,F17)",
           style: "1",
         },
         "1": {
-          // value: 124,
           value: "",
           formula: "SUM(1,4)",
           style: "2",
@@ -69,28 +67,28 @@ export const MOCK_MODEL: WorkBookJSON = {
           style: "style1",
         },
       },
+      "4": {
+        0: {
+          style: "style1",
+        },
+        1: {
+          style: "style1",
+        },
+        2: {
+          style: "style1",
+        },
+        3: {
+          style: "style1",
+        },
+      },
     },
   },
   styles: {
     "1": {
       fontColor: "#ff0000",
-      fillColor: "blue",
-      fontSize: 12,
-      fontFamily: "宋体",
-      format: "$0.00",
-      verticalAlign: 0,
-      horizontalAlign: 0,
-      wrapText: 0,
     },
     "2": {
-      fontColor: "white",
-      fillColor: "black",
-      fontSize: 12,
-      fontFamily: "宋体",
-      format: "0",
-      verticalAlign: 0,
-      horizontalAlign: 0,
-      wrapText: 0,
+      fontSize: 16,
     },
     style1: {
       fillColor: "red",
@@ -116,20 +114,24 @@ export class Model {
       tempList.splice(index, 1, { ...this.workbook[index], activeCell });
       this.workbook = tempList;
     }
+    this.modelChange();
   }
   addSheet(): void {
     const item = getDefaultSheetInfo(this.workbook);
     this.workbook = [...this.workbook, item];
     this.currentSheetId = item.sheetId;
+    this.modelChange();
   }
   getSheetInfo(id: string = this.currentSheetId): WorksheetType {
     const item = this.workbook.find((item) => item.sheetId === id);
     assert(item !== undefined);
     return item;
   }
-  protected modelChange(): void {
-    const data = this.worksheets[this.currentSheetId];
-    modelLog("modelChange", data);
+  protected modelChange(isRecovering = false): void {
+    modelLog("modelChange", isRecovering);
+    if (!isRecovering) {
+      this.controller.history.onChange(this.toJSON());
+    }
   }
   getCellsContent(): Array<Coordinate> {
     const sheetData = this.worksheets[this.currentSheetId];
@@ -158,7 +160,7 @@ export class Model {
     this.workbook = workbook;
     this.styles = cloneDeep(styles);
     this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
-    this.modelChange();
+    this.modelChange(true);
   }
   toJSON(): WorkBookJSON {
     const { worksheets, styles, workbook } = this;
