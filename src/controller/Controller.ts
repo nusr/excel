@@ -242,7 +242,7 @@ export class Controller extends EventEmitter<EventType> {
     let displayValue = value || "";
     if (formula) {
       const temp = this.formulaParser.init(formula, this.convertCell);
-      displayValue = temp.result;
+      displayValue = temp.result as number | string;
     }
 
     return {
