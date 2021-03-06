@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import styled, { withTheme } from "styled-components";
 import { classnames } from "@/util";
-import noop from "lodash/noop";
+import { noop } from "lodash";
 
 const ButtonContainer = withTheme(styled.div`
   padding: 0 4px;

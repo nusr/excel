@@ -1,6 +1,6 @@
 import { SHEET_NAME_PREFIX } from "./constant";
 import type { WorksheetType } from "@/types";
-import isNil from "lodash/isNil";
+import { isNil } from "lodash";
 export function isNumber(value: string | number): boolean {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore

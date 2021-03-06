@@ -1,5 +1,4 @@
-import random from "lodash/random";
-import noop from "lodash/noop";
+import { random, noop } from "lodash";
 import { assert } from "./assert";
 type NameSpaceType =
   | "store"
