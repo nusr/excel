@@ -9,7 +9,7 @@ const assetsDir = path.join(cwd, "assets");
 const NODE_ENV = (process.env.NODE_ENV || "production").trim();
 const isProd = NODE_ENV === "production";
 const { staticService, openBrowser, buildLog } = require("./server");
-buildLog("NODE_ENV", NODE_ENV, isProd);
+console.log("NODE_ENV", NODE_ENV, isProd);
 const { handleSVGFiles } = require("./svg");
 
 function fileWatch(watchDir, callback) {
