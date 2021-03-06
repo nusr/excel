@@ -13,7 +13,7 @@
     "test-coverage": "npm run test -- --coverage",
     "test-watch": "npm run test -- --watch",
     "check-version": "ncu -u",
-    "ci": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "ci": "npm run build && npm run lint && npm run test",
     "deploy": "deploy.sh",
     "typecheck": "tsc",
     "postinstall": "husky install"

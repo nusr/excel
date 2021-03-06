@@ -1,6 +1,6 @@
 import React, { memo, useRef, useEffect } from "react";
 import styled from "styled-components";
-import { CellEditor } from "../CellEditor";
+import { CellEditorContainer } from "../CellEditor";
 import { controller } from "@/controller";
 import { Main } from "@/canvas";
 import { Interaction } from "@/interaction";
@@ -26,7 +26,7 @@ export const CanvasContainer = memo(() => {
   return (
     <ContentContainer>
       <canvas ref={canvasRef} />
-      <CellEditor />
+      <CellEditorContainer />
     </ContentContainer>
   );
 });

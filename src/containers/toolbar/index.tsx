@@ -13,7 +13,7 @@ import {
   DEFAULT_FONT_FAMILY,
 } from "@/util";
 
-export const ToolbarContainer = withTheme(styled.div`
+const ToolbarWrapper = withTheme(styled.div`
   width: 100%;
   padding: 0 20px;
   box-sizing: border-box;
@@ -26,7 +26,7 @@ export const ToolbarContainer = withTheme(styled.div`
 
 const colorPickerStyle = { marginLeft: 8 };
 
-export const Toolbar = memo(() => {
+export const ToolbarContainer = memo(() => {
   const { activeCell, canRedo, canUndo } = useSelector([
     "activeCell",
     "canRedo",
@@ -57,7 +57,7 @@ export const Toolbar = memo(() => {
     return { fontFamily: value };
   }, []);
   return (
-    <ToolbarContainer id="tool-bar-container">
+    <ToolbarWrapper id="tool-bar-container">
       <Button disabled={!canUndo} onClick={controller.undo}>
         <BaseIcon name="undo" />
       </Button>
@@ -101,8 +101,8 @@ export const Toolbar = memo(() => {
         <BaseIcon name="fillColor" />
       </ColorPicker>
       <Github />
-    </ToolbarContainer>
+    </ToolbarWrapper>
   );
 });
 
-Toolbar.displayName = "Toolbar";
+ToolbarContainer.displayName = "ToolbarContainer";

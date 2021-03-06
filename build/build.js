@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const esBuild = require("esbuild");
 const cwd = process.cwd();
+console.log("cwd", cwd);
 const distDir = path.join(cwd, "dist");
 const assetsDir = path.join(cwd, "assets");
 const NODE_ENV = (process.env.NODE_ENV || "production").trim();
@@ -45,13 +46,15 @@ function buildJs(type = "", fileName = "") {
   const errorFilePath = path.join(distDir, "buildError.txt");
   isBuild = true;
   buildLog(`${typeof fileName === "string" ? fileName : ""}: ${type}`);
+  const entryPath = path.join(cwd, "src/index.tsx");
+  const tsconfigPath = path.join(cwd, "tsconfig.json");
   const commonConfig = {
-    entryPoints: ["./src/index.tsx"],
+    entryPoints: [entryPath],
     bundle: true,
     minify: isProd,
     sourcemap: true,
-    tsconfig: "./tsconfig.json",
-    outdir: "dist",
+    tsconfig: tsconfigPath,
+    outdir: distDir,
     define: {
       "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
     },
@@ -71,6 +74,8 @@ function buildJs(type = "", fileName = "") {
       buildLog("buildJs error", error);
       if (!isProd) {
         fs.writeFileSync(errorFilePath, `${error.message}\n${error.stack}`);
+      } else {
+        process.exit(1);
       }
     })
     .finally(() => {

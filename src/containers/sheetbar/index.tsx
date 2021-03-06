@@ -9,7 +9,7 @@ const addButtonStyle = {
   backgroundColor: theme.buttonActiveColor,
 };
 
-export const SheetBarContainer = withTheme(styled.div`
+const SheetBarWrapper = withTheme(styled.div`
   width: 100%;
   box-sizing: border-box;
   padding: 0 10px;
@@ -36,7 +36,7 @@ const AddSheetWrapper = styled.div`
   margin-left: 20px;
 `;
 
-export const SheetBar = memo(() => {
+export const SheetBarContainer = memo(() => {
   const { currentSheetId, sheetList = [] } = useSelector([
     "currentSheetId",
     "sheetList",
@@ -48,7 +48,7 @@ export const SheetBar = memo(() => {
     controller.addSheet();
   }, []);
   return (
-    <SheetBarContainer id="sheet-bar-container">
+    <SheetBarWrapper id="sheet-bar-container">
       <SheetList>
         {sheetList.map((item) => (
           <SheetItem
@@ -65,8 +65,8 @@ export const SheetBar = memo(() => {
           <BaseIcon name="plus" />
         </Button>
       </AddSheetWrapper>
-    </SheetBarContainer>
+    </SheetBarWrapper>
   );
 });
 
-SheetBar.displayName = "SheetBar";
+SheetBarContainer.displayName = "SheetBarContainer";

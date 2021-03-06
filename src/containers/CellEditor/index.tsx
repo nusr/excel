@@ -16,7 +16,7 @@ const EditorWrapper = withTheme(styled.div`
   box-sizing: border-box;
 `);
 
-export const CellEditor = memo(() => {
+export const CellEditorContainer = memo(() => {
   const { activeCell, isCellEditing } = useSelector([
     "activeCell",
     "isCellEditing",
@@ -35,4 +35,4 @@ export const CellEditor = memo(() => {
   );
 });
 
-CellEditor.displayName = "CellEditor";
+CellEditorContainer.displayName = "CellEditorContainer";
