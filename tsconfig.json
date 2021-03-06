@@ -1,19 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "types": ["vite/client", "node"],
-    "allowJs": false,
-    "skipLibCheck": false,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react",
+    "target": "ES2015",
+    "module": "commonjs",
+    "lib": ["dom", "ES2015"],
     "strict": true,
     "noImplicitAny": true,
     "alwaysStrict": true,
@@ -25,10 +14,18 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "jsx": "react",
+    "sourceMap": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "outDir": "dist",
+    "removeComments": true,
+    "declaration": true
   },
-  "include": ["./src"],
+  "include": ["./src/**/*"],
   "exclude": ["node_modules", "/node_modules/", "**/*.test.ts"]
 }

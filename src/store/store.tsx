@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useReducer,
 } from "react";
-import { pick } from "lodash";
+import pick from "lodash/pick";
 import produce, { Draft } from "immer";
 import { reducer, initialState } from "./reducer";
 import { Action, State } from "@/types";

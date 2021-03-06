@@ -30,10 +30,10 @@ jobs:
         pwd
         npm install
         npm run ci
-    # - name: Deploy to Github Pages
-      # uses: JamesIves/github-pages-deploy-action@3.7.1
-      # with:
-        # GITHUB_TOKEN: ${{ secrets.EXCEL_ACCESS_TOKEN }}
-        # BRANCH: gh-pages # The branch the action should deploy to.
-        # FOLDER: dist # The folder the action should deploy.
-        # CLEAN: true # Automatically remove deleted files from the deploy branch
+    - name: Deploy to Github Pages
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+        GITHUB_TOKEN: ${{ secrets.EXCEL_ACCESS_TOKEN }}
+        BRANCH: gh-pages # The branch the action should deploy to.
+        FOLDER: dist # The folder the action should deploy.
+        CLEAN: true # Automatically remove deleted files from the deploy branch

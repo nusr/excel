@@ -1,5 +1,8 @@
 import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, intToColumnName } from "@/util";
-import { isEmpty, get, setWith, cloneDeep } from "lodash";
+import isEmpty from "lodash/isEmpty";
+import get from "lodash/get";
+import setWith from "lodash/setWith";
+import cloneDeep from "lodash/cloneDeep";
 import {
   StyleType,
   QueryCellResult,
@@ -17,7 +20,7 @@ import {
   getListMaxNum,
   STYLE_ID_PREFIX,
 } from "@/util";
-import type { Controller } from "../controller";
+import { Controller } from "../controller/controller";
 
 export const MOCK_MODEL: WorkBookJSON = {
   workbook: [
