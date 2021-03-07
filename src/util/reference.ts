@@ -1,3 +1,4 @@
+import type { Coordinate } from "@/types";
 import { assert } from "./assert";
 import { columnNameToInt } from "./convert";
 import { Range } from "./range";
@@ -7,7 +8,7 @@ function isCharacter(text: string): boolean {
 function isNum(text: string): boolean {
   return text >= "0" && text <= "9";
 }
-export function parseReference(text: string, sheetId: string): Range {
+function parseCell(text: string): Coordinate {
   const charList = [];
   const numList = [];
   let i = 0;
@@ -25,5 +26,16 @@ export function parseReference(text: string, sheetId: string): Range {
   const col = columnNameToInt(charList.join("")) - 1;
   const row = parseInt(numList.join(""), 10) - 1;
   assert(!isNaN(col) && !isNaN(row) && col >= 0 && row >= 0);
-  return new Range(row, col, 1, 1, sheetId);
+  return { row, col };
+}
+export function parseReference(text: string, sheetId: string): Range {
+  const [cell1, cell2] = text.split(":");
+  const startCell = parseCell(cell1);
+  if (!cell2) {
+    return new Range(startCell.row, startCell.col, 1, 1, sheetId);
+  }
+  const endCell = parseCell(cell2);
+  const rowCount = endCell.row - startCell.row + 1;
+  const colCount = endCell.col - startCell.col + 1;
+  return new Range(startCell.row, startCell.col, rowCount, colCount, sheetId);
 }

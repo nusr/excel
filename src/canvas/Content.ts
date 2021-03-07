@@ -1,16 +1,16 @@
-import isEmpty from "lodash/isEmpty";
+import { isEmpty } from "lodash";
 import { CanvasOption, CellInfo } from "@/types";
 import {
   thinLineWidth,
   npx,
   dpr,
+  canvasLog,
   intToColumnName,
   isNumber,
   makeFont,
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
 } from "@/util";
-import { Controller } from "@/controller";
 import { Base } from "./Base";
 import theme from "@/theme";
 
@@ -26,11 +26,6 @@ export const HEADER_STYLE: Omit<CanvasOption, "direction"> = {
 };
 
 export class Content extends Base {
-  protected controller: Controller;
-  constructor(controller: Controller, width: number, height: number) {
-    super({ width, height });
-    this.controller = controller;
-  }
   render(width: number, height: number): void {
     this.resize(width, height);
     this.renderGrid();
@@ -51,33 +46,7 @@ export class Content extends Base {
       textBaseline: "middle",
     });
     for (const item of data) {
-      const cellInfo = controller.queryCell(item.row, item.col);
-      const { left, top, height, width, style, displayValue } = cellInfo;
-      const isNum = isNumber(displayValue);
-      let font = DEFAULT_FONT;
-      let fillStyle = DEFAULT_FONT_COLOR;
-      if (!isEmpty(style)) {
-        const fontSize = npx(
-          style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE
-        );
-        font = makeFont(
-          style?.isItalic ? "italic" : "normal",
-          style?.isBold ? "bold" : "500",
-          fontSize,
-          style?.fontFamily
-        );
-        fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
-        if (style?.fillColor) {
-          this.setAttributes({ fillStyle: style?.fillColor });
-          this.fillRect(left, top, width, height);
-        }
-      }
-      this.setAttributes({
-        textAlign: isNum ? "right" : "left",
-        font,
-        fillStyle,
-      });
-      this.fillText(displayValue, left + (isNum ? width : 0), top + height / 2);
+      this.renderCell(item.row, item.col);
     }
     this.restore();
   }
@@ -135,6 +104,7 @@ export class Content extends Base {
       }
     }
     pointList.push([0, height], [width, height], [width, 0], [width, height]);
+    canvasLog("render grid point list:", pointList);
     this.line(pointList);
     this.restore();
   }

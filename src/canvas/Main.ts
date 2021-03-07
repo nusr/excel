@@ -4,36 +4,33 @@ import { Selection } from "./Selection";
 import { Content } from "./Content";
 import { CanvasOverlayPosition } from "@/types";
 import theme from "@/theme";
-import { Base } from "./Base";
 
-export class Main extends Base {
-  protected mainCanvas: HTMLCanvasElement;
-  protected mainCtx: CanvasRenderingContext2D;
+export class Main {
+  protected canvas: HTMLCanvasElement;
+  protected ctx: CanvasRenderingContext2D;
   protected controller: Controller;
   protected selection: Selection;
   protected content: Content;
-  private activeCellFillColor = "";
   constructor(controller: Controller, canvas: HTMLCanvasElement) {
-    super(controller.getCanvasSize());
     const { width, height } = controller.getCanvasSize();
     this.controller = controller;
-    this.mainCanvas = canvas;
-    const mainCtx = canvas.getContext("2d");
-    assert(!!mainCtx);
-    this.mainCtx = mainCtx;
-    this.resizeMain(width, height);
+    this.canvas = canvas;
+    const ctx = canvas.getContext("2d");
+    assert(!!ctx);
+    this.ctx = ctx;
+    this.resize(width, height);
     const size = dpr();
-    this.mainCtx.scale(size, size);
-    this.selection = new Selection({ width, height });
-    this.content = new Content(controller, width, height);
+    this.ctx.scale(size, size);
+    this.selection = new Selection({ width, height, controller });
+    this.content = new Content({ width, height, controller });
     this.controller.on("change", this.render);
   }
-  resizeMain(width: number, height: number): void {
-    const { mainCanvas } = this;
-    mainCanvas.style.width = width + "px";
-    mainCanvas.style.height = height + "px";
-    mainCanvas.width = npx(width);
-    mainCanvas.height = npx(height);
+  resize(width: number, height: number): void {
+    const { canvas } = this;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    canvas.width = npx(width);
+    canvas.height = npx(height);
   }
   getSelection(): CanvasOverlayPosition[] {
     const { controller } = this;
@@ -41,7 +38,6 @@ export class Main extends Base {
     const [range] = ranges;
     const startCell = controller.queryCell(range.row, range.col);
     const activeCell = controller.queryActiveCellInfo();
-    this.activeCellFillColor = activeCell.style?.fillColor || theme.white;
     const firstCell = {
       left: activeCell.left,
       top: activeCell.top,
@@ -73,24 +69,24 @@ export class Main extends Base {
     this.resize(width, height);
     this.content.render(width, height);
     const list = this.getSelection();
-    this.selection.render(width, height, list, this.activeCellFillColor);
+    this.selection.render(width, height, list);
     this.ctx.drawImage(this.content.canvas, 0, 0);
     this.ctx.drawImage(this.selection.canvas, 0, 0);
-
     const [activeCell, all] = list;
     const line = all ? all : activeCell;
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
     this.strokeRect(line.left, line.top, line.width, line.height);
-
-    this.renderMain(width, height);
   };
+  strokeRect(x: number, y: number, width: number, height: number): void {
+    this.ctx.strokeRect(npx(x) - 0.5, npx(y) - 0.5, npx(width), npx(height));
+  }
   renderMain(width: number, height: number): void {
-    this.resizeMain(width, height);
-    this.mainCtx.drawImage(this.canvas, 0, 0);
+    this.resize(width, height);
+    this.ctx.drawImage(this.canvas, 0, 0);
   }
   clearMain(): void {
     const { width, height } = this.canvas;
-    this.mainCtx.clearRect(0, 0, width, height);
+    this.ctx.clearRect(0, 0, width, height);
   }
 }

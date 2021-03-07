@@ -18,12 +18,9 @@ export class Selection extends Base {
     );
     this.restore();
   }
-  render(
-    width: number,
-    height: number,
-    data: CanvasOverlayPosition[],
-    activeCellFillColor: string
-  ): void {
+  render(width: number, height: number, data: CanvasOverlayPosition[]): void {
+    const cellData = this.controller.queryActiveCellInfo();
+    const activeCellFillColor = cellData.style?.fillColor || theme.white;
     this.resize(width, height);
     const [activeCell, all] = data;
     if (all) {

@@ -1,4 +1,4 @@
-import isEmpty from "lodash/isEmpty";
+import { isEmpty } from "lodash";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {

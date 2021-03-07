@@ -1,10 +1,31 @@
-import { thinLineWidth, npx, assert, dpr, npxLine } from "@/util";
+import {
+  thinLineWidth,
+  npx,
+  assert,
+  dpr,
+  npxLine,
+  isNumber,
+  DEFAULT_FONT_SIZE,
+  DEFAULT_FONT_COLOR,
+  makeFont,
+} from "@/util";
+import { isEmpty } from "lodash";
 import { CanvasOption, EBorderLineType } from "@/types";
+import type { Controller } from "@/controller";
+
+export type BaseProps = {
+  width: number;
+  height: number;
+  controller: Controller;
+};
 
 export class Base {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
-  constructor({ width, height }: { width: number; height: number }) {
+  controller: Controller;
+  defaultFont = makeFont(undefined, "500", npx(DEFAULT_FONT_SIZE));
+  constructor({ width, height, controller }: BaseProps) {
+    this.controller = controller;
     this.canvas = document.createElement("canvas");
     this.canvas.style.display = "none";
     document.body.appendChild(this.canvas);
@@ -101,5 +122,34 @@ export class Base {
       ctx.lineTo(npxLine(second[0]), npxLine(second[1]));
     }
     ctx.stroke();
+  }
+  renderCell(row: number, col: number): void {
+    const cellInfo = this.controller.queryCell(row, col);
+    const { left, top, height, width, style, displayValue } = cellInfo;
+    const isNum = isNumber(displayValue);
+    let font = this.defaultFont;
+    let fillStyle = DEFAULT_FONT_COLOR;
+    if (!isEmpty(style)) {
+      const fontSize = npx(
+        style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE
+      );
+      font = makeFont(
+        style?.isItalic ? "italic" : "normal",
+        style?.isBold ? "bold" : "500",
+        fontSize,
+        style?.fontFamily
+      );
+      fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
+      if (style?.fillColor) {
+        this.setAttributes({ fillStyle: style?.fillColor });
+        this.fillRect(left, top, width, height);
+      }
+    }
+    this.setAttributes({
+      textAlign: isNum ? "right" : "left",
+      font,
+      fillStyle,
+    });
+    this.fillText(displayValue, left + (isNum ? width : 0), top + height / 2);
   }
 }

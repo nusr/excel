@@ -15,12 +15,12 @@ export class History {
     this.redoList = [];
   }
   addUndoData(sheetData: WorkBookJSON): void {
-    historyLog("addUndoData");
     this.undoList.push(JSON.stringify(sheetData));
+    historyLog("addUndoData", this.undoList);
   }
   addRedoData(sheetData: WorkBookJSON): void {
-    historyLog("addRedoData");
     this.redoList.push(JSON.stringify(sheetData));
+    historyLog("addRedoData", this.redoList);
   }
   getUndoData(): WorkBookJSON | undefined {
     const temp = this.undoList.pop();

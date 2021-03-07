@@ -56,6 +56,7 @@ export type WorkBookJSON = {
   workbook: WorksheetType[];
   worksheets: Record<string, ModelRowType>;
   styles: Record<string, Partial<StyleType>>;
+  mergeCells?: string[];
 };
 
 export interface IModelValue {

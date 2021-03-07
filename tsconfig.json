@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2015",
-    "module": "commonjs",
-    "lib": ["dom", "ES2015"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "strict": true,
     "noImplicitAny": true,
     "alwaysStrict": true,
@@ -16,7 +17,6 @@
     "noFallthroughCasesInSwitch": true,
     "jsx": "react",
     "sourceMap": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },

@@ -1,5 +1,5 @@
 import { columnNameToInt, intToColumnName } from "../convert";
-console.log('columnNameToInt("XFD")', columnNameToInt("XFD"));
+// console.log('columnNameToInt("XFD")', columnNameToInt("XFD"));
 describe("convert.test.ts", () => {
   describe("columnNameToInt", () => {
     it("should convert A, B and C to 1, 2 and 3", function () {
