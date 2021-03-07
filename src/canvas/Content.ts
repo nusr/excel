@@ -6,10 +6,8 @@ import {
   dpr,
   canvasLog,
   intToColumnName,
-  isNumber,
   makeFont,
   DEFAULT_FONT_SIZE,
-  DEFAULT_FONT_COLOR,
 } from "@/util";
 import { Base } from "./Base";
 import theme from "@/theme";

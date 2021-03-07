@@ -1,4 +1,4 @@
-import { random, noop } from "lodash";
+import { random } from "lodash";
 import { assert } from "./assert";
 import { DEBUG_COLOR_LIST } from "./constant";
 type NameSpaceType =
