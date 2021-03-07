@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from "react";
 import styled, { withTheme } from "styled-components";
+import { pick } from "lodash";
 import { useSelector } from "@/store";
 import { CELL_HEIGHT, CELL_WIDTH } from "@/util";
 import { TextEditorContainer } from "../TextEditor";
@@ -21,13 +22,13 @@ export const CellEditorContainer = memo(() => {
     "activeCell",
     "isCellEditing",
   ]);
-  const { value, row, col, ...rest } = activeCell;
   const style = useMemo(() => {
+    const temp = pick(activeCell, ["top", "left", "width", "height"]);
     return {
-      ...rest,
+      ...temp,
       display: isCellEditing ? "inline-block" : "none",
     };
-  }, [rest, isCellEditing]);
+  }, [activeCell, isCellEditing]);
   return (
     <EditorWrapper style={style}>
       <TextEditorContainer />

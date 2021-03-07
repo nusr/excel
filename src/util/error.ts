@@ -25,15 +25,11 @@ export function handleBuildError(controller: unknown): () => void {
       console.log("off");
     };
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).controller = controller;
   localStorage.setItem("debug", "*");
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  window.console.debug = null;
   outputError();
   return () => {
     console.log("off");
   };
-  // const timer: ReturnType<typeof setInterval> = setInterval(outputError, 2000);
-  // return () => clearInterval(timer);
 }

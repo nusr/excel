@@ -23,6 +23,7 @@ function checkDependencies() {
     }
   }
 }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function searchPackage(packageName) {
   const dir = path.join(cwd, "node_modules");
   const list = fs.readdirSync(dir);
