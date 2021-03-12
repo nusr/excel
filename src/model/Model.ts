@@ -1,5 +1,5 @@
 import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, intToColumnName } from "@/util";
-import { isEmpty, get, setWith } from "lodash";
+import { isEmpty, get, setWith } from "@/lodash";
 import {
   StyleType,
   QueryCellResult,

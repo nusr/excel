@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from "react";
 import styled, { withTheme } from "styled-components";
-import { pick } from "lodash";
+import { pick } from "@/lodash";
 import { useSelector } from "@/store";
 import { CELL_HEIGHT, CELL_WIDTH } from "@/util";
 import { TextEditorContainer } from "../TextEditor";

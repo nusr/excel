@@ -9,7 +9,7 @@ import {
   DEFAULT_FONT_COLOR,
   makeFont,
 } from "@/util";
-import { isEmpty } from "lodash";
+import { isEmpty } from "@/lodash";
 import { CanvasOption, EBorderLineType } from "@/types";
 import type { Controller } from "@/controller";
 

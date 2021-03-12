@@ -1,4 +1,4 @@
-import { isEmpty } from "lodash";
+import { isEmpty } from "@/lodash";
 import { CanvasOption, CellInfo } from "@/types";
 import {
   thinLineWidth,

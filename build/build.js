@@ -50,6 +50,9 @@ function buildJs(type = "", fileName = "") {
   const tsconfigPath = path.join(cwd, "tsconfig.json");
   const commonConfig = {
     entryPoints: [entryPath],
+    chunkNames: "chunks/[name]-[hash]",
+    splitting: true,
+    format: "esm",
     bundle: true,
     minify: isProd,
     sourcemap: true,
