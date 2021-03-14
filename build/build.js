@@ -51,8 +51,8 @@ function buildJs(type = "", fileName = "") {
   const commonConfig = {
     entryPoints: [entryPath],
     chunkNames: "chunks/[name]-[hash]",
-    splitting: true,
-    format: "esm",
+    // splitting: true,
+    // format: "esm",
     bundle: true,
     minify: isProd,
     sourcemap: true,
