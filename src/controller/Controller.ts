@@ -15,7 +15,6 @@ import {
   controllerLog,
   assert,
   EventEmitter,
-  singletonPattern,
   CELL_WIDTH,
   CELL_HEIGHT,
   Range,
@@ -50,6 +49,9 @@ export class Controller extends EventEmitter<EventType> {
       ),
     ];
     this.addSheet();
+  }
+  static createController(): Controller {
+    return new this();
   }
   emitChange(): void {
     const changeSet = Array.from(this.changeSet.values());
@@ -279,9 +281,3 @@ export class Controller extends EventEmitter<EventType> {
     }
   };
 }
-
-export const getSingletonController = singletonPattern<Controller, []>(
-  Controller
-);
-
-export const controller = getSingletonController();

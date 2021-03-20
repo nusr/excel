@@ -1,7 +1,6 @@
 import React, { memo, useCallback, useMemo } from "react";
 import { TextEditor } from "@/components";
-import { useSelector, useDispatch } from "@/store";
-import { controller } from "@/controller";
+import { useSelector, useDispatch, useController } from "@/store";
 import { isEmpty } from "@/lodash";
 import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE } from "@/util";
 
@@ -9,7 +8,9 @@ type Props = {
   isFormulaBar?: boolean;
 };
 
-export const TextEditorContainer = memo<Props>(({ isFormulaBar = false }) => {
+export const TextEditorContainer = memo<Props>((props) => {
+  const { isFormulaBar = false } = props;
+  const controller = useController();
   const { activeCell, isCellEditing, editCellValue } = useSelector([
     "activeCell",
     "isCellEditing",
@@ -49,12 +50,12 @@ export const TextEditorContainer = memo<Props>(({ isFormulaBar = false }) => {
     controller.setCellValue(editCellValue);
     controller.quitEditing();
     controller.setActiveCell(activeCell.row + 1, activeCell.col);
-  }, [activeCell, editCellValue]);
+  }, [activeCell, editCellValue, controller]);
   const onInputTab = useCallback(() => {
     controller.setCellValue(editCellValue);
     controller.quitEditing();
     controller.setActiveCell(activeCell.row, activeCell.col + 1);
-  }, [activeCell, editCellValue]);
+  }, [activeCell, editCellValue, controller]);
   const onBlur = useCallback(() => {
     // controller.setCellValue(activeCell.row, activeCell.col, editCellValue);
     // controller.quitEditing();

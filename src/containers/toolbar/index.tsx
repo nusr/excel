@@ -1,8 +1,7 @@
 import React, { memo, useCallback } from "react";
 import styled, { withTheme } from "styled-components";
 import { Button, Github, BaseIcon, Select, ColorPicker } from "@/components";
-import { controller } from "@/controller";
-import { useSelector } from "@/store";
+import { useSelector, useController } from "@/store";
 import { StyleType } from "@/types";
 import {
   FONT_SIZE_LIST,
@@ -27,6 +26,7 @@ const ToolbarWrapper = withTheme(styled.div`
 const colorPickerStyle = { marginLeft: 8 };
 
 export const ToolbarContainer = memo(() => {
+  const controller = useController();
   const { activeCell, canRedo, canUndo } = useSelector([
     "activeCell",
     "canRedo",
@@ -41,9 +41,12 @@ export const ToolbarContainer = memo(() => {
     fillColor,
     fontFamily,
   } = style;
-  const setCellStyle = useCallback((value: Partial<StyleType>) => {
-    controller.setCellStyle(value);
-  }, []);
+  const setCellStyle = useCallback(
+    (value: Partial<StyleType>) => {
+      controller.setCellStyle(value);
+    },
+    [controller]
+  );
   const handleFontSize = useCallback(
     (value) => {
       if (isNumber(value)) {

@@ -8,8 +8,7 @@ import {
 import styled, { ThemeProvider } from "styled-components";
 import { GlobalStyle } from "./GlobalStyle";
 import theme from "@/theme";
-import { useDispatch } from "@/store";
-import { controller, getSingletonController } from "@/controller";
+import { useDispatch, useController } from "@/store";
 import { MOCK_MODEL } from "@/model";
 import { handleBuildError } from "@/util";
 import { State } from "@/types";
@@ -18,7 +17,9 @@ const AppContainer = styled.div`
   overflow: hidden;
   height: 100%;
 `;
+
 export const App = React.memo(() => {
+  const controller = useController();
   const dispatch = useDispatch();
   useEffect(() => {
     const off = controller.on("dispatch", (data) => {
@@ -48,11 +49,10 @@ export const App = React.memo(() => {
     controller.loadJSON(MOCK_MODEL);
     const offError = handleBuildError(controller);
     return () => {
-      getSingletonController.destroy();
       off();
       offError();
     };
-  }, [dispatch]);
+  }, [dispatch, controller]);
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />

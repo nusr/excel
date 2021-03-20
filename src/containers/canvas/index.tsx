@@ -1,15 +1,16 @@
 import React, { memo, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { CellEditorContainer } from "../CellEditor";
-import { controller } from "@/controller";
 import { Main } from "@/canvas";
 import { Interaction } from "@/interaction";
+import { useController } from "@/store";
 
 const ContentContainer = styled.div`
   position: relative;
 `;
 
 export const CanvasContainer = memo(() => {
+  const controller = useController();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     if (!canvasRef.current) {
@@ -21,7 +22,7 @@ export const CanvasContainer = memo(() => {
     return () => {
       interaction.removeEvents();
     };
-  }, []);
+  }, [controller]);
 
   return (
     <ContentContainer>

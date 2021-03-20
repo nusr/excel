@@ -2,8 +2,7 @@ import React, { memo, useCallback } from "react";
 import styled, { withTheme } from "styled-components";
 import { classnames } from "@/util";
 import { Button, BaseIcon } from "@/components";
-import { useSelector } from "@/store";
-import { controller } from "@/controller";
+import { useSelector, useController } from "@/store";
 import theme from "@/theme";
 const addButtonStyle = {
   backgroundColor: theme.buttonActiveColor,
@@ -37,16 +36,20 @@ const AddSheetWrapper = styled.div`
 `;
 
 export const SheetBarContainer = memo(() => {
+  const controller = useController();
   const { currentSheetId, sheetList = [] } = useSelector([
     "currentSheetId",
     "sheetList",
   ]);
-  const handleClickSheet = useCallback((item) => {
-    controller.setCurrentSheetId(item.sheetId);
-  }, []);
+  const handleClickSheet = useCallback(
+    (item) => {
+      controller.setCurrentSheetId(item.sheetId);
+    },
+    [controller]
+  );
   const handleAddSheet = useCallback(() => {
     controller.addSheet();
-  }, []);
+  }, [controller]);
   return (
     <SheetBarWrapper id="sheet-bar-container">
       <SheetList>
