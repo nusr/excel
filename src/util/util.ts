@@ -15,7 +15,7 @@ export function parseNumber(value?: string | number): number {
     return value;
   }
   if (typeof value === "string") {
-    return value.includes(".") ? parseFloat(value) : parseInt(value);
+    return value.includes(".") ? parseFloat(value) : parseInt(value, 10);
   }
   return window.NaN;
 }

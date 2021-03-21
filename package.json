@@ -26,7 +26,8 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "dependencies": {
-    "immer": "^9.0.0",
+    "chevrotain": "^9.0.0",
+    "immer": "^9.0.1",
     "lodash": "4.17.21",
     "react": "17.0.1",
     "react-dom": "17.0.1",
@@ -41,7 +42,7 @@
     "@typescript-eslint/eslint-plugin": "4.18.0",
     "@typescript-eslint/parser": "4.18.0",
     "cross-env": "7.0.3",
-    "esbuild": "0.9.5",
+    "esbuild": "0.9.6",
     "eslint": "7.22.0",
     "eslint-plugin-react": "7.22.0",
     "eslint-plugin-react-hooks": "4.2.0",

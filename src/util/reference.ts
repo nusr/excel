@@ -23,7 +23,7 @@ function parseCell(text: string): Coordinate {
     }
   } while (isNum(text[i]) && i < text.length);
   assert(i === text.length);
-  const col = columnNameToInt(charList.join("")) - 1;
+  const col = columnNameToInt(charList.join(""));
   const row = parseInt(numList.join(""), 10) - 1;
   assert(!isNaN(col) && !isNaN(row) && col >= 0 && row >= 0);
   return { row, col };

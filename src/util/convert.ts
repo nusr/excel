@@ -1,5 +1,5 @@
 /**
- * convert column name to number. e.g A -> 1, a -> 1
+ * convert column name to number. e.g A -> 0, a -> 0
  * @param { string } columnName
  */
 export function columnNameToInt(columnName: string): number {
@@ -8,15 +8,16 @@ export function columnNameToInt(columnName: string): number {
   for (let i = 0; i < temp.length; i++) {
     num = temp.charCodeAt(i) - 64 + num * 26;
   }
-  return num;
+  return num - 1;
 }
 /**
- * convert number to column name
+ * convert number to column name 0 -> A
  * @param { string } number
  */
-export function intToColumnName(number: number): string {
+export function intToColumnName(temp: number): string {
+  const num = temp + 1;
   let columnName = "";
-  let dividend = Math.floor(Math.abs(number));
+  let dividend = Math.floor(Math.abs(num));
   let rest;
 
   while (dividend > 0) {

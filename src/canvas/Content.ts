@@ -128,7 +128,7 @@ export class Content extends Base {
     colHeight: number,
     activeCell: CellInfo
   ): void {
-    const isActive = intToColumnName(activeCell.col + 1) === colText;
+    const isActive = intToColumnName(activeCell.col) === colText;
     const fillStyle = isActive ? theme.primaryColor : theme.black;
     if (isActive) {
       this.setAttributes({ fillStyle: theme.buttonActiveColor });
@@ -199,7 +199,7 @@ export class Content extends Base {
       }
       pointList.push([temp, 0], [temp, config.height]);
       this.fillColText(
-        intToColumnName(i + 1),
+        intToColumnName(i),
         temp + activeCell.width / 2,
         config.height,
         activeCell
@@ -210,7 +210,7 @@ export class Content extends Base {
       }
     }
     this.fillColText(
-      intToColumnName(i + 1),
+      intToColumnName(i),
       x + activeCell.width / 2,
       config.height,
       activeCell

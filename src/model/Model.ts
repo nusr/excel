@@ -35,7 +35,7 @@ export class Model {
     );
     if (index >= 0) {
       const tempList = Array.from(this.workbook);
-      const activeCell = `${intToColumnName(col + 1)}${row + 1}`;
+      const activeCell = `${intToColumnName(col)}${row + 1}`;
       tempList.splice(index, 1, { ...this.workbook[index], activeCell });
       this.workbook = tempList;
     }
