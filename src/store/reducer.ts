@@ -4,7 +4,6 @@ import { EDITOR_DEFAULT_POSITION, storeLog } from "@/util";
 export const initialState: State = {
   activeCell: { ...EDITOR_DEFAULT_POSITION },
   isCellEditing: false,
-  overlayPosition: { left: 0, top: 0, width: 0, height: 0 },
   currentSheetId: "",
   sheetList: [],
   editCellValue: "",
@@ -20,9 +19,6 @@ export const reducer: Reducer = (state, action) => {
       break;
     case "CHANGE_ACTIVE_CELL":
       state.activeCell = action.payload;
-      break;
-    case "WINDOW_RESIZE":
-      state.overlayPosition = action.payload;
       break;
     case "ENTER_EDITING":
       state.isCellEditing = true;

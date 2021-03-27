@@ -1,12 +1,20 @@
 import { Controller } from "@/controller";
+import { Controller as RenderController } from "@/canvas";
+
 import { DOUBLE_CLICK_TIME, interactionLog } from "@/util";
 export class Interaction {
   protected canvas: HTMLCanvasElement;
   protected controller: Controller;
   protected lastTimeStamp = 0;
   protected canvasRect: ClientRect;
-  constructor(controller: Controller, canvas: HTMLCanvasElement) {
+  renderController: RenderController;
+  constructor(
+    controller: Controller,
+    canvas: HTMLCanvasElement,
+    renderController: RenderController
+  ) {
     this.canvas = canvas;
+    this.renderController = renderController;
     this.canvasRect = this.canvas.getBoundingClientRect();
     this.controller = controller;
     this.addEvents();
@@ -27,14 +35,11 @@ export class Interaction {
   }
   mouseDown = (event: MouseEvent): void => {
     const { timeStamp, clientX, clientY } = event;
-    const { controller } = this;
-    const {
-      width,
-      height,
-    } = controller.model.getRowTitleHeightAndColTitleWidth();
+    const { controller, renderController } = this;
+    const { width, height } = renderController.getHeaderSize();
     const x = clientX - this.canvasRect.left;
     const y = clientY - this.canvasRect.top;
-    const position = controller.clickPositionToCell(x, y);
+    const position = renderController.getHitInfo(event);
     if (width > x && height > y) {
       controller.selectAll(position.row, position.col);
       return;
@@ -57,16 +62,13 @@ export class Interaction {
   };
   mouseMove = (event: MouseEvent): void => {
     const { clientX, clientY } = event;
-    const { controller } = this;
-    const {
-      width,
-      height,
-    } = controller.model.getRowTitleHeightAndColTitleWidth();
+    const { controller, renderController } = this;
+    const { width, height } = renderController.getHeaderSize();
     const x = clientX - this.canvasRect.left;
     const y = clientY - this.canvasRect.top;
     const checkMove = x > width && y > height && event.buttons === 1;
     if (checkMove) {
-      const position = controller.clickPositionToCell(x, y);
+      const position = renderController.getHitInfo(event);
       interactionLog("mouseMove", position);
       controller.updateSelection(position.row, position.col);
     }

@@ -14,12 +14,10 @@ export interface Coordinate {
 }
 
 export type CellInfo = QueryCellResult &
-  CanvasOverlayPosition &
   Coordinate & { displayValue: string | number };
 export type State = {
-  activeCell: CellInfo;
+  activeCell: CellInfo & CanvasOverlayPosition;
   isCellEditing: boolean;
-  overlayPosition: CanvasOverlayPosition;
   currentSheetId: string;
   sheetList: WorkBookJSON["workbook"];
   editCellValue: string;
@@ -28,10 +26,9 @@ export type State = {
 };
 
 export type Action =
-  | { type: "CHANGE_ACTIVE_CELL"; payload: CellInfo }
+  | { type: "CHANGE_ACTIVE_CELL"; payload: CellInfo & CanvasOverlayPosition }
   | { type: "CHANGE_Edit_CELL_VALUE"; payload: string }
   | { type: "RESET" }
-  | { type: "WINDOW_RESIZE"; payload: CanvasOverlayPosition }
   | { type: "ENTER_EDITING" }
   | { type: "QUIT_EDITING" }
   | { type: "SET_CURRENT_SHEET_ID"; payload: string }

@@ -1,8 +1,7 @@
-import { dpr } from "@/util";
+import { dpr, npxLine } from "@/util";
 import { CanvasOverlayPosition } from "@/types";
 import theme from "@/theme";
 import { Base } from "./Base";
-const DISTANCE = 0.5;
 export class Selection extends Base {
   renderFillRect(fillStyle: string, data: CanvasOverlayPosition): void {
     this.save();
@@ -10,21 +9,29 @@ export class Selection extends Base {
       lineWidth: dpr(),
       fillStyle,
     });
+    const temp = npxLine(0.5);
     this.fillRect(
-      data.left + DISTANCE,
-      data.top + DISTANCE,
-      data.width - DISTANCE,
-      data.height - DISTANCE
+      data.left + temp,
+      data.top + temp,
+      data.width - temp,
+      data.height - temp
     );
     this.restore();
   }
-  render(width: number, height: number, data: CanvasOverlayPosition[]): void {
+  render(
+    width: number,
+    height: number,
+    selectAll: CanvasOverlayPosition | null
+  ): void {
     const cellData = this.controller.queryActiveCellInfo();
+    const activeCell = this.renderController.queryCell(
+      cellData.row,
+      cellData.col
+    );
     const activeCellFillColor = cellData.style?.fillColor || theme.white;
     this.resize(width, height);
-    const [activeCell, all] = data;
-    if (all) {
-      this.renderFillRect(theme.selectionColor, all);
+    if (selectAll) {
+      this.renderFillRect(theme.selectionColor, selectAll);
       this.renderFillRect(activeCellFillColor, activeCell);
     }
   }

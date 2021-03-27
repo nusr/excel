@@ -12,19 +12,23 @@ import {
 import { isEmpty } from "@/lodash";
 import { CanvasOption, EBorderLineType } from "@/types";
 import type { Controller } from "@/controller";
+import { Controller as RenderController } from "./controller";
 
 export type BaseProps = {
   width: number;
   height: number;
   controller: Controller;
+  renderController: RenderController;
 };
 
 export class Base {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   controller: Controller;
+  renderController: RenderController;
   defaultFont = makeFont(undefined, "500", npx(DEFAULT_FONT_SIZE));
-  constructor({ width, height, controller }: BaseProps) {
+  constructor({ width, height, controller, renderController }: BaseProps) {
+    this.renderController = renderController;
     this.controller = controller;
     this.canvas = document.createElement("canvas");
     this.canvas.style.display = "none";
@@ -124,8 +128,12 @@ export class Base {
     ctx.stroke();
   }
   renderCell(row: number, col: number): void {
+    const { left, top, height, width } = this.renderController.queryCell(
+      row,
+      col
+    );
     const cellInfo = this.controller.queryCell(row, col);
-    const { left, top, height, width, style, displayValue } = cellInfo;
+    const { style, displayValue } = cellInfo;
     const isNum = isNumber(displayValue);
     let font = this.defaultFont;
     let fillStyle = DEFAULT_FONT_COLOR;

@@ -3,7 +3,7 @@ export function isSheet(range: IRange): boolean {
   return isRow(range) && isCol(range);
 }
 export function isRow(range: IRange): boolean {
-  return range.col === range.colCount && range.colCount === 0;
+  return range.col === range.rowCount && range.rowCount === 0;
 }
 export function isCol(range: IRange): boolean {
   return range.row === range.colCount && range.colCount === 0;

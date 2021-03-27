@@ -1,6 +1,6 @@
-import { CellInfo } from "@/types";
+import { CellInfo, CanvasOverlayPosition } from "@/types";
 import { CELL_HEIGHT, CELL_WIDTH } from "./cell";
-export const EDITOR_DEFAULT_POSITION: CellInfo = {
+export const EDITOR_DEFAULT_POSITION: CellInfo & CanvasOverlayPosition = {
   left: -999,
   top: -999,
   value: "",

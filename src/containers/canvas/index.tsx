@@ -1,7 +1,7 @@
 import React, { memo, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { CellEditorContainer } from "../CellEditor";
-import { Main } from "@/canvas";
+import { Main, Controller } from "@/canvas";
 import { Interaction } from "@/interaction";
 import { useController } from "@/store";
 
@@ -16,9 +16,16 @@ export const CanvasContainer = memo(() => {
     if (!canvasRef.current) {
       return;
     }
+
     const canvasDom = canvasRef.current;
-    new Main(controller, canvasDom);
-    const interaction = new Interaction(controller, canvasDom);
+    const renderController = new Controller(canvasDom);
+    controller.setRenderController(renderController);
+    new Main(controller, canvasDom, renderController);
+    const interaction = new Interaction(
+      controller,
+      canvasDom,
+      renderController
+    );
     return () => {
       interaction.removeEvents();
     };

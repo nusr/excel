@@ -1,5 +1,5 @@
 import { isEmpty } from "@/lodash";
-import { CanvasOption, CellInfo } from "@/types";
+import { CanvasOption, CanvasOverlayPosition } from "@/types";
 import {
   thinLineWidth,
   npx,
@@ -49,8 +49,7 @@ export class Content extends Base {
     this.restore();
   }
   protected renderTriangle(): void {
-    const { model } = this.controller;
-    const config = model.getRowTitleHeightAndColTitleWidth();
+    const config = this.renderController.getHeaderSize();
     const offset = 2;
     const path = new Path2D();
     path.moveTo(npx(config.width / 2 - offset), npx(config.height - offset));
@@ -70,12 +69,13 @@ export class Content extends Base {
   }
 
   protected renderGrid(): void {
+    const { renderController } = this;
     const { scroll, model } = this.controller;
     const { rowIndex, colIndex } = scroll;
     const { rowCount, colCount } = model.getSheetInfo();
-    const cell = this.controller.queryCell(0, 0);
-    const config = model.getRowTitleHeightAndColTitleWidth();
-    const { width, height } = this.controller.getDrawSize(config);
+    const cell = this.renderController.queryCell(0, 0);
+    const config = renderController.getHeaderSize();
+    const { width, height } = renderController.getDrawSize();
     const lineWidth = thinLineWidth();
     this.save();
     this.setAttributes({
@@ -110,9 +110,10 @@ export class Content extends Base {
     row: number,
     rowWidth: number,
     y: number,
-    activeCell: CellInfo
+    activeCell: CanvasOverlayPosition,
+    activeRow: number
   ): void {
-    const isActive = activeCell.row === row - 1;
+    const isActive = activeRow === row - 1;
     const fillStyle = isActive ? theme.primaryColor : theme.black;
     if (isActive) {
       this.setAttributes({ fillStyle: theme.buttonActiveColor });
@@ -126,9 +127,10 @@ export class Content extends Base {
     colText: string,
     x: number,
     colHeight: number,
-    activeCell: CellInfo
+    activeCell: CanvasOverlayPosition,
+    activeCellCol: number
   ): void {
-    const isActive = intToColumnName(activeCell.col) === colText;
+    const isActive = intToColumnName(activeCellCol) === colText;
     const fillStyle = isActive ? theme.primaryColor : theme.black;
     if (isActive) {
       this.setAttributes({ fillStyle: theme.buttonActiveColor });
@@ -141,9 +143,10 @@ export class Content extends Base {
     const { scroll, model } = this.controller;
     const { rowIndex } = scroll;
     const { rowCount } = model.getSheetInfo();
-    const config = model.getRowTitleHeightAndColTitleWidth();
-    const activeCell = this.controller.queryActiveCellInfo();
-    const { height } = this.controller.getDrawSize(config);
+    const config = this.renderController.getHeaderSize();
+    const { row, col } = this.controller.queryActiveCell();
+    const activeCell = this.renderController.queryCell(row, col);
+    const { height } = this.renderController.getDrawSize();
     this.save();
     this.setAttributes({ fillStyle: theme.backgroundColor });
     this.fillRect(0, config.height, config.width, height);
@@ -161,7 +164,8 @@ export class Content extends Base {
         i + 1,
         config.width,
         temp + activeCell.height / 2,
-        activeCell
+        activeCell,
+        row
       );
       y += activeCell.height;
       if (y > height) {
@@ -172,7 +176,8 @@ export class Content extends Base {
       i + 1,
       config.width,
       y + activeCell.height / 2,
-      activeCell
+      activeCell,
+      row
     );
     pointList.push([0, y], [config.width, y], [0, 0], [0, y]);
     this.line(pointList);
@@ -182,9 +187,10 @@ export class Content extends Base {
     const { scroll, model } = this.controller;
     const { colIndex } = scroll;
     const { colCount } = model.getSheetInfo();
-    const config = model.getRowTitleHeightAndColTitleWidth();
-    const activeCell = this.controller.queryActiveCellInfo();
-    const { width } = this.controller.getDrawSize(config);
+    const config = this.renderController.getHeaderSize();
+    const { row, col } = this.controller.queryActiveCell();
+    const activeCell = this.renderController.queryCell(row, col);
+    const { width } = this.renderController.getDrawSize();
     const pointList = [];
     this.save();
     this.setAttributes({ fillStyle: theme.backgroundColor });
@@ -202,7 +208,8 @@ export class Content extends Base {
         intToColumnName(i),
         temp + activeCell.width / 2,
         config.height,
-        activeCell
+        activeCell,
+        col
       );
       x += activeCell.width;
       if (x > width) {
@@ -213,7 +220,8 @@ export class Content extends Base {
       intToColumnName(i),
       x + activeCell.width / 2,
       config.height,
-      activeCell
+      activeCell,
+      col
     );
     pointList.push([x, 0], [x, config.height], [0, 0], [x, 0]);
     this.line(pointList);

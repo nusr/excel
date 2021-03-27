@@ -6,29 +6,20 @@ import {
   WorkBookJSON,
   EventType,
   CellInfo,
-  IWindowSize,
   StyleType,
   ChangeEventType,
 } from "@/types";
 import {
   parseReference,
   controllerLog,
-  assert,
   EventEmitter,
-  CELL_WIDTH,
-  CELL_HEIGHT,
   Range,
   DEFAULT_ACTIVE_CELL,
 } from "@/util";
 import { FormulaParser } from "@/parser";
 import { History } from "./History";
+import { Controller as RenderController } from "@/canvas";
 
-function getWidthHeight(): IWindowSize {
-  return {
-    width: document.documentElement.clientWidth,
-    height: document.documentElement.clientHeight,
-  };
-}
 export class Controller extends EventEmitter<EventType> {
   scroll: Scroll = new Scroll(this);
   model: Model = new Model(this);
@@ -36,6 +27,7 @@ export class Controller extends EventEmitter<EventType> {
   isCellEditing = false;
   formulaParser: FormulaParser = new FormulaParser();
   private changeSet = new Set<ChangeEventType>();
+  private renderController: RenderController | null = null;
   history = new History();
   constructor() {
     super();
@@ -52,6 +44,12 @@ export class Controller extends EventEmitter<EventType> {
   }
   static createController(): Controller {
     return new this();
+  }
+  getRenderController(): RenderController | null {
+    return this.renderController;
+  }
+  setRenderController(renderController: RenderController): void {
+    this.renderController = renderController;
   }
   emitChange(): void {
     const changeSet = Array.from(this.changeSet.values());
@@ -88,7 +86,6 @@ export class Controller extends EventEmitter<EventType> {
         this.model.currentSheetId
       ),
     ];
-    // controllerLog("setActiveCell", this.ranges[0]);
     this.emitChange();
   }
   setCurrentSheetId(id: string): void {
@@ -107,18 +104,17 @@ export class Controller extends EventEmitter<EventType> {
     this.emitChange();
   }
   selectAll(row: number, col: number): void {
-    const sheetInfo = this.model.getSheetInfo();
-    this.setActiveCell(row, col, sheetInfo.rowCount, sheetInfo.colCount);
+    this.setActiveCell(row, col, 0, 0);
     controllerLog("selectAll");
   }
   selectCol(row: number, col: number): void {
     const sheetInfo = this.model.getSheetInfo();
-    this.setActiveCell(row, col, sheetInfo.rowCount);
+    this.setActiveCell(row, col, sheetInfo.rowCount, 0);
     controllerLog("selectCol");
   }
   selectRow(row: number, col: number): void {
     const sheetInfo = this.model.getSheetInfo();
-    this.setActiveCell(row, col, 1, sheetInfo.colCount);
+    this.setActiveCell(row, col, 0, sheetInfo.colCount);
     controllerLog("selectRow");
   }
   quitEditing(): void {
@@ -137,22 +133,6 @@ export class Controller extends EventEmitter<EventType> {
   }
   toJSON(): WorkBookJSON {
     return this.model.toJSON();
-  }
-  clickPositionToCell(x: number, y: number): Coordinate {
-    const config = this.model.getRowTitleHeightAndColTitleWidth();
-    let resultX = config.width;
-    let resultY = config.height;
-    let row = 0;
-    let col = 0;
-    while (resultX + CELL_WIDTH <= x) {
-      resultX += CELL_WIDTH;
-      col++;
-    }
-    while (resultY + CELL_HEIGHT <= y) {
-      resultY += CELL_HEIGHT;
-      row++;
-    }
-    return { row, col };
   }
   updateSelection(row: number, col: number): void {
     const { model } = this;
@@ -178,35 +158,7 @@ export class Controller extends EventEmitter<EventType> {
     this.changeSet.add("contentChange");
     this.emitChange();
   }
-  getCanvasSize(): IWindowSize {
-    const { width, height } = getWidthHeight();
-    const toolbarDom = document.getElementById("tool-bar-container");
-    const sheetBarDom = document.getElementById("sheet-bar-container");
-    const formulaBarDom = document.getElementById("formula-bar-container");
-    assert(toolbarDom !== null);
-    assert(sheetBarDom !== null);
-    assert(formulaBarDom !== null);
-    const toolbarSize = toolbarDom.getBoundingClientRect();
-    const sheetBarSize = sheetBarDom.getBoundingClientRect();
-    const formulaBarSize = formulaBarDom.getBoundingClientRect();
-    return {
-      width,
-      height:
-        height -
-        toolbarSize.height -
-        sheetBarSize.height -
-        formulaBarSize.height,
-    };
-  }
-  getDrawSize(config: IWindowSize): IWindowSize {
-    const size = this.getCanvasSize();
-    const width = size.width - config.width;
-    const height = size.height - config.height;
-    return {
-      width,
-      height,
-    };
-  }
+
   setCellValue(value: string): void {
     this.model.setCellValue(value);
     this.changeSet.add("contentChange");
@@ -227,20 +179,7 @@ export class Controller extends EventEmitter<EventType> {
   };
   queryCell(row: number, col: number): CellInfo {
     const { model } = this;
-    const { width, height, value, formula, style } = model.queryCell(row, col);
-    const config = model.getRowTitleHeightAndColTitleWidth();
-    let resultX = config.width;
-    let resultY = config.height;
-    let r = 0;
-    let c = 0;
-    while (c < col) {
-      resultX += CELL_WIDTH;
-      c++;
-    }
-    while (r < row) {
-      resultY += CELL_HEIGHT;
-      r++;
-    }
+    const { value, formula, style } = model.queryCell(row, col);
     let displayValue = value || "";
     if (formula) {
       const temp = this.formulaParser.init(formula, this.convertCell);
@@ -248,11 +187,7 @@ export class Controller extends EventEmitter<EventType> {
     }
 
     return {
-      width: width || CELL_WIDTH,
-      height: height || CELL_HEIGHT,
       value,
-      top: resultY,
-      left: resultX,
       row,
       col,
       formula,
