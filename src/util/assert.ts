@@ -1,13 +1,13 @@
 export function assert(
   condition: boolean,
-  message?: string
+  message = "assert error",
+  env = process.env.NODE_ENV
 ): asserts condition {
   if (!condition) {
-    const realMessage = message || "断言错误";
-    if (process.env.NODE_ENV === "production") {
-      console.error(realMessage);
+    if (env === "production") {
+      console.error(message);
       return;
     }
-    throw new Error(realMessage);
+    throw new Error(message);
   }
 }

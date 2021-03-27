@@ -1,4 +1,4 @@
-import { random } from "@/lodash";
+import { randomInt } from "@/lodash";
 import { assert } from "./assert";
 import { DEBUG_COLOR_LIST } from "./constant";
 type NameSpaceType =
@@ -45,7 +45,7 @@ class Debug {
     console.log(...result);
   };
   getRandomColor = (): string => {
-    const index = random(0, DEBUG_COLOR_LIST.length - 1);
+    const index = randomInt(0, DEBUG_COLOR_LIST.length - 1);
     assert(index >= 0 && index < DEBUG_COLOR_LIST.length, String(index));
     return DEBUG_COLOR_LIST[index];
   };

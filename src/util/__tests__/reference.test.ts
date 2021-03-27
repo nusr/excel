@@ -1,5 +1,5 @@
 import { parseReference } from "../reference";
-import { Range } from "../range";
+import { Range, isCol } from "../range";
 
 describe("reference.test.ts", () => {
   describe("parseReference", () => {
@@ -13,6 +13,12 @@ describe("reference.test.ts", () => {
       expect(parseReference("a1:b2", mockSheetName)).toEqual(
         new Range(0, 0, 2, 2, mockSheetName)
       );
+    });
+  });
+  describe("isCol", () => {
+    const mockSheetName = "test";
+    it("should get true ", function () {
+      expect(isCol(new Range(0, 5, 0, 30, mockSheetName))).toBeTruthy();
     });
   });
 });

@@ -121,8 +121,8 @@ export class Model {
       realValue = value.trim();
       formula = "";
     }
-    setWith(this, `${configPath}.formula`, formula, Object);
-    setWith(this, `${configPath}.value`, realValue, Object);
+    setWith(this, `${configPath}.formula`, formula);
+    setWith(this, `${configPath}.value`, realValue);
     this.modelChange();
   }
   setCellStyle(style: Partial<StyleType>, ranges: Range[]): void {
@@ -131,7 +131,7 @@ export class Model {
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
         const stylePath = `worksheets[${this.currentSheetId}][${r}][${c}].style`;
-        const oldStyleId = get(this, stylePath, "");
+        const oldStyleId = get<string>(this, stylePath, "");
         if (oldStyleId) {
           const oldStyle = this.styles[oldStyleId];
           if (isEmpty(oldStyle)) {
@@ -149,14 +149,14 @@ export class Model {
           );
           const styleId = `${STYLE_ID_PREFIX}${styleNum + 1}`;
           this.styles[styleId] = { ...style };
-          setWith(this, stylePath, styleId, Object);
+          setWith(this, stylePath, styleId);
         }
       }
     }
     this.modelChange();
   }
   queryCell(row: number, col: number): QueryCellResult {
-    const cellData: ModelCellType = get(
+    const cellData = get<ModelCellType>(
       this,
       `worksheets[${this.currentSheetId}][${row}][${col}]`,
       {}

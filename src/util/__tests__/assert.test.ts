@@ -2,6 +2,13 @@ import { assert } from "../assert";
 
 describe("assert.test.ts", () => {
   describe("assert", () => {
+    it("should throw 'assert error' error", function () {
+      function testFunc() {
+        assert(false);
+      }
+      expect(testFunc).toThrowError(new Error("assert error"));
+    });
+
     it("should throw error", function () {
       function testFunc() {
         assert(false, "test");
@@ -16,12 +23,9 @@ describe("assert.test.ts", () => {
     });
   });
   describe("production assert", () => {
-    beforeAll(() => {
-      process.env.NODE_ENV = "production";
-    });
     it("should not throw error", function () {
       function testFunc() {
-        assert(true, "test");
+        assert(true, "test", "production");
       }
       expect(testFunc).not.toThrowError(new Error("test"));
     });
