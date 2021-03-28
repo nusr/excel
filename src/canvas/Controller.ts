@@ -86,19 +86,19 @@ export class Controller {
     const toolbarDom = document.getElementById("tool-bar-container");
     const sheetBarDom = document.getElementById("sheet-bar-container");
     const formulaBarDom = document.getElementById("formula-bar-container");
-    assert(toolbarDom !== null);
-    assert(sheetBarDom !== null);
-    assert(formulaBarDom !== null);
-    const toolbarSize = toolbarDom.getBoundingClientRect();
-    const sheetBarSize = sheetBarDom.getBoundingClientRect();
-    const formulaBarSize = formulaBarDom.getBoundingClientRect();
+    // assert(toolbarDom !== null);
+    // assert(sheetBarDom !== null);
+    // assert(formulaBarDom !== null);
+    const toolbarSize = toolbarDom?.getBoundingClientRect();
+    const sheetBarSize = sheetBarDom?.getBoundingClientRect();
+    const formulaBarSize = formulaBarDom?.getBoundingClientRect();
     return {
       width,
       height:
         height -
-        toolbarSize.height -
-        sheetBarSize.height -
-        formulaBarSize.height,
+        (toolbarSize?.height || 0) -
+        (sheetBarSize?.height || 0) -
+        (formulaBarSize?.height || 0),
     };
   }
   getDrawSize(): IWindowSize {

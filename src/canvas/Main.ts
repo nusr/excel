@@ -41,6 +41,7 @@ export class Main {
       renderController: this.renderController,
     });
     this.controller.on("change", this.render);
+    this.render();
   }
   resize(width: number, height: number): void {
     const { canvas } = this;

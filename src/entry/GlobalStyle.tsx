@@ -1,6 +1,6 @@
 import { createGlobalStyle } from "styled-components";
 
-export const GlobalStyle = createGlobalStyle`
+const GlobalStyle = createGlobalStyle`
     html {
         font-size: ${(props) => props.theme.font};
         font-family: ${(props) => props.theme.fontFamily};
@@ -20,3 +20,5 @@ export const GlobalStyle = createGlobalStyle`
         box-sizing: border-box;
     }
 `;
+
+export default GlobalStyle;

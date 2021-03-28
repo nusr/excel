@@ -13,6 +13,23 @@ const { staticService, openBrowser, buildLog } = require("./server");
 console.log("NODE_ENV", NODE_ENV, isProd);
 const { handleSVGFiles } = require("./svg");
 
+const entryPath = path.join(cwd, "src/index.tsx");
+const tsconfigPath = path.join(cwd, "tsconfig.json");
+const commonConfig = {
+  entryPoints: [entryPath],
+  chunkNames: "chunks/[name]-[hash]",
+  splitting: true,
+  format: "esm",
+  bundle: true,
+  minify: isProd,
+  sourcemap: true,
+  tsconfig: tsconfigPath,
+  outdir: distDir,
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
+  },
+};
+
 function fileWatch(watchDir, callback) {
   if (process.platform === "linux") {
     if (fs.statSync(watchDir).isDirectory()) {
@@ -29,12 +46,29 @@ function copyHtml() {
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir);
   }
+  const htmlPath = "index.html";
   const files = fs.readdirSync(assetsDir);
   for (const item of files) {
+    if (item === htmlPath) {
+      continue;
+    }
     const sourceFile = path.join(assetsDir, item);
     const targetFile = path.join(distDir, item);
     fs.copyFileSync(sourceFile, targetFile);
   }
+  const encoding = "utf8";
+  const htmlStr = fs.readFileSync(path.join(assetsDir, htmlPath), encoding);
+  const distFiles = fs.readdirSync(distDir);
+  const indexJs = distFiles.filter((v) => /^index.[m]?js$/.test(v))[0];
+  console.log(indexJs);
+  console.log(typeof htmlStr);
+  const result = htmlStr.replace(
+    `<!--INDEX_JS_ENTRY-->`,
+    `<script ${
+      commonConfig.format === "esm" ? ' type="module" ' : ""
+    } src="${indexJs}"></script>`
+  );
+  fs.writeFileSync(path.join(distDir, htmlPath), result, encoding);
 }
 
 let isBuild = false;
@@ -46,22 +80,7 @@ function buildJs(type = "", fileName = "") {
   const errorFilePath = path.join(distDir, "buildError.txt");
   isBuild = true;
   buildLog(`${typeof fileName === "string" ? fileName : ""}: ${type}`);
-  const entryPath = path.join(cwd, "src/index.tsx");
-  const tsconfigPath = path.join(cwd, "tsconfig.json");
-  const commonConfig = {
-    entryPoints: [entryPath],
-    // chunkNames: "chunks/[name]-[hash]",
-    // splitting: true,
-    // format: "esm",
-    bundle: true,
-    minify: isProd,
-    sourcemap: true,
-    tsconfig: tsconfigPath,
-    outdir: distDir,
-    define: {
-      "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
-    },
-  };
+
   esBuild
     .build({
       ...commonConfig,
@@ -74,7 +93,7 @@ function buildJs(type = "", fileName = "") {
       }
     })
     .catch((error) => {
-      buildLog("buildJs error", error);
+      console.log(error);
       if (!isProd) {
         fs.writeFileSync(errorFilePath, `${error.message}\n${error.stack}`);
       } else {
