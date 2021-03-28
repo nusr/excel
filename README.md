@@ -1,6 +1,6 @@
 # Web Excel
 
-[online demo](https://nusr.github.io/excel/
+[online demo](https://nusr.github.io/excel/)
 
 ## Start
 
