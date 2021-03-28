@@ -1,16 +1,27 @@
 import React, { useCallback } from "react";
 import styled, { withTheme } from "styled-components";
+import { classnames } from "@/util";
 
 const SelectContainer = styled.select``;
 const SelectItem = withTheme(styled.option`
   font-size: ${(props) => props.theme.font};
+  cursor: pointer;
+  &.disabled {
+    background-color: #fff;
+    cursor: not-allowed;
+    color: ${(props) => props.theme.disabledColor};
+    &:hover {
+      background-color: #fff;
+    }
+  }
 `);
 
 type ValueType = string | number;
 
-type OptionItem = {
+export type OptionItem = {
   value: ValueType;
   label: string;
+  disabled?: boolean;
 };
 
 type Props = {
@@ -41,9 +52,15 @@ export const Select = React.memo((props: Props) => {
       {data.map((item) => {
         const value = typeof item === "object" ? item.value : item;
         const label = typeof item === "object" ? item.label : item;
+        const disabled = typeof item === "object" ? item.disabled : false;
         const itemStyle = getItemStyle(value);
         return (
-          <SelectItem key={value} value={value} style={itemStyle}>
+          <SelectItem
+            key={value}
+            value={value}
+            style={itemStyle}
+            className={classnames({ disabled })}
+          >
             {label}
           </SelectItem>
         );

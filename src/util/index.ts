@@ -14,3 +14,4 @@ export * from "./error";
 export * from "./range";
 export * from "./reference";
 export * from "./debug";
+export * from "./isSupportFontFamily";

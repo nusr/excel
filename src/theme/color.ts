@@ -11,5 +11,6 @@ const color = {
   contentColor: DEFAULT_FONT_COLOR,
   borderColor: "#cccccc",
   activeBorderColor: "#808080",
+  disabledColor: "#ccc",
 };
 export default color;

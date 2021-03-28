@@ -13,7 +13,7 @@ export const DEFAULT_FONT_SIZE = 11;
 export const DEFAULT_FONT_COLOR = "#333333";
 export const DEFAULT_FILL_COLOR = "transparent";
 export const MUST_FONT_FAMILY = "sans-serif";
-export const DEFAULT_FONT_FAMILY = "Source Sans Pro";
+export const DEFAULT_FONT_FAMILY = "宋体";
 
 export const FONT_SIZE_LIST = [
   6,
@@ -42,7 +42,6 @@ export const FONT_FAMILY_LIST = [
   "Tahoma",
   "Verdana",
   "微软雅黑",
-  "宋体",
   "黑体",
   "楷体",
   "仿宋",
@@ -50,6 +49,7 @@ export const FONT_FAMILY_LIST = [
   "华文新魏",
   "华文行楷",
   "华文隶书",
+  "苹方",
 ];
 
 export function makeFont(

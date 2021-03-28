@@ -21,5 +21,6 @@ declare module "styled-components" {
     borderColor: string;
     lineHeight: number;
     borderRadius: string;
+    disabledColor: string;
   }
 }

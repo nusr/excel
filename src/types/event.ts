@@ -9,7 +9,7 @@ export type IWindowSize = {
 export type EventType = {
   dispatch: Action;
   change: {
-    changeSet: Array<ChangeEventType>;
+    changeSet: Set<ChangeEventType>;
     payload?: CellInfo;
   };
 };

@@ -38,7 +38,7 @@ export const App = React.memo(() => {
         canRedo: controller.canRedo(),
         canUndo: controller.canUndo(),
       };
-      if (changeSet.includes("contentChange")) {
+      if (changeSet.has("contentChange")) {
         const { workbook, currentSheetId } = controller.model;
         state.sheetList = workbook;
         state.currentSheetId = currentSheetId;

@@ -1,6 +1,13 @@
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import styled, { withTheme } from "styled-components";
-import { Button, Github, BaseIcon, Select, ColorPicker } from "@/components";
+import {
+  Button,
+  Github,
+  BaseIcon,
+  Select,
+  ColorPicker,
+  OptionItem,
+} from "@/components";
 import { useSelector, useController } from "@/store";
 import { StyleType } from "@/types";
 import {
@@ -10,6 +17,7 @@ import {
   DEFAULT_FONT_COLOR,
   FONT_FAMILY_LIST,
   DEFAULT_FONT_FAMILY,
+  isSupportFontFamily,
 } from "@/util";
 
 const ToolbarWrapper = withTheme(styled.div`
@@ -26,6 +34,7 @@ const ToolbarWrapper = withTheme(styled.div`
 const colorPickerStyle = { marginLeft: 8 };
 
 export const ToolbarContainer = memo(() => {
+  const [fontFamilyList, setFontFamilyList] = useState<OptionItem[]>([]);
   const controller = useController();
   const { activeCell, canRedo, canUndo } = useSelector([
     "activeCell",
@@ -41,6 +50,13 @@ export const ToolbarContainer = memo(() => {
     fillColor,
     fontFamily,
   } = style;
+  useEffect(() => {
+    const list = FONT_FAMILY_LIST.map((v) => {
+      const disabled = !isSupportFontFamily(v);
+      return { label: v, value: v, disabled };
+    });
+    setFontFamilyList(list);
+  }, []);
   const setCellStyle = useCallback(
     (value: Partial<StyleType>) => {
       controller.setCellStyle(value);
@@ -77,7 +93,7 @@ export const ToolbarContainer = memo(() => {
         <BaseIcon name="italic" />
       </Button>
       <Select
-        data={FONT_FAMILY_LIST}
+        data={fontFamilyList}
         style={colorPickerStyle}
         value={fontFamily || DEFAULT_FONT_FAMILY}
         onChange={(item) => setCellStyle({ fontFamily: item })}

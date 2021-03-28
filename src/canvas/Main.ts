@@ -43,7 +43,7 @@ export class Main {
       name: "Selection",
     });
     this.controller.on("change", this.render);
-    this.render({ changeSet: ["contentChange"] });
+    this.render({ changeSet: new Set(["contentChange"]) });
   }
   resize(width: number, height: number): void {
     const { canvas } = this;
@@ -103,7 +103,7 @@ export class Main {
     };
   }
   render = ({ changeSet }: EventType["change"]): void => {
-    const isContentChange = changeSet.includes("contentChange");
+    const isContentChange = changeSet.has("contentChange");
     const { width, height } = this.renderController.getCanvasSize();
     this.resize(width, height);
     if (isContentChange) {

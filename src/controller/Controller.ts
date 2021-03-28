@@ -52,9 +52,8 @@ export class Controller extends EventEmitter<EventType> {
     this.renderController = renderController;
   }
   emitChange(): void {
-    const changeSet = Array.from(this.changeSet.values());
-    this.emit("change", { changeSet });
-    this.changeSet.clear();
+    this.emit("change", { changeSet: this.changeSet });
+    this.changeSet = new Set<ChangeEventType>();
   }
   queryActiveCell(): Coordinate {
     const { activeCell } = this.model.getSheetInfo();
