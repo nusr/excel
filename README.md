@@ -1,10 +1,13 @@
-# Excel
+# Web Excel
 
-[online demo](https://nusr.github.io/excel/)
+[online demo](https://nusr.github.io/excel/
 
 ## Start
 
 ```bash
+git clone https://github.com/nusr/excel.git
+cd excel
+
 npm install
 npm run start
 ```

@@ -40,9 +40,6 @@ export class Content extends Base {
       return;
     }
     this.save();
-    this.setAttributes({
-      textBaseline: "middle",
-    });
     for (const item of data) {
       this.renderCell(item.row, item.col);
     }

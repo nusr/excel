@@ -19,6 +19,7 @@ export type BaseProps = {
   height: number;
   controller: Controller;
   renderController: RenderController;
+  name?: string;
 };
 
 export class Base {
@@ -27,10 +28,17 @@ export class Base {
   controller: Controller;
   renderController: RenderController;
   defaultFont = makeFont(undefined, "500", npx(DEFAULT_FONT_SIZE));
-  constructor({ width, height, controller, renderController }: BaseProps) {
+  constructor({
+    width,
+    height,
+    controller,
+    renderController,
+    name = "Base",
+  }: BaseProps) {
     this.renderController = renderController;
     this.controller = controller;
     this.canvas = document.createElement("canvas");
+    this.canvas.id = name;
     this.canvas.style.display = "none";
     document.body.appendChild(this.canvas);
     const ctx = this.canvas.getContext("2d");
@@ -149,7 +157,9 @@ export class Base {
       );
       fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
       if (style?.fillColor) {
-        this.setAttributes({ fillStyle: style?.fillColor });
+        this.setAttributes({
+          fillStyle: style?.fillColor,
+        });
         this.fillRect(left, top, width, height);
       }
     }
@@ -157,7 +167,9 @@ export class Base {
       textAlign: isNum ? "right" : "left",
       font,
       fillStyle,
+      textBaseline: "middle",
     });
+
     this.fillText(displayValue, left + (isNum ? width : 0), top + height / 2);
   }
 }

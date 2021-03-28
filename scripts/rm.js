@@ -4,6 +4,10 @@ const fs = require("fs");
 const path = require("path");
 function init() {
   const deleteDir = process.argv[2] || "dist";
-  fs.rmdirSync(path.join(process.cwd(), deleteDir), { recursive: true });
+  const deletePath = path.join(process.cwd(), deleteDir);
+  if (!fs.existsSync(deletePath)) {
+    return;
+  }
+  fs.rmdirSync(deletePath, { recursive: true });
 }
 init();

@@ -1,7 +1,7 @@
 import { npx, assert, dpr, isCol, isRow, isSheet } from "@/util";
 import type { Controller } from "@/controller";
 import { Content } from "./Content";
-import { CanvasOverlayPosition } from "@/types";
+import { CanvasOverlayPosition, EventType } from "@/types";
 import theme from "@/theme";
 import { Controller as RenderController } from "./controller";
 import { Selection } from "./Selection";
@@ -33,15 +33,17 @@ export class Main {
       height,
       controller,
       renderController: this.renderController,
+      name: "Content",
     });
     this.selection = new Selection({
       width,
       height,
       controller,
       renderController: this.renderController,
+      name: "Selection",
     });
     this.controller.on("change", this.render);
-    this.render();
+    this.render({ changeSet: ["contentChange"] });
   }
   resize(width: number, height: number): void {
     const { canvas } = this;
@@ -100,10 +102,13 @@ export class Main {
       height: height,
     };
   }
-  render = (): void => {
+  render = ({ changeSet }: EventType["change"]): void => {
+    const isContentChange = changeSet.includes("contentChange");
     const { width, height } = this.renderController.getCanvasSize();
     this.resize(width, height);
-    this.content.render(width, height);
+    if (isContentChange) {
+      this.content.render(width, height);
+    }
     const [range] = this.controller.ranges;
     const activeCell = this.renderController.queryCell(range.row, range.col);
     const selectAll = this.getSelection(activeCell);

@@ -3,6 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const esBuild = require("esbuild");
+require("../scripts/rm.js");
 const cwd = process.cwd();
 console.log("cwd:", cwd);
 const distDir = path.join(cwd, "dist");

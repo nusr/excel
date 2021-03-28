@@ -4,8 +4,8 @@
   "description": "web excel",
   "main": "dist/index.js",
   "scripts": {
-    "start": "npm run rm-dist && cross-env NODE_ENV=development node ./build/build.js",
-    "build": "npm run rm-dist && cross-env NODE_ENV=production  node ./build/build.js",
+    "start": "cross-env NODE_ENV=development node ./build/build.js",
+    "build": "cross-env NODE_ENV=production  node ./build/build.js",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
     "test": "npx jest --config ./unittest/jest.config.js",
@@ -13,20 +13,19 @@
     "test-watch": "npm run test -- --watch",
     "ci": "npm run build && npm run lint && npm run test && npm run typecheck",
     "deploy": "deploy.sh",
-    "typecheck": "npm run rm-dist && tsc",
-    "postinstall": "husky install",
-    "rm-dist": "node scripts/rm.js"
+    "typecheck": "node scripts/rm.js && tsc",
+    "postinstall": "husky install"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/nusr/excel.git"
+    "url": "https://github.com/nusr/excel.git"
   },
   "keywords": [],
   "author": "Steve Xu <1161176156@qq.com>",
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "dependencies": {
-    "immer": "^9.0.1",
+    "immer": "9.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "styled-components": "5.2.1"
@@ -41,7 +40,7 @@
     "cross-env": "7.0.3",
     "esbuild": "0.10.2",
     "eslint": "7.23.0",
-    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-import": "2.22.1",
     "eslint-plugin-react": "7.23.1",
     "eslint-plugin-react-hooks": "4.2.0",
     "husky": "5.2.0",
