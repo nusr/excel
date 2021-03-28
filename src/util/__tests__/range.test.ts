@@ -17,4 +17,17 @@ describe("range.test.ts", () => {
       expect(isSheet(new Range(0, 0, 0, 0, mockSheetName))).toBeTruthy();
     });
   });
+  describe("Range", () => {
+    it("should get true", function () {
+      expect(
+        Range.makeRange({
+          row: 0,
+          col: 0,
+          rowCount: 0,
+          colCount: 0,
+          sheetId: mockSheetName,
+        })
+      ).toBeInstanceOf(Range);
+    });
+  });
 });

@@ -7,7 +7,7 @@
  * font-family
  * e.g italic bold 14px/16px sans-serif;
  */
-import { CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
 export const DEFAULT_FONT_SIZE = 11;
 export const DEFAULT_FONT_COLOR = "#333333";

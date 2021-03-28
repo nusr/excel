@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   parser: "@typescript-eslint/parser",
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "import"],
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -9,7 +9,7 @@ module.exports = {
     "plugin:react-hooks/recommended",
   ],
   rules: {
-    "react/prop-types": 0,
+    "react/prop-types": "off",
   },
   settings: {
     react: {

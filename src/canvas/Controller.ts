@@ -3,7 +3,6 @@ import {
   ROW_TITLE_HEIGHT,
   CELL_WIDTH,
   CELL_HEIGHT,
-  assert,
 } from "@/util";
 import { IWindowSize, CanvasOverlayPosition } from "@/types";
 export interface IHitInfo {
@@ -25,12 +24,10 @@ export function getWindowWidthHeight(): IWindowSize {
 
 export class Controller {
   canvas: HTMLCanvasElement;
-  protected canvasRect: ClientRect;
   protected readonly rowMap: Map<number, number> = new Map([]);
   protected readonly colMap: Map<number, number> = new Map([]);
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.canvasRect = this.canvas.getBoundingClientRect();
   }
   getHeaderSize(): IWindowSize {
     return { width: COL_TITLE_WIDTH, height: ROW_TITLE_HEIGHT };
@@ -46,8 +43,9 @@ export class Controller {
   }
   getHitInfo(event: MouseEvent): IHitInfo {
     const { pageX, pageY } = event;
-    const x = pageX - this.canvasRect.left;
-    const y = pageY - this.canvasRect.top;
+    const size = this.canvas.getBoundingClientRect();
+    const x = pageX - size.left;
+    const y = pageY - size.top;
     const config = this.getHeaderSize();
     let resultX = config.width;
     let resultY = config.height;
@@ -86,9 +84,6 @@ export class Controller {
     const toolbarDom = document.getElementById("tool-bar-container");
     const sheetBarDom = document.getElementById("sheet-bar-container");
     const formulaBarDom = document.getElementById("formula-bar-container");
-    // assert(toolbarDom !== null);
-    // assert(sheetBarDom !== null);
-    // assert(formulaBarDom !== null);
     const toolbarSize = toolbarDom?.getBoundingClientRect();
     const sheetBarSize = sheetBarDom?.getBoundingClientRect();
     const formulaBarSize = formulaBarDom?.getBoundingClientRect();

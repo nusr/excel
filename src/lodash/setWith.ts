@@ -1,7 +1,9 @@
-export function setWith<T>(
+export function setWith<ValueType>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   obj: Record<string, any> | null | undefined,
   path: string,
-  value: T
+  value: ValueType
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Record<string, any> | null | undefined {
   if (obj == null || typeof obj !== "object") {
     return obj;

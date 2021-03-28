@@ -4,13 +4,13 @@ const fs = require("fs");
 const path = require("path");
 const esBuild = require("esbuild");
 const cwd = process.cwd();
-console.log("cwd", cwd);
+console.log("cwd:", cwd);
 const distDir = path.join(cwd, "dist");
 const assetsDir = path.join(cwd, "assets");
 const NODE_ENV = (process.env.NODE_ENV || "production").trim();
 const isProd = NODE_ENV === "production";
 const { staticService, openBrowser, buildLog } = require("./server");
-console.log("NODE_ENV", NODE_ENV, isProd);
+console.log("NODE_ENV:", NODE_ENV);
 const { handleSVGFiles } = require("./svg");
 
 const entryPath = path.join(cwd, "src/index.tsx");
@@ -60,8 +60,6 @@ function copyHtml() {
   const htmlStr = fs.readFileSync(path.join(assetsDir, htmlPath), encoding);
   const distFiles = fs.readdirSync(distDir);
   const indexJs = distFiles.filter((v) => /^index.[m]?js$/.test(v))[0];
-  console.log(indexJs);
-  console.log(typeof htmlStr);
   const result = htmlStr.replace(
     `<!--INDEX_JS_ENTRY-->`,
     `<script ${
@@ -80,7 +78,6 @@ function buildJs(type = "", fileName = "") {
   const errorFilePath = path.join(distDir, "buildError.txt");
   isBuild = true;
   buildLog(`${typeof fileName === "string" ? fileName : ""}: ${type}`);
-
   esBuild
     .build({
       ...commonConfig,

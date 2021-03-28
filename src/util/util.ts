@@ -26,13 +26,18 @@ export function getListMaxNum(list: string[] = [], prefix = ""): number {
       if (isNumber(item) || prefix.length === 0) {
         return parseInt(item, 10);
       }
-      return parseInt(item.slice(prefix.length), 10);
+      return parseInt(
+        item.includes(prefix) ? item.slice(prefix.length) : item,
+        10
+      );
     })
     .filter((v) => !isNaN(v));
   return Math.max(Math.max(...idList), 0);
 }
 
-export function getDefaultSheetInfo(list: WorksheetType[] = []): WorksheetType {
+export function getDefaultSheetInfo(
+  list: WorksheetType[] = []
+): Pick<WorksheetType, "name" | "sheetId"> {
   const sheetNum = getListMaxNum(
     list.map((item) => item.name),
     SHEET_NAME_PREFIX
@@ -41,7 +46,5 @@ export function getDefaultSheetInfo(list: WorksheetType[] = []): WorksheetType {
   return {
     name: `${SHEET_NAME_PREFIX}${sheetNum + 1}`,
     sheetId: String(sheetId),
-    rowCount: 30,
-    colCount: 30,
   };
 }

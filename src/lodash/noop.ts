@@ -1,3 +1,3 @@
-export function noop(...args: any[]): void {
+export function noop(...args: unknown[]): void {
   console.log(args);
 }

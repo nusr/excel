@@ -27,19 +27,6 @@ export class Range {
     this.rowCount = rowCount;
     this.sheetId = sheetId;
   }
-  toIRange(): IRange {
-    const { row, col, rowCount, colCount, sheetId } = this;
-    return { row, col, rowCount, colCount, sheetId };
-  }
-  isSheet(): boolean {
-    return isSheet(this);
-  }
-  isRow(): boolean {
-    return isRow(this);
-  }
-  isCol(): boolean {
-    return isCol(this);
-  }
   static makeRange(range: IRange): Range {
     return new Range(
       range.row,

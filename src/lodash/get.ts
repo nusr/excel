@@ -1,4 +1,5 @@
 export function get<T>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   obj: Record<string, any> | null | undefined,
   path: string,
   defaultValue?: T

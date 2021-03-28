@@ -9,6 +9,11 @@ const ContentContainer = styled.div`
   position: relative;
 `;
 
+const CanvasElement = styled.canvas`
+  width: 100%;
+  height: 100%;
+`;
+
 export const CanvasContainer = memo(() => {
   const controller = useController();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -33,7 +38,7 @@ export const CanvasContainer = memo(() => {
 
   return (
     <ContentContainer>
-      <canvas ref={canvasRef} />
+      <CanvasElement ref={canvasRef} />
       <CellEditorContainer />
     </ContentContainer>
   );

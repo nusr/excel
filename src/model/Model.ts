@@ -1,9 +1,7 @@
-import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, intToColumnName } from "@/util";
 import { isEmpty, get, setWith } from "@/lodash";
 import {
   StyleType,
   QueryCellResult,
-  IWindowSize,
   WorkBookJSON,
   WorksheetType,
   Coordinate,
@@ -16,6 +14,9 @@ import {
   Range,
   getListMaxNum,
   STYLE_ID_PREFIX,
+  intToColumnName,
+  DEFAULT_ROW_COUNT,
+  DEFAULT_COL_COUNT,
 } from "@/util";
 import { Controller } from "../controller/controller";
 
@@ -43,7 +44,10 @@ export class Model {
   }
   addSheet(): void {
     const item = getDefaultSheetInfo(this.workbook);
-    this.workbook = [...this.workbook, item];
+    this.workbook = [
+      ...this.workbook,
+      { ...item, colCount: DEFAULT_COL_COUNT, rowCount: DEFAULT_ROW_COUNT },
+    ];
     this.currentSheetId = item.sheetId;
     this.modelChange();
   }
@@ -100,13 +104,6 @@ export class Model {
       styles,
       worksheets,
       mergeCells,
-    };
-  }
-
-  getRowTitleHeightAndColTitleWidth(): IWindowSize {
-    return {
-      width: COL_TITLE_WIDTH,
-      height: ROW_TITLE_HEIGHT,
     };
   }
   setCellValue(value = ""): void {

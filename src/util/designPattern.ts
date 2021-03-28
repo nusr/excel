@@ -1,12 +1,13 @@
 import { assert } from "./assert";
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function singletonPattern<T, D extends Array<unknown>>(
-  C: new (...params: D) => T
-) {
-  let instance: T | null;
-  function getParams(...rest: D): T {
+export function singletonPattern<
+  ConstructorType,
+  ConstructorParams extends Array<unknown>
+>(Constructor: new (...params: ConstructorParams) => ConstructorType) {
+  let instance: ConstructorType | null;
+  function getParams(...rest: ConstructorParams): ConstructorType {
     if (!instance) {
-      instance = new C(...rest);
+      instance = new Constructor(...rest);
     }
     assert(!!instance, "singletonPattern");
     return instance;
