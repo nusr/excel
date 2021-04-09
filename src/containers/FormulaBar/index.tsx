@@ -24,6 +24,7 @@ const ActiveCellName = withTheme(styled.div`
   border-radius: 2px;
   text-align: center;
   background-color: ${(props) => props.theme.white};
+  user-select: none;
 `);
 
 const TextEditorWrapper = withTheme(styled.div`

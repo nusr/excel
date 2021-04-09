@@ -3,7 +3,6 @@ import type { Controller } from "@/controller";
 import { Content } from "./Content";
 import { CanvasOverlayPosition, EventType } from "@/types";
 import theme from "@/theme";
-import { Controller as RenderController } from "./controller";
 import { Selection } from "./Selection";
 
 export class Main {
@@ -11,35 +10,21 @@ export class Main {
   protected ctx: CanvasRenderingContext2D;
   protected controller: Controller;
   protected content: Content;
-  protected renderController: RenderController;
   protected selection: Selection;
-  constructor(
-    controller: Controller,
-    canvas: HTMLCanvasElement,
-    renderController: RenderController
-  ) {
-    const { width, height } = renderController.getCanvasSize();
-    this.renderController = renderController;
+  constructor(controller: Controller, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
     const ctx = canvas.getContext("2d");
     assert(!!ctx);
     this.ctx = ctx;
-    this.resize(width, height);
     const size = dpr();
     this.ctx.scale(size, size);
     this.content = new Content({
-      width,
-      height,
       controller,
-      renderController: this.renderController,
       name: "Content",
     });
     this.selection = new Selection({
-      width,
-      height,
       controller,
-      renderController: this.renderController,
       name: "Selection",
     });
     this.controller.on("change", this.render);
@@ -55,10 +40,13 @@ export class Main {
   getSelection(
     activeCell: CanvasOverlayPosition
   ): CanvasOverlayPosition | null {
-    const { controller, renderController } = this;
-    const { ranges } = controller;
+    const { controller } = this;
+    const { ranges, renderController } = controller;
     const [range] = ranges;
-    if (range.rowCount === range.colCount && range.rowCount === 1) {
+    if (
+      (range.rowCount === range.colCount && range.rowCount === 1) ||
+      !renderController
+    ) {
       return null;
     }
     const drawSize = renderController.getDrawSize();
@@ -103,14 +91,18 @@ export class Main {
     };
   }
   render = ({ changeSet }: EventType["change"]): void => {
+    const { renderController } = this.controller;
+    if (!renderController) {
+      return;
+    }
     const isContentChange = changeSet.has("contentChange");
-    const { width, height } = this.renderController.getCanvasSize();
+    const { width, height } = renderController.getCanvasSize();
     this.resize(width, height);
     if (isContentChange) {
       this.content.render(width, height);
     }
     const [range] = this.controller.ranges;
-    const activeCell = this.renderController.queryCell(range.row, range.col);
+    const activeCell = renderController.queryCell(range.row, range.col);
     const selectAll = this.getSelection(activeCell);
     this.selection.render(width, height, selectAll);
     this.ctx.drawImage(this.content.canvas, 0, 0);

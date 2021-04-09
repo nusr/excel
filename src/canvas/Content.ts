@@ -1,5 +1,5 @@
 import { isEmpty } from "@/lodash";
-import { CanvasOption, CanvasOverlayPosition } from "@/types";
+import { CanvasOption } from "@/types";
 import {
   thinLineWidth,
   npx,
@@ -11,6 +11,13 @@ import {
 } from "@/util";
 import { Base } from "./Base";
 import theme from "@/theme";
+import {
+  fillRect,
+  fillText,
+  drawLines,
+  renderCell,
+  resizeCanvas,
+} from "./util";
 
 const DEFAULT_FONT = makeFont(undefined, "500", npx(DEFAULT_FONT_SIZE));
 
@@ -25,7 +32,10 @@ export const HEADER_STYLE: Omit<CanvasOption, "direction"> = {
 
 export class Content extends Base {
   render(width: number, height: number): void {
-    this.resize(width, height);
+    if (!this.controller.renderController) {
+      return;
+    }
+    resizeCanvas(this.canvas, width, height);
     this.renderGrid();
     this.renderRowsHeader();
     this.renderColsHeader();
@@ -34,54 +44,52 @@ export class Content extends Base {
   }
   protected renderContent(): void {
     const { controller } = this;
-    const { model } = controller;
+    const { model, renderController } = controller;
     const data = model.getCellsContent();
     if (isEmpty(data)) {
       return;
     }
-    this.save();
+    this.ctx.save();
     for (const item of data) {
-      this.renderCell(item.row, item.col);
+      const { row, col } = item;
+      const result = renderController!.queryCell(row, col);
+      const cellInfo = this.controller.queryCell(row, col);
+      renderCell(this.ctx, { ...cellInfo, ...result });
     }
-    this.restore();
+    this.ctx.restore();
   }
   protected renderTriangle(): void {
-    const config = this.renderController.getHeaderSize();
+    const { renderController } = this.controller;
+    const config = renderController!.getHeaderSize();
     const offset = 2;
     const path = new Path2D();
     path.moveTo(npx(config.width / 2 - offset), npx(config.height - offset));
     path.lineTo(npx(config.width - offset), npx(config.height - offset));
     path.lineTo(npx(config.width - offset), npx(offset));
 
-    this.save();
-    this.setAttributes({
-      fillStyle: theme.backgroundColor,
-    });
-    this.fillRect(0, 0, config.width, config.height);
-    this.setAttributes({
-      fillStyle: theme.triangleFillColor,
-    });
-    this.fill(path);
-    this.restore();
+    this.ctx.save();
+    this.ctx.fillStyle = theme.backgroundColor;
+
+    fillRect(this.ctx, 0, 0, config.width, config.height);
+    this.ctx.fillStyle = theme.triangleFillColor;
+    this.ctx.fill(path);
+    this.ctx.restore();
   }
 
   protected renderGrid(): void {
-    const { renderController } = this;
-    const { scroll, model } = this.controller;
+    const { scroll, model, renderController } = this.controller;
     const { rowIndex, colIndex } = scroll;
     const { rowCount, colCount } = model.getSheetInfo();
-    const cell = this.renderController.queryCell(0, 0);
-    const config = renderController.getHeaderSize();
-    const { width, height } = renderController.getDrawSize();
+    const cell = renderController!.queryCell(0, 0);
+    const config = renderController!.getHeaderSize();
+    const { width, height } = renderController!.getDrawSize();
     const lineWidth = thinLineWidth();
-    this.save();
-    this.setAttributes({
-      fillStyle: theme.white,
-      lineWidth,
-      strokeStyle: theme.gridStrokeColor,
-    });
-    this.translate(config.width, config.height);
-    const pointList = [];
+    this.ctx.save();
+    this.ctx.fillStyle = theme.white;
+    this.ctx.lineWidth = lineWidth;
+    this.ctx.strokeStyle = theme.gridStrokeColor;
+    this.ctx.translate(npx(config.width), npx(config.height));
+    const pointList: Array<[x: number, y: number]> = [];
     let y = 0;
     let x = 0;
     for (let i = rowIndex; i <= rowCount; i++) {
@@ -100,55 +108,31 @@ export class Content extends Base {
     }
     pointList.push([0, height], [width, height], [width, 0], [width, height]);
     canvasLog("render grid point list:", pointList);
-    this.line(pointList);
-    this.restore();
+    drawLines(this.ctx, pointList);
+    this.ctx.restore();
   }
-  fillRowText(
-    row: number,
-    rowWidth: number,
-    y: number,
-    activeCell: CanvasOverlayPosition,
-    activeRow: number
-  ): void {
-    const isActive = activeRow === row - 1;
-    const fillStyle = isActive ? theme.primaryColor : theme.black;
-    if (isActive) {
-      this.setAttributes({ fillStyle: theme.buttonActiveColor });
-      this.fillRect(0, activeCell.top, rowWidth, activeCell.height);
-    }
-    this.setAttributes({ fillStyle });
-    this.fillText(row, rowWidth / 2, y);
+  fillRowText(row: number, rowWidth: number, y: number): void {
+    this.ctx.fillStyle = theme.black;
+    fillText(this.ctx, String(row), rowWidth / 2, y);
   }
 
-  fillColText(
-    colText: string,
-    x: number,
-    colHeight: number,
-    activeCell: CanvasOverlayPosition,
-    activeCellCol: number
-  ): void {
-    const isActive = intToColumnName(activeCellCol) === colText;
-    const fillStyle = isActive ? theme.primaryColor : theme.black;
-    if (isActive) {
-      this.setAttributes({ fillStyle: theme.buttonActiveColor });
-      this.fillRect(activeCell.left, 0, activeCell.width, colHeight);
-    }
-    this.setAttributes({ fillStyle });
-    this.fillText(colText, x, colHeight / 2 + dpr());
+  fillColText(colText: string, x: number, colHeight: number): void {
+    this.ctx.fillStyle = theme.black;
+    fillText(this.ctx, colText, x, colHeight / 2 + dpr());
   }
   protected renderRowsHeader(): void {
-    const { scroll, model } = this.controller;
+    const { scroll, model, renderController } = this.controller;
     const { rowIndex } = scroll;
     const { rowCount } = model.getSheetInfo();
-    const config = this.renderController.getHeaderSize();
+    const config = renderController!.getHeaderSize();
     const { row, col } = this.controller.queryActiveCell();
-    const activeCell = this.renderController.queryCell(row, col);
-    const { height } = this.renderController.getDrawSize();
-    this.save();
-    this.setAttributes({ fillStyle: theme.backgroundColor });
-    this.fillRect(0, config.height, config.width, height);
-    this.setAttributes(HEADER_STYLE);
-    const pointList = [];
+    const activeCell = renderController!.queryCell(row, col);
+    const { height } = renderController!.getDrawSize();
+    this.ctx.save();
+    this.ctx.fillStyle = theme.backgroundColor;
+    fillRect(this.ctx, 0, config.height, config.width, height);
+    Object.assign(this.ctx, HEADER_STYLE);
+    const pointList: Array<[x: number, y: number]> = [];
     let y = config.height;
     let i = rowIndex;
     for (; i < rowCount; i++) {
@@ -157,42 +141,30 @@ export class Content extends Base {
         temp += thinLineWidth() / 2;
       }
       pointList.push([0, temp], [config.width, temp]);
-      this.fillRowText(
-        i + 1,
-        config.width,
-        temp + activeCell.height / 2,
-        activeCell,
-        row
-      );
+      this.fillRowText(i + 1, config.width, temp + activeCell.height / 2);
       y += activeCell.height;
       if (y > height) {
         break;
       }
     }
-    this.fillRowText(
-      i + 1,
-      config.width,
-      y + activeCell.height / 2,
-      activeCell,
-      row
-    );
+    this.fillRowText(i + 1, config.width, y + activeCell.height / 2);
     pointList.push([0, y], [config.width, y], [0, 0], [0, y]);
-    this.line(pointList);
-    this.restore();
+    drawLines(this.ctx, pointList);
+    this.ctx.restore();
   }
   protected renderColsHeader(): void {
-    const { scroll, model } = this.controller;
+    const { scroll, model, renderController } = this.controller;
     const { colIndex } = scroll;
     const { colCount } = model.getSheetInfo();
-    const config = this.renderController.getHeaderSize();
+    const config = renderController!.getHeaderSize();
     const { row, col } = this.controller.queryActiveCell();
-    const activeCell = this.renderController.queryCell(row, col);
-    const { width } = this.renderController.getDrawSize();
-    const pointList = [];
-    this.save();
-    this.setAttributes({ fillStyle: theme.backgroundColor });
-    this.fillRect(config.width, 0, width, config.height);
-    this.setAttributes(HEADER_STYLE);
+    const activeCell = renderController!.queryCell(row, col);
+    const { width } = renderController!.getDrawSize();
+    const pointList: Array<[x: number, y: number]> = [];
+    this.ctx.save();
+    this.ctx.fillStyle = theme.backgroundColor;
+    fillRect(this.ctx, config.width, 0, width, config.height);
+    Object.assign(this.ctx, HEADER_STYLE);
     let x = config.width;
     let i = colIndex;
     for (; i < colCount; i++) {
@@ -204,9 +176,7 @@ export class Content extends Base {
       this.fillColText(
         intToColumnName(i),
         temp + activeCell.width / 2,
-        config.height,
-        activeCell,
-        col
+        config.height
       );
       x += activeCell.width;
       if (x > width) {
@@ -216,12 +186,10 @@ export class Content extends Base {
     this.fillColText(
       intToColumnName(i),
       x + activeCell.width / 2,
-      config.height,
-      activeCell,
-      col
+      config.height
     );
     pointList.push([x, 0], [x, config.height], [0, 0], [x, 0]);
-    this.line(pointList);
-    this.restore();
+    drawLines(this.ctx, pointList);
+    this.ctx.restore();
   }
 }

@@ -27,7 +27,7 @@ export class Controller extends EventEmitter<EventType> {
   isCellEditing = false;
   formulaParser: FormulaParser = new FormulaParser();
   private changeSet = new Set<ChangeEventType>();
-  private renderController: RenderController | null = null;
+  renderController: RenderController | null = null;
   history = new History();
   constructor() {
     super();
@@ -44,9 +44,6 @@ export class Controller extends EventEmitter<EventType> {
   }
   static createController(): Controller {
     return new this();
-  }
-  getRenderController(): RenderController | null {
-    return this.renderController;
   }
   setRenderController(renderController: RenderController): void {
     this.renderController = renderController;

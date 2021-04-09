@@ -25,7 +25,7 @@ export const CanvasContainer = memo(() => {
     const canvasDom = canvasRef.current;
     const renderController = new Controller(canvasDom);
     controller.setRenderController(renderController);
-    new Main(controller, canvasDom, renderController);
+    new Main(controller, canvasDom);
     const interaction = new Interaction(
       controller,
       canvasDom,

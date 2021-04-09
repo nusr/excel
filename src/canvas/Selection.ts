@@ -2,14 +2,14 @@ import { dpr, npxLine } from "@/util";
 import { CanvasOverlayPosition } from "@/types";
 import theme from "@/theme";
 import { Base } from "./Base";
+import { fillRect, renderCell, resizeCanvas } from "./util";
 export class Selection extends Base {
   renderFillRect(fillStyle: string, data: CanvasOverlayPosition): void {
-    this.setAttributes({
-      lineWidth: dpr(),
-      fillStyle,
-    });
+    this.ctx.fillStyle = fillStyle;
+    this.ctx.lineWidth = dpr();
     const temp = npxLine(0.5);
-    this.fillRect(
+    fillRect(
+      this.ctx,
       data.left + temp,
       data.top + temp,
       data.width - temp,
@@ -21,17 +21,19 @@ export class Selection extends Base {
     height: number,
     selectAll: CanvasOverlayPosition | null
   ): void {
-    this.resize(width, height);
+    resizeCanvas(this.canvas, width, height);
     if (selectAll) {
       const cellData = this.controller.queryActiveCellInfo();
-      const activeCell = this.renderController.queryCell(
+      const activeCell = this.controller.renderController?.queryCell(
         cellData.row,
         cellData.col
       );
       const activeCellFillColor = cellData.style?.fillColor || theme.white;
       this.renderFillRect(theme.selectionColor, selectAll);
-      this.renderFillRect(activeCellFillColor, activeCell);
-      this.renderCell(cellData.row, cellData.col);
+      if (activeCell) {
+        this.renderFillRect(activeCellFillColor, activeCell);
+        renderCell(this.ctx, { ...cellData, ...activeCell });
+      }
     }
   }
 }

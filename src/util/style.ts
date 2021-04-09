@@ -8,6 +8,7 @@
  * e.g italic bold 14px/16px sans-serif;
  */
 import type { CSSProperties } from "react";
+import { npx } from "./dpr";
 
 export const DEFAULT_FONT_SIZE = 11;
 export const DEFAULT_FONT_COLOR = "#333333";
@@ -60,3 +61,9 @@ export function makeFont(
 ): string {
   return `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily},${MUST_FONT_FAMILY}`;
 }
+
+export const DEFAULT_FONT_CONFIG = makeFont(
+  undefined,
+  "500",
+  npx(DEFAULT_FONT_SIZE)
+);

@@ -49,7 +49,7 @@ export const App = React.memo(() => {
       state.isCellEditing = isCellEditing;
       state.editCellValue = payload;
       if (cell) {
-        const temp = controller.getRenderController();
+        const temp = controller.renderController;
         const config = temp
           ? temp.queryCell(cell.row, cell.col)
           : { top: 0, left: 0, width: 0, height: 0 };
