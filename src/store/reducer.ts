@@ -3,12 +3,12 @@ import { EDITOR_DEFAULT_POSITION, storeLog } from "@/util";
 
 export const initialState: State = {
   activeCell: { ...EDITOR_DEFAULT_POSITION },
-  isCellEditing: false,
   currentSheetId: "",
   sheetList: [],
   editCellValue: "",
   canRedo: false,
   canUndo: false,
+  isCellEditing: false,
 };
 
 export const reducer: Reducer = (state, action) => {
@@ -19,12 +19,6 @@ export const reducer: Reducer = (state, action) => {
       break;
     case "CHANGE_ACTIVE_CELL":
       state.activeCell = action.payload;
-      break;
-    case "ENTER_EDITING":
-      state.isCellEditing = true;
-      break;
-    case "QUIT_EDITING":
-      state.isCellEditing = false;
       break;
     case "RESET":
       state = initialState;

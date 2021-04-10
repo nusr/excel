@@ -23,12 +23,12 @@ class Debug {
     boolean
   >([
     ["model", false],
-    ["store", false],
-    ["interaction", false],
+    ["store", true],
+    ["interaction", true],
     ["history", false],
     ["canvas", false],
-    ["controller", false],
-    ["containers", false],
+    ["controller", true],
+    ["containers", true],
   ]);
   constructor(namespace: NameSpaceType) {
     this.namespace = namespace;

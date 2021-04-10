@@ -1,4 +1,4 @@
-import { isEmpty, isNil } from "@/lodash";
+import { isEmpty } from "@/lodash";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
@@ -24,7 +24,6 @@ export class Controller extends EventEmitter<EventType> {
   scroll: Scroll = new Scroll(this);
   model: Model = new Model(this);
   ranges: Array<Range> = [];
-  isCellEditing = false;
   formulaParser: FormulaParser = new FormulaParser();
   private changeSet = new Set<ChangeEventType>();
   renderController: RenderController | null = null;
@@ -49,6 +48,7 @@ export class Controller extends EventEmitter<EventType> {
     this.renderController = renderController;
   }
   emitChange(): void {
+    controllerLog("emitChange", this.changeSet);
     this.emit("change", { changeSet: this.changeSet });
     this.changeSet = new Set<ChangeEventType>();
   }
@@ -113,11 +113,20 @@ export class Controller extends EventEmitter<EventType> {
     this.setActiveCell(row, col, 0, sheetInfo.colCount);
     controllerLog("selectRow");
   }
+
   quitEditing(): void {
-    this.isCellEditing = false;
+    controllerLog("quitEditing");
+    const dom = document.getElementById("cell-editor");
+    if (dom) {
+      dom.blur();
+    }
   }
   enterEditing(): void {
-    this.isCellEditing = true;
+    controllerLog("enterEditing");
+    const dom = document.getElementById("cell-editor");
+    if (dom) {
+      dom.focus();
+    }
   }
   loadJSON(json: WorkBookJSON): void {
     const { model } = this;
@@ -155,17 +164,12 @@ export class Controller extends EventEmitter<EventType> {
     this.emitChange();
   }
 
-  setCellValue(value: string, ranges?: Range[]): void {
-    let temp;
-    if (!isNil(ranges)) {
-      temp = ranges;
-    } else {
-      const t = this.queryActiveCell();
-      temp = [new Range(t.row, t.col, 1, 1, this.model.currentSheetId)];
-    }
+  setCellValue(value: string): void {
+    controllerLog("setCellValue", value);
+    const t = this.queryActiveCell();
+    const temp = [new Range(t.row, t.col, 1, 1, this.model.currentSheetId)];
     this.model.setCellValue(value, temp);
     this.changeSet.add("contentChange");
-    this.quitEditing();
     this.emitChange();
   }
   setCellStyle(style: Partial<StyleType>, ranges = this.ranges): void {

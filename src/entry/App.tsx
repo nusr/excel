@@ -4,7 +4,7 @@ import styled, { ThemeProvider } from "styled-components";
 import theme from "@/theme";
 import { useDispatch, useController } from "@/store";
 import { MOCK_MODEL } from "@/model";
-import { handleBuildError, containersLog } from "@/util";
+import { handleBuildError } from "@/util";
 import { State } from "@/types";
 
 const AsyncCanvasContainer = React.lazy(
@@ -30,7 +30,6 @@ export const App = React.memo(() => {
   const dispatch = useDispatch();
   useEffect(() => {
     controller.on("change", (data) => {
-      const { isCellEditing } = controller;
       const { changeSet } = data;
       const state: Partial<State> = {
         canRedo: controller.canRedo(),
@@ -41,18 +40,15 @@ export const App = React.memo(() => {
         state.sheetList = workbook;
         state.currentSheetId = currentSheetId;
       }
-      if (changeSet.has("selectionChange")) {
-        const cell = controller.queryActiveCellInfo();
-        state.isCellEditing = isCellEditing;
-        if (cell) {
-          const temp = controller.renderController;
-          const config = temp
-            ? temp.queryCell(cell.row, cell.col)
-            : { top: 0, left: 0, width: 0, height: 0 };
-          state.activeCell = { ...cell, ...config };
-        }
+
+      const cell = controller.queryActiveCellInfo();
+      if (cell) {
+        const temp = controller.renderController;
+        const config = temp
+          ? temp.queryCell(cell.row, cell.col)
+          : { top: 0, left: 0, width: 0, height: 0 };
+        state.activeCell = { ...cell, ...config };
       }
-      containersLog("app batch:", state);
       dispatch({ type: "BATCH", payload: state });
     });
     controller.loadJSON(MOCK_MODEL);

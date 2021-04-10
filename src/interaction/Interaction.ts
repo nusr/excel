@@ -26,15 +26,13 @@ export class Interaction {
     window.removeEventListener("resize", this.resize);
   }
   mouseDown = (event: MouseEvent): void => {
+    // interactionLog(event);
     const { timeStamp, clientX, clientY } = event;
     const { controller } = this;
     const { renderController } = controller;
     if (!renderController) {
       return;
     }
-    // if (controller.isCellEditing) {
-      // return;
-    // }
     const { width, height } = renderController.getHeaderSize();
     const x = clientX - this.canvasRect.left;
     const y = clientY - this.canvasRect.top;
@@ -51,13 +49,22 @@ export class Interaction {
       controller.selectCol(position.row, position.col);
       return;
     }
-    controller.setActiveCell(position.row, position.col);
+    const activeCell = controller.queryActiveCell();
+    const check =
+      activeCell.row >= 0 &&
+      activeCell.row === position.row &&
+      activeCell.col === position.col;
+    if (!check) {
+      controller.quitEditing();
+      controller.setActiveCell(position.row, position.col);
+    }
     const delay = timeStamp - this.lastTimeStamp;
+    // const checkDelay = delay < DOUBLE_CLICK_TIME;
     if (delay < DOUBLE_CLICK_TIME) {
+      // interactionLog("mouseDown", check, checkDelay);
       controller.enterEditing();
     }
     this.lastTimeStamp = timeStamp;
-    interactionLog("mouseDown", position);
   };
   mouseMove = (event: MouseEvent): void => {
     const { clientX, clientY } = event;

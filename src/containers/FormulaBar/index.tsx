@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from "react";
 import styled, { withTheme } from "styled-components";
 import { useSelector } from "@/store";
-import { TextEditorContainer } from "../TextEditor";
+import { FormulaEditor } from "./FormulaEditor";
 import { intToColumnName } from "@/util";
 
 const FormulaBarContainer = withTheme(styled.div`
@@ -46,7 +46,7 @@ export const FormulaBar = memo(() => {
     <FormulaBarContainer id="formula-bar-container">
       <ActiveCellName>{text}</ActiveCellName>
       <TextEditorWrapper>
-        <TextEditorContainer isFormulaBar />
+        <FormulaEditor />
       </TextEditorWrapper>
     </FormulaBarContainer>
   );

@@ -17,12 +17,12 @@ export type CellInfo = QueryCellResult &
   Coordinate & { displayValue: string | number };
 export type State = {
   activeCell: CellInfo & CanvasOverlayPosition;
-  isCellEditing: boolean;
   currentSheetId: string;
   sheetList: WorkBookJSON["workbook"];
   editCellValue: string;
   canRedo: boolean;
   canUndo: boolean;
+  isCellEditing: boolean;
 };
 
 export type Action =
