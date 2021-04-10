@@ -1,20 +1,12 @@
 import { Controller } from "@/controller";
-import { Controller as RenderController } from "@/canvas";
-
 import { DOUBLE_CLICK_TIME, interactionLog } from "@/util";
 export class Interaction {
   protected canvas: HTMLCanvasElement;
   protected controller: Controller;
   protected lastTimeStamp = 0;
   protected canvasRect: ClientRect;
-  renderController: RenderController;
-  constructor(
-    controller: Controller,
-    canvas: HTMLCanvasElement,
-    renderController: RenderController
-  ) {
+  constructor(controller: Controller, canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.renderController = renderController;
     this.canvasRect = this.canvas.getBoundingClientRect();
     this.controller = controller;
     this.addEvents();
@@ -35,7 +27,14 @@ export class Interaction {
   }
   mouseDown = (event: MouseEvent): void => {
     const { timeStamp, clientX, clientY } = event;
-    const { controller, renderController } = this;
+    const { controller } = this;
+    const { renderController } = controller;
+    if (!renderController) {
+      return;
+    }
+    // if (controller.isCellEditing) {
+      // return;
+    // }
     const { width, height } = renderController.getHeaderSize();
     const x = clientX - this.canvasRect.left;
     const y = clientY - this.canvasRect.top;
@@ -62,7 +61,11 @@ export class Interaction {
   };
   mouseMove = (event: MouseEvent): void => {
     const { clientX, clientY } = event;
-    const { controller, renderController } = this;
+    const { controller } = this;
+    const { renderController } = controller;
+    if (!renderController) {
+      return;
+    }
     const { width, height } = renderController.getHeaderSize();
     const x = clientX - this.canvasRect.left;
     const y = clientY - this.canvasRect.top;

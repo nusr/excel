@@ -28,6 +28,7 @@ class Debug {
     ["history", false],
     ["canvas", false],
     ["controller", false],
+    ["containers", false],
   ]);
   constructor(namespace: NameSpaceType) {
     this.namespace = namespace;

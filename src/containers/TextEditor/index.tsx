@@ -2,7 +2,12 @@ import React, { memo, useCallback, useMemo } from "react";
 import { TextEditor } from "@/components";
 import { useSelector, useDispatch, useController } from "@/store";
 import { isEmpty } from "@/lodash";
-import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE } from "@/util";
+import {
+  DEFAULT_FONT_COLOR,
+  makeFont,
+  DEFAULT_FONT_SIZE,
+  containersLog,
+} from "@/util";
 
 type Props = {
   isFormulaBar?: boolean;
@@ -16,17 +21,22 @@ export const TextEditorContainer = memo<Props>((props) => {
     "isCellEditing",
     "editCellValue",
   ]);
+
+  const initValue = useMemo(() => {
+    const temp = String(activeCell.value || "");
+    if (isFormulaBar) {
+      return (activeCell.formula ? `=${activeCell.formula}` : "") || temp;
+    }
+    return temp;
+  }, [isFormulaBar, activeCell]);
+
   const displayValue = useMemo(() => {
     if (isCellEditing) {
       return editCellValue;
     } else {
-      const temp = String(activeCell.value || "");
-      if (isFormulaBar) {
-        return (activeCell.formula ? `=${activeCell.formula}` : "") || temp;
-      }
-      return temp;
+      return initValue;
     }
-  }, [isCellEditing, isFormulaBar, activeCell, editCellValue]);
+  }, [isCellEditing, initValue, editCellValue]);
   const style = useMemo(() => {
     const { style } = activeCell;
     if (isFormulaBar || isEmpty(style)) {
@@ -48,19 +58,19 @@ export const TextEditorContainer = memo<Props>((props) => {
 
   const onInputEnter = useCallback(() => {
     controller.setCellValue(editCellValue);
-    controller.quitEditing();
     controller.setActiveCell(activeCell.row + 1, activeCell.col);
   }, [activeCell, editCellValue, controller]);
   const onInputTab = useCallback(() => {
     controller.setCellValue(editCellValue);
-    controller.quitEditing();
     controller.setActiveCell(activeCell.row, activeCell.col + 1);
   }, [activeCell, editCellValue, controller]);
   const onBlur = useCallback(() => {
-    // controller.setCellValue(activeCell.row, activeCell.col, editCellValue);
-    // controller.quitEditing();
-    // dispatch({ type: "QUIT_EDITING" });
-  }, []);
+    if (controller.isCellEditing) {
+      console.log("blur", activeCell, editCellValue);
+      controller.setCellValue(editCellValue);
+      dispatch({ type: "CHANGE_Edit_CELL_VALUE", payload: "" });
+    }
+  }, [controller, editCellValue, activeCell, dispatch]);
   const onChange = useCallback(
     (event) => {
       const { value } = event.currentTarget;
@@ -68,12 +78,20 @@ export const TextEditorContainer = memo<Props>((props) => {
     },
     [dispatch]
   );
+  const onFocus = useCallback(() => {
+    if (controller.isCellEditing) {
+      return;
+    }
+    containersLog("focus", initValue);
+    dispatch({ type: "CHANGE_Edit_CELL_VALUE", payload: initValue });
+  }, [initValue, dispatch, controller]);
   return (
     <TextEditor
       value={displayValue}
       style={style}
       isCellEditing={isCellEditing}
       onBlur={onBlur}
+      onFocus={onFocus}
       onInputEnter={onInputEnter}
       onInputTab={onInputTab}
       onChange={onChange}

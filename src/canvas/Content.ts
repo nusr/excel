@@ -1,14 +1,5 @@
 import { isEmpty } from "@/lodash";
-import { CanvasOption } from "@/types";
-import {
-  thinLineWidth,
-  npx,
-  dpr,
-  canvasLog,
-  intToColumnName,
-  makeFont,
-  DEFAULT_FONT_SIZE,
-} from "@/util";
+import { thinLineWidth, npx, dpr, intToColumnName } from "@/util";
 import { Base } from "./Base";
 import theme from "@/theme";
 import {
@@ -18,23 +9,10 @@ import {
   renderCell,
   resizeCanvas,
 } from "./util";
-
-const DEFAULT_FONT = makeFont(undefined, "500", npx(DEFAULT_FONT_SIZE));
-
-export const HEADER_STYLE: Omit<CanvasOption, "direction"> = {
-  textAlign: "center",
-  textBaseline: "middle",
-  font: DEFAULT_FONT,
-  fillStyle: theme.black,
-  lineWidth: thinLineWidth(),
-  strokeStyle: theme.gridStrokeColor,
-};
+import { HEADER_STYLE } from "./constant";
 
 export class Content extends Base {
   render(width: number, height: number): void {
-    if (!this.controller.renderController) {
-      return;
-    }
     resizeCanvas(this.canvas, width, height);
     this.renderGrid();
     this.renderRowsHeader();
@@ -46,13 +24,13 @@ export class Content extends Base {
     const { controller } = this;
     const { model, renderController } = controller;
     const data = model.getCellsContent();
-    if (isEmpty(data)) {
+    if (isEmpty(data) || !renderController) {
       return;
     }
     this.ctx.save();
     for (const item of data) {
       const { row, col } = item;
-      const result = renderController!.queryCell(row, col);
+      const result = renderController.queryCell(row, col);
       const cellInfo = this.controller.queryCell(row, col);
       renderCell(this.ctx, { ...cellInfo, ...result });
     }
@@ -60,7 +38,10 @@ export class Content extends Base {
   }
   protected renderTriangle(): void {
     const { renderController } = this.controller;
-    const config = renderController!.getHeaderSize();
+    if (!renderController) {
+      return;
+    }
+    const config = renderController.getHeaderSize();
     const offset = 2;
     const path = new Path2D();
     path.moveTo(npx(config.width / 2 - offset), npx(config.height - offset));
@@ -78,11 +59,14 @@ export class Content extends Base {
 
   protected renderGrid(): void {
     const { scroll, model, renderController } = this.controller;
+    if (!renderController) {
+      return;
+    }
     const { rowIndex, colIndex } = scroll;
     const { rowCount, colCount } = model.getSheetInfo();
-    const cell = renderController!.queryCell(0, 0);
-    const config = renderController!.getHeaderSize();
-    const { width, height } = renderController!.getDrawSize();
+    const cell = renderController.queryCell(0, 0);
+    const config = renderController.getHeaderSize();
+    const { width, height } = renderController.getDrawSize();
     const lineWidth = thinLineWidth();
     this.ctx.save();
     this.ctx.fillStyle = theme.white;
@@ -107,7 +91,6 @@ export class Content extends Base {
       }
     }
     pointList.push([0, height], [width, height], [width, 0], [width, height]);
-    canvasLog("render grid point list:", pointList);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
   }
@@ -122,12 +105,15 @@ export class Content extends Base {
   }
   protected renderRowsHeader(): void {
     const { scroll, model, renderController } = this.controller;
+    if (!renderController) {
+      return;
+    }
     const { rowIndex } = scroll;
     const { rowCount } = model.getSheetInfo();
-    const config = renderController!.getHeaderSize();
+    const config = renderController.getHeaderSize();
     const { row, col } = this.controller.queryActiveCell();
-    const activeCell = renderController!.queryCell(row, col);
-    const { height } = renderController!.getDrawSize();
+    const activeCell = renderController.queryCell(row, col);
+    const { height } = renderController.getDrawSize();
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
     fillRect(this.ctx, 0, config.height, config.width, height);
@@ -154,12 +140,15 @@ export class Content extends Base {
   }
   protected renderColsHeader(): void {
     const { scroll, model, renderController } = this.controller;
+    if (!renderController) {
+      return;
+    }
     const { colIndex } = scroll;
     const { colCount } = model.getSheetInfo();
-    const config = renderController!.getHeaderSize();
+    const config = renderController.getHeaderSize();
     const { row, col } = this.controller.queryActiveCell();
-    const activeCell = renderController!.queryCell(row, col);
-    const { width } = renderController!.getDrawSize();
+    const activeCell = renderController.queryCell(row, col);
+    const { width } = renderController.getDrawSize();
     const pointList: Array<[x: number, y: number]> = [];
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;

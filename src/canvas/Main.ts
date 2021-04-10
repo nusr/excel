@@ -1,9 +1,10 @@
-import { npx, assert, dpr, isCol, isRow, isSheet } from "@/util";
+import { assert, dpr, isCol, isRow, isSheet, canvasLog } from "@/util";
 import type { Controller } from "@/controller";
 import { Content } from "./Content";
 import { CanvasOverlayPosition, EventType } from "@/types";
 import theme from "@/theme";
 import { Selection } from "./Selection";
+import { strokeRect, resizeCanvas } from "./util";
 
 export class Main {
   protected canvas: HTMLCanvasElement;
@@ -30,13 +31,7 @@ export class Main {
     this.controller.on("change", this.render);
     this.render({ changeSet: new Set(["contentChange"]) });
   }
-  resize(width: number, height: number): void {
-    const { canvas } = this;
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-    canvas.width = npx(width);
-    canvas.height = npx(height);
-  }
+
   getSelection(
     activeCell: CanvasOverlayPosition
   ): CanvasOverlayPosition | null {
@@ -97,23 +92,23 @@ export class Main {
     }
     const isContentChange = changeSet.has("contentChange");
     const { width, height } = renderController.getCanvasSize();
-    this.resize(width, height);
+    resizeCanvas(this.canvas, width, height);
     if (isContentChange) {
+      canvasLog("render content");
       this.content.render(width, height);
     }
     const [range] = this.controller.ranges;
     const activeCell = renderController.queryCell(range.row, range.col);
     const selectAll = this.getSelection(activeCell);
+
     this.selection.render(width, height, selectAll);
+    canvasLog("render selection");
     this.ctx.drawImage(this.content.canvas, 0, 0);
     this.ctx.drawImage(this.selection.canvas, 0, 0);
+
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
     const line = selectAll ? selectAll : activeCell;
-    this.strokeRect(line.left, line.top, line.width, line.height);
+    strokeRect(this.ctx, line.left, line.top, line.width, line.height);
   };
-
-  strokeRect(x: number, y: number, width: number, height: number): void {
-    this.ctx.strokeRect(npx(x) - 0.5, npx(y) - 0.5, npx(width), npx(height));
-  }
 }

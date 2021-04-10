@@ -1,10 +1,11 @@
 import { assert } from "./assert";
+import { MUST_FONT_FAMILY } from "./style";
 
 export function isSupportFontFamily(fontFamily: string): boolean {
   if (typeof fontFamily != "string") {
     return false;
   }
-  const defaultFont = "Arial";
+  const defaultFont = MUST_FONT_FAMILY;
   if (fontFamily.toLowerCase() == defaultFont.toLowerCase()) {
     return true;
   }

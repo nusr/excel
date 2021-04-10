@@ -24,6 +24,7 @@ export type CommonProps = {
   onInputTab(event: React.KeyboardEvent<HTMLInputElement>): void;
   onBlur(event: React.FocusEvent<HTMLInputElement>): void;
   onChange(event: React.ChangeEvent<HTMLInputElement>): void;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
 };
 type TextEditorProps = {
   style?: React.CSSProperties;
@@ -33,11 +34,12 @@ type TextEditorProps = {
 
 export const TextEditor = memo((props: TextEditorProps) => {
   const {
-    style = {},
+    style,
     value = "",
     className = "",
     isCellEditing,
     onBlur,
+    onFocus,
     onChange,
     onInputTab,
     onInputEnter,
@@ -49,12 +51,6 @@ export const TextEditor = memo((props: TextEditorProps) => {
       dom.focus();
     }
   }, [isCellEditing]);
-  const handleBlur = useCallback(
-    (event: React.FocusEvent<HTMLInputElement>) => {
-      onBlur(event);
-    },
-    [onBlur]
-  );
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       const { key } = event;
@@ -66,21 +62,24 @@ export const TextEditor = memo((props: TextEditorProps) => {
     },
     [onInputEnter, onInputTab]
   );
-  const handleChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(event);
+
+  const handleFocus = useCallback(
+    (event: React.FocusEvent<HTMLInputElement>) => {
+      onFocus && onFocus(event);
     },
-    [onChange]
+    [onFocus]
   );
+
   return (
     <TextEditorWrapper className={className}>
       <TextEditorContent
         style={style}
         ref={inputRef}
         value={value}
-        onBlur={handleBlur}
+        onBlur={onBlur}
+        onFocus={handleFocus}
         onKeyDown={handleKeyDown}
-        onChange={handleChange}
+        onChange={onChange}
       />
     </TextEditorWrapper>
   );

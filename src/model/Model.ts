@@ -106,8 +106,9 @@ export class Model {
       mergeCells,
     };
   }
-  setCellValue(value = ""): void {
-    const { row, col } = this.controller.queryActiveCell();
+  setCellValue(value = "", ranges: Range[]): void {
+    const [range] = ranges;
+    const { row, col } = range;
     const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
     let formula = "";
     let realValue = "";

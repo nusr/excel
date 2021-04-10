@@ -26,11 +26,7 @@ export const CanvasContainer = memo(() => {
     const renderController = new Controller(canvasDom);
     controller.setRenderController(renderController);
     new Main(controller, canvasDom);
-    const interaction = new Interaction(
-      controller,
-      canvasDom,
-      renderController
-    );
+    const interaction = new Interaction(controller, canvasDom);
     return () => {
       interaction.removeEvents();
     };

@@ -1,4 +1,4 @@
-import { Action, CellInfo } from "./store";
+import { CellInfo } from "./store";
 export type ChangeEventType = "contentChange" | "selectionChange";
 
 export type IWindowSize = {
@@ -7,7 +7,6 @@ export type IWindowSize = {
 };
 
 export type EventType = {
-  dispatch: Action;
   change: {
     changeSet: Set<ChangeEventType>;
     payload?: CellInfo;

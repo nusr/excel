@@ -1,4 +1,4 @@
-import { isEmpty } from "@/lodash";
+import { isEmpty, isNil } from "@/lodash";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
@@ -155,9 +155,17 @@ export class Controller extends EventEmitter<EventType> {
     this.emitChange();
   }
 
-  setCellValue(value: string): void {
-    this.model.setCellValue(value);
+  setCellValue(value: string, ranges?: Range[]): void {
+    let temp;
+    if (!isNil(ranges)) {
+      temp = ranges;
+    } else {
+      const t = this.queryActiveCell();
+      temp = [new Range(t.row, t.col, 1, 1, this.model.currentSheetId)];
+    }
+    this.model.setCellValue(value, temp);
     this.changeSet.add("contentChange");
+    this.quitEditing();
     this.emitChange();
   }
   setCellStyle(style: Partial<StyleType>, ranges = this.ranges): void {
