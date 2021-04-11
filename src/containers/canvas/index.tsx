@@ -1,4 +1,4 @@
-import React, { memo, useRef, useEffect } from "react";
+import React, { memo, useRef, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import { CellEditorContainer } from "./CellEditor";
 import { Main, Controller } from "@/canvas";
@@ -32,9 +32,17 @@ export const CanvasContainer = memo(() => {
     };
   }, [controller]);
 
+  const onContextMenu = useCallback(
+    (event: React.MouseEvent<HTMLCanvasElement>) => {
+      event.stopPropagation();
+      event.preventDefault();
+    },
+    []
+  );
+
   return (
     <ContentContainer>
-      <CanvasElement ref={canvasRef} id="canvas-element" />
+      <CanvasElement ref={canvasRef} onContextMenu={onContextMenu} />
       <CellEditorContainer />
     </ContentContainer>
   );

@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useCallback, useRef } from "react";
+import React, { memo, useMemo, useCallback, useRef, useEffect } from "react";
 import { pick, isEmpty } from "@/lodash";
 import { CellEditorContent } from "@/components";
 import { QueryCellResult } from "@/types";
@@ -36,7 +36,6 @@ export const CellEditorContainer = memo(() => {
     "editCellValue",
     "isCellEditing",
   ]);
-  console.log("isCellEditing", isCellEditing);
   const style = useMemo(() => {
     const otherStyle = getEditorStyle(activeCell.style);
     const temp: React.CSSProperties = pick(activeCell, [
@@ -45,23 +44,35 @@ export const CellEditorContainer = memo(() => {
       "width",
       "height",
     ]);
-    return { ...temp, ...otherStyle };
-  }, [activeCell]);
+    return {
+      ...temp,
+      ...otherStyle,
+      display: isCellEditing ? "inline-block" : "none",
+    };
+  }, [activeCell, isCellEditing]);
 
   const initValue = useMemo(() => {
     const temp = String(activeCell.value || "");
     return temp;
   }, [activeCell]);
 
-  const onFocus = useCallback(() => {
-    const editCellValue =
-      (activeCell.formula ? `=${activeCell.formula}` : "") ||
-      String(activeCell.value || "");
-    dispatch({
-      type: "BATCH",
-      payload: { isCellEditing: true, editCellValue },
-    });
-  }, [activeCell, dispatch]);
+  useEffect(() => {
+    const handleKeyDown = () => {
+      if (isCellEditing) {
+        return;
+      }
+      dispatch({
+        type: "BATCH",
+        payload: { isCellEditing: true, editCellValue: initValue },
+      });
+      inputRef.current?.focus();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [initValue, dispatch, isCellEditing]);
+
   const onChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const { value } = event.currentTarget;
@@ -109,7 +120,6 @@ export const CellEditorContainer = memo(() => {
       style={style}
       ref={inputRef}
       id="cell-editor"
-      onFocus={onFocus}
       onChange={onChange}
       onKeyDown={onKeyDown}
       onBlur={onBlur}

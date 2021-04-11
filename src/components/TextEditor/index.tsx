@@ -12,7 +12,7 @@ export const BaseEditor = styled.input`
 `;
 
 export const CellEditorContent = withTheme(styled(BaseEditor)`
-  /* display: none; */
+  display: none;
   position: absolute;
   left: 0;
   top: 0;

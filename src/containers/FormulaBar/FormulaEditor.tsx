@@ -1,6 +1,7 @@
 import React, { memo, useMemo, useCallback, useRef } from "react";
 import { useSelector, useController, useDispatch } from "@/store";
 import { BaseEditor } from "@/components";
+import { containersLog } from "@/util";
 
 export const FormulaEditor = memo(() => {
   const controller = useController();
@@ -35,17 +36,21 @@ export const FormulaEditor = memo(() => {
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       const { key } = event;
       if (key === "Enter") {
-        controller.setCellValue(editCellValue);
-        controller.setActiveCell(activeCell.row + 1, activeCell.col);
-        dispatch({
-          type: "BATCH",
-          payload: { isCellEditing: false, editCellValue: "" },
-        });
         inputRef.current?.blur();
+        controller.setActiveCell(activeCell.row + 1, activeCell.col);
       }
     },
-    [activeCell, controller, editCellValue, dispatch]
+    [activeCell, controller]
   );
+
+  const onBlur = useCallback(() => {
+    containersLog("FormulaEditor onBlur");
+    controller.setCellValue(editCellValue);
+    dispatch({
+      type: "BATCH",
+      payload: { isCellEditing: false, editCellValue: "" },
+    });
+  }, [controller, editCellValue, dispatch]);
 
   return (
     <BaseEditor
@@ -54,6 +59,7 @@ export const FormulaEditor = memo(() => {
       onFocus={onFocus}
       onChange={onChange}
       onKeyDown={handleKeyDown}
+      onBlur={onBlur}
     />
   );
 });

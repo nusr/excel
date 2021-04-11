@@ -25,6 +25,7 @@ export class Controller extends EventEmitter<EventType> {
   model: Model = new Model(this);
   ranges: Array<Range> = [];
   formulaParser: FormulaParser = new FormulaParser();
+  isCellEditing = false;
   private changeSet = new Set<ChangeEventType>();
   renderController: RenderController | null = null;
   history = new History();
@@ -116,10 +117,12 @@ export class Controller extends EventEmitter<EventType> {
 
   quitEditing(): void {
     controllerLog("quitEditing");
-    const dom = document.getElementById("cell-editor");
-    if (dom) {
-      dom.blur();
+    // Cell Editor or Formula Bar Editor
+    const dom = document.activeElement;
+    if (dom && dom.tagName === "INPUT") {
+      (dom as HTMLInputElement).blur();
     }
+    this.isCellEditing = false;
   }
   enterEditing(): void {
     controllerLog("enterEditing");
@@ -127,6 +130,8 @@ export class Controller extends EventEmitter<EventType> {
     if (dom) {
       dom.focus();
     }
+    this.isCellEditing = true;
+    this.emitChange();
   }
   loadJSON(json: WorkBookJSON): void {
     const { model } = this;

@@ -40,14 +40,19 @@ export const App = React.memo(() => {
         state.sheetList = workbook;
         state.currentSheetId = currentSheetId;
       }
-
       const cell = controller.queryActiveCellInfo();
-      if (cell) {
-        const temp = controller.renderController;
-        const config = temp
-          ? temp.queryCell(cell.row, cell.col)
-          : { top: 0, left: 0, width: 0, height: 0 };
+      const { isCellEditing, renderController } = controller;
+      if (renderController) {
+        const config = renderController.queryCell(cell.row, cell.col);
         state.activeCell = { ...cell, ...config };
+      }
+      state.isCellEditing = isCellEditing;
+      if (isCellEditing) {
+        const editCellValue =
+          (cell.formula ? `=${cell.formula}` : "") || String(cell.value || "");
+        state.editCellValue = editCellValue;
+      } else {
+        state.editCellValue = "";
       }
       dispatch({ type: "BATCH", payload: state });
     });

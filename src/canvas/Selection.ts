@@ -52,6 +52,7 @@ export class Selection extends Base {
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
     pointList.push([top.left, size.height], [top.left + width, size.height]);
+    pointList.push([size.width, left.top], [size.width, left.top + height]);
     drawLines(this.ctx, pointList);
   }
   render(

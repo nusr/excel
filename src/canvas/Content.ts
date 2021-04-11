@@ -64,7 +64,6 @@ export class Content extends Base {
     }
     const { rowIndex, colIndex } = scroll;
     const { rowCount, colCount } = model.getSheetInfo();
-    const cell = renderController.queryCell(0, 0);
     const config = renderController.getHeaderSize();
     const { width, height } = renderController.getDrawSize();
     const lineWidth = thinLineWidth();
@@ -78,14 +77,14 @@ export class Content extends Base {
     let x = 0;
     for (let i = rowIndex; i <= rowCount; i++) {
       pointList.push([0, y], [width, y]);
-      y += cell.height;
+      y += renderController.getRowHeight(i);
       if (y > height) {
         break;
       }
     }
     for (let i = colIndex; i <= colCount; i++) {
       pointList.push([x, 0], [x, y]);
-      x += cell.width;
+      x += renderController.getColWidth(i);
       if (x > width) {
         break;
       }
@@ -111,8 +110,7 @@ export class Content extends Base {
     const { rowIndex } = scroll;
     const { rowCount } = model.getSheetInfo();
     const config = renderController.getHeaderSize();
-    const { row, col } = this.controller.queryActiveCell();
-    const activeCell = renderController.queryCell(row, col);
+    const { row } = this.controller.queryActiveCell();
     const { height } = renderController.getDrawSize();
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
@@ -121,19 +119,20 @@ export class Content extends Base {
     const pointList: Array<[x: number, y: number]> = [];
     let y = config.height;
     let i = rowIndex;
+    const rowHeight = renderController.getRowHeight(row);
     for (; i < rowCount; i++) {
       let temp = y;
       if (i === rowIndex) {
         temp += thinLineWidth() / 2;
       }
       pointList.push([0, temp], [config.width, temp]);
-      this.fillRowText(i + 1, config.width, temp + activeCell.height / 2);
-      y += activeCell.height;
+      this.fillRowText(i + 1, config.width, temp + rowHeight / 2);
+      y += rowHeight;
       if (y > height) {
         break;
       }
     }
-    this.fillRowText(i + 1, config.width, y + activeCell.height / 2);
+    this.fillRowText(i + 1, config.width, y + rowHeight / 2);
     pointList.push([0, y], [config.width, y], [0, 0], [0, y]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
@@ -146,14 +145,14 @@ export class Content extends Base {
     const { colIndex } = scroll;
     const { colCount } = model.getSheetInfo();
     const config = renderController.getHeaderSize();
-    const { row, col } = this.controller.queryActiveCell();
-    const activeCell = renderController.queryCell(row, col);
+    const { col } = this.controller.queryActiveCell();
     const { width } = renderController.getDrawSize();
     const pointList: Array<[x: number, y: number]> = [];
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
     fillRect(this.ctx, config.width, 0, width, config.height);
     Object.assign(this.ctx, HEADER_STYLE);
+    const colWidth = renderController.getColWidth(col);
     let x = config.width;
     let i = colIndex;
     for (; i < colCount; i++) {
@@ -162,21 +161,13 @@ export class Content extends Base {
         temp += thinLineWidth() / 2;
       }
       pointList.push([temp, 0], [temp, config.height]);
-      this.fillColText(
-        intToColumnName(i),
-        temp + activeCell.width / 2,
-        config.height
-      );
-      x += activeCell.width;
+      this.fillColText(intToColumnName(i), temp + colWidth / 2, config.height);
+      x += colWidth;
       if (x > width) {
         break;
       }
     }
-    this.fillColText(
-      intToColumnName(i),
-      x + activeCell.width / 2,
-      config.height
-    );
+    this.fillColText(intToColumnName(i), x + colWidth / 2, config.height);
     pointList.push([x, 0], [x, config.height], [0, 0], [x, 0]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
