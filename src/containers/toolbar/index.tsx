@@ -1,13 +1,5 @@
-import React, { memo, useCallback, useEffect, useState } from "react";
-import styled, { withTheme } from "styled-components";
-import {
-  Button,
-  Github,
-  BaseIcon,
-  Select,
-  ColorPicker,
-  OptionItem,
-} from "@/components";
+import React, { memo, useCallback } from "react";
+import { Button, Github, BaseIcon, Select, ColorPicker } from "@/components";
 import { useSelector, useController } from "@/store";
 import { StyleType } from "@/types";
 import {
@@ -15,26 +7,14 @@ import {
   DEFAULT_FONT_SIZE,
   isNumber,
   DEFAULT_FONT_COLOR,
-  FONT_FAMILY_LIST,
   DEFAULT_FONT_FAMILY,
-  isSupportFontFamily,
 } from "@/util";
-
-const ToolbarWrapper = withTheme(styled.div`
-  width: 100%;
-  padding: 0 20px;
-  box-sizing: border-box;
-  height: 40px;
-  background-color: #f3f3f3;
-  border-bottom: 1px solid ${(props) => props.theme.gridStrokeColor};
-  display: flex;
-  align-items: center;
-`);
+import { useFontFamily } from "@/hooks";
 
 const colorPickerStyle = { marginLeft: 8 };
 
 export const ToolbarContainer = memo(() => {
-  const [fontFamilyList, setFontFamilyList] = useState<OptionItem[]>([]);
+  const [fontFamilyList] = useFontFamily();
   const controller = useController();
   const { activeCell, canRedo, canUndo } = useSelector([
     "activeCell",
@@ -50,13 +30,6 @@ export const ToolbarContainer = memo(() => {
     fillColor,
     fontFamily,
   } = style;
-  useEffect(() => {
-    const list = FONT_FAMILY_LIST.map((v) => {
-      const disabled = !isSupportFontFamily(v);
-      return { label: v, value: v, disabled };
-    });
-    setFontFamilyList(list);
-  }, []);
   const setCellStyle = useCallback(
     (value: Partial<StyleType>) => {
       controller.setCellStyle(value);
@@ -76,7 +49,7 @@ export const ToolbarContainer = memo(() => {
     return { fontFamily: value };
   }, []);
   return (
-    <ToolbarWrapper id="tool-bar-container">
+    <div className="toolbar-wrapper" id="tool-bar-container">
       <Button disabled={!canUndo} onClick={controller.undo}>
         <BaseIcon name="undo" />
       </Button>
@@ -120,7 +93,7 @@ export const ToolbarContainer = memo(() => {
         <BaseIcon name="fillColor" />
       </ColorPicker>
       <Github />
-    </ToolbarWrapper>
+    </div>
   );
 });
 

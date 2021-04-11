@@ -1,6 +1,5 @@
 import React, { memo, useMemo, useCallback, useRef, useEffect } from "react";
 import { pick, isEmpty } from "@/lodash";
-import { CellEditorContent } from "@/components";
 import { QueryCellResult } from "@/types";
 import { useSelector, useDispatch, useController } from "@/store";
 import {
@@ -115,7 +114,8 @@ export const CellEditorContainer = memo(() => {
   );
 
   return (
-    <CellEditorContent
+    <input
+      className="base-editor cell-editor"
       value={isCellEditing ? editCellValue : initValue}
       style={style}
       ref={inputRef}

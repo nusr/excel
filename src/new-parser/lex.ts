@@ -93,7 +93,8 @@ type ETokenType =
   | "rightParen"
   | "leftParen"
   | "comma"
-  | "colon";
+  | "colon"
+  | "whiteSpace";
 
 class Token {
   type: ETokenType;
@@ -113,9 +114,7 @@ function isNumber(char: string): boolean {
 }
 
 function isCharacter(char: string): boolean {
-  return (
-    (char >= "a" && char <= "z") || (char >= "A" && char <= "Z") || char === "$"
-  );
+  return (char >= "a" && char <= "z") || (char >= "A" && char <= "Z");
 }
 
 export function lex(input: string): Token[] {
@@ -124,7 +123,12 @@ export function lex(input: string): Token[] {
   while (current < input.length) {
     let char = input[current];
     if (isWhiteSpace(char)) {
-      current += 1;
+      let value = "";
+      while (isWhiteSpace(char)) {
+        value += char;
+        char = input[++current];
+      }
+      tokens.push(new Token(value, "whiteSpace"));
       continue;
     }
     if (char === ")") {

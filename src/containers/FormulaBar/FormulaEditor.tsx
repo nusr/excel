@@ -1,6 +1,5 @@
 import React, { memo, useMemo, useCallback, useRef } from "react";
 import { useSelector, useController, useDispatch } from "@/store";
-import { BaseEditor } from "@/components";
 import { containersLog } from "@/util";
 
 export const FormulaEditor = memo(() => {
@@ -53,7 +52,8 @@ export const FormulaEditor = memo(() => {
   }, [controller, editCellValue, dispatch]);
 
   return (
-    <BaseEditor
+    <input
+      className="base-editor"
       value={isCellEditing ? editCellValue : initValue}
       ref={inputRef}
       onFocus={onFocus}

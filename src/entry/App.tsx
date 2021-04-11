@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
 import { Lazy } from "@/components";
-import styled, { ThemeProvider } from "styled-components";
-import theme from "@/theme";
 import { useDispatch, useController } from "@/store";
 import { MOCK_MODEL } from "@/model";
 import { handleBuildError } from "@/util";
 import { State } from "@/types";
+import { useTheme } from "@/hooks";
 
 const AsyncCanvasContainer = React.lazy(
   () => import("./lazyLoad/CanvasContainer")
@@ -18,16 +17,11 @@ const AsyncSheetBarContainer = React.lazy(
   () => import("./lazyLoad/SheetBarContainer")
 );
 const AsyncFormulaBar = React.lazy(() => import("./lazyLoad/FormulaBar"));
-const AsyncGlobalStyle = React.lazy(() => import("./GlobalStyle"));
-
-const AppContainer = styled.div`
-  overflow: hidden;
-  height: 100%;
-`;
 
 export const App = React.memo(() => {
   const controller = useController();
   const dispatch = useDispatch();
+  useTheme();
   useEffect(() => {
     controller.on("change", (data) => {
       const { changeSet } = data;
@@ -63,25 +57,20 @@ export const App = React.memo(() => {
     };
   }, [dispatch, controller]);
   return (
-    <ThemeProvider theme={theme}>
+    <div className="app-container" id="AppContainer">
       <Lazy>
-        <AsyncGlobalStyle />
+        <AsyncToolbarContainer />
       </Lazy>
-      <AppContainer id="AppContainer">
-        <Lazy>
-          <AsyncToolbarContainer />
-        </Lazy>
-        <Lazy>
-          <AsyncFormulaBar />
-        </Lazy>
-        <Lazy>
-          <AsyncCanvasContainer />
-        </Lazy>
-        <Lazy>
-          <AsyncSheetBarContainer />
-        </Lazy>
-      </AppContainer>
-    </ThemeProvider>
+      <Lazy>
+        <AsyncFormulaBar />
+      </Lazy>
+      <Lazy>
+        <AsyncCanvasContainer />
+      </Lazy>
+      <Lazy>
+        <AsyncSheetBarContainer />
+      </Lazy>
+    </div>
   );
 });
 

@@ -1,55 +1,9 @@
 import React, { useCallback, useState } from "react";
-import styled from "styled-components";
 type Props = {
   color: string;
   style?: React.CSSProperties;
   onChange: (value: string) => void;
 };
-const Container = styled.div`
-  position: relative;
-`;
-const Content = styled.div<{ color: string }>`
-  color: ${(props) => props.color};
-  border: 1px solid ${({ theme }) => theme.borderColor};
-  padding: 0 8px;
-  height: 20px;
-  line-height: 20px;
-  &:hover,
-  &.active {
-    background-color: ${({ theme }) => theme.buttonActiveColor};
-    border-color: ${({ theme }) => theme.activeBorderColor};
-  }
-`;
-
-const ColorPickerContainer = styled.div`
-  width: 228px;
-  position: absolute;
-  z-index: 1;
-  top: 22px;
-  left: 0;
-`;
-
-const List = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  border: 1px solid #ccc;
-  padding-top: 4px;
-  padding-left: 4px;
-  background-color: #fff;
-`;
-const Item = styled.div<{ color: string }>`
-  background-color: ${(props) => props.color};
-  width: 16px;
-  height: 16px;
-  margin-bottom: 4px;
-  margin-right: 4px;
-  cursor: pointer;
-  border: 1px solid transparent;
-  &:hover {
-    border-color: #ccc;
-  }
-`;
-
 export const COLOR_LIST = [
   "#4D4D4D",
   "#999999",
@@ -101,27 +55,32 @@ export const ColorPicker: React.FunctionComponent<Props> = React.memo(
     }, []);
 
     return (
-      <Container onBlur={handleBlur} style={style}>
-        <Content color={color} onClick={toggleColorPicker}>
+      <div className="relative" onBlur={handleBlur} style={style}>
+        <div
+          className="color-picker-trigger"
+          style={{ color }}
+          onClick={toggleColorPicker}
+        >
           {children}
-        </Content>
+        </div>
         {visible ? (
-          <ColorPickerContainer>
-            <List>
+          <div className="color-picker-wrapper">
+            <div className="color-picker-list">
               {COLOR_LIST.map((item) => (
-                <Item
-                  color={item}
+                <div
+                  className="color-picker-item"
+                  style={{ backgroundColor: item }}
                   key={item}
                   onClick={() => {
                     onChange(item);
                     setVisible(false);
                   }}
-                ></Item>
+                ></div>
               ))}
-            </List>
-          </ColorPickerContainer>
+            </div>
+          </div>
         ) : null}
-      </Container>
+      </div>
     );
   }
 );

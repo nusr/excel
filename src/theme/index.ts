@@ -1,7 +1,8 @@
 import size from "./size";
 import color from "./color";
-const theme = {
+const theme: any = {
   ...size,
   ...color,
 };
+
 export default theme;

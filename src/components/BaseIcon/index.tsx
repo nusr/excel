@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import styled from "styled-components";
+import { classnames } from "@/util";
 export type BaseIconName =
   | "alignCenter"
   | "alignLeft"
@@ -14,13 +14,6 @@ export type BaseIconName =
   | "underline"
   | "undo";
 
-const SvgContainer = styled.svg`
-  width: 1em;
-  height: 1em;
-  fill: currentColor;
-  overflow: hidden;
-`;
-
 type BaseIconProps = {
   className?: string;
   name: BaseIconName;
@@ -28,9 +21,9 @@ type BaseIconProps = {
 export const BaseIcon = memo((props: BaseIconProps) => {
   const { className = "", name } = props;
   return (
-    <SvgContainer className={className} aria-hidden="true">
+    <svg className={classnames("icon-wrapper", className)} aria-hidden="true">
       <use xlinkHref={`#icon-${name}`}></use>
-    </SvgContainer>
+    </svg>
   );
 });
 

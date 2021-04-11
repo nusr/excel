@@ -1,18 +1,8 @@
 import React, { memo, useRef, useEffect, useCallback } from "react";
-import styled from "styled-components";
 import { CellEditorContainer } from "./CellEditor";
 import { Main, Controller } from "@/canvas";
 import { Interaction } from "@/interaction";
 import { useController } from "@/store";
-
-const ContentContainer = styled.div`
-  position: relative;
-`;
-
-const CanvasElement = styled.canvas`
-  width: 100%;
-  height: 100%;
-`;
 
 export const CanvasContainer = memo(() => {
   const controller = useController();
@@ -41,10 +31,10 @@ export const CanvasContainer = memo(() => {
   );
 
   return (
-    <ContentContainer>
-      <CanvasElement ref={canvasRef} onContextMenu={onContextMenu} />
+    <div className="relative">
+      <canvas className="full" ref={canvasRef} onContextMenu={onContextMenu} />
       <CellEditorContainer />
-    </ContentContainer>
+    </div>
   );
 });
 

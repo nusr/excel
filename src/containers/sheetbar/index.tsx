@@ -1,5 +1,4 @@
 import React, { memo, useCallback } from "react";
-import styled, { withTheme } from "styled-components";
 import { classnames } from "@/util";
 import { Button, BaseIcon } from "@/components";
 import { useSelector, useController } from "@/store";
@@ -7,33 +6,6 @@ import theme from "@/theme";
 const addButtonStyle = {
   backgroundColor: theme.buttonActiveColor,
 };
-
-const SheetBarWrapper = withTheme(styled.div`
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0 10px;
-  background-color: ${({ theme }) => theme.backgroundColor};
-  display: flex;
-  align-items: center;
-`);
-const SheetList = styled.div`
-  display: flex;
-  align-items: center;
-  height: 30px;
-  line-height: 30px;
-`;
-const SheetItem = withTheme(styled.div`
-  padding: 0 10px;
-  border-left: 1px solid ${(props) => props.theme.gridStrokeColor};
-  user-select: none;
-  &.active {
-    background-color: ${(props) => props.theme.white};
-    color: ${({ theme }) => theme.primaryColor};
-  }
-`);
-const AddSheetWrapper = styled.div`
-  margin-left: 20px;
-`;
 
 export const SheetBarContainer = memo(() => {
   const controller = useController();
@@ -51,24 +23,26 @@ export const SheetBarContainer = memo(() => {
     controller.addSheet();
   }, [controller]);
   return (
-    <SheetBarWrapper id="sheet-bar-container">
-      <SheetList>
+    <div className="sheet-bar-wrapper" id="sheet-bar-container">
+      <div className="sheet-bar-list ">
         {sheetList.map((item) => (
-          <SheetItem
+          <div
             key={item.sheetId}
             onMouseDown={() => handleClickSheet(item)}
-            className={classnames({ active: currentSheetId === item.sheetId })}
+            className={classnames("sheet-bar-item", {
+              active: currentSheetId === item.sheetId,
+            })}
           >
             {item.name}
-          </SheetItem>
+          </div>
         ))}
-      </SheetList>
-      <AddSheetWrapper>
+      </div>
+      <div style={{ marginLeft: 20 }}>
         <Button style={addButtonStyle} type="circle" onClick={handleAddSheet}>
           <BaseIcon name="plus" />
         </Button>
-      </AddSheetWrapper>
-    </SheetBarWrapper>
+      </div>
+    </div>
   );
 });
 
