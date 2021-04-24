@@ -114,7 +114,12 @@ export class Controller extends EventEmitter<EventType> {
     this.setActiveCell(row, col, 0, sheetInfo.colCount);
     controllerLog("selectRow");
   }
-
+  setCellEditing(value: boolean): void {
+    this.isCellEditing = value;
+  }
+  getCellEditing(): boolean {
+    return this.isCellEditing;
+  }
   quitEditing(): void {
     controllerLog("quitEditing");
     // Cell Editor or Formula Bar Editor
@@ -122,16 +127,16 @@ export class Controller extends EventEmitter<EventType> {
     if (dom && dom.tagName === "INPUT") {
       (dom as HTMLInputElement).blur();
     }
-    this.isCellEditing = false;
+    this.setCellEditing(false);
   }
   enterEditing(): void {
     controllerLog("enterEditing");
     const dom = document.getElementById("cell-editor");
     if (dom) {
       dom.focus();
+      this.setCellEditing(true);
+      this.emitChange();
     }
-    this.isCellEditing = true;
-    this.emitChange();
   }
   loadJSON(json: WorkBookJSON): void {
     const { model } = this;

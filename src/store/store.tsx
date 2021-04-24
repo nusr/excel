@@ -14,33 +14,42 @@ import { Controller } from "@/controller";
 
 type Reducer = (draftState: Draft<State>, action: Action) => State;
 
+type ConstantState = {
+  controller: Controller;
+  dispatch: React.Dispatch<Action>;
+};
+
 function useCustomReducer(reducer: Reducer, initialState: State) {
   const cachedReducer = useMemo(() => produce(reducer), [reducer]);
   return useReducer(cachedReducer, initialState);
 }
 const controller = Controller.createController();
-const controllerContext = React.createContext(controller);
-const storeContext = React.createContext(initialState);
-const dispatchContext = React.createContext((() => 0) as Dispatch<Action>);
+const constantContext = React.createContext<ConstantState>({
+  controller,
+  dispatch: (action: Action) => action,
+});
+const storeContext = React.createContext<State>(initialState);
 type Props = {
   children: React.ReactNode;
 };
 export const StoreProvider: FunctionComponent<Props> = memo((props) => {
   const { children } = props;
   const [state, dispatch] = useCustomReducer(reducer, initialState);
+  const constantState = useMemo(() => {
+    return { dispatch, controller };
+  }, [dispatch]);
   return (
-    <controllerContext.Provider value={controller}>
-      <dispatchContext.Provider value={dispatch}>
-        <storeContext.Provider value={state}>{children}</storeContext.Provider>
-      </dispatchContext.Provider>
-    </controllerContext.Provider>
+    <constantContext.Provider value={constantState}>
+      <storeContext.Provider value={state}>{children}</storeContext.Provider>
+    </constantContext.Provider>
   );
 });
 
 StoreProvider.displayName = "StoreProvider";
 
 export const useDispatch = (): Dispatch<Action> => {
-  return useContext(dispatchContext);
+  const temp = useContext(constantContext);
+  return temp.dispatch;
 };
 export function useSelector<k extends keyof State>(
   pickStr: Array<k>
@@ -50,5 +59,6 @@ export function useSelector<k extends keyof State>(
 }
 
 export const useController = (): Controller => {
-  return useContext(controllerContext);
+  const temp = useContext(constantContext);
+  return temp.controller;
 };

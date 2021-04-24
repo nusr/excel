@@ -24,7 +24,7 @@ class Debug {
   >([
     ["model", false],
     ["store", true],
-    ["interaction", true],
+    ["interaction", false],
     ["history", false],
     ["canvas", false],
     ["controller", true],

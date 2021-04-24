@@ -20,7 +20,7 @@ function getEditorStyle(style: QueryCellResult["style"]): React.CSSProperties {
     style?.fontFamily
   );
   return {
-    backgroundColor: style?.fillColor || "inherit",
+    backgroundColor: style?.fillColor || "#fff",
     color: style?.fontColor || DEFAULT_FONT_COLOR,
     font,
   };
@@ -82,6 +82,7 @@ export const CellEditorContainer = memo(() => {
 
   const setCellValue = useCallback(() => {
     controller.setCellValue(editCellValue);
+    controller.setCellEditing(false);
     dispatch({
       type: "BATCH",
       payload: { isCellEditing: false, editCellValue: "" },
