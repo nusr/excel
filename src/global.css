@@ -1,0 +1,20 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+}
+html {
+  font-size: var(--font);
+  font-family: var(--fontFamily);
+  color: var(--contentColor);
+  line-height: var(--lineHeight);
+}
+#root {
+  height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+div,
+span {
+  box-sizing: border-box;
+}

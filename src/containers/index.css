@@ -1,0 +1,77 @@
+.app-container {
+  overflow: hidden;
+  height: 100%;
+}
+.relative {
+  position: relative;
+}
+.full {
+  width: 100%;
+  height: 100%;
+}
+
+.toolbar-wrapper {
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+  height: 40px;
+  background-color: #f3f3f3;
+  border-bottom: 1px solid var(--gridStrokeColor);
+  display: flex;
+  align-items: center;
+}
+
+.formula-bar-wrapper {
+  width: 100%;
+  padding: 0 5px;
+  box-sizing: border-box;
+  height: 42px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--backgroundColor);
+}
+
+.formula-bar-name {
+  border: 1px solid var(--gridStrokeColor);
+  width: 100px;
+  height: 21px;
+  line-height: 21px;
+  margin-right: 10px;
+  border-radius: 2px;
+  text-align: center;
+  background-color: var(--white);
+  user-select: none;
+}
+.formula-bar-editor-wrapper {
+  border: 1px solid var(--gridStrokeColor);
+  flex: 1;
+  height: 21px;
+  line-height: 21px;
+  border-radius: 2px;
+  background-color: var(--white);
+}
+
+.sheet-bar-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 10px;
+  background-color: var(--backgroundColor);
+  display: flex;
+  align-items: center;
+}
+.sheet-bar-list {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  line-height: 30px;
+}
+.sheet-bar-item {
+  padding: 0 10px;
+  border-left: 1px solid var(--gridStrokeColor);
+  user-select: none;
+}
+.sheet-bar-item.active {
+  background-color: var(--white);
+  color: var(--primaryColor);
+}

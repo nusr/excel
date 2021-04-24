@@ -17,7 +17,7 @@ const { handleSVGFiles } = require("./svg");
 const entryPath = path.join(cwd, "src/index.tsx");
 const tsconfigPath = path.join(cwd, "tsconfig.json");
 const commonConfig = {
-  entryPoints: [entryPath, path.join(cwd, "src/index.css")],
+  entryPoints: [entryPath],
   chunkNames: "chunks/[name]-[hash]",
   splitting: true,
   format: "esm",
