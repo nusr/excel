@@ -3,12 +3,13 @@
 const fs = require("fs");
 const path = require("path");
 const esBuild = require("esbuild");
+const { getEnv } = require("./env");
 require("../scripts/rm.js");
 const cwd = process.cwd();
 console.log("cwd:", cwd);
 const distDir = path.join(cwd, "dist");
 const assetsDir = path.join(cwd, "assets");
-const NODE_ENV = (process.env.NODE_ENV || "production").trim();
+const { NODE_ENV } = getEnv();
 const isProd = NODE_ENV === "production";
 const { staticService, openBrowser, buildLog } = require("./server");
 console.log("NODE_ENV:", NODE_ENV);
