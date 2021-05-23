@@ -27,7 +27,7 @@ export function handleBuildError(controller: unknown): () => void {
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).controller = controller;
-  localStorage.setItem("debug", "*");
+  // localStorage.setItem("debug", "*");
   outputError();
   return () => {
     console.log("off");

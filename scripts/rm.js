@@ -2,12 +2,15 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs");
 const path = require("path");
-function init() {
-  const deleteDir = process.argv[2] || "dist";
+function deleteDirectory(deleteDir = "dist") {
   const deletePath = path.join(process.cwd(), deleteDir);
   if (!fs.existsSync(deletePath)) {
+    console.log(`directory: ${deletePath} no exist!`);
     return;
   }
   fs.rmdirSync(deletePath, { recursive: true });
 }
-init();
+deleteDirectory();
+module.exports = {
+  deleteDirectory,
+};

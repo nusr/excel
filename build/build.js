@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const esBuild = require("esbuild");
 const { getEnv } = require("./env");
-require("../scripts/rm.js");
+const { deleteDirectory } = require("../scripts/rm.js");
 const cwd = process.cwd();
 console.log("cwd:", cwd);
 const distDir = path.join(cwd, "dist");
@@ -105,6 +105,7 @@ function buildJs(type = "", fileName = "") {
 }
 
 function init() {
+  deleteDirectory();
   buildJs();
   if (!isProd) {
     const watchList = ["src", "icons", "assets"];
