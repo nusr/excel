@@ -5,38 +5,38 @@ const T_SUB = "-";
 const T_MUL = "*";
 const T_DIV = "/";
 
-const T_QST = "?";
-const T_COL = ":";
-const T_LCMT = "/*";
-const T_RCMT = "*/";
-const T_LINE_CMT = "//";
+const TERNARY_EXPRESSION = "?";
+const COLON = ":";
+const T_LEFT_BLOCK_COMMENT = "/*";
+const T_RIGHT_BLOCK_COMMENT = "*/";
+const T_LINE_COMMENT = "//";
 
 const T_GT = ">";
 const T_GE = ">=";
 const T_LT = "<";
 const T_LE = "<=";
-const T_EQ = "==";
-const T_NEQ = "!=";
+const T_EQUAL = "==";
+const T_NOT_EQUAL = "!=";
 
 const T_AND = "&&";
 const T_OR = "||";
 
 const T_EOF = "";
-const T_SEMI = ";";
+const T_SEMICOLON = ";";
 const T_COMMA = ",";
 
 const T_ASSIGN = "=";
 
 const T_VAR = "var";
-const T_IDENT = "identifier";
-const T_LVALUE = "leftValue";
+const T_IDENTIFIER = "identifier";
+const T_LEFT_VALUE = "leftValue";
 
-const T_LPT = "(";
-const T_RPT = ")";
-const T_LBR = "{";
-const T_RBR = "}";
-const T_LMBR = "[";
-const T_RMBR = "]";
+const T_LEFT_BRACKET = "(";
+const T_RIGHT_BRACKET = ")";
+const T_LEFT_CURLY_BRACKET = "{";
+const T_RIGHT_CURLY_BRACKET = "}";
+const T_LEFT_SQUARE_BRACKET = "[";
+const T_RIGHT_SQUARE_BRACKET = "]";
 
 const T_OBJECT = "[object object]";
 const T_ARRAY = "array";
@@ -45,13 +45,13 @@ const T_VISIT = "visit key";
 const T_STRING = "string";
 const T_NULL = "null";
 const T_UNDEFINED = "undefined";
-const T_BOOL = "BOOL";
+const T_BOOLEAN = "BOOL";
 
-const T_INT = "number";
-const T_FUN = "function";
+const INTEGER = "integer";
+const T_FUNCTION = "function";
 const T_NATIVE_FUN = "native function";
-const T_FUNCALL = "execute function";
-const T_FUNARGS = "args";
+const T_FUNCTION_CALL = "execute function";
+const T_FUNCTION_ARGUMENTS = "args";
 const T_ARGUMENT = "argument";
 const T_RETURN = "return";
 
@@ -80,16 +80,16 @@ const tokenTypes = {
   T_SUB,
   T_MUL,
   T_DIV,
-  T_RCMT,
-  T_LCMT,
-  T_LINE_CMT,
-  T_QST,
-  T_COL,
+  T_RIGHT_BLOCK_COMMENT,
+  T_LEFT_BLOCK_COMMENT,
+  T_LINE_COMMENT,
+  TERNARY_EXPRESSION,
+  COLON,
   T_ASSIGN,
   T_VAR,
-  T_IDENT,
+  T_IDENTIFIER,
   T_EOF,
-  T_SEMI,
+  T_SEMICOLON,
   T_COMMA,
   T_AND,
   T_OR,
@@ -97,27 +97,27 @@ const tokenTypes = {
   T_GE,
   T_LT,
   T_LE,
-  T_EQ,
-  T_NEQ,
+  T_EQUAL,
+  T_NOT_EQUAL,
   T_IF,
   T_ELSE,
-  T_LPT,
-  T_RPT,
-  T_LBR,
-  T_RBR,
-  T_LMBR,
-  T_RMBR,
+  T_LEFT_BRACKET,
+  T_RIGHT_BRACKET,
+  T_LEFT_CURLY_BRACKET,
+  T_RIGHT_CURLY_BRACKET,
+  T_LEFT_SQUARE_BRACKET,
+  T_RIGHT_SQUARE_BRACKET,
   T_WHILE,
   T_FOR,
-  T_FUN,
-  T_FUNCALL,
+  T_FUNCTION,
+  T_FUNCTION_CALL,
   T_RETURN,
   T_ARGUMENT,
-  T_INT,
+  INTEGER,
   T_STRING,
   T_NULL,
   T_UNDEFINED,
-  T_BOOL,
+  T_BOOLEAN,
   T_OBJECT,
   T_ARRAY,
 };
@@ -129,34 +129,34 @@ const ASTNodeTypes = {
   T_DIV,
   T_VAR,
   T_ASSIGN,
-  T_INT,
-  T_IDENT,
+  INTEGER,
+  T_IDENTIFIER,
   T_STRING,
   T_NULL,
   T_UNDEFINED,
-  T_BOOL,
+  T_BOOLEAN,
   T_OBJECT,
-  T_LVALUE,
+  T_LEFT_VALUE,
   T_GT,
   T_GE,
   T_LT,
   T_LE,
-  T_EQ,
-  T_NEQ,
+  T_EQUAL,
+  T_NOT_EQUAL,
   T_AND,
   T_OR,
   T_IF,
   T_ELSE,
-  T_LPT,
-  T_RPT,
-  T_LBR,
-  T_RBR,
+  T_LEFT_BRACKET,
+  T_RIGHT_BRACKET,
+  T_LEFT_CURLY_BRACKET,
+  T_RIGHT_CURLY_BRACKET,
   T_GLUE,
   T_WHILE,
   T_FOR,
-  T_FUN,
-  T_FUNCALL,
-  T_FUNARGS,
+  T_FUNCTION,
+  T_FUNCTION_CALL,
+  T_FUNCTION_ARGUMENTS,
   T_RETURN,
   T_NATIVE_FUN,
   T_ARGUMENT,
@@ -181,7 +181,7 @@ interface IData {
   nextToken: null | Token;
   token: Token;
   KEYWORD_MAX_LENGTH: number;
-  gScope: Scope;
+  globalScope: Scope;
   reset(): void;
 }
 const DEFAULT_CONFIG = {
@@ -192,7 +192,7 @@ const DEFAULT_CONFIG = {
   nextToken: null,
   token: new Token("", null),
   KEYWORD_MAX_LENGTH: 512,
-  gScope: new Scope(),
+  globalScope: new Scope(),
 };
 const globalData: IData = {
   ...DEFAULT_CONFIG,

@@ -11,6 +11,7 @@ function deleteDirectory(deleteDir = "dist") {
   fs.rmdirSync(deletePath, { recursive: true });
 }
 deleteDirectory();
+deleteDirectory("yarn.lock");
 module.exports = {
   deleteDirectory,
 };

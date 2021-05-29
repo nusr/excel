@@ -1,24 +1,14 @@
-const reg = /[a-z]|[A-Z]|_|\$/;
-function validVar(char: string): boolean {
-  return reg.test(char);
+const IDENTIFIER_REG = /[a-z]|[A-Z]|_|\$/;
+function validIdentifier(char: string): boolean {
+  return IDENTIFIER_REG.test(char);
 }
 
-function validNumber(char: string): boolean {
-  const reg = /[0-9]/;
-  return reg.test(char);
+function isNumber(char: string): boolean {
+  return char >= "0" && char <= "9";
 }
 
-function validBlank(value: string): boolean {
-  if (
-    value !== " " &&
-    value.indexOf("\r\n") === -1 &&
-    value.indexOf("\n") === -1 &&
-    value.indexOf("\r") === -1
-  ) {
-    return false;
-  } else {
-    return true;
-  }
+function isBlankChar(value: string): boolean {
+  return value === " " || value === "\r\n" || value === "\n" || value === "\r";
 }
 
-export { validVar, validNumber, validBlank };
+export { validIdentifier, isNumber, isBlankChar };

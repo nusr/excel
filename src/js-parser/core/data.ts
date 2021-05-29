@@ -1,16 +1,10 @@
-function addVar(name: string, scope: Record<string, any>): void {
-  scope.add(name, {
-    type: null,
-    value: undefined,
-  });
-}
-
-function assignVal(name: string, val: any, scope: Record<string, any>): any {
+import { Scope } from "./scope";
+function assignVal(name: string, val: any, scope: Scope): any {
   scope.set(name, val);
   return val;
 }
 
-function findVar(name: string, scope: Record<string, any>): any {
+function findVar(name: string, scope: Scope): any {
   return scope.get(name);
 }
 
@@ -27,4 +21,4 @@ function assignArr(object: any, val: any): any {
   return val;
 }
 
-export { addVar, assignVal, findVar, readVal, assignArr };
+export { assignVal, findVar, readVal, assignArr };

@@ -1,9 +1,9 @@
 import { ASTNodeTypes } from "./token";
-import { errPrint } from "../init/commons";
+import { printError } from "../init/commons";
 import { assignVal, findVar, readVal, assignArr } from "./data";
 import { Scope } from "./scope";
 import { buildInMethods } from "../init/buildInFn";
-import { ASTNode } from "./ASTnode";
+import { ASTNode } from "./ASTNode";
 
 function interpretIfAST(astNode: ASTNode, scope: Scope): any {
   const state = interpretAST(astNode.left, null, scope);
@@ -31,7 +31,7 @@ function interpretFunCallAST(astNode: ASTNode, scope: Scope): any {
   const argument: Record<number, any> = {};
   if (
     astNode.left &&
-    astNode.left.op === ASTNodeTypes.T_FUNARGS &&
+    astNode.left.op === ASTNodeTypes.T_FUNCTION_ARGUMENTS &&
     Array.isArray(astNode.left.value) &&
     astNode.left.value.length > 0
   ) {
@@ -96,16 +96,16 @@ function interpretAST(
     }
     case ASTNodeTypes.T_WHILE:
       return interpretWhileAST(astNode, scope);
-    case ASTNodeTypes.T_FUN:
+    case ASTNodeTypes.T_FUNCTION:
       if (astNode.option === "run") {
         astNode.option = "";
         break;
       } else {
         scope.add(astNode.value);
-        scope.set(astNode.value, astNode, ASTNodeTypes.T_FUN);
+        scope.set(astNode.value, astNode, ASTNodeTypes.T_FUNCTION);
         return;
       }
-    case ASTNodeTypes.T_FUNCALL:
+    case ASTNodeTypes.T_FUNCTION_CALL:
       return interpretFunCallAST(astNode, scope);
   }
 
@@ -123,7 +123,7 @@ function interpretAST(
   result = readVal(result);
 
   switch (astNode.op) {
-    case ASTNodeTypes.T_LVALUE:
+    case ASTNodeTypes.T_LEFT_VALUE:
       if (leftResult && leftResult._inner && leftResult._parent) {
         return assignArr(leftResult, result);
       }
@@ -146,9 +146,9 @@ function interpretAST(
     case ASTNodeTypes.T_RETURN:
       scope.returnValue = leftResult;
       return;
-    case ASTNodeTypes.T_FUN:
+    case ASTNodeTypes.T_FUNCTION:
       return scope.returnValue;
-    case ASTNodeTypes.T_INT:
+    case ASTNodeTypes.INTEGER:
       return astNode.value;
     case ASTNodeTypes.T_STRING:
       return astNode.value;
@@ -170,7 +170,7 @@ function interpretAST(
       return leftResult / rightResult;
     case ASTNodeTypes.T_ASSIGN:
       return rightResult;
-    case ASTNodeTypes.T_IDENT:
+    case ASTNodeTypes.T_IDENTIFIER:
       return findVar(astNode.value, scope);
     case ASTNodeTypes.T_GE:
       return leftResult >= rightResult;
@@ -180,14 +180,14 @@ function interpretAST(
       return leftResult <= rightResult;
     case ASTNodeTypes.T_LT:
       return leftResult < rightResult;
-    case ASTNodeTypes.T_EQ:
+    case ASTNodeTypes.T_EQUAL:
       return leftResult === rightResult;
-    case ASTNodeTypes.T_NEQ:
+    case ASTNodeTypes.T_NOT_EQUAL:
       return leftResult !== rightResult;
     case ASTNodeTypes.T_VISIT:
       return scope.getProperty(astNode.value, leftResult);
     default:
-      errPrint(`unknown ASTNode op : ${astNode.op}`);
+      printError(`unknown ASTNode op : ${astNode.op}`);
   }
 }
 

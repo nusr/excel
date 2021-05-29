@@ -7,14 +7,14 @@
     "start": "node ./build/build.js NODE_ENV=development",
     "build": "node ./build/build.js NODE_ENV=production",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "npm run lint -- --fix",
+    "lint-fix": "npm run lint -- --fix",
     "test": "npx jest --config ./unittest/jest.config.js",
     "coverage": "npm run test -- --coverage",
     "watch": "npm run test -- --watch",
     "ci": "npm run build && npm run lint && npm run test && npm run typecheck",
     "deploy": "deploy.sh",
-    "typecheck": "node scripts/rm.js && tsc",
-    "postinstall": "node ./scripts/link-hook.js",
+    "type-check": "node scripts/rm.js && tsc",
+    "postinstall": "node ./scripts/link-hook.js && node scripts/rm.js",
     "update": "ncu -u"
   },
   "repository": {
@@ -26,24 +26,24 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "dependencies": {
-    "immer": "9.0.2",
+    "immer": "9.0.3",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
   "devDependencies": {
     "@types/jest": "26.0.23",
-    "@types/react": "17.0.8",
-    "@types/react-dom": "17.0.5",
-    "@typescript-eslint/eslint-plugin": "4.25.0",
-    "@typescript-eslint/parser": "4.25.0",
-    "esbuild": "0.12.5",
-    "eslint": "7.27.0",
-    "eslint-plugin-import": "2.23.3",
-    "eslint-plugin-react": "7.23.2",
+    "@types/react": "17.0.13",
+    "@types/react-dom": "17.0.8",
+    "@typescript-eslint/eslint-plugin": "4.28.1",
+    "@typescript-eslint/parser": "4.28.1",
+    "esbuild": "0.12.14",
+    "eslint": "7.30.0",
+    "eslint-plugin-import": "2.23.4",
+    "eslint-plugin-react": "7.24.0",
     "eslint-plugin-react-hooks": "4.2.0",
-    "jest": "27.0.1",
+    "jest": "27.0.6",
     "svg-parser": "2.0.4",
-    "typescript": "4.3.2"
+    "typescript": "4.3.5"
   },
   "browser": {
     "path": "path-browserify"

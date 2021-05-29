@@ -1,4 +1,4 @@
-import { errPrint } from "../init/commons";
+import { printError } from "../init/commons";
 
 let scopeId = 0;
 
@@ -26,7 +26,7 @@ class Scope {
       value: undefined,
     };
   }
-  set(name: string | null, value: unknown, type: unknown): void {
+  set(name: string, value: unknown, type?: unknown): void {
     if (name === null) {
       return;
     }
@@ -80,7 +80,7 @@ class Scope {
   } {
     const val = this.get(name);
     if (val === null) {
-      errPrint(`Uncaught ReferenceError: ${name} is not defined`);
+      printError(`Uncaught ReferenceError: ${name} is not defined`);
     }
     return {
       _inner: true,

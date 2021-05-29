@@ -1,22 +1,22 @@
 import { globalData, tokenTypes, ASTNodeTypes } from "./token";
-import { errPrint } from "../init/commons";
+import { printError } from "../init/commons";
 import {
   match,
   scan,
-  leftBrace,
-  rightBrace,
-  leftPt,
-  rightPt,
-  semicolon,
+  matchLeftCurlyBracket,
+  matchRightCurlyBracket,
+  matchLeftBracket,
+  matchRightBracket,
+  matchSemicolon,
 } from "./scanner";
 import { parseExpression, prefixParserMap } from "./expression";
-import { ASTNode } from "./ASTnode";
+import { ASTNode } from "./ASTNode";
 
 function varDeclaration() {
   const { token } = globalData;
-  let tree = null,
-    left = null,
-    lastTokenValue;
+  let tree = null;
+  let left = null;
+  let lastTokenValue;
   const type =
     token.type === tokenTypes.T_ARGUMENT
       ? ASTNodeTypes.T_ARGUMENT
@@ -24,7 +24,7 @@ function varDeclaration() {
   let index = 0;
   scan();
   do {
-    if (token.type === tokenTypes.T_IDENT) {
+    if (token.type === tokenTypes.T_IDENTIFIER) {
       left = new ASTNode().initLeafNode(type, token.value);
       lastTokenValue = left;
       if (type === tokenTypes.T_ARGUMENT) {
@@ -37,18 +37,18 @@ function varDeclaration() {
       } else {
         tree = new ASTNode().initTwoNode(ASTNodeTypes.T_GLUE, tree, left, null);
       }
-      if (token.type === tokenTypes.T_SEMI) {
+      if (token.type === tokenTypes.T_SEMICOLON) {
         break;
       }
     } else {
-      errPrint(`unknown error : token type: ${token.type}`);
+      printError(`unknown error : token type: ${token.type}`);
     }
   } while (token.type === tokenTypes.T_COMMA && scan());
 
   if (token.type === tokenTypes.T_ASSIGN) {
     scan();
     const right = new ASTNode().initLeafNode(
-      ASTNodeTypes.T_LVALUE,
+      ASTNodeTypes.T_LEFT_VALUE,
       lastTokenValue?.value
     );
     const left = normalStatement();
@@ -65,8 +65,8 @@ function varDeclaration() {
       null
     );
   }
-  if (token.type === tokenTypes.T_SEMI) {
-    semicolon();
+  if (token.type === tokenTypes.T_SEMICOLON) {
+    matchSemicolon();
   }
   return tree;
 }
@@ -77,17 +77,17 @@ function ifStatement(): ASTNode {
   let trueBody: ASTNode | null = null;
   let falseBody: ASTNode | null = null;
   match(tokenTypes.T_IF, "if");
-  leftPt();
+  matchLeftBracket();
   condition = parseExpression(0);
-  rightPt();
-  leftBrace();
+  matchRightBracket();
+  matchLeftCurlyBracket();
   trueBody = statement();
-  rightBrace();
+  matchRightCurlyBracket();
   if (token.type === tokenTypes.T_ELSE) {
     scan();
-    leftBrace();
+    matchLeftCurlyBracket();
     falseBody = statement();
-    rightBrace();
+    matchRightCurlyBracket();
   }
   return new ASTNode().initThreeNode(
     ASTNodeTypes.T_IF,
@@ -102,39 +102,39 @@ function whileStatement(): ASTNode {
   let condition: ASTNode | null = null;
   let body: ASTNode | null = null;
   match(tokenTypes.T_WHILE, "while");
-  leftPt();
+  matchLeftBracket();
   condition = parseExpression(0);
-  rightPt();
-  leftBrace();
+  matchRightBracket();
+  matchLeftCurlyBracket();
   body = statement();
-  rightBrace();
+  matchRightCurlyBracket();
   return new ASTNode().initTwoNode(ASTNodeTypes.T_WHILE, condition, body, null);
 }
 
-function funStatement(): ASTNode {
+function functionStatement(): ASTNode {
   const { token } = globalData;
-  match(tokenTypes.T_FUN, "function");
+  match(tokenTypes.T_FUNCTION, "function");
   const funName = token.value;
-  match(tokenTypes.T_IDENT, "identifier");
+  match(tokenTypes.T_IDENTIFIER, "identifier");
   token.type = tokenTypes.T_ARGUMENT;
   const left = statement();
-  rightPt();
-  leftBrace();
+  matchRightBracket();
+  matchLeftCurlyBracket();
   const funBody = statement();
-  rightBrace();
-  return new ASTNode().initTwoNode(ASTNodeTypes.T_FUN, left, funBody, funName);
+  matchRightCurlyBracket();
+  return new ASTNode().initTwoNode(ASTNodeTypes.T_FUNCTION, left, funBody, funName);
 }
 
 function returnStatement(): ASTNode {
   match(tokenTypes.T_RETURN, "return");
   const returnTree = parseExpression(0);
-  semicolon();
+  matchSemicolon();
   return new ASTNode().initUnaryNode(ASTNodeTypes.T_RETURN, returnTree, null);
 }
 
 function normalStatement() {
   const tree = parseExpression(0);
-  semicolon();
+  matchSemicolon();
   return tree;
 }
 
@@ -142,7 +142,7 @@ function statement(): ASTNode | null {
   let tree: ASTNode | null = null;
   let left: ASTNode | null = null;
   while (
-    ![tokenTypes.T_EOF, tokenTypes.T_RBR, tokenTypes.T_RPT].includes(
+    ![tokenTypes.T_EOF, tokenTypes.T_RIGHT_CURLY_BRACKET, tokenTypes.T_RIGHT_BRACKET].includes(
       globalData.token.type
     )
   ) {
@@ -158,21 +158,21 @@ function statement(): ASTNode | null {
       case tokenTypes.T_WHILE:
         left = whileStatement();
         break;
-      case tokenTypes.T_FUN:
-        left = funStatement();
+      case tokenTypes.T_FUNCTION:
+        left = functionStatement();
         break;
       case tokenTypes.T_RETURN:
         left = returnStatement();
         break;
       case tokenTypes.T_EOF:
-      case tokenTypes.T_RBR:
-      case tokenTypes.T_RPT:
+      case tokenTypes.T_RIGHT_CURLY_BRACKET:
+      case tokenTypes.T_RIGHT_BRACKET:
         break;
       default:
         if (prefixParserMap[token.type]) {
           left = normalStatement();
         } else {
-          errPrint(`unknown Syntax:${token.type} , at ${globalData.line} line`);
+          printError(`unknown Syntax:${token.type} , at ${globalData.line} line`);
         }
     }
     if (left !== null) {

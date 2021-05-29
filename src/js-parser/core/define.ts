@@ -9,7 +9,7 @@ const defineKeywords: Record<string, string> = {
   else: tokenTypes.T_ELSE,
   while: tokenTypes.T_WHILE,
 
-  function: tokenTypes.T_FUN,
+  function: tokenTypes.T_FUNCTION,
   return: tokenTypes.T_RETURN,
 };
 

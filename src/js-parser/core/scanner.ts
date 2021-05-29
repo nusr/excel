@@ -1,23 +1,19 @@
 import { globalData, tokenTypes, Token } from "./token";
-import { errPrint } from "../init/commons";
-import { validVar, validNumber, validBlank } from "../utils/utils";
+import { printError } from "../init/commons";
+import { validIdentifier, isNumber, isBlankChar } from "../utils/utils";
 import { defineKeywords } from "./define";
 
 function scanKeyword(str: string) {
   if (defineKeywords[str]) {
     return defineKeywords[str];
   }
-  return tokenTypes.T_IDENT;
+  return tokenTypes.T_IDENTIFIER;
 }
 
-function scanStr(endStr: string) {
+function scanString(endStr: string) {
   let s = "";
   let c = nextChar();
-  // eslint-disable-next-line no-constant-condition
-  while (1) {
-    if (c === endStr) {
-      break;
-    }
+  while (c !== endStr) {
     if (c === "\\") {
       c = nextChar();
     }
@@ -32,13 +28,9 @@ function scanIdent(s: string) {
   let str = s;
   let c = nextChar();
   if (c) {
-    while (
-      typeof c !== "undefined" &&
-      !validBlank(c) &&
-      (validNumber(c) || validVar(c))
-    ) {
+    while (isNumber(c) || validIdentifier(c)) {
       if (str.length > globalData.KEYWORD_MAX_LENGTH) {
-        errPrint(`Identifier too long : ${str}`);
+        printError(`Identifier too long : ${str}`);
         return "";
       }
       str += c;
@@ -52,7 +44,7 @@ function scanIdent(s: string) {
 function scanInt(s: string) {
   let n = Number(s);
   let c = nextChar();
-  while (validNumber(c)) {
+  while (isNumber(c)) {
     n = n * 10 + Number(c);
     c = nextChar();
   }
@@ -67,12 +59,7 @@ function skipBlank() {
     if (!value) {
       return;
     }
-    if (
-      value !== " " &&
-      value.indexOf("\r\n") === -1 &&
-      value.indexOf("\n") === -1 &&
-      value.indexOf("\r") === -1
-    ) {
+    if (!isBlankChar(value)) {
       putBack(value);
       return;
     }
@@ -114,7 +101,7 @@ function scan(): boolean {
     case "*":
       next = nextChar();
       if (next === "/") {
-        token.type = tokenTypes.T_RCMT;
+        token.type = tokenTypes.T_RIGHT_BLOCK_COMMENT;
       } else {
         putBack(next);
         token.type = tokenTypes.T_MUL;
@@ -124,9 +111,9 @@ function scan(): boolean {
     case "/":
       next = nextChar();
       if (next === "*") {
-        token.type = tokenTypes.T_LCMT;
+        token.type = tokenTypes.T_LEFT_BLOCK_COMMENT;
       } else if (next === "/") {
-        token.type = tokenTypes.T_LINE_CMT;
+        token.type = tokenTypes.T_LINE_COMMENT;
       } else {
         putBack(next);
         token.type = tokenTypes.T_DIV;
@@ -139,7 +126,7 @@ function scan(): boolean {
     case "=":
       next = nextChar();
       if (next === "=") {
-        token.type = tokenTypes.T_EQ;
+        token.type = tokenTypes.T_EQUAL;
         next = nextChar();
         if (next !== "=") {
           putBack(next);
@@ -150,14 +137,14 @@ function scan(): boolean {
       }
       break;
     case ";":
-      token.type = tokenTypes.T_SEMI;
+      token.type = tokenTypes.T_SEMICOLON;
       break;
     case "!":
       next = nextChar();
       if (next === "=") {
-        token.type = tokenTypes.T_NEQ;
+        token.type = tokenTypes.T_NOT_EQUAL;
       }
-      errPrint(`Unrecognised char : ${value}${next}`);
+      printError(`Unrecognised char : ${value}${next}`);
       break;
     case ">":
       next = nextChar();
@@ -196,52 +183,52 @@ function scan(): boolean {
       }
       break;
     case "(":
-      token.type = tokenTypes.T_LPT;
+      token.type = tokenTypes.T_LEFT_BRACKET;
       break;
     case ")":
-      token.type = tokenTypes.T_RPT;
+      token.type = tokenTypes.T_RIGHT_BRACKET;
       break;
     case "{":
-      token.type = tokenTypes.T_LBR;
+      token.type = tokenTypes.T_LEFT_CURLY_BRACKET;
       break;
     case "}":
-      token.type = tokenTypes.T_RBR;
+      token.type = tokenTypes.T_RIGHT_CURLY_BRACKET;
       break;
     case "[":
-      token.type = tokenTypes.T_LMBR;
+      token.type = tokenTypes.T_LEFT_SQUARE_BRACKET;
       break;
     case "]":
-      token.type = tokenTypes.T_RMBR;
+      token.type = tokenTypes.T_RIGHT_SQUARE_BRACKET;
       break;
     case "?":
-      token.type = tokenTypes.T_QST;
+      token.type = tokenTypes.TERNARY_EXPRESSION;
       break;
     case ":":
-      token.type = tokenTypes.T_COL;
+      token.type = tokenTypes.COLON;
       break;
     case '"':
       token.type = tokenTypes.T_STRING;
-      token.value = scanStr('"');
+      token.value = scanString('"');
       break;
     case "'":
       token.type = tokenTypes.T_STRING;
-      token.value = scanStr("'");
+      token.value = scanString("'");
       break;
 
     default:
-      if (validNumber(value)) {
+      if (isNumber(value)) {
         token.value = scanInt(value);
-        token.type = tokenTypes.T_INT;
-        break;
-      } else if (validVar(value)) {
+        token.type = tokenTypes.INTEGER;
+      } else if (validIdentifier(value)) {
         value = scanIdent(value);
         token.type = scanKeyword(value);
         token.value = value;
-        break;
+      } else {
+        printError(`Unrecognised char : (${value})`);
       }
-      errPrint(`Unrecognised char : (${value})`);
+      break;
   }
-  if (token.type === tokenTypes.T_LINE_CMT) {
+  if (token.type === tokenTypes.T_LINE_COMMENT) {
     skipOneLine();
     scan();
   }
@@ -253,7 +240,7 @@ function match(type: string, text: string): boolean {
     scan();
     return true;
   } else {
-    errPrint(
+    printError(
       `Exception : (${globalData.token.type},${globalData.token.value}) !== (${type},${text})`
     );
     return false;
@@ -286,33 +273,33 @@ function putBack(char: string) {
   globalData.putBack = char;
 }
 
-function leftBrace(): boolean {
-  return match(tokenTypes.T_LBR, "{");
+function matchLeftCurlyBracket(): boolean {
+  return match(tokenTypes.T_LEFT_CURLY_BRACKET, "{");
 }
 
-function rightBrace(): boolean {
-  return match(tokenTypes.T_RBR, "}");
+function matchRightCurlyBracket(): boolean {
+  return match(tokenTypes.T_RIGHT_CURLY_BRACKET, "}");
 }
 
-function leftPt(): boolean {
-  return match(tokenTypes.T_LPT, "(");
+function matchLeftBracket(): boolean {
+  return match(tokenTypes.T_LEFT_BRACKET, "(");
 }
 
-function rightPt(): boolean {
-  return match(tokenTypes.T_RPT, ")");
+function matchRightBracket(): boolean {
+  return match(tokenTypes.T_RIGHT_BRACKET, ")");
 }
 
-function semicolon(): boolean {
-  return match(tokenTypes.T_SEMI, ";");
+function matchSemicolon(): boolean {
+  return match(tokenTypes.T_SEMICOLON, ";");
 }
 
 export {
   scan,
   match,
-  leftBrace,
-  rightBrace,
-  leftPt,
-  rightPt,
-  semicolon,
+  matchLeftCurlyBracket,
+  matchRightCurlyBracket,
+  matchLeftBracket,
+  matchRightBracket,
+  matchSemicolon,
   putBackToken,
 };

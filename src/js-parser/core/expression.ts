@@ -1,14 +1,14 @@
 import { globalData, tokenTypes, precedenceList, ASTNodeTypes } from "./token";
-import { errPrint } from "../init/commons";
+import { printError } from "../init/commons";
 import { match, scan, putBackToken } from "./scanner";
-import { ASTNode } from "./ASTnode";
+import { ASTNode } from "./ASTNode";
 
 const prefixParserMap: Record<string, () => ASTNode> = {
-  [tokenTypes.T_IDENT]: identifier,
-  [tokenTypes.T_INT]: int,
-  [tokenTypes.T_STRING]: str,
-  [tokenTypes.T_LPT]: group,
-  [tokenTypes.T_LMBR]: array,
+  [tokenTypes.T_IDENTIFIER]: identifier,
+  [tokenTypes.INTEGER]: numberHandler,
+  [tokenTypes.T_STRING]: stringHandler,
+  [tokenTypes.T_LEFT_BRACKET]: group,
+  [tokenTypes.T_LEFT_SQUARE_BRACKET]: array,
   [tokenTypes.T_ADD]: prefix.bind(null, tokenTypes.T_ADD),
   [tokenTypes.T_SUB]: prefix.bind(null, tokenTypes.T_SUB),
 };
@@ -19,8 +19,8 @@ type ParserType = {
 };
 
 const infixParserMap: Record<string, ParserType> = {
-  [tokenTypes.T_LPT]: { parser: funCall, precedence: precedenceList.call },
-  [tokenTypes.T_QST]: {
+  [tokenTypes.T_LEFT_BRACKET]: { parser: funCall, precedence: precedenceList.call },
+  [tokenTypes.TERNARY_EXPRESSION]: {
     parser: condition,
     precedence: precedenceList.condition,
   },
@@ -68,11 +68,11 @@ const infixParserMap: Record<string, ParserType> = {
     parser: infix.bind(null, precedenceList.compare),
     precedence: precedenceList.compare,
   },
-  [tokenTypes.T_EQ]: {
+  [tokenTypes.T_EQUAL]: {
     parser: infix.bind(null, precedenceList.compare),
     precedence: precedenceList.compare,
   },
-  [tokenTypes.T_NEQ]: {
+  [tokenTypes.T_NOT_EQUAL]: {
     parser: infix.bind(null, precedenceList.compare),
     precedence: precedenceList.compare,
   },
@@ -90,18 +90,18 @@ function parseExpression(precedenceValue = 0): ASTNode {
   const prefixParser = prefixParserMap[token.type];
 
   if (!prefixParser) {
-    errPrint(`unknown token : ${token.value}（${token.type}）`);
+    printError(`unknown token : ${token.value}（${token.type}）`);
   }
 
   let left = prefixParser();
   scan();
   if (
-    token.type === tokenTypes.T_SEMI ||
-    token.type === tokenTypes.T_RPT ||
+    token.type === tokenTypes.T_SEMICOLON ||
+    token.type === tokenTypes.T_RIGHT_BRACKET ||
     token.type === tokenTypes.T_EOF ||
     token.type === tokenTypes.T_COMMA ||
-    token.type === tokenTypes.T_COL ||
-    token.type === tokenTypes.T_RMBR
+    token.type === tokenTypes.COLON ||
+    token.type === tokenTypes.T_RIGHT_SQUARE_BRACKET
   ) {
     return left;
   }
@@ -110,11 +110,11 @@ function parseExpression(precedenceValue = 0): ASTNode {
     const { token } = globalData;
     const type = token.type;
     if (
-      token.type === tokenTypes.T_SEMI ||
-      token.type === tokenTypes.T_RPT ||
+      token.type === tokenTypes.T_SEMICOLON ||
+      token.type === tokenTypes.T_RIGHT_BRACKET ||
       token.type === tokenTypes.T_EOF ||
       token.type === tokenTypes.T_COMMA ||
-      token.type === tokenTypes.T_RMBR
+      token.type === tokenTypes.T_RIGHT_SQUARE_BRACKET
     ) {
       return left;
     }
@@ -132,9 +132,9 @@ function parseExpression(precedenceValue = 0): ASTNode {
 
 function identifier(): ASTNode {
   const { token } = globalData;
-  const indent = new ASTNode().initLeafNode(ASTNodeTypes.T_IDENT, token.value);
+  const indent = new ASTNode().initLeafNode(ASTNodeTypes.T_IDENTIFIER, token.value);
   scan();
-  if (token.type === tokenTypes.T_LMBR) {
+  if (token.type === tokenTypes.T_LEFT_SQUARE_BRACKET) {
     scan();
     const left = parseExpression(0);
     indent.op = ASTNodeTypes.T_VISIT;
@@ -145,25 +145,25 @@ function identifier(): ASTNode {
   return indent;
 }
 
-function int(): ASTNode {
+function numberHandler(): ASTNode {
   const { token } = globalData;
-  return new ASTNode().initLeafNode(ASTNodeTypes.T_INT, token.value);
+  return new ASTNode().initLeafNode(ASTNodeTypes.INTEGER, token.value);
 }
 
-function str(): ASTNode {
+function stringHandler(): ASTNode {
   const { token } = globalData;
   return new ASTNode().initLeafNode(ASTNodeTypes.T_STRING, token.value);
 }
 
 function assign(left: ASTNode): ASTNode {
   const right = parseExpression(0);
-  left = new ASTNode().initUnaryNode(ASTNodeTypes.T_LVALUE, left, left.value);
+  left = new ASTNode().initUnaryNode(ASTNodeTypes.T_LEFT_VALUE, left, left.value);
   return new ASTNode().initTwoNode(ASTNodeTypes.T_ASSIGN, right, left, null);
 }
 
 function condition(left: ASTNode): ASTNode {
   const trueBody = parseExpression(0);
-  match(tokenTypes.T_COL, ":");
+  match(tokenTypes.COLON, ":");
   const falseBody = parseExpression(precedenceList.condition - 1);
   return new ASTNode().initThreeNode(
     ASTNodeTypes.T_IF,
@@ -182,27 +182,27 @@ function group(): ASTNode {
 function funCall(left: ASTNode): ASTNode {
   const { token } = globalData;
   const args: any[] = [];
-  const astNode = new ASTNode().initLeafNode(ASTNodeTypes.T_FUNARGS, args);
+  const astNode = new ASTNode().initLeafNode(ASTNodeTypes.T_FUNCTION_ARGUMENTS, args);
 
-  while (token.type !== tokenTypes.T_RPT) {
+  while (token.type !== tokenTypes.T_RIGHT_BRACKET) {
     const tree = parseExpression(0);
     args.push(tree);
 
-    if (token.type !== tokenTypes.T_COMMA && token.type !== tokenTypes.T_RPT) {
-      errPrint(`unknown Syntax token : ${token.type} : value : ${token.value}`);
+    if (token.type !== tokenTypes.T_COMMA && token.type !== tokenTypes.T_RIGHT_BRACKET) {
+      printError(`unknown Syntax token : ${token.type} : value : ${token.value}`);
     }
-    if (token.type === tokenTypes.T_RPT) {
+    if (token.type === tokenTypes.T_RIGHT_BRACKET) {
       scan();
       break;
     } else {
       scan();
     }
   }
-  if (token.type === tokenTypes.T_RPT) {
+  if (token.type === tokenTypes.T_RIGHT_BRACKET) {
     scan();
   }
   return new ASTNode().initUnaryNode(
-    ASTNodeTypes.T_FUNCALL,
+    ASTNodeTypes.T_FUNCTION_CALL,
     astNode,
     left.value
   );
@@ -225,7 +225,7 @@ function array(): ASTNode {
   scan();
   const arr = [];
   do {
-    if (token.type === tokenTypes.T_RMBR) {
+    if (token.type === tokenTypes.T_RIGHT_SQUARE_BRACKET) {
       scan();
       break;
     }
