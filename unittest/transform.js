@@ -16,9 +16,9 @@ const getExt = (str) => {
 
 const getOptions = (config) => {
   let options = {};
-
-  for (let i = 0; i < config.transform.length; i++) {
-    options = config.transform[i][2];
+  const transform = config.transform || [];
+  for (let i = 0; i < transform.length; i++) {
+    options = transform[i][2];
   }
 
   return options;

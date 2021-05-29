@@ -3,12 +3,13 @@ import { statement } from "./core/parse";
 import { interpretAST } from "./core/interpreter";
 import { globalData } from "./core/token";
 import { addBuildInMethod } from "./init/buildInFn";
+
 function jsParser(content = ""): void {
-  globalData.content = content;
-  scan();
-  const astNodeTree = statement();
-  interpretAST(astNodeTree, null, globalData.gScope);
   globalData.reset();
+  globalData.content = content;
+  scan(); // get first token
+  const astNodeTree = statement(); // get AST
+  interpretAST(astNodeTree, null, globalData.gScope); // code generate
 }
 export { addBuildInMethod, jsParser };
 const mock1 = `//Let's do something , like a array sort
