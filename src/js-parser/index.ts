@@ -13,11 +13,11 @@ function jsParser(content = ""): void {
   interpretAST(astNodeTree, null, globalData.globalScope); // code generate
 }
 export { addBuildInMethod, jsParser };
-const mock1 = "log(333);";
+const mock1 = "log(333, 22);";
 
 function init(data: string) {
   addBuildInMethod("log", (...result: unknown[]) => {
-    console.log(result);
+    console.log(...result);
   });
   jsParser(data);
 }

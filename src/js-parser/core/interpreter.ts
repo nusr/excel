@@ -1,9 +1,16 @@
 import { ASTNodeTypes } from "./token";
 import { printError } from "../init/commons";
-import { assignVal, findVar, readVal, assignArr } from "./data";
+
 import { Scope } from "./scope";
 import { buildInMethods } from "../init/buildInFn";
 import { ASTNode } from "./ASTNode";
+
+function readVal(object: any): any {
+  if (object && object._inner) {
+    return object.value;
+  }
+  return object;
+}
 
 function interpretIfAST(astNode: ASTNode, scope: Scope): any {
   const state = interpretAST(astNode.left, null, scope);
@@ -125,9 +132,12 @@ function interpretAST(
   switch (astNode.op) {
     case ASTNodeTypes.T_LEFT_VALUE:
       if (leftResult && leftResult._inner && leftResult._parent) {
-        return assignArr(leftResult, result);
+        const key = leftResult._key;
+        leftResult._parent.value[key] = result;
+      } else {
+        scope.set(astNode.value, result);
       }
-      return assignVal(astNode.value, result, scope);
+      return result;
   }
 
   leftResult = readVal(leftResult);
@@ -153,7 +163,9 @@ function interpretAST(
     case ASTNodeTypes.T_STRING:
       return astNode.value;
     case ASTNodeTypes.T_ARRAY:
-      return (astNode.value || []).map((item: any) => interpretAST(item, null, scope));
+      return (astNode.value || []).map((item: any) =>
+        interpretAST(item, null, scope)
+      );
     case ASTNodeTypes.T_ADD:
       if (rightResult === null || typeof rightResult === "undefined") {
         return leftResult;
@@ -171,7 +183,7 @@ function interpretAST(
     case ASTNodeTypes.T_ASSIGN:
       return rightResult;
     case ASTNodeTypes.T_IDENTIFIER:
-      return findVar(astNode.value, scope);
+      return scope.get(astNode.value);
     case ASTNodeTypes.T_GE:
       return leftResult >= rightResult;
     case ASTNodeTypes.T_GT:
