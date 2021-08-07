@@ -36,7 +36,7 @@ function scanIdent(s: string) {
       str += c;
       c = nextChar();
     }
-    putBack(c);
+    setPutBack(c);
   }
   return str;
 }
@@ -48,7 +48,7 @@ function scanInt(s: string) {
     n = n * 10 + Number(c);
     c = nextChar();
   }
-  putBack(c);
+  setPutBack(c);
   return n;
 }
 
@@ -60,7 +60,7 @@ function skipBlank() {
       return;
     }
     if (!isBlankChar(value)) {
-      putBack(value);
+      setPutBack(value);
       return;
     }
   }
@@ -81,7 +81,7 @@ function scan(): boolean {
   if (nextToken) {
     globalData.token.type = nextToken.type;
     globalData.token.value = nextToken.value;
-    globalData.nextToken = null;
+    setNextToken(null);
     return !!globalData.token;
   }
   if (index >= content.length) {
@@ -103,7 +103,7 @@ function scan(): boolean {
       if (next === "/") {
         token.type = tokenTypes.T_RIGHT_BLOCK_COMMENT;
       } else {
-        putBack(next);
+        setPutBack(next);
         token.type = tokenTypes.T_MUL;
       }
 
@@ -115,7 +115,7 @@ function scan(): boolean {
       } else if (next === "/") {
         token.type = tokenTypes.T_LINE_COMMENT;
       } else {
-        putBack(next);
+        setPutBack(next);
         token.type = tokenTypes.T_DIV;
       }
       break;
@@ -129,11 +129,11 @@ function scan(): boolean {
         token.type = tokenTypes.T_EQUAL;
         next = nextChar();
         if (next !== "=") {
-          putBack(next);
+          setPutBack(next);
         }
       } else {
         token.type = tokenTypes.T_ASSIGN;
-        putBack(next);
+        setPutBack(next);
       }
       break;
     case ";":
@@ -152,7 +152,7 @@ function scan(): boolean {
         token.type = tokenTypes.T_GE;
       } else {
         token.type = tokenTypes.T_GT;
-        putBack(next);
+        setPutBack(next);
       }
       break;
     case "<":
@@ -161,7 +161,7 @@ function scan(): boolean {
         token.type = tokenTypes.T_LE;
       } else {
         token.type = tokenTypes.T_LT;
-        putBack(next);
+        setPutBack(next);
       }
       break;
     case "&":
@@ -170,7 +170,7 @@ function scan(): boolean {
         token.type = tokenTypes.T_AND;
       } else {
         //todo
-        putBack(next);
+        setPutBack(next);
       }
       break;
     case "|":
@@ -179,7 +179,7 @@ function scan(): boolean {
         token.type = tokenTypes.T_OR;
       } else {
         //todo
-        putBack(next);
+        setPutBack(next);
       }
       break;
     case "(":
@@ -251,14 +251,13 @@ function nextChar(): string {
   const { content, putBack } = globalData;
 
   if (putBack) {
-    const c = putBack;
-    globalData.putBack = "";
-    return c;
+    setPutBack("");
+    return putBack;
   }
   globalData.index += 1;
   if (globalData.index <= content.length - 1) {
     const value = content[globalData.index];
-    if (value.indexOf("\r\n") > -1 || value.indexOf("\n") > -1) {
+    if (value === "\n") {
       globalData.line += 1;
     }
     return value;
@@ -266,10 +265,10 @@ function nextChar(): string {
   return "";
 }
 
-function putBackToken(token: Token): void {
-  globalData.nextToken = JSON.parse(JSON.stringify(token));
+function setNextToken(token: Token | null): void {
+  globalData.nextToken = token ? { ...token } : null;
 }
-function putBack(char: string) {
+function setPutBack(char: string) {
   globalData.putBack = char;
 }
 
@@ -301,5 +300,5 @@ export {
   matchLeftBracket,
   matchRightBracket,
   matchSemicolon,
-  putBackToken,
+  setNextToken,
 };

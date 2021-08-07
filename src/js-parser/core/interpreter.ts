@@ -1,8 +1,7 @@
 import { ASTNodeTypes } from "./token";
 import { printError } from "../init/commons";
-
 import { Scope } from "./scope";
-import { buildInMethods } from "../init/buildInFn";
+import { buildInMethodHandler } from "../init/buildInFn";
 import { ASTNode } from "./ASTNode";
 
 function readVal(object: any): any {
@@ -49,14 +48,15 @@ function interpretFunCallAST(astNode: ASTNode, scope: Scope): any {
     });
   }
 
-  if (buildInMethods[astNode.value as string]) {
+  if (buildInMethodHandler.has(astNode.value as string)) {
     const arr = [];
     let i = 0;
     while (typeof argument[i] !== "undefined") {
       arr.push(argument[i] ? argument[i].value : argument[i]);
       ++i;
     }
-    buildInMethods[astNode.value as string](...arr);
+    const method = buildInMethodHandler.get(astNode.value as string);
+    method && method(...arr);
   } else {
     childScope.set("arguments", argument, ASTNodeTypes.T_ARGUMENT);
     const fnAST = scope.get(astNode.value as string).value;
@@ -193,9 +193,9 @@ function interpretAST(
     case ASTNodeTypes.T_LT:
       return leftResult < rightResult;
     case ASTNodeTypes.T_EQUAL:
-      return leftResult === rightResult;
+      return leftResult == rightResult;
     case ASTNodeTypes.T_NOT_EQUAL:
-      return leftResult !== rightResult;
+      return leftResult != rightResult;
     case ASTNodeTypes.T_VISIT:
       return scope.getProperty(astNode.value, leftResult);
     default:

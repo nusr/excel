@@ -2,7 +2,7 @@ import { scan } from "./core/scanner";
 import { statement } from "./core/parse";
 import { interpretAST } from "./core/interpreter";
 import { globalData } from "./core/token";
-import { addBuildInMethod } from "./init/buildInFn";
+import { buildInMethodHandler } from "./init/buildInFn";
 
 function jsParser(content = ""): void {
   globalData.reset();
@@ -12,11 +12,19 @@ function jsParser(content = ""): void {
   // console.log(astNodeTree);
   interpretAST(astNodeTree, null, globalData.globalScope); // code generate
 }
-export { addBuildInMethod, jsParser };
-const mock1 = "log(333, 22);";
+export { buildInMethodHandler, jsParser };
+const mock1 = `let i;
+let result;
+i = 0;
+while (i < 10) {
+  i = i + 1;
+}
+result = i * 2;
+log(result);
+`;
 
 function init(data: string) {
-  addBuildInMethod("log", (...result: unknown[]) => {
+  buildInMethodHandler.register("log", (...result: unknown[]) => {
     console.log(...result);
   });
   jsParser(data);

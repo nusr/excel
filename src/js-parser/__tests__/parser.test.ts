@@ -1,4 +1,4 @@
-import { jsParser, addBuildInMethod } from "../";
+import { jsParser, buildInMethodHandler } from "../";
 import fs from "fs";
 import path from "path";
 
@@ -19,7 +19,7 @@ const outputList = [
 describe("parser.test.ts", () => {
   describe("jsParser", () => {
     const assert = (i: number) => {
-      addBuildInMethod("log", (...result: unknown[]): void => {
+      buildInMethodHandler.register("log", (...result: unknown[]): void => {
         expect(result).toEqual(outputList[i]);
       });
     };

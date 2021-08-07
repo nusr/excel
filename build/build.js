@@ -45,7 +45,14 @@ function copyHtml() {
   fs.writeFileSync(path.join(distDir, htmlPath), result, encoding);
 }
 
+let isBuilding = false;
+
 function buildJs() {
+  if (isBuilding) {
+    console.log("Building js");
+    return;
+  }
+  isBuilding = true;
   const errorFilePath = path.join(distDir, "buildError.txt");
   esBuild
     .build({
@@ -85,6 +92,9 @@ function buildJs() {
       } else {
         process.exit(1);
       }
+    })
+    .finally(() => {
+      isBuilding = false;
     });
 }
 

@@ -1,16 +1,16 @@
 import { globalData, tokenTypes, precedenceList, ASTNodeTypes } from "./token";
 import { printError } from "../init/commons";
-import { match, scan, putBackToken } from "./scanner";
+import { match, scan, setNextToken } from "./scanner";
 import { ASTNode } from "./ASTNode";
 
 const prefixParserMap: Record<string, () => ASTNode> = {
-  [tokenTypes.T_IDENTIFIER]: identifier,
+  [tokenTypes.T_IDENTIFIER]: identifierHandler,
   [tokenTypes.INTEGER]: numberHandler,
   [tokenTypes.T_STRING]: stringHandler,
-  [tokenTypes.T_LEFT_BRACKET]: group,
-  [tokenTypes.T_LEFT_SQUARE_BRACKET]: array,
-  [tokenTypes.T_ADD]: prefix.bind(null, tokenTypes.T_ADD),
-  [tokenTypes.T_SUB]: prefix.bind(null, tokenTypes.T_SUB),
+  [tokenTypes.T_LEFT_BRACKET]: groupHandler,
+  [tokenTypes.T_LEFT_SQUARE_BRACKET]: arrayHandler,
+  [tokenTypes.T_ADD]: prefixHandler.bind(null, tokenTypes.T_ADD),
+  [tokenTypes.T_SUB]: prefixHandler.bind(null, tokenTypes.T_SUB),
 };
 
 type ParserType = {
@@ -19,61 +19,61 @@ type ParserType = {
 };
 
 const infixParserMap: Record<string, ParserType> = {
-  [tokenTypes.T_LEFT_BRACKET]: { parser: funCall, precedence: precedenceList.call },
+  [tokenTypes.T_LEFT_BRACKET]: { parser: funCallHandler, precedence: precedenceList.call },
   [tokenTypes.TERNARY_EXPRESSION]: {
-    parser: condition,
+    parser: conditionHandler,
     precedence: precedenceList.condition,
   },
 
-  [tokenTypes.T_ASSIGN]: { parser: assign, precedence: precedenceList.assign },
+  [tokenTypes.T_ASSIGN]: { parser: assignHandler, precedence: precedenceList.assign },
 
   [tokenTypes.T_AND]: {
-    parser: infix.bind(null, precedenceList.and),
+    parser: infixHandler.bind(null, precedenceList.and),
     precedence: precedenceList.and,
   },
   [tokenTypes.T_OR]: {
-    parser: infix.bind(null, precedenceList.and),
+    parser: infixHandler.bind(null, precedenceList.and),
     precedence: precedenceList.and,
   },
   [tokenTypes.T_ADD]: {
-    parser: infix.bind(null, precedenceList.sum),
+    parser: infixHandler.bind(null, precedenceList.sum),
     precedence: precedenceList.sum,
   },
   [tokenTypes.T_SUB]: {
-    parser: infix.bind(null, precedenceList.sum),
+    parser: infixHandler.bind(null, precedenceList.sum),
     precedence: precedenceList.sum,
   },
   [tokenTypes.T_MUL]: {
-    parser: infix.bind(null, precedenceList.product),
+    parser: infixHandler.bind(null, precedenceList.product),
     precedence: precedenceList.product,
   },
   [tokenTypes.T_DIV]: {
-    parser: infix.bind(null, precedenceList.product),
+    parser: infixHandler.bind(null, precedenceList.product),
     precedence: precedenceList.product,
   },
 
   [tokenTypes.T_GT]: {
-    parser: infix.bind(null, precedenceList.compare),
+    parser: infixHandler.bind(null, precedenceList.compare),
     precedence: precedenceList.compare,
   },
   [tokenTypes.T_GE]: {
-    parser: infix.bind(null, precedenceList.compare),
+    parser: infixHandler.bind(null, precedenceList.compare),
     precedence: precedenceList.compare,
   },
   [tokenTypes.T_LT]: {
-    parser: infix.bind(null, precedenceList.compare),
+    parser: infixHandler.bind(null, precedenceList.compare),
     precedence: precedenceList.compare,
   },
   [tokenTypes.T_LE]: {
-    parser: infix.bind(null, precedenceList.compare),
+    parser: infixHandler.bind(null, precedenceList.compare),
     precedence: precedenceList.compare,
   },
   [tokenTypes.T_EQUAL]: {
-    parser: infix.bind(null, precedenceList.compare),
+    parser: infixHandler.bind(null, precedenceList.compare),
     precedence: precedenceList.compare,
   },
   [tokenTypes.T_NOT_EQUAL]: {
-    parser: infix.bind(null, precedenceList.compare),
+    parser: infixHandler.bind(null, precedenceList.compare),
     precedence: precedenceList.compare,
   },
 };
@@ -130,7 +130,7 @@ function parseExpression(precedenceValue = 0): ASTNode {
   return left;
 }
 
-function identifier(): ASTNode {
+function identifierHandler(): ASTNode {
   const { token } = globalData;
   const indent = new ASTNode().initLeafNode(ASTNodeTypes.T_IDENTIFIER, token.value);
   scan();
@@ -141,7 +141,7 @@ function identifier(): ASTNode {
     indent.left = left;
     return indent;
   }
-  putBackToken(token);
+  setNextToken(token);
   return indent;
 }
 
@@ -155,13 +155,13 @@ function stringHandler(): ASTNode {
   return new ASTNode().initLeafNode(ASTNodeTypes.T_STRING, token.value);
 }
 
-function assign(left: ASTNode): ASTNode {
+function assignHandler(left: ASTNode): ASTNode {
   const right = parseExpression(0);
   left = new ASTNode().initUnaryNode(ASTNodeTypes.T_LEFT_VALUE, left, left.value);
   return new ASTNode().initTwoNode(ASTNodeTypes.T_ASSIGN, right, left, null);
 }
 
-function condition(left: ASTNode): ASTNode {
+function conditionHandler(left: ASTNode): ASTNode {
   const trueBody = parseExpression(0);
   match(tokenTypes.COLON, ":");
   const falseBody = parseExpression(precedenceList.condition - 1);
@@ -174,12 +174,12 @@ function condition(left: ASTNode): ASTNode {
   );
 }
 
-function group(): ASTNode {
+function groupHandler(): ASTNode {
   scan();
   return parseExpression(0);
 }
 
-function funCall(left: ASTNode): ASTNode {
+function funCallHandler(left: ASTNode): ASTNode {
   const { token } = globalData;
   const args: any[] = [];
   const astNode = new ASTNode().initLeafNode(ASTNodeTypes.T_FUNCTION_ARGUMENTS, args);
@@ -208,19 +208,19 @@ function funCall(left: ASTNode): ASTNode {
   );
 }
 
-function prefix(type: string): ASTNode {
+function prefixHandler(type: string): ASTNode {
   scan();
   const right = parseExpression(precedenceList.prefix);
-  putBackToken(globalData.token);
+  setNextToken(globalData.token);
   return new ASTNode().initUnaryNode(type, right, null);
 }
 
-function infix(precedence: number, left: ASTNode, type: string): ASTNode {
+function infixHandler(precedence: number, left: ASTNode, type: string): ASTNode {
   const right = parseExpression(precedence);
   return new ASTNode().initTwoNode(type, left, right, null);
 }
 
-function array(): ASTNode {
+function arrayHandler(): ASTNode {
   const { token } = globalData;
   scan();
   const arr = [];

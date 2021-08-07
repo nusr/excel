@@ -1,7 +1,14 @@
-const buildInMethods: Record<string, any> = {};
-
-function addBuildInMethod(name: string, fn: any): void {
-  buildInMethods[name] = fn;
+class BuildInMethod {
+  buildInMethodMap = new Map<string, (...data: any[]) => any>();
+  register(methodName: string, method: (...data: any[]) => any) {
+    this.buildInMethodMap.set(methodName, method);
+  }
+  get(methodName: string) {
+    return this.buildInMethodMap.get(methodName);
+  }
+  has(methodName: string) {
+    return this.buildInMethodMap.has(methodName);
+  }
 }
 
-export { addBuildInMethod, buildInMethods };
+export const buildInMethodHandler = new BuildInMethod();
