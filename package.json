@@ -11,7 +11,7 @@
     "test": "npx jest --config ./unittest/jest.config.js",
     "coverage": "npm run test -- --coverage",
     "watch": "npm run test -- --watch",
-    "ci": "npm run build && npm run lint && npm run test && npm run typecheck",
+    "ci": "npm run build && npm run lint && npm run test && npm run type-check",
     "deploy": "deploy.sh",
     "type-check": "node scripts/rm.js && tsc",
     "postinstall": "node ./scripts/link-hook.js && node scripts/rm.js",

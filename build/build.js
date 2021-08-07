@@ -17,33 +17,9 @@ const { handleSVGFiles } = require("./svg");
 
 const entryPath = path.join(cwd, "src/index.tsx");
 const tsconfigPath = path.join(cwd, "tsconfig.json");
-const commonConfig = {
-  entryPoints: [entryPath],
-  chunkNames: "chunks/[name]-[hash]",
-  splitting: true,
-  format: "esm",
-  bundle: true,
-  minify: isProd,
-  sourcemap: true,
-  tsconfig: tsconfigPath,
-  outdir: distDir,
-  define: {
-    "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
-  },
-};
 
-function fileWatch(watchDir, callback) {
-  if (process.platform === "linux") {
-    if (fs.statSync(watchDir).isDirectory()) {
-      fs.watch(watchDir, callback);
-      fs.readdirSync(watchDir).forEach((filePath) =>
-        fileWatch(`${watchDir}/${filePath}`, callback)
-      );
-    }
-  } else {
-    fs.watch(watchDir, { recursive: true }, callback);
-  }
-}
+const FORMAT = "esm";
+
 function copyHtml() {
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir);
@@ -65,7 +41,7 @@ function copyHtml() {
   const result = htmlStr.replace(
     `<!--INDEX_JS_ENTRY-->`,
     `<script ${
-      commonConfig.format === "esm" ? ' type="module" ' : ""
+      FORMAT === "esm" ? ' type="module" ' : ""
     } src="${indexJs}"></script>`
   );
   fs.writeFileSync(path.join(distDir, htmlPath), result, encoding);
@@ -82,7 +58,27 @@ function buildJs(type = "", fileName = "") {
   buildLog(`${typeof fileName === "string" ? fileName : ""}: ${type}`);
   esBuild
     .build({
-      ...commonConfig,
+      entryPoints: [entryPath],
+      chunkNames: "chunks/[name]-[hash]",
+      splitting: true,
+      format: FORMAT,
+      bundle: true,
+      minify: isProd,
+      sourcemap: true,
+      tsconfig: tsconfigPath,
+      outdir: distDir,
+      define: {
+        "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
+      },
+      watch: isProd
+        ? null
+        : {
+            onRebuild(error) {
+              if (error) console.error("watch build failed:", error);
+              else console.log("watch build succeeded");
+              buildJs();
+            },
+          },
     })
     .then(() => {
       copyHtml();
@@ -108,10 +104,6 @@ function init() {
   deleteDirectory();
   buildJs();
   if (!isProd) {
-    const watchList = ["src", "icons", "assets"];
-    for (const item of watchList) {
-      fileWatch(path.join(cwd, item), buildJs);
-    }
     const url = staticService();
     openBrowser(url);
   }
