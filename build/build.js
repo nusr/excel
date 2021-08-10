@@ -49,7 +49,6 @@ let isBuilding = false;
 
 function buildJs() {
   if (isBuilding) {
-    console.log("Building js");
     return;
   }
   isBuilding = true;

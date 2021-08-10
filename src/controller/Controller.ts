@@ -16,7 +16,6 @@ import {
   Range,
   DEFAULT_ACTIVE_CELL,
 } from "@/util";
-import { FormulaParser } from "@/parser";
 import { History } from "./History";
 import { Controller as RenderController } from "@/canvas";
 
@@ -24,7 +23,6 @@ export class Controller extends EventEmitter<EventType> {
   scroll: Scroll = new Scroll(this);
   model: Model = new Model(this);
   ranges: Array<Range> = [];
-  formulaParser: FormulaParser = new FormulaParser();
   isCellEditing = false;
   private changeSet = new Set<ChangeEventType>();
   renderController: RenderController | null = null;
@@ -198,11 +196,11 @@ export class Controller extends EventEmitter<EventType> {
   queryCell(row: number, col: number): CellInfo {
     const { model } = this;
     const { value, formula, style } = model.queryCell(row, col);
-    let displayValue = value || "";
-    if (formula) {
-      const temp = this.formulaParser.init(formula, this.convertCell);
-      displayValue = temp.result as number | string;
-    }
+    const displayValue = value || "";
+    // if (formula) {
+      // const temp = this.formulaParser.init(formula, this.convertCell);
+      // displayValue = temp.result as number | string;
+    // }
 
     return {
       value,

@@ -1,1 +1,0 @@
-export { lex } from "./lex";
