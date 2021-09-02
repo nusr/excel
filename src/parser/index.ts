@@ -1,4 +1,49 @@
 import formulas from "../formula";
+
+export const ERROR = "ERROR";
+export const ERROR_DIV_ZERO = "DIV/0";
+export const ERROR_NAME = "NAME";
+export const ERROR_NOT_AVAILABLE = "N/A";
+export const ERROR_NULL = "NULL";
+export const ERROR_NUM = "NUM";
+export const ERROR_REF = "REF";
+export const ERROR_VALUE = "VALUE";
+
+const errors = {
+  [ERROR]: "#ERROR!",
+  [ERROR_DIV_ZERO]: "#DIV/0!",
+  [ERROR_NAME]: "#NAME?",
+  [ERROR_NOT_AVAILABLE]: "#N/A",
+  [ERROR_NULL]: "#NULL!",
+  [ERROR_NUM]: "#NUM!",
+  [ERROR_REF]: "#REF!",
+  [ERROR_VALUE]: "#VALUE!",
+};
+type ErrorTypes =
+  | "#ERROR!"
+  | "#DIV/0!"
+  | "#NAME?"
+  | "#N/A"
+  | "#NULL!"
+  | "#NUM!"
+  | "#REF!"
+  | "#VALUE!";
+const FORMULA_ERRORS: ErrorTypes[] = [
+  "#ERROR!",
+  "#DIV/0!",
+  "#NAME?",
+  "#N/A",
+  "#NULL!",
+  "#NUM!",
+  "#REF!",
+  "#VALUE!",
+];
+function parseError(type: string): ErrorTypes | null {
+  if (FORMULA_ERRORS.some((item) => item === type)) {
+    return type as ErrorTypes;
+  }
+  return null;
+}
 interface IInputStreamResult {
   next: () => string;
   peek: () => string;
@@ -180,18 +225,21 @@ function TokenStream(
 
 function parse(input: ITokenStreamResult) {
   const PRECEDENCE: Record<string, number> = {
-    "<": 7,
-    ">": 7,
-    "<=": 7,
-    ">=": 7,
-    "<>": 7,
-    "=": 7,
-    "+": 10,
-    "-": 10,
-    "*": 20,
-    "/": 20,
-    "%": 20,
-    "^": 20,
+    "=": 1,
+    "<=": 2,
+    ">=": 2,
+    "<>": 2,
+    NOT: 2,
+    "||": 2,
+    "<": 3,
+    ">": 3,
+    "+": 4,
+    "-": 4,
+    "*": 5,
+    "/": 5,
+    "^": 6,
+    "&": 7,
+    "%": 8,
   };
 
   function isPunctuation(ch: string) {
@@ -219,7 +267,7 @@ function parse(input: ITokenStreamResult) {
         input.next();
         return maybeBinary(
           {
-            type: tok.value == "=" ? "assign" : "binary",
+            type: "binary",
             operator: tok.value,
             left: left,
             right: maybeBinary(parseAtom(), newPre),
@@ -307,40 +355,22 @@ function parse(input: ITokenStreamResult) {
 }
 
 class Environment {
-  vars: any;
-  parent: Environment | null;
-  constructor(parent: Environment | null) {
-    this.parent = parent;
-    this.vars = Object.create(parent ? parent.vars : null);
-  }
+  variables: Record<string, any> = {};
   extend = () => {
-    return new Environment(this);
+    return new Environment();
   };
-  lookup = (name: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    let scope: any = this;
-    while (scope) {
-      if (Object.prototype.hasOwnProperty.call(scope.vars, name)) {
-        return scope;
-      }
-      scope = scope.parent;
-    }
-  };
+
   get = (name: string) => {
-    if (name in this.vars) {
-      return this.vars[name];
+    if (name in this.variables) {
+      return this.variables[name];
     }
     throw new Error("Undefined variable " + name);
   };
   set = (name: string, value: any) => {
-    const scope = this.lookup(name);
-    if (!scope || this.parent) {
-      throw new Error("undefined variable " + name);
-    }
-    return ((scope || this).vars[name] = value);
+    return (this.variables[name] = value);
   };
   def = (name: string, value: any) => {
-    return (this.vars[name] = value);
+    return (this.variables[name] = value);
   };
 }
 
@@ -348,7 +378,9 @@ const evaluateMap: Record<string, (ast: any, scope: Environment) => any> = {
   NumberLiteral: (ast: NumberLiteral) => ast.value,
   StringLiteral: (ast: StringLiteral) => ast.value,
   BooleanLiteral: (ast: BooleanLiteral) => ast.value,
-  VariableLiteral: (ast: VariableLiteral, scope: Environment) => scope.get(ast.value),
+  VariableLiteral: (ast: VariableLiteral, scope: Environment) => {
+    scope.get(ast.value);
+  },
   assign: (ast: any, scope: Environment) => {
     if (ast.left.type !== "variable") {
       throw new Error("Can not assign to " + JSON.stringify(ast.left));
@@ -387,48 +419,45 @@ function evaluate(ast: any, scope: Environment) {
 
 function applyOperator(op: string, a: any, b: any) {
   function num(x: number) {
-    if (typeof x != "number") throw new Error("Expected number but got " + x);
-    return x;
-  }
-  function div(x: number) {
-    if (num(x) == 0) throw new Error("Divide by zero");
+    if (typeof x != "number") throw new Error("#VALUE!");
     return x;
   }
   switch (op) {
+    case "=":
+      return a == b;
+    case "<=":
+      return num(a) <= num(b);
+    case ">=":
+      return num(a) >= num(b);
+    case "<>":
+      return a != b;
+    case "<":
+      return num(a) < num(b);
+    case ">":
+      return num(a) > num(b);
     case "+":
       return num(a) + num(b);
     case "-":
       return num(a) - num(b);
     case "*":
       return num(a) * num(b);
-    case "/":
-      return num(a) / div(b);
-    case "%":
-      return num(a) % div(b);
-    case "<":
-      return num(a) < num(b);
-    case ">":
-      return num(a) > num(b);
-    case "<=":
-      return num(a) <= num(b);
-    case ">=":
-      return num(a) >= num(b);
+    case "/": {
+      if (num(b) == 0) {
+        throw new Error("#DIV/0!");
+      }
+      return num(a) / num(b);
+    }
     case "^":
       return Math.pow(num(a), num(b));
-    case "=":
-      return a === b;
-    case "<>":
-      return a !== b;
+    case "&":
+      return `${a}${b}`;
+    case "%":
+      return num(a) * 0.01;
   }
   throw new Error("Can't apply operator " + op);
 }
 
-function init(): void {
-  const globalEnv = new Environment(null);
-  Object.keys(formulas).forEach((key) => {
-    globalEnv.def(key, formulas[key]);
-  });
-  const code = "sum(1,3,45)";
+function parser(code: string, globalEnv: Environment) {
   const ast = parse(
     TokenStream(InputStream(code), (value: string) => {
       if (value === "true" || value === "false") {
@@ -450,7 +479,40 @@ function init(): void {
       };
     })
   );
-  const result = evaluate(ast, globalEnv);
-  console.log(result);
+
+  return evaluate(ast, globalEnv);
 }
-init();
+export function parseFormula(code: string): {
+  result: any;
+  error: ErrorTypes | null;
+} {
+  let result: any = null;
+  let error: ErrorTypes | null = null;
+  try {
+    if (code === "") {
+      result = "";
+    } else {
+      const globalEnv = new Environment();
+      Object.keys(formulas).forEach((key) => {
+        globalEnv.def(key, formulas[key]);
+      });
+      result = parser(code, globalEnv);
+    }
+  } catch (e) {
+    const message = parseError(e.message);
+    if (message) {
+      error = message;
+    } else {
+      console.log(e);
+      error = "#ERROR!";
+    }
+  }
+  if (result instanceof Error) {
+    error = parseError(result.message) || "#ERROR!";
+    result = null;
+  }
+  return {
+    result,
+    error,
+  };
+}
