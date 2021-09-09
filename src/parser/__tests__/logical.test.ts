@@ -1,6 +1,6 @@
 import { parseFormula } from "..";
 
-describe.only(".parseFormula() logical", () => {
+describe(".parseFormula() logical", () => {
   it("operator: =", () => {
     expect(parseFormula("10 = 10")).toEqual({
       error: null,
