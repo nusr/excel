@@ -24,4 +24,18 @@ describe(".parseFormula() function", () => {
       result: 6,
     });
   });
+  it("function: ABS", () => {
+    expect(parseFormula("ABS(1)")).toEqual({
+      error: null,
+      result: 1,
+    });
+    expect(parseFormula("ABS(-1)")).toEqual({
+      error: null,
+      result: 1,
+    });
+    expect(parseFormula('ABS("ff")')).toEqual({
+      error: "#VALUE!",
+      result: null,
+    });
+  });
 });

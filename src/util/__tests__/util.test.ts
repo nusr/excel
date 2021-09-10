@@ -47,11 +47,11 @@ describe("util.test.ts", () => {
     });
   });
   describe("parseNumber", () => {
-    it("should convert null to NaN", function () {
-      expect(parseNumber(null)).toBeNaN();
+    it("should convert null to 0", function () {
+      expect(parseNumber(null)).toEqual(0)
     });
-    it("should convert undefined to NaN", function () {
-      expect(parseNumber(undefined)).toBeNaN();
+    it("should convert undefined to 0", function () {
+      expect(parseNumber(undefined)).toEqual(0)
     });
     it("should convert 1 to 1", function () {
       expect(parseNumber(1)).toEqual(1);

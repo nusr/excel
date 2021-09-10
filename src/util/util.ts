@@ -1,23 +1,32 @@
 import { SHEET_NAME_PREFIX } from "./constant";
-import type { WorksheetType } from "@/types";
-import { isNil } from "@/lodash";
-export function isNumber(value: string | number): boolean {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  return parseFloat(value) == value;
+import type { WorksheetType, ResultType } from "@/types";
+export function isNumber(value: ResultType): boolean {
+  if (typeof value === "number" && !window.isNaN(value)) {
+    return true;
+  }
+  if (typeof value !== "string") {
+    return false;
+  }
+  const t = parseFloat(value);
+  return !window.isNaN(t) && t === Number(value);
 }
 
-export function parseNumber(value?: string | number): number {
-  if (isNil(value)) {
-    return window.NaN;
+export function parseNumber(value: ResultType): number {
+  if (isNumber(value)) {
+    return Number(value);
   }
-  if (typeof value === "number") {
-    return value;
+  return 0;
+}
+
+export function parseNumberArray(list: ResultType[]): number[] {
+  const result: number[] = [];
+  for (let i = 0; i < list.length; i++) {
+    const temp = parseNumber(list[i]);
+    if (!window.isNaN(temp)) {
+      result.push(temp);
+    }
   }
-  if (typeof value === "string") {
-    return value.includes(".") ? parseFloat(value) : parseInt(value, 10);
-  }
-  return window.NaN;
+  return result;
 }
 
 export function getListMaxNum(list: string[] = [], prefix = ""): number {

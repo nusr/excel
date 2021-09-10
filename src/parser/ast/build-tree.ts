@@ -29,12 +29,9 @@ function parseExpression(
   parseOperandExpression(stream, shuntingYard);
 
   let pos;
-  while (true) {
-    if (!stream.nextIsBinaryOperator()) {
-      break;
-    }
+  while (stream.nextIsBinaryOperator()) {
     if (pos === stream.pos()) {
-      throw new Error("Invalid syntax!");
+      throw new Error("parseExpression: Invalid syntax!");
     }
     pos = stream.pos();
     pushOperator(createBinaryOperator(stream.getNext().value), shuntingYard);
@@ -79,7 +76,7 @@ function parseFunctionCall(
   stream.consume(); // consume start of function call
 
   const args = parseFunctionArgList(stream, shuntingYard);
-  shuntingYard.operands.push(builder.functionCall(name, args));
+  shuntingYard.operands.push(builder.functionCall(name, ...args));
 
   stream.consume(); // consume end of function call
 }
@@ -93,8 +90,7 @@ function parseFunctionArgList(
   withinSentinel(shuntingYard, function () {
     let arity = 0;
     let pos;
-    while (true) {
-      if (stream.nextIsEndOfFunctionCall()) break;
+    while (!stream.nextIsEndOfFunctionCall()) {
       if (pos === stream.pos()) {
         throw new Error("Invalid syntax");
       }

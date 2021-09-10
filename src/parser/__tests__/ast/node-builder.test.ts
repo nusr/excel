@@ -3,7 +3,7 @@ import * as nodeBuilder from "../../ast/node-builder";
 describe("node builder", function () {
   it("cell", function () {
     const cell = nodeBuilder.cell("A1", "relative");
-    expect(cell.type).toEqual("cell");
+    expect(cell.type).toEqual("Cell");
     expect(cell.key).toEqual("A1");
     expect(cell.refType).toEqual("relative");
   });
@@ -14,7 +14,7 @@ describe("node builder", function () {
 
     const cellRange = nodeBuilder.cellRange(left, right);
 
-    expect(cellRange.type).toEqual("cell-range");
+    expect(cellRange.type).toEqual("CellRange");
     expect(cellRange.left).toEqual(left);
     expect(cellRange.right).toEqual(right);
   });
@@ -23,9 +23,9 @@ describe("node builder", function () {
     const arg1 = nodeBuilder.numberLiteral(1);
     const arg2 = nodeBuilder.numberLiteral(2);
 
-    const functionCall = nodeBuilder.functionCall("SUM", [arg1, arg2]);
+    const functionCall = nodeBuilder.functionCall("SUM", arg1, arg2);
 
-    expect(functionCall.type).toEqual("function");
+    expect(functionCall.type).toEqual("CallExpression");
     expect(functionCall.name).toEqual("SUM");
     expect(functionCall.arguments).toEqual([arg1, arg2]);
   });
@@ -36,7 +36,7 @@ describe("node builder", function () {
 
     const functionCall = nodeBuilder.functionCall("SUM", arg1, arg2);
 
-    expect(functionCall.type).toEqual("function");
+    expect(functionCall.type).toEqual("CallExpression");
     expect(functionCall.name).toEqual("SUM");
     expect(functionCall.arguments).toEqual([arg1, arg2]);
   });
@@ -44,7 +44,7 @@ describe("node builder", function () {
   it("functionCall given no args", function () {
     const functionCall = nodeBuilder.functionCall("SUM");
 
-    expect(functionCall.type).toEqual("function");
+    expect(functionCall.type).toEqual("CallExpression");
     expect(functionCall.name).toEqual("SUM");
     expect(functionCall.arguments).toEqual([]);
   });
@@ -52,21 +52,21 @@ describe("node builder", function () {
   it("number", function () {
     const number = nodeBuilder.numberLiteral(2);
 
-    expect(number.type).toEqual("number");
+    expect(number.type).toEqual("NumberLiteral");
     expect(number.value).toEqual(2);
   });
 
   it("text", function () {
     const text = nodeBuilder.stringLiteral("abc");
 
-    expect(text.type).toEqual("string");
+    expect(text.type).toEqual("StringLiteral");
     expect(text.value).toEqual("abc");
   });
 
   it("logical", function () {
     const logical = nodeBuilder.booleanLiteral(true);
 
-    expect(logical.type).toEqual("boolean");
+    expect(logical.type).toEqual("BooleanLiteral");
     expect(logical.value).toEqual(true);
   });
 
@@ -75,7 +75,7 @@ describe("node builder", function () {
     const op2 = nodeBuilder.numberLiteral(2);
     const expr = nodeBuilder.binaryExpression("+", op1, op2);
 
-    expect(expr.type).toEqual("binary-expression");
+    expect(expr.type).toEqual("BinaryExpression");
     expect(expr.operator).toEqual("+");
     expect(expr.left).toEqual(op1);
     expect(expr.right).toEqual(op2);
@@ -85,7 +85,7 @@ describe("node builder", function () {
     const operand = nodeBuilder.numberLiteral(1);
     const expr = nodeBuilder.unaryExpression("-", operand);
 
-    expect(expr.type).toEqual("unary-expression");
+    expect(expr.type).toEqual("UnaryExpression");
     expect(expr.operator).toEqual("-");
     expect(expr.operand).toEqual(operand);
   });

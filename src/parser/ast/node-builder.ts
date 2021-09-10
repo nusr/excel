@@ -15,13 +15,13 @@ import type {
 
 function cell(key: string, refType: RefTypes): CellNode {
   return {
-    type: "cell",
+    type: "Cell",
     refType,
     key,
   };
 }
 
-function cellRange(leftCell: Node, rightCell: Node): CellRangeNode {
+function cellRange(leftCell: CellNode, rightCell: CellNode): CellRangeNode {
   if (!leftCell) {
     throw new Error("Invalid Syntax");
   }
@@ -29,7 +29,7 @@ function cellRange(leftCell: Node, rightCell: Node): CellRangeNode {
     throw new Error("Invalid Syntax");
   }
   return {
-    type: "cell-range",
+    type: "CellRange",
     left: leftCell,
     right: rightCell,
   };
@@ -39,7 +39,7 @@ function functionCall(name: string, ...args: Node[]): FunctionNode {
   const argArray = Array.isArray(args[0]) ? args[0] : args;
 
   return {
-    type: "function",
+    type: "CallExpression",
     name,
     arguments: argArray,
   };
@@ -47,21 +47,21 @@ function functionCall(name: string, ...args: Node[]): FunctionNode {
 
 function numberLiteral(value: number): NumberNode {
   return {
-    type: "number",
+    type: "NumberLiteral",
     value,
   };
 }
 
 function stringLiteral(value: string): StringNode {
   return {
-    type: "string",
+    type: "StringLiteral",
     value,
   };
 }
 
 function booleanLiteral(value: boolean): BooleanNode {
   return {
-    type: "boolean",
+    type: "BooleanLiteral",
     value,
   };
 }
@@ -78,7 +78,7 @@ function binaryExpression(
     throw new Error("Invalid Syntax");
   }
   return {
-    type: "binary-expression",
+    type: "BinaryExpression",
     operator,
     left,
     right,
@@ -93,7 +93,7 @@ function unaryExpression(
     throw new Error("Invalid Syntax");
   }
   return {
-    type: "unary-expression",
+    type: "UnaryExpression",
     operator,
     operand: expression,
   };

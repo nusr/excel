@@ -1,1 +1,1 @@
-export { parseFormula } from "./parse";
+export { parseFormula } from "./compiler";
