@@ -1,64 +1,89 @@
-import { generateAST as buildTree, nodeBuilder as builder } from "../../ast";
-import { tokenize } from "../../tokenize";
+import { parser as buildTree } from "../../ast";
+import { tokenizer } from "../../tokenize";
+import * as builder from "../../ast/node-builder";
 
 describe("operators", function () {
   describe("precendence", function () {
     it("1 + 2 >= 3 - 4", function () {
-      const tree = buildTree(tokenize("1 + 2 >= 3 - 4"));
+      const tree = buildTree(tokenizer("1 + 2 >= 3 - 4"));
 
       expect(tree).toEqual(
         builder.binaryExpression(
           ">=",
-          builder.binaryExpression("+", builder.number(1), builder.number(2)),
-          builder.binaryExpression("-", builder.number(3), builder.number(4))
+          builder.binaryExpression(
+            "+",
+            builder.numberLiteral(1),
+            builder.numberLiteral(2)
+          ),
+          builder.binaryExpression(
+            "-",
+            builder.numberLiteral(3),
+            builder.numberLiteral(4)
+          )
         )
       );
     });
 
     it('1 + 2 & "a"', function () {
-      const tree = buildTree(tokenize('1 + 2 & "a"'));
+      const tree = buildTree(tokenizer('1 + 2 & "a"'));
 
       expect(tree).toEqual(
         builder.binaryExpression(
           "&",
-          builder.binaryExpression("+", builder.number(1), builder.number(2)),
-          builder.text("a")
+          builder.binaryExpression(
+            "+",
+            builder.numberLiteral(1),
+            builder.numberLiteral(2)
+          ),
+          builder.stringLiteral("a")
         )
       );
     });
 
     it("1 + 2 * 3", function () {
-      const tree = buildTree(tokenize("1 + 2 * 3"));
+      const tree = buildTree(tokenizer("1 + 2 * 3"));
 
       expect(tree).toEqual(
         builder.binaryExpression(
           "+",
-          builder.number(1),
-          builder.binaryExpression("*", builder.number(2), builder.number(3))
+          builder.numberLiteral(1),
+          builder.binaryExpression(
+            "*",
+            builder.numberLiteral(2),
+            builder.numberLiteral(3)
+          )
         )
       );
     });
 
     it("1 * 2 ^ 3", function () {
-      const tree = buildTree(tokenize("1 * 2 ^ 3"));
+      const tree = buildTree(tokenizer("1 * 2 ^ 3"));
 
       expect(tree).toEqual(
         builder.binaryExpression(
           "*",
-          builder.number(1),
-          builder.binaryExpression("^", builder.number(2), builder.number(3))
+          builder.numberLiteral(1),
+          builder.binaryExpression(
+            "^",
+            builder.numberLiteral(2),
+            builder.numberLiteral(3)
+          )
         )
       );
     });
 
     it("(1 * 2) ^ 3", function () {
-      const tree = buildTree(tokenize("(1 * 2) ^ 3"));
+      const tree = buildTree(tokenizer("(1 * 2) ^ 3"));
 
       expect(tree).toEqual(
         builder.binaryExpression(
           "^",
-          builder.binaryExpression("*", builder.number(1), builder.number(2)),
-          builder.number(3)
+          builder.binaryExpression(
+            "*",
+            builder.numberLiteral(1),
+            builder.numberLiteral(2)
+          ),
+          builder.numberLiteral(3)
         )
       );
     });
@@ -67,37 +92,49 @@ describe("operators", function () {
   // everything is left associative
   describe("associativity", function () {
     it("1 + 2 + 3", function () {
-      const tree = buildTree(tokenize("1 + 2 + 3"));
+      const tree = buildTree(tokenizer("1 + 2 + 3"));
 
       expect(tree).toEqual(
         builder.binaryExpression(
           "+",
-          builder.binaryExpression("+", builder.number(1), builder.number(2)),
-          builder.number(3)
+          builder.binaryExpression(
+            "+",
+            builder.numberLiteral(1),
+            builder.numberLiteral(2)
+          ),
+          builder.numberLiteral(3)
         )
       );
     });
 
     it("1 + (2 + 3)", function () {
-      const tree = buildTree(tokenize("1 + (2 + 3)"));
+      const tree = buildTree(tokenizer("1 + (2 + 3)"));
 
       expect(tree).toEqual(
         builder.binaryExpression(
           "+",
-          builder.number(1),
-          builder.binaryExpression("+", builder.number(2), builder.number(3))
+          builder.numberLiteral(1),
+          builder.binaryExpression(
+            "+",
+            builder.numberLiteral(2),
+            builder.numberLiteral(3)
+          )
         )
       );
     });
 
     it("1 / 2 / 3", function () {
-      const tree = buildTree(tokenize("1 / 2 / 3"));
+      const tree = buildTree(tokenizer("1 / 2 / 3"));
 
       expect(tree).toEqual(
         builder.binaryExpression(
           "/",
-          builder.binaryExpression("/", builder.number(1), builder.number(2)),
-          builder.number(3)
+          builder.binaryExpression(
+            "/",
+            builder.numberLiteral(1),
+            builder.numberLiteral(2)
+          ),
+          builder.numberLiteral(3)
         )
       );
     });

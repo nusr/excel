@@ -4,8 +4,8 @@ import type {
   CellRangeNode,
   FunctionNode,
   NumberNode,
-  TextNode,
-  LogicalNode,
+  StringNode,
+  BooleanNode,
   BinaryExpressionNode,
   UnaryExpressionNode,
   RefTypes,
@@ -45,23 +45,23 @@ function functionCall(name: string, ...args: Node[]): FunctionNode {
   };
 }
 
-function number(value: number): NumberNode {
+function numberLiteral(value: number): NumberNode {
   return {
     type: "number",
     value,
   };
 }
 
-function text(value: string): TextNode {
+function stringLiteral(value: string): StringNode {
   return {
-    type: "text",
+    type: "string",
     value,
   };
 }
 
-function logical(value: boolean): LogicalNode {
+function booleanLiteral(value: boolean): BooleanNode {
   return {
-    type: "logical",
+    type: "boolean",
     value,
   };
 }
@@ -100,9 +100,9 @@ function unaryExpression(
 }
 export {
   functionCall,
-  number,
-  text,
-  logical,
+  numberLiteral,
+  stringLiteral,
+  booleanLiteral,
   cell,
   cellRange,
   binaryExpression,

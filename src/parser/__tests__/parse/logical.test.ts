@@ -1,4 +1,4 @@
-import { parseFormula } from "..";
+import { parseFormula } from "../..";
 
 describe(".parseFormula() logical", () => {
   it("operator: =", () => {
@@ -22,10 +22,10 @@ describe(".parseFormula() logical", () => {
       error: null,
       result: true,
     });
-    // expect(parseFormula("10 >- 10")).toEqual({
-      // error: null,
-      // result: true,
-    // });
+    expect(parseFormula("10 >- 10")).toEqual({
+      error: null,
+      result: true,
+    });
 
     expect(parseFormula("10 > 11")).toEqual({
       error: null,
@@ -63,10 +63,10 @@ describe(".parseFormula() logical", () => {
       error: null,
       result: false,
     });
-    // expect(parseFormula("10 <- 10")).toEqual({
-      // error: null,
-      // result: false,
-    // });
+    expect(parseFormula("10 <- 10")).toEqual({
+      error: null,
+      result: false,
+    });
   });
 
   it("operator: >=", () => {
@@ -82,10 +82,10 @@ describe(".parseFormula() logical", () => {
       error: null,
       result: true,
     });
-    // expect(parseFormula("10 >= -10")).toEqual({
-      // error: null,
-      // result: true,
-    // });
+    expect(parseFormula("10 >= -10")).toEqual({
+      error: null,
+      result: true,
+    });
 
     expect(parseFormula("10 >= 11")).toEqual({
       error: null,
@@ -110,10 +110,10 @@ describe(".parseFormula() logical", () => {
       error: null,
       result: true,
     });
-    // expect(parseFormula("-10 <= 10")).toEqual({
-      // error: null,
-      // result: true,
-    // });
+    expect(parseFormula("-10 <= 10")).toEqual({
+      error: null,
+      result: true,
+    });
 
     expect(parseFormula("11 <= 10")).toEqual({
       error: null,
@@ -138,10 +138,10 @@ describe(".parseFormula() logical", () => {
       error: null,
       result: true,
     });
-    // expect(parseFormula("-10 <> 10")).toEqual({
-      // error: null,
-      // result: true,
-    // });
+    expect(parseFormula("-10 <> 10")).toEqual({
+      error: null,
+      result: true,
+    });
 
     expect(parseFormula("10 <> 10")).toEqual({
       error: null,

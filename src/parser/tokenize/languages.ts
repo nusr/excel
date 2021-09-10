@@ -9,10 +9,10 @@ export default {
     // decimal point in numbers
     decimalSeparator: ".",
     // returns number string that can be parsed by Number()
-    reformatNumberForJsParsing: function (n) {
+    reformatNumberForJsParsing: (n: string): string => {
       return n;
     },
-    isScientificNotation: function (token) {
+    isScientificNotation: (token: string): boolean => {
       return /^[1-9]{1}(\.[0-9]+)?E{1}$/.test(token);
     },
   },
@@ -21,10 +21,10 @@ export default {
     false: "FALSCH",
     argumentSeparator: ";",
     decimalSeparator: ",",
-    reformatNumberForJsParsing: function (n) {
+    reformatNumberForJsParsing: (n: string): string => {
       return n.replace(",", ".");
     },
-    isScientificNotation: function (token) {
+    isScientificNotation: (token: string): boolean => {
       return /^[1-9]{1}(,[0-9]+)?E{1}$/.test(token);
     },
   },

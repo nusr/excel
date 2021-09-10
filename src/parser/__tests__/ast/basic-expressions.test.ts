@@ -1,87 +1,102 @@
-import { generateAST as buildTree, nodeBuilder as builder } from "../../ast";
-import { tokenize } from "../../tokenize";
+import { parser as buildTree } from "../../ast";
+import * as builder from "../../ast/node-builder";
+import { tokenizer } from "../../tokenize";
 
 describe("basic expressions", function () {
   it("1", function () {
-    const tree = buildTree(tokenize("1"));
+    const tree = buildTree(tokenizer("1"));
 
-    expect(tree).toEqual(builder.number(1));
+    expect(tree).toEqual(builder.numberLiteral(1));
   });
 
   it("1E-2", function () {
-    const tree = buildTree(tokenize("1E-2"));
-    expect(tree).toEqual(builder.number(0.01));
+    const tree = buildTree(tokenizer("1E-2"));
+    expect(tree).toEqual(builder.numberLiteral(0.01));
   });
 
   it("10%", function () {
-    const tree = buildTree(tokenize("10%"));
-    expect(tree).toEqual(builder.number(0.1));
+    const tree = buildTree(tokenizer("10%"));
+    expect(tree).toEqual(builder.numberLiteral(0.1));
   });
 
   it("-1", function () {
-    const tree = buildTree(tokenize("-1"));
-    expect(tree).toEqual(builder.unaryExpression("-", builder.number(1)));
+    const tree = buildTree(tokenizer("-1"));
+    expect(tree).toEqual(
+      builder.unaryExpression("-", builder.numberLiteral(1))
+    );
   });
 
   it("---1", function () {
-    const tree = buildTree(tokenize("---1"));
+    const tree = buildTree(tokenizer("---1"));
 
     expect(tree).toEqual(
       builder.unaryExpression(
         "-",
         builder.unaryExpression(
           "-",
-          builder.unaryExpression("-", builder.number(1))
+          builder.unaryExpression("-", builder.numberLiteral(1))
         )
       )
     );
   });
 
   it('"abc"', function () {
-    const tree = buildTree(tokenize('"abc"'));
+    const tree = buildTree(tokenizer('"abc"'));
 
-    expect(tree).toEqual(builder.text("abc"));
+    expect(tree).toEqual(builder.stringLiteral("abc"));
   });
 
   it("TRUE", function () {
-    const tree = buildTree(tokenize("TRUE"));
+    const tree = buildTree(tokenizer("TRUE"));
 
-    expect(tree).toEqual(builder.logical(true));
+    expect(tree).toEqual(builder.booleanLiteral(true));
   });
 
   it("1 + 2", function () {
-    const tree = buildTree(tokenize("1 + 2"));
-
-    expect(tree).toEqual(
-      builder.binaryExpression("+", builder.number(1), builder.number(2))
-    );
-  });
-
-  it("-1 + 2", function () {
-    const tree = buildTree(tokenize("-1 + 2"));
+    const tree = buildTree(tokenizer("1 + 2"));
 
     expect(tree).toEqual(
       builder.binaryExpression(
         "+",
-        builder.unaryExpression("-", builder.number(1)),
-        builder.number(2)
+        builder.numberLiteral(1),
+        builder.numberLiteral(2)
+      )
+    );
+  });
+
+  it("-1 + 2", function () {
+    const tree = buildTree(tokenizer("-1 + 2"));
+
+    expect(tree).toEqual(
+      builder.binaryExpression(
+        "+",
+        builder.unaryExpression("-", builder.numberLiteral(1)),
+        builder.numberLiteral(2)
       )
     );
   });
 
   it('"a" & "b"', function () {
-    const tree = buildTree(tokenize('"a" & "b"'));
+    const tree = buildTree(tokenizer('"a" & "b"'));
 
     expect(tree).toEqual(
-      builder.binaryExpression("&", builder.text("a"), builder.text("b"))
+      builder.binaryExpression(
+        "&",
+        builder.stringLiteral("a"),
+        builder.stringLiteral("b")
+      )
     );
   });
 
   it('1 <> "b"', function () {
-    const tree = buildTree(tokenize('1 <> "b"'));
+    const tree = buildTree(tokenizer('1 <> "b"'));
 
     expect(tree).toEqual(
-      builder.binaryExpression("<>", builder.number(1), builder.text("b"))
+      builder.binaryExpression(
+        "<>",
+        builder.numberLiteral(1),
+        builder.stringLiteral("b")
+      )
     );
   });
 });

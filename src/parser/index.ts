@@ -1,4 +1,4 @@
-export { tokenize } from "./tokenize";
+export { tokenizer } from "./tokenize";
 export { parseFormula } from "./parse";
-export { generateAST, visit } from "./ast";
+export { parser } from "./ast";
 export * from "./type";

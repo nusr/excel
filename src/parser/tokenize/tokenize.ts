@@ -125,7 +125,7 @@ class TokenStack {
   }
 }
 
-export function tokenize(
+export function tokenizer(
   formula: string,
   options: { language?: "en-US" | "de-DE" } = {}
 ): Token[] {
@@ -535,28 +535,30 @@ export function tokenize(
   const tokens2 = new Tokens();
 
   while (tokens.moveNext()) {
-    token = tokens.current();
-
+    const token = tokens.current();
+    if (!token) {
+      continue;
+    }
     if (token.type == TOK_TYPE_WSPACE) {
       if (tokens.BOF() || tokens.EOF()) {
         // no-op
       } else if (
         !(
-          (tokens.previous().type == TOK_TYPE_FUNCTION &&
-            tokens.previous().subtype == TOK_SUBTYPE_STOP) ||
-          (tokens.previous().type == TOK_TYPE_SUBEXPR &&
-            tokens.previous().subtype == TOK_SUBTYPE_STOP) ||
-          tokens.previous().type == TOK_TYPE_OPERAND
+          (tokens.previous()?.type == TOK_TYPE_FUNCTION &&
+            tokens.previous()?.subtype == TOK_SUBTYPE_STOP) ||
+          (tokens.previous()?.type == TOK_TYPE_SUBEXPR &&
+            tokens.previous()?.subtype == TOK_SUBTYPE_STOP) ||
+          tokens.previous()?.type == TOK_TYPE_OPERAND
         )
       ) {
         // no-op
       } else if (
         !(
-          (tokens.next().type == TOK_TYPE_FUNCTION &&
-            tokens.next().subtype == TOK_SUBTYPE_START) ||
-          (tokens.next().type == TOK_TYPE_SUBEXPR &&
-            tokens.next().subtype == TOK_SUBTYPE_START) ||
-          tokens.next().type == TOK_TYPE_OPERAND
+          (tokens.next()?.type == TOK_TYPE_FUNCTION &&
+            tokens.next()?.subtype == TOK_SUBTYPE_START) ||
+          (tokens.next()?.type == TOK_TYPE_SUBEXPR &&
+            tokens.next()?.subtype == TOK_SUBTYPE_START) ||
+          tokens.next()?.type == TOK_TYPE_OPERAND
         )
       ) {
         // no-op
@@ -573,18 +575,21 @@ export function tokenize(
   // and infix-operator subtypes, pull "@" from in front of function names
 
   while (tokens2.moveNext()) {
-    token = tokens2.current();
+    const token = tokens2.current();
+    if (!token) {
+      continue;
+    }
 
     if (token.type == TOK_TYPE_OP_IN && token.value == "-") {
       if (tokens2.BOF()) {
         token.type = TOK_TYPE_OP_PRE;
       } else if (
-        (tokens2.previous().type == TOK_TYPE_FUNCTION &&
-          tokens2.previous().subtype == TOK_SUBTYPE_STOP) ||
-        (tokens2.previous().type == TOK_TYPE_SUBEXPR &&
-          tokens2.previous().subtype == TOK_SUBTYPE_STOP) ||
-        tokens2.previous().type == TOK_TYPE_OP_POST ||
-        tokens2.previous().type == TOK_TYPE_OPERAND
+        (tokens2.previous()?.type == TOK_TYPE_FUNCTION &&
+          tokens2.previous()?.subtype == TOK_SUBTYPE_STOP) ||
+        (tokens2.previous()?.type == TOK_TYPE_SUBEXPR &&
+          tokens2.previous()?.subtype == TOK_SUBTYPE_STOP) ||
+        tokens2.previous()?.type == TOK_TYPE_OP_POST ||
+        tokens2.previous()?.type == TOK_TYPE_OPERAND
       ) {
         token.subtype = TOK_SUBTYPE_MATH;
       } else {
@@ -597,12 +602,12 @@ export function tokenize(
       if (tokens2.BOF()) {
         token.type = TOK_TYPE_NOOP;
       } else if (
-        (tokens2.previous().type == TOK_TYPE_FUNCTION &&
-          tokens2.previous().subtype == TOK_SUBTYPE_STOP) ||
-        (tokens2.previous().type == TOK_TYPE_SUBEXPR &&
-          tokens2.previous().subtype == TOK_SUBTYPE_STOP) ||
-        tokens2.previous().type == TOK_TYPE_OP_POST ||
-        tokens2.previous().type == TOK_TYPE_OPERAND
+        (tokens2.previous()?.type == TOK_TYPE_FUNCTION &&
+          tokens2.previous()?.subtype == TOK_SUBTYPE_STOP) ||
+        (tokens2.previous()?.type == TOK_TYPE_SUBEXPR &&
+          tokens2.previous()?.subtype == TOK_SUBTYPE_STOP) ||
+        tokens2.previous()?.type == TOK_TYPE_OP_POST ||
+        tokens2.previous()?.type == TOK_TYPE_OPERAND
       ) {
         token.subtype = TOK_SUBTYPE_MATH;
       } else {
@@ -655,8 +660,9 @@ export function tokenize(
   tokens = new Tokens();
 
   while (tokens2.moveNext()) {
-    if (tokens2.current().type != TOK_TYPE_NOOP) {
-      tokens.addRef(tokens2.current());
+    const token = tokens2.current();
+    if (token && token.type != TOK_TYPE_NOOP) {
+      tokens.addRef(token);
     }
   }
 

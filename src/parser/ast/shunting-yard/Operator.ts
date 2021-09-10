@@ -1,11 +1,11 @@
 class Operator {
   operandCount: number;
-  precendence: number;
+  precedence: number;
   leftAssociative: boolean;
   symbol: string;
   constructor(
     symbol: string,
-    precendence = 0,
+    precedence = 0,
     operandCount = 2,
     leftAssociative = true
   ) {
@@ -14,7 +14,7 @@ class Operator {
     }
 
     this.symbol = symbol;
-    this.precendence = precendence;
+    this.precedence = precedence;
     this.operandCount = operandCount;
     this.leftAssociative = leftAssociative;
   }
@@ -33,19 +33,19 @@ class Operator {
     if (other.isUnary()) return false;
 
     if (this.isUnary()) {
-      return this.precendence >= other.precendence;
+      return this.precedence >= other.precedence;
     } else if (this.isBinary()) {
-      if (this.precendence === other.precendence) {
+      if (this.precedence === other.precedence) {
         return this.leftAssociative;
       } else {
-        return this.precendence > other.precendence;
+        return this.precedence > other.precedence;
       }
     }
     return false;
   }
 }
 
-// fake operator with lowest precendence
+// fake operator with lowest precedence
 const SENTINEL = new Operator("S", 0);
 
 export { SENTINEL, Operator };

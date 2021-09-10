@@ -1,4 +1,4 @@
-import { parseFormula } from "..";
+import { parseFormula } from "../..";
 
 describe(".parseFormula() math", () => {
   it("operator: +", () => {

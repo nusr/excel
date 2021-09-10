@@ -1,18 +1,19 @@
+type StackItem = any;
 export class Stack {
-  items: any[] = [];
+  items: StackItem[] = [];
   constructor() {
     this.items = [];
   }
 
-  push(value: any): void {
+  push(value: StackItem): void {
     this.items.push(value);
   }
 
-  pop() {
+  pop(): StackItem {
     return this.items.pop();
   }
 
-  top() {
+  top(): StackItem {
     return this.items[this.items.length - 1];
   }
 }

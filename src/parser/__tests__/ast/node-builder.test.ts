@@ -1,4 +1,4 @@
-import { nodeBuilder } from "../../ast";
+import * as nodeBuilder from "../../ast/node-builder";
 
 describe("node builder", function () {
   it("cell", function () {
@@ -20,8 +20,8 @@ describe("node builder", function () {
   });
 
   it("functionCall given args array", function () {
-    const arg1 = nodeBuilder.number(1);
-    const arg2 = nodeBuilder.number(2);
+    const arg1 = nodeBuilder.numberLiteral(1);
+    const arg2 = nodeBuilder.numberLiteral(2);
 
     const functionCall = nodeBuilder.functionCall("SUM", [arg1, arg2]);
 
@@ -31,8 +31,8 @@ describe("node builder", function () {
   });
 
   it("functionCall given individual args", function () {
-    const arg1 = nodeBuilder.number(1);
-    const arg2 = nodeBuilder.number(2);
+    const arg1 = nodeBuilder.numberLiteral(1);
+    const arg2 = nodeBuilder.numberLiteral(2);
 
     const functionCall = nodeBuilder.functionCall("SUM", arg1, arg2);
 
@@ -50,29 +50,29 @@ describe("node builder", function () {
   });
 
   it("number", function () {
-    const number = nodeBuilder.number(2);
+    const number = nodeBuilder.numberLiteral(2);
 
     expect(number.type).toEqual("number");
     expect(number.value).toEqual(2);
   });
 
   it("text", function () {
-    const text = nodeBuilder.text("abc");
+    const text = nodeBuilder.stringLiteral("abc");
 
-    expect(text.type).toEqual("text");
+    expect(text.type).toEqual("string");
     expect(text.value).toEqual("abc");
   });
 
   it("logical", function () {
-    const logical = nodeBuilder.logical(true);
+    const logical = nodeBuilder.booleanLiteral(true);
 
-    expect(logical.type).toEqual("logical");
+    expect(logical.type).toEqual("boolean");
     expect(logical.value).toEqual(true);
   });
 
   it("binary expression", function () {
-    const op1 = nodeBuilder.number(1);
-    const op2 = nodeBuilder.number(2);
+    const op1 = nodeBuilder.numberLiteral(1);
+    const op2 = nodeBuilder.numberLiteral(2);
     const expr = nodeBuilder.binaryExpression("+", op1, op2);
 
     expect(expr.type).toEqual("binary-expression");
@@ -82,7 +82,7 @@ describe("node builder", function () {
   });
 
   it("unary expression", function () {
-    const operand = nodeBuilder.number(1);
+    const operand = nodeBuilder.numberLiteral(1);
     const expr = nodeBuilder.unaryExpression("-", operand);
 
     expect(expr.type).toEqual("unary-expression");

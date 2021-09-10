@@ -9,7 +9,7 @@ import { tokenStream, StreamResult } from "./token-stream";
 import * as builder from "./node-builder";
 import type { Token, Node, RefTypes } from "../type";
 
-function generateAST(tokens: Token[]): Node {
+export function parser(tokens: Token[]): Node {
   const stream = tokenStream(tokens);
   const shuntingYard = createStack();
 
@@ -193,13 +193,13 @@ function cellRefType(key: string): RefTypes {
 function parseText(stream: StreamResult) {
   const next = stream.getNext();
   stream.consume();
-  return builder.text(next.value);
+  return builder.stringLiteral(next.value);
 }
 
 function parseLogical(stream: StreamResult) {
   const next = stream.getNext();
   stream.consume();
-  return builder.logical(next.value === "TRUE");
+  return builder.booleanLiteral(next.value === "TRUE");
 }
 
 function parseNumber(stream: StreamResult) {
@@ -211,20 +211,20 @@ function parseNumber(stream: StreamResult) {
     stream.consume();
   }
 
-  return builder.number(value);
+  return builder.numberLiteral(value);
 }
 
 function createUnaryOperator(symbol: string) {
-  const precendence = {
+  const precedence = {
     // negation
     "-": 7,
   }[symbol];
 
-  return new Operator(symbol, precendence, 1, true);
+  return new Operator(symbol, precedence, 1, true);
 }
 
 function createBinaryOperator(symbol: string) {
-  const precendence = {
+  const precedence = {
     // cell range union and intersect
     " ": 8,
     ",": 8,
@@ -247,7 +247,5 @@ function createBinaryOperator(symbol: string) {
     "<": 1,
   }[symbol];
 
-  return new Operator(symbol, precendence, 2, true);
+  return new Operator(symbol, precedence, 2, true);
 }
-
-export { generateAST };

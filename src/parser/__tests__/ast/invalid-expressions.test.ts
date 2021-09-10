@@ -1,35 +1,35 @@
-import { generateAST as buildTree } from "../../ast";
-import { tokenize } from "../../tokenize";
+import { parser as buildTree } from "../../ast";
+import { tokenizer } from "../../tokenize";
 
 describe("invalid expressions", function () {
   it("SUM(", function () {
     expect(function () {
-      buildTree(tokenize("SUM("));
+      buildTree(tokenizer("SUM("));
     }).toThrow();
   });
   it("+", function () {
     expect(function () {
-      buildTree(tokenize("+"));
+      buildTree(tokenizer("+"));
     }).toThrow();
   });
   it("SUM(,,", function () {
     expect(function () {
-      buildTree(tokenize("SUM(,,"));
+      buildTree(tokenizer("SUM(,,"));
     }).toThrow();
   });
   it(">", function () {
     expect(function () {
-      buildTree(tokenize(">"));
+      buildTree(tokenizer(">"));
     }).toThrow();
   });
   it("a >", function () {
     expect(function () {
-      buildTree(tokenize("a >"));
+      buildTree(tokenizer("a >"));
     }).toThrow();
   });
   it("> b", function () {
     expect(function () {
-      buildTree(tokenize("> b"));
+      buildTree(tokenizer("> b"));
     }).toThrow();
   });
 });

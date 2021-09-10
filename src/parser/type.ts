@@ -10,8 +10,8 @@ export type Node =
   | FunctionNode
   | NumberNode
   | CellNode
-  | LogicalNode
-  | TextNode
+  | BooleanNode
+  | StringNode
   | CellRangeNode;
 export type BinaryOperatorTypes =
   | ">"
@@ -44,6 +44,7 @@ export interface FunctionNode {
   type: "function";
   name: string;
   arguments: Node[];
+  ns?: string;
 }
 export interface NumberNode {
   type: "number";
@@ -54,43 +55,61 @@ export interface CellNode {
   type: "cell";
   refType?: RefTypes;
   key: string;
+  ns?: string;
 }
 export interface CellRangeNode {
   type: "cell-range";
-  left: Node;
-  right: Node;
+  left: CellNode;
+  right: CellNode;
+  sheet?: string;
 }
-export interface LogicalNode {
-  type: "logical";
+export interface BooleanNode {
+  type: "boolean";
   value: boolean;
 }
-export interface TextNode {
-  type: "text";
+export interface StringNode {
+  type: "string";
   value: string;
 }
 
+export type ResultType = boolean | string | number | null;
+
+export type VisitParentType = any;
+
 export interface Visitor {
-  enterCell?(node: CellNode): void;
-  exitCell?(node: CellNode): void;
+  enterCell?(node: CellNode, parent: VisitParentType): void;
+  exitCell?(node: CellNode, parent: VisitParentType): void;
 
-  enterCellRange?(node: CellRangeNode): void;
-  exitCellRange?(node: CellRangeNode): void;
+  enterCellRange?(node: CellRangeNode, parent: VisitParentType): void;
+  exitCellRange?(node: CellRangeNode, parent: VisitParentType): void;
 
-  enterFunction?(node: FunctionNode): void;
-  exitFunction?(node: FunctionNode): void;
+  enterFunction?(node: FunctionNode, parent: VisitParentType): void;
+  exitFunction?(node: FunctionNode, parent: VisitParentType): void;
 
-  enterNumber?(node: NumberNode): void;
-  exitNumber?(node: NumberNode): void;
+  enterNumber?(node: NumberNode, parent: VisitParentType): void;
+  exitNumber?(node: NumberNode, parent: VisitParentType): void;
 
-  enterText?(node: TextNode): void;
-  exitText?(node: TextNode): void;
+  enterString?(node: StringNode, parent: VisitParentType): void;
+  exitString?(node: StringNode, parent: VisitParentType): void;
 
-  enterLogical?(node: LogicalNode): void;
-  exitLogical?(node: LogicalNode): void;
+  enterBoolean?(node: BooleanNode, parent: VisitParentType): void;
+  exitBoolean?(node: BooleanNode, parent: VisitParentType): void;
 
-  enterBinaryExpression?(node: BinaryExpressionNode): void;
-  exitBinaryExpression?(node: BinaryExpressionNode): void;
+  enterBinaryExpression?(
+    node: BinaryExpressionNode,
+    parent: VisitParentType
+  ): void;
+  exitBinaryExpression?(
+    node: BinaryExpressionNode,
+    parent: VisitParentType
+  ): void;
 
-  enterUnaryExpression?(node: UnaryExpressionNode): void;
-  exitUnaryExpression?(node: UnaryExpressionNode): void;
+  enterUnaryExpression?(
+    node: UnaryExpressionNode,
+    parent: VisitParentType
+  ): void;
+  exitUnaryExpression?(
+    node: UnaryExpressionNode,
+    parent: VisitParentType
+  ): void;
 }

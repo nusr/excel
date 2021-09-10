@@ -1,33 +1,34 @@
-import { generateAST as buildTree, nodeBuilder as builder } from "../../ast";
-import { tokenize } from "../../tokenize";
+import { parser as buildTree } from "../../ast";
+import { tokenizer } from "../../tokenize";
+import * as builder from "../../ast/node-builder";
 
 describe("cell ranges", function () {
   it("A1", function () {
-    const tree = buildTree(tokenize("A1"));
+    const tree = buildTree(tokenizer("A1"));
 
     expect(tree).toEqual(builder.cell("A1", "relative"));
   });
 
   it("A$1", function () {
-    const tree = buildTree(tokenize("A$1"));
+    const tree = buildTree(tokenizer("A$1"));
 
     expect(tree).toEqual(builder.cell("A$1", "mixed"));
   });
 
   it("$A1", function () {
-    const tree = buildTree(tokenize("$A1"));
+    const tree = buildTree(tokenizer("$A1"));
 
     expect(tree).toEqual(builder.cell("$A1", "mixed"));
   });
 
   it("$A$1", function () {
-    const tree = buildTree(tokenize("$A$1"));
+    const tree = buildTree(tokenizer("$A$1"));
 
     expect(tree).toEqual(builder.cell("$A$1", "absolute"));
   });
 
   it("A1:A4", function () {
-    const tree = buildTree(tokenize("A1:A4"));
+    const tree = buildTree(tokenizer("A1:A4"));
 
     expect(tree).toEqual(
       builder.cellRange(
@@ -38,7 +39,7 @@ describe("cell ranges", function () {
   });
 
   it("$A1:A$4", function () {
-    const tree = buildTree(tokenize("$A1:A$4"));
+    const tree = buildTree(tokenizer("$A1:A$4"));
 
     expect(tree).toEqual(
       builder.cellRange(
@@ -49,7 +50,7 @@ describe("cell ranges", function () {
   });
 
   it("$A$1:$A$4", function () {
-    const tree = buildTree(tokenize("$A$1:$A$4"));
+    const tree = buildTree(tokenizer("$A$1:$A$4"));
 
     expect(tree).toEqual(
       builder.cellRange(
@@ -60,7 +61,7 @@ describe("cell ranges", function () {
   });
 
   it("1:4", function () {
-    const tree = buildTree(tokenize("1:4"));
+    const tree = buildTree(tokenizer("1:4"));
 
     expect(tree).toEqual(
       builder.cellRange(
@@ -71,7 +72,7 @@ describe("cell ranges", function () {
   });
 
   it("$1:4", function () {
-    const tree = buildTree(tokenize("$1:4"));
+    const tree = buildTree(tokenizer("$1:4"));
 
     expect(tree).toEqual(
       builder.cellRange(
@@ -82,7 +83,7 @@ describe("cell ranges", function () {
   });
 
   it("C:G", function () {
-    const tree = buildTree(tokenize("C:G"));
+    const tree = buildTree(tokenizer("C:G"));
 
     expect(tree).toEqual(
       builder.cellRange(
@@ -93,7 +94,7 @@ describe("cell ranges", function () {
   });
 
   it("C:$G", function () {
-    const tree = buildTree(tokenize("C:$G"));
+    const tree = buildTree(tokenizer("C:$G"));
 
     expect(tree).toEqual(
       builder.cellRange(
@@ -104,7 +105,7 @@ describe("cell ranges", function () {
   });
 
   it("C:G5", function () {
-    const tree = buildTree(tokenize("C:G5"));
+    const tree = buildTree(tokenizer("C:G5"));
 
     expect(tree).toEqual(
       builder.cellRange(
@@ -115,7 +116,7 @@ describe("cell ranges", function () {
   });
 
   it("5:D5", function () {
-    const tree = buildTree(tokenize("5:D5"));
+    const tree = buildTree(tokenizer("5:D5"));
 
     expect(tree).toEqual(
       builder.cellRange(
@@ -126,7 +127,7 @@ describe("cell ranges", function () {
   });
 
   it("A1:B3,C1:D3", function () {
-    const tree = buildTree(tokenize("A1:B3,C1:D3"));
+    const tree = buildTree(tokenizer("A1:B3,C1:D3"));
 
     expect(tree).toEqual(
       builder.binaryExpression(
@@ -144,7 +145,7 @@ describe("cell ranges", function () {
   });
 
   it("A1:B3 B1:D3", function () {
-    const tree = buildTree(tokenize("A1:B3 B1:D3"));
+    const tree = buildTree(tokenizer("A1:B3 B1:D3"));
 
     expect(tree).toEqual(
       builder.binaryExpression(
