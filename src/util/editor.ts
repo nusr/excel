@@ -10,4 +10,5 @@ export const EDITOR_DEFAULT_POSITION: CellInfo & CanvasOverlayPosition = {
   col: 0,
   style: {},
   displayValue: "",
+  errorValue: "",
 };

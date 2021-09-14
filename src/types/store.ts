@@ -14,7 +14,7 @@ export interface Coordinate {
 }
 
 export type CellInfo = QueryCellResult &
-  Coordinate & { displayValue: string | number };
+  Coordinate & { displayValue: string | number; errorValue: string };
 export type State = {
   activeCell: CellInfo & CanvasOverlayPosition;
   currentSheetId: string;

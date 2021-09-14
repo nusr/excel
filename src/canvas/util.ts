@@ -7,6 +7,7 @@ import {
   makeFont,
   npxLine,
   assert,
+  ERROR_FORMULA_COLOR,
 } from "@/util";
 import { isEmpty } from "@/lodash";
 import { CellInfo } from "@/types";
@@ -48,7 +49,8 @@ export function renderCell(
     height: number;
   }
 ): void {
-  const { style, displayValue, left, top, width, height } = cellInfo;
+  const { style, displayValue, left, top, width, height, errorValue } =
+    cellInfo;
   const isNum = isNumber(displayValue);
   let font = DEFAULT_FONT_CONFIG;
   let fillStyle = DEFAULT_FONT_COLOR;
@@ -66,16 +68,17 @@ export function renderCell(
       fillRect(ctx, left, top, width, height);
     }
   }
+  let text = String(displayValue);
+  if (errorValue) {
+    fillStyle = ERROR_FORMULA_COLOR;
+    text = errorValue;
+  }
+
   ctx.textAlign = isNum ? "right" : "left";
   ctx.font = font;
   ctx.fillStyle = fillStyle;
   ctx.textBaseline = "middle";
-  fillText(
-    ctx,
-    String(displayValue),
-    left + (isNum ? width : 0),
-    top + height / 2
-  );
+  fillText(ctx, text, left + (isNum ? width : 0), top + height / 2);
 }
 
 export function drawLines(

@@ -9,9 +9,6 @@ import { StoreProvider } from "@/store";
 import "./global.css";
 import "./containers/index.css";
 import "./components/index.css";
-import "./parser";
-
-
 
 ReactDom.render(
   <React.StrictMode>

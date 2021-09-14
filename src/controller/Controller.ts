@@ -18,6 +18,7 @@ import {
 } from "@/util";
 import { History } from "./History";
 import { Controller as RenderController } from "@/canvas";
+import { parseFormula } from "../parser";
 
 export class Controller extends EventEmitter<EventType> {
   scroll: Scroll = new Scroll(this);
@@ -196,11 +197,13 @@ export class Controller extends EventEmitter<EventType> {
   queryCell(row: number, col: number): CellInfo {
     const { model } = this;
     const { value, formula, style } = model.queryCell(row, col);
-    const displayValue = value || "";
-    // if (formula) {
-      // const temp = this.formulaParser.init(formula, this.convertCell);
-      // displayValue = temp.result as number | string;
-    // }
+    let displayValue: any = value || "";
+    let errorValue = "";
+    if (formula) {
+      const result = parseFormula(formula);
+      errorValue = result.error || '';
+      displayValue = result.result;
+    }
 
     return {
       value,
@@ -208,6 +211,7 @@ export class Controller extends EventEmitter<EventType> {
       col,
       formula,
       style,
+      errorValue,
       displayValue,
     };
   }

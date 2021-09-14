@@ -1,15 +1,15 @@
-import type { Node } from "../type";
+import type { Node, FunctionNode } from "../type";
 import type { FormulasKeys, FormulaType } from "../../formula";
-import { throwError, isNumber } from "../../util";
+import { throwError, isNumber, isString } from "../../util";
 import type { ResultType } from "../../types";
 
 export class Environment {
-  funcs: Partial<FormulaType> = {};
+  funcs = {} as FormulaType;
   setFunc<T extends FormulasKeys>(name: T, value: FormulaType[T]): void {
     this.funcs[name] = value;
   }
-  getFunc<T extends FormulasKeys>(name: T) {
-    if (this.funcs[name]) {
+  getFunc<T extends FormulasKeys>(name: T): FormulaType[T] {
+    if (name in this.funcs) {
       return this.funcs[name];
     }
     throw new Error("Environment: Undefined function " + name);
@@ -54,30 +54,41 @@ function applyOperator(op: string, a: ResultType, b: ResultType) {
   throw new Error("applyOperator: Can't apply operator " + op);
 }
 
+function handleCallExpression(ast: FunctionNode, env: Environment) {
+  const args = ast.arguments.map((node) => codeGenerator(node, env));
+  const funcName = ast.name.toUpperCase() as FormulasKeys;
+  const func = env.getFunc(funcName);
+  if (!func) {
+    throw new Error("codeGenerator: not support function");
+  }
+  const { paramsType, minParamsCount, maxParamsCount, resultType } =
+    func.options;
+  if (paramsType === "number") {
+    throwError(args.every(isNumber), "#VALUE!");
+  } else if (paramsType === "string") {
+    throwError(args.every(isString), "#VALUE!");
+  }
+  throwError(
+    args.length <= maxParamsCount && args.length >= minParamsCount,
+    "#VALUE!"
+  );
+  const result = func.func(...args);
+  if (resultType === "number") {
+    throwError(isNumber(result), "#NUM!");
+  } else if (resultType === "string") {
+    throwError(isString(result), "#NUM!");
+  }
+  return result;
+}
+
 export function codeGenerator(ast: Node, env: Environment): ResultType {
   switch (ast.type) {
     case "StringLiteral":
     case "NumberLiteral":
     case "BooleanLiteral":
       return ast.value;
-    case "CallExpression": {
-      const args = ast.arguments.map((node) => codeGenerator(node, env));
-      const funcName = ast.name.toUpperCase() as FormulasKeys;
-      const func = env.getFunc(funcName);
-      if (!func) {
-        throw new Error("codeGenerator: not support function");
-      }
-      const { paramsType, minParamsCount, maxParamsCount, resultType } =
-        func.options;
-      if (paramsType === "number") {
-        throwError(args.every(isNumber), "#VALUE!");
-      }
-      const result = func.func(...(args as any[]));
-      if (resultType === "number") {
-        throwError(isNumber(result), "#NUM!");
-      }
-      return result;
-    }
+    case "CallExpression":
+      return handleCallExpression(ast, env);
     case "BinaryExpression":
       return applyOperator(
         ast.operator,

@@ -12,6 +12,7 @@ import { npx } from "./dpr";
 
 export const DEFAULT_FONT_SIZE = 11;
 export const DEFAULT_FONT_COLOR = "#333333";
+export const ERROR_FORMULA_COLOR = "#ff0000";
 export const DEFAULT_FILL_COLOR = "transparent";
 export const MUST_FONT_FAMILY = "sans-serif";
 export const DEFAULT_FONT_FAMILY = "宋体";

@@ -1,6 +1,8 @@
-import { SUM, ABS } from "./math";
 import type { ResultType } from "../types";
-export type FormulasKeys = "SUM" | "ABS";
+import { SUM, ABS } from "./math";
+import { T, LOWER } from "./text";
+
+export type FormulasKeys = "SUM" | "ABS" | "T" | "LOWER";
 type FormulaContent = {
   func: (...data: ResultType[]) => number | string | boolean;
   options: {
@@ -11,17 +13,10 @@ type FormulaContent = {
   };
 };
 
+const MAX_PARAMS_COUNT = 256;
+
 export type FormulaType = Record<FormulasKeys, FormulaContent>;
 const formulas: FormulaType = {
-  SUM: {
-    func: SUM,
-    options: {
-      paramsType: "any",
-      minParamsCount: 1,
-      maxParamsCount: window.Infinity,
-      resultType: "number",
-    },
-  },
   ABS: {
     func: ABS,
     options: {
@@ -29,6 +24,33 @@ const formulas: FormulaType = {
       minParamsCount: 1,
       maxParamsCount: 1,
       resultType: "number",
+    },
+  },
+  LOWER: {
+    func: LOWER,
+    options: {
+      paramsType: "string",
+      minParamsCount: 1,
+      maxParamsCount: 1,
+      resultType: "string",
+    },
+  },
+  SUM: {
+    func: SUM,
+    options: {
+      paramsType: "any",
+      minParamsCount: 1,
+      maxParamsCount: MAX_PARAMS_COUNT,
+      resultType: "number",
+    },
+  },
+  T: {
+    func: T,
+    options: {
+      paramsType: "any",
+      minParamsCount: 1,
+      maxParamsCount: 1,
+      resultType: "string",
     },
   },
 };

@@ -1,5 +1,8 @@
 import { SHEET_NAME_PREFIX } from "./constant";
 import type { WorksheetType, ResultType } from "@/types";
+export const isString = (value: ResultType): boolean => {
+  return typeof value === "string";
+};
 export function isNumber(value: ResultType): boolean {
   if (typeof value === "number" && !window.isNaN(value)) {
     return true;
@@ -7,8 +10,8 @@ export function isNumber(value: ResultType): boolean {
   if (typeof value !== "string") {
     return false;
   }
-  const t = parseFloat(value);
-  return !window.isNaN(t) && t === Number(value);
+  const temp = parseFloat(value);
+  return !window.isNaN(temp) && temp === Number(value);
 }
 
 export function parseNumber(value: ResultType): number {
