@@ -183,7 +183,13 @@ function cellRefType(key: string): RefTypes {
   if (/^[A-Z]+\d+$/.test(key)) return "relative";
   if (/^\d+$/.test(key)) return "relative";
   if (/^[A-Z]+$/.test(key)) return "relative";
-  throw new Error("not found cell ref type");
+  const list = key.match(/\$/g) || [];
+  if (list.length === 2) {
+    return "absolute";
+  } else if (list.length === 1) {
+    return "mixed";
+  }
+  return "relative";
 }
 
 function parseText(stream: StreamResult) {

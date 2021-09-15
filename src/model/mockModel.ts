@@ -28,11 +28,10 @@ export const MOCK_MODEL: WorkBookJSON = {
         "1": {
           value: "",
           formula: "SUM(1,4)",
-          style: "2",
         },
         "2": {
           value: "",
-          formula: "SUM()",
+          formula: "SUM(A1)",
           style: "2",
         },
       },

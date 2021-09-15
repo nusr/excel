@@ -1,4 +1,4 @@
-import { isEmpty } from "@/lodash";
+import { isEmpty, isNil } from "@/lodash";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
@@ -15,10 +15,10 @@ import {
   EventEmitter,
   Range,
   DEFAULT_ACTIVE_CELL,
+  assert,
 } from "@/util";
 import { History } from "./History";
 import { Controller as RenderController } from "@/canvas";
-import { parseFormula } from "../parser";
 
 export class Controller extends EventEmitter<EventType> {
   scroll: Scroll = new Scroll(this);
@@ -57,7 +57,9 @@ export class Controller extends EventEmitter<EventType> {
     if (!activeCell) {
       return { ...DEFAULT_ACTIVE_CELL };
     }
-    const { row, col } = parseReference(activeCell, this.model.currentSheetId);
+    const result = parseReference(activeCell, this.model.currentSheetId);
+    assert(!!result);
+    const { row, col } = result;
     return { row, col };
   }
   queryActiveCellInfo(): CellInfo {
@@ -189,32 +191,21 @@ export class Controller extends EventEmitter<EventType> {
     this.changeSet.add("contentChange");
     this.emitChange();
   }
-  convertCell = (item: string): string | number => {
-    const { row, col } = parseReference(item, this.model.currentSheetId);
-    const data = this.model.queryCell(row, col);
-    return data.value || "";
-  };
-  queryCell(row: number, col: number): CellInfo {
+  queryCell = (row: number, col: number): CellInfo => {
     const { model } = this;
     const { value, formula, style } = model.queryCell(row, col);
-    let displayValue: any = value || "";
-    let errorValue = "";
-    if (formula) {
-      const result = parseFormula(formula);
-      errorValue = result.error || '';
-      displayValue = result.result;
+    let realValue = value;
+    if (formula && !value) {
+      realValue = model.computeFormula(formula);
     }
-
     return {
-      value,
+      value: realValue,
       row,
       col,
       formula,
       style,
-      errorValue,
-      displayValue,
     };
-  }
+  };
   canRedo(): boolean {
     return this.history.canRedo();
   }

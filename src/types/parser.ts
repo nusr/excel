@@ -1,4 +1,4 @@
-export type ResultType = boolean | string | number | null;
+export type ResultType = boolean | string | number | null | undefined;
 export type ErrorTypes =
   | "#ERROR!"
   | "#DIV/0!"

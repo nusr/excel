@@ -1,4 +1,4 @@
-import type { ErrorTypes } from "../types";
+import type { ErrorTypes, ResultType } from "../types";
 const FORMULA_ERRORS: ErrorTypes[] = [
   "#ERROR!",
   "#DIV/0!",
@@ -17,7 +17,7 @@ export function throwError(
     throw new Error(type);
   }
 }
-export function parseError(type: string): ErrorTypes | null {
+export function parseError(type: ResultType): ErrorTypes | null {
   if (FORMULA_ERRORS.some((item) => item === type)) {
     return type as ErrorTypes;
   }

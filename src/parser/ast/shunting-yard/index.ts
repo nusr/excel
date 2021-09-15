@@ -7,9 +7,7 @@ export type CreateStackResult = {
 export function createStack(): CreateStackResult {
   const operands = new Stack();
   const operators = new Stack();
-
   operators.push(SENTINEL);
-
   return {
     operands,
     operators,

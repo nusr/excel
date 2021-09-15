@@ -1,15 +1,14 @@
-import languages from "./languages";
 import type { Token } from "../type";
 
 const TOK_TYPE_NOOP = "noop";
 const TOK_TYPE_OPERAND = "operand";
 const TOK_TYPE_FUNCTION = "function";
-const TOK_TYPE_SUBEXPR = "subexpression";
+const TOK_TYPE_SUB_EXPRESSION = "sub-expression";
 const TOK_TYPE_ARGUMENT = "argument";
 const TOK_TYPE_OP_PRE = "operator-prefix";
 const TOK_TYPE_OP_IN = "operator-infix";
 const TOK_TYPE_OP_POST = "operator-postfix";
-const TOK_TYPE_WSPACE = "white-space";
+const TOK_TYPE_WHITE_SPACE = "white-space";
 const TOK_TYPE_UNKNOWN = "unknown";
 
 const TOK_SUBTYPE_START = "start";
@@ -25,6 +24,8 @@ const TOK_SUBTYPE_MATH = "math";
 const TOK_SUBTYPE_CONCAT = "concatenate";
 const TOK_SUBTYPE_INTERSECT = "intersect";
 const TOK_SUBTYPE_UNION = "union";
+
+const SCIENTIFIC_NOTATION = /^[1-9]{1}(\.[0-9]+)?E{1}$/;
 
 function createToken(value: string, type: string, subtype = ""): Token {
   return { value, type, subtype };
@@ -125,22 +126,7 @@ class TokenStack {
   }
 }
 
-export function tokenizer(
-  formula: string,
-  options: { language?: "en-US" | "de-DE" } = {}
-): Token[] {
-  options.language = options.language || "en-US";
-
-  const language = languages[options.language];
-  if (!language) {
-    const msg =
-      "Unsupported language " +
-      options.language +
-      ". Expected one of: " +
-      Object.keys(languages).sort().join(", ");
-    throw new Error(msg);
-  }
-
+export function tokenizer(formula: string): Token[] {
   let tokens = new Tokens();
   const tokenStack = new TokenStack();
 
@@ -279,17 +265,14 @@ export function tokenizer(
     }
 
     if (inNumeric) {
-      if (
-        [language.decimalSeparator, "E"].indexOf(currentChar()) != -1 ||
-        /\d/.test(currentChar())
-      ) {
+      if ([".", "E"].indexOf(currentChar()) != -1 || /\d/.test(currentChar())) {
         token += currentChar();
 
         offset += 1;
         continue;
       } else if (
         "+-".indexOf(currentChar()) != -1 &&
-        language.isScientificNotation(token)
+        SCIENTIFIC_NOTATION.test(token)
       ) {
         token += currentChar();
 
@@ -297,8 +280,7 @@ export function tokenizer(
         continue;
       } else {
         inNumeric = false;
-        const jsValue = language.reformatNumberForJsParsing(token);
-        tokens.add(jsValue, TOK_TYPE_OPERAND, TOK_SUBTYPE_NUMBER);
+        tokens.add(token, TOK_TYPE_OPERAND, TOK_SUBTYPE_NUMBER);
         token = "";
       }
     }
@@ -307,7 +289,7 @@ export function tokenizer(
 
     if ("+-".indexOf(currentChar()) != -1) {
       if (token.length > 1) {
-        if (language.isScientificNotation(token)) {
+        if (SCIENTIFIC_NOTATION.test(token)) {
           token += currentChar();
           offset += 1;
           continue;
@@ -317,9 +299,9 @@ export function tokenizer(
 
     // independent character evaulation (order not important)
 
-    // function, subexpression, array parameters
+    // function, sub-expression, array parameters
 
-    if (currentChar() == language.argumentSeparator) {
+    if (currentChar() == ",") {
       if (token.length > 0) {
         tokens.add(token, TOK_TYPE_OPERAND);
         token = "";
@@ -449,7 +431,7 @@ export function tokenizer(
         tokens.add(token, TOK_TYPE_OPERAND);
         token = "";
       }
-      tokens.add(currentChar(), TOK_TYPE_WSPACE);
+      tokens.add(currentChar(), TOK_TYPE_WHITE_SPACE);
       offset += 1;
       while (currentChar() == " " && !EOF()) {
         offset += 1;
@@ -493,7 +475,7 @@ export function tokenizer(
       continue;
     }
 
-    // start subexpression or function
+    // start sub-expression or function
 
     if (currentChar() == "(") {
       if (token.length > 0) {
@@ -502,13 +484,13 @@ export function tokenizer(
         );
         token = "";
       } else {
-        tokenStack.push(tokens.add("", TOK_TYPE_SUBEXPR, TOK_SUBTYPE_START));
+        tokenStack.push(tokens.add("", TOK_TYPE_SUB_EXPRESSION, TOK_SUBTYPE_START));
       }
       offset += 1;
       continue;
     }
 
-    // stop subexpression
+    // stop sub-expression
 
     if (currentChar() == ")") {
       if (token.length > 0) {
@@ -535,18 +517,18 @@ export function tokenizer(
   const tokens2 = new Tokens();
 
   while (tokens.moveNext()) {
-    const token = tokens.current();
-    if (!token) {
+    const currentToken = tokens.current();
+    if (!currentToken) {
       continue;
     }
-    if (token.type == TOK_TYPE_WSPACE) {
+    if (currentToken.type == TOK_TYPE_WHITE_SPACE) {
       if (tokens.BOF() || tokens.EOF()) {
         // no-op
       } else if (
         !(
           (tokens.previous()?.type == TOK_TYPE_FUNCTION &&
             tokens.previous()?.subtype == TOK_SUBTYPE_STOP) ||
-          (tokens.previous()?.type == TOK_TYPE_SUBEXPR &&
+          (tokens.previous()?.type == TOK_TYPE_SUB_EXPRESSION &&
             tokens.previous()?.subtype == TOK_SUBTYPE_STOP) ||
           tokens.previous()?.type == TOK_TYPE_OPERAND
         )
@@ -556,98 +538,97 @@ export function tokenizer(
         !(
           (tokens.next()?.type == TOK_TYPE_FUNCTION &&
             tokens.next()?.subtype == TOK_SUBTYPE_START) ||
-          (tokens.next()?.type == TOK_TYPE_SUBEXPR &&
+          (tokens.next()?.type == TOK_TYPE_SUB_EXPRESSION &&
             tokens.next()?.subtype == TOK_SUBTYPE_START) ||
           tokens.next()?.type == TOK_TYPE_OPERAND
         )
       ) {
         // no-op
       } else {
-        tokens2.add(token.value, TOK_TYPE_OP_IN, TOK_SUBTYPE_INTERSECT);
+        tokens2.add(currentToken.value, TOK_TYPE_OP_IN, TOK_SUBTYPE_INTERSECT);
       }
       continue;
     }
 
-    tokens2.addRef(token);
+    tokens2.addRef(currentToken);
   }
 
   // switch infix "-" operator to prefix when appropriate, switch infix "+" operator to noop when appropriate, identify operand
   // and infix-operator subtypes, pull "@" from in front of function names
 
   while (tokens2.moveNext()) {
-    const token = tokens2.current();
-    if (!token) {
+    const currentToken = tokens2.current();
+    if (!currentToken) {
       continue;
     }
 
-    if (token.type == TOK_TYPE_OP_IN && token.value == "-") {
+    if (currentToken.type == TOK_TYPE_OP_IN && currentToken.value == "-") {
       if (tokens2.BOF()) {
-        token.type = TOK_TYPE_OP_PRE;
+        currentToken.type = TOK_TYPE_OP_PRE;
       } else if (
         (tokens2.previous()?.type == TOK_TYPE_FUNCTION &&
           tokens2.previous()?.subtype == TOK_SUBTYPE_STOP) ||
-        (tokens2.previous()?.type == TOK_TYPE_SUBEXPR &&
+        (tokens2.previous()?.type == TOK_TYPE_SUB_EXPRESSION &&
           tokens2.previous()?.subtype == TOK_SUBTYPE_STOP) ||
         tokens2.previous()?.type == TOK_TYPE_OP_POST ||
         tokens2.previous()?.type == TOK_TYPE_OPERAND
       ) {
-        token.subtype = TOK_SUBTYPE_MATH;
+        currentToken.subtype = TOK_SUBTYPE_MATH;
       } else {
-        token.type = TOK_TYPE_OP_PRE;
+        currentToken.type = TOK_TYPE_OP_PRE;
       }
       continue;
     }
 
-    if (token.type == TOK_TYPE_OP_IN && token.value == "+") {
+    if (currentToken.type == TOK_TYPE_OP_IN && currentToken.value == "+") {
       if (tokens2.BOF()) {
-        token.type = TOK_TYPE_NOOP;
+        currentToken.type = TOK_TYPE_NOOP;
       } else if (
         (tokens2.previous()?.type == TOK_TYPE_FUNCTION &&
           tokens2.previous()?.subtype == TOK_SUBTYPE_STOP) ||
-        (tokens2.previous()?.type == TOK_TYPE_SUBEXPR &&
+        (tokens2.previous()?.type == TOK_TYPE_SUB_EXPRESSION &&
           tokens2.previous()?.subtype == TOK_SUBTYPE_STOP) ||
         tokens2.previous()?.type == TOK_TYPE_OP_POST ||
         tokens2.previous()?.type == TOK_TYPE_OPERAND
       ) {
-        token.subtype = TOK_SUBTYPE_MATH;
+        currentToken.subtype = TOK_SUBTYPE_MATH;
       } else {
-        token.type = TOK_TYPE_NOOP;
+        currentToken.type = TOK_TYPE_NOOP;
       }
       continue;
     }
 
-    if (token.type == TOK_TYPE_OP_IN && token.subtype.length == 0) {
-      if ("<>=".indexOf(token.value.substr(0, 1)) != -1) {
-        token.subtype = TOK_SUBTYPE_LOGICAL;
-      } else if (token.value == "&") {
-        token.subtype = TOK_SUBTYPE_CONCAT;
+    if (currentToken.type == TOK_TYPE_OP_IN && currentToken.subtype.length == 0) {
+      if ("<>=".indexOf(currentToken.value.substr(0, 1)) != -1) {
+        currentToken.subtype = TOK_SUBTYPE_LOGICAL;
+      } else if (currentToken.value == "&") {
+        currentToken.subtype = TOK_SUBTYPE_CONCAT;
       } else {
-        token.subtype = TOK_SUBTYPE_MATH;
+        currentToken.subtype = TOK_SUBTYPE_MATH;
       }
       continue;
     }
 
-    if (token.type == TOK_TYPE_OPERAND && token.subtype.length == 0) {
-      if (isNaN(Number(language.reformatNumberForJsParsing(token.value)))) {
-        if (token.value == language.true) {
-          token.subtype = TOK_SUBTYPE_LOGICAL;
-          token.value = "TRUE";
-        } else if (token.value == language.false) {
-          token.subtype = TOK_SUBTYPE_LOGICAL;
-          token.value = "FALSE";
+    if (currentToken.type == TOK_TYPE_OPERAND && currentToken.subtype.length == 0) {
+      if (isNaN(Number(currentToken.value))) {
+        if (currentToken.value == "TRUE") {
+          currentToken.subtype = TOK_SUBTYPE_LOGICAL;
+          currentToken.value = "TRUE";
+        } else if (currentToken.value == "FALSE") {
+          currentToken.subtype = TOK_SUBTYPE_LOGICAL;
+          currentToken.value = "FALSE";
         } else {
-          token.subtype = TOK_SUBTYPE_RANGE;
+          currentToken.subtype = TOK_SUBTYPE_RANGE;
         }
       } else {
-        token.subtype = TOK_SUBTYPE_NUMBER;
-        token.value = language.reformatNumberForJsParsing(token.value);
+        currentToken.subtype = TOK_SUBTYPE_NUMBER;
       }
       continue;
     }
 
-    if (token.type == TOK_TYPE_FUNCTION) {
-      if (token.value.substr(0, 1) == "@") {
-        token.value = token.value.substr(1);
+    if (currentToken.type == TOK_TYPE_FUNCTION) {
+      if (currentToken.value.substr(0, 1) == "@") {
+        currentToken.value = currentToken.value.substr(1);
       }
       continue;
     }
@@ -660,9 +641,9 @@ export function tokenizer(
   tokens = new Tokens();
 
   while (tokens2.moveNext()) {
-    const token = tokens2.current();
-    if (token && token.type != TOK_TYPE_NOOP) {
-      tokens.addRef(token);
+    const currentToken = tokens2.current();
+    if (currentToken && currentToken.type != TOK_TYPE_NOOP) {
+      tokens.addRef(currentToken);
     }
   }
 

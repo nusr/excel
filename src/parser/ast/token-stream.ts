@@ -25,7 +25,7 @@ export function tokenStream(tokens: Token[]) {
       return true;
     },
     nextIsOpenParen() {
-      return this.nextIs("subexpression", "start");
+      return this.nextIs("sub-expression", "start");
     },
     nextIsTerminal() {
       if (this.nextIsNumber()) return true;

@@ -1,18 +1,34 @@
-import type { Node, FunctionNode } from "../type";
-import type { FormulasKeys, FormulaType } from "../../formula";
-import { throwError, isNumber, isString } from "../../util";
-import type { ResultType } from "../../types";
+import type {
+  Node,
+  FunctionNode,
+  CellNode,
+  IParseFormulaOptions,
+} from "../type";
+import { parser } from "../ast";
+import { tokenizer } from "../tokenize";
+import type { FormulasKeys, FormulaType } from "@/formula";
+import { throwError, isNumber, isString, parseCell } from "@/util";
+import type { ResultType } from "@/types";
 
 export class Environment {
+  hooks?: IParseFormulaOptions;
   funcs = {} as FormulaType;
+  constructor(hooks?: IParseFormulaOptions) {
+    this.hooks = hooks;
+  }
+  queryCell(row: number, col: number, sheetId?: string) {
+    if (this.hooks) {
+      return this.hooks.queryCell(row, col, sheetId);
+    }
+  }
+
   setFunc<T extends FormulasKeys>(name: T, value: FormulaType[T]): void {
     this.funcs[name] = value;
   }
-  getFunc<T extends FormulasKeys>(name: T): FormulaType[T] {
+  getFunc<T extends FormulasKeys>(name: T) {
     if (name in this.funcs) {
       return this.funcs[name];
     }
-    throw new Error("Environment: Undefined function " + name);
   }
 }
 
@@ -59,7 +75,7 @@ function handleCallExpression(ast: FunctionNode, env: Environment) {
   const funcName = ast.name.toUpperCase() as FormulasKeys;
   const func = env.getFunc(funcName);
   if (!func) {
-    throw new Error("codeGenerator: not support function");
+    throwError(false, "#NAME?");
   }
   const { paramsType, minParamsCount, maxParamsCount, resultType } =
     func.options;
@@ -80,6 +96,28 @@ function handleCallExpression(ast: FunctionNode, env: Environment) {
   }
   return result;
 }
+export function generateAST(code: string): Node {
+  const tokens = tokenizer(code);
+  return parser(tokens);
+}
+
+export function handelCell(cell: CellNode, env: Environment): ResultType {
+  const { key } = cell;
+  const range = parseCell(key);
+  if (!range) {
+    throwError(false, "#REF!");
+  }
+  const data = env.queryCell(
+    range.row,
+    range.col,
+    range.sheetId ? range.sheetId : undefined
+  );
+  if (data?.formula) {
+    const newAst = generateAST(data?.formula);
+    return codeGenerator(newAst, env);
+  }
+  return data?.value || "";
+}
 
 export function codeGenerator(ast: Node, env: Environment): ResultType {
   switch (ast.type) {
@@ -87,6 +125,8 @@ export function codeGenerator(ast: Node, env: Environment): ResultType {
     case "NumberLiteral":
     case "BooleanLiteral":
       return ast.value;
+    case "Cell":
+      return handelCell(ast, env);
     case "CallExpression":
       return handleCallExpression(ast, env);
     case "BinaryExpression":

@@ -7,9 +7,10 @@ import {
   makeFont,
   npxLine,
   assert,
+  parseError,
   ERROR_FORMULA_COLOR,
 } from "@/util";
-import { isEmpty } from "@/lodash";
+import { isEmpty, isNil } from "@/lodash";
 import { CellInfo } from "@/types";
 
 export function fillRect(
@@ -49,9 +50,8 @@ export function renderCell(
     height: number;
   }
 ): void {
-  const { style, displayValue, left, top, width, height, errorValue } =
-    cellInfo;
-  const isNum = isNumber(displayValue);
+  const { style, value, left, top, width, height } = cellInfo;
+  const isNum = isNumber(value);
   let font = DEFAULT_FONT_CONFIG;
   let fillStyle = DEFAULT_FONT_COLOR;
   if (!isEmpty(style)) {
@@ -68,10 +68,16 @@ export function renderCell(
       fillRect(ctx, left, top, width, height);
     }
   }
-  let text = String(displayValue);
-  if (errorValue) {
+  let text = String(value);
+  if (parseError(value)) {
     fillStyle = ERROR_FORMULA_COLOR;
-    text = errorValue;
+  } else if (
+    typeof value === "boolean" ||
+    ["TRUE", "FALSE"].includes(text.toUpperCase())
+  ) {
+    text = text.toUpperCase();
+  } else if (isNil(value)) {
+    text = "";
   }
 
   ctx.textAlign = isNum ? "right" : "left";

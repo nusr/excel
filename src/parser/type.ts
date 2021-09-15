@@ -1,3 +1,4 @@
+import type { QueryCellResult } from "@/types";
 export interface Token {
   value: string;
   type: string;
@@ -54,7 +55,6 @@ export interface CellNode {
   type: "Cell";
   refType?: RefTypes;
   key: string;
-  ns?: string;
 }
 export interface CellRangeNode {
   type: "CellRange";
@@ -69,4 +69,8 @@ export interface BooleanNode {
 export interface StringNode {
   type: "StringLiteral";
   value: string;
+}
+
+export interface IParseFormulaOptions {
+  queryCell: (row: number, col: number, sheetId?: string) => QueryCellResult;
 }

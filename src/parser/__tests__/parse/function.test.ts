@@ -1,6 +1,12 @@
 import { parseFormula } from "../..";
 
 describe(".parseFormula() function", () => {
+  it("not defined function", () => {
+    expect(parseFormula("foo()")).toEqual({
+      error: "#NAME?",
+      result: null,
+    });
+  });
   it("function: SUM", () => {
     expect(parseFormula("SUM(1,2)")).toEqual({
       error: null,

@@ -6,6 +6,7 @@ import {
   WorksheetType,
   Coordinate,
   ModelCellType,
+  ResultType,
 } from "@/types";
 import {
   getDefaultSheetInfo,
@@ -19,6 +20,7 @@ import {
   DEFAULT_COL_COUNT,
 } from "@/util";
 import { Controller } from "../controller/controller";
+import { parseFormula } from "../parser";
 
 export class Model {
   public currentSheetId = "";
@@ -106,19 +108,25 @@ export class Model {
       mergeCells,
     };
   }
+  computeFormula = (formula: string): ResultType => {
+    const result = parseFormula(formula, {
+      queryCell: this.queryCell,
+    });
+    return result.error ? result.error : result.result;
+  };
   setCellValue(value = "", ranges: Range[]): void {
     const [range] = ranges;
     const { row, col } = range;
-    const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
+    const configPath = `worksheets[${
+      range.sheetId || this.currentSheetId
+    }][${row}][${col}]`;
     let formula = "";
-    let realValue = "";
     if (value.startsWith("=")) {
       formula = value.trim().slice(1);
-      realValue = "";
     } else {
-      realValue = value.trim();
       formula = "";
     }
+    const realValue = this.computeFormula(formula);
     setWith(this, `${configPath}.formula`, formula);
     setWith(this, `${configPath}.value`, realValue);
     this.modelChange();
@@ -153,10 +161,14 @@ export class Model {
     }
     this.modelChange();
   }
-  queryCell(row: number, col: number): QueryCellResult {
+  queryCell = (
+    row: number,
+    col: number,
+    sheetId: string = this.currentSheetId
+  ): QueryCellResult => {
     const cellData = get<ModelCellType>(
       this,
-      `worksheets[${this.currentSheetId}][${row}][${col}]`,
+      `worksheets[${sheetId}][${row}][${col}]`,
       {}
     );
     const { style } = cellData;
@@ -165,5 +177,5 @@ export class Model {
       temp = this.styles[style];
     }
     return { ...cellData, style: temp };
-  }
+  };
 }

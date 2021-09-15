@@ -1,40 +1,38 @@
-import type { Coordinate } from "@/types";
-import { assert } from "./assert";
-import { columnNameToInt } from "./convert";
+import { columnNameToInt, rowLabelToInt } from "./convert";
 import { Range } from "./range";
-function isCharacter(text: string): boolean {
-  return (text >= "a" && text <= "z") || (text >= "A" && text <= "Z");
-}
-function isNum(text: string): boolean {
-  return text >= "0" && text <= "9";
-}
-function parseCell(text: string): Coordinate {
-  const charList = [];
-  const numList = [];
-  let i = 0;
-  do {
-    if (isCharacter(text[i])) {
-      charList.push(text[i++]);
-    }
-  } while (isCharacter(text[i]) && i < text.length);
-  do {
-    if (isNum(text[i])) {
-      numList.push(text[i++]);
-    }
-  } while (isNum(text[i]) && i < text.length);
-  assert(i === text.length);
-  const col = columnNameToInt(charList.join(""));
-  const row = parseInt(numList.join(""), 10) - 1;
-  assert(!isNaN(col) && !isNaN(row) && col >= 0 && row >= 0);
-  return { row, col };
-}
-export function parseReference(text: string, sheetId: string): Range {
-  const [cell1, cell2] = text.split(":");
-  const startCell = parseCell(cell1);
-  if (!cell2) {
-    return new Range(startCell.row, startCell.col, 1, 1, sheetId);
+const LABEL_EXTRACT_REGEXP = /^([$])?([A-Za-z]+)([$])?([0-9]+)$/;
+
+export function parseCell(ref: string, sheetId = ""): Range | null {
+  if (typeof ref !== "string" || !ref) {
+    return null;
   }
-  const endCell = parseCell(cell2);
+  let text = ref.trim();
+  const index = text.indexOf("!");
+  let sheetName = "";
+  if (index > -1) {
+    sheetName = text.slice(0, index);
+    text = text.slice(index + 1);
+  }
+  const result = text.toUpperCase().match(LABEL_EXTRACT_REGEXP) || [];
+  const [, , col, , row] = result;
+  // console.log(text, result, col, row);
+  const r = rowLabelToInt(row);
+  const c = columnNameToInt(col);
+  const range = new Range(r, c, col ? 1 : 0, row ? 1 : 0, sheetId || sheetName);
+  return range.isValid() ? range : null;
+}
+
+export function parseReference(text: string, sheetId: string): Range | null {
+  const [cell1, cell2] = text.split(":");
+  const startCell = parseCell(cell1, sheetId);
+  if (!startCell) {
+    return null;
+  }
+  const endCell = parseCell(cell2, sheetId);
+  if (!endCell) {
+    startCell.sheetId = sheetId;
+    return startCell;
+  }
   const rowCount = endCell.row - startCell.row + 1;
   const colCount = endCell.col - startCell.col + 1;
   return new Range(startCell.row, startCell.col, rowCount, colCount, sheetId);

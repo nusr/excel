@@ -1,5 +1,6 @@
 import { IWindowSize } from "./event";
 import { Coordinate, CellInfo } from "./store";
+import { ResultType } from "./parser";
 export enum EVerticalAlign {
   TOP,
   MIDDLE,
@@ -37,7 +38,7 @@ export type WorksheetType = {
 };
 
 export type ModelCellType = {
-  value?: string | number;
+  value?: ResultType;
   formula?: string;
   width?: number;
   height?: number;

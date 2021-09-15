@@ -13,8 +13,7 @@ export interface Coordinate {
   col: number;
 }
 
-export type CellInfo = QueryCellResult &
-  Coordinate & { displayValue: string | number; errorValue: string };
+export type CellInfo = QueryCellResult & Coordinate;
 export type State = {
   activeCell: CellInfo & CanvasOverlayPosition;
   currentSheetId: string;

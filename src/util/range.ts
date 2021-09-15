@@ -27,6 +27,12 @@ export class Range {
     this.rowCount = rowCount;
     this.sheetId = sheetId;
   }
+
+  isValid(): boolean {
+    return (
+      this.row >= 0 && this.col >= 0 && this.colCount >= 0 && this.rowCount >= 0
+    );
+  }
   static makeRange(range: IRange): Range {
     return new Range(
       range.row,

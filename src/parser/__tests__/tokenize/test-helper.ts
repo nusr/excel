@@ -1,8 +1,8 @@
 import { tokenizer } from "../../tokenize";
 
-export function itBlock([formula, expected, options]: any[]): void {
+export function itBlock([formula, expected]: any[]): void {
   it(formula, function () {
-    const result = tokenizer(formula, options);
+    const result = tokenizer(formula);
 
     const data = expected.map((tuple: any) => {
       const [value, type, subtype] = tuple;
