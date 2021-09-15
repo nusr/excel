@@ -1,7 +1,7 @@
 import { parseFormula } from "../..";
 
-describe(".parseFormula() math", () => {
-  it("operator: +", () => {
+describe("parseFormula math", () => {
+  it("operator +", () => {
     expect(parseFormula("10+10")).toEqual({ error: null, result: 20 });
     expect(parseFormula("10 + 10")).toEqual({ error: null, result: 20 });
     expect(parseFormula("10 + 11 + 23 + 11 + 2")).toEqual({
@@ -18,7 +18,7 @@ describe(".parseFormula() math", () => {
     });
   });
 
-  it("operator: -", () => {
+  it("operator -", () => {
     expect(parseFormula("10-10")).toEqual({ error: null, result: 0 });
     expect(parseFormula("10 - 10")).toEqual({ error: null, result: 0 });
     expect(parseFormula("10 - 10 - 2")).toEqual({
@@ -35,7 +35,7 @@ describe(".parseFormula() math", () => {
     });
   });
 
-  it("operator: /", () => {
+  it("operator /", () => {
     expect(parseFormula("2 / 1")).toEqual({ error: null, result: 2 });
     expect(parseFormula("64 / 2 / 4")).toEqual({
       error: null,
@@ -51,7 +51,7 @@ describe(".parseFormula() math", () => {
     });
   });
 
-  it("operator: *", () => {
+  it("operator *", () => {
     expect(parseFormula("0 * 0 * 0 * 0 * 0")).toEqual({
       error: null,
       result: 0,
@@ -67,7 +67,7 @@ describe(".parseFormula() math", () => {
     });
   });
 
-  it("operator: ^", () => {
+  it("operator ^", () => {
     expect(parseFormula("2 ^ 5")).toEqual({ error: null, result: 32 });
     expect(parseFormula('"foo" ^ 4')).toEqual({
       error: "#VALUE!",
@@ -75,7 +75,7 @@ describe(".parseFormula() math", () => {
     });
   });
 
-  it("operator: &", () => {
+  it("operator &", () => {
     expect(parseFormula("2 & 5")).toEqual({ error: null, result: "25" });
     expect(parseFormula("(2 & 5)")).toEqual({
       error: null,

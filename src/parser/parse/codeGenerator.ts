@@ -8,7 +8,7 @@ import { parser } from "../ast";
 import { tokenizer } from "../tokenize";
 import type { FormulasKeys, FormulaType } from "@/formula";
 import { throwError, isNumber, isString, parseCell } from "@/util";
-import type { ResultType } from "@/types";
+import type { ResultType, QueryCellResult } from "@/types";
 
 export class Environment {
   hooks?: IParseFormulaOptions;
@@ -16,7 +16,11 @@ export class Environment {
   constructor(hooks?: IParseFormulaOptions) {
     this.hooks = hooks;
   }
-  queryCell(row: number, col: number, sheetId?: string) {
+  queryCell(
+    row: number,
+    col: number,
+    sheetId?: string
+  ): QueryCellResult | undefined {
     if (this.hooks) {
       return this.hooks.queryCell(row, col, sheetId);
     }
@@ -25,7 +29,7 @@ export class Environment {
   setFunc<T extends FormulasKeys>(name: T, value: FormulaType[T]): void {
     this.funcs[name] = value;
   }
-  getFunc<T extends FormulasKeys>(name: T) {
+  getFunc<T extends FormulasKeys>(name: T): FormulaType[T] | undefined {
     if (name in this.funcs) {
       return this.funcs[name];
     }

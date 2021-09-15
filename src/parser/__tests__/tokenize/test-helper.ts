@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { tokenizer } from "../../tokenize";
 
 export function itBlock([formula, expected]: any[]): void {

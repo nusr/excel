@@ -1,13 +1,13 @@
 import { parseFormula } from "../..";
 
-describe(".parseFormula() function", () => {
+describe("parseFormula function", () => {
   it("not defined function", () => {
     expect(parseFormula("foo()")).toEqual({
       error: "#NAME?",
       result: null,
     });
   });
-  it("function: SUM", () => {
+  it("function SUM", () => {
     expect(parseFormula("SUM(1,2)")).toEqual({
       error: null,
       result: 3,
@@ -30,7 +30,7 @@ describe(".parseFormula() function", () => {
       result: 6,
     });
   });
-  it("function: ABS", () => {
+  it("function ABS", () => {
     expect(parseFormula("ABS()")).toEqual({
       error: "#VALUE!",
       result: null,

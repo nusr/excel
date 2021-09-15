@@ -1,12 +1,13 @@
-import type { Token } from "../type";
+import type { Token, TokenType, TokenSubType } from "../type";
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function tokenStream(tokens: Token[]) {
-  const end = {
-    type: "",
+  const placeholderToken: Token = {
+    type: "unknown",
     value: "",
-    subtype: "",
+    subtype: "start",
   };
-  const arr: Token[] = [...tokens, end];
+  const arr: Token[] = [...tokens, placeholderToken];
   let index = 0;
 
   return {
@@ -19,7 +20,7 @@ export function tokenStream(tokens: Token[]) {
     getNext() {
       return arr[index];
     },
-    nextIs(type: string, subtype?: string) {
+    nextIs(type: TokenType, subtype?: TokenSubType) {
       if (this.getNext().type !== type) return false;
       if (subtype && this.getNext().subtype !== subtype) return false;
       return true;

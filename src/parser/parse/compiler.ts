@@ -42,8 +42,8 @@ export function parseFormula(
       }
       result = compiler(code, env);
     }
-  } catch (e: any) {
-    const message = parseError(e.message);
+  } catch (e) {
+    const message = parseError((e as Error).message);
     if (message) {
       error = message;
     } else {

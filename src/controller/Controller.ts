@@ -195,7 +195,7 @@ export class Controller extends EventEmitter<EventType> {
     const { model } = this;
     const { value, formula, style } = model.queryCell(row, col);
     let realValue = value;
-    if (formula && !value) {
+    if (formula && (isNil(value) || value === "")) {
       realValue = model.computeFormula(formula);
     }
     return {

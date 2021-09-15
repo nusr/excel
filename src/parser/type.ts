@@ -1,8 +1,8 @@
 import type { QueryCellResult } from "@/types";
 export interface Token {
   value: string;
-  type: string;
-  subtype: string;
+  type: TokenType;
+  subtype?: TokenSubType;
 }
 
 export type Node =
@@ -74,3 +74,29 @@ export interface StringNode {
 export interface IParseFormulaOptions {
   queryCell: (row: number, col: number, sheetId?: string) => QueryCellResult;
 }
+
+export type TokenSubType =
+  | "start"
+  | "stop"
+  | "range"
+  | "number"
+  | "text"
+  | "logical"
+  | "error"
+  | "union"
+  | "intersect"
+  | "concatenate"
+  | "math"
+  | "";
+
+export type TokenType =
+  | "sub-expression"
+  | "function"
+  | "argument"
+  | "operator-infix"
+  | "operator-prefix"
+  | "operator-postfix"
+  | "operand"
+  | "unknown"
+  | "white-space"
+  | "noop";

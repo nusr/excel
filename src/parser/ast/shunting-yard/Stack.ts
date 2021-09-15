@@ -1,3 +1,8 @@
+// import type { Operator } from "./Operator";
+// import type { Node } from "../../type";
+
+// type StackItem = Operator | Node;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type StackItem = any;
 export class Stack {
   items: StackItem[] = [];
