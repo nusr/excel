@@ -3,27 +3,49 @@ import type {
   FunctionNode,
   CellNode,
   IParseFormulaOptions,
+  CellRangeNode,
 } from "../type";
 import { parser } from "../ast";
 import { tokenizer } from "../tokenize";
 import type { FormulasKeys, FormulaType } from "@/formula";
-import { throwError, isNumber, isString, parseCell } from "@/util";
+import {
+  throwError,
+  isNumber,
+  isString,
+  parseCell,
+  parseReference,
+  Range,
+} from "@/util";
 import type { ResultType, QueryCellResult } from "@/types";
 
 export class Environment {
-  hooks?: IParseFormulaOptions;
-  funcs = {} as FormulaType;
-  constructor(hooks?: IParseFormulaOptions) {
+  protected hooks?: IParseFormulaOptions;
+  protected funcs = {} as FormulaType;
+  protected variables: Record<string, ResultType> = {};
+  setVariable(key: string, value: ResultType): void {
+    this.variables[key] = value;
+  }
+  reset(): void {
+    this.hooks = undefined;
+    this.funcs = {} as FormulaType;
+    this.variables = {};
+  }
+  getVariable(key: string): ResultType {
+    return this.variables[key];
+  }
+  setHooks(hooks?: IParseFormulaOptions): void {
     this.hooks = hooks;
   }
-  queryCell(
-    row: number,
-    col: number,
-    sheetId?: string
-  ): QueryCellResult | undefined {
+  queryCells(range: Range): QueryCellResult[] | undefined {
     if (this.hooks) {
-      return this.hooks.queryCell(row, col, sheetId);
+      return this.hooks.queryCells(range);
     }
+  }
+  getSheetId(): string {
+    if (this.hooks) {
+      return this.hooks.currentSheetId;
+    }
+    return "";
   }
 
   setFunc<T extends FormulasKeys>(name: T, value: FormulaType[T]): void {
@@ -75,7 +97,11 @@ function applyOperator(op: string, a: ResultType, b: ResultType) {
 }
 
 function handleCallExpression(ast: FunctionNode, env: Environment) {
-  const args = ast.arguments.map((node) => codeGenerator(node, env));
+  const args = ast.arguments
+    .map((node) => codeGenerator(node, env))
+    .reduce((sum, cur) => {
+      return sum.concat(cur);
+    }, []);
   const funcName = ast.name.toUpperCase() as FormulasKeys;
   const func = env.getFunc(funcName);
   if (!func) {
@@ -105,50 +131,83 @@ export function generateAST(code: string): Node {
   return parser(tokens);
 }
 
-export function handelCell(cell: CellNode, env: Environment): ResultType {
+function handelCell(cell: CellNode, env: Environment): ResultType {
   const { key } = cell;
   const range = parseCell(key);
   if (!range) {
     throwError(false, "#REF!");
   }
-  const data = env.queryCell(
-    range.row,
-    range.col,
-    range.sheetId ? range.sheetId : undefined
-  );
-  if (data?.formula) {
-    const newAst = generateAST(data?.formula);
-    return codeGenerator(newAst, env);
+  const data = env.queryCells(range);
+  if (data === undefined) {
+    return "";
   }
-  return data?.value || "";
+  const [result] = data;
+  if (result?.formula) {
+    const newAst = generateAST(result?.formula);
+    const [temp] = codeGenerator(newAst, env);
+    return temp;
+  }
+  return result?.value;
 }
 
-export function codeGenerator(ast: Node, env: Environment): ResultType {
+function handelCellRange(ast: CellRangeNode, env: Environment): ResultType[] {
+  const { left, right } = ast;
+  const range = parseReference(`${left.key}:${right.key}`, env.getSheetId());
+  if (!range) {
+    throwError(false, "#REF!");
+  }
+  const data = env.queryCells(range);
+  if (data === undefined) {
+    return [];
+  }
+  return data.map((item) => {
+    if (item?.formula) {
+      const newAst = generateAST(item?.formula);
+      const [temp] = codeGenerator(newAst, env);
+      return temp;
+    }
+    return item?.value;
+  });
+}
+
+export function codeGenerator(ast: Node, env: Environment): ResultType[] {
   switch (ast.type) {
     case "StringLiteral":
     case "NumberLiteral":
     case "BooleanLiteral":
-      return ast.value;
-    case "Cell":
-      return handelCell(ast, env);
-    case "CallExpression":
-      return handleCallExpression(ast, env);
-    case "BinaryExpression":
-      return applyOperator(
-        ast.operator,
-        codeGenerator(ast.left, env),
-        codeGenerator(ast.right, env)
-      );
+      return [ast.value];
+    case "DefineName": {
+      const temp = env.getVariable(ast.value);
+      throwError(temp !== undefined, "#NAME?");
+      return [temp];
+    }
+
+    case "Cell": {
+      const result = handelCell(ast, env);
+      return [result || 0];
+    }
+    case "CellRange":
+      return handelCellRange(ast, env);
+    case "CallExpression": {
+      const result = handleCallExpression(ast, env);
+      return [result];
+    }
+    case "BinaryExpression": {
+      const [left] = codeGenerator(ast.left, env);
+      const [right] = codeGenerator(ast.right, env);
+      const result = applyOperator(ast.operator, left, right);
+      return [result];
+    }
     case "UnaryExpression": {
-      const result = codeGenerator(ast.operand, env);
+      const [result] = codeGenerator(ast.operand, env);
       if (ast.operator === "-") {
         throwError(typeof result === "number", "#VALUE!");
-        return -result;
+        return [-result];
       } else {
-        return result;
+        return [result];
       }
     }
     default:
-      throw new Error("codeGenerator: not found type" + ast.type);
+      throw new Error("codeGenerator: not found ast: " + JSON.stringify(ast));
   }
 }

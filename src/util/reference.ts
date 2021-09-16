@@ -1,6 +1,10 @@
 import { columnNameToInt, rowLabelToInt } from "./convert";
 import { Range } from "./range";
-const LABEL_EXTRACT_REGEXP = /^([$])?([A-Za-z]+)([$])?([0-9]+)$/;
+import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from "./constant";
+
+const isCharacter = (char: string) =>
+  (char >= "a" && char <= "z") || (char >= "A" && char <= "Z");
+const isNum = (char: string) => char >= "0" && char <= "9";
 
 export function parseCell(ref: string, sheetId = ""): Range | null {
   if (typeof ref !== "string" || !ref) {
@@ -13,13 +17,42 @@ export function parseCell(ref: string, sheetId = ""): Range | null {
     sheetName = text.slice(0, index);
     text = text.slice(index + 1);
   }
-  const result = text.toUpperCase().match(LABEL_EXTRACT_REGEXP) || [];
-  const [, , col, , row] = result;
-  // console.log(text, result, col, row);
-  const r = rowLabelToInt(row);
-  const c = columnNameToInt(col);
-  const range = new Range(r, c, col ? 1 : 0, row ? 1 : 0, sheetId || sheetName);
-  return range.isValid() ? range : null;
+  let i = 0;
+  let rowText = "";
+  let colText = "";
+  if (text[i] === "$") {
+    i++;
+  }
+  while (isCharacter(text[i])) {
+    colText += text[i++];
+  }
+  if (text[i] === "$") {
+    i++;
+  }
+  while (isNum(text[i])) {
+    rowText += text[i++];
+  }
+
+  let rowCount = 1;
+  let colCount = 1;
+  let row = 0;
+  let col = 0;
+  if (rowText === "") {
+    row = 0;
+    colCount = 0;
+    rowCount = DEFAULT_ROW_COUNT;
+  } else {
+    row = rowLabelToInt(rowText);
+  }
+  if (colText === "") {
+    col = 0;
+    colCount = DEFAULT_COL_COUNT;
+    rowCount = 0;
+  } else {
+    col = columnNameToInt(colText);
+  }
+  const range = new Range(row, col, rowCount, colCount, sheetId || sheetName);
+  return range;
 }
 
 export function parseReference(text: string, sheetId: string): Range | null {

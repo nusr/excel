@@ -11,6 +11,7 @@ import type {
   RefTypes,
   BinaryOperatorTypes,
   unaryOperatorTypes,
+  DefineNameNode,
 } from "../type";
 
 function cell(key: string, refType: RefTypes): CellNode {
@@ -98,6 +99,13 @@ function unaryExpression(
     operand: expression,
   };
 }
+
+function defineName(value: string): DefineNameNode {
+  return {
+    type: "DefineName",
+    value,
+  };
+}
 export {
   functionCall,
   numberLiteral,
@@ -105,6 +113,7 @@ export {
   booleanLiteral,
   cell,
   cellRange,
+  defineName,
   binaryExpression,
   unaryExpression,
 };

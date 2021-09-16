@@ -1,1 +1,1 @@
-export { parseFormula } from "./compiler";
+export { parseFormula, globalEnv } from "./compiler";

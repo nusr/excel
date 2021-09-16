@@ -32,6 +32,7 @@ export function tokenStream(tokens: Token[]) {
       if (this.nextIsNumber()) return true;
       if (this.nextIsText()) return true;
       if (this.nextIsLogical()) return true;
+      if (this.nextIsDefineName()) return true;
       if (this.nextIsRange()) return true;
       return false;
     },
@@ -61,6 +62,9 @@ export function tokenStream(tokens: Token[]) {
     },
     nextIsText() {
       return this.nextIs("operand", "text");
+    },
+    nextIsDefineName() {
+      return this.nextIs("operand", "define-name");
     },
     nextIsLogical() {
       return this.nextIs("operand", "logical");

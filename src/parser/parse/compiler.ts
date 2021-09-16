@@ -1,25 +1,22 @@
-import type { CellRangeNode, IParseFormulaOptions } from "../type";
+import type { IParseFormulaOptions } from "../type";
 import formulas, { FormulasKeys } from "../../formula";
 import { parseError } from "../../util";
 import { codeGenerator, Environment, generateAST } from "./codeGenerator";
 import type { ResultType, ErrorTypes } from "@/types";
 
-export function parseCellRange(range: CellRangeNode): void {
-  const { left, right } = range;
-  const leftKey = left.key.trim();
-  const index = leftKey.indexOf("!");
-  if (index < 0) {
-    return;
-  }
-  const sheet = leftKey.substr(0, index).trim();
-  range.sheet = sheet;
-  right.key = `${sheet}!${right.key}`;
-}
-
 export function compiler(code: string, env: Environment): ResultType {
   const ast = generateAST(code);
   const result = codeGenerator(ast, env);
+  if (Array.isArray(result)) {
+    return result[0];
+  }
   return result;
+}
+
+const globalEnv = new Environment();
+const list = Object.keys(formulas) as Array<FormulasKeys>;
+for (const key of list) {
+  globalEnv.setFunc(key, formulas[key]);
 }
 
 export function parseFormula(
@@ -35,12 +32,8 @@ export function parseFormula(
     if (code === "") {
       result = "";
     } else {
-      const env = new Environment(options);
-      const list = Object.keys(formulas) as Array<FormulasKeys>;
-      for (const key of list) {
-        env.setFunc(key, formulas[key]);
-      }
-      result = compiler(code, env);
+      globalEnv.setHooks(options);
+      result = compiler(code, globalEnv);
     }
   } catch (e) {
     const message = parseError((e as Error).message);
@@ -56,3 +49,5 @@ export function parseFormula(
     error,
   };
 }
+
+export { globalEnv };

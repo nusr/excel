@@ -149,10 +149,18 @@ function parseTerminal(stream: StreamResult) {
   if (stream.nextIsLogical()) {
     return parseLogical(stream);
   }
-
+  if (stream.nextIsDefineName()) {
+    return parseDefineName(stream);
+  }
   if (stream.nextIsRange()) {
     return parseRange(stream);
   }
+}
+
+function parseDefineName(stream: StreamResult) {
+  const next = stream.getNext();
+  stream.consume();
+  return builder.defineName(next.value);
 }
 
 function parseRange(stream: StreamResult) {

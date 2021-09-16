@@ -25,8 +25,8 @@ describe("cell ranges", function () {
       ["R[2]C[2]", [["R[2]C[2]", "operand", "range"]]],
       ["R[-1]", [["R[-1]", "operand", "range"]]],
       ["C[-1]", [["C[-1]", "operand", "range"]]],
-      ["R", [["R", "operand", "range"]]],
-      ["C", [["C", "operand", "range"]]],
+      // ["R", [["R", "operand", "range"]]],
+      // ["C", [["C", "operand", "range"]]],
     ].forEach(itBlock);
   });
 });

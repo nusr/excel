@@ -1,5 +1,5 @@
 import type { Token, TokenType, TokenSubType } from "../type";
-import { assert } from '@/util'
+import { assert } from "@/util";
 
 const TOK_TYPE_NOOP = "noop";
 const TOK_TYPE_OPERAND = "operand";
@@ -26,9 +26,15 @@ const TOK_SUBTYPE_CONCAT = "concatenate";
 const TOK_SUBTYPE_INTERSECT = "intersect";
 const TOK_SUBTYPE_UNION = "union";
 
+const TOK_SUBTYPE_CUSTOM_NAME = "define-name";
+
 const SCIENTIFIC_NOTATION = /^[1-9]{1}(\.[0-9]+)?E{1}$/;
 
-function createToken(value: string, type: TokenType, subtype: TokenSubType = ''): Token {
+function createToken(
+  value: string,
+  type: TokenType,
+  subtype: TokenSubType = ""
+): Token {
   return { value, type, subtype };
 }
 
@@ -100,7 +106,7 @@ class TokenStack {
 
   pop() {
     const token = this.items.pop();
-    assert(!!token?.type)
+    assert(!!token?.type);
     return createToken("", token?.type, TOK_SUBTYPE_STOP);
   }
 
@@ -627,6 +633,8 @@ export function tokenizer(formula: string): Token[] {
         } else if (currentToken.value === "FALSE") {
           currentToken.subtype = TOK_SUBTYPE_LOGICAL;
           currentToken.value = "FALSE";
+        } else if (/^[A-Z]+$/i.test(currentToken.value)) {
+          currentToken.subtype = TOK_SUBTYPE_CUSTOM_NAME;
         } else {
           currentToken.subtype = TOK_SUBTYPE_RANGE;
         }

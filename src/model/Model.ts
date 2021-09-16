@@ -110,7 +110,8 @@ export class Model {
   }
   computeFormula = (formula: string): ResultType => {
     const result = parseFormula(formula, {
-      queryCell: this.queryCell,
+      queryCells: this.queryCells,
+      currentSheetId: this.currentSheetId,
     });
     return result.error ? result.error : result.result;
   };
@@ -161,6 +162,16 @@ export class Model {
     }
     this.modelChange();
   }
+  queryCells = (range: Range): QueryCellResult[] => {
+    const result = [];
+    const { row, col, rowCount, colCount, sheetId } = range;
+    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+      for (let c = col, endCol = col + colCount; c < endCol; c++) {
+        result.push(this.queryCell(row, col, sheetId || this.currentSheetId));
+      }
+    }
+    return result;
+  };
   queryCell = (
     row: number,
     col: number,

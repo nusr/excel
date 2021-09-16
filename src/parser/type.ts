@@ -1,4 +1,5 @@
 import type { QueryCellResult } from "@/types";
+import type { Range } from "@/util";
 export interface Token {
   value: string;
   type: TokenType;
@@ -13,7 +14,8 @@ export type Node =
   | CellNode
   | BooleanNode
   | StringNode
-  | CellRangeNode;
+  | CellRangeNode
+  | DefineNameNode;
 export type BinaryOperatorTypes =
   | ">"
   | "<"
@@ -60,7 +62,6 @@ export interface CellRangeNode {
   type: "CellRange";
   left: CellNode;
   right: CellNode;
-  sheet?: string;
 }
 export interface BooleanNode {
   type: "BooleanLiteral";
@@ -71,8 +72,14 @@ export interface StringNode {
   value: string;
 }
 
+export interface DefineNameNode {
+  type: "DefineName";
+  value: string;
+}
+
 export interface IParseFormulaOptions {
-  queryCell: (row: number, col: number, sheetId?: string) => QueryCellResult;
+  currentSheetId: string;
+  queryCells: (range: Range) => QueryCellResult[];
 }
 
 export type TokenSubType =
@@ -87,6 +94,7 @@ export type TokenSubType =
   | "intersect"
   | "concatenate"
   | "math"
+  | "define-name"
   | "";
 
 export type TokenType =

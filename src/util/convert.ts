@@ -2,7 +2,7 @@
  * convert column name to number. e.g A -> 0, a -> 0
  * @param { string } columnName
  */
-export function columnNameToInt(columnName = ''): number {
+export function columnNameToInt(columnName = ""): number {
   const temp = columnName.toUpperCase();
   let num = 0;
   for (let i = 0; i < temp.length; i++) {
