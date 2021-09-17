@@ -115,21 +115,29 @@ export class Model {
     });
     return result.error ? result.error : result.result;
   };
-  setCellValue(value = "", ranges: Range[]): void {
-    const [range] = ranges;
+  setCellValue(value: ResultType, range: Range): void {
     const { row, col } = range;
     const configPath = `worksheets[${
       range.sheetId || this.currentSheetId
     }][${row}][${col}]`;
-    let formula = "";
-    if (value.startsWith("=")) {
-      formula = value.trim().slice(1);
-    } else {
-      formula = "";
-    }
-    const realValue = this.computeFormula(formula);
+    setWith(this, `${configPath}.value`, value);
+  }
+  setCellFormula(formula: string, range: Range): void {
+    const { row, col } = range;
+    const configPath = `worksheets[${
+      range.sheetId || this.currentSheetId
+    }][${row}][${col}]`;
     setWith(this, `${configPath}.formula`, formula);
-    setWith(this, `${configPath}.value`, realValue);
+  }
+  setCellValues(value: string, ranges: Range[]): void {
+    const [range] = ranges;
+    if (value.startsWith("=")) {
+      const formula = value.slice(1);
+      this.setCellFormula(formula, range);
+    } else {
+      this.setCellFormula("", range);
+      this.setCellValue(value, range);
+    }
     this.modelChange();
   }
   setCellStyle(style: Partial<StyleType>, ranges: Range[]): void {

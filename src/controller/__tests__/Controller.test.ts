@@ -1,6 +1,6 @@
 import { Controller } from "../Controller";
 
-describe.skip("Controller.test.ts", () => {
+describe.only("Controller.test.ts", () => {
   describe("Controller", () => {
     const controller = new Controller();
     it("can not redo", function () {
@@ -10,8 +10,13 @@ describe.skip("Controller.test.ts", () => {
       expect(controller.model.workbook).toHaveLength(1);
     });
     it("should set value '1'", function () {
-      controller.setCellValue("1");
-      expect(controller.queryActiveCellInfo().value).toEqual(1);
+      const data = {
+        row: 2,
+        col: 3,
+      };
+      controller.setCellValue(data, "1");
+      const temp = controller.queryCell(data);
+      expect(temp.value).toEqual("1");
     });
     it("should set style", function () {
       const style = {
@@ -29,7 +34,8 @@ describe.skip("Controller.test.ts", () => {
         isCrossOut: true,
       };
       controller.setCellStyle(style);
-      expect(controller.queryActiveCellInfo().style).toEqual(style);
+      const data = controller.queryCell(controller.queryActiveCell());
+      expect(data.style).toEqual({ ...style });
     });
     it("can undo", function () {
       expect(controller.canUndo()).toBeTruthy();

@@ -44,7 +44,7 @@ export const FormulaEditor = memo(() => {
 
   const onBlur = useCallback(() => {
     containersLog("FormulaEditor onBlur");
-    controller.setCellValue(editCellValue);
+    controller.setCellValue(controller.queryActiveCell(), editCellValue);
     controller.setCellEditing(false);
     dispatch({
       type: "BATCH",

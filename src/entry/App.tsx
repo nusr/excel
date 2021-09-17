@@ -34,7 +34,7 @@ export const App = React.memo(() => {
         state.sheetList = workbook;
         state.currentSheetId = currentSheetId;
       }
-      const cell = controller.queryActiveCellInfo();
+      const cell = controller.queryCell(controller.queryActiveCell());
       const { isCellEditing, renderController } = controller;
       if (renderController) {
         const config = renderController.queryCell(cell.row, cell.col);

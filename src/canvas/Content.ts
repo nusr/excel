@@ -31,7 +31,7 @@ export class Content extends Base {
     for (const item of data) {
       const { row, col } = item;
       const result = renderController.queryCell(row, col);
-      const cellInfo = this.controller.queryCell(row, col);
+      const cellInfo = this.controller.queryCell(item);
       renderCell(this.ctx, { ...cellInfo, ...result });
     }
     this.ctx.restore();

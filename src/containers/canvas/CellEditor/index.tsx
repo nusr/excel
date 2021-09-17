@@ -81,7 +81,7 @@ export const CellEditorContainer = memo(() => {
   );
 
   const setCellValue = useCallback(() => {
-    controller.setCellValue(editCellValue);
+    controller.setCellValue(controller.queryActiveCell(), editCellValue);
     controller.setCellEditing(false);
     dispatch({
       type: "BATCH",

@@ -1,4 +1,4 @@
-import { isEmpty, isNil } from "@/lodash";
+import { isEmpty } from "@/lodash";
 import { Model } from "@/model";
 import { Scroll } from "./Scroll";
 import {
@@ -61,10 +61,6 @@ export class Controller extends EventEmitter<EventType> {
     assert(!!result);
     const { row, col } = result;
     return { row, col };
-  }
-  queryActiveCellInfo(): CellInfo {
-    const { row, col } = this.queryActiveCell();
-    return this.queryCell(row, col);
   }
   setActiveCell(row = -1, col = -1, colCount = 1, rowCount = 1): void {
     this.changeSet.add("selectionChange");
@@ -175,11 +171,12 @@ export class Controller extends EventEmitter<EventType> {
     this.emitChange();
   }
 
-  setCellValue(value: string): void {
+  setCellValue(data: Coordinate, value: string): void {
     controllerLog("setCellValue", value);
-    const t = this.queryActiveCell();
-    const temp = [new Range(t.row, t.col, 1, 1, this.model.currentSheetId)];
-    this.model.setCellValue(value, temp);
+    const temp = [
+      new Range(data.row, data.col, 1, 1, this.model.currentSheetId),
+    ];
+    this.model.setCellValues(value, temp);
     this.changeSet.add("contentChange");
     this.emitChange();
   }
@@ -191,12 +188,19 @@ export class Controller extends EventEmitter<EventType> {
     this.changeSet.add("contentChange");
     this.emitChange();
   }
-  queryCell = (row: number, col: number): CellInfo => {
+  queryCell = (data: Coordinate): CellInfo => {
+    const { row, col } = data;
     const { model } = this;
     const { value, formula, style } = model.queryCell(row, col);
     let realValue = value;
-    if (formula && (isNil(value) || value === "")) {
+    if (formula) {
       realValue = model.computeFormula(formula);
+      if (realValue !== value) {
+        model.setCellValue(
+          realValue,
+          new Range(row, col, 1, 1, model.currentSheetId)
+        );
+      }
     }
     return {
       value: realValue,

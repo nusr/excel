@@ -25,11 +25,6 @@ export class Environment {
   setVariable(key: string, value: ResultType): void {
     this.variables[key] = value;
   }
-  reset(): void {
-    this.hooks = undefined;
-    this.funcs = {} as FormulaType;
-    this.variables = {};
-  }
   getVariable(key: string): ResultType {
     return this.variables[key];
   }
@@ -58,7 +53,7 @@ export class Environment {
   }
 }
 
-function applyOperator(op: string, a: ResultType, b: ResultType) {
+function applyOperator(op: string, a: ResultType, b: ResultType): ResultType {
   function num(x: ResultType) {
     throwError(typeof x === "number", "#VALUE!");
     return x;
@@ -96,7 +91,7 @@ function applyOperator(op: string, a: ResultType, b: ResultType) {
   throw new Error("applyOperator: Can't apply operator " + op);
 }
 
-function handleCallExpression(ast: FunctionNode, env: Environment) {
+function handleCallExpression(ast: FunctionNode, env: Environment): ResultType {
   const args = ast.arguments
     .map((node) => codeGenerator(node, env))
     .reduce((sum, cur) => {
