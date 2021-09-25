@@ -394,7 +394,7 @@ function handleFormula(data = {}) {
   const implementFormula = Object.keys(data);
   const result = [];
   for (const item of ALL_FORMULAS) {
-    result.push(`[${implementFormula.includes(item) ? "x" : ""}] ${item}`);
+    result.push(`[${implementFormula.includes(item) ? "x" : " "}] ${item}`);
   }
   const text = result.map((item, i) => `${i + 1}. ${item}`).join("\n");
   const mdPath = path.join(process.cwd(), "README.md");
