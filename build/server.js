@@ -6,8 +6,9 @@ const path = require("path");
 const http = require("http");
 const zlib = require("zlib");
 const childProcess = require("child_process");
-const buildLog = (message) => {
-  console.log(`build: ${message}`);
+const updateMd = require("../scripts/update-md");
+const buildLog = (message, other = "") => {
+  console.log(`build: ${message}, ${other}`);
 };
 function getMimeType(ext) {
   const types = {
@@ -62,9 +63,7 @@ function staticService({
   port = 9999,
 } = {}) {
   buildLog("staticService start");
-  const rootPath = root.startsWith("/") ? root : path.join(process.cwd(), root);
-
-  const isRouteRequest = (pathname) => !~pathname.split("/").pop().indexOf(".");
+  const rootPath = path.join(process.cwd(), root);
   const utf8 = (file) => Buffer.from(file, "binary").toString("utf8");
 
   const sendError = (res, status) => {
@@ -84,9 +83,9 @@ function staticService({
     res.end();
   };
 
-  const serveStaticFile = (res, pathname) => {
+  const renderStaticFile = (res, pathname) => {
     const uri = path.join(rootPath, pathname);
-    let ext = uri.replace(/^.*[./\\]/, "").toLowerCase();
+    const ext = uri.replace(/^.*[./\\]/, "").toLowerCase();
     if (!fs.existsSync(uri)) {
       return sendError(res, 404);
     }
@@ -98,7 +97,7 @@ function staticService({
     });
   };
 
-  const serveRoute = (res, pathname) => {
+  const renderHtml = (res, pathname) => {
     const index = path.join(rootPath, startPage);
     fs.readFile(index, "binary", (error, file) => {
       if (error) {
@@ -108,14 +107,25 @@ function staticService({
       return sendFile(res, status, file, "html");
     });
   };
+  const handleFormula = (res, data) => {
+    const result = url.parse(data, true);
+    const formulas = JSON.parse(result.query.data);
+    updateMd.handleFormula(formulas);
+    res.writeHead(200);
+    res.end();
+  };
   buildLog("createServer");
   const server = http.createServer((req, res) => {
     const pathname = decodeURI(url.parse(req.url).pathname);
     res.setHeader("access-control-allow-origin", "*");
-    if (!isRouteRequest(pathname)) {
-      return serveStaticFile(res, pathname);
+    if (pathname.split("/").pop().indexOf(".") < 0) {
+      if (pathname.startsWith("/formula")) {
+        return handleFormula(res, req.url);
+      } else {
+        return renderHtml(res, pathname);
+      }
     } else {
-      return serveRoute(res, pathname);
+      return renderStaticFile(res, pathname);
     }
   });
   server.listen(port);

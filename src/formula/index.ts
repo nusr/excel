@@ -56,3 +56,15 @@ const formulas: FormulaType = {
 };
 
 export default formulas;
+
+export function handleFormula(): void {
+  if (process.env.NODE_ENV !== "development") {
+    return;
+  }
+  const temp = JSON.stringify(formulas);
+  console.log(temp);
+  fetch(`/formula?data=${encodeURIComponent(temp)}`).then((data) => {
+    console.log(data);
+  });
+}
+handleFormula()

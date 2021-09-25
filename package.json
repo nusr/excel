@@ -14,7 +14,7 @@
     "ci": "npm run build && npm run lint && npm run test && npm run type-check",
     "deploy": "deploy.sh",
     "type-check": "node scripts/rm.js && tsc",
-    "postinstall": "node ./scripts/link-hook.js && node scripts/rm.js",
+    "postinstall": "node scripts/rm.js",
     "update": "ncu -u && npm i"
   },
   "repository": {

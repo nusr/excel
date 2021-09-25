@@ -1,27 +1,31 @@
-import { parseNumber, parseNumberArray } from "@/util";
+import { parseNumberArray, throwError } from "@/util";
 import type { ResultType } from "../types";
 export const ABS = (data: ResultType): number => {
-  return Math.abs(parseNumber(data));
+  throwError(typeof data === "number", "#VALUE!");
+  return Math.abs(data);
 };
 export const ACOS = (data: ResultType): number => {
-  return Math.acos(parseNumber(data));
+  throwError(typeof data === "number", "#VALUE!");
+  return Math.acos(data);
 };
 
 export const ACOSH = (data: ResultType): number => {
-  const temp = parseNumber(data);
-  return Math.log(temp + Math.sqrt(temp * temp - 1));
+  throwError(typeof data === "number", "#VALUE!");
+  return Math.log(data + Math.sqrt(data * data - 1));
 };
 
 export const ACOT = (data: ResultType): number => {
-  return Math.atan(1 / parseNumber(data));
+  throwError(typeof data === "number", "#VALUE!");
+  return Math.atan(1 / data);
 };
 
 export const ACOTH = (data: ResultType): number => {
-  const temp = parseNumber(data);
-  return 0.5 * Math.log((temp + 1) / (temp - 1));
+  throwError(typeof data === "number", "#VALUE!");
+  return 0.5 * Math.log((data + 1) / (data - 1));
 };
 export const ASIN = (data: ResultType): number => {
-  return Math.asin(parseNumber(data));
+  throwError(typeof data === "number", "#VALUE!");
+  return Math.asin(data);
 };
 export const SUM = (...rest: Array<ResultType>): number => {
   const list = parseNumberArray(rest);
