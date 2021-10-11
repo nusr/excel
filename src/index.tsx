@@ -5,6 +5,7 @@ import { App } from "./entry/App";
 import { ErrorBoundary } from "@/components";
 
 import { StoreProvider } from "@/store";
+import { readXLSXfile } from "@/xlsx";
 
 import "./global.css";
 import "./containers/index.css";
@@ -20,3 +21,13 @@ ReactDom.render(
   </React.StrictMode>,
   document.getElementById("root") as HTMLDivElement
 );
+
+(async () => {
+  const result = await fetch("../test.xlsx");
+  if (result.status === 404) {
+    console.error("not found xlsx");
+    return;
+  }
+  const blob = await result.blob();
+  readXLSXfile(blob);
+})();
