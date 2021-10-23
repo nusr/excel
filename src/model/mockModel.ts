@@ -1,4 +1,5 @@
 import type { WorkBookJSON } from "@/types";
+import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from "@/util";
 
 export const MOCK_MODEL: WorkBookJSON = {
   workbook: [
@@ -6,14 +7,14 @@ export const MOCK_MODEL: WorkBookJSON = {
       sheetId: "Sheet1",
       name: "Sheet1",
       activeCell: "B2",
-      colCount: 30,
-      rowCount: 30,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
     },
     {
       sheetId: "2",
       name: "test",
-      colCount: 30,
-      rowCount: 30,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
       activeCell: "F5",
     },
   ],

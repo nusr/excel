@@ -25,7 +25,6 @@ function getData(list: NodeListOf<ChildNode>, parent: IJSONObject) {
 }
 export function parseXMLToJSON(content: string): IJSONObject {
   const xml = new DOMParser().parseFromString(content.trim(), "text/xml");
-  console.dir(xml);
   const root: IJSONObject = {
     children: [],
     name: "xml",

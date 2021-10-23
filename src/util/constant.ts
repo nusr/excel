@@ -1,7 +1,7 @@
 export const SHEET_NAME_PREFIX = "Sheet";
 export const STYLE_ID_PREFIX = "style";
-export const DEFAULT_ROW_COUNT = 30;
-export const DEFAULT_COL_COUNT = 30;
+export const DEFAULT_ROW_COUNT = 200;
+export const DEFAULT_COL_COUNT = 40;
 export const XLSX_MAX_COL_COUNT = 16384; // XFD
 export const XLSX_MAX_ROW_COUNT = 1048575; // XFD
 export const DEBUG_COLOR_LIST = [
@@ -82,3 +82,4 @@ export const DEBUG_COLOR_LIST = [
   "#FFCC00",
   "#FFCC33",
 ];
+export const MAX_PARAMS_COUNT = 256;

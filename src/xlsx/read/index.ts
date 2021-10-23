@@ -24,7 +24,7 @@ export async function readXLSXfile(
     }
     return sum;
   }, entries);
-  console.log(entries);
+  // console.log(entries);
   console.dir(parseXMLToJSON(entries['docProps/core.xml']));
   return entries;
 }

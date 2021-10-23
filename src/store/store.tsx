@@ -23,7 +23,7 @@ function useCustomReducer(reducer: Reducer, initialState: State) {
   const cachedReducer = useMemo(() => produce(reducer), [reducer]);
   return useReducer(cachedReducer, initialState);
 }
-const controller = Controller.createController();
+const controller = new Controller();
 const constantContext = React.createContext<ConstantState>({
   controller,
   dispatch: (action: Action) => action,

@@ -20,6 +20,11 @@ import {
 import { History } from "./History";
 import { Controller as RenderController } from "@/canvas";
 
+type IHooks = {
+  focus: () => void;
+  blur: () => void;
+};
+
 export class Controller extends EventEmitter<EventType> {
   scroll: Scroll = new Scroll(this);
   model: Model = new Model(this);
@@ -28,6 +33,7 @@ export class Controller extends EventEmitter<EventType> {
   private changeSet = new Set<ChangeEventType>();
   renderController: RenderController | null = null;
   history = new History();
+  private hooks: IHooks = {} as IHooks;
   constructor() {
     super();
     this.ranges = [
@@ -41,8 +47,8 @@ export class Controller extends EventEmitter<EventType> {
     ];
     this.addSheet();
   }
-  static createController(): Controller {
-    return new this();
+  setHooks(hooks: IHooks): void {
+    this.hooks = hooks;
   }
   setRenderController(renderController: RenderController): void {
     this.renderController = renderController;
@@ -119,18 +125,15 @@ export class Controller extends EventEmitter<EventType> {
   }
   quitEditing(): void {
     controllerLog("quitEditing");
-    // Cell Editor or Formula Bar Editor
-    const dom = document.activeElement;
-    if (dom && dom.tagName === "INPUT") {
-      (dom as HTMLInputElement).blur();
+    if (this.hooks) {
+      this.hooks.blur();
     }
     this.setCellEditing(false);
   }
   enterEditing(): void {
     controllerLog("enterEditing");
-    const dom = document.getElementById("cell-editor");
-    if (dom) {
-      dom.focus();
+    if (this.hooks) {
+      this.hooks.focus();
       this.setCellEditing(true);
       this.emitChange();
     }

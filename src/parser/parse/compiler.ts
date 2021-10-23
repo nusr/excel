@@ -1,8 +1,8 @@
 import type { IParseFormulaOptions } from "../type";
-import formulas, { FormulasKeys } from "../../formula";
+import formulas from "../../formula";
 import { parseError } from "../../util";
 import { codeGenerator, Environment, generateAST } from "./codeGenerator";
-import type { ResultType, ErrorTypes } from "@/types";
+import type { ResultType, ErrorTypes, FormulaKeys } from "@/types";
 
 export function compiler(code: string, env: Environment): ResultType {
   const ast = generateAST(code);
@@ -14,7 +14,7 @@ export function compiler(code: string, env: Environment): ResultType {
 }
 
 const globalEnv = new Environment();
-const list = Object.keys(formulas) as Array<FormulasKeys>;
+const list = Object.keys(formulas) as Array<FormulaKeys>;
 for (const key of list) {
   globalEnv.setFunc(key, formulas[key]);
 }

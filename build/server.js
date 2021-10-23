@@ -85,7 +85,8 @@ function staticService({
 
   const renderStaticFile = (res, pathname) => {
     const uri = path.join(rootPath, pathname);
-    const ext = uri.replace(/^.*[./\\]/, "").toLowerCase();
+    const basename = pathname.split("/").pop();
+    const ext = basename.split('.').pop();
     if (!fs.existsSync(uri)) {
       return sendError(res, 404);
     }
@@ -116,9 +117,11 @@ function staticService({
   };
   buildLog("createServer");
   const server = http.createServer((req, res) => {
-    const pathname = decodeURI(url.parse(req.url).pathname);
+    const result = url.parse(req.url, true);
+    const pathname = decodeURI(result.pathname);
     res.setHeader("access-control-allow-origin", "*");
-    if (pathname.split("/").pop().indexOf(".") < 0) {
+    const basename = pathname.split("/").pop();
+    if (basename.indexOf(".") < 0) {
       if (pathname.startsWith("/formula")) {
         return handleFormula(res, req.url);
       } else {

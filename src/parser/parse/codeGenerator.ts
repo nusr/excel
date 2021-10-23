@@ -7,7 +7,6 @@ import type {
 } from "../type";
 import { parser } from "../ast";
 import { tokenizer } from "../tokenize";
-import type { FormulasKeys, FormulaType } from "@/formula";
 import {
   throwError,
   isNumber,
@@ -16,7 +15,12 @@ import {
   parseReference,
   Range,
 } from "@/util";
-import type { ResultType, QueryCellResult } from "@/types";
+import type {
+  ResultType,
+  QueryCellResult,
+  FormulaKeys,
+  FormulaType,
+} from "@/types";
 
 export class Environment {
   protected hooks?: IParseFormulaOptions;
@@ -43,10 +47,10 @@ export class Environment {
     return "";
   }
 
-  setFunc<T extends FormulasKeys>(name: T, value: FormulaType[T]): void {
+  setFunc<T extends FormulaKeys>(name: T, value: FormulaType[T]): void {
     this.funcs[name] = value;
   }
-  getFunc<T extends FormulasKeys>(name: T): FormulaType[T] | undefined {
+  getFunc<T extends FormulaKeys>(name: T): FormulaType[T] | undefined {
     if (name in this.funcs) {
       return this.funcs[name];
     }
@@ -97,7 +101,7 @@ function handleCallExpression(ast: FunctionNode, env: Environment): ResultType {
     .reduce((sum, cur) => {
       return sum.concat(cur);
     }, []);
-  const funcName = ast.name.toUpperCase() as FormulasKeys;
+  const funcName = ast.name.toUpperCase() as FormulaKeys;
   const func = env.getFunc(funcName);
   if (!func) {
     throwError(false, "#NAME?");

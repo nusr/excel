@@ -403,7 +403,9 @@ function handleFormula(data = {}) {
 
   fs.writeFileSync(
     mdPath,
-    `${mdText.slice(0, index + FORMULA_TAG.length)}\n\n${text}`
+    `${mdText.slice(0, index + FORMULA_TAG.length)}\n\n${
+      implementFormula.length
+    }/${ALL_FORMULAS.length}\n\n${text}`
   );
 }
 module.exports = {

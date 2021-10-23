@@ -4,9 +4,16 @@ import { Main, Controller } from "@/canvas";
 import { Interaction } from "@/interaction";
 import { useController } from "@/store";
 
+type IEditorHandler = {
+  focus: () => void;
+};
+
 export const CanvasContainer = memo(() => {
   const controller = useController();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ref = useRef<IEditorHandler>({
+    focus: () => 0,
+  });
   useEffect(() => {
     if (!canvasRef.current) {
       return;
@@ -17,6 +24,16 @@ export const CanvasContainer = memo(() => {
     controller.setRenderController(renderController);
     new Main(controller, canvasDom);
     const interaction = new Interaction(controller, canvasDom);
+    controller.setHooks({
+      focus: ref.current.focus,
+      blur: () => {
+        // Cell Editor or Formula Bar Editor
+        const dom = document.activeElement;
+        if (dom && dom.tagName === "INPUT") {
+          (dom as HTMLInputElement).blur();
+        }
+      },
+    });
     return () => {
       interaction.removeEvents();
     };
@@ -31,9 +48,9 @@ export const CanvasContainer = memo(() => {
   );
 
   return (
-    <div className="relative">
+    <div className="relative canvas-container" id="main-canvas">
       <canvas className="full" ref={canvasRef} onContextMenu={onContextMenu} />
-      <CellEditorContainer />
+      <CellEditorContainer ref={ref} />
     </div>
   );
 });

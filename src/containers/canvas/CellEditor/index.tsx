@@ -1,4 +1,12 @@
-import React, { memo, useMemo, useCallback, useRef, useEffect } from "react";
+import React, {
+  memo,
+  useMemo,
+  useCallback,
+  useRef,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+} from "react";
 import { pick, isEmpty } from "@/lodash";
 import { QueryCellResult } from "@/types";
 import { useSelector, useDispatch, useController } from "@/store";
@@ -26,106 +34,116 @@ function getEditorStyle(style: QueryCellResult["style"]): React.CSSProperties {
   };
 }
 
-export const CellEditorContainer = memo(() => {
-  const dispatch = useDispatch();
-  const controller = useController();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { activeCell, editCellValue, isCellEditing } = useSelector([
-    "activeCell",
-    "editCellValue",
-    "isCellEditing",
-  ]);
-  const style = useMemo(() => {
-    const otherStyle = getEditorStyle(activeCell.style);
-    const temp: React.CSSProperties = pick(activeCell, [
-      "top",
-      "left",
-      "width",
-      "height",
+export const CellEditorContainer = memo(
+  forwardRef((_, ref) => {
+    const dispatch = useDispatch();
+    const controller = useController();
+    const inputRef = useRef<HTMLInputElement>(null);
+    const { activeCell, editCellValue, isCellEditing } = useSelector([
+      "activeCell",
+      "editCellValue",
+      "isCellEditing",
     ]);
-    return {
-      ...temp,
-      ...otherStyle,
-      display: isCellEditing ? "inline-block" : "none",
-    };
-  }, [activeCell, isCellEditing]);
+    const style = useMemo(() => {
+      const otherStyle = getEditorStyle(activeCell.style);
+      const temp: React.CSSProperties = pick(activeCell, [
+        "top",
+        "left",
+        "width",
+        "height",
+      ]);
+      return {
+        ...temp,
+        ...otherStyle,
+        display: isCellEditing ? "inline-block" : "none",
+      };
+    }, [activeCell, isCellEditing]);
 
-  const initValue = useMemo(() => {
-    const temp = String(activeCell.value || "");
-    return temp;
-  }, [activeCell]);
+    const initValue = useMemo(() => {
+      const temp = String(activeCell.value || "");
+      return temp;
+    }, [activeCell]);
+    useImperativeHandle(
+      ref,
+      () => ({
+        focus: () => {
+          inputRef.current?.focus();
+        },
+      }),
+      []
+    );
+    useEffect(() => {
+      const handleKeyDown = () => {
+        if (isCellEditing) {
+          return;
+        }
+        dispatch({
+          type: "BATCH",
+          payload: { isCellEditing: true, editCellValue: initValue },
+        });
+        inputRef.current?.focus();
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }, [initValue, dispatch, isCellEditing]);
 
-  useEffect(() => {
-    const handleKeyDown = () => {
-      if (isCellEditing) {
-        return;
-      }
+    const onChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { value } = event.currentTarget;
+        dispatch({ type: "CHANGE_Edit_CELL_VALUE", payload: value });
+      },
+      [dispatch]
+    );
+
+    const setCellValue = useCallback(() => {
+      controller.setCellValue(controller.queryActiveCell(), editCellValue);
+      controller.setCellEditing(false);
       dispatch({
         type: "BATCH",
-        payload: { isCellEditing: true, editCellValue: initValue },
+        payload: { isCellEditing: false, editCellValue: "" },
       });
-      inputRef.current?.focus();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [initValue, dispatch, isCellEditing]);
+      inputRef.current?.blur();
+    }, [controller, editCellValue, dispatch]);
+    const onInputEnter = useCallback(() => {
+      inputRef.current?.blur();
+      controller.setActiveCell(activeCell.row + 1, activeCell.col);
+    }, [activeCell, controller]);
+    const onInputTab = useCallback(() => {
+      inputRef.current?.blur();
+      controller.setActiveCell(activeCell.row, activeCell.col + 1);
+    }, [activeCell, controller]);
+    const onBlur = useCallback(() => {
+      containersLog("onBlur");
+      setCellValue();
+    }, [setCellValue]);
 
-  const onChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const { value } = event.currentTarget;
-      dispatch({ type: "CHANGE_Edit_CELL_VALUE", payload: value });
-    },
-    [dispatch]
-  );
+    const onKeyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLInputElement>) => {
+        const { key } = event;
+        if (key === "Enter") {
+          onInputEnter();
+        } else if (key === "Tab") {
+          onInputTab();
+        }
+      },
+      [onInputEnter, onInputTab]
+    );
 
-  const setCellValue = useCallback(() => {
-    controller.setCellValue(controller.queryActiveCell(), editCellValue);
-    controller.setCellEditing(false);
-    dispatch({
-      type: "BATCH",
-      payload: { isCellEditing: false, editCellValue: "" },
-    });
-    inputRef.current?.blur();
-  }, [controller, editCellValue, dispatch]);
-  const onInputEnter = useCallback(() => {
-    inputRef.current?.blur();
-    controller.setActiveCell(activeCell.row + 1, activeCell.col);
-  }, [activeCell, controller]);
-  const onInputTab = useCallback(() => {
-    inputRef.current?.blur();
-    controller.setActiveCell(activeCell.row, activeCell.col + 1);
-  }, [activeCell, controller]);
-  const onBlur = useCallback(() => {
-    containersLog("onBlur");
-    setCellValue();
-  }, [setCellValue]);
-
-  const onKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      const { key } = event;
-      if (key === "Enter") {
-        onInputEnter();
-      } else if (key === "Tab") {
-        onInputTab();
-      }
-    },
-    [onInputEnter, onInputTab]
-  );
-
-  return (
-    <input
-      className="base-editor cell-editor"
-      value={isCellEditing ? editCellValue : initValue}
-      style={style}
-      ref={inputRef}
-      id="cell-editor"
-      onChange={onChange}
-      onKeyDown={onKeyDown}
-      onBlur={onBlur}
-    />
-  );
-});
+    return (
+      <input
+        className="base-editor cell-editor"
+        value={isCellEditing ? editCellValue : initValue}
+        style={style}
+        ref={inputRef}
+        id="cell-editor"
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        onBlur={onBlur}
+      />
+    );
+  })
+);
 
 CellEditorContainer.displayName = "CellEditorContainer";

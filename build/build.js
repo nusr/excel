@@ -72,7 +72,7 @@ function buildJs() {
         : {
             onRebuild(error) {
               if (error) console.error("watch build failed:", error);
-              else console.log("watch build succeeded");
+              else console.log(`watch build succeeded:${new Date().getTime()}`);
               buildJs();
             },
           },

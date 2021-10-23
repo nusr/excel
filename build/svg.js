@@ -2,12 +2,21 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs");
 const path = require("path");
-const camelCase = require("lodash/camelCase");
 const assert = require("assert").strict;
 const svgParser = require("svg-parser");
 const cwd = process.cwd();
 const ENCODING = "utf8";
 const SVG_SYMBOL_TAG = "__SVG_SYMBOL_NODE__";
+
+function formatFileName(svgName) {
+  const list = svgName.toLowerCase().split("-");
+  return list.map((item, i) => {
+    if (i === 0) {
+      return item;
+    }
+    return item[0].toUpperCase() + item.slice(1);
+  }).join('');
+}
 function parseSVGFile(text, fileName) {
   assert(text.length > 0);
   const data = svgParser.parse(text);
@@ -49,7 +58,7 @@ async function handleSVGFiles() {
     const [temp] = item.split(".");
     const filePath = path.join(dir, item);
     const text = await fs.promises.readFile(filePath, ENCODING);
-    const fileName = camelCase(temp);
+    const fileName = formatFileName(temp);
     svgList.push(parseSVGFile(text, fileName));
     fileNameList.push(fileName);
   }

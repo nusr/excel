@@ -15,12 +15,6 @@ export interface IHitInfo {
   pageX: number;
   pageY: number;
 }
-export function getWindowWidthHeight(): IWindowSize {
-  return {
-    width: document.documentElement.clientWidth,
-    height: document.documentElement.clientHeight,
-  };
-}
 
 export class Controller {
   canvas: HTMLCanvasElement;
@@ -80,20 +74,10 @@ export class Controller {
     return { ...cellSize, top: resultY, left: resultX };
   }
   getCanvasSize(): IWindowSize {
-    const { width, height } = getWindowWidthHeight();
-    const toolbarDom = document.getElementById("tool-bar-container");
-    const sheetBarDom = document.getElementById("sheet-bar-container");
-    const formulaBarDom = document.getElementById("formula-bar-container");
-    const toolbarSize = toolbarDom?.getBoundingClientRect();
-    const sheetBarSize = sheetBarDom?.getBoundingClientRect();
-    const formulaBarSize = formulaBarDom?.getBoundingClientRect();
+    const size = this.canvas.parentElement?.getBoundingClientRect();
     return {
-      width,
-      height:
-        height -
-        (toolbarSize?.height || 0) -
-        (sheetBarSize?.height || 0) -
-        (formulaBarSize?.height || 0),
+      width: size?.width || 0,
+      height: size?.height || 0,
     };
   }
   getDrawSize(): IWindowSize {

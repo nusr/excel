@@ -26,22 +26,24 @@ npm run build
 
 ## Formula
 
+26/385
+
 1. [x] ABS
 2. [ ] ACCRINT
-3. [ ] ACOS
-4. [ ] ACOSH
-5. [ ] ACOT
-6. [ ] ACOTH
+3. [x] ACOS
+4. [x] ACOSH
+5. [x] ACOT
+6. [x] ACOTH
 7. [ ] ADD
 8. [ ] AGGREGATE
 9. [ ] AND
 10. [ ] ARABIC
 11. [ ] ARGS2ARRAY
-12. [ ] ASIN
-13. [ ] ASINH
-14. [ ] ATAN
+12. [x] ASIN
+13. [x] ASINH
+14. [x] ATAN
 15. [ ] ATAN2
-16. [ ] ATANH
+16. [x] ATANH
 17. [ ] AVEDEV
 18. [ ] AVERAGE
 19. [ ] AVERAGEA
@@ -71,7 +73,7 @@ npm run build
 43. [ ] CEILING
 44. [ ] CEILINGMATH
 45. [ ] CEILINGPRECISE
-46. [ ] CHAR
+46. [x] CHAR
 47. [ ] CHISQ.DIST
 48. [ ] CHISQ.DIST.RT
 49. [ ] CHISQ.INV
@@ -79,7 +81,7 @@ npm run build
 51. [ ] CHOOSE
 52. [ ] CHOOSE
 53. [ ] CLEAN
-54. [ ] CODE
+54. [x] CODE
 55. [ ] COLUMN
 56. [ ] COLUMNS
 57. [ ] COMBIN
@@ -91,9 +93,9 @@ npm run build
 63. [ ] CONFIDENCE.T
 64. [ ] CONVERT
 65. [ ] CORREL
-66. [ ] COS
+66. [x] COS
 67. [ ] COSH
-68. [ ] COT
+68. [x] COT
 69. [ ] COTH
 70. [ ] COUNT
 71. [ ] COUNTA
@@ -125,7 +127,7 @@ npm run build
 97. [ ] DIVIDE
 98. [ ] DOLLARDE
 99. [ ] DOLLARFR
-100. [ ] E
+100. [x] E
 101. [ ] EDATE
 102. [ ] EFFECT
 103. [ ] EOMONTH
@@ -134,7 +136,7 @@ npm run build
 106. [ ] ERFC
 107. [ ] EVEN
 108. [ ] EXACT
-109. [ ] EXP
+109. [x] EXP
 110. [ ] EXPON.DIST
 111. [ ] EXPONDIST
 112. [ ] F.DIST
@@ -204,7 +206,7 @@ npm run build
 176. [ ] IMSUB
 177. [ ] IMSUM
 178. [ ] IMTAN
-179. [ ] INT
+179. [x] INT
 180. [ ] INTERCEPT
 181. [ ] INTERVAL
 182. [ ] IPMT
@@ -225,7 +227,7 @@ npm run build
 197. [ ] LARGE
 198. [ ] LCM
 199. [ ] LEFT
-200. [ ] LEN
+200. [x] LEN
 201. [ ] LINEST
 202. [ ] LN
 203. [ ] LOG
@@ -289,7 +291,7 @@ npm run build
 261. [ ] PERMUT
 262. [ ] PERMUTATIONA
 263. [ ] PHI
-264. [ ] PI
+264. [x] PI
 265. [ ] PMT
 266. [ ] POISSON.DIST
 267. [ ] POISSONDIST
@@ -334,7 +336,7 @@ npm run build
 306. [ ] SECOND
 307. [ ] SERIESSUM
 308. [ ] SIGN
-309. [ ] SIN
+309. [x] SIN
 310. [ ] SINH
 311. [ ] SKEW
 312. [ ] SKEW.P
@@ -387,14 +389,14 @@ npm run build
 359. [ ] TODAY
 360. [ ] TRANSPOSE
 361. [ ] TREND
-362. [ ] TRIM
+362. [x] TRIM
 363. [ ] TRIMMEAN
 364. [ ] TRUE
 365. [ ] TRUNC
-366. [ ] UNICHAR
-367. [ ] UNICODE
+366. [x] UNICHAR
+367. [x] UNICODE
 368. [ ] UNIQUE
-369. [ ] UPPER
+369. [x] UPPER
 370. [ ] VAR.P
 371. [ ] VAR.S
 372. [ ] VARA
