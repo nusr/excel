@@ -1,6 +1,6 @@
 import { Controller } from "../Controller";
 
-describe.only("Controller.test.ts", () => {
+describe("Controller.test.ts", () => {
   describe("Controller", () => {
     const controller = new Controller();
     it("can not redo", function () {

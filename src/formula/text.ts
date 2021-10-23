@@ -1,6 +1,6 @@
 import type { TextFormulaType } from "@/types";
 
-export const T = (value: any): string => {
+export const T = (value: unknown): string => {
   return typeof value === "string" ? value : "";
 };
 
