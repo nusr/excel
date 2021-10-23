@@ -23,6 +23,9 @@ ReactDom.render(
 );
 
 (async () => {
+  if (process.env.NODE_ENV !== "development") {
+    return;
+  }
   const result = await fetch("../test.xlsx");
   if (result.status === 404) {
     console.error("not found xlsx");
