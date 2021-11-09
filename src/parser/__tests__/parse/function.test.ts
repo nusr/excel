@@ -7,6 +7,12 @@ describe("parseFormula function", () => {
       result: null,
     });
   });
+  it("not support function", () => {
+    expect(parseFormula("BAHTTEXT()")).toEqual({
+      error: "#NAME?",
+      result: null,
+    });
+  });
   it("function SUM", () => {
     expect(parseFormula("SUM(1,2)")).toEqual({
       error: null,

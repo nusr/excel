@@ -1,14 +1,42 @@
+interface IFormulaOptions {
+  paramsType: "number" | "string" | "any";
+  minParamsCount: number;
+  maxParamsCount: number;
+  resultType: "number" | "string";
+}
+type FormulaFunction = (...data: any[]) => number | string | boolean;
 export type FormulaContent = {
-  func: (...data: any[]) => number | string | boolean;
-  options: {
-    paramsType: "number" | "string" | "any";
-    minParamsCount: number;
-    maxParamsCount: number;
-    resultType: "number" | "string";
-  };
-};
+  func: FormulaFunction;
+  options: IFormulaOptions;
+} | null;
 
 export type TextFormulaKeys =
+  | "ASC"
+  | "BAHTTEXT"
+  | "CLEAN"
+  | "CONCATENATE"
+  | "DBCS"
+  | "DOLLAR"
+  | "EXACT"
+  | "FIND"
+  | "FIXED"
+  | "HTML2TEXT"
+  | "LEFT"
+  | "MID"
+  | "NUMBERVALUE"
+  | "PRONETIC"
+  | "PROPER"
+  | "REGEXEXTRACT"
+  | "REGEXMATCH"
+  | "REGREPLACE"
+  | "REPLACE"
+  | "REPT"
+  | "RIGHT"
+  | "SEARCH"
+  | "SPLIT"
+  | "SUBSTITUTE"
+  | "TEXT"
+  | "VALUE"
   | "T"
   | "LOWER"
   | "CHAR"

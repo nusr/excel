@@ -391,10 +391,12 @@ const ALL_FORMULAS = [
 ];
 const FORMULA_TAG = "## Formula";
 function handleFormula(data = {}) {
-  const implementFormula = Object.keys(data);
+  const allFormulas = Object.keys(data);
+  allFormulas.sort((a, b) => a.localeCompare(b));
+  const set = new Set(Object.keys(data).filter((key) => Boolean(data[key])));
   const result = [];
-  for (const item of ALL_FORMULAS) {
-    result.push(`[${implementFormula.includes(item) ? "x" : " "}] ${item}`);
+  for (const item of allFormulas) {
+    result.push(`[${set.has(item) ? "x" : " "}] ${item}`);
   }
   const text = result.map((item, i) => `${i + 1}. ${item}`).join("\n");
   const mdPath = path.join(process.cwd(), "README.md");
@@ -403,9 +405,9 @@ function handleFormula(data = {}) {
 
   fs.writeFileSync(
     mdPath,
-    `${mdText.slice(0, index + FORMULA_TAG.length)}\n\n${
-      implementFormula.length
-    }/${ALL_FORMULAS.length}\n\n${text}`
+    `${mdText.slice(0, index + FORMULA_TAG.length)}\n\n${set.size}/${
+      allFormulas.length
+    }\n\n${text}`
   );
 }
 module.exports = {

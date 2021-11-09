@@ -16,6 +16,32 @@ export const UPPER = (value: string): string => value.toUpperCase();
 export const TRIM = (value: string): string => value.replace(/ +/g, " ").trim();
 
 const textFormulas: TextFormulaType = {
+  ASC: null,
+  BAHTTEXT: null,
+  CONCATENATE: null,
+  CLEAN: null,
+  DBCS: null,
+  DOLLAR: null,
+  EXACT: null,
+  FIND: null,
+  FIXED: null,
+  HTML2TEXT: null,
+  LEFT: null,
+  MID: null,
+  NUMBERVALUE: null,
+  PRONETIC: null,
+  PROPER: null,
+  REGEXEXTRACT: null,
+  REGEXMATCH: null,
+  REGREPLACE: null,
+  REPLACE: null,
+  REPT: null,
+  RIGHT: null,
+  SEARCH: null,
+  SPLIT: null,
+  SUBSTITUTE: null,
+  TEXT: null,
+  VALUE: null,
   CHAR: {
     func: CHAR,
     options: {
