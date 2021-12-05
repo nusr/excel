@@ -12,6 +12,7 @@ export class Main {
   protected controller: Controller;
   protected content: Content;
   protected selection: Selection;
+  protected isRendering = false;
   constructor(controller: Controller, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
@@ -28,8 +29,14 @@ export class Main {
       controller,
       name: "Selection",
     });
-    this.controller.on("change", this.render);
-    this.render({ changeSet: new Set(["contentChange"]) });
+    const checkChange = (params: EventType["change"]) => {
+      this.render(params);
+      if (this.controller.renderController?.isChanged) {
+        this.render({ changeSet: new Set(["contentChange", "selectionChange"]) });
+      }
+    };
+    this.controller.on("change", checkChange);
+    checkChange({ changeSet: new Set(["contentChange"]) });
   }
 
   getSelection(
@@ -90,6 +97,12 @@ export class Main {
     if (!renderController) {
       return;
     }
+    renderController.isChanged = false;
+    if (this.isRendering) {
+      console.log("isRendering");
+      return;
+    }
+    this.isRendering = true;
     const isContentChange = changeSet.has("contentChange");
     const { width, height } = renderController.getCanvasSize();
     resizeCanvas(this.canvas, width, height);
@@ -110,5 +123,6 @@ export class Main {
     this.ctx.lineWidth = dpr();
     const line = selectAll ? selectAll : activeCell;
     strokeRect(this.ctx, line.left, line.top, line.width, line.height);
+    this.isRendering = false;
   };
 }

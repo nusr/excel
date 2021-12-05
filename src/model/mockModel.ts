@@ -35,6 +35,10 @@ export const MOCK_MODEL: WorkBookJSON = {
           formula: "SUM(A1)",
           style: "2",
         },
+        "3": {
+          value: "这是一段非常长的文本，不得不换行",
+          style: "3"
+        }
       },
       "3": {
         0: {
@@ -76,6 +80,9 @@ export const MOCK_MODEL: WorkBookJSON = {
     style1: {
       fillColor: "red",
     },
+    "3": {
+      wrapText: 1,
+    }
   },
   mergeCells: ["D2:E3"],
 };

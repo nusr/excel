@@ -20,8 +20,10 @@ export class Controller {
   canvas: HTMLCanvasElement;
   protected readonly rowMap: Map<number, number> = new Map([]);
   protected readonly colMap: Map<number, number> = new Map([]);
+  isChanged = false;
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
+    this.isChanged = false;
   }
   getHeaderSize(): IWindowSize {
     return { width: COL_TITLE_WIDTH, height: ROW_TITLE_HEIGHT };
@@ -29,8 +31,16 @@ export class Controller {
   getColWidth(col: number): number {
     return this.colMap.get(col) || CELL_WIDTH;
   }
+  setColWidth(col: number, width: number): void {
+    this.colMap.set(col, width);
+    this.isChanged = true;
+  }
   getRowHeight(row: number): number {
     return this.rowMap.get(row) || CELL_HEIGHT;
+  }
+  setRowHeight(row: number, height: number) {
+    this.rowMap.set(row, height);
+    this.isChanged = true;
   }
   getCellSize(row: number, col: number): IWindowSize {
     return { width: this.getColWidth(col), height: this.getRowHeight(row) };
@@ -45,12 +55,12 @@ export class Controller {
     let resultY = config.height;
     let row = 0;
     let col = 0;
-    while (resultX + CELL_WIDTH <= x) {
-      resultX += CELL_WIDTH;
+    while (resultX + this.getColWidth(col) <= x) {
+      resultX += this.getColWidth(col);
       col++;
     }
-    while (resultY + CELL_HEIGHT <= y) {
-      resultY += CELL_HEIGHT;
+    while (resultY + this.getRowHeight(row) <= y) {
+      resultY += this.getRowHeight(row);
       row++;
     }
     const cellSize = this.getCellSize(row, col);
@@ -63,11 +73,11 @@ export class Controller {
     let r = 0;
     let c = 0;
     while (c < col) {
-      resultX += CELL_WIDTH;
+      resultX += this.getColWidth(c);
       c++;
     }
     while (r < row) {
-      resultY += CELL_HEIGHT;
+      resultY += this.getRowHeight(r);
       r++;
     }
     const cellSize = this.getCellSize(row, col);

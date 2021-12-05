@@ -1,7 +1,7 @@
 import React, { memo, useCallback } from "react";
 import { Button, Github, BaseIcon, Select, ColorPicker } from "@/components";
 import { useSelector, useController } from "@/store";
-import { StyleType } from "@/types";
+import { StyleType, EWrap } from "@/types";
 import {
   FONT_SIZE_LIST,
   DEFAULT_FONT_SIZE,
@@ -29,6 +29,7 @@ export const ToolbarContainer = memo(() => {
     fontColor = DEFAULT_FONT_COLOR,
     fillColor,
     fontFamily,
+    wrapText,
   } = style;
   const setCellStyle = useCallback(
     (value: Partial<StyleType>) => {
@@ -64,6 +65,12 @@ export const ToolbarContainer = memo(() => {
         onClick={() => setCellStyle({ isItalic: !isItalic })}
       >
         <BaseIcon name="italic" />
+      </Button>
+      <Button
+        active={wrapText === EWrap.AUTO_WRAP}
+        onClick={() => setCellStyle({ wrapText: EWrap.AUTO_WRAP })}
+      >
+        Wrap Text
       </Button>
       <Select
         data={fontFamilyList}

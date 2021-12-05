@@ -32,7 +32,16 @@ export class Content extends Base {
       const { row, col } = item;
       const result = renderController.queryCell(row, col);
       const cellInfo = this.controller.queryCell(item);
-      renderCell(this.ctx, { ...cellInfo, ...result });
+      const { width = 0, height = 0 } = renderCell(this.canvas, {
+        ...cellInfo,
+        ...result,
+      });
+      if (height > 0) {
+        renderController.setRowHeight(row, height);
+      }
+      if (width > 0) {
+        renderController.setColWidth(col, width);
+      }
     }
     this.ctx.restore();
   }
@@ -110,7 +119,6 @@ export class Content extends Base {
     const { rowIndex } = scroll;
     const { rowCount } = model.getSheetInfo();
     const config = renderController.getHeaderSize();
-    const { row } = this.controller.queryActiveCell();
     const { height } = renderController.getDrawSize();
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
@@ -119,8 +127,9 @@ export class Content extends Base {
     const pointList: Array<[x: number, y: number]> = [];
     let y = config.height;
     let i = rowIndex;
-    const rowHeight = renderController.getRowHeight(row);
+
     for (; i < rowCount; i++) {
+      const rowHeight = renderController.getRowHeight(i);
       let temp = y;
       if (i === rowIndex) {
         temp += thinLineWidth() / 2;
@@ -132,7 +141,11 @@ export class Content extends Base {
         break;
       }
     }
-    this.fillRowText(i + 1, config.width, y + rowHeight / 2);
+    this.fillRowText(
+      i + 1,
+      config.width,
+      y + renderController.getRowHeight(i) / 2
+    );
     pointList.push([0, y], [config.width, y], [0, 0], [0, y]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
@@ -145,17 +158,17 @@ export class Content extends Base {
     const { colIndex } = scroll;
     const { colCount } = model.getSheetInfo();
     const config = renderController.getHeaderSize();
-    const { col } = this.controller.queryActiveCell();
     const { width } = renderController.getDrawSize();
     const pointList: Array<[x: number, y: number]> = [];
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
     fillRect(this.ctx, config.width, 0, width, config.height);
     Object.assign(this.ctx, HEADER_STYLE);
-    const colWidth = renderController.getColWidth(col);
+
     let x = config.width;
     let i = colIndex;
     for (; i < colCount; i++) {
+      const colWidth = renderController.getColWidth(i);
       let temp = x;
       if (i === colIndex) {
         temp += thinLineWidth() / 2;
@@ -167,7 +180,7 @@ export class Content extends Base {
         break;
       }
     }
-    this.fillColText(intToColumnName(i), x + colWidth / 2, config.height);
+    this.fillColText(intToColumnName(i), x + renderController.getColWidth(i) / 2, config.height);
     pointList.push([x, 0], [x, config.height], [0, 0], [x, 0]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();

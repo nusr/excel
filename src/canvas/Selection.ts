@@ -79,6 +79,6 @@ export class Selection extends Base {
     const activeCellFillColor = cellData.style?.fillColor || theme.white;
     this.renderFillRect(theme.selectionColor, selectAll);
     this.renderFillRect(activeCellFillColor, activeCell);
-    renderCell(this.ctx, { ...cellData, ...activeCell });
+    renderCell(this.canvas, { ...cellData, ...activeCell });
   }
 }

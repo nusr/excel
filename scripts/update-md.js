@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require("fs");
 const path = require("path");
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ALL_FORMULAS = [
   "ABS",
   "ACCRINT",

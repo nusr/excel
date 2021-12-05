@@ -9,9 +9,29 @@ import {
   assert,
   parseError,
   ERROR_FORMULA_COLOR,
+  CELL_HEIGHT,
 } from "@/util";
 import { isEmpty, isNil } from "@/lodash";
-import { CellInfo } from "@/types";
+import { CellInfo, EWrap } from "@/types";
+
+const getStyle = (
+  key: "lineHeight" | "letterSpacing",
+  dom: HTMLElement = document.body
+): number => {
+  return parseInt(window.getComputedStyle(dom)[key]);
+};
+
+const measureTextMap = new Map<string, TextMetrics>();
+
+function measureText(ctx: CanvasRenderingContext2D, char: string) {
+  const temp = measureTextMap.get(char);
+  if (temp) {
+    return temp;
+  }
+  const metrics = ctx.measureText(char);
+  measureTextMap.set(char, metrics);
+  return metrics;
+}
 
 export function fillRect(
   ctx: CanvasRenderingContext2D,
@@ -37,19 +57,66 @@ export function fillText(
   text: string,
   x: number,
   y: number
-): void {
+) {
   ctx.fillText(text, npx(x), npx(y));
+  return 0;
+}
+
+export function fillWrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  cellWidth: number,
+  cellHeight: number,
+  lineHeight: number
+) {
+  const originY = y;
+  let line = "";
+  const lh = lineHeight || getStyle("lineHeight");
+  const textList = text.split("");
+  const widths = textList.map((item) => measureText(ctx, item));
+  let testWidth = 0;
+  const realCellWidth = cellWidth * 2;
+  for (let i = 0; i < widths.length; i++) {
+    const { width } = widths[i];
+    const char = textList[i];
+    if (testWidth + width > realCellWidth && i > 0) {
+      fillText(ctx, line, x, y);
+      line = char;
+      y += lh;
+      testWidth = width;
+    } else {
+      testWidth += width;
+      line = line + char;
+    }
+  }
+  if (line) {
+    fillText(ctx, line, x, y);
+    y -= lh;
+  }
+  const temp = y - originY;
+  return {
+    height: temp > 0 ? temp * 2 + cellHeight : 0,
+  };
+}
+
+interface IRenderCellResult {
+  height?: number;
+  width?: number;
 }
 
 export function renderCell(
-  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
   cellInfo: CellInfo & {
     left: number;
     top: number;
     width: number;
     height: number;
   }
-): void {
+): IRenderCellResult {
+  const ctx = canvas.getContext("2d");
+  assert(!!ctx);
   const { style, value, left, top, width, height } = cellInfo;
   const isNum = isNumber(value);
   let font = DEFAULT_FONT_CONFIG;
@@ -84,7 +151,14 @@ export function renderCell(
   ctx.font = font;
   ctx.fillStyle = fillStyle;
   ctx.textBaseline = "middle";
-  fillText(ctx, text, left + (isNum ? width : 0), top + height / 2);
+  const x = left + (isNum ? width : 0);
+  const y = top + CELL_HEIGHT / 2;
+  if (style?.wrapText === EWrap.AUTO_WRAP) {
+    const lineHeight = getStyle("lineHeight", canvas);
+    return fillWrapText(ctx, text, x, y, width, height, lineHeight);
+  }
+  fillText(ctx, text, x, y);
+  return {};
 }
 
 export function drawLines(
