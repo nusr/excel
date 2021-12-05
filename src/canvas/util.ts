@@ -75,12 +75,11 @@ export function fillWrapText(
   let line = "";
   const lh = lineHeight || getStyle("lineHeight");
   const textList = text.split("");
-  const widths = textList.map((item) => measureText(ctx, item));
   let testWidth = 0;
   const realCellWidth = cellWidth * 2;
-  for (let i = 0; i < widths.length; i++) {
-    const { width } = widths[i];
+  for (let i = 0; i < textList.length; i++) {
     const char = textList[i];
+    const { width } = measureText(ctx, char);
     if (testWidth + width > realCellWidth && i > 0) {
       fillText(ctx, line, x, y);
       line = char;
@@ -91,13 +90,11 @@ export function fillWrapText(
       line = line + char;
     }
   }
-  if (line) {
-    fillText(ctx, line, x, y);
-    y -= lh;
-  }
-  const temp = y - originY;
+  fillText(ctx, line, x, y);
+
+  const temp = y + lh - originY;
   return {
-    height: temp > 0 ? temp * 2 + cellHeight : 0,
+    height: y > cellHeight ? temp + cellHeight : 0,
   };
 }
 
@@ -152,7 +149,7 @@ export function renderCell(
   ctx.fillStyle = fillStyle;
   ctx.textBaseline = "middle";
   const x = left + (isNum ? width : 0);
-  const y = top + CELL_HEIGHT / 2;
+  const y = Math.floor(top + CELL_HEIGHT / 2);
   if (style?.wrapText === EWrap.AUTO_WRAP) {
     const lineHeight = getStyle("lineHeight", canvas);
     return fillWrapText(ctx, text, x, y, width, height, lineHeight);

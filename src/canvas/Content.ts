@@ -37,6 +37,7 @@ export class Content extends Base {
         ...result,
       });
       if (height > 0) {
+        console.log("height", height);
         renderController.setRowHeight(row, height);
       }
       if (width > 0) {
@@ -180,7 +181,11 @@ export class Content extends Base {
         break;
       }
     }
-    this.fillColText(intToColumnName(i), x + renderController.getColWidth(i) / 2, config.height);
+    this.fillColText(
+      intToColumnName(i),
+      x + renderController.getColWidth(i) / 2,
+      config.height
+    );
     pointList.push([x, 0], [x, config.height], [0, 0], [x, 0]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();

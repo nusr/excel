@@ -21,10 +21,12 @@ export class Controller {
   protected readonly rowMap: Map<number, number> = new Map([]);
   protected readonly colMap: Map<number, number> = new Map([]);
   isChanged = false;
+  isRendering = false;
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.isChanged = false;
   }
+
   getHeaderSize(): IWindowSize {
     return { width: COL_TITLE_WIDTH, height: ROW_TITLE_HEIGHT };
   }
@@ -33,14 +35,18 @@ export class Controller {
   }
   setColWidth(col: number, width: number): void {
     this.colMap.set(col, width);
-    this.isChanged = true;
+    if (this.isRendering) {
+      this.isChanged = true;
+    }
   }
   getRowHeight(row: number): number {
     return this.rowMap.get(row) || CELL_HEIGHT;
   }
   setRowHeight(row: number, height: number) {
     this.rowMap.set(row, height);
-    this.isChanged = true;
+    if (this.isRendering) {
+      this.isChanged = true;
+    }
   }
   getCellSize(row: number, col: number): IWindowSize {
     return { width: this.getColWidth(col), height: this.getRowHeight(row) };

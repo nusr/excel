@@ -12,7 +12,6 @@ export class Main {
   protected controller: Controller;
   protected content: Content;
   protected selection: Selection;
-  protected isRendering = false;
   constructor(controller: Controller, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
@@ -32,7 +31,10 @@ export class Main {
     const checkChange = (params: EventType["change"]) => {
       this.render(params);
       if (this.controller.renderController?.isChanged) {
-        this.render({ changeSet: new Set(["contentChange", "selectionChange"]) });
+        this.controller.renderController.isChanged = false;
+        this.render({
+          changeSet: new Set(["contentChange", "selectionChange"]),
+        });
       }
     };
     this.controller.on("change", checkChange);
@@ -97,12 +99,12 @@ export class Main {
     if (!renderController) {
       return;
     }
-    renderController.isChanged = false;
-    if (this.isRendering) {
+    if (renderController.isRendering) {
       console.log("isRendering");
       return;
     }
-    this.isRendering = true;
+    renderController.isChanged = false;
+    renderController.isRendering = true;
     const isContentChange = changeSet.has("contentChange");
     const { width, height } = renderController.getCanvasSize();
     resizeCanvas(this.canvas, width, height);
@@ -123,6 +125,6 @@ export class Main {
     this.ctx.lineWidth = dpr();
     const line = selectAll ? selectAll : activeCell;
     strokeRect(this.ctx, line.left, line.top, line.width, line.height);
-    this.isRendering = false;
+    renderController.isRendering = false;
   };
 }
