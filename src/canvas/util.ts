@@ -23,14 +23,18 @@ const getStyle = (
 
 const measureTextMap = new Map<string, TextMetrics>();
 
-function measureText(ctx: CanvasRenderingContext2D, char: string) {
-  const temp = measureTextMap.get(char);
-  if (temp) {
-    return temp;
+export function measureText(ctx: CanvasRenderingContext2D, char: string) {
+  const fontList = ctx.font.split(" ");
+  const fontFamily = fontList.pop();
+  const fontSize = fontList.pop();
+  const mapKey = `${char}${fontFamily}${fontSize}`;
+  let temp = measureTextMap.get(mapKey);
+  if (!temp) {
+    const metrics = ctx.measureText(char);
+    measureTextMap.set(mapKey, metrics);
+    temp = metrics;
   }
-  const metrics = ctx.measureText(char);
-  measureTextMap.set(char, metrics);
-  return metrics;
+  return temp;
 }
 
 export function fillRect(
@@ -56,10 +60,16 @@ export function fillText(
   ctx: CanvasRenderingContext2D,
   text: string,
   x: number,
-  y: number
-) {
+  y: number,
+  isMeasure = false
+): IRenderCellResult {
   ctx.fillText(text, npx(x), npx(y));
-  return 0;
+  if (isMeasure) {
+    // const { fontBoundingBoxAscent } = measureText(ctx, text[0]);
+    // return { fontSizeHeight: Math.ceil(fontBoundingBoxAscent) };
+    return {};
+  }
+  return {};
 }
 
 export function fillWrapText(
@@ -68,39 +78,38 @@ export function fillWrapText(
   x: number,
   y: number,
   cellWidth: number,
-  cellHeight: number,
   lineHeight: number
-) {
-  const originY = y;
+): IRenderCellResult {
   let line = "";
   const lh = lineHeight || getStyle("lineHeight");
   const textList = text.split("");
   let testWidth = 0;
   const realCellWidth = cellWidth * 2;
+  let wrapHeight = lh;
   for (let i = 0; i < textList.length; i++) {
     const char = textList[i];
     const { width } = measureText(ctx, char);
-    if (testWidth + width > realCellWidth && i > 0) {
+    if (testWidth + width > realCellWidth) {
       fillText(ctx, line, x, y);
       line = char;
       y += lh;
       testWidth = width;
+      wrapHeight += lh;
     } else {
       testWidth += width;
       line = line + char;
     }
   }
-  fillText(ctx, line, x, y);
-
-  const temp = y + lh - originY;
+  const result = fillText(ctx, line, x, y, true);
   return {
-    height: y > cellHeight ? temp + cellHeight : 0,
+    ...result,
+    wrapHeight,
   };
 }
 
 interface IRenderCellResult {
-  height?: number;
-  width?: number;
+  wrapHeight?: number;
+  fontSizeHeight?: number;
 }
 
 export function renderCell(
@@ -149,13 +158,12 @@ export function renderCell(
   ctx.fillStyle = fillStyle;
   ctx.textBaseline = "middle";
   const x = left + (isNum ? width : 0);
-  const y = Math.floor(top + CELL_HEIGHT / 2);
+  const y = Math.floor(top + CELL_HEIGHT * 0.5);
   if (style?.wrapText === EWrap.AUTO_WRAP) {
     const lineHeight = getStyle("lineHeight", canvas);
-    return fillWrapText(ctx, text, x, y, width, height, lineHeight);
+    return fillWrapText(ctx, text, x, y, width, lineHeight);
   }
-  fillText(ctx, text, x, y);
-  return {};
+  return fillText(ctx, text, x, y, true);
 }
 
 export function drawLines(
