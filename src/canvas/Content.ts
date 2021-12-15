@@ -32,7 +32,11 @@ export class Content extends Base {
       const { row, col } = item;
       const result = renderController.queryCell(row, col);
       const cellInfo = this.controller.queryCell(item);
-      const { wrapHeight = 0, fontSizeHeight = 0 } = renderCell(this.canvas, {
+      const {
+        wrapHeight = 0,
+        fontSizeHeight = 0,
+        textWidth = 0,
+      } = renderCell(this.canvas, {
         ...cellInfo,
         ...result,
       });
@@ -40,6 +44,10 @@ export class Content extends Base {
       if (height > result.height) {
         console.log("height", height);
         renderController.setRowHeight(row, height);
+      }
+      if (textWidth > result.width) {
+        console.log("col", textWidth);
+        renderController.setRowHeight(col, textWidth);
       }
     }
     this.ctx.restore();

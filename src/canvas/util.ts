@@ -9,7 +9,6 @@ import {
   assert,
   parseError,
   ERROR_FORMULA_COLOR,
-  CELL_HEIGHT,
 } from "@/util";
 import { isEmpty, isNil } from "@/lodash";
 import { CellInfo, EWrap } from "@/types";
@@ -24,10 +23,7 @@ const getStyle = (
 const measureTextMap = new Map<string, TextMetrics>();
 
 export function measureText(ctx: CanvasRenderingContext2D, char: string) {
-  const fontList = ctx.font.split(" ");
-  const fontFamily = fontList.pop();
-  const fontSize = fontList.pop();
-  const mapKey = `${char}${fontFamily}${fontSize}`;
+  const mapKey = `${char}__${ctx.font}`;
   let temp = measureTextMap.get(mapKey);
   if (!temp) {
     const metrics = ctx.measureText(char);
@@ -56,20 +52,22 @@ export function strokeRect(
   ctx.strokeRect(npx(x) - 0.5, npx(y) - 0.5, npx(width), npx(height));
 }
 
+function getFontSizeHeight(ctx: CanvasRenderingContext2D, char: string) {
+  const { actualBoundingBoxDescent, actualBoundingBoxAscent } = measureText(
+    ctx,
+    char
+  );
+  const result = actualBoundingBoxDescent + actualBoundingBoxAscent;
+  return Math.ceil(result);
+}
+
 export function fillText(
   ctx: CanvasRenderingContext2D,
   text: string,
   x: number,
-  y: number,
-  isMeasure = false
-): IRenderCellResult {
+  y: number
+) {
   ctx.fillText(text, npx(x), npx(y));
-  if (isMeasure) {
-    // const { fontBoundingBoxAscent } = measureText(ctx, text[0]);
-    // return { fontSizeHeight: Math.ceil(fontBoundingBoxAscent) };
-    return {};
-  }
-  return {};
 }
 
 export function fillWrapText(
@@ -79,37 +77,63 @@ export function fillWrapText(
   y: number,
   cellWidth: number,
   lineHeight: number
-): IRenderCellResult {
+): number {
   let line = "";
-  const lh = lineHeight || getStyle("lineHeight");
   const textList = text.split("");
   let testWidth = 0;
   const realCellWidth = cellWidth * 2;
-  let wrapHeight = lh;
+  let wrapHeight = lineHeight;
   for (let i = 0; i < textList.length; i++) {
     const char = textList[i];
     const { width } = measureText(ctx, char);
     if (testWidth + width > realCellWidth) {
       fillText(ctx, line, x, y);
       line = char;
-      y += lh;
+      y += lineHeight;
       testWidth = width;
-      wrapHeight += lh;
+      wrapHeight += lineHeight;
     } else {
       testWidth += width;
       line = line + char;
     }
   }
-  const result = fillText(ctx, line, x, y, true);
-  return {
-    ...result,
-    wrapHeight,
-  };
+  return wrapHeight;
+}
+
+export function fillTexts(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  cellWidth: number
+) {
+  let line = "";
+  const textList = text.split("");
+  let testWidth = 0;
+  const realCellWidth = cellWidth * 2;
+  let textWidth = 0;
+  for (let i = 0; i < textList.length; i++) {
+    const char = textList[i];
+    const { width } = measureText(ctx, char);
+    if (testWidth + width > realCellWidth) {
+      if (i === 0) {
+        textWidth = width;
+        line = char;
+      }
+      break;
+    } else {
+      testWidth += width;
+      line = line + char;
+    }
+  }
+  fillText(ctx, line, x, y);
+  return textWidth;
 }
 
 interface IRenderCellResult {
   wrapHeight?: number;
   fontSizeHeight?: number;
+  textWidth?: number;
 }
 
 export function renderCell(
@@ -158,12 +182,24 @@ export function renderCell(
   ctx.fillStyle = fillStyle;
   ctx.textBaseline = "middle";
   const x = left + (isNum ? width : 0);
-  const y = Math.floor(top + CELL_HEIGHT * 0.5);
+  const result: IRenderCellResult = {};
+  const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
+  const textHeight = Math.max(
+    fontSizeHeight,
+    getStyle("lineHeight", canvas),
+    getStyle("lineHeight")
+  );
   if (style?.wrapText === EWrap.AUTO_WRAP) {
-    const lineHeight = getStyle("lineHeight", canvas);
-    return fillWrapText(ctx, text, x, y, width, lineHeight);
+    const y = top;
+    result.wrapHeight = fillWrapText(ctx, text, x, y, width, textHeight);
+  } else {
+    const y = Math.floor(top + height / 2);
+    result.textWidth = fillTexts(ctx, text, x, y, width);
   }
-  return fillText(ctx, text, x, y, true);
+  return {
+    ...result,
+    fontSizeHeight: textHeight,
+  };
 }
 
 export function drawLines(
