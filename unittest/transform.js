@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable @typescript-eslint/no-var-requires */
-const { transformSync } = require("esbuild");
+const { transform } = require("esbuild");
 const path = require("path");
 
 const getExt = (str) => {
@@ -35,7 +35,7 @@ const getOptions = (config) => {
 //   format?: string
 // }
 
-function process(content, filename, config) {
+async function process(content, filename, config) {
   const options /* : Options  */ = getOptions(config);
 
   const ext = getExt(filename);
@@ -55,7 +55,7 @@ function process(content, filename, config) {
     ...(options?.jsxFragment ? { jsxFragment: options.jsxFragment } : {}),
     ...sourcemaps,
   };
-  const result = transformSync(content, realOptions);
+  const result = await transform(content, realOptions);
 
   return {
     code: result.code,

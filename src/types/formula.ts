@@ -4,6 +4,7 @@ interface IFormulaOptions {
   maxParamsCount: number;
   resultType: "number" | "string";
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FormulaFunction = (...data: any[]) => number | string | boolean;
 export type FormulaContent = {
   func: FormulaFunction;

@@ -11,7 +11,7 @@ const cwd = process.cwd();
 console.log("cwd:", cwd);
 const distDir = path.join(cwd, "dist");
 const assetsDir = path.join(cwd, "assets");
-const { NODE_ENV } = getEnv();
+const { NODE_ENV, CI } = getEnv();
 const isProd = NODE_ENV === "production";
 console.log("NODE_ENV:", NODE_ENV);
 const entryPath = path.join(cwd, "src/index.tsx");
@@ -101,7 +101,10 @@ function init() {
   deleteDirectory();
   buildJs();
   if (!isProd) {
-    openBrowser(staticService());
+    const url = staticService();
+    if (CI !== "true") {
+      openBrowser(url);
+    }
   }
 }
 
