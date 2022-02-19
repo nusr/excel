@@ -7,3 +7,4 @@ export * from './scroll';
 export * from './range';
 export * from './parser';
 export * from './formula';
+export * from './icons';

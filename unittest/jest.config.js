@@ -3,7 +3,6 @@
 const path = require("path");
 const rootDir = path.join(__dirname, "..");
 const transformPath = path.join(__dirname, "transform.js");
-console.log("rootDir", rootDir);
 module.exports = {
   rootDir,
   testEnvironment: "jsdom",

@@ -1,18 +1,6 @@
 import React, { memo } from "react";
 import { classnames } from "@/util";
-export type BaseIconName =
-  | "alignCenter"
-  | "alignLeft"
-  | "alignRight"
-  | "bold"
-  | "fillColor"
-  | "fontColor"
-  | "italic"
-  | "middleAlign"
-  | "plus"
-  | "redo"
-  | "underline"
-  | "undo";
+import type { BaseIconName } from "@/types";
 
 type BaseIconProps = {
   className?: string;

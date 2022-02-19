@@ -3,38 +3,27 @@
 const fs = require("fs");
 const path = require("path");
 const assert = require("assert").strict;
-const svgParser = require("svg-parser");
 const cwd = process.cwd();
 const ENCODING = "utf8";
 const SVG_SYMBOL_TAG = "__SVG_SYMBOL_NODE__";
 
 function formatFileName(svgName) {
   const list = svgName.toLowerCase().split("-");
-  return list.map((item, i) => {
-    if (i === 0) {
-      return item;
-    }
-    return item[0].toUpperCase() + item.slice(1);
-  }).join('');
+  return list
+    .map((item, i) => {
+      if (i === 0) {
+        return item;
+      }
+      return item[0].toUpperCase() + item.slice(1);
+    })
+    .join("");
 }
 function parseSVGFile(text, fileName) {
-  assert(text.length > 0);
-  const data = svgParser.parse(text);
-  const pathList = data.children[0].children
-    .filter((v) => v.tagName === "path")
-    .map((item) => {
-      return { ...item, properties: { ...item.properties, fill: "" } };
-    });
-  assert(pathList && pathList.length > 0, "svg path length should not empty");
-  const result = pathList
-    .map((item) => {
-      const { properties, tagName } = item;
-      const temp = Object.entries(properties)
-        .map((v) => `${v[0]}="${v[1]}"`)
-        .join(" ");
-      return `<${tagName} ${temp}></${tagName}>`;
-    })
-    .join("\n");
+  assert(text.length > 0, "svg file can not be empty");
+  const start = text.indexOf("<path");
+  const end = text.indexOf("</svg>");
+  const result = text.slice(start, end);
+  assert(text.length > 0, `${fileName} path is empty`);
   return `
     <symbol
       xmlns="http://www.w3.org/2000/svg"
@@ -64,11 +53,15 @@ async function handleSVGFiles() {
   }
   if (!isOutput) {
     isOutput = true;
-    console.log(
-      `export type BaseIconName = ${fileNameList
-        .map((item) => `"${item}"`)
-        .join(" | ")}`
-    );
+    const data = `export type BaseIconName = ${fileNameList
+      .map((item) => `"${item}"`)
+      .join(" | ")}`;
+    const iconType = path.join(cwd, "src/types/icons.ts");
+    fs.writeFile(iconType, data, "utf-8", (error) => {
+      if (error) {
+        console.log("write icon type fail", error);
+      }
+    });
   }
   const svg = `
     <svg
