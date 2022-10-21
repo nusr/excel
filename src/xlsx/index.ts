@@ -1,1 +1,0 @@
-export { readXLSXfile } from "./read";

@@ -5,18 +5,17 @@ const path = require("path");
 const esBuild = require("esbuild");
 const { getEnv } = require("./env");
 const { deleteDirectory } = require("../scripts/rm");
-const { staticService, openBrowser } = require("./server");
 const { handleSVGFiles } = require("./svg");
 const cwd = process.cwd();
 console.log("cwd:", cwd);
 const distDir = path.join(cwd, "dist");
 const assetsDir = path.join(cwd, "assets");
-const { NODE_ENV, CI } = getEnv();
+const { NODE_ENV } = getEnv();
 const isProd = NODE_ENV === "production";
 console.log("NODE_ENV:", NODE_ENV);
 const entryPath = path.join(cwd, "src/index.tsx");
 const tsconfigPath = path.join(cwd, "tsconfig.json");
-const FORMAT = "esm";
+const FORMAT = "iife";
 
 function copyHtml() {
   if (!fs.existsSync(distDir)) {
@@ -53,20 +52,23 @@ function buildJs() {
   }
   isBuilding = true;
   const errorFilePath = path.join(distDir, "buildError.txt");
+  const params = {
+    entryPoints: [entryPath],
+    chunkNames: "chunks/[name]-[hash]",
+    // splitting: true,
+    format: FORMAT,
+    bundle: true,
+    minify: isProd,
+    sourcemap: true,
+    tsconfig: tsconfigPath,
+    outdir: distDir,
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
+    },
+  };
   esBuild
     .build({
-      entryPoints: [entryPath],
-      chunkNames: "chunks/[name]-[hash]",
-      splitting: true,
-      format: FORMAT,
-      bundle: true,
-      minify: isProd,
-      sourcemap: true,
-      tsconfig: tsconfigPath,
-      outdir: distDir,
-      define: {
-        "process.env.NODE_ENV": JSON.stringify(NODE_ENV),
-      },
+      ...params,
       watch: isProd
         ? null
         : {
@@ -100,12 +102,6 @@ function buildJs() {
 function init() {
   deleteDirectory();
   buildJs();
-  if (!isProd) {
-    const url = staticService();
-    if (CI !== "true") {
-      openBrowser(url);
-    }
-  }
 }
 
 init();

@@ -9,13 +9,13 @@
     "test": "jest --config ./unittest/jest.config.js",
     "coverage": "npm run test -- --coverage",
     "watch": "npm run test -- --watch",
-    "ci": "npm run build && npm run test && npm run type-check",
+    "ci": "npm run build && npm run test && npm run type-check && npm run e2e",
     "deploy": "deploy.sh",
     "type-check": "node scripts/rm.js && tsc",
     "postinstall": "husky install",
-    "update": "npx ncu -u && npm i && npm run ci && npm run e2e",
-    "e2e-test": "jest --config ./e2e/lib/jest.config.js --forceExit",
-    "e2e": "concurrently \"node ./build/build.js NODE_ENV=development CI=true\" \"npm run e2e-test\" -k"
+    "update": "npx ncu -u && npm i && npm run ci",
+    "pree2e": "npm run build",
+    "e2e": "jest --config ./e2e/lib/jest.config.js --forceExit"
   },
   "repository": {
     "type": "git",
@@ -27,20 +27,18 @@
   "homepage": "https://nusr.github.io/excel",
   "dependencies": {
     "immer": "9.0.12",
-    "jszip": "3.7.1",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
   "devDependencies": {
-    "@types/jest": "27.4.0",
+    "@types/jest": "27.4.1",
     "@types/react": "17.0.39",
     "@types/react-dom": "17.0.11",
-    "concurrently": "^7.0.0",
     "esbuild": "0.14.23",
     "husky": "^7.0.4",
     "istanbul-lib-coverage": "^3.2.0",
     "jest": "27.5.1",
-    "puppeteer": "^13.3.2",
+    "puppeteer": "^13.4.0",
     "typescript": "4.5.5"
   },
   "browser": {

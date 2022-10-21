@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const puppeteer = require("puppeteer");
+const path = require("path");
 
 async function setupPuppeteer() {
   const browser = await puppeteer.launch();
@@ -11,7 +12,7 @@ async function setupPuppeteer() {
 describe("toolbar.test", () => {
   beforeAll(async () => {
     await setupPuppeteer();
-    await page.goto("http://localhost:9999");
+    await page.goto(path.join(process.cwd(), "./dist/index.html"));
     await page.waitForTimeout(200);
   });
 
