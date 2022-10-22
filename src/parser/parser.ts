@@ -1,6 +1,10 @@
 import { TokenType } from '@/types';
 import { Token } from './token';
-import type { Expression } from './expression';
+import {
+  DefineNameExpression,
+  Expression,
+  GroupExpression,
+} from './expression';
 import {
   BinaryExpression,
   UnaryExpression,
@@ -8,10 +12,11 @@ import {
   CallExpression,
   LiteralExpression,
   ErrorExpression,
-  TokenExpression,
   CellRangeExpression,
 } from './expression';
 import { isLetter } from '@/util';
+import { CustomError } from './error';
+
 export class Parser {
   private readonly tokens: Token[];
   private current = 0;
@@ -108,20 +113,20 @@ export class Parser {
         );
       }
     }
-    if (expr instanceof TokenExpression) {
+    if (expr instanceof DefineNameExpression) {
       if (expr.value.value.split('').every((v) => isLetter(v))) {
         return new CellExpression(
           new Token(TokenType.RELATIVE_CELL, expr.value.value),
         );
       }
     }
-    throw new Error('error cell');
+    throw new CustomError('#REF!');
   }
   private spread(): Expression {
-    let expr = this.call();
+    let expr = this.primary();
     while (this.match(TokenType.COLON)) {
       const operator = this.previous();
-      const right = this.call();
+      const right = this.primary();
       expr = new CellRangeExpression(
         this.convertToCellExpression(expr),
         operator,
@@ -129,27 +134,6 @@ export class Parser {
       );
     }
     return expr;
-  }
-  private call() {
-    let expr = this.primary();
-    while (true) {
-      if (this.match(TokenType.LEFT_BRACKET)) {
-        expr = this.finishCall(expr);
-      } else {
-        break;
-      }
-    }
-    return expr;
-  }
-  private finishCall(expr: Expression): CallExpression {
-    const params: Expression[] = [];
-    if (!this.check(TokenType.RIGHT_BRACKET)) {
-      do {
-        params.push(this.expression());
-      } while (this.match(TokenType.COMMA));
-    }
-    this.expect(TokenType.RIGHT_BRACKET, 'expect )');
-    return new CallExpression(expr, params);
   }
   private primary(): Expression {
     if (this.match(TokenType.NUMBER)) {
@@ -177,9 +161,26 @@ export class Parser {
       return new ErrorExpression(this.previous());
     }
     if (this.match(TokenType.IDENTIFIER)) {
-      return new TokenExpression(this.previous());
+      const name = this.previous();
+      if (this.match(TokenType.LEFT_BRACKET)) {
+        const params: Expression[] = [];
+        if (!this.check(TokenType.RIGHT_BRACKET)) {
+          do {
+            params.push(this.expression());
+          } while (this.match(TokenType.COMMA));
+        }
+        this.expect(TokenType.RIGHT_BRACKET);
+        return new CallExpression(name, params);
+      } else {
+        return new DefineNameExpression(name);
+      }
     }
-    throw new Error('can not handle token:' + this.peek().error());
+    if (this.match(TokenType.LEFT_BRACKET)) {
+      const value = this.expression();
+      this.expect(TokenType.RIGHT_BRACKET);
+      return new GroupExpression(value);
+    }
+    throw new CustomError('#ERROR!');
   }
   private match(...types: TokenType[]): boolean {
     const type = this.peek().type;
@@ -195,12 +196,12 @@ export class Parser {
   private check(type: TokenType): boolean {
     return this.peek().type === type;
   }
-  private expect(type: TokenType, message: string): Token {
+  private expect(type: TokenType): Token {
     if (this.check(type)) {
       this.next();
       return this.previous();
     } else {
-      throw new Error(message);
+      throw new CustomError('#ERROR!');
     }
   }
   private next() {

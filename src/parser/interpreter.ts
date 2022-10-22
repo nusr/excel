@@ -1,5 +1,11 @@
-import { assert, Range, parseReference, parseCell } from '@/util';
-import { TokenType, FunctionMap, CellDataMap } from '@/types';
+import { Range, parseReference, parseCell } from '@/util';
+import {
+  TokenType,
+  FunctionMap,
+  CellDataMap,
+  ErrorTypes,
+  VariableMap,
+} from '@/types';
 import type { Visitor, Expression, CellRangeExpression } from './expression';
 import {
   BinaryExpression,
@@ -8,56 +14,26 @@ import {
   CallExpression,
   LiteralExpression,
   ErrorExpression,
-  TokenExpression,
+  DefineNameExpression,
+  GroupExpression,
 } from './expression';
-
-export class FunctionMapImpl implements FunctionMap {
-  private readonly map = new Map<string, any>();
-  set(name: string, value: (...list: any[]) => any) {
-    this.map.set(name.toLowerCase(), value);
-  }
-  get(name: string) {
-    return this.map.get(name.toLowerCase());
-  }
-}
-
-export class CellDataMapImpl implements CellDataMap {
-  private readonly map = new Map<string, any>();
-  private getKey(row: number, col: number, sheetId: string = '') {
-    const key = `${row}${col}${sheetId}`;
-    console.log('key:', key);
-    return key;
-  }
-  set(row: number, col: number, sheetId: string, value: any): void {
-    const key = this.getKey(row, col, sheetId);
-    this.map.set(key, value);
-  }
-  get(row: number, col: number, sheetId: string = ''): any {
-    const key = this.getKey(row, col, sheetId);
-    return this.map.get(key);
-  }
-}
-
-export class CustomError extends Error {
-  readonly value: string;
-  constructor(value: string) {
-    super(value);
-    this.value = value;
-  }
-}
+import { CustomError } from './error';
 
 export class Interpreter implements Visitor {
   private readonly expressions: Expression[];
   private readonly functionMap: FunctionMap;
   private readonly cellDataMap: CellDataMap;
+  private readonly variableMap: VariableMap;
   constructor(
     expressions: Expression[],
     functionMap: FunctionMap,
     cellDataMap: CellDataMap,
+    variableMap: VariableMap,
   ) {
     this.expressions = expressions;
     this.functionMap = functionMap;
     this.cellDataMap = cellDataMap;
+    this.variableMap = variableMap;
   }
   interpret(): any[] {
     const result: any[] = [];
@@ -66,19 +42,37 @@ export class Interpreter implements Visitor {
     }
     return result;
   }
+  private checkNumber(value: any) {
+    if (typeof value !== 'number') {
+      throw new CustomError('#VALUE!');
+    }
+  }
   visitBinaryExpression(data: BinaryExpression): any {
     const left = this.evaluate(data.left);
     const right = this.evaluate(data.right);
     switch (data.operator.type) {
       case TokenType.MINUS:
+        this.checkNumber(left);
+        this.checkNumber(right);
         return left - right;
       case TokenType.PLUS:
+        this.checkNumber(left);
+        this.checkNumber(right);
         return left + right;
       case TokenType.SLASH:
+        this.checkNumber(left);
+        this.checkNumber(right);
+        if (right === 0) {
+          throw new CustomError('#DIV/0!');
+        }
         return left / right;
       case TokenType.STAR:
+        this.checkNumber(left);
+        this.checkNumber(right);
         return left * right;
       case TokenType.EXPONENT:
+        this.checkNumber(left);
+        this.checkNumber(right);
         return Math.pow(left, right);
       case TokenType.EQUAL:
         return left === right;
@@ -96,25 +90,20 @@ export class Interpreter implements Visitor {
         return `${left}${right}`;
 
       default:
-        throw new Error('can not handle binary:' + data.operator.error());
+        throw new CustomError('#VALUE!');
     }
   }
-  visitCallExpression(data: CallExpression) {
-    const name = this.evaluate(data.name);
-    console.log('name', name);
-    if (!name || typeof name !== 'string') {
-      throw new Error('function name not string');
-    }
-    const callee: any = this.functionMap.get(name);
+  visitCallExpression(expr: CallExpression) {
+    const callee: any = this.functionMap.get(expr.name.value);
     if (callee && typeof callee === 'function') {
       const params: any[] = [];
-      for (const item of data.params) {
+      for (const item of expr.params) {
         const t = this.evaluate(item);
         if (t instanceof Range) {
           const { row, col, rowCount, colCount, sheetId } = t;
           for (let r = row, endRow = row + rowCount; r < endRow; r++) {
             for (let c = col, endCol = col + colCount; c < endCol; c++) {
-              params.push(this.cellDataMap.get(row, col, sheetId));
+              params.push(this.cellDataMap.get(r, c, sheetId));
             }
           }
         } else {
@@ -123,15 +112,17 @@ export class Interpreter implements Visitor {
       }
       return callee(...params);
     }
-    throw new Error('not function name');
+    throw new CustomError('#NAME?');
   }
   visitCellExpression(data: CellExpression) {
     const t = parseCell(data.value.value);
-    assert(t !== null);
+    if (t === null) {
+      throw new CustomError('#REF!');
+    }
     return this.cellDataMap.get(t.row, t.col, t.sheetId);
   }
   visitErrorExpression(data: ErrorExpression) {
-    throw new CustomError(data.value.value);
+    throw new CustomError(data.value.value as ErrorTypes);
   }
   visitLiteralExpression(expr: LiteralExpression) {
     const { type, value } = expr.value;
@@ -145,11 +136,15 @@ export class Interpreter implements Visitor {
       case TokenType.FALSE:
         return false;
       default:
-        throw new Error('can not handle literal:' + expr.value.error());
+        throw new CustomError('#ERROR!');
     }
   }
-  visitTokenExpression(data: TokenExpression) {
-    return data.value.value;
+  visitDefineNameExpression(expr: DefineNameExpression) {
+    if (!this.variableMap.has(expr.value.value)) {
+      throw new CustomError('#NAME?');
+    }
+    const result = this.variableMap.get(expr.value.value);
+    return result;
   }
   visitUnaryExpression(data: UnaryExpression): any {
     const value = this.evaluate(data.right);
@@ -159,21 +154,26 @@ export class Interpreter implements Visitor {
       case TokenType.PLUS:
         return value;
       default:
-        throw new Error('can not handle unary:' + data.operator.error());
+        throw new CustomError('#VALUE!');
     }
   }
   visitCellRangeExpression(expr: CellRangeExpression): any {
-    const left = this.evaluate(expr.left);
-    const right = this.evaluate(expr.right);
     switch (expr.operator.type) {
       case TokenType.COLON: {
-        assert(typeof left === 'string');
-        assert(typeof right === 'string');
-        return parseReference(`${left}:${right}`, '');
+        const result = parseReference(
+          `${expr.left.value.value}:${expr.right.value.value}`,
+        );
+        if (result === null) {
+          throw new CustomError('#REF!');
+        }
+        return result;
       }
       default:
-        throw new Error('can not handle cell-range:' + expr.operator.error());
+        throw new CustomError('#REF!');
     }
+  }
+  visitGroupExpression(expr: GroupExpression): any {
+    return this.evaluate(expr.value);
   }
   private evaluate(expr: Expression) {
     return expr.accept(this);

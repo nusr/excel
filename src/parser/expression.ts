@@ -1,14 +1,15 @@
 import type { Token } from './token';
 
 export interface Visitor {
-  visitBinaryExpression(data: BinaryExpression): any;
-  visitUnaryExpression(data: UnaryExpression): any;
-  visitLiteralExpression(data: LiteralExpression): any;
-  visitCellExpression(data: CellExpression): any;
-  visitCellRangeExpression(data: CellRangeExpression): any;
-  visitCallExpression(data: CallExpression): any;
-  visitErrorExpression(data: ErrorExpression): any;
-  visitTokenExpression(data: TokenExpression): any;
+  visitBinaryExpression(expr: BinaryExpression): any;
+  visitUnaryExpression(expr: UnaryExpression): any;
+  visitLiteralExpression(expr: LiteralExpression): any;
+  visitCellExpression(expr: CellExpression): any;
+  visitCellRangeExpression(expr: CellRangeExpression): any;
+  visitCallExpression(expr: CallExpression): any;
+  visitErrorExpression(expr: ErrorExpression): any;
+  visitGroupExpression(expr: GroupExpression): any;
+  visitDefineNameExpression(expr: DefineNameExpression): any;
 }
 
 export interface Expression {
@@ -75,9 +76,9 @@ export class CellExpression implements Expression {
 }
 
 export class CallExpression implements Expression {
-  readonly name: Expression;
+  readonly name: Token;
   readonly params: Expression[];
-  constructor(name: Expression, params: Expression[]) {
+  constructor(name: Token, params: Expression[]) {
     this.name = name;
     this.params = params;
   }
@@ -100,19 +101,6 @@ export class ErrorExpression implements Expression {
     return '';
   }
 }
-export class TokenExpression implements Expression {
-  readonly value: Token;
-  constructor(value: Token) {
-    this.value = value;
-  }
-  accept(visitor: Visitor) {
-    return visitor.visitTokenExpression(this);
-  }
-  toString(): string {
-    return '';
-  }
-}
-
 export class CellRangeExpression implements Expression {
   readonly left: CellExpression;
   readonly right: CellExpression;
@@ -124,6 +112,32 @@ export class CellRangeExpression implements Expression {
   }
   accept(visitor: Visitor) {
     return visitor.visitCellRangeExpression(this);
+  }
+  toString(): string {
+    return '';
+  }
+}
+
+export class GroupExpression implements Expression {
+  readonly value: Expression;
+  constructor(value: Expression) {
+    this.value = value;
+  }
+  accept(visitor: Visitor) {
+    return visitor.visitGroupExpression(this);
+  }
+  toString(): string {
+    return '';
+  }
+}
+
+export class DefineNameExpression implements Expression {
+  readonly value: Token;
+  constructor(value: Token) {
+    this.value = value;
+  }
+  accept(visitor: Visitor) {
+    return visitor.visitDefineNameExpression(this);
   }
   toString(): string {
     return '';

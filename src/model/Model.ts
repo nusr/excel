@@ -1,4 +1,4 @@
-import { isEmpty, get, setWith } from "@/lodash";
+import { isEmpty, get, setWith } from '@/lodash';
 import {
   StyleType,
   QueryCellResult,
@@ -7,7 +7,7 @@ import {
   Coordinate,
   ModelCellType,
   ResultType,
-} from "@/types";
+} from '@/types';
 import {
   getDefaultSheetInfo,
   assert,
@@ -18,23 +18,23 @@ import {
   intToColumnName,
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
-} from "@/util";
-import { Controller } from "../controller/controller";
-import { parseFormula } from "../parser";
+} from '@/util';
+import { Controller } from '../controller/controller';
+import { parseFormula } from '../parser';
 
 export class Model {
-  public currentSheetId = "";
-  public workbook: WorkBookJSON["workbook"] = [];
-  protected worksheets: WorkBookJSON["worksheets"] = {};
-  public styles: WorkBookJSON["styles"] = {};
-  public mergeCells: WorkBookJSON["mergeCells"] = [];
+  public currentSheetId = '';
+  public workbook: WorkBookJSON['workbook'] = [];
+  protected worksheets: WorkBookJSON['worksheets'] = {};
+  public styles: WorkBookJSON['styles'] = {};
+  public mergeCells: WorkBookJSON['mergeCells'] = [];
   protected controller: Controller;
   constructor(controller: Controller) {
     this.controller = controller;
   }
   setActiveCell(row: number, col: number): void {
     const index = this.workbook.findIndex(
-      (v) => v.sheetId === this.currentSheetId
+      (v) => v.sheetId === this.currentSheetId,
     );
     if (index >= 0) {
       const tempList = Array.from(this.workbook);
@@ -59,7 +59,7 @@ export class Model {
     return item;
   }
   protected modelChange(isRecovering = false): void {
-    modelLog("modelChange", isRecovering);
+    modelLog('modelChange', isRecovering);
     if (!isRecovering) {
       this.controller.history.onChange(this.toJSON());
     }
@@ -85,7 +85,7 @@ export class Model {
     return result;
   }
   fromJSON(json: WorkBookJSON): void {
-    modelLog("fromJSON", json);
+    modelLog('fromJSON', json);
     const {
       worksheets = {},
       workbook = [],
@@ -110,8 +110,13 @@ export class Model {
   }
   computeFormula = (formula: string): ResultType => {
     const result = parseFormula(formula, {
-      queryCells: this.queryCells,
-      currentSheetId: this.currentSheetId,
+      get: (row: number, col: number, sheetId: string) => {
+        const temp = this.queryCell(row, col, sheetId);
+        return temp.value;
+      },
+      set: () => {
+
+      }
     });
     return result.error ? result.error : result.result;
   };
@@ -131,11 +136,11 @@ export class Model {
   }
   setCellValues(value: string, ranges: Range[]): void {
     const [range] = ranges;
-    if (value.startsWith("=")) {
+    if (value.startsWith('=')) {
       const formula = value.slice(1);
       this.setCellFormula(formula, range);
     } else {
-      this.setCellFormula("", range);
+      this.setCellFormula('', range);
       this.setCellValue(value, range);
     }
     this.modelChange();
@@ -146,7 +151,7 @@ export class Model {
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
         const stylePath = `worksheets[${this.currentSheetId}][${r}][${c}].style`;
-        const oldStyleId = get<string>(this, stylePath, "");
+        const oldStyleId = get<string>(this, stylePath, '');
         if (oldStyleId) {
           const oldStyle = this.styles[oldStyleId];
           if (isEmpty(oldStyle)) {
@@ -160,7 +165,7 @@ export class Model {
         } else {
           const styleNum = getListMaxNum(
             Object.keys(this.styles),
-            STYLE_ID_PREFIX
+            STYLE_ID_PREFIX,
           );
           const styleId = `${STYLE_ID_PREFIX}${styleNum + 1}`;
           this.styles[styleId] = { ...style };
@@ -170,25 +175,16 @@ export class Model {
     }
     this.modelChange();
   }
-  queryCells = (range: Range): QueryCellResult[] => {
-    const result = [];
-    const { row, col, rowCount, colCount, sheetId } = range;
-    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
-      for (let c = col, endCol = col + colCount; c < endCol; c++) {
-        result.push(this.queryCell(row, col, sheetId || this.currentSheetId));
-      }
-    }
-    return result;
-  };
   queryCell = (
     row: number,
     col: number,
-    sheetId: string = this.currentSheetId
+    sheetId: string = '',
   ): QueryCellResult => {
+    const realSheetId = sheetId || this.currentSheetId;
     const cellData = get<ModelCellType>(
       this,
-      `worksheets[${sheetId}][${row}][${col}]`,
-      {}
+      `worksheets[${realSheetId}][${row}][${col}]`,
+      {},
     );
     const { style } = cellData;
     let temp = undefined;

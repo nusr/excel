@@ -1,10 +1,12 @@
 import { TokenType } from '@/types';
 import { Token } from './token';
-import { isLetter }  from '@/util'
+import { isLetter } from '@/util';
+import { CustomError } from './error';
+
 const emptyData = '';
 const identifierMap = new Map<string, TokenType>([
-  ['true', TokenType.TRUE],
-  ['false', TokenType.FALSE],
+  ['TRUE', TokenType.TRUE],
+  ['FALSE', TokenType.FALSE],
 ]);
 
 export class Scanner {
@@ -22,6 +24,9 @@ export class Scanner {
       this.scanToken();
     }
     this.tokens.push(new Token(TokenType.EOF, ''));
+    if (this.tokens.length > 0 && this.tokens[0].type === TokenType.EQUAL) {
+      this.tokens.shift();
+    }
     return this.tokens;
   }
   private peek() {
@@ -50,11 +55,12 @@ export class Scanner {
     return this.current >= this.list.length;
   }
   private addToken(type: TokenType) {
-    const text = this.list.slice(this.start, this.current).join('');
+    let text = this.list.slice(this.start, this.current).join('');
     let realType = type;
     if (type === TokenType.IDENTIFIER) {
-      const temp = identifierMap.get(text.toLowerCase());
+      const temp = identifierMap.get(text.toUpperCase());
       if (temp) {
+        text = text.toUpperCase();
         realType = temp;
       }
     }
@@ -65,7 +71,7 @@ export class Scanner {
       this.next();
     }
     if (this.peek() !== end) {
-      throw new Error('unterminated string');
+      throw new CustomError('#VALUE!');
     } else {
       this.next();
     }
@@ -76,7 +82,7 @@ export class Scanner {
     while (!this.isAtEnd() && this.isDigit(this.peek())) {
       this.next();
     }
-    if (this.peek() === '.') {
+    if (this.match('.')) {
       while (!this.isAtEnd() && this.isDigit(this.peek())) {
         this.next();
       }
@@ -87,21 +93,20 @@ export class Scanner {
     return char >= '0' && char <= '9';
   }
   private isLetter(char: string) {
-    return isLetter(char)
+    return isLetter(char);
   }
   private identifier() {
     while (!this.isAtEnd() && this.isLetter(this.peek())) {
       this.next();
     }
-    if (this.peek() === '$') {
-      this.next();
+    if (this.match('$')) {
       if (this.isDigit(this.peek())) {
         while (!this.isAtEnd() && this.isDigit(this.peek())) {
           this.next();
         }
         this.addToken(TokenType.MIXED_CELL);
       } else {
-        throw new Error('error MIXED_CELL');
+        throw new CustomError('#REF!');
       }
     } else if (this.isDigit(this.peek())) {
       while (!this.isAtEnd() && this.isDigit(this.peek())) {
@@ -164,8 +169,20 @@ export class Scanner {
       case '&':
         this.addToken(TokenType.CONCATENATE);
         break;
+      case '%':
+        this.addToken(TokenType.PERCENT);
+        break;
       case '"':
         this.string(c);
+        break;
+      case ';':
+        this.addToken(TokenType.SEMICOLON);
+        break;
+      case '{':
+        this.addToken(TokenType.lEFT_BRACE);
+        break;
+      case '}':
+        this.addToken(TokenType.RIGHT_BRACE);
         break;
       case ' ':
       case '\r':
@@ -190,7 +207,7 @@ export class Scanner {
               }
               this.addToken(TokenType.ABSOLUTE_CELL);
             } else {
-              throw new Error('error ABSOLUTE_CELL');
+              throw new CustomError('#REF!');
             }
           } else {
             this.addToken(TokenType.ABSOLUTE_CELL);
@@ -202,7 +219,7 @@ export class Scanner {
           if (this.isDigit(this.previous())) {
             this.addToken(TokenType.ABSOLUTE_CELL);
           } else {
-            throw new Error('error ABSOLUTE_CELL');
+            throw new CustomError('#REF!');
           }
         }
         break;

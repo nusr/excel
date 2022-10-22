@@ -1,4 +1,4 @@
-import { parseFormula, globalEnv } from "../..";
+import { parseFormula, VariableMapImpl } from "../..";
 
 describe("parseFormula variable", () => {
   it("should evaluate default variables", () => {
@@ -16,8 +16,9 @@ describe("parseFormula variable", () => {
       result: null,
       error: "#NAME?",
     });
-    globalEnv.setVariable("foo", "222");
-    expect(parseFormula("foo")).toEqual({
+    const temp = new VariableMapImpl()
+    temp.set("foo", "222");
+    expect(parseFormula("foo", undefined, temp)).toEqual({
       result: "222",
       error: null,
     });

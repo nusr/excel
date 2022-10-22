@@ -1,14 +1,13 @@
-import ReactDom from "react-dom";
-import React from "react";
+import ReactDom from 'react-dom';
+import React from 'react';
 
-import { App } from "./entry/App";
-import { ErrorBoundary } from "@/components";
-import { StoreProvider } from "@/store";
-import { interpret } from './parser'
+import { App } from './entry/App';
+import { ErrorBoundary } from '@/components';
+import { StoreProvider } from '@/store';
 
-import "./global.css";
-import "./containers/index.css";
-import "./components/index.css";
+import './global.css';
+import './containers/index.css';
+import './components/index.css';
 
 ReactDom.render(
   <React.StrictMode>
@@ -18,9 +17,5 @@ ReactDom.render(
       </StoreProvider>
     </ErrorBoundary>
   </React.StrictMode>,
-  document.getElementById("root") as HTMLDivElement
+  document.getElementById('root') as HTMLDivElement,
 );
-
-if(process.env.NODE_ENV === 'development') {
-  interpret('1 <> "b"');
-}

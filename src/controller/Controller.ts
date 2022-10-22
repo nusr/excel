@@ -63,7 +63,7 @@ export class Controller extends EventEmitter<EventType> {
     if (!activeCell) {
       return { ...DEFAULT_ACTIVE_CELL };
     }
-    const result = parseReference(activeCell, this.model.currentSheetId);
+    const result = parseReference(activeCell);
     assert(!!result);
     const { row, col } = result;
     return { row, col };

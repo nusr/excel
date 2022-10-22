@@ -5,7 +5,7 @@ import {
 } from '../../expression';
 import { Token } from '../../token';
 import { TokenType } from '../../../types';
-import { buildTree } from './helper';
+import { buildTree } from './util';
 
 describe('basic expressions', function () {
   it('1', function () {
