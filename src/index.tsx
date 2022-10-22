@@ -3,8 +3,8 @@ import React from "react";
 
 import { App } from "./entry/App";
 import { ErrorBoundary } from "@/components";
-
 import { StoreProvider } from "@/store";
+import { interpret } from './parser'
 
 import "./global.css";
 import "./containers/index.css";
@@ -20,3 +20,7 @@ ReactDom.render(
   </React.StrictMode>,
   document.getElementById("root") as HTMLDivElement
 );
+
+if(process.env.NODE_ENV === 'development') {
+  interpret('1 <> "b"');
+}

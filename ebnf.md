@@ -4,25 +4,22 @@ equality       = comparison ( ( "=" ｜ "<>" ) comparison )* ;
 comparison     = term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           = factor ( ( "-" | "+" ) factor )* ;
 factor         = expo ( ( "/" | "*" ) expo )* ;
-expo           = connection ( "^"  expo )* ;
-connection     = percent ( ( "&" ) percent )* ;
+expo           = concatenate ( "^"  expo )* ;
+concatenate     = percent ( ( "&" ) percent )* ;
 percent        = percent | unary ( "%" );
-unary          = ( "+" | "-" ) unary | call ;
-call           = cellOp ( "(" arguments? ")" ) ;
-cellOp         = primary ( ":" ) primary ;
+unary          = ( "+" | "-" ) unary | spread ;
+spread         = call ( ( ":" ) call )* ;
+call           = primary ( "(" arguments? ")" ) * ;
 primary        = literal | identifier | "(" expression ")" | error;
-parameters     = identifier ( "," identifier )* ;
 arguments      = expression ( "," expression )* ;
-literal        = number | string | cell
-cell           = ABSOLUTE_CELL | MIXED_CELL | RELATIVE_CELL ;
-ABSOLUTE_CELL  = "$" char+ "$" digit+
-MIXED_CELL     = ("$" RELATIVE_CELL) | (char+ "$" digit+) 
-RELATIVE_CELL  = char+ | digit+   
+literal        = number | string | ABSOLUTE_CELL | MIXED_CELL | RELATIVE_CELL
+ABSOLUTE_CELL  = "$" [A-Za-z]+ "$" [0-9]+
+MIXED_CELL     = ("$" [A-Za-z]+[0-9]+ ) | ([A-Za-z]+ "$" [0-9]+ )
+RELATIVE_CELL  = [A-Za-z]+ [0-9]+ 
 number         = digit+ ( "." digit+ )?;
 string         = """ (any char except ") """ ;
-identifier     = alpha ( alpha | digit )* ;
-alpha          = char | "_" ;
-char           = "a" ... "z" | "A" ... "Z" ;
+identifier     = letter ( letter | digit )* ;
+letter           = "a" ... "z" | "A" ... "Z" ;
 digit          = "0" ... "9" ;
 error          = "#" ("A" ... "Z")+ ("!" | "?")? ;
 

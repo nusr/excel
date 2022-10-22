@@ -1,7 +1,0 @@
-.eslintrc.js
-node_modules
-dist
-package-lock.json
-coverage
-src/js-parser/__tests__/data/*.js
-e2e/lib

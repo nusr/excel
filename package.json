@@ -15,7 +15,7 @@
     "postinstall": "husky install",
     "update": "npx ncu -u && npm i && npm run ci",
     "pree2e": "npm run build",
-    "e2e": "jest --config ./e2e/lib/jest.config.js --forceExit"
+    "e2e": "jest --config ./e2e/lib/jest.config.js --forceExit --detectOpenHandles"
   },
   "repository": {
     "type": "git",
@@ -36,7 +36,6 @@
     "@types/react-dom": "17.0.11",
     "esbuild": "0.14.23",
     "husky": "^7.0.4",
-    "istanbul-lib-coverage": "^3.2.0",
     "jest": "27.5.1",
     "puppeteer": "^13.4.0",
     "typescript": "4.5.5"
