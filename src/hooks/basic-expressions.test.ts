@@ -2,10 +2,10 @@ import {
   BinaryExpression,
   UnaryExpression,
   LiteralExpression,
-} from '../../expression';
-import { Token } from '../../token';
-import { TokenType } from '../../../types';
-import { buildTree } from './util';
+} from '../parser/expression';
+import { Token } from '../parser/token';
+import { TokenType } from '../types';
+import { buildTree } from '../parser/__tests__/parser/util';
 
 describe('basic expressions', function () {
   it('1', function () {

@@ -14,8 +14,16 @@ import {
   ErrorExpression,
   CellRangeExpression,
 } from './expression';
-import { isLetter } from '@/util';
 import { CustomError } from './error';
+
+const errorSet = new Set([
+  '#ERROR',
+  '#DIV/0',
+  '#NULL',
+  '#NUM',
+  '#REF',
+  '#VALUE',
+]);
 
 export class Parser {
   private readonly tokens: Token[];
@@ -31,27 +39,29 @@ export class Parser {
     return result;
   }
   private expression(): Expression {
-    return this.equality();
-  }
-  private equality(): Expression {
-    let expr = this.comparison();
-    while (this.match(TokenType.EQUAL, TokenType.NOT_EQUAL)) {
-      const operator = this.previous();
-      const right = this.comparison();
-      expr = new BinaryExpression(expr, operator, right);
-    }
-    return expr;
+    return this.comparison();
   }
   private comparison(): Expression {
-    let expr = this.term();
+    let expr = this.concatenate();
     while (
       this.match(
+        TokenType.EQUAL,
+        TokenType.NOT_EQUAL,
         TokenType.GREATER,
         TokenType.GREATER_EQUAL,
         TokenType.LESS,
         TokenType.LESS_EQUAL,
       )
     ) {
+      const operator = this.previous();
+      const right = this.concatenate();
+      expr = new BinaryExpression(expr, operator, right);
+    }
+    return expr;
+  }
+  private concatenate(): Expression {
+    let expr = this.term();
+    while (this.match(TokenType.CONCATENATE)) {
       const operator = this.previous();
       const right = this.term();
       expr = new BinaryExpression(expr, operator, right);
@@ -77,7 +87,7 @@ export class Parser {
     return expr;
   }
   private expo(): Expression {
-    let expr = this.concatenate();
+    let expr = this.unary();
     while (this.match(TokenType.EXPONENT)) {
       const operator = this.previous();
       const right = this.expo();
@@ -85,15 +95,7 @@ export class Parser {
     }
     return expr;
   }
-  private concatenate(): Expression {
-    let expr = this.unary();
-    while (this.match(TokenType.CONCATENATE)) {
-      const operator = this.previous();
-      const right = this.unary();
-      expr = new BinaryExpression(expr, operator, right);
-    }
-    return expr;
-  }
+
   private unary(): Expression {
     if (this.match(TokenType.PLUS, TokenType.MINUS)) {
       const operator = this.previous();
@@ -102,26 +104,31 @@ export class Parser {
     }
     return this.spread();
   }
-  private convertToCellExpression(expr: Expression): CellExpression {
+  private convertToCellExpression(
+    expr: Expression,
+  ): CellExpression {
     if (expr instanceof CellExpression) {
       return expr;
+    }
+    if (expr instanceof DefineNameExpression) {
+      return new CellExpression(
+        new Token(TokenType.IDENTIFIER, expr.value.value.toUpperCase()),
+        'relative',
+        null,
+      );
     }
     if (expr instanceof LiteralExpression) {
       if (expr.value.type === TokenType.NUMBER) {
         return new CellExpression(
-          new Token(TokenType.RELATIVE_CELL, expr.value.value),
-        );
-      }
-    }
-    if (expr instanceof DefineNameExpression) {
-      if (expr.value.value.split('').every((v) => isLetter(v))) {
-        return new CellExpression(
-          new Token(TokenType.RELATIVE_CELL, expr.value.value),
+          new Token(TokenType.IDENTIFIER, expr.value.value),
+          'relative',
+          null,
         );
       }
     }
     throw new CustomError('#REF!');
   }
+
   private spread(): Expression {
     let expr = this.primary();
     while (this.match(TokenType.COLON)) {
@@ -135,44 +142,68 @@ export class Parser {
     }
     return expr;
   }
+  private finishCall(name: Token): CallExpression {
+    const params: Expression[] = [];
+    if (!this.check(TokenType.RIGHT_BRACKET)) {
+      do {
+        params.push(this.expression());
+      } while (this.match(TokenType.COMMA));
+    }
+    this.expect(TokenType.RIGHT_BRACKET);
+    let realName: Token = name;
+    if (name.value[0] === '@') {
+      realName = new Token(TokenType.IDENTIFIER, name.value.slice(1));
+    }
+    return new CallExpression(realName, params);
+  }
   private primary(): Expression {
-    if (this.match(TokenType.NUMBER)) {
-      return new LiteralExpression(this.previous());
-    }
-    if (this.match(TokenType.STRING)) {
-      return new LiteralExpression(this.previous());
-    }
-    if (this.match(TokenType.TRUE)) {
-      return new LiteralExpression(this.previous());
-    }
-    if (this.match(TokenType.FALSE)) {
-      return new LiteralExpression(this.previous());
-    }
     if (
       this.match(
-        TokenType.MIXED_CELL,
-        TokenType.RELATIVE_CELL,
-        TokenType.ABSOLUTE_CELL,
+        TokenType.NUMBER,
+        TokenType.STRING,
+        TokenType.TRUE,
+        TokenType.FALSE,
       )
     ) {
-      return new CellExpression(this.previous());
+      return new LiteralExpression(this.previous());
     }
-    if (this.match(TokenType.ERROR)) {
-      return new ErrorExpression(this.previous());
-    }
+
     if (this.match(TokenType.IDENTIFIER)) {
       const name = this.previous();
+      const { value, type } = name;
+      const realValue = value.toUpperCase();
+      const newToken = new Token(type, realValue);
       if (this.match(TokenType.LEFT_BRACKET)) {
-        const params: Expression[] = [];
-        if (!this.check(TokenType.RIGHT_BRACKET)) {
-          do {
-            params.push(this.expression());
-          } while (this.match(TokenType.COMMA));
+        return this.finishCall(name);
+      }
+      if (realValue === '#NAME?' || realValue === '#N/A') {
+        return new ErrorExpression(newToken);
+      }
+      if (errorSet.has(realValue) && this.match(TokenType.BANG)) {
+        return new ErrorExpression(new Token(type, realValue + '!'));
+      }
+      if (this.match(TokenType.BANG)) {
+        const expr = this.expression();
+        if (expr instanceof CellExpression) {
+          return new CellExpression(expr.value, expr.type, name);
         }
-        this.expect(TokenType.RIGHT_BRACKET);
-        return new CallExpression(name, params);
-      } else {
+        throw new CustomError('#REF!');
+      }
+      if (/^[A-Z]+$/i.test(value)) {
         return new DefineNameExpression(name);
+      }
+      if (
+        /^\$[A-Z]+\$\d+$/.test(realValue) ||
+        /^\$[A-Z]+$/.test(realValue) ||
+        /^\$\d+$/.test(realValue)
+      ) {
+        return new CellExpression(newToken, 'absolute', null);
+      }
+      if (/^\$[A-Z]+\d+$/.test(realValue) || /^[A-Z]+\$\d+$/.test(realValue)) {
+        return new CellExpression(newToken, 'mixed', null);
+      }
+      if (/^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue)) {
+        return new CellExpression(newToken, 'relative', null);
       }
     }
     if (this.match(TokenType.LEFT_BRACKET)) {
@@ -180,6 +211,9 @@ export class Parser {
       this.expect(TokenType.RIGHT_BRACKET);
       return new GroupExpression(value);
     }
+    // if (this.match(TokenType.EMPTY_CHAR)) {
+    // return this.expression();
+    // }
     throw new CustomError('#ERROR!');
   }
   private match(...types: TokenType[]): boolean {

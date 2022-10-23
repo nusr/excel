@@ -10,7 +10,7 @@ describe('arithmetic expressions', function () {
     // ['1.5E-10', [['1.5E-10', 'operand', 'number']]],
     // ['1.55E+100', [['1.55E+100', 'operand', 'number']]],
     [
-      '1 + 2',
+      '1+2',
       [
         getToken(TokenType.NUMBER, '1'),
         getToken(TokenType.PLUS, '+'),
@@ -34,7 +34,7 @@ describe('arithmetic expressions', function () {
       ],
     ],
     [
-      '(1 + 2) - 3',
+      '(1+2)-3',
       [
         getToken(TokenType.LEFT_BRACKET, '('),
         getToken(TokenType.NUMBER, '1'),
@@ -46,7 +46,7 @@ describe('arithmetic expressions', function () {
       ],
     ],
     [
-      '    =     (     1.1+2  )   -       3  ',
+      '=(1.1+2)-3',
       [
         getToken(TokenType.LEFT_BRACKET, '('),
         getToken(TokenType.NUMBER, '1.1'),
@@ -68,7 +68,7 @@ describe('arithmetic expressions', function () {
       ],
     ],
     [
-      '= 1+2*3',
+      '=1+2*3',
       [
         getToken(TokenType.NUMBER, '1'),
         getToken(TokenType.PLUS, '+'),
@@ -81,7 +81,7 @@ describe('arithmetic expressions', function () {
     ['+1', [getToken(TokenType.PLUS, '+'), getToken(TokenType.NUMBER, '1')]],
     ['1%', [getToken(TokenType.NUMBER, '1'), getToken(TokenType.PERCENT, '%')]],
     [
-      '-(1 + 2)',
+      '-(1+2)',
       [
         getToken(TokenType.MINUS, '-'),
         getToken(TokenType.LEFT_BRACKET, '('),
@@ -92,7 +92,7 @@ describe('arithmetic expressions', function () {
       ],
     ],
     [
-      '(1 + 2)%',
+      '(1+2)%',
       [
         getToken(TokenType.LEFT_BRACKET, '('),
         getToken(TokenType.NUMBER, '1'),

@@ -35,12 +35,25 @@ export class Interpreter implements Visitor {
     this.cellDataMap = cellDataMap;
     this.variableMap = variableMap;
   }
-  interpret(): any[] {
+  interpret(): any {
     const result: any[] = [];
     for (const item of this.expressions) {
       result.push(this.evaluate(item));
     }
-    return result;
+    if (result.length === 1) {
+      const t = result[0];
+      if (t instanceof Range) {
+        if (t.colCount === t.rowCount && t.colCount === 1) {
+          return this.cellDataMap.get(t.row, t.col, t.sheetId);
+        } else {
+          throw new CustomError('#REF!');
+        }
+      } else {
+        return t;
+      }
+    } else {
+      throw new CustomError('#ERROR!');
+    }
   }
   private checkNumber(value: any) {
     if (typeof value !== 'number') {
@@ -119,7 +132,7 @@ export class Interpreter implements Visitor {
     if (t === null) {
       throw new CustomError('#REF!');
     }
-    return this.cellDataMap.get(t.row, t.col, t.sheetId);
+    return t;
   }
   visitErrorExpression(data: ErrorExpression) {
     throw new CustomError(data.value.value as ErrorTypes);

@@ -1,4 +1,5 @@
 import type { Token } from './token';
+import type { ReferenceType } from '@/types';
 
 export interface Visitor {
   visitBinaryExpression(expr: BinaryExpression): any;
@@ -64,8 +65,12 @@ export class LiteralExpression implements Expression {
 
 export class CellExpression implements Expression {
   readonly value: Token;
-  constructor(value: Token) {
+  readonly sheetName: Token | null;
+  readonly type: ReferenceType;
+  constructor(value: Token, type: ReferenceType, sheetName: Token | null) {
     this.value = value;
+    this.sheetName = sheetName;
+    this.type = type;
   }
   accept(visitor: Visitor) {
     return visitor.visitCellExpression(this);
@@ -95,7 +100,7 @@ export class ErrorExpression implements Expression {
     this.value = value;
   }
   accept(visitor: Visitor): any {
-    return visitor.visitCellExpression(this);
+    return visitor.visitErrorExpression(this);
   }
   toString(): string {
     return '';

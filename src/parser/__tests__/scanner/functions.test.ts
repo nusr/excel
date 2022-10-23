@@ -21,16 +21,7 @@ describe('functions', function () {
       ],
     ],
     [
-      '@SUM(1)',
-      [
-        getToken(TokenType.IDENTIFIER, 'SUM'),
-        getToken(TokenType.LEFT_BRACKET, '('),
-        getToken(TokenType.NUMBER, '1'),
-        getToken(TokenType.RIGHT_BRACKET, ')'),
-      ],
-    ],
-    [
-      'SUM(1, 2)',
+      'SUM(1,2)',
       [
         getToken(TokenType.IDENTIFIER, 'SUM'),
         getToken(TokenType.LEFT_BRACKET, '('),
@@ -41,7 +32,7 @@ describe('functions', function () {
       ],
     ],
     [
-      'SUM(1, SUM(2, 3))',
+      'SUM(1,SUM(2,3))',
       [
         getToken(TokenType.IDENTIFIER, 'SUM'),
         getToken(TokenType.LEFT_BRACKET, '('),

@@ -1,6 +1,5 @@
 import { TokenType } from '@/types';
 import { Token } from './token';
-import { isLetter } from '@/util';
 import { CustomError } from './error';
 
 const emptyData = '';
@@ -35,9 +34,6 @@ export class Scanner {
     }
     return this.list[this.current];
   }
-  private previous() {
-    return this.list[this.current - 1];
-  }
   private match(text: string) {
     if (this.peek() !== text) {
       return false;
@@ -55,16 +51,8 @@ export class Scanner {
     return this.current >= this.list.length;
   }
   private addToken(type: TokenType) {
-    let text = this.list.slice(this.start, this.current).join('');
-    let realType = type;
-    if (type === TokenType.IDENTIFIER) {
-      const temp = identifierMap.get(text.toUpperCase());
-      if (temp) {
-        text = text.toUpperCase();
-        realType = temp;
-      }
-    }
-    this.tokens.push(new Token(realType, text));
+    const text = this.list.slice(this.start, this.current).join('');
+    this.tokens.push(new Token(type, text));
   }
   private string(end: string) {
     while (!this.isAtEnd() && this.peek() !== end) {
@@ -92,30 +80,18 @@ export class Scanner {
   private isDigit(char: string) {
     return char >= '0' && char <= '9';
   }
-  private isLetter(char: string) {
-    return isLetter(char);
-  }
   private identifier() {
-    while (!this.isAtEnd() && this.isLetter(this.peek())) {
+    while (!this.isAtEnd() && this.anyChar(this.peek())) {
       this.next();
     }
-    if (this.match('$')) {
-      if (this.isDigit(this.peek())) {
-        while (!this.isAtEnd() && this.isDigit(this.peek())) {
-          this.next();
-        }
-        this.addToken(TokenType.MIXED_CELL);
-      } else {
-        throw new CustomError('#REF!');
-      }
-    } else if (this.isDigit(this.peek())) {
-      while (!this.isAtEnd() && this.isDigit(this.peek())) {
-        this.next();
-      }
-      this.addToken(TokenType.RELATIVE_CELL);
-    } else {
-      this.addToken(TokenType.IDENTIFIER);
+    let text = this.list.slice(this.start, this.current).join('');
+    const temp = identifierMap.get(text.toUpperCase());
+    let type: TokenType = TokenType.IDENTIFIER;
+    if (temp) {
+      text = text.toUpperCase();
+      type = temp;
     }
+    this.tokens.push(new Token(type, text));
   }
   private scanToken() {
     const c = this.next();
@@ -188,57 +164,30 @@ export class Scanner {
       case '\r':
       case '\t':
       case '\n':
+        // while (!this.isAtEnd() && this.isWhiteSpace(this.peek())) {
+          // this.next();
+        // }
+        // this.addToken(TokenType.EMPTY_CHAR);
         break;
-      case '$':
-        while (!this.isAtEnd() && this.isLetter(this.peek())) {
-          this.next();
-        }
-        const isLetter = this.isLetter(this.previous());
-        if (isLetter) {
-          if (this.isDigit(this.peek())) {
-            while (!this.isAtEnd() && this.isDigit(this.peek())) {
-              this.next();
-            }
-            this.addToken(TokenType.MIXED_CELL);
-          } else if (this.match('$')) {
-            if (this.isDigit(this.peek())) {
-              while (!this.isAtEnd() && this.isDigit(this.peek())) {
-                this.next();
-              }
-              this.addToken(TokenType.ABSOLUTE_CELL);
-            } else {
-              throw new CustomError('#REF!');
-            }
-          } else {
-            this.addToken(TokenType.ABSOLUTE_CELL);
-          }
-        } else {
-          while (!this.isAtEnd() && this.isDigit(this.peek())) {
-            this.next();
-          }
-          if (this.isDigit(this.previous())) {
-            this.addToken(TokenType.ABSOLUTE_CELL);
-          } else {
-            throw new CustomError('#REF!');
-          }
-        }
-        break;
-      case '#':
-        while (!this.isAtEnd() && this.isLetter(this.peek())) {
-          this.next();
-        }
-        if (this.peek() === '!' || this.peek() === '?') {
-          this.next();
-        }
-        this.addToken(TokenType.ERROR);
+      case '!':
+        this.addToken(TokenType.BANG);
         break;
       default:
         if (this.isDigit(c)) {
           this.number();
-        } else if (this.isLetter(c)) {
+        } else if (this.anyChar(c)) {
           this.identifier();
+        } else {
+          throw new CustomError('#ERROR!');
         }
         break;
     }
+  }
+  private anyChar(c: string) {
+    const text = '(),:=<>+-*/^&%"{}!';
+    return !text.includes(c) && !this.isWhiteSpace(c);
+  }
+  private isWhiteSpace(c: string) {
+    return c === ' ' || c === '\r' || c === '\n' || c === '\t';
   }
 }

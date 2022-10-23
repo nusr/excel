@@ -19,26 +19,23 @@ export enum TokenType {
   GREATER, // >
   GREATER_EQUAL, // >=
   CONCATENATE, // &
+  COLON, // : 区域运算符，形成区域
+  COMMA, // , 联合运算符 求并集
+  EMPTY_CHAR, // ' ' 交叉运算符 求交集
   PERCENT, // %
   LESS, // <
   LESS_EQUAL, // <=
-  ERROR, // error
+  BANG, // !
   IDENTIFIER, //
   STRING,
   NUMBER,
   TRUE,
   FALSE,
-  BOOLEAN, // true false
-  COLON, // :
-  COMMA, // ,
   LEFT_BRACKET, // (
   RIGHT_BRACKET, // )
   lEFT_BRACE, // {
   RIGHT_BRACE, // }
   SEMICOLON, // ;
-  MIXED_CELL,
-  ABSOLUTE_CELL,
-  RELATIVE_CELL,
   EOF,
 }
 
@@ -63,3 +60,5 @@ export type InterpreterResult = {
   result: any;
   error: ErrorTypes | null;
 };
+
+export type ReferenceType = 'absolute' | 'mixed' | 'relative';

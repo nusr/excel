@@ -10,11 +10,7 @@ export default {
     '^.+\\.tsx?$': transformPath,
   },
   collectCoverageFrom: [
-    '**/src/**/*.{js,jsx,ts,tsx}',
-    '!**/node_modules/**',
-    '!**/dist/**',
-    '!**/scripts/**',
-    '!**/assets/**',
+    'src/**/*.{js,jsx,ts,tsx}'
   ],
 
   coverageReporters: [

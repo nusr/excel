@@ -72,7 +72,7 @@ function interpret(
       variableMap,
     ).interpret();
     return {
-      result: result[0],
+      result: result,
       error: null,
     };
   } catch (error) {

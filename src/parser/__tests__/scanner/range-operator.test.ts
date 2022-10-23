@@ -6,38 +6,25 @@ describe('range operators', function () {
     [
       'A1:C1,A2:C2',
       [
-        getToken(TokenType.RELATIVE_CELL, 'A1'),
+        getToken(TokenType.IDENTIFIER, 'A1'),
         getToken(TokenType.COLON, ':'),
-        getToken(TokenType.RELATIVE_CELL, 'C1'),
+        getToken(TokenType.IDENTIFIER, 'C1'),
         getToken(TokenType.COMMA, ','),
-        getToken(TokenType.RELATIVE_CELL, 'A2'),
+        getToken(TokenType.IDENTIFIER, 'A2'),
         getToken(TokenType.COLON, ':'),
-        getToken(TokenType.RELATIVE_CELL, 'C2'),
+        getToken(TokenType.IDENTIFIER, 'C2'),
       ],
     ],
     [
       'A1:C1 A2:C2',
       [
-        getToken(TokenType.RELATIVE_CELL, 'A1'),
+        getToken(TokenType.IDENTIFIER, 'A1'),
         getToken(TokenType.COLON, ':'),
-        getToken(TokenType.RELATIVE_CELL, 'C1'),
-        // getToken(TokenType.COMMA, ','),
-        getToken(TokenType.RELATIVE_CELL, 'A2'),
+        getToken(TokenType.IDENTIFIER, 'C1'),
+        // getToken(TokenType.EMPTY_CHAR, ' '),
+        getToken(TokenType.IDENTIFIER, 'A2'),
         getToken(TokenType.COLON, ':'),
-        getToken(TokenType.RELATIVE_CELL, 'C2'),
-      ],
-    ],
-    // multiple spaces between ranges
-    [
-      'A1:C1  A2:C2',
-      [
-        getToken(TokenType.RELATIVE_CELL, 'A1'),
-        getToken(TokenType.COLON, ':'),
-        getToken(TokenType.RELATIVE_CELL, 'C1'),
-        // getToken(TokenType.COMMA, ','),
-        getToken(TokenType.RELATIVE_CELL, 'A2'),
-        getToken(TokenType.COLON, ':'),
-        getToken(TokenType.RELATIVE_CELL, 'C2'),
+        getToken(TokenType.IDENTIFIER, 'C2'),
       ],
     ],
   ];

@@ -7,7 +7,7 @@ import {
 import { Token } from '../../token';
 import { TokenType } from '../../../types';
 
-describe.only('operators', function () {
+describe('operators', function () {
   describe('precedence', function () {
     it('1 + 2 >= 3 - 4', function () {
       const tree = buildTree('1 + 2 >= 3 - 4');
@@ -32,13 +32,13 @@ describe.only('operators', function () {
       const tree = buildTree('1 + 2 & "a"');
       expect(tree).toEqual(
         new BinaryExpression(
-          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
-          new Token(TokenType.PLUS, '+'),
           new BinaryExpression(
+            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+            new Token(TokenType.PLUS, '+'),
             new LiteralExpression(new Token(TokenType.NUMBER, '2')),
-            new Token(TokenType.CONCATENATE, '&'),
-            new LiteralExpression(new Token(TokenType.STRING, 'a')),
           ),
+          new Token(TokenType.CONCATENATE, '&'),
+          new LiteralExpression(new Token(TokenType.STRING, 'a')),
         ),
       );
     });

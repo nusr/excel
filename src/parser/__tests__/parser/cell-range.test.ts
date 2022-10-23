@@ -8,7 +8,11 @@ describe('cell ranges', function () {
     const tree = buildTree('A1');
 
     expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.RELATIVE_CELL, 'A1')),
+      new CellExpression(
+        new Token(TokenType.IDENTIFIER, 'A1'),
+        'relative',
+        null,
+      ),
     );
   });
 
@@ -16,7 +20,7 @@ describe('cell ranges', function () {
     const tree = buildTree('A$1');
 
     expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.MIXED_CELL, 'A$1')),
+      new CellExpression(new Token(TokenType.IDENTIFIER, 'A$1'), 'mixed', null),
     );
   });
 
@@ -24,14 +28,18 @@ describe('cell ranges', function () {
     const tree = buildTree('$A1');
 
     expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.MIXED_CELL, '$A1')),
+      new CellExpression(new Token(TokenType.IDENTIFIER, '$A1'), 'mixed', null),
     );
   });
 
   it('$A$1', function () {
     const tree = buildTree('$A$1');
     expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.ABSOLUTE_CELL, '$A$1')),
+      new CellExpression(
+        new Token(TokenType.IDENTIFIER, '$A$1'),
+        'absolute',
+        null,
+      ),
     );
   });
 
@@ -40,9 +48,17 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, 'A1')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, 'A1'),
+          'relative',
+          null,
+        ),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, 'A4')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, 'A4'),
+          'relative',
+          null,
+        ),
       ),
     );
   });
@@ -52,9 +68,17 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(new Token(TokenType.MIXED_CELL, '$A1')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, '$A1'),
+          'mixed',
+          null,
+        ),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(new Token(TokenType.MIXED_CELL, 'A$4')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, 'A$4'),
+          'mixed',
+          null,
+        ),
       ),
     );
   });
@@ -64,9 +88,17 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(new Token(TokenType.ABSOLUTE_CELL, '$A$1')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, '$A$1'),
+          'absolute',
+          null,
+        ),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(new Token(TokenType.ABSOLUTE_CELL, '$A$4')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, '$A$4'),
+          'absolute',
+          null,
+        ),
       ),
     );
   });
@@ -75,9 +107,17 @@ describe('cell ranges', function () {
     const tree = buildTree('1:4');
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, '1')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, '1'),
+          'relative',
+          null,
+        ),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, '4')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, '4'),
+          'relative',
+          null,
+        ),
       ),
     );
   });
@@ -87,9 +127,17 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(new Token(TokenType.ABSOLUTE_CELL, '$1')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, '$1'),
+          'absolute',
+          null,
+        ),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, '4')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, '4'),
+          'relative',
+          null,
+        ),
       ),
     );
   });
@@ -99,9 +147,17 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, 'C')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, 'C'),
+          'relative',
+          null,
+        ),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, 'G')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, 'G'),
+          'relative',
+          null,
+        ),
       ),
     );
   });
@@ -111,9 +167,17 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, 'C')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, 'C'),
+          'relative',
+          null,
+        ),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(new Token(TokenType.ABSOLUTE_CELL, '$G')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, '$G'),
+          'absolute',
+          null,
+        ),
       ),
     );
   });
@@ -123,9 +187,17 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, 'C')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, 'C'),
+          'relative',
+          null,
+        ),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, 'G5')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, 'G5'),
+          'relative',
+          null,
+        ),
       ),
     );
   });
@@ -135,31 +207,55 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, '5')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, '5'),
+          'relative',
+          null,
+        ),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(new Token(TokenType.RELATIVE_CELL, 'D5')),
+        new CellExpression(
+          new Token(TokenType.IDENTIFIER, 'D5'),
+          'relative',
+          null,
+        ),
       ),
     );
   });
 
   // it('A1:B3,C1:D3', function () {
-  // const tree = buildTree('A1:B3,C1:D3');
+    // const tree = buildTree('A1:B3,C1:D3');
 
-  // expect(tree).toEqual(
-  // new BinaryExpression(
-  // new CellRangeExpression(
-  // new CellExpression(new Token(TokenType.RELATIVE_CELL, 'A1')),
-  // new Token(TokenType.COLON, ':'),
-  // new CellExpression(new Token(TokenType.RELATIVE_CELL, 'B3')),
-  // ),
-  // new Token(TokenType.COMMA, ','),
-  // new CellRangeExpression(
-  // new CellExpression(new Token(TokenType.RELATIVE_CELL, 'C1')),
-  // new Token(TokenType.COLON, ':'),
-  // new CellExpression(new Token(TokenType.RELATIVE_CELL, 'D3')),
-  // ),
-  // ),
-  // );
+    // expect(tree).toEqual(
+      // new CellRangeExpression(
+        // new CellRangeExpression(
+          // new CellExpression(
+            // new Token(TokenType.IDENTIFIER, 'A1'),
+            // 'relative',
+            // null,
+          // ),
+          // new Token(TokenType.COLON, ':'),
+          // new CellExpression(
+            // new Token(TokenType.IDENTIFIER, 'B3'),
+            // 'relative',
+            // null,
+          // ),
+        // ),
+        // new Token(TokenType.COMMA, ','),
+        // new CellRangeExpression(
+          // new CellExpression(
+            // new Token(TokenType.IDENTIFIER, 'C1'),
+            // 'relative',
+            // null,
+          // ),
+          // new Token(TokenType.COLON, ':'),
+          // new CellExpression(
+            // new Token(TokenType.IDENTIFIER, 'D3'),
+            // 'relative',
+            // null,
+          // ),
+        // ),
+      // ),
+    // );
   // });
 
   // it('A1:B3 B1:D3', function () {
@@ -167,15 +263,15 @@ describe('cell ranges', function () {
   // expect(tree).toEqual(
   // new BinaryExpression(
   // new CellRangeExpression(
-  // new CellExpression(new Token(TokenType.RELATIVE_CELL, 'A1')),
+  // new CellExpression(new Token(TokenType.IDENTIFIER, 'A1')),
   // new Token(TokenType.COLON, ':'),
-  // new CellExpression(new Token(TokenType.RELATIVE_CELL, 'B3')),
+  // new CellExpression(new Token(TokenType.IDENTIFIER, 'B3')),
   // ),
   // new Token(TokenType.COMMA, ','),
   // new CellRangeExpression(
-  // new CellExpression(new Token(TokenType.RELATIVE_CELL, 'C1')),
+  // new CellExpression(new Token(TokenType.IDENTIFIER, 'C1')),
   // new Token(TokenType.COLON, ':'),
-  // new CellExpression(new Token(TokenType.RELATIVE_CELL, 'D3')),
+  // new CellExpression(new Token(TokenType.IDENTIFIER, 'D3')),
   // ),
   // ),
   // );

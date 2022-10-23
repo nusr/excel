@@ -4,24 +4,24 @@ import { TokenType } from '../../../types';
 describe('cell ranges', function () {
   describe('A1 style', function () {
     const list: Array<BlockType> = [
-      ['A1', [getToken(TokenType.RELATIVE_CELL, 'A1')]],
-      ['$A$1', [getToken(TokenType.ABSOLUTE_CELL, '$A$1')]],
-      ['A$1', [getToken(TokenType.MIXED_CELL, 'A$1')]],
-      ['$A1', [getToken(TokenType.MIXED_CELL, '$A1')]],
+      ['A1', [getToken(TokenType.IDENTIFIER, 'A1')]],
+      ['$A$1', [getToken(TokenType.IDENTIFIER, '$A$1')]],
+      ['A$1', [getToken(TokenType.IDENTIFIER, 'A$1')]],
+      ['$A1', [getToken(TokenType.IDENTIFIER, '$A1')]],
       [
         'A10:A20',
         [
-          getToken(TokenType.RELATIVE_CELL, 'A10'),
+          getToken(TokenType.IDENTIFIER, 'A10'),
           getToken(TokenType.COLON, ':'),
-          getToken(TokenType.RELATIVE_CELL, 'A20'),
+          getToken(TokenType.IDENTIFIER, 'A20'),
         ],
       ],
       [
         'A1:C1',
         [
-          getToken(TokenType.RELATIVE_CELL, 'A1'),
+          getToken(TokenType.IDENTIFIER, 'A1'),
           getToken(TokenType.COLON, ':'),
-          getToken(TokenType.RELATIVE_CELL, 'C1'),
+          getToken(TokenType.IDENTIFIER, 'C1'),
         ],
       ],
       [
@@ -59,9 +59,9 @@ describe('cell ranges', function () {
       [
         'A10:E20',
         [
-          getToken(TokenType.RELATIVE_CELL, 'A10'),
+          getToken(TokenType.IDENTIFIER, 'A10'),
           getToken(TokenType.COLON, ':'),
-          getToken(TokenType.RELATIVE_CELL, 'E20'),
+          getToken(TokenType.IDENTIFIER, 'E20'),
         ],
       ],
     ];
