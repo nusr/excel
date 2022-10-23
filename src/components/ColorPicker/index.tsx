@@ -43,7 +43,7 @@ export const COLOR_LIST = [
   "#AB149E",
 ];
 
-export const ColorPicker: React.FunctionComponent<Props> = React.memo(
+export const ColorPicker: React.FunctionComponent<React.PropsWithChildren<Props>> = React.memo(
   (props) => {
     const { color, style = {}, children, onChange } = props;
     const [visible, setVisible] = useState(false);

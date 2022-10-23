@@ -11,7 +11,7 @@ type ButtonProps = {
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 };
 
-export const Button: React.FunctionComponent<ButtonProps> = memo((props) => {
+export const Button: React.FunctionComponent<React.PropsWithChildren<ButtonProps>> = memo((props) => {
   const {
     children,
     style = {},

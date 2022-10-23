@@ -2,20 +2,18 @@
   "name": "excel",
   "version": "1.0.0",
   "description": "web excel",
-  "main": "dist/index.js",
+  "main": "lib/excel.umd.js",
+  "module": "lib/excel.esm.js",
   "scripts": {
-    "start": "node ./build/build.js NODE_ENV=development",
-    "build": "node ./build/build.js NODE_ENV=production",
-    "test": "jest --config ./unittest/jest.config.js",
+    "start": "npm run build -- NODE_ENV=development",
+    "build": "node ./scripts/esbuild.js",
+    "test": "jest --config ./scripts/unit-test-jest.config.js",
     "coverage": "npm run test -- --coverage",
-    "watch": "npm run test -- --watch",
     "ci": "npm run build && npm run test && npm run type-check && npm run e2e",
-    "deploy": "deploy.sh",
-    "type-check": "node scripts/rm.js && tsc",
-    "postinstall": "husky install",
-    "update": "npx ncu -u && npm i && npm run ci",
-    "pree2e": "npm run build",
-    "e2e": "jest --config ./e2e/lib/jest.config.js --forceExit --detectOpenHandles"
+    "type-check": "npx tsc",
+    "postinstall": "node ./post-install.js",
+    "prebuild": "node ./post-install.js",
+    "e2e": "jest --config ./scripts/e2e-jest.config.js --forceExit --detectOpenHandles"
   },
   "repository": {
     "type": "git",
@@ -26,24 +24,21 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "dependencies": {
-    "immer": "9.0.12",
-    "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "immer": "9.0.16",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "@types/jest": "27.4.1",
-    "@types/react": "17.0.39",
-    "@types/react-dom": "17.0.11",
-    "esbuild": "0.14.23",
-    "husky": "^7.0.4",
-    "jest": "27.5.1",
-    "puppeteer": "^13.4.0",
-    "typescript": "4.5.5"
-  },
-  "browser": {
-    "path": "path-browserify"
+    "@types/jest": "29.2.0",
+    "@types/react": "18.0.21",
+    "@types/react-dom": "18.0.6",
+    "esbuild": "0.15.12",
+    "jest": "29.2.1",
+    "jest-environment-jsdom": "29.2.1",
+    "puppeteer": "19.1.0",
+    "typescript": "4.8.4"
   },
   "engines": {
-    "node": ">=12.10.0"
+    "node": ">=14"
   }
 }

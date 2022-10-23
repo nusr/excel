@@ -1,6 +1,6 @@
 import { randomInt } from "../randomInt";
 
-function checkResult(min, max): boolean {
+function checkResult(min: number, max: number): boolean {
   if (min < max) {
     const temp = randomInt(min, max);
     return temp >= min && temp <= max;

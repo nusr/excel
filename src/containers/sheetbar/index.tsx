@@ -3,6 +3,7 @@ import { classnames } from "@/util";
 import { Button, BaseIcon } from "@/components";
 import { useSelector, useController } from "@/store";
 import theme from "@/theme";
+import { WorksheetType } from "@/types";
 const addButtonStyle = {
   backgroundColor: theme.buttonActiveColor,
 };
@@ -14,7 +15,7 @@ export const SheetBarContainer = memo(() => {
     "sheetList",
   ]);
   const handleClickSheet = useCallback(
-    (item) => {
+    (item: WorksheetType) => {
       controller.setCurrentSheetId(item.sheetId);
     },
     [controller]

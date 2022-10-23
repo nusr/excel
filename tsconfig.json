@@ -24,7 +24,7 @@
     "experimentalDecorators": true,
     "outDir": "dist",
     "removeComments": true,
-    "declaration": true
-  },
-  "exclude": ["node_modules", "/node_modules/", "**/*.test.ts"]
+    "declaration": true,
+    "resolveJsonModule": true
+  }
 }

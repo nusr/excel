@@ -38,7 +38,7 @@ export const ToolbarContainer = memo(() => {
     [controller]
   );
   const handleFontSize = useCallback(
-    (value) => {
+    (value: string) => {
       if (isNumber(value)) {
         const realValue = parseFloat(value);
         setCellStyle({ fontSize: realValue });
@@ -46,8 +46,8 @@ export const ToolbarContainer = memo(() => {
     },
     [setCellStyle]
   );
-  const getItemStyle = useCallback((value) => {
-    return { fontFamily: value };
+  const getItemStyle = useCallback((value: string | number): React.CSSProperties => {
+    return { fontFamily: String(value) };
   }, []);
   return (
     <div className="toolbar-wrapper" id="tool-bar-container">
