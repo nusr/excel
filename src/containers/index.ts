@@ -1,4 +1,4 @@
 export * from "./canvas";
 export * from "./FormulaBar";
-export * from "./toolbar";
-export * from "./sheetbar";
+export * from "./ToolBar";
+export * from "./SheetBar";

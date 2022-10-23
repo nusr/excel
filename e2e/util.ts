@@ -1,8 +1,7 @@
-import puppeteer, { Page } from 'puppeteer';
-import path from 'path';
+import * as puppeteer from 'puppeteer';
 
 declare global {
-  var page: Page;
+  var page: puppeteer.Page;
 }
 
 async function setupPuppeteer() {
@@ -16,6 +15,8 @@ export function sleep(milliseconds: number) {
 
 export async function openPage() {
   await setupPuppeteer();
-  await page.goto(path.join(process.cwd(), './dist/index.html'));
+  const filePath = `file://${process.cwd()}/dist/index.html`;
+  console.log(filePath);
+  await page.goto(filePath);
   await sleep(200);
 }
