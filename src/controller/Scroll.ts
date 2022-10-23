@@ -1,5 +1,5 @@
 import { IScrollValue } from "@/types";
-import type { Controller } from "./controller";
+import type { Controller } from "./Controller";
 export class Scroll implements IScrollValue {
   x = 0;
   y = 0;

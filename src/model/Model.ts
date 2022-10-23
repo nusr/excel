@@ -19,7 +19,7 @@ import {
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
 } from '@/util';
-import { Controller } from '../controller/controller';
+import { Controller } from '../controller/Controller';
 import { parseFormula } from '../parser';
 
 export class Model {
