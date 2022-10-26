@@ -1,3 +1,4 @@
+import type { ErrorTypes } from '@/types'
 export const SHEET_NAME_PREFIX = "Sheet";
 export const STYLE_ID_PREFIX = "style";
 export const DEFAULT_ROW_COUNT = 200;
@@ -83,3 +84,14 @@ export const DEBUG_COLOR_LIST = [
   "#FFCC33",
 ];
 export const MAX_PARAMS_COUNT = 256;
+
+export const ERROR_SET = new Set<ErrorTypes>([
+  '#ERROR!',
+  '#DIV/0!',
+  '#NULL!',
+  '#NUM!',
+  '#REF!',
+  '#VALUE!',
+  '#N/A',
+  '#NAME?',
+]);

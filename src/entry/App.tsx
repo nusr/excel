@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { Lazy } from "@/components";
 import { useDispatch, useController } from "@/store";
 import { MOCK_MODEL } from "@/model";
-import { handleBuildError } from "@/util";
 import { State } from "@/types";
 import { useTheme } from "@/hooks";
 
@@ -51,10 +50,6 @@ export const App = React.memo(() => {
       dispatch({ type: "BATCH", payload: state });
     });
     controller.loadJSON(MOCK_MODEL);
-    const offError = handleBuildError(controller);
-    return () => {
-      offError();
-    };
   }, [dispatch, controller]);
   return (
     <div className="app-container" id="AppContainer">

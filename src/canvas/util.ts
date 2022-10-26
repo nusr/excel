@@ -7,11 +7,11 @@ import {
   makeFont,
   npxLine,
   assert,
-  parseError,
+  ERROR_SET,
   ERROR_FORMULA_COLOR,
 } from "@/util";
 import { isEmpty, isNil } from "@/lodash";
-import { CellInfo, EWrap } from "@/types";
+import { CellInfo, ErrorTypes, EWrap } from "@/types";
 
 const getStyle = (
   key: "lineHeight" | "letterSpacing",
@@ -166,7 +166,7 @@ export function renderCell(
     }
   }
   let text = String(value);
-  if (parseError(value)) {
+  if (ERROR_SET.has(text as ErrorTypes)) {
     fillStyle = ERROR_FORMULA_COLOR;
   } else if (
     typeof value === "boolean" ||
