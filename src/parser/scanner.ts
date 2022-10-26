@@ -161,16 +161,14 @@ export class Scanner {
         this.addToken(TokenType.RIGHT_BRACE);
         break;
       case ' ':
-      case '\r':
-      case '\t':
-      case '\n':
-        // while (!this.isAtEnd() && this.isWhiteSpace(this.peek())) {
+        // while (!this.isAtEnd() && this.peek() === ' ') {
           // this.next();
         // }
         // this.addToken(TokenType.EMPTY_CHAR);
         break;
-      case '!':
-        this.addToken(TokenType.BANG);
+      case '\r':
+      case '\t':
+      case '\n':
         break;
       default:
         if (this.isDigit(c)) {
@@ -184,7 +182,7 @@ export class Scanner {
     }
   }
   private anyChar(c: string) {
-    const text = '(),:=<>+-*/^&%"{}!';
+    const text = '(),:=<>+-*/^&%"{}';
     return !text.includes(c) && !this.isWhiteSpace(c);
   }
   private isWhiteSpace(c: string) {

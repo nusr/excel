@@ -8,6 +8,10 @@ describe('parseFormula reference', () => {
       error: null,
       result: 0,
     });
+    expect(parseFormula('sum(A1)', cellDataMap)).toEqual({
+      error: null,
+      result: 0,
+    });
     cellDataMap.set(0, 0, '', '22');
     expect(parseFormula('A1', cellDataMap)).toEqual({
       error: null,

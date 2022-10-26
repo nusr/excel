@@ -1,4 +1,4 @@
-import { TokenType } from '@/types';
+import { TokenType, ErrorTypes } from '@/types';
 import { Token } from './token';
 import {
   DefineNameExpression,
@@ -16,13 +16,15 @@ import {
 } from './expression';
 import { CustomError } from './error';
 
-const errorSet = new Set([
-  '#ERROR',
-  '#DIV/0',
-  '#NULL',
-  '#NUM',
-  '#REF',
-  '#VALUE',
+const errorSet = new Set<ErrorTypes>([
+  '#ERROR!',
+  '#DIV/0!',
+  '#NULL!',
+  '#NUM!',
+  '#REF!',
+  '#VALUE!',
+  '#N/A',
+  '#NAME?',
 ]);
 
 export class Parser {
@@ -90,7 +92,7 @@ export class Parser {
     let expr = this.unary();
     while (this.match(TokenType.EXPONENT)) {
       const operator = this.previous();
-      const right = this.expo();
+      const right = this.unary();
       expr = new BinaryExpression(expr, operator, right);
     }
     return expr;
@@ -104,41 +106,23 @@ export class Parser {
     }
     return this.spread();
   }
-  private convertToCellExpression(
-    expr: Expression,
-  ): CellExpression {
-    if (expr instanceof CellExpression) {
-      return expr;
-    }
-    if (expr instanceof DefineNameExpression) {
-      return new CellExpression(
-        new Token(TokenType.IDENTIFIER, expr.value.value.toUpperCase()),
-        'relative',
-        null,
-      );
-    }
-    if (expr instanceof LiteralExpression) {
-      if (expr.value.type === TokenType.NUMBER) {
-        return new CellExpression(
-          new Token(TokenType.IDENTIFIER, expr.value.value),
-          'relative',
-          null,
-        );
-      }
-    }
-    throw new CustomError('#REF!');
-  }
-
   private spread(): Expression {
-    let expr = this.primary();
+    let expr = this.call();
     while (this.match(TokenType.COLON)) {
       const operator = this.previous();
-      const right = this.primary();
-      expr = new CellRangeExpression(
-        this.convertToCellExpression(expr),
-        operator,
-        this.convertToCellExpression(right),
-      );
+      const right = this.call();
+      expr = new CellRangeExpression(expr, operator, right);
+    }
+    return expr;
+  }
+  private call(): Expression {
+    let expr = this.primary();
+    if (this.match(TokenType.LEFT_BRACKET)) {
+      if (expr instanceof DefineNameExpression) {
+        expr = this.finishCall(expr.value);
+      } else {
+        throw new CustomError('#NAME?');
+      }
     }
     return expr;
   }
@@ -173,23 +157,17 @@ export class Parser {
       const { value, type } = name;
       const realValue = value.toUpperCase();
       const newToken = new Token(type, realValue);
-      if (this.match(TokenType.LEFT_BRACKET)) {
-        return this.finishCall(name);
+      if (errorSet.has(realValue as ErrorTypes)) {
+        return new ErrorExpression(new Token(type, realValue));
       }
-      if (realValue === '#NAME?' || realValue === '#N/A') {
-        return new ErrorExpression(newToken);
-      }
-      if (errorSet.has(realValue) && this.match(TokenType.BANG)) {
-        return new ErrorExpression(new Token(type, realValue + '!'));
-      }
-      if (this.match(TokenType.BANG)) {
+      if (realValue && realValue[realValue.length - 1] === '!') {
         const expr = this.expression();
         if (expr instanceof CellExpression) {
           return new CellExpression(expr.value, expr.type, name);
         }
         throw new CustomError('#REF!');
       }
-      if (/^[A-Z]+$/i.test(value)) {
+      if (/^[a-z]+$/i.test(value)) {
         return new DefineNameExpression(name);
       }
       if (
@@ -211,9 +189,11 @@ export class Parser {
       this.expect(TokenType.RIGHT_BRACKET);
       return new GroupExpression(value);
     }
-    // if (this.match(TokenType.EMPTY_CHAR)) {
-    // return this.expression();
-    // }
+
+    if (this.peek().type === TokenType.EMPTY_CHAR) {
+      while (!this.isAtEnd() && this.match(TokenType.EMPTY_CHAR)) {}
+      return this.primary();
+    }
     throw new CustomError('#ERROR!');
   }
   private match(...types: TokenType[]): boolean {

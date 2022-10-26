@@ -25,7 +25,6 @@ export enum TokenType {
   PERCENT, // %
   LESS, // <
   LESS_EQUAL, // <=
-  BANG, // !
   IDENTIFIER, //
   STRING,
   NUMBER,

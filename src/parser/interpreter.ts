@@ -18,6 +18,7 @@ import {
   GroupExpression,
 } from './expression';
 import { CustomError } from './error';
+import { Token } from './token';
 
 export class Interpreter implements Visitor {
   private readonly expressions: Expression[];
@@ -41,19 +42,20 @@ export class Interpreter implements Visitor {
       result.push(this.evaluate(item));
     }
     if (result.length === 1) {
-      const t = result[0];
-      if (t instanceof Range) {
-        if (t.colCount === t.rowCount && t.colCount === 1) {
-          return this.cellDataMap.get(t.row, t.col, t.sheetId);
-        } else {
-          throw new CustomError('#REF!');
-        }
-      } else {
-        return t;
-      }
+      return this.getRangeCellValue(result[0]);
     } else {
       throw new CustomError('#ERROR!');
     }
+  }
+  private getRangeCellValue(value: any): any {
+    if (value instanceof Range) {
+      if (value.colCount === value.rowCount && value.colCount === 1) {
+        return this.cellDataMap.get(value.row, value.col, value.sheetId);
+      } else {
+        throw new CustomError('#REF!');
+      }
+    }
+    return value;
   }
   private checkNumber(value: any) {
     if (typeof value !== 'number') {
@@ -61,8 +63,10 @@ export class Interpreter implements Visitor {
     }
   }
   visitBinaryExpression(data: BinaryExpression): any {
-    const left = this.evaluate(data.left);
-    const right = this.evaluate(data.right);
+    let left = this.evaluate(data.left);
+    let right = this.evaluate(data.right);
+    left = this.getRangeCellValue(left);
+    right = this.getRangeCellValue(right);
     switch (data.operator.type) {
       case TokenType.MINUS:
         this.checkNumber(left);
@@ -101,7 +105,6 @@ export class Interpreter implements Visitor {
         return left <= right;
       case TokenType.CONCATENATE:
         return `${left}${right}`;
-
       default:
         throw new CustomError('#VALUE!');
     }
@@ -170,11 +173,35 @@ export class Interpreter implements Visitor {
         throw new CustomError('#VALUE!');
     }
   }
+  private convertToCellExpression(expr: Expression): CellExpression {
+    if (expr instanceof CellExpression) {
+      return expr;
+    }
+    if (expr instanceof DefineNameExpression) {
+      return new CellExpression(
+        new Token(TokenType.IDENTIFIER, expr.value.value.toUpperCase()),
+        'relative',
+        null,
+      );
+    }
+    if (expr instanceof LiteralExpression) {
+      if (expr.value.type === TokenType.NUMBER && /^\d+$/.test(expr.value.value)) {
+        return new CellExpression(
+          new Token(TokenType.IDENTIFIER, expr.value.value),
+          'relative',
+          null,
+        );
+      }
+    }
+    throw new CustomError('#REF!');
+  }
   visitCellRangeExpression(expr: CellRangeExpression): any {
     switch (expr.operator.type) {
       case TokenType.COLON: {
+        const left = this.convertToCellExpression(expr.left);
+        const right = this.convertToCellExpression(expr.right);
         const result = parseReference(
-          `${expr.left.value.value}:${expr.right.value.value}`,
+          `${left.value.value}:${right.value.value}`,
         );
         if (result === null) {
           throw new CustomError('#REF!');

@@ -107,10 +107,10 @@ export class ErrorExpression implements Expression {
   }
 }
 export class CellRangeExpression implements Expression {
-  readonly left: CellExpression;
-  readonly right: CellExpression;
+  readonly left: Expression;
+  readonly right: Expression;
   readonly operator: Token;
-  constructor(left: CellExpression, operator: Token, right: CellExpression) {
+  constructor(left: Expression, operator: Token, right: Expression) {
     this.left = left;
     this.operator = operator;
     this.right = right;
