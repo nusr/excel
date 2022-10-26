@@ -173,7 +173,7 @@ export class Interpreter implements Visitor {
         throw new CustomError('#VALUE!');
     }
   }
-  private convertToCellExpression(expr: Expression): CellExpression {
+  private convertToCellExpression(expr: Expression): CellExpression | null {
     if (expr instanceof CellExpression) {
       return expr;
     }
@@ -185,7 +185,10 @@ export class Interpreter implements Visitor {
       );
     }
     if (expr instanceof LiteralExpression) {
-      if (expr.value.type === TokenType.NUMBER && /^\d+$/.test(expr.value.value)) {
+      if (
+        expr.value.type === TokenType.NUMBER &&
+        /^\d+$/.test(expr.value.value)
+      ) {
         return new CellExpression(
           new Token(TokenType.IDENTIFIER, expr.value.value),
           'relative',
@@ -193,20 +196,25 @@ export class Interpreter implements Visitor {
         );
       }
     }
-    throw new CustomError('#REF!');
+    return null;
   }
   visitCellRangeExpression(expr: CellRangeExpression): any {
     switch (expr.operator.type) {
       case TokenType.COLON: {
         const left = this.convertToCellExpression(expr.left);
         const right = this.convertToCellExpression(expr.right);
-        const result = parseReference(
-          `${left.value.value}:${right.value.value}`,
-        );
-        if (result === null) {
+        if (left !== null && right !== null) {
+          const result = parseReference(
+            `${left.value.value}:${right.value.value}`,
+          );
+          if (result === null) {
+            throw new CustomError('#REF!');
+          }
+          return result;
+        } else {
           throw new CustomError('#REF!');
         }
-        return result;
+        break;
       }
       default:
         throw new CustomError('#REF!');

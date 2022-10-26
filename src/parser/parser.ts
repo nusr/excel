@@ -126,6 +126,7 @@ export class Parser {
     }
     return expr;
   }
+
   private finishCall(name: Token): CallExpression {
     const params: Expression[] = [];
     if (!this.check(TokenType.RIGHT_BRACKET)) {
@@ -189,11 +190,9 @@ export class Parser {
       this.expect(TokenType.RIGHT_BRACKET);
       return new GroupExpression(value);
     }
-
-    if (this.peek().type === TokenType.EMPTY_CHAR) {
-      while (!this.isAtEnd() && this.match(TokenType.EMPTY_CHAR)) {}
-      return this.primary();
-    }
+    // if (this.match(TokenType.EMPTY_CHAR)) {
+      // return this.expression();
+    // }
     throw new CustomError('#ERROR!');
   }
   private match(...types: TokenType[]): boolean {
