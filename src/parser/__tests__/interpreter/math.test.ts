@@ -117,4 +117,8 @@ describe('parseFormula math', () => {
       { error: '#VALUE!', result: null },
     );
   });
+  it('operator %', () => {
+    expect(parseFormula('1%')).toEqual({ error: null, result: 0.01 });
+    expect(parseFormula('(1+2)%')).toEqual({ error: null, result: 0.03 });
+  });
 });

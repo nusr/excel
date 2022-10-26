@@ -6,7 +6,12 @@ import {
   ErrorTypes,
   VariableMap,
 } from '@/types';
-import type { Visitor, Expression, CellRangeExpression } from './expression';
+import type {
+  Visitor,
+  Expression,
+  CellRangeExpression,
+  PostUnaryExpression,
+} from './expression';
 import {
   BinaryExpression,
   UnaryExpression,
@@ -222,6 +227,16 @@ export class Interpreter implements Visitor {
   }
   visitGroupExpression(expr: GroupExpression): any {
     return this.evaluate(expr.value);
+  }
+  visitPostUnaryExpression(expr: PostUnaryExpression): any {
+    const value = this.evaluate(expr.left);
+    switch (expr.operator.type) {
+      case TokenType.PERCENT:
+        this.checkNumber(value);
+        return value * 0.01;
+      default:
+        throw new CustomError('#VALUE!');
+    }
   }
   private evaluate(expr: Expression) {
     return expr.accept(this);

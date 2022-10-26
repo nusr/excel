@@ -4,6 +4,7 @@ import {
   DefineNameExpression,
   Expression,
   GroupExpression,
+  PostUnaryExpression,
 } from './expression';
 import {
   BinaryExpression,
@@ -104,7 +105,15 @@ export class Parser {
       const right = this.unary();
       return new UnaryExpression(operator, right);
     }
-    return this.spread();
+    return this.postUnary();
+  }
+  private postUnary(): Expression {
+    let expr = this.spread();
+    if(this.match(TokenType.PERCENT)) {
+      const operator = this.previous();
+      expr = new PostUnaryExpression(operator, expr)
+    }
+    return expr
   }
   private spread(): Expression {
     let expr = this.call();

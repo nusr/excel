@@ -3,6 +3,7 @@ import {
   BinaryExpression,
   GroupExpression,
   LiteralExpression,
+  PostUnaryExpression,
 } from '../../expression';
 import { Token } from '../../token';
 import { TokenType } from '../../../types';
@@ -135,6 +136,15 @@ describe('operators', function () {
           ),
           new Token(TokenType.SLASH, '/'),
           new LiteralExpression(new Token(TokenType.NUMBER, '3')),
+        ),
+      );
+    });
+    it('2%', () => {
+      const tree = buildTree('2%');
+      expect(tree).toEqual(
+        new PostUnaryExpression(
+          new Token(TokenType.PERCENT, '%'),
+          new LiteralExpression(new Token(TokenType.NUMBER, '2')),
         ),
       );
     });

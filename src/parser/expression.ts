@@ -4,6 +4,7 @@ import type { ReferenceType } from '@/types';
 export interface Visitor {
   visitBinaryExpression(expr: BinaryExpression): any;
   visitUnaryExpression(expr: UnaryExpression): any;
+  visitPostUnaryExpression(expr: PostUnaryExpression): any;
   visitLiteralExpression(expr: LiteralExpression): any;
   visitCellExpression(expr: CellExpression): any;
   visitCellRangeExpression(expr: CellRangeExpression): any;
@@ -44,6 +45,21 @@ export class UnaryExpression implements Expression {
   }
   accept(visitor: Visitor) {
     return visitor.visitUnaryExpression(this);
+  }
+  toString(): string {
+    return '';
+  }
+}
+
+export class PostUnaryExpression implements Expression {
+  readonly left: Expression;
+  readonly operator: Token;
+  constructor(operator: Token, left: Expression) {
+    this.operator = operator;
+    this.left = left;
+  }
+  accept(visitor: Visitor) {
+    return visitor.visitPostUnaryExpression(this);
   }
   toString(): string {
     return '';
