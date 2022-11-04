@@ -17,4 +17,4 @@ export function handleFormula(): void {
   const temp = JSON.stringify(formulas);
   fetch(`/formula?data=${encodeURIComponent(temp)}`);
 }
-handleFormula();
+// handleFormula();

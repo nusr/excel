@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect } from "@/react";
 import theme from "../theme";
 
 export function useTheme(): void {

@@ -1,39 +1,42 @@
-import React, { memo } from "react";
-import { classnames } from "@/util";
-import { noop } from "@/lodash";
+import { Component, h, PropsType } from '@/react';
+import { classnames } from '@/util';
+import { noop } from '@/lodash';
+import type { BaseIconName } from '@/types';
+import { BaseIcon, BaseIconProps } from '../BaseIcon';
 
-type ButtonProps = {
-  type?: "normal" | "circle";
+export interface ButtonProps extends PropsType {
+  type?: 'normal' | 'circle';
+  icon?: BaseIconName;
   active?: boolean;
-  className?: string;
   disabled?: boolean;
-  style?: React.CSSProperties;
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 };
 
-export const Button: React.FunctionComponent<React.PropsWithChildren<ButtonProps>> = memo((props) => {
+export const Button: Component<ButtonProps> = (props) => {
   const {
-    children,
-    style = {},
-    className = "",
+    children = [],
+    className = '',
     onClick = noop,
     disabled = false,
     active = false,
-    type = "normal",
+    type = 'normal',
+    style,
+    icon,
   } = props;
-  return (
-    <div
-      onClick={onClick}
-      style={style}
-      className={classnames("button-wrapper", className, {
+  if (icon) {
+    children.push(h<BaseIconProps>(BaseIcon, { name: icon }));
+  }
+  return h(
+    'div',
+    {
+      onClick,
+      className: classnames('button-wrapper', className, {
         disabled,
         active,
-        circle: type === "circle",
-      })}
-    >
-      {children}
-    </div>
+        circle: type === 'circle',
+      }),
+      style,
+    },
+    ...children,
   );
-});
-
-Button.displayName = "Button";
+};

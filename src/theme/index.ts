@@ -1,6 +1,6 @@
 import size from "./size";
 import color from "./color";
-const theme: Record<string, string> = {
+const theme = {
   ...size,
   ...color,
 };

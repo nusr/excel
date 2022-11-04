@@ -1,72 +1,59 @@
-import React, { useEffect } from "react";
-import { Lazy } from "@/components";
-import { useDispatch, useController } from "@/store";
-import { MOCK_MODEL } from "@/model";
-import { State } from "@/types";
-import { useTheme } from "@/hooks";
+import { h, Component } from '@/react';
+// import { Lazy } from '@/components';
+// import { useDispatch, useController } from '@/store';
+// import { MOCK_MODEL } from '@/model';
+// import { State } from '@/types';
+import { useTheme } from '@/hooks';
+import {
+  CanvasContainer,
+  SheetBarContainer,
+  ToolbarContainer,
+  FormulaBarContainer,
+} from '@/containers';
 
-const AsyncCanvasContainer = React.lazy(
-  () => import("./lazyLoad/CanvasContainer")
-);
-
-const AsyncToolbarContainer = React.lazy(
-  () => import("./lazyLoad/ToolbarContainer")
-);
-const AsyncSheetBarContainer = React.lazy(
-  () => import("./lazyLoad/SheetBarContainer")
-);
-const AsyncFormulaBar = React.lazy(() => import("./lazyLoad/FormulaBar"));
-
-export const App = React.memo(() => {
-  const controller = useController();
-  const dispatch = useDispatch();
+export const App: Component = () => {
+  // const controller = useController();
+  // const dispatch = useDispatch();
   useTheme();
-  useEffect(() => {
-    controller.on("change", (data) => {
-      const { changeSet } = data;
-      const state: Partial<State> = {
-        canRedo: controller.canRedo(),
-        canUndo: controller.canUndo(),
-      };
-      if (changeSet.has("contentChange")) {
-        const { workbook, currentSheetId } = controller.model;
-        state.sheetList = workbook;
-        state.currentSheetId = currentSheetId;
-      }
-      const cell = controller.queryCell(controller.queryActiveCell());
-      const { isCellEditing, renderController } = controller;
-      if (renderController) {
-        const config = renderController.queryCell(cell.row, cell.col);
-        state.activeCell = { ...cell, ...config };
-      }
-      state.isCellEditing = isCellEditing;
-      if (isCellEditing) {
-        const editCellValue =
-          (cell.formula ? `=${cell.formula}` : "") || String(cell.value || "");
-        state.editCellValue = editCellValue;
-      } else {
-        state.editCellValue = "";
-      }
-      dispatch({ type: "BATCH", payload: state });
-    });
-    controller.loadJSON(MOCK_MODEL);
-  }, [dispatch, controller]);
-  return (
-    <div className="app-container" id="AppContainer">
-      <Lazy>
-        <AsyncToolbarContainer />
-      </Lazy>
-      <Lazy>
-        <AsyncFormulaBar />
-      </Lazy>
-      <Lazy>
-        <AsyncCanvasContainer />
-      </Lazy>
-      <Lazy>
-        <AsyncSheetBarContainer />
-      </Lazy>
-    </div>
+  // useEffect(() => {
+  // controller.on('change', (data) => {
+  // const { changeSet } = data;
+  // const state: Partial<State> = {
+  // canRedo: controller.canRedo(),
+  // canUndo: controller.canUndo(),
+  // };
+  // if (changeSet.has('contentChange')) {
+  // const { workbook, currentSheetId } = controller.model;
+  // state.sheetList = workbook;
+  // state.currentSheetId = currentSheetId;
+  // }
+  // const cell = controller.queryCell(controller.queryActiveCell());
+  // const { isCellEditing, renderController } = controller;
+  // if (renderController) {
+  // const config = renderController.queryCell(cell.row, cell.col);
+  // state.activeCell = { ...cell, ...config };
+  // }
+  // state.isCellEditing = isCellEditing;
+  // if (isCellEditing) {
+  // const editCellValue =
+  // (cell.formula ? `=${cell.formula}` : '') || String(cell.value || '');
+  // state.editCellValue = editCellValue;
+  // } else {
+  // state.editCellValue = '';
+  // }
+  // dispatch({ type: 'BATCH', payload: state });
+  // });
+  // controller.loadJSON(MOCK_MODEL);
+  // }, [dispatch, controller]);
+  return h(
+    'div',
+    {
+      className: 'app-container',
+      id: 'AppContainer',
+    },
+    h(ToolbarContainer, {}),
+    h(FormulaBarContainer, {}),
+    h(CanvasContainer, {}),
+    h(SheetBarContainer, {}),
   );
-});
-
-App.displayName = "APP";
+};

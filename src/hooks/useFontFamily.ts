@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { FONT_FAMILY_LIST, isSupportFontFamily } from "@/util";
-import type { OptionItem } from "@/components";
+import { useEffect, useState, Dispatch, SetStateAction } from '@/react';
+import { FONT_FAMILY_LIST, isSupportFontFamily } from '@/util';
+import type { OptionItem } from '@/components';
 export function useFontFamily(): [
   list: OptionItem[],
-  setList: React.Dispatch<React.SetStateAction<OptionItem[]>>
+  setList: Dispatch<SetStateAction<OptionItem[]>>,
 ] {
   const [fontFamilyList, setFontFamilyList] = useState<OptionItem[]>([]);
   useEffect(() => {

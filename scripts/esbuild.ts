@@ -147,7 +147,7 @@ function parseSVGFile(text: string, fileName: string) {
 }
 
 async function buildIcon() {
-  const SVG_SYMBOL_TAG = "__SVG_SYMBOL_NODE__";
+  const SVG_SYMBOL_TAG = '__SVG_SYMBOL_NODE__';
   const dir = path.join(process.cwd(), 'icons');
   const files = fs.readdirSync(dir);
   const svgList: string[] = [];
@@ -185,12 +185,12 @@ async function buildIcon() {
 }
 
 async function main() {
-  deleteDir('lib');
-  deleteDir('dist');
   const startPath = path.join(distDir, 'excel.umd.js');
   if (isDev) {
     return buildUMD(startPath);
   }
+  deleteDir('lib');
+  deleteDir('dist');
   const list = await Promise.all([
     buildUMD(startPath),
     buildESM(packageJson.module),
@@ -199,7 +199,7 @@ async function main() {
     buildUMD(packageJson.main.replace('.js', '.min.js')),
   ]);
   buildHtml();
-  await buildIcon()
+  await buildIcon();
   return list;
 }
 
