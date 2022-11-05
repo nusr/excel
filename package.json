@@ -23,7 +23,6 @@
   "author": "Steve Xu <1161176156@qq.com>",
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
-  "dependencies": {},
   "devDependencies": {
     "@types/jest": "29.2.0",
     "esbuild": "0.15.12",

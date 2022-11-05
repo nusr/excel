@@ -1,13 +1,13 @@
-import { SHEET_NAME_PREFIX } from "./constant";
-import type { WorksheetType, ResultType } from "@/types";
+import { SHEET_NAME_PREFIX } from './constant';
+import type { WorksheetType, ResultType } from '@/types';
 export const isString = (value: ResultType): boolean => {
-  return typeof value === "string";
+  return typeof value === 'string';
 };
 export function isNumber(value: ResultType): boolean {
-  if (typeof value === "number" && !window.isNaN(value)) {
+  if (typeof value === 'number' && !window.isNaN(value)) {
     return true;
   }
-  if (typeof value !== "string") {
+  if (typeof value !== 'string') {
     return false;
   }
   const temp = parseFloat(value);
@@ -32,7 +32,7 @@ export function parseNumberArray(list: ResultType[]): number[] {
   return result;
 }
 
-export function getListMaxNum(list: string[] = [], prefix = ""): number {
+export function getListMaxNum(list: string[] = [], prefix = ''): number {
   const idList: number[] = list
     .map((item) => {
       if (isNumber(item) || prefix.length === 0) {
@@ -40,7 +40,7 @@ export function getListMaxNum(list: string[] = [], prefix = ""): number {
       }
       return parseInt(
         item.includes(prefix) ? item.slice(prefix.length) : item,
-        10
+        10,
       );
     })
     .filter((v) => !isNaN(v));
@@ -48,15 +48,19 @@ export function getListMaxNum(list: string[] = [], prefix = ""): number {
 }
 
 export function getDefaultSheetInfo(
-  list: WorksheetType[] = []
-): Pick<WorksheetType, "name" | "sheetId"> {
+  list: WorksheetType[] = [],
+): Pick<WorksheetType, 'name' | 'sheetId'> {
   const sheetNum = getListMaxNum(
     list.map((item) => item.name),
-    SHEET_NAME_PREFIX
+    SHEET_NAME_PREFIX,
   );
   const sheetId = getListMaxNum(list.map((item) => item.sheetId)) + 1;
   return {
     name: `${SHEET_NAME_PREFIX}${sheetNum + 1}`,
     sheetId: String(sheetId),
   };
+}
+
+export function isTestEnv(): boolean {
+  return process.env.NODE_ENV === 'test';
 }

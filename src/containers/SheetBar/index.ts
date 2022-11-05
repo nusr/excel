@@ -48,27 +48,5 @@ export const SheetBarContainer: Component = () => {
       }),
     ),
   );
-  // return x`
-  // <div className="sheet-bar-wrapper" id="sheet-bar-container">
-  // <div className="sheet-bar-list ">
-  // {sheetList.map((item) => (
-  // <div
-  // key={item.sheetId}
-  // onMouseDown={() => handleClickSheet(item)}
-  // className={classnames("sheet-bar-item", {
-  // active: currentSheetId === item.sheetId,
-  // })}
-  // >
-  // {item.name}
-  // </div>
-  // ))}
-  // </div>
-  // <div style={{ marginLeft: 20 }}>
-  // <Button style={addButtonStyle} type="circle" onClick={handleAddSheet}>
-  // <BaseIcon name="plus" />
-  // </Button>
-  // </div>
-  // </div>
-  // `;
 };
 SheetBarContainer.displayName = 'SheetBarContainer';

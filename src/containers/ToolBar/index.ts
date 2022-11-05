@@ -64,7 +64,6 @@ export const ToolbarContainer: Component = () => {
     h<ButtonProps>(Button, {
       icon: 'italic',
       active: isItalic,
-      testId: 'toolbar-italic',
       onClick: () => {
         setCellStyle({
           isItalic: !isItalic,

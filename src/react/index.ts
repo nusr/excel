@@ -11,5 +11,4 @@ export {
   useEffect,
   useReducer,
   useState,
-  useOnceMount,
 } from './react';

@@ -1,13 +1,8 @@
 import * as path from 'path';
-import * as fs from 'fs';
 
 const rootDir = process.cwd();
 const transformPath = path.join(__dirname, 'transform.js');
-fs.rm(path.join(process.cwd(), 'dist'), { recursive: true }, (error) => {
-  if (error) {
-    console.log(error);
-  }
-});
+
 export default {
   rootDir,
   testEnvironment: 'jsdom',
@@ -16,10 +11,8 @@ export default {
     '^.+\\.tsx?$': transformPath,
   },
   collectCoverageFrom: [
-    'src/formula/**/*.{ts,tsx}',
-    'src/lodash/**/*.{ts,tsx}',
-    'src/parser/**/*.{ts,tsx}',
-    'src/util/**/*.{ts,tsx}',
+    'src/**/*.{ts,tsx}',
+    '!src/theme/*.{ts,tsx}',
   ],
 
   coverageReporters: [

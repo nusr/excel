@@ -2,7 +2,7 @@ import { h, Component } from '@/react';
 import globalStore from '@/store';
 const inputId = 'formula-editor';
 
-export const FormulaEditor: Component = (props, children, forceUpdate) => {
+export const FormulaEditor: Component = () => {
   const activeCell = globalStore.get('activeCell');
   const editCellValue = globalStore.get('editCellValue');
   const isCellEditing = globalStore.get('isCellEditing');

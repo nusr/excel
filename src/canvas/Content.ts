@@ -1,5 +1,5 @@
 import { isEmpty } from '@/lodash';
-import { thinLineWidth, npx, dpr, intToColumnName } from '@/util';
+import { thinLineWidth, npx, dpr, intToColumnName, isTestEnv } from '@/util';
 import { Base } from './Base';
 import theme from '@/theme';
 import {
@@ -53,6 +53,9 @@ export class Content extends Base {
     this.ctx.restore();
   }
   protected renderTriangle(): void {
+    if (isTestEnv()) {
+      return;
+    }
     const { renderController } = this;
 
     const config = renderController.getHeaderSize();

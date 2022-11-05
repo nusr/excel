@@ -1,10 +1,9 @@
 import { h, Component } from '@/react';
-
-import theme from '../theme';
+import theme from './theme';
 import { Model, MOCK_MODEL } from '@/model';
 import { Controller, Scroll } from '@/controller';
 import { MAIN_CANVAS_ID } from '@/util';
-import { MainCanvas } from '@/canvas';
+import { MainCanvas, RenderController } from '@/canvas';
 import globalStore from '@/store';
 import {
   CanvasContainer,
@@ -43,7 +42,6 @@ export const App: Component = () => {
     'div',
     {
       className: 'app-container',
-      id: 'AppContainer',
     },
     h(ToolbarContainer, {}),
     h(FormulaBarContainer, {}),
@@ -65,8 +63,12 @@ App.onceMount = (forceUpdate) => {
   )!;
   const controller = new Controller(new Model(), new Scroll());
   globalStore.setController(controller);
-  const mainCanvas = new MainCanvas(controller, canvas);
-
+  const mainCanvas = new MainCanvas(
+    controller,
+    new RenderController(canvas),
+    canvas,
+  );
+  mainCanvas.addEvents();
   controller.setHooks({
     focus: () => {
       canvas.focus();

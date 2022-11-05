@@ -1,8 +1,8 @@
 import { dpr, npxLine, isSheet } from '@/util';
-import { CanvasOverlayPosition } from '@/types';
 import theme from '@/theme';
 import { Base } from './Base';
 import { fillRect, renderCell, resizeCanvas, drawLines } from './util';
+import type { CanvasOverlayPosition } from '@/types';
 
 export class Selection extends Base {
   renderFillRect(fillStyle: string, data: CanvasOverlayPosition): void {

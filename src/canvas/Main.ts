@@ -6,6 +6,7 @@ import {
   isSheet,
   canvasLog,
   DOUBLE_CLICK_TIME,
+  isTestEnv,
 } from '@/util';
 import { Content } from './Content';
 import { CanvasOverlayPosition, EventType, IController } from '@/types';
@@ -16,38 +17,37 @@ import { RenderController } from './Controller';
 
 export class MainCanvas {
   private lastTimeStamp = 0;
-  private canvasRect: DOMRect;
   private ctx: CanvasRenderingContext2D;
   private controller: IController;
   private canvas: HTMLCanvasElement;
   private content: Content;
   private selection: Selection;
   private renderController: RenderController;
-  constructor(controller: IController, canvas: HTMLCanvasElement) {
+  constructor(
+    controller: IController,
+    renderController: RenderController,
+    canvas: HTMLCanvasElement,
+    content: Content = new Content(controller, renderController, 'content'),
+    selection: Selection = new Selection(
+      controller,
+      renderController,
+      'selection',
+    ),
+  ) {
     this.controller = controller;
-    this.renderController = new RenderController(canvas);
+    this.renderController = renderController;
     this.canvas = canvas;
-    this.canvasRect = this.canvas.getBoundingClientRect();
     const ctx = canvas.getContext('2d');
     assert(!!ctx);
     this.ctx = ctx;
     const size = dpr();
     this.ctx.scale(size, size);
-    this.content = new Content({
-      controller,
-      name: 'Content',
-      renderController: this.renderController,
-    });
-    this.selection = new Selection({
-      controller,
-      name: 'Selection',
-      renderController: this.renderController,
-    });
+    this.content = content;
+    this.selection = selection;
     this.checkChange({ changeSet: new Set(['contentChange']) });
-    this.addEvents();
   }
   queryCell(row: number, col: number): CanvasOverlayPosition {
-    return this.renderController.queryCell(row, col)
+    return this.renderController.queryCell(row, col);
   }
   checkChange = (params: EventType['change']) => {
     this.render(params);
@@ -59,6 +59,9 @@ export class MainCanvas {
     }
   };
   addEvents(): void {
+    if (isTestEnv()) {
+      return;
+    }
     const { canvas } = this;
     canvas.addEventListener('mousedown', this.mouseDown);
     canvas.addEventListener('mousemove', this.mouseMove);
@@ -66,6 +69,9 @@ export class MainCanvas {
     window.addEventListener('resize', this.resize);
   }
   removeEvents(): void {
+    if (isTestEnv()) {
+      return;
+    }
     const { canvas } = this;
     canvas.removeEventListener('mousedown', this.mouseDown);
     canvas.removeEventListener('mousemove', this.mouseMove);
@@ -73,12 +79,12 @@ export class MainCanvas {
     window.removeEventListener('resize', this.resize);
   }
   mouseDown = (event: MouseEvent): void => {
-    // interactionLog(event);
+    const canvasRect = this.canvas.getBoundingClientRect();
     const { timeStamp, clientX, clientY } = event;
     const { controller } = this;
     const { width, height } = this.renderController.getHeaderSize();
-    const x = clientX - this.canvasRect.left;
-    const y = clientY - this.canvasRect.top;
+    const x = clientX - canvasRect.left;
+    const y = clientY - canvasRect.top;
     const position = this.renderController.getHitInfo(event);
     if (width > x && height > y) {
       controller.selectAll(position.row, position.col);
@@ -110,11 +116,12 @@ export class MainCanvas {
     this.lastTimeStamp = timeStamp;
   };
   mouseMove = (event: MouseEvent): void => {
+    const rect = this.canvas.getBoundingClientRect();
     const { clientX, clientY } = event;
     const { controller } = this;
     const { width, height } = this.renderController.getHeaderSize();
-    const x = clientX - this.canvasRect.left;
-    const y = clientY - this.canvasRect.top;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
     const checkMove = x > width && y > height && event.buttons === 1;
     if (checkMove) {
       const position = this.renderController.getHitInfo(event);
@@ -198,6 +205,7 @@ export class MainCanvas {
 
     this.selection.render(width, height, selectAll);
     canvasLog('render selection');
+
     this.ctx.drawImage(this.content.canvas, 0, 0);
     this.ctx.drawImage(this.selection.canvas, 0, 0);
 

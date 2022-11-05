@@ -9,12 +9,3 @@ const formulas: FormulaType = {
   ...mathFormulas,
 };
 export default formulas;
-
-export function handleFormula(): void {
-  if (process.env.NODE_ENV !== "development") {
-    return;
-  }
-  const temp = JSON.stringify(formulas);
-  fetch(`/formula?data=${encodeURIComponent(temp)}`);
-}
-// handleFormula();

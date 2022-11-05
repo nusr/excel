@@ -1,5 +1,5 @@
 import { Component, h } from '@/react';
-import { classnames, TEST_ID_KEY } from '@/util';
+import { classnames } from '@/util';
 import { noop } from '@/lodash';
 import type { BaseIconName } from '@/types';
 import { BaseIcon, BaseIconProps } from '../BaseIcon';
@@ -12,7 +12,6 @@ export interface ButtonProps {
   disabled?: boolean;
   onClick?: (event: MouseEvent) => void;
   className?: string;
-  testId?: string;
 }
 
 export const Button: Component<ButtonProps> = (props, children = []) => {
@@ -24,7 +23,6 @@ export const Button: Component<ButtonProps> = (props, children = []) => {
     type = 'normal',
     style,
     icon,
-    testId,
   } = props;
   if (icon && children.length === 0) {
     children.push(h<BaseIconProps>(BaseIcon, { name: icon }));
@@ -39,7 +37,6 @@ export const Button: Component<ButtonProps> = (props, children = []) => {
         circle: type === 'circle',
       }),
       style,
-      [TEST_ID_KEY]: testId,
     },
     ...children,
   );

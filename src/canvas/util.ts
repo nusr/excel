@@ -9,6 +9,7 @@ import {
   assert,
   ERROR_SET,
   ERROR_FORMULA_COLOR,
+  isTestEnv,
 } from "@/util";
 import { isEmpty, isNil } from "@/lodash";
 import { CellInfo, ErrorTypes, EWrap } from "@/types";
@@ -17,6 +18,9 @@ const getStyle = (
   key: "lineHeight" | "letterSpacing",
   dom: HTMLElement = document.body
 ): number => {
+  if (isTestEnv()) {
+    return 20;
+  }
   return parseInt(window.getComputedStyle(dom)[key]);
 };
 

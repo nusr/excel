@@ -103,17 +103,12 @@ export function useState<S>(
   return useReducer((_, v) => v, initialState);
 }
 
-export const useEffect = (cb: HooksType['cb'], args = []) => {
+export const useEffect = (cb: HooksType['cb'], args: any[] = []) => {
   const hook = getHook(undefined);
   if (changed(hook.value, args)) {
     hook.value = args;
     hook.cb = cb;
   }
-};
-
-export const useOnceMount = (cb: HooksType['cb']) => {
-  const hook = getHook(undefined);
-  hook.cb = cb;
 };
 
 const changed = (a: any[], b: any[]) =>
@@ -160,7 +155,7 @@ export const render = (
     forceUpdate = () => render(nodeList, dom);
     // Current component re-rendering function (global, used by some hooks).
     while (v.element && typeof v.element === 'function') {
-      if (v.element.onceMount) {
+      if (v?.element?.onceMount) {
         mountList.push({
           onceMount: v.element.onceMount,
           forceUpdate,
@@ -206,16 +201,17 @@ export const render = (
     }
     if (v.element && !isRenderHtml) {
       node.e = v.element;
-      for (const propName of Object.keys(v.props)) {
-        if (node[propName] !== v.props[propName]) {
-          if (!v.props[propName]) {
+      const props = v.props || {};
+      for (const propName of Object.keys(props)) {
+        if (node[propName] !== props[propName]) {
+          if (!props[propName]) {
             continue;
           }
           const key = propName;
           if (nsURI) {
-            node.setAttribute(key, v.props[key]);
+            node.setAttribute(key, props[key]);
           } else {
-            node[key] = v.props[key];
+            node[key] = props[key];
           }
         }
       }
@@ -255,7 +251,9 @@ export const render = (
     );
 
   for (const item of mountList) {
-    item.onceMount(item.forceUpdate);
+    if (item.onceMount && item.forceUpdate) {
+      item.onceMount(item.forceUpdate);
+    }
   }
   for (let child; (child = dom.childNodes[nodeList.length]); ) {
     render([], dom.removeChild(child) as any);
