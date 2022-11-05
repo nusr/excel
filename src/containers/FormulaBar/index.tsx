@@ -1,11 +1,10 @@
 import { h, Component } from '@/react';
 import { FormulaEditor } from './FormulaEditor';
 import { intToColumnName } from '@/util';
-const activeCell = {
-  row: 23,
-  col: 22,
-};
+import globalStore from '@/store';
+
 export const FormulaBarContainer: Component = () => {
+  const activeCell = globalStore.get('activeCell');
   return h(
     'div',
     {

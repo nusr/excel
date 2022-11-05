@@ -1,6 +1,6 @@
 export interface IScrollValue {
-  x: number;
-  y: number;
-  rowIndex: number;
-  colIndex: number;
+  getX(): number;
+  getY(): number;
+  getRowIndex(): number;
+  getColIndex(): number;
 }

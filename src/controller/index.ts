@@ -1,1 +1,2 @@
-export { Controller } from "./Controller";
+export { Controller } from './Controller';
+export { Scroll } from './Scroll';

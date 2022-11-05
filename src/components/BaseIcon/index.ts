@@ -15,4 +15,4 @@ export const BaseIcon: Component<BaseIconProps> = (props) => {
     )}" aria-hidden="true"><use xlink:href="#icon-${name}"></use></svg>`,
   });
 };
-BaseIcon.displayName = 'BaseIcon'
+BaseIcon.displayName = 'BaseIcon';

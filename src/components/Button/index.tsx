@@ -1,5 +1,5 @@
 import { Component, h } from '@/react';
-import { classnames } from '@/util';
+import { classnames, TEST_ID_KEY } from '@/util';
 import { noop } from '@/lodash';
 import type { BaseIconName } from '@/types';
 import { BaseIcon, BaseIconProps } from '../BaseIcon';
@@ -10,8 +10,9 @@ export interface ButtonProps {
   style?: string;
   active?: boolean;
   disabled?: boolean;
-  onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onClick?: (event: MouseEvent) => void;
   className?: string;
+  testId?: string;
 }
 
 export const Button: Component<ButtonProps> = (props, children = []) => {
@@ -23,22 +24,24 @@ export const Button: Component<ButtonProps> = (props, children = []) => {
     type = 'normal',
     style,
     icon,
+    testId,
   } = props;
-  if (icon) {
+  if (icon && children.length === 0) {
     children.push(h<BaseIconProps>(BaseIcon, { name: icon }));
   }
   return h(
     'div',
     {
-      onClick,
+      onclick: onClick,
       className: classnames('button-wrapper', className, {
         disabled,
         active,
         circle: type === 'circle',
       }),
       style,
+      [TEST_ID_KEY]: testId,
     },
     ...children,
   );
 };
-Button.displayName = 'Button'
+Button.displayName = 'Button';

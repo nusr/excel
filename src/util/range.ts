@@ -8,7 +8,7 @@ export function isRow(range: IRange): boolean {
 export function isCol(range: IRange): boolean {
   return range.row === range.colCount && range.colCount === 0;
 }
-export class Range {
+export class Range implements IRange {
   row = 0;
   col = 0;
   colCount = 0;

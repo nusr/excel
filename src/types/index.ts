@@ -1,4 +1,4 @@
-export * from './store';
+export * from './components';
 export * from './model';
 export * from './controller';
 export * from './event';

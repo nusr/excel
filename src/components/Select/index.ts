@@ -1,18 +1,13 @@
 import { h, Component } from '@/react';
 import { classnames } from '@/util';
-
-export type OptionItem = {
-  value: string | number;
-  label: string;
-  disabled?: boolean;
-};
+import { OptionItem } from '@/types';
 
 export type SelectProps = {
   value?: string | number;
   style?: string;
   data: Array<string | number | OptionItem>;
   getItemStyle?: (value: string | number) => string;
-  onChange: (value: string) => void;
+  onChange: (value: string | number) => void;
 };
 
 export const Select: Component<SelectProps> = (props) => {
@@ -23,7 +18,7 @@ export const Select: Component<SelectProps> = (props) => {
     onChange,
     getItemStyle = () => '',
   } = props;
-  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = (event: any) => {
     const { value } = event.target;
     onChange(value);
   };
@@ -34,7 +29,7 @@ export const Select: Component<SelectProps> = (props) => {
       value: activeValue,
       style,
       name: 'select',
-      className: 'select-list'
+      className: 'select-list',
     },
     ...data.map((item) => {
       const value = typeof item === 'object' ? item.value : item;
@@ -49,9 +44,9 @@ export const Select: Component<SelectProps> = (props) => {
           style: itemStyle,
           className: classnames('select-item', { disabled }),
         },
-        label,
+        String(label),
       );
     }),
   );
 };
-Select.displayName = 'Select'
+Select.displayName = 'Select';

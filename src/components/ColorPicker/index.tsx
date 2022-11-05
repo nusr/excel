@@ -59,6 +59,7 @@ export const ColorPicker: Component<ColorPickerProps> = (props, children) => {
       className: 'relative',
       style: style,
       onblur: handleBlur,
+      onmouseleave: handleBlur,
     },
     h(
       'div',

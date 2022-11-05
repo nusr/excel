@@ -1,1 +1,0 @@
-export { Interaction } from "./Interaction";

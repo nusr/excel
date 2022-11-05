@@ -1,4 +1,4 @@
-type ForceUpdateType = () => void;
+export type ForceUpdateType = () => void;
 type ReactElement = VNode | string | null | undefined | number;
 type ChildrenType = Array<ReactElement>;
 export interface PropsType {
@@ -8,8 +8,16 @@ export interface PropsType {
   dangerouslySetInnerHTML?: string;
   style?: string;
   key?: string | number;
+  onclick?: (event: MouseEvent) => void;
+  onblur?: (event: Event) => void;
+  onfocus?: (event: FocusEvent) => void;
+  onchange?: (event: Event) => void;
+  onmouseout?: (event: MouseEvent) => void;
+  onmouseleave?: (event: MouseEvent) => void;
+  onkeydown?: (event: KeyboardEvent) => void;
   [key: string]: any;
 }
+type MountType = (forceUpdate: ForceUpdateType) => void;
 export interface Component<T = PropsType> {
   (
     props: T & PropsType,
@@ -17,6 +25,7 @@ export interface Component<T = PropsType> {
     forceUpdate: ForceUpdateType,
   ): ReactElement;
   displayName: string;
+  onceMount?: MountType;
 }
 type ElementType = string | Component<any>;
 interface HooksType {
@@ -52,6 +61,9 @@ export function h<T extends PropsType>(
   props: T,
   ...children: ChildrenType
 ): VNode {
+  if (props.dangerouslySetInnerHTML) {
+    props.dangerouslySetInnerHTML = props.dangerouslySetInnerHTML.trim();
+  }
   return { element, props, children };
 }
 
@@ -99,21 +111,14 @@ export const useEffect = (cb: HooksType['cb'], args = []) => {
   }
 };
 
+export const useOnceMount = (cb: HooksType['cb']) => {
+  const hook = getHook(undefined);
+  hook.cb = cb;
+};
+
 const changed = (a: any[], b: any[]) =>
   !a || a.length !== b.length || b.some((arg, i) => arg !== a[i]);
 
-const createNode = (v: VNode, nsURI: string) => {
-  if (v?.props?.dangerouslySetInnerHTML?.trim()) {
-    const template = document.createElement('span');
-    template.innerHTML = v?.props?.dangerouslySetInnerHTML.trim();
-    return template.childNodes[0];
-  }
-  if (nsURI) {
-    return document.createElementNS(nsURI, v.element as string);
-  } else {
-    return document.createElement(v.element as string);
-  }
-};
 export const render = (
   list: ReactElement | Array<ReactElement>,
   dom: Element & { h?: Record<string, HooksType[]> },
@@ -146,11 +151,22 @@ export const render = (
   const hs: Record<string, HooksType[]> = dom.h || {};
   // Erase hooks storage
   dom.h = {};
+  const mountList: Array<{
+    onceMount: MountType;
+    forceUpdate: ForceUpdateType;
+  }> = [];
   for (let i = 0; i < nodeList.length; i++) {
     let v = nodeList[i];
-    // Current component re-rendering function (global, used by some hooks).
     forceUpdate = () => render(nodeList, dom);
+    // Current component re-rendering function (global, used by some hooks).
     while (v.element && typeof v.element === 'function') {
+      if (v.element.onceMount) {
+        mountList.push({
+          onceMount: v.element.onceMount,
+          forceUpdate,
+        });
+        v.element.onceMount = undefined;
+      }
       // Key, explicit v property or implicit auto-incremented key
       const oldKey = ids.get(v.element) || 1;
       const k = (v.props && v.props.key) || '' + v.element + (oldKey + 1);
@@ -165,21 +181,41 @@ export const render = (
 
     // DOM node builder for the given v node
     const nsURI = ns || (v.props && v.props.xmlns);
-
+    const createNode = () => {
+      if (typeof v === 'string') {
+        return document.createTextNode(v);
+      }
+      if (v?.props?.dangerouslySetInnerHTML?.trim()) {
+        const template = document.createElement('span');
+        template.innerHTML = v?.props?.dangerouslySetInnerHTML;
+        return template.childNodes[0];
+      }
+      if (nsURI) {
+        return document.createElementNS(nsURI, v.element as string);
+      } else {
+        return document.createElement(v.element as string);
+      }
+    };
+    const isRenderHtml = !!v?.props?.dangerouslySetInnerHTML;
     // Corresponding DOM node, if any. Reuse if tag and text matches. Insert
     // new DOM node before otherwise.
     let node = dom.childNodes[i] as any;
+
     if (!node || (v.element ? node.e !== v.element : node.data !== v)) {
-      node = dom.insertBefore(createNode(v, nsURI), node) as any;
+      node = dom.insertBefore(createNode(), node) as any;
     }
-    if (v.element && !v?.props?.dangerouslySetInnerHTML?.trim()) {
+    if (v.element && !isRenderHtml) {
       node.e = v.element;
       for (const propName of Object.keys(v.props)) {
         if (node[propName] !== v.props[propName]) {
+          if (!v.props[propName]) {
+            continue;
+          }
+          const key = propName;
           if (nsURI) {
-            node.setAttribute(propName, v.props[propName]);
+            node.setAttribute(key, v.props[key]);
           } else {
-            node[propName] = v.props[propName];
+            node[key] = v.props[key];
           }
         }
       }
@@ -190,6 +226,7 @@ export const render = (
       node.data = v;
     }
   }
+
   // Iterate over all hooks, if a hook has a useEffect callback set - call it
   // (since the rendering is now done) and remove.
   Object.values(dom.h).forEach((componentHooks) => {
@@ -200,6 +237,7 @@ export const render = (
       }
     });
   });
+
   // For all hooks present in the DOM node before rendering, but not present
   // after - call the cleanup callbacks, if any. This means the corresponding
   // nodes have been removed from DOM and cleanup should happen. Beware, that
@@ -208,7 +246,17 @@ export const render = (
   Object.keys(hs)
     // @ts-ignore
     .filter((k) => !dom.h[k])
-    .forEach((k) => hs[k].forEach((h) => h.cleanup && h.cleanup()));
+    .forEach((k) =>
+      hs[k].forEach((h) => {
+        if (h.cleanup) {
+          h.cleanup();
+        }
+      }),
+    );
+
+  for (const item of mountList) {
+    item.onceMount(item.forceUpdate);
+  }
   for (let child; (child = dom.childNodes[nodeList.length]); ) {
     render([], dom.removeChild(child) as any);
   }

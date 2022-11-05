@@ -1,6 +1,6 @@
-import { IWindowSize } from "./event";
-import { Coordinate, CellInfo } from "./store";
-import { ResultType } from "./parser";
+import { Coordinate } from './components';
+import { ResultType } from './parser';
+import { IRange } from './range';
 export enum EVerticalAlign {
   TOP,
   MIDDLE,
@@ -45,7 +45,7 @@ export type ModelCellType = {
   style?: string;
 };
 
-export type QueryCellResult = Omit<ModelCellType, "style"> & {
+export type QueryCellResult = Omit<ModelCellType, 'style'> & {
   style?: Partial<StyleType>;
 };
 
@@ -60,16 +60,23 @@ export type WorkBookJSON = {
   mergeCells?: string[];
 };
 
-export interface IModelValue {
-  sheetList: WorksheetType[];
-  currentSheetId: string;
+export interface IModel {
+  getCurrentSheetId(): string;
+  canRedo(): boolean;
+  canUndo(): boolean;
+  undo(): void;
+  redo(): void;
   addSheet(): void;
-  getCellsContent(): CellInfo[];
+  setCurrentSheetId(id: string): void;
+  getCellsContent(sheetId?: string): Array<Coordinate>;
+  setActiveCell(row: number, col: number): void;
   toJSON(): WorkBookJSON;
-  fromJSON(data: WorkBookJSON): void;
-  getSheetInfo(id?: string): WorksheetType;
-  getRowTitleHeightAndColTitleWidth(): IWindowSize;
-  setCellValue(row: number, col: number, value: string): void;
-  queryCell(row: number, col: number): CellInfo;
-  clickPositionToCell(x: number, y: number, size: IWindowSize): Coordinate;
+  fromJSON(json: WorkBookJSON): void;
+  queryCell(row: number, col: number, sheetId?: string): QueryCellResult;
+  setCellFormula(formula: string, range: IRange): void;
+  setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void;
+  getSheetInfo(sheetId?: string): WorksheetType;
+  setCellValues(value: string, ranges: IRange[]): void;
+  setCellValue(value: ResultType, range: IRange): void;
+  getSheetList(): WorkBookJSON['workbook'];
 }

@@ -1,6 +1,8 @@
-import { WorkBookJSON } from "./model";
-import { Coordinate } from "./store";
-import { IWindowSize } from "./event";
+import { WorkBookJSON, StyleType, WorksheetType } from './model';
+import { Coordinate, CellInfo } from './components';
+import { IRange } from './range';
+import { IScrollValue } from './scroll';
+import { ChangeEventType } from './event';
 
 export enum EBorderLineType {
   MEDIUM,
@@ -9,21 +11,43 @@ export enum EBorderLineType {
   DOTTED,
   DOUBLE,
 }
-
-export interface IController {
+export type IHooks = {
+  focus: () => void;
+  blur: () => void;
+  modelChange: (val: Set<ChangeEventType>) => void;
+};
+export interface IController extends IScrollValue {
+  getSheetInfo(sheetId?: string): WorksheetType;
+  getCellsContent(sheetId?: string): Array<Coordinate>;
+  getRanges(): IRange[];
+  setHooks(hooks: IHooks): void;
+  getActiveCell(): Coordinate;
+  setActiveCell(
+    row: number,
+    col: number,
+    colCount: number,
+    rowCount: number,
+  ): void;
+  setCurrentSheetId(sheetId: string): void;
+  getCurrentSheetId(): string;
   addSheet(): void;
-  reset(): void;
-  selectAll(): void;
-  loadJSON(json: WorkBookJSON): void;
-  selectRow(offsetX: number, offsetY: number): void;
-  selectCol(offsetX: number, offsetY: number): void;
-  setActiveCell(offsetX: number, offsetY: number): void;
+  selectAll(row: number, col: number): void;
+  selectCol(row: number, col: number): void;
+  selectRow(row: number, col: number): void;
+  setCellEditing(value: boolean): void;
+  getCellEditing(): boolean;
   quitEditing(): void;
   enterEditing(): void;
+  fromJSON(json: WorkBookJSON): void;
+  toJSON(): WorkBookJSON;
+  updateSelection(row: number, col: number): void;
   windowResize(): void;
-  setCurrentSheetId(id: string): void;
-  setCellValue(row: number, col: number, value: string): void;
-  clickPositionToCell(offsetX: number, offsetY: number): Coordinate;
-  getCanvasSize(): IWindowSize;
-  getDrawSize(config: IWindowSize): IWindowSize;
+  setCellStyle(style: Partial<StyleType>, ranges?: IRange[]): void;
+  setCellValue(data: Coordinate, value: string): void;
+  queryCell(data: Coordinate): CellInfo;
+  canRedo(): boolean;
+  canUndo(): boolean;
+  undo(): void;
+  redo(): void;
+  getSheetList(): WorkBookJSON['workbook'];
 }

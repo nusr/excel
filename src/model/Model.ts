@@ -6,6 +6,7 @@ import {
   WorksheetType,
   Coordinate,
   ModelCellType,
+  IModel,
   ResultType,
 } from '@/types';
 import {
@@ -19,19 +20,28 @@ import {
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
 } from '@/util';
-import { Controller } from '../controller/Controller';
-import { parseFormula } from '../parser';
 
-export class Model {
-  public currentSheetId = '';
-  public workbook: WorkBookJSON['workbook'] = [];
-  protected worksheets: WorkBookJSON['worksheets'] = {};
-  public styles: WorkBookJSON['styles'] = {};
-  public mergeCells: WorkBookJSON['mergeCells'] = [];
-  protected controller: Controller;
-  constructor(controller: Controller) {
-    this.controller = controller;
+export class Model implements IModel {
+  private currentSheetId = '';
+  private workbook: WorkBookJSON['workbook'] = [];
+  private worksheets: WorkBookJSON['worksheets'] = {};
+  private styles: WorkBookJSON['styles'] = {};
+  private mergeCells: WorkBookJSON['mergeCells'] = [];
+  // private controller: Controller;
+  // constructor(controller: Controller) {
+  // this.controller = controller;
+  // }
+  getSheetList(): WorkBookJSON['workbook'] {
+    return this.workbook;
   }
+  canUndo(): boolean {
+    return false;
+  }
+  canRedo(): boolean {
+    return false;
+  }
+  undo(): void {}
+  redo(): void {}
   setActiveCell(row: number, col: number): void {
     const index = this.workbook.findIndex(
       (v) => v.sheetId === this.currentSheetId,
@@ -42,7 +52,6 @@ export class Model {
       tempList.splice(index, 1, { ...this.workbook[index], activeCell });
       this.workbook = tempList;
     }
-    this.modelChange();
   }
   addSheet(): void {
     const item = getDefaultSheetInfo(this.workbook);
@@ -51,18 +60,17 @@ export class Model {
       { ...item, colCount: DEFAULT_COL_COUNT, rowCount: DEFAULT_ROW_COUNT },
     ];
     this.currentSheetId = item.sheetId;
-    this.modelChange();
   }
   getSheetInfo(id: string = this.currentSheetId): WorksheetType {
     const item = this.workbook.find((item) => item.sheetId === id);
     assert(item !== undefined);
     return item;
   }
-  protected modelChange(isRecovering = false): void {
-    modelLog('modelChange', isRecovering);
-    if (!isRecovering) {
-      this.controller.history.onChange(this.toJSON());
-    }
+  setCurrentSheetId(id: string): void {
+    this.currentSheetId = id;
+  }
+  getCurrentSheetId(): string {
+    return this.currentSheetId;
   }
   getCellsContent(): Array<Coordinate> {
     const sheetData = this.worksheets[this.currentSheetId];
@@ -97,7 +105,6 @@ export class Model {
     this.styles = styles;
     this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
     this.mergeCells = mergeCells;
-    this.modelChange(true);
   }
   toJSON(): WorkBookJSON {
     const { worksheets, styles, workbook, mergeCells } = this;
@@ -108,18 +115,7 @@ export class Model {
       mergeCells,
     };
   }
-  computeFormula = (formula: string): ResultType => {
-    const result = parseFormula(formula, {
-      get: (row: number, col: number, sheetId: string) => {
-        const temp = this.queryCell(row, col, sheetId);
-        return temp.value;
-      },
-      set: () => {
 
-      }
-    });
-    return result.error ? result.error : result.result;
-  };
   setCellValue(value: ResultType, range: Range): void {
     const { row, col } = range;
     const configPath = `worksheets[${
@@ -143,7 +139,6 @@ export class Model {
       this.setCellFormula('', range);
       this.setCellValue(value, range);
     }
-    this.modelChange();
   }
   setCellStyle(style: Partial<StyleType>, ranges: Range[]): void {
     const [range] = ranges;
@@ -173,7 +168,6 @@ export class Model {
         }
       }
     }
-    this.modelChange();
   }
   queryCell = (
     row: number,

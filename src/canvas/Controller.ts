@@ -3,8 +3,8 @@ import {
   ROW_TITLE_HEIGHT,
   CELL_WIDTH,
   CELL_HEIGHT,
-} from "@/util";
-import { IWindowSize, CanvasOverlayPosition } from "@/types";
+} from '@/util';
+import { IWindowSize, CanvasOverlayPosition } from '@/types';
 export interface IHitInfo {
   width: number;
   height: number;
@@ -16,15 +16,14 @@ export interface IHitInfo {
   pageY: number;
 }
 
-export class Controller {
-  canvas: HTMLCanvasElement;
-  protected readonly rowMap: Map<number, number> = new Map([]);
-  protected readonly colMap: Map<number, number> = new Map([]);
-  isChanged = false;
+export class RenderController {
+  private canvas: HTMLCanvasElement;
+  private readonly rowMap: Map<number, number> = new Map([]);
+  private readonly colMap: Map<number, number> = new Map([]);
+  isChanged = true;
   isRendering = false;
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.isChanged = false;
   }
 
   getHeaderSize(): IWindowSize {

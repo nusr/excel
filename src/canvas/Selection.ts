@@ -1,8 +1,8 @@
-import { dpr, npxLine, isSheet } from "@/util";
-import { CanvasOverlayPosition } from "@/types";
-import theme from "@/theme";
-import { Base } from "./Base";
-import { fillRect, renderCell, resizeCanvas, drawLines } from "./util";
+import { dpr, npxLine, isSheet } from '@/util';
+import { CanvasOverlayPosition } from '@/types';
+import theme from '@/theme';
+import { Base } from './Base';
+import { fillRect, renderCell, resizeCanvas, drawLines } from './util';
 
 export class Selection extends Base {
   renderFillRect(fillStyle: string, data: CanvasOverlayPosition): void {
@@ -14,16 +14,13 @@ export class Selection extends Base {
       data.left + temp,
       data.top + temp,
       data.width - temp,
-      data.height - temp
+      data.height - temp,
     );
   }
   renderSelectedRange(): void {
-    const { controller } = this;
-    const { renderController } = controller;
-    if (!renderController) {
-      return;
-    }
-    const { ranges } = controller;
+    const { controller, renderController } = this;
+
+    const ranges = controller.getRanges();
     const [range] = ranges;
     const size = renderController.getHeaderSize();
     this.ctx.fillStyle = theme.selectionColor;
@@ -58,15 +55,11 @@ export class Selection extends Base {
   render(
     width: number,
     height: number,
-    selectAll: CanvasOverlayPosition | null
+    selectAll: CanvasOverlayPosition | null,
   ): void {
     resizeCanvas(this.canvas, width, height);
 
-    const { controller } = this;
-    const { renderController } = controller;
-    if (!renderController) {
-      return;
-    }
+    const { controller, renderController } = this;
 
     this.renderSelectedRange();
 
@@ -74,7 +67,7 @@ export class Selection extends Base {
       return;
     }
 
-    const cellData = controller.queryCell(controller.queryActiveCell());
+    const cellData = controller.queryCell(controller.getActiveCell());
     const activeCell = renderController.queryCell(cellData.row, cellData.col);
     const activeCellFillColor = cellData.style?.fillColor || theme.white;
     this.renderFillRect(theme.selectionColor, selectAll);

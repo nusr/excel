@@ -1,4 +1,4 @@
-import { CellInfo } from "./store";
+import { CellInfo } from "./components";
 export type ChangeEventType = "contentChange" | "selectionChange";
 
 export type IWindowSize = {

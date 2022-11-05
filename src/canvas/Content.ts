@@ -1,15 +1,15 @@
-import { isEmpty } from "@/lodash";
-import { thinLineWidth, npx, dpr, intToColumnName } from "@/util";
-import { Base } from "./Base";
-import theme from "@/theme";
+import { isEmpty } from '@/lodash';
+import { thinLineWidth, npx, dpr, intToColumnName } from '@/util';
+import { Base } from './Base';
+import theme from '@/theme';
 import {
   fillRect,
   fillText,
   drawLines,
   renderCell,
   resizeCanvas,
-} from "./util";
-import { HEADER_STYLE } from "./constant";
+} from './util';
+import { HEADER_STYLE } from './constant';
 
 export class Content extends Base {
   render(width: number, height: number): void {
@@ -21,10 +21,10 @@ export class Content extends Base {
     this.renderContent();
   }
   protected renderContent(): void {
-    const { controller } = this;
-    const { model, renderController } = controller;
-    const data = model.getCellsContent();
-    if (isEmpty(data) || !renderController) {
+    const { controller, renderController } = this;
+    // const { model, renderController } = controller;
+    const data = controller.getCellsContent();
+    if (isEmpty(data)) {
       return;
     }
     this.ctx.save();
@@ -42,21 +42,19 @@ export class Content extends Base {
       });
       const height = Math.max(wrapHeight, fontSizeHeight);
       if (height > result.height) {
-        console.log("height", height);
+        console.log('height', height);
         renderController.setRowHeight(row, height);
       }
       if (textWidth > result.width) {
-        console.log("col", textWidth);
+        console.log('col', textWidth);
         renderController.setRowHeight(col, textWidth);
       }
     }
     this.ctx.restore();
   }
   protected renderTriangle(): void {
-    const { renderController } = this.controller;
-    if (!renderController) {
-      return;
-    }
+    const { renderController } = this;
+
     const config = renderController.getHeaderSize();
     const offset = 2;
     const path = new Path2D();
@@ -74,12 +72,11 @@ export class Content extends Base {
   }
 
   protected renderGrid(): void {
-    const { scroll, model, renderController } = this.controller;
-    if (!renderController) {
-      return;
-    }
-    const { rowIndex, colIndex } = scroll;
-    const { rowCount, colCount } = model.getSheetInfo();
+    const { controller } = this;
+    const { renderController } = this;
+    const rowIndex = controller.getRowIndex();
+    const colIndex = controller.getColIndex();
+    const { rowCount, colCount } = this.controller.getSheetInfo();
     const config = renderController.getHeaderSize();
     const { width, height } = renderController.getDrawSize();
     const lineWidth = thinLineWidth();
@@ -119,12 +116,10 @@ export class Content extends Base {
     fillText(this.ctx, colText, x, colHeight / 2 + dpr());
   }
   protected renderRowsHeader(): void {
-    const { scroll, model, renderController } = this.controller;
-    if (!renderController) {
-      return;
-    }
-    const { rowIndex } = scroll;
-    const { rowCount } = model.getSheetInfo();
+    const { renderController, controller } = this;
+    const rowIndex = controller.getRowIndex();
+
+    const { rowCount } = controller.getSheetInfo();
     const config = renderController.getHeaderSize();
     const { height } = renderController.getDrawSize();
     this.ctx.save();
@@ -151,19 +146,17 @@ export class Content extends Base {
     this.fillRowText(
       i + 1,
       config.width,
-      y + renderController.getRowHeight(i) / 2
+      y + renderController.getRowHeight(i) / 2,
     );
     pointList.push([0, y], [config.width, y], [0, 0], [0, y]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
   }
   protected renderColsHeader(): void {
-    const { scroll, model, renderController } = this.controller;
-    if (!renderController) {
-      return;
-    }
-    const { colIndex } = scroll;
-    const { colCount } = model.getSheetInfo();
+    const { renderController, controller } = this;
+
+    const colIndex = controller.getColIndex();
+    const { colCount } = controller.getSheetInfo();
     const config = renderController.getHeaderSize();
     const { width } = renderController.getDrawSize();
     const pointList: Array<[x: number, y: number]> = [];
@@ -190,7 +183,7 @@ export class Content extends Base {
     this.fillColText(
       intToColumnName(i),
       x + renderController.getColWidth(i) / 2,
-      config.height
+      config.height,
     );
     pointList.push([x, 0], [x, config.height], [0, 0], [x, 0]);
     drawLines(this.ctx, pointList);

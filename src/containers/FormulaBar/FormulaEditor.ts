@@ -1,68 +1,45 @@
 import { h, Component } from '@/react';
+import globalStore from '@/store';
+const inputId = 'formula-editor';
 
-export const FormulaEditor: Component = () => {
-  // const controller = useController();
-  // const { activeCell, editCellValue, isCellEditing } = useSelector([
-  // 'activeCell',
-  // 'editCellValue',
-  // 'isCellEditing',
-  // ]);
-  // const dispatch = useDispatch();
-  // const inputRef = useRef<HTMLInputElement>(null);
-  // const initValue = useMemo(() => {
-  // const temp = String(activeCell.value || '');
-  // return (activeCell.formula ? `=${activeCell.formula}` : '') || temp;
-  // }, [activeCell]);
+export const FormulaEditor: Component = (props, children, forceUpdate) => {
+  const activeCell = globalStore.get('activeCell');
+  const editCellValue = globalStore.get('editCellValue');
+  const isCellEditing = globalStore.get('isCellEditing');
+  const initValue =
+    (activeCell.formula ? `=${activeCell.formula}` : '') ||
+    String(activeCell.value || '');
 
-  // const onFocus = useCallback(() => {
-  // dispatch({
-  // type: 'BATCH',
-  // payload: { isCellEditing: true, editCellValue: initValue },
-  // });
-  // }, [initValue, dispatch]);
-
-  // const onChange = useCallback(
-  // (event: React.ChangeEvent<HTMLInputElement>) => {
-  // const { value } = event.currentTarget;
-  // dispatch({ type: 'CHANGE_Edit_CELL_VALUE', payload: value });
-  // },
-  // [dispatch],
-  // );
-
-  // const handleKeyDown = useCallback(
-  // (event: React.KeyboardEvent<HTMLInputElement>) => {
-  // const { key } = event;
-  // if (key === 'Enter') {
-  // inputRef.current?.blur();
-  // controller.setActiveCell(activeCell.row + 1, activeCell.col);
-  // }
-  // },
-  // [activeCell, controller],
-  // );
-
-  // const onBlur = useCallback(() => {
-  // containersLog('FormulaEditor onBlur');
-  // controller.setCellValue(controller.queryActiveCell(), editCellValue);
-  // controller.setCellEditing(false);
-  // dispatch({
-  // type: 'BATCH',
-  // payload: { isCellEditing: false, editCellValue: '' },
-  // });
-  // }, [controller, editCellValue, dispatch]);
   return h('input', {
     className: 'base-editor',
+    id: inputId,
+    value: isCellEditing ? editCellValue : initValue,
+    onfocus: () => {
+      globalStore.getController().enterEditing();
+    },
+    onblur: (event: any) => {
+      const controller = globalStore.getController();
+      const cell = globalStore.get('activeCell');
+      controller.setCellValue(cell, event.target.value);
+      const dom = document.querySelector<HTMLInputElement>('#' + inputId)!;
+      if (event.target === dom) {
+        dom.value = '';
+        controller.setActiveCell(cell.row + 1, cell.col, 1, 1);
+      }
+      globalStore.getController().quitEditing();
+      globalStore.set({ editCellValue: '' });
+    },
+    onkeydown: (event: any) => {
+      if (event.key === 'Enter') {
+        const dom = document.querySelector<HTMLInputElement>('#' + inputId)!;
+        dom.blur();
+      } else {
+        globalStore.set({
+          editCellValue: event.target.value,
+        });
+      }
+    },
   });
-  // return (
-  // <input
-  // className="base-editor"
-  // value={isCellEditing ? editCellValue : initValue}
-  // ref={inputRef}
-  // onFocus={onFocus}
-  // onChange={onChange}
-  // onKeyDown={handleKeyDown}
-  // onBlur={onBlur}
-  // />
-  // );
 };
 
-FormulaEditor.displayName = 'FormulaEditor'
+FormulaEditor.displayName = 'FormulaEditor';
