@@ -45,6 +45,10 @@
   width: 40px;
 }
 
+.select-list {
+  width: 100px;
+  color: #000;
+}
 .select-item {
   font-size: var(--font);
   cursor: pointer;
@@ -86,6 +90,10 @@
   z-index: 1;
   top: 22px;
   left: 0;
+  display: none;
+}
+.color-picker-wrapper.show {
+  display: block;
 }
 .color-picker-list {
   display: flex;

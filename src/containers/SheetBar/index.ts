@@ -1,4 +1,4 @@
-import { x, Component, h } from '@/react';
+import { Component, h } from '@/react';
 // import { classnames } from '@/util';
 // import { Button, BaseIcon } from '@/components';
 // import { useSelector, useController } from '@/store';
@@ -60,3 +60,4 @@ export const SheetBarContainer: Component = () => {
   // </div>
   // `;
 };
+SheetBarContainer.displayName = 'SheetBarContainer'

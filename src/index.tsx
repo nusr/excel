@@ -6,4 +6,4 @@ import './global.css';
 import './components/index.css';
 import './containers/index.css';
 
-render(h(App, {}), document.getElementById('root') as HTMLDivElement);
+render(h(App, {}), document.querySelector('#root')!);

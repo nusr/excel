@@ -1,6 +1,6 @@
-import { h } from '@/react';
+import { h, Component } from '@/react';
 
-export const FormulaEditor = () => {
+export const FormulaEditor: Component = () => {
   // const controller = useController();
   // const { activeCell, editCellValue, isCellEditing } = useSelector([
   // 'activeCell',
@@ -64,3 +64,5 @@ export const FormulaEditor = () => {
   // />
   // );
 };
+
+FormulaEditor.displayName = 'FormulaEditor'

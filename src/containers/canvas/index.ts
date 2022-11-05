@@ -50,3 +50,4 @@ export const CanvasContainer: Component = () => {
     }),
   );
 };
+CanvasContainer.displayName = 'CanvasContainer'

@@ -1,20 +1,21 @@
-import { Component, h, PropsType } from '@/react';
+import { Component, h } from '@/react';
 import { classnames } from '@/util';
 import { noop } from '@/lodash';
 import type { BaseIconName } from '@/types';
 import { BaseIcon, BaseIconProps } from '../BaseIcon';
 
-export interface ButtonProps extends PropsType {
+export interface ButtonProps {
   type?: 'normal' | 'circle';
   icon?: BaseIconName;
+  style?: string;
   active?: boolean;
   disabled?: boolean;
   onClick?: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-};
+  className?: string;
+}
 
-export const Button: Component<ButtonProps> = (props) => {
+export const Button: Component<ButtonProps> = (props, children = []) => {
   const {
-    children = [],
     className = '',
     onClick = noop,
     disabled = false,
@@ -40,3 +41,4 @@ export const Button: Component<ButtonProps> = (props) => {
     ...children,
   );
 };
+Button.displayName = 'Button'

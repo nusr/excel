@@ -1,9 +1,10 @@
-import { h, Component } from '@/react';
+import { h, Component, useEffect } from '@/react';
 // import { Lazy } from '@/components';
 // import { useDispatch, useController } from '@/store';
 // import { MOCK_MODEL } from '@/model';
 // import { State } from '@/types';
-import { useTheme } from '@/hooks';
+import theme from '../theme';
+
 import {
   CanvasContainer,
   SheetBarContainer,
@@ -14,7 +15,16 @@ import {
 export const App: Component = () => {
   // const controller = useController();
   // const dispatch = useDispatch();
-  useTheme();
+  useEffect(() => {
+    console.log('useEffect')
+    for (const key of Object.keys(theme)) {
+      document.documentElement.style.setProperty(
+        `--${key}`,
+        // @ts-ignore
+        String(theme[key] || ''),
+      );
+    }
+  }, []);
   // useEffect(() => {
   // controller.on('change', (data) => {
   // const { changeSet } = data;
@@ -57,3 +67,4 @@ export const App: Component = () => {
     h(SheetBarContainer, {}),
   );
 };
+App.displayName = 'App';

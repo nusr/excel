@@ -88,7 +88,7 @@ async function buildBrowserConfig(options: BuildOptions): Promise<BuildResult> {
       js: `/* \n${licenseText}\n*/`,
     },
     platform: 'browser',
-    sourcemap: isDev,
+    sourcemap: true,
     minify: false,
     metafile: minify,
   };

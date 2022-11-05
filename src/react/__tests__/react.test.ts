@@ -1,9 +1,9 @@
-// import jsdom from 'jsdom';
+import jsdom from 'jsdom';
 
-import { h, x, render, Component } from '../react';
+import { h, render, Component } from '../react';
 
 // Global document mock
-// global.document = new jsdom.JSDOM(`<html><body></body></html>`).window.document;
+global.document = new jsdom.JSDOM(`<html><body></body></html>`).window.document;
 
 describe('index.test.ts', () => {
   describe('h', () => {
@@ -21,99 +21,59 @@ describe('index.test.ts', () => {
       });
     });
   });
-  describe('x', () => {
-    test('empty', () => {
-      expect(x``).toEqual(undefined);
-    });
-    test('text', () => {
-      expect(x`hello`).toEqual('hello');
-    });
-    test('normal tag', () => {
-      expect(x`<div></div>`).toEqual(h('div', {}));
-    });
-    test('self-closing tag', () => {
-      expect(x`<br />`).toEqual(h('br', {}));
-    });
-    test('attrs', () => {
-      expect(x`<div a="b" c="d e" />`).toEqual(h('div', { a: 'b', c: 'd e' }));
-    });
-    test('tag with text', () => {
-      expect(x`<p>Hello</p>`).toEqual(h('p', {}, 'Hello'));
-    });
-    test('nested tags', () => {
-      expect(x`<p><i>Hello</i></p>`).toEqual(h('p', {}, h('i', {}, 'Hello')));
-    });
-    test('x: ${text}', () => {
-      expect(x`<p>hello, ${'world'}</p>`).toEqual(
-        h('p', {}, 'hello, ', 'world'),
-      );
-      expect(x`<p>hello, ${'world'}!</p>`).toEqual(
-        h('p', {}, 'hello, ', 'world', '!'),
-      );
-      expect(x`<p>${'world'}, hello!</p>`).toEqual(
-        h('p', {}, 'world', ', hello!'),
-      );
-    });
-    test('x: ${tag}', () => {
-      expect(x`<${'p'}>hello</${'p'}>`).toEqual(h('p', {}, 'hello'));
-      expect(x`<${'br'} />`).toEqual(h('br', {}));
-    });
-    test('x: ${attr}', () => {
-      expect(x`<p a=${'b'} c=${'d'}/>`).toEqual(h('p', { a: 'b', c: 'd' }));
-    });
-  });
   describe('render', () => {
     test('single stateless node', () => {
-      render(x`<div className="simple">text</div>`, document.body);
+      render(h('div', { className: 'simple' }, 'text'), document.body);
       expect(document.querySelector('.simple')!.textContent).toEqual('text');
     });
     test('single stateless component', () => {
-      const Hello = () => x`<div className="component">Hello</div>`;
+      const Hello: Component = () => h('div', { className: 'component' }, 'hello');
+      Hello.displayName = 'Hello'
       render(h(Hello, {}), document.body);
       expect(document.querySelector('.component')!.textContent).toEqual(
         'Hello',
       );
     });
-    test('component with properties', () => {
-      const Text: Component = ({ cls, text }) =>
-        x`<p className=${cls}>${text}</p>`;
-      render(h(Text, { cls: 'foo', text: 'bar' }), document.body);
-      expect(document.querySelector('.foo')!.textContent).toEqual('bar');
-    });
-    test('component with children', () => {
-      const A = () => x`<div className="a">A</div>`;
-      const B = () => x`<div className="b">B</div>`;
-      const C: Component = (props, children) =>
-        x`<div className="c">${children}</div>`;
-      const D = () => x`<${C}><${C}><${A} /><${B} /></${C}></${C}>`;
-      render(h(D, {}), document.body);
-      expect(document.querySelector('.c > .c > .a')!.textContent).toEqual('A');
-      expect(document.querySelector('.c > .c > .b')!.textContent).toEqual('B');
-    });
+    // test('component with properties', () => {
+    // const Text: Component = ({ cls, text }) =>
+    // x`<p className=${cls}>${text}</p>`;
+    // render(h(Text, { cls: 'foo', text: 'bar' }), document.body);
+    // expect(document.querySelector('.foo')!.textContent).toEqual('bar');
+    // });
+    // test('component with children', () => {
+    // const A = () => x`<div className="a">A</div>`;
+    // const B = () => x`<div className="b">B</div>`;
+    // const C: Component = (props, children) =>
+    // x`<div className="c">${children}</div>`;
+    // const D = () => x`<${C}><${C}><${A} /><${B} /></${C}></${C}>`;
+    // render(h(D, {}), document.body);
+    // expect(document.querySelector('.c > .c > .a')!.textContent).toEqual('A');
+    // expect(document.querySelector('.c > .c > .b')!.textContent).toEqual('B');
+    // });
   });
-  describe('forceUpdate', () => {
-    test('click counter', () => {
-      let count = 0;
-      const Counter: Component = (props, children, forceUpdate) => {
-        const handleClick = () => {
-          count++;
-          forceUpdate();
-        };
-        return x`
-              <div>
-                <div className="count">Count: ${count}</div>
-                <button onclick=${handleClick}>Add</button>
-              </div>
-            `;
-      };
-      render(h(Counter, {}), document.body);
-      expect(document.querySelector('.count')!.textContent).toEqual('Count: 0');
-      // document!.querySelector('button')!.onclick();
-      // expect(document.querySelector('.count')!.textContent).toEqual('Count: 1');
-      // document!.querySelector('button')!.onclick();
-      // expect(document.querySelector('.count')!.textContent).toEqual('Count: 2');
-    });
-  });
+  // describe('forceUpdate', () => {
+  // test('click counter', () => {
+  // let count = 0;
+  // const Counter: Component = (props, children, forceUpdate) => {
+  // const handleClick = () => {
+  // count++;
+  // forceUpdate();
+  // };
+  // return x`
+  // <div>
+  // <div className="count">Count: ${count}</div>
+  // <button onclick=${handleClick}>Add</button>
+  // </div>
+  // `;
+  // };
+  // render(h(Counter, {}), document.body);
+  // expect(document.querySelector('.count')!.textContent).toEqual('Count: 0');
+  // document!.querySelector('button')!.onclick();
+  // expect(document.querySelector('.count')!.textContent).toEqual('Count: 1');
+  // document!.querySelector('button')!.onclick();
+  // expect(document.querySelector('.count')!.textContent).toEqual('Count: 2');
+  // });
+  // });
 });
 
 // // ---------------------------------------------------------------------------
