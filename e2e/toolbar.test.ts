@@ -14,13 +14,13 @@ describe('toolbar.test', () => {
 
   test('test italic', async () => {
     expect(
-      await clickToolbar('#tool-bar-container > div:nth-child(3)'),
+      await clickToolbar('.toolbar-wrapper > div:nth-child(3)'),
     ).toContain('active');
     expect(
-      await clickToolbar('#tool-bar-container > div:nth-child(4)'),
+      await clickToolbar('.toolbar-wrapper > div:nth-child(4)'),
     ).toContain('active');
     expect(
-      await clickToolbar('#tool-bar-container > div:nth-child(5)'),
+      await clickToolbar('.toolbar-wrapper > div:nth-child(5)'),
     ).toContain('active');
   });
 });
