@@ -169,12 +169,9 @@ export const render = (
       hooks = hs[k] || [];
       index = 0;
       v = v.element(v.props, v.children, forceUpdate);
-      // Put current hooks into the new hooks storage
       // @ts-ignore
       dom.h[k] = hooks;
     }
-
-    // DOM node builder for the given v node
     const nsURI = ns || (v.props && v.props.xmlns);
     const createNode = () => {
       if (typeof v === 'string') {
@@ -191,15 +188,13 @@ export const render = (
         return document.createElement(v.element as string);
       }
     };
-    const isRenderHtml = !!v?.props?.dangerouslySetInnerHTML;
-    // Corresponding DOM node, if any. Reuse if tag and text matches. Insert
-    // new DOM node before otherwise.
+
     let node = dom.childNodes[i] as any;
 
     if (!node || (v.element ? node.e !== v.element : node.data !== v)) {
       node = dom.insertBefore(createNode(), node) as any;
     }
-    if (v.element && !isRenderHtml) {
+    if (v.element && !v?.props?.dangerouslySetInnerHTML) {
       node.e = v.element;
       const props = v.props || {};
       for (const propName of Object.keys(props)) {
@@ -223,8 +218,6 @@ export const render = (
     }
   }
 
-  // Iterate over all hooks, if a hook has a useEffect callback set - call it
-  // (since the rendering is now done) and remove.
   Object.values(dom.h).forEach((componentHooks) => {
     componentHooks.forEach((h) => {
       if (h.cb) {
@@ -234,11 +227,6 @@ export const render = (
     });
   });
 
-  // For all hooks present in the DOM node before rendering, but not present
-  // after - call the cleanup callbacks, if any. This means the corresponding
-  // nodes have been removed from DOM and cleanup should happen. Beware, that
-  // the order is unfortunately not guaranteed, to keep the implementation
-  // simple.
   Object.keys(hs)
     // @ts-ignore
     .filter((k) => !dom.h[k])

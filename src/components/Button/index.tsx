@@ -1,12 +1,8 @@
 import { Component, h } from '@/react';
 import { classnames } from '@/util';
-import { noop } from '@/lodash';
-import type { BaseIconName } from '@/types';
-import { BaseIcon, BaseIconProps } from '../BaseIcon';
 
 export interface ButtonProps {
   type?: 'normal' | 'circle';
-  icon?: BaseIconName;
   style?: string;
   active?: boolean;
   disabled?: boolean;
@@ -14,19 +10,19 @@ export interface ButtonProps {
   className?: string;
 }
 
+const defaultClick: (event: MouseEvent) => void = () => {
+  console.log('add click event');
+};
+
 export const Button: Component<ButtonProps> = (props, children = []) => {
   const {
     className = '',
-    onClick = noop,
+    onClick = defaultClick,
     disabled = false,
     active = false,
     type = 'normal',
     style,
-    icon,
   } = props;
-  if (icon && children.length === 0) {
-    children.push(h<BaseIconProps>(BaseIcon, { name: icon }));
-  }
   return h(
     'div',
     {

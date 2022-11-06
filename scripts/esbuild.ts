@@ -2,7 +2,6 @@ import { build, BuildOptions, BuildResult, analyzeMetafile } from 'esbuild';
 import packageJson from '../package.json';
 import * as fs from 'fs';
 import * as path from 'path';
-import assert from 'assert';
 
 const envConfig = getEnv();
 const productionMode = 'production';
@@ -89,7 +88,7 @@ async function buildBrowserConfig(options: BuildOptions): Promise<BuildResult> {
     },
     platform: 'browser',
     sourcemap: true,
-    minify: false,
+    minify,
     metafile: minify,
   };
   Object.assign(realOptions, options);
@@ -116,74 +115,6 @@ function deleteDir(dir: string) {
   });
 }
 
-function formatFileName(svgName: string) {
-  const list = svgName.toLowerCase().split('-');
-  return list
-    .map((item, i) => {
-      if (i === 0) {
-        return item;
-      }
-      return item[0].toUpperCase() + item.slice(1);
-    })
-    .join('');
-}
-
-function parseSVGFile(text: string, fileName: string) {
-  assert(text.length > 0, 'svg file can not be empty');
-  const start = text.indexOf('<path');
-  const end = text.indexOf('</svg>');
-  const result = text.slice(start, end);
-  assert(text.length > 0, `${fileName} path is empty`);
-  return `
-    <symbol
-      xmlns="http://www.w3.org/2000/svg"
-      xmlns:xlink="http://www.w3.org/1999/xlink"
-      viewBox="0 0 1024 1024"
-      id="icon-${fileName}"
-      version="1.1"
-    >
-      ${result}
-    </symbol>`;
-}
-
-async function buildIcon() {
-  const SVG_SYMBOL_TAG = '__SVG_SYMBOL_NODE__';
-  const dir = path.join(process.cwd(), 'icons');
-  const files = fs.readdirSync(dir);
-  const svgList: string[] = [];
-  const fileNameList: string[] = [];
-  for (const item of files) {
-    const [temp] = item.split('.');
-    const filePath = path.join(dir, item);
-    const text = await fs.promises.readFile(filePath, 'utf-8');
-    const fileName = formatFileName(temp);
-    svgList.push(parseSVGFile(text, fileName));
-    fileNameList.push(fileName);
-  }
-  const nameList = fileNameList.map((item) => `"${item}"`).join(' | ');
-  const data = `export type BaseIconName = ${nameList}`;
-  const iconType = path.join(process.cwd(), 'src/types/icons.ts');
-  fs.writeFile(iconType, data, 'utf-8', (error) => {
-    if (error) {
-      console.log('write icon type fail', error);
-    }
-  });
-
-  const svg = `
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      xmlns:xlink="http://www.w3.org/1999/xlink"
-      style="position: absolute; width: 0; height: 0"
-      id="${SVG_SYMBOL_TAG}"
-    >
-      ${svgList.join('\n\t\t\t\t')}
-    </svg>`;
-  const htmlPath = path.join(distDir, 'index.html');
-  const htmlStr = await fs.promises.readFile(htmlPath, 'utf-8');
-  const result = htmlStr.replace(`<!--${SVG_SYMBOL_TAG}-->`, svg);
-  await fs.promises.writeFile(htmlPath, result, 'utf-8');
-}
-
 async function main() {
   const startPath = path.join(distDir, 'excel.umd.js');
   if (isDev) {
@@ -199,7 +130,6 @@ async function main() {
     buildUMD(packageJson.main.replace('.js', '.min.js')),
   ]);
   buildHtml();
-  await buildIcon();
   return list;
 }
 

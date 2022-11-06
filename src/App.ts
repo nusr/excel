@@ -1,7 +1,7 @@
 import { h, Component } from '@/react';
 import theme from './theme';
 import { Model, MOCK_MODEL } from '@/model';
-import { Controller, Scroll } from '@/controller';
+import { Controller, Scroll, History } from '@/controller';
 import { MAIN_CANVAS_ID } from '@/util';
 import { MainCanvas, RenderController } from '@/canvas';
 import globalStore from '@/store';
@@ -61,7 +61,8 @@ App.onceMount = (forceUpdate) => {
   const canvas = document.querySelector<HTMLCanvasElement>(
     '#' + MAIN_CANVAS_ID,
   )!;
-  const controller = new Controller(new Model(), new Scroll());
+  const controller = new Controller(new Model(), new Scroll(), new History());
+  controller.addSheet();
   globalStore.setController(controller);
   const mainCanvas = new MainCanvas(
     controller,

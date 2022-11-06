@@ -22,7 +22,6 @@ describe('Button.test.ts', () => {
         {
           active: true,
           className: 'icon_button',
-          icon: 'alignCenter',
           type: 'circle',
         },
         'add',
@@ -32,6 +31,8 @@ describe('Button.test.ts', () => {
     expect(document.querySelector('.icon_button.circle')!.textContent).toEqual(
       'add',
     );
-    expect(document.querySelector('.icon_button')!.childNodes).toHaveLength(1);
+    expect(
+      document.querySelector('.icon_button')!.childNodes,
+    ).toHaveLength(1);
   });
 });

@@ -7,7 +7,6 @@
  * font-family
  * e.g italic bold 14px/16px sans-serif;
  */
-import type { CSSProperties } from "react";
 import { npx } from "./dpr";
 
 export const DEFAULT_FONT_SIZE = 11;
@@ -55,10 +54,10 @@ export const FONT_FAMILY_LIST = [
 ];
 
 export function makeFont(
-  fontStyle: CSSProperties["fontStyle"] = "normal",
+  fontStyle: "none" | "normal" | "italic" | "oblique" = "normal",
   fontWeight = "normal",
   fontSize = 12,
-  fontFamily: CSSProperties["fontFamily"] = DEFAULT_FONT_FAMILY
+  fontFamily: string = DEFAULT_FONT_FAMILY
 ): string {
   return `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily},${MUST_FONT_FAMILY}`;
 }

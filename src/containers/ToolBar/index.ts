@@ -1,7 +1,7 @@
 import { h, Component } from '@/react';
 import {
-  BaseIcon,
-  BaseIconProps,
+  Icon,
+  IconProps,
   Button,
   ButtonProps,
   ColorPicker,
@@ -9,6 +9,7 @@ import {
   Github,
   Select,
   SelectProps,
+  FillColorIcon,
 } from '@/components';
 import {
   DEFAULT_FONT_FAMILY,
@@ -44,32 +45,50 @@ export const ToolbarContainer: Component = () => {
     {
       className: 'toolbar-wrapper',
     },
-    h<ButtonProps>(Button, {
-      icon: 'undo',
-      disabled: !globalStore.get('canUndo'),
-    }),
-    h<ButtonProps>(Button, {
-      icon: 'redo',
-      disabled: !globalStore.get('canRedo'),
-    }),
-    h<ButtonProps>(Button, {
-      icon: 'bold',
-      active: isBold,
-      onClick: () => {
-        setCellStyle({
-          isBold: !isBold,
-        });
+    h<ButtonProps>(
+      Button,
+      {
+        disabled: !globalStore.get('canUndo'),
+        onClick() {
+          globalStore.getController().undo();
+        },
       },
-    }),
-    h<ButtonProps>(Button, {
-      icon: 'italic',
-      active: isItalic,
-      onClick: () => {
-        setCellStyle({
-          isItalic: !isItalic,
-        });
+      h<IconProps>(Icon, { name: 'undo' }),
+    ),
+    h<ButtonProps>(
+      Button,
+      {
+        disabled: !globalStore.get('canRedo'),
+        onClick() {
+          globalStore.getController().redo();
+        },
       },
-    }),
+      h<IconProps>(Icon, { name: 'redo' }),
+    ),
+    h<ButtonProps>(
+      Button,
+      {
+        active: isBold,
+        onClick: () => {
+          setCellStyle({
+            isBold: !isBold,
+          });
+        },
+      },
+      h<IconProps>(Icon, { name: 'bold' }),
+    ),
+    h<ButtonProps>(
+      Button,
+      {
+        active: isItalic,
+        onClick: () => {
+          setCellStyle({
+            isItalic: !isItalic,
+          });
+        },
+      },
+      h<IconProps>(Icon, { name: 'italic' }),
+    ),
     h<ButtonProps>(
       Button,
       {
@@ -104,7 +123,7 @@ export const ToolbarContainer: Component = () => {
           setCellStyle({ fontColor: value });
         },
       },
-      h<BaseIconProps>(BaseIcon, { name: 'fontColor' }),
+      h<IconProps>(Icon, { name: 'fontColor' }),
     ),
     h<ColorPickerProps>(
       ColorPicker,
@@ -115,7 +134,7 @@ export const ToolbarContainer: Component = () => {
           setCellStyle({ fillColor: value });
         },
       },
-      h<BaseIconProps>(BaseIcon, { name: 'fillColor' }),
+      h(FillColorIcon, {}),
     ),
     h(Github, {}),
   );

@@ -4,6 +4,12 @@
   fill: currentColor;
   overflow: hidden;
 }
+.base-icon {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  overflow: hidden;
+}
 .button-wrapper {
   padding: 0 4px;
   min-width: 20px;

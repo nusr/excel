@@ -13,6 +13,7 @@ export default {
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/theme/*.{ts,tsx}',
+    '!src/canvas/*.{ts,tsx}',
   ],
 
   coverageReporters: [

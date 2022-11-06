@@ -62,10 +62,6 @@ export type WorkBookJSON = {
 
 export interface IModel {
   getCurrentSheetId(): string;
-  canRedo(): boolean;
-  canUndo(): boolean;
-  undo(): void;
-  redo(): void;
   addSheet(): void;
   setCurrentSheetId(id: string): void;
   getCellsContent(sheetId?: string): Array<Coordinate>;
@@ -79,4 +75,14 @@ export interface IModel {
   setCellValues(value: string, ranges: IRange[]): void;
   setCellValue(value: ResultType, range: IRange): void;
   getSheetList(): WorkBookJSON['workbook'];
+}
+
+export interface IHistory {
+  canRedo(): boolean;
+  canUndo(): boolean;
+  undo(sheetData: WorkBookJSON): void;
+  redo(sheetData: WorkBookJSON): void;
+  onChange(sheetData: WorkBookJSON): void;
+  getUndoData(): WorkBookJSON | undefined
+  getRedoData(): WorkBookJSON | undefined
 }

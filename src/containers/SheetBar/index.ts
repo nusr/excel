@@ -2,7 +2,7 @@ import { Component, h } from '@/react';
 import { classnames } from '@/util';
 import globalStore from '@/store';
 import theme from '@/theme';
-import { Button, ButtonProps } from '@/components';
+import { Button, ButtonProps, Icon, IconProps } from '@/components';
 
 export const SheetBarContainer: Component = () => {
   const sheetList = globalStore.get('sheetList');
@@ -38,14 +38,19 @@ export const SheetBarContainer: Component = () => {
       {
         className: 'sheet-bar-add',
       },
-      h<ButtonProps>(Button, {
-        onClick: () => {
-          globalStore.getController().addSheet();
+      h<ButtonProps>(
+        Button,
+        {
+          onClick: () => {
+            globalStore.getController().addSheet();
+          },
+          type: 'circle',
+          style: `background-color: ${theme.buttonActiveColor};`,
         },
-        type: 'circle',
-        style: `background-color: ${theme.buttonActiveColor};`,
-        icon: 'plus',
-      }),
+        h<IconProps>(Icon, {
+          name: 'plus',
+        }),
+      ),
     ),
   );
 };

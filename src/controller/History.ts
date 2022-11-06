@@ -1,12 +1,11 @@
-import { WorkBookJSON } from "@/types";
-import { historyLog } from "@/util";
-export class History {
-  undoList: string[] = [];
-  redoList: string[] = [];
+import { WorkBookJSON, IHistory } from '@/types';
+export class History implements IHistory {
+  private undoList: string[] = [];
+  private redoList: string[] = [];
   constructor() {
     this.reset();
   }
-  reset(): void {
+  private reset(): void {
     this.undoList = [];
     this.redoList = [];
   }
@@ -14,13 +13,11 @@ export class History {
     this.addUndoData(sheetData);
     this.redoList = [];
   }
-  addUndoData(sheetData: WorkBookJSON): void {
+  private addUndoData(sheetData: WorkBookJSON): void {
     this.undoList.push(JSON.stringify(sheetData));
-    historyLog("addUndoData", this.undoList);
   }
-  addRedoData(sheetData: WorkBookJSON): void {
+  private addRedoData(sheetData: WorkBookJSON): void {
     this.redoList.push(JSON.stringify(sheetData));
-    historyLog("addRedoData", this.redoList);
   }
   getUndoData(): WorkBookJSON | undefined {
     const temp = this.undoList.pop();
@@ -36,27 +33,10 @@ export class History {
   canUndo(): boolean {
     return this.undoList.length > 0;
   }
-  redo(sheetData: WorkBookJSON): Promise<WorkBookJSON | undefined> {
-    return new Promise((resolve, reject) => {
-      historyLog("redo");
-      if (this.canRedo()) {
-        this.addUndoData(sheetData);
-        resolve(this.getRedoData());
-        historyLog("redo success");
-      }
-      reject();
-    });
+  redo(sheetData: WorkBookJSON): void {
+    this.addUndoData(sheetData);
   }
-  undo(sheetData: WorkBookJSON): Promise<WorkBookJSON | undefined> {
-    return new Promise((resolve, reject) => {
-      historyLog("undo");
-      if (this.canUndo()) {
-        this.addRedoData(sheetData);
-        const temp = this.getUndoData();
-        resolve(temp);
-        historyLog("undo success", temp);
-      }
-      reject();
-    });
+  undo(sheetData: WorkBookJSON): void {
+    this.addRedoData(sheetData);
   }
 }

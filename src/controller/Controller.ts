@@ -10,6 +10,7 @@ import {
   IModel,
   IScrollValue,
   WorksheetType,
+  IHistory,
 } from '@/types';
 import {
   parseReference,
@@ -31,7 +32,8 @@ export class Controller implements IController {
     modelChange() {},
   };
   private scroll: IScrollValue;
-  constructor(model: IModel, scroll: IScrollValue) {
+  private history: IHistory;
+  constructor(model: IModel, scroll: IScrollValue, history: IHistory) {
     this.model = model;
     this.scroll = scroll;
     this.ranges = [
@@ -43,7 +45,7 @@ export class Controller implements IController {
         this.model.getCurrentSheetId(),
       ),
     ];
-    this.addSheet();
+    this.history = history;
   }
   getCurrentSheetId(): string {
     return this.model.getCurrentSheetId();
@@ -75,13 +77,12 @@ export class Controller implements IController {
   setHooks(hooks: IHooks): void {
     this.hooks = hooks;
   }
-  // setRenderController(renderController: RenderController): void {
-  // this.renderController = renderController;
-  // }
-  emitChange(): void {
+  emitChange(recordHistory = true): void {
     controllerLog('emitChange', this.changeSet);
+    if (recordHistory) {
+      this.history.onChange(this.model.toJSON());
+    }
     this.hooks.modelChange(this.changeSet);
-    // this.emit('change', { changeSet: this.changeSet });
     this.changeSet = new Set<ChangeEventType>();
   }
   getActiveCell(): Coordinate {
@@ -230,12 +231,6 @@ export class Controller implements IController {
         set: () => {},
       });
       realValue = result.error ? result.error : result.result;
-      // if (realValue !== value) {
-      // model.setCellValue(
-      // realValue,
-      // new Range(row, col, 1, 1, model.currentSheetId),
-      // );
-      // }
     }
     return {
       value: realValue,
@@ -246,21 +241,31 @@ export class Controller implements IController {
     };
   };
   canRedo(): boolean {
-    return this.model.canRedo();
+    return this.history.canRedo();
   }
   canUndo(): boolean {
-    return this.model.canUndo();
+    return this.history.canUndo();
   }
   undo(): void {
     if (!this.canUndo) {
       return;
     }
-    this.model.undo();
+    const temp = this.history.getUndoData();
+    if (temp !== undefined) {
+      this.history.undo(temp);
+      this.changeSet.add('contentChange');
+      this.emitChange();
+    }
   }
   redo(): void {
     if (!this.canRedo()) {
       return;
     }
-    this.model.redo();
+    const temp = this.history.getRedoData();
+    if (temp !== undefined) {
+      this.history.redo(temp);
+      this.changeSet.add('contentChange');
+      this.emitChange(false);
+    }
   }
 }

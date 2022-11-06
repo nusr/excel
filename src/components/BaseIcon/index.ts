@@ -1,18 +1,19 @@
-import { Component, h } from '@/react';
-import { classnames } from '@/util';
+import { h, Component } from '@/react';
+import iconConfig from './icon';
 import type { BaseIconName } from '@/types';
+import { BaseIcon, BaseIconProps } from './BaseIcon';
 
-export type BaseIconProps = {
+export interface IconProps {
   name: BaseIconName;
   className?: string;
+}
+
+export const Icon: Component<IconProps> = ({ name, className = '' }) => {
+  const paths = iconConfig[name].map((item) => ({ d: item }));
+  return h<BaseIconProps>(BaseIcon, { className, paths });
 };
-export const BaseIcon: Component<BaseIconProps> = (props) => {
-  const { className = '', name } = props;
-  return h('BaseIcon', {
-    dangerouslySetInnerHTML: `<svg class="${classnames(
-      'icon-wrapper',
-      className,
-    )}" aria-hidden="true"><use xlink:href="#icon-${name}"></use></svg>`,
-  });
-};
-BaseIcon.displayName = 'BaseIcon';
+Icon.displayName = 'Icon';
+
+export { BaseIcon, BaseIconProps };
+
+export { FillColorIcon } from './FillColorIcon'

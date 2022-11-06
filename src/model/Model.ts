@@ -27,21 +27,9 @@ export class Model implements IModel {
   private worksheets: WorkBookJSON['worksheets'] = {};
   private styles: WorkBookJSON['styles'] = {};
   private mergeCells: WorkBookJSON['mergeCells'] = [];
-  // private controller: Controller;
-  // constructor(controller: Controller) {
-  // this.controller = controller;
-  // }
   getSheetList(): WorkBookJSON['workbook'] {
     return this.workbook;
   }
-  canUndo(): boolean {
-    return false;
-  }
-  canRedo(): boolean {
-    return false;
-  }
-  undo(): void {}
-  redo(): void {}
   setActiveCell(row: number, col: number): void {
     const index = this.workbook.findIndex(
       (v) => v.sheetId === this.currentSheetId,
@@ -184,6 +172,7 @@ export class Model implements IModel {
     let temp = undefined;
     if (style && this.styles[style]) {
       temp = this.styles[style];
+      return {};
     }
     return { ...cellData, style: temp };
   };

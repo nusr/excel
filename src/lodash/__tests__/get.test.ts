@@ -1,4 +1,4 @@
-import { get, noop } from "../";
+import { get } from "../";
 
 describe("get.test.ts", () => {
   describe("get", () => {
@@ -20,11 +20,6 @@ describe("get.test.ts", () => {
           "worksheets.1.2.value"
         )
       ).toEqual("1");
-    });
-  });
-  describe("noop", () => {
-    it("should return undefined", function () {
-      expect(noop()).toBeUndefined();
     });
   });
 });

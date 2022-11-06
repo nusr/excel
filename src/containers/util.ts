@@ -1,23 +1,18 @@
-import { QueryCellResult } from "@/types";
-import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE } from "@/util";
-import { isEmpty } from "@/lodash";
-import type { CSSProperties } from "react";
+import { QueryCellResult } from '@/types';
+import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE } from '@/util';
+import { isEmpty } from '@/lodash';
 
-export function getEditorStyle(
-  style: QueryCellResult["style"]
-): CSSProperties | undefined {
+export function getEditorStyle(style: QueryCellResult['style']): string {
   if (isEmpty(style)) {
-    return undefined;
+    return '';
   }
   const font = makeFont(
-    style?.isItalic ? "italic" : "normal",
-    style?.isBold ? "bold" : "500",
+    style?.isItalic ? 'italic' : 'normal',
+    style?.isBold ? 'bold' : '500',
     style?.fontSize || DEFAULT_FONT_SIZE,
-    style?.fontFamily
+    style?.fontFamily,
   );
-  return {
-    backgroundColor: style?.fillColor || "inherit",
-    color: style?.fontColor || DEFAULT_FONT_COLOR,
-    font,
-  };
+  return `background-color:${style?.fillColor || 'inherit'},color:${
+    style?.fontColor || DEFAULT_FONT_COLOR
+  },font:${font}`;
 }
