@@ -30,5 +30,4 @@ export default {
   },
   maxConcurrency: 1,
   maxWorkers: '50%',
-  setupFilesAfterEnv: ['<rootDir>/scripts/unit-test-jest.setup.js'],
 };
