@@ -1,4 +1,4 @@
-export type ForceUpdateType = () => void;
+// @ts-nocheck
 type ReactElement = VNode | string | null | undefined | number;
 type ChildrenType = Array<ReactElement>;
 export interface PropsType {
@@ -17,233 +17,300 @@ export interface PropsType {
   onkeydown?: (event: KeyboardEvent) => void;
   [key: string]: any;
 }
-type MountType = (forceUpdate: ForceUpdateType) => void;
-export interface Component<T = PropsType> {
-  (
-    props: T & PropsType,
-    children: ChildrenType,
-    forceUpdate: ForceUpdateType,
-  ): ReactElement;
-  displayName: string;
-  onceMount?: MountType;
-}
-type ElementType = string | Component<any>;
-interface HooksType {
-  value: any;
-  cb?: () => ForceUpdateType | void;
-  cleanup?: ForceUpdateType | void;
-}
-
-interface VNode<T = PropsType> {
-  element: ElementType;
-  props: T;
+interface VNode {
+  tag: string;
+  props: Record<string, any>;
   children: ChildrenType;
+  key?: string;
+  type?: number;
+  node?: Element;
 }
 
-export type SetStateAction<S> = S | ((prevState: S) => S);
-export type ReducerAction<R extends Reducer<any, any>> = R extends Reducer<
-  any,
-  infer A
->
-  ? A
-  : never;
-export type Dispatch<A> = (value: A) => void;
-export type ReducerState<R extends Reducer<any, any>> = R extends Reducer<
-  infer S,
-  any
->
-  ? S
-  : never;
-export type Reducer<S, A> = (prevState: S, action: A) => S;
-
-export function h<T extends PropsType>(
-  element: ElementType,
-  props: T,
-  ...children: ChildrenType
-): VNode {
-  if (props.dangerouslySetInnerHTML) {
-    props.dangerouslySetInnerHTML = props.dangerouslySetInnerHTML.trim();
-  }
-  return { element, props, children };
+export interface Component<T = {}> {
+  (props: T, ...children: VNode[]): VNode;
+  displayName: string;
 }
 
-// Global array of hooks for the current functional component
-let hooks: HooksType[];
-// Global index of the current hook in the array of hooks above
-let index = 0;
-// Function, that forces an update of the current component
-let forceUpdate: ForceUpdateType;
-// Returns an existing hook at the current index for the current component, or
-// creates a new one.
-const getHook = (value: any) => {
-  let hook = hooks[index++];
-  if (!hook) {
-    hook = { value };
-    hooks.push(hook);
-  }
-  return hook;
+type DomType = Element;
+
+const SSR_NODE = 1;
+const TEXT_NODE = 3;
+const EMPTY_OBJ = {};
+const EMPTY_ARR: ChildrenType = [];
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+const listener = function (event) {
+  this.events[event.type](event);
 };
 
-export function useReducer<R extends Reducer<any, any>, I>(
-  reducer: R,
-  initialState: I & ReducerState<R>,
-): [ReducerState<R>, Dispatch<ReducerAction<R>>] {
-  const hook = getHook(initialState);
-  const update = forceUpdate;
-  const dispatch = (action: any) => {
-    hook.value = reducer(hook.value, action);
-    update();
-  };
-  return [hook.value, dispatch];
-}
+const getKey = (vdom: any) => (vdom == null ? vdom : vdom.key);
 
-export function useState<S>(
-  initialState: S | (() => S),
-): [S, Dispatch<SetStateAction<S>>] {
-  return useReducer((_, v) => v, initialState);
-}
-
-export const useEffect = (cb: HooksType['cb'], args: any[] = []) => {
-  const hook = getHook(undefined);
-  if (changed(hook.value, args)) {
-    hook.value = args;
-    hook.cb = cb;
-  }
-};
-
-const changed = (a: any[], b: any[]) =>
-  !a || a.length !== b.length || b.some((arg, i) => arg !== a[i]);
-
-export const render = (
-  list: ReactElement | Array<ReactElement>,
-  dom: Element & { h?: Record<string, HooksType[]> },
-  ns: string = '',
+const patchProperty = (
+  node: DomType,
+  key: string,
+  oldValue: VNode,
+  newValue: VNode,
+  isSvg?: boolean,
 ) => {
-  // Make vlist always an array, even if it's a single node.
-  const realList: Array<ReactElement> = Array.isArray(list) ? list : [list];
-  const nodeList: any[] = realList
-    .filter((v) => {
-      if (v === null) {
-        return false;
-      }
-      if (v === undefined) {
-        return false;
-      }
-      if (v === '') {
-        return false;
-      }
-      return true;
-    })
-    .map((item) => {
-      if (typeof item === 'number') {
-        return String(item);
-      }
-      return item;
-    }) as Array<string | VNode>;
-  // Unique implicit keys counter for un-keyed nodes
-  const ids = new Map<any, number>();
-  // Current hooks storage
-  const hs: Record<string, HooksType[]> = dom.h || {};
-  // Erase hooks storage
-  dom.h = {};
-  const mountList: Array<{
-    onceMount: MountType;
-    forceUpdate: ForceUpdateType;
-  }> = [];
-  for (let i = 0; i < nodeList.length; i++) {
-    let v = nodeList[i];
-    forceUpdate = () => render(nodeList, dom);
-    // Current component re-rendering function (global, used by some hooks).
-    while (v.element && typeof v.element === 'function') {
-      if (v?.element?.onceMount) {
-        mountList.push({
-          onceMount: v.element.onceMount,
-          forceUpdate,
-        });
-        v.element.onceMount = undefined;
-      }
-      // Key, explicit v property or implicit auto-incremented key
-      const oldKey = ids.get(v.element) || 1;
-      const k = (v.props && v.props.key) || '' + v.element + (oldKey + 1);
-      ids.set(v.element, oldKey + 1);
-      hooks = hs[k] || [];
-      index = 0;
-      v = v.element(v.props, v.children, forceUpdate);
-      // @ts-ignore
-      dom.h[k] = hooks;
+  if (key === 'key') {
+  } else if (key[0] === 'o' && key[1] === 'n') {
+    if (
+      !((node.events || (node.events = {}))[(key = key.slice(2))] = newValue)
+    ) {
+      node.removeEventListener(key, listener);
+    } else if (!oldValue) {
+      node.addEventListener(key, listener);
     }
-    const nsURI = ns || (v.props && v.props.xmlns);
-    const createNode = () => {
-      if (typeof v === 'string') {
-        return document.createTextNode(v);
-      }
-      if (v?.props?.dangerouslySetInnerHTML?.trim()) {
-        const template = document.createElement('span');
-        template.innerHTML = v?.props?.dangerouslySetInnerHTML;
-        return template.childNodes[0];
-      }
-      if (nsURI) {
-        return document.createElementNS(nsURI, v.element as string);
-      } else {
-        return document.createElement(v.element as string);
-      }
-    };
+  } else if (!isSvg && key !== 'list' && key !== 'form' && key in node) {
+    node[key] = newValue == null ? '' : newValue;
+  } else if (newValue == null || newValue === false) {
+    node.removeAttribute(key);
+  } else {
+    node.setAttribute(key, newValue);
+  }
+};
 
-    let node = dom.childNodes[i] as any;
+const createNode = (vdom: VNode, isSvg?: boolean) => {
+  if (!vdom.props) {
+    console.log(vdom);
+  }
+  const props = vdom.props;
+  const node =
+    vdom.type === TEXT_NODE
+      ? document.createTextNode(vdom.tag)
+      : (isSvg = isSvg || vdom.tag === 'svg')
+      ? document.createElementNS(SVG_NS, vdom.tag, { is: props.is })
+      : document.createElement(vdom.tag, { is: props.is });
 
-    if (!node || (v.element ? node.e !== v.element : node.data !== v)) {
-      node = dom.insertBefore(createNode(), node) as any;
+  for (var k in props) {
+    patchProperty(node, k, null, props[k], isSvg);
+  }
+
+  for (var i = 0; i < vdom.children.length; i++) {
+    node.appendChild(
+      createNode((vdom.children[i] = vdomify(vdom.children[i])), isSvg),
+    );
+  }
+
+  return (vdom.node = node);
+};
+
+const patchNode = (
+  parent: DomType,
+  node: DomType,
+  oldVNode: VNode,
+  newVNode: VNode,
+  isSvg?: boolean,
+) => {
+  if (oldVNode === newVNode) {
+  } else if (
+    oldVNode != null &&
+    oldVNode.type === TEXT_NODE &&
+    newVNode.type === TEXT_NODE
+  ) {
+    if (oldVNode.tag !== newVNode.tag) node.nodeValue = newVNode.tag;
+  } else if (oldVNode == null || oldVNode.tag !== newVNode.tag) {
+    node = parent.insertBefore(
+      createNode((newVNode = vdomify(newVNode)), isSvg),
+      node,
+    );
+    if (oldVNode != null) {
+      parent.removeChild(oldVNode.node);
     }
-    if (v.element && !v?.props?.dangerouslySetInnerHTML) {
-      node.e = v.element;
-      const props = v.props || {};
-      for (const propName of Object.keys(props)) {
-        if (node[propName] !== props[propName]) {
-          if (!props[propName]) {
-            continue;
-          }
-          const key = propName;
-          if (nsURI) {
-            node.setAttribute(key, props[key]);
-          } else {
-            node[key] = props[key];
-          }
-        }
+  } else {
+    var tmpVKid,
+      oldVKid,
+      oldKey,
+      newKey,
+      oldProps = oldVNode.props,
+      newProps = newVNode.props,
+      oldVKids = oldVNode.children,
+      newVKids = newVNode.children,
+      oldHead = 0,
+      newHead = 0,
+      oldTail = oldVKids.length - 1,
+      newTail = newVKids.length - 1;
+
+    isSvg = isSvg || newVNode.tag === 'svg';
+
+    for (var i in { ...oldProps, ...newProps }) {
+      if (
+        (i === 'value' || i === 'selected' || i === 'checked'
+          ? node[i]
+          : oldProps[i]) !== newProps[i]
+      ) {
+        patchProperty(node, i, oldProps[i], newProps[i], isSvg);
       }
-      if (v.children && v.children.length > 0) {
-        render(v.children as any, node, nsURI);
+    }
+
+    while (newHead <= newTail && oldHead <= oldTail) {
+      if (
+        (oldKey = getKey(oldVKids[oldHead])) == null ||
+        oldKey !== getKey(newVKids[newHead])
+      ) {
+        break;
+      }
+
+      patchNode(
+        node,
+        oldVKids[oldHead].node,
+        oldVKids[oldHead++],
+        (newVKids[newHead] = vdomify(newVKids[newHead++])),
+        isSvg,
+      );
+    }
+
+    while (newHead <= newTail && oldHead <= oldTail) {
+      if (
+        (oldKey = getKey(oldVKids[oldTail])) == null ||
+        oldKey !== getKey(newVKids[newTail])
+      ) {
+        break;
+      }
+
+      patchNode(
+        node,
+        oldVKids[oldTail].node,
+        oldVKids[oldTail--],
+        (newVKids[newTail] = vdomify(newVKids[newTail--])),
+        isSvg,
+      );
+    }
+
+    if (oldHead > oldTail) {
+      while (newHead <= newTail) {
+        node.insertBefore(
+          createNode((newVKids[newHead] = vdomify(newVKids[newHead++])), isSvg),
+          (oldVKid = oldVKids[oldHead]) && oldVKid.node,
+        );
+      }
+    } else if (newHead > newTail) {
+      while (oldHead <= oldTail) {
+        node.removeChild(oldVKids[oldHead++].node);
       }
     } else {
-      node.data = v;
-    }
-  }
-
-  Object.values(dom.h).forEach((componentHooks) => {
-    componentHooks.forEach((h) => {
-      if (h.cb) {
-        h.cleanup = h.cb();
-        h.cb = undefined;
-      }
-    });
-  });
-
-  Object.keys(hs)
-    // @ts-ignore
-    .filter((k) => !dom.h[k])
-    .forEach((k) =>
-      hs[k].forEach((h) => {
-        if (h.cleanup) {
-          h.cleanup();
+      for (var keyed = {}, newKeyed = {}, i = oldHead; i <= oldTail; i++) {
+        if ((oldKey = oldVKids[i].key) != null) {
+          keyed[oldKey] = oldVKids[i];
         }
-      }),
-    );
+      }
 
-  for (const item of mountList) {
-    if (item.onceMount && item.forceUpdate) {
-      item.onceMount(item.forceUpdate);
+      while (newHead <= newTail) {
+        oldKey = getKey((oldVKid = oldVKids[oldHead]));
+        newKey = getKey((newVKids[newHead] = vdomify(newVKids[newHead])));
+
+        if (
+          newKeyed[oldKey] ||
+          (newKey != null && newKey === getKey(oldVKids[oldHead + 1]))
+        ) {
+          if (oldKey == null) {
+            node.removeChild(oldVKid.node);
+          }
+          oldHead++;
+          continue;
+        }
+
+        if (newKey == null || oldVNode.type === SSR_NODE) {
+          if (oldKey == null) {
+            patchNode(
+              node,
+              oldVKid && oldVKid.node,
+              oldVKid,
+              newVKids[newHead],
+              isSvg,
+            );
+            newHead++;
+          }
+          oldHead++;
+        } else {
+          if (oldKey === newKey) {
+            patchNode(node, oldVKid.node, oldVKid, newVKids[newHead], isSvg);
+            newKeyed[newKey] = true;
+            oldHead++;
+          } else {
+            if ((tmpVKid = keyed[newKey]) != null) {
+              patchNode(
+                node,
+                node.insertBefore(tmpVKid.node, oldVKid && oldVKid.node),
+                tmpVKid,
+                newVKids[newHead],
+                isSvg,
+              );
+              newKeyed[newKey] = true;
+            } else {
+              patchNode(
+                node,
+                oldVKid && oldVKid.node,
+                null,
+                newVKids[newHead],
+                isSvg,
+              );
+            }
+          }
+          newHead++;
+        }
+      }
+
+      while (oldHead <= oldTail) {
+        if (getKey((oldVKid = oldVKids[oldHead++])) == null) {
+          node.removeChild(oldVKid.node);
+        }
+      }
+
+      for (var i in keyed) {
+        if (newKeyed[i] == null) {
+          node.removeChild(keyed[i].node);
+        }
+      }
     }
   }
-  for (let child; (child = dom.childNodes[nodeList.length]); ) {
-    render([], dom.removeChild(child) as any);
-  }
+
+  return (newVNode.node = node);
 };
+
+const vdomify = (newVNode: any) =>
+  newVNode !== true && newVNode !== false && newVNode ? newVNode : text('');
+
+const recycleNode = (node: DomType) =>
+  node.nodeType === TEXT_NODE
+    ? text(node.nodeValue, node)
+    : createVNode(
+        node.nodeName.toLowerCase(),
+        EMPTY_OBJ,
+        EMPTY_ARR.map.call(node.childNodes, recycleNode),
+        SSR_NODE,
+        node,
+      );
+
+function createVNode(
+  tag: string,
+  props: any,
+  children: ChildrenType,
+  type?: number,
+  node?: DomType,
+): VNode {
+  return {
+    tag,
+    props,
+    key: props.key,
+    children,
+    type,
+    node,
+  };
+}
+
+export const text = (value: string | number, node?: DomType) =>
+  createVNode(String(value), EMPTY_OBJ, EMPTY_ARR, TEXT_NODE, node);
+
+export const h = (tag: string, props: PropsType, ...children: VNode[]) =>
+  createVNode(tag, props, children);
+
+export const render = (node: DomType, vdom: ReactElement) => (
+  ((node = patchNode(
+    node.parentNode,
+    node,
+    node.vdom || recycleNode(node),
+    vdom,
+  )).vdom = vdom),
+  node
+);

@@ -1,5 +1,5 @@
 import { FormulaBarContainer } from '..';
-import { h, render } from '@/react';
+import { render } from '@/react';
 import globalStore from '@/store';
 
 describe('FormulaBarContainer.test.ts', () => {
@@ -10,7 +10,7 @@ describe('FormulaBarContainer.test.ts', () => {
         col: 0,
       },
     });
-    render(h(FormulaBarContainer, {}), document.body);
+    render(document.body, FormulaBarContainer({}));
     expect(
       document.querySelector('.formula-bar-wrapper')!.childNodes,
     ).toHaveLength(2);

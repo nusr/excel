@@ -1,5 +1,5 @@
 import { ToolbarContainer } from '..';
-import { h, render } from '@/react';
+import { render } from '@/react';
 import globalStore from '@/store';
 
 describe('ToolbarContainer.test.ts', () => {
@@ -10,7 +10,7 @@ describe('ToolbarContainer.test.ts', () => {
         col: 0,
       },
     });
-    render(h(ToolbarContainer, {}), document.body);
+    render(document.body, ToolbarContainer({}));
     expect(document.querySelector('.toolbar-wrapper')!.childNodes).toHaveLength(
       10,
     );

@@ -1,14 +1,2 @@
-export type {
-  Component,
-  Dispatch,
-  SetStateAction,
-  ForceUpdateType,
-} from './react';
-
-export {
-  render,
-  h,
-  useEffect,
-  useReducer,
-  useState,
-} from './react';
+export { render, h, text } from './react';
+export { Component } from './react';

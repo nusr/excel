@@ -3,9 +3,9 @@ import globalStore from '@/store';
 const inputId = 'formula-editor';
 
 export const FormulaEditor: Component = () => {
-  const activeCell = globalStore.get('activeCell');
-  const editCellValue = globalStore.get('editCellValue');
-  const isCellEditing = globalStore.get('isCellEditing');
+  const activeCell = globalStore.value.activeCell;
+  const editCellValue = globalStore.value.editCellValue;
+  const isCellEditing = globalStore.value.isCellEditing;
   const initValue =
     (activeCell.formula ? `=${activeCell.formula}` : '') ||
     String(activeCell.value || '');
@@ -15,18 +15,18 @@ export const FormulaEditor: Component = () => {
     id: inputId,
     value: isCellEditing ? editCellValue : initValue,
     onfocus: () => {
-      globalStore.getController().enterEditing();
+      globalStore.controller.enterEditing();
     },
     onblur: (event: any) => {
-      const controller = globalStore.getController();
-      const cell = globalStore.get('activeCell');
+      const controller = globalStore.controller;
+      const cell = globalStore.value.activeCell;
       controller.setCellValue(cell, event.target.value);
       const dom = document.querySelector<HTMLInputElement>('#' + inputId)!;
       if (event.target === dom) {
         dom.value = '';
         controller.setActiveCell(cell.row + 1, cell.col, 1, 1);
       }
-      globalStore.getController().quitEditing();
+      globalStore.controller.quitEditing();
       globalStore.set({ editCellValue: '' });
     },
     onkeydown: (event: any) => {

@@ -1,15 +1,17 @@
-import { h, render, Component } from '../react';
+import { h, render, Component, text as TextNode } from '../react';
+import { JSDOM } from "jsdom"
+global.document = new JSDOM(`<div id="app"></div>`).window.document
 
 describe('react.test.ts', () => {
   describe('h', () => {
     test('normal', () => {
       expect(h('div', {})).toEqual({ element: 'div', props: {}, children: [] });
-      expect(h('div', {}, 'hello')).toEqual({
+      expect(h('div', {}, TextNode('hello'))).toEqual({
         element: 'div',
         props: {},
         children: ['hello'],
       });
-      expect(h('div', { a: 1 }, 'hello')).toEqual({
+      expect(h('div', { a: 1 }, TextNode('hello'))).toEqual({
         element: 'div',
         props: { a: 1 },
         children: ['hello'],
@@ -18,76 +20,41 @@ describe('react.test.ts', () => {
   });
   describe('render', () => {
     test('single stateless node', () => {
-      render(h('div', { className: 'simple' }, 'text'), document.body);
+      render(
+        document.getElementById("app")!,
+        h('div', { className: 'simple' }, TextNode('text')),
+      );
       expect(document.querySelector('.simple')!.textContent).toEqual('text');
     });
     test('single stateless component', () => {
       const Hello: Component = () =>
-        h('div', { className: 'component' }, 'Hello');
+        h('div', { className: 'component' }, TextNode('Hello'));
       Hello.displayName = 'Hello';
-      render(h(Hello, {}), document.body);
+      render(document.getElementById("app")!, Hello({}));
       expect(document.querySelector('.component')!.textContent).toEqual(
         'Hello',
       );
     });
     test('component with properties', () => {
       const Text: Component<{ cls: string; text: string }> = ({ cls, text }) =>
-        h('p', { className: cls }, text);
+        h('p', { className: cls }, TextNode(text));
       Text.displayName = 'Text';
-      render(h(Text, { cls: 'foo', text: 'bar' }), document.body);
+      render(document.getElementById("app")!, Text({ cls: 'foo', text: 'bar' }));
       expect(document.querySelector('.foo')!.textContent).toEqual('bar');
     });
     test('component with children', () => {
-      const A: Component = () => h('div', { className: 'a' }, 'A');
+      const A: Component = () => h('div', { className: 'a' }, TextNode('A'));
       A.displayName = 'A';
-      const B: Component = () => h('div', { className: 'b' }, 'B');
+      const B: Component = () => h('div', { className: 'b' }, TextNode('B'));
       B.displayName = 'B';
-      const C: Component = (_, children) =>
+      const C: Component = (_, ...children) =>
         h('div', { className: 'c' }, ...children);
       C.displayName = 'C';
-      const D: Component = () => h(C, {}, h(C, {}, h(A, {}), h(B, {})));
+      const D: Component = () => C({}, C({}, A({}), B({})));
       D.displayName = 'D';
-      render(h(D, {}), document.body);
+      render(document.getElementById("app")!, D({}));
       expect(document.querySelector('.c > .c > .a')!.textContent).toEqual('A');
       expect(document.querySelector('.c > .c > .b')!.textContent).toEqual('B');
-    });
-  });
-  describe('forceUpdate', () => {
-    test('click counter', () => {
-      let count = 0;
-      const Counter: Component = (_, __, forceUpdate) => {
-        const handleClick = () => {
-          count++;
-          forceUpdate();
-        };
-        return h(
-          'div',
-          {},
-          h(
-            'div',
-            {
-              className: 'count',
-            },
-            `Count: ${count}`,
-          ),
-          h(
-            'button',
-            {
-              onclick: handleClick,
-            },
-            'Add',
-          ),
-        );
-      };
-      Counter.displayName = 'Counter';
-      render(h(Counter, {}), document.body);
-      expect(document.querySelector('.count')!.textContent).toEqual('Count: 0');
-      // @ts-ignore
-      document.querySelector<HTMLButtonElement>('button')!.onclick();
-      expect(document.querySelector('.count')!.textContent).toEqual('Count: 1');
-      // @ts-ignore
-      document!.querySelector('button')!.onclick();
-      expect(document.querySelector('.count')!.textContent).toEqual('Count: 2');
     });
   });
 });

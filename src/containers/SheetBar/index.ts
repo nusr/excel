@@ -1,12 +1,12 @@
-import { Component, h } from '@/react';
+import { Component, h, text } from '@/react';
 import { classnames } from '@/util';
 import globalStore from '@/store';
 import theme from '@/theme';
-import { Button, ButtonProps, Icon, IconProps } from '@/components';
+import { Button, Icon } from '@/components';
 
 export const SheetBarContainer: Component = () => {
-  const sheetList = globalStore.get('sheetList');
-  const currentSheetId = globalStore.get('currentSheetId');
+  const sheetList = globalStore.value.sheetList;
+  const currentSheetId = globalStore.value.currentSheetId;
   return h(
     'div',
     {
@@ -26,10 +26,10 @@ export const SheetBarContainer: Component = () => {
               active: currentSheetId === item.sheetId,
             }),
             onclick: () => {
-              globalStore.getController().setCurrentSheetId(item.sheetId);
+              globalStore.controller.setCurrentSheetId(item.sheetId);
             },
           },
-          item.name,
+          text(item.name),
         );
       }),
     ),
@@ -38,16 +38,15 @@ export const SheetBarContainer: Component = () => {
       {
         className: 'sheet-bar-add',
       },
-      h<ButtonProps>(
-        Button,
+      Button(
         {
           onClick: () => {
-            globalStore.getController().addSheet();
+            globalStore.controller.addSheet();
           },
           type: 'circle',
           style: `background-color: ${theme.buttonActiveColor};`,
         },
-        h<IconProps>(Icon, {
+        Icon({
           name: 'plus',
         }),
       ),

@@ -14,7 +14,7 @@ const defaultClick: (event: MouseEvent) => void = () => {
   console.log('add click event');
 };
 
-export const Button: Component<ButtonProps> = (props, children = []) => {
+export const Button: Component<ButtonProps> = (props, ...children) => {
   const {
     className = '',
     onClick = defaultClick,

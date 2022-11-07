@@ -1,4 +1,4 @@
-import { h, Component } from '@/react';
+import { h, text, Component } from '@/react';
 import { classnames } from '@/util';
 import { OptionItem } from '@/types';
 
@@ -44,7 +44,7 @@ export const Select: Component<SelectProps> = (props) => {
           style: itemStyle,
           className: classnames('select-item', { disabled }),
         },
-        String(label),
+        text(label),
       );
     }),
   );

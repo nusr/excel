@@ -1,10 +1,10 @@
-import { h, Component } from '@/react';
+import { h, Component, text } from '@/react';
 import { FormulaEditor } from './FormulaEditor';
 import { intToColumnName } from '@/util';
 import globalStore from '@/store';
 
 export const FormulaBarContainer: Component = () => {
-  const activeCell = globalStore.get('activeCell');
+  const activeCell = globalStore.value.activeCell;
   return h(
     'div',
     {
@@ -13,9 +13,9 @@ export const FormulaBarContainer: Component = () => {
     h(
       'div',
       { className: 'formula-bar-name' },
-      `${intToColumnName(activeCell.col)}${activeCell.row + 1}`,
+      text(`${intToColumnName(activeCell.col)}${activeCell.row + 1}`),
     ),
-    h('div', { className: 'formula-bar-editor-wrapper' }, h(FormulaEditor, {})),
+    h('div', { className: 'formula-bar-editor-wrapper' }, FormulaEditor({})),
   );
 };
 FormulaBarContainer.displayName = 'FormulaBarContainer';

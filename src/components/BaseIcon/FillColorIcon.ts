@@ -1,8 +1,8 @@
-import { h, Component } from '@/react';
-import { BaseIcon, BaseIconProps } from './BaseIcon';
+import { Component } from '@/react';
+import { BaseIcon } from './BaseIcon';
 
 export const FillColorIcon: Component = () => {
-  return h<BaseIconProps>(BaseIcon, {
+  return BaseIcon({
     paths: [
       {
         d: 'M0 0h1024v1024H0z',

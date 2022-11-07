@@ -1,13 +1,15 @@
 import { SheetBarContainer } from '..';
-import { h, render } from '@/react';
+import { render } from '@/react';
 import globalStore from '@/store';
+import { JSDOM } from 'jsdom';
+global.document = new JSDOM(`<div id="app"></div>`).window.document;
 
 describe('SheetBarContainer.test.ts', () => {
   test('normal', () => {
     globalStore.set({
       sheetList: [],
     });
-    render(h(SheetBarContainer, {}), document.body);
+    render(document.getElementById('app')!, SheetBarContainer({}));
     expect(
       document.querySelector('.sheet-bar-wrapper')!.childNodes,
     ).toHaveLength(2);
@@ -26,7 +28,7 @@ describe('SheetBarContainer.test.ts', () => {
         },
       ],
     });
-    render(h(SheetBarContainer, {}), document.body);
+    render(document.getElementById('app')!, SheetBarContainer({}));
 
     expect(document.querySelector('.sheet-bar-list')!.childNodes).toHaveLength(
       1,

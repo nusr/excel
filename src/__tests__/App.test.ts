@@ -1,10 +1,12 @@
 import { App } from '../App';
-import { h, render } from '@/react';
+import { render } from '@/react';
+import { JSDOM } from 'jsdom';
+
+global.document = new JSDOM(`<div id="app"></div>`).window.document;
 
 describe('App.test.ts', () => {
   test('normal', () => {
-    App.onceMount = () => {};
-    render(h(App, {}), document.body);
+    render(document.getElementById('app')!, App({}));
     expect(document.querySelector('.app-container')!.childNodes).toHaveLength(
       4,
     );

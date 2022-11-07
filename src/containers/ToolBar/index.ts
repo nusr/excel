@@ -1,23 +1,17 @@
-import { h, Component } from '@/react';
+import { h, Component, text } from '@/react';
 import {
   Icon,
-  IconProps,
   Button,
-  ButtonProps,
   ColorPicker,
-  ColorPickerProps,
   Github,
   Select,
-  SelectProps,
   FillColorIcon,
 } from '@/components';
 import {
   DEFAULT_FONT_FAMILY,
   FONT_SIZE_LIST,
-  FONT_FAMILY_LIST,
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
-  isSupportFontFamily,
 } from '@/util';
 import { StyleType, EWrap } from '@/types';
 import globalStore from '@/store';
@@ -27,9 +21,9 @@ export const ToolbarContainer: Component = () => {
     return `font-family:${value}`;
   };
   const setCellStyle = (value: Partial<StyleType>) => {
-    globalStore.getController().setCellStyle(value);
+    globalStore.controller.setCellStyle(value);
   };
-  const activeCell = globalStore.get('activeCell');
+  const activeCell = globalStore.value.activeCell;
   const { style = {} } = activeCell;
   const {
     isBold,
@@ -45,28 +39,25 @@ export const ToolbarContainer: Component = () => {
     {
       className: 'toolbar-wrapper',
     },
-    h<ButtonProps>(
-      Button,
+    Button(
       {
-        disabled: !globalStore.get('canUndo'),
+        disabled: !globalStore.value.canUndo,
         onClick() {
-          globalStore.getController().undo();
+          globalStore.controller.undo();
         },
       },
-      h<IconProps>(Icon, { name: 'undo' }),
+      Icon({ name: 'undo' })
     ),
-    h<ButtonProps>(
-      Button,
+    Button(
       {
-        disabled: !globalStore.get('canRedo'),
+        disabled: !globalStore.value.canRedo,
         onClick() {
-          globalStore.getController().redo();
+          globalStore.controller.redo();
         },
       },
-      h<IconProps>(Icon, { name: 'redo' }),
+      Icon({ name: 'redo' })
     ),
-    h<ButtonProps>(
-      Button,
+    Button(
       {
         active: isBold,
         onClick: () => {
@@ -75,10 +66,9 @@ export const ToolbarContainer: Component = () => {
           });
         },
       },
-      h<IconProps>(Icon, { name: 'bold' }),
+      Icon({ name: 'bold' })
     ),
-    h<ButtonProps>(
-      Button,
+    Button(
       {
         active: isItalic,
         onClick: () => {
@@ -87,35 +77,33 @@ export const ToolbarContainer: Component = () => {
           });
         },
       },
-      h<IconProps>(Icon, { name: 'italic' }),
+      Icon({ name: 'italic' })
     ),
-    h<ButtonProps>(
-      Button,
+    Button(
       {
         onClick: () => {
           setCellStyle({ wrapText: EWrap.AUTO_WRAP });
         },
         active: wrapText === EWrap.AUTO_WRAP,
       },
-      'Wrap Text',
+      text('Wrap Text')
     ),
-    h<SelectProps>(Select, {
-      data: globalStore.get('fontFamilyList'),
+    Select({
+      data: globalStore.value.fontFamilyList,
       value: fontFamily,
       getItemStyle: getItemStyle,
       onChange: (value) => {
         setCellStyle({ fontFamily: String(value) });
       },
     }),
-    h<SelectProps>(Select, {
+    Select({
       data: FONT_SIZE_LIST,
       value: fontSize,
       onChange: (value) => {
         setCellStyle({ fontSize: Number(value) });
       },
     }),
-    h<ColorPickerProps>(
-      ColorPicker,
+    ColorPicker(
       {
         color: fontColor,
         style: 'margin-left:8px',
@@ -123,10 +111,9 @@ export const ToolbarContainer: Component = () => {
           setCellStyle({ fontColor: value });
         },
       },
-      h<IconProps>(Icon, { name: 'fontColor' }),
+      Icon({ name: 'fontColor' })
     ),
-    h<ColorPickerProps>(
-      ColorPicker,
+    ColorPicker(
       {
         color: fillColor,
         style: 'margin-left:8px',
@@ -134,17 +121,17 @@ export const ToolbarContainer: Component = () => {
           setCellStyle({ fillColor: value });
         },
       },
-      h(FillColorIcon, {}),
+      FillColorIcon({}),
     ),
-    h(Github, {}),
+    Github({}),
   );
 };
 
 ToolbarContainer.displayName = 'ToolbarContainer';
-ToolbarContainer.onceMount = () => {
-  const list = FONT_FAMILY_LIST.map((v) => {
-    const disabled = !isSupportFontFamily(v);
-    return { label: v, value: v, disabled };
-  });
-  globalStore.set({ fontFamilyList: list });
-};
+// ToolbarContainer.onceMount = () => {
+//   const list = FONT_FAMILY_LIST.map((v) => {
+//     const disabled = !isSupportFontFamily(v);
+//     return { label: v, value: v, disabled };
+//   });
+//   globalStore.set({ fontFamilyList: list });
+// };

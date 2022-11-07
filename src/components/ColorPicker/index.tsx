@@ -1,4 +1,4 @@
-import { h, useState, Component } from '@/react';
+import { h, Component } from '@/react';
 import { classnames } from '@/util';
 export type ColorPickerProps = {
   color: string;
@@ -44,29 +44,32 @@ export const COLOR_LIST = [
   '#AB149E',
 ];
 
-export const ColorPicker: Component<ColorPickerProps> = (props, children) => {
+export const ColorPicker: Component<ColorPickerProps> = (
+  props,
+  ...children
+) => {
   const { color, style = '', onChange } = props;
-  const [visible, setVisible] = useState(false);
-  const toggleColorPicker = () => {
-    setVisible((v) => !v);
-  };
-  const handleBlur = () => {
-    setVisible(false);
-  };
+  // const [visible, setVisible] = useState(false);
+  // const toggleColorPicker = () => {
+  //   setVisible((v) => !v);
+  // };
+  // const handleBlur = () => {
+  //   setVisible(false);
+  // };
   return h(
     'div',
     {
       className: 'relative',
       style: style,
-      onblur: handleBlur,
-      onmouseleave: handleBlur,
+      // onblur: handleBlur,
+      // onmouseleave: handleBlur,
     },
     h(
       'div',
       {
         className: 'color-picker-trigger',
         style: `color:${color};`,
-        onclick: toggleColorPicker,
+        // onclick: toggleColorPicker,
       },
       ...children,
     ),
@@ -75,7 +78,7 @@ export const ColorPicker: Component<ColorPickerProps> = (props, children) => {
       'div',
       {
         className: classnames('color-picker-wrapper', {
-          show: visible,
+          // show: visible,
         }),
       },
       h(
@@ -90,7 +93,7 @@ export const ColorPicker: Component<ColorPickerProps> = (props, children) => {
             style: `background-color:${item};`,
             onclick: () => {
               onChange(item);
-              setVisible(false);
+              // setVisible(false);
             },
           }),
         ),

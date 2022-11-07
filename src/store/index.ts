@@ -1,10 +1,48 @@
-import { StoreValue, IController } from '@/types';
-import { ForceUpdateType } from '@/react';
-import { CELL_HEIGHT, CELL_WIDTH, assert } from '@/util';
+import { StoreValue, IController, ChangeEventType } from '@/types';
+import { CELL_HEIGHT, CELL_WIDTH } from '@/util';
+import { Model, MOCK_MODEL } from '@/model';
+import { Controller, Scroll, History } from '@/controller';
+import { MAIN_CANVAS_ID } from '@/util';
+import { MainCanvas, RenderController } from '@/canvas';
+import theme from '@/theme';
+
+function initTheme() {
+  const keyList = Object.keys(theme) as Array<keyof typeof theme>;
+  for (const key of keyList) {
+    document.documentElement.style.setProperty(
+      `--${key}`,
+      String(theme[key] || ''),
+    );
+  }
+}
+
+function handleModelChange(
+  controller: IController,
+  mainCanvas: MainCanvas,
+  changeSet: Set<ChangeEventType>,
+) {
+  const cell = controller.queryCell(controller.getActiveCell());
+  const value: Partial<StoreValue> = {
+    editCellValue: '',
+    isCellEditing: controller.getCellEditing(),
+    canRedo: controller.canRedo(),
+    canUndo: controller.canUndo(),
+    sheetList: controller.getSheetList(),
+    currentSheetId: controller.getCurrentSheetId(),
+    cellPosition: mainCanvas.queryCell(cell.row, cell.col),
+  };
+  value.activeCell = cell;
+  if (value.isCellEditing) {
+    value.editCellValue =
+      (cell.formula ? `=${cell.formula}` : '') || String(cell.value || '');
+  }
+  globalStore.set(value);
+  mainCanvas.checkChange({ changeSet: changeSet });
+}
+
 class Store {
-  private value: StoreValue;
-  private forceUpdate: ForceUpdateType;
-  private controller: IController | null = null;
+  value: StoreValue;
+  controller: IController;
   constructor() {
     this.value = {
       sheetList: [],
@@ -27,24 +65,41 @@ class Store {
       canUndo: false,
       fontFamilyList: [],
     };
-    this.forceUpdate = () => {};
+    const controller = new Controller(new Model(), new Scroll(), new History());
+    controller.addSheet();
+    this.controller = controller;
   }
-  setUpdate(f: ForceUpdateType) {
-    this.forceUpdate = f;
+
+  initCanvas() {
+    initTheme();
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '#' + MAIN_CANVAS_ID,
+    )!;
+    const mainCanvas = new MainCanvas(
+      this.controller,
+      new RenderController(canvas),
+      canvas,
+    );
+    mainCanvas.addEvents();
+    this.controller.setHooks({
+      focus: () => {
+        canvas.focus();
+      },
+      blur: () => {
+        // console.log('blur');
+      },
+      modelChange: (changeSet) => {
+        console.log(changeSet);
+        handleModelChange(this.controller, mainCanvas, changeSet);
+      },
+    });
+    this.controller.fromJSON(MOCK_MODEL);
   }
   get<T extends keyof StoreValue>(key: T): StoreValue[T] {
     return this.value[key];
   }
   set(newValue: Partial<StoreValue>) {
     this.value = Object.assign(this.value, newValue);
-    this.forceUpdate();
-  }
-  setController(c: IController) {
-    this.controller = c;
-  }
-  getController(): IController {
-    assert(!!this.controller)
-    return this.controller;
   }
 }
 
