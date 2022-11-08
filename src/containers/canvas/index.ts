@@ -1,5 +1,6 @@
-import { h, Component } from '@/react';
+import { h } from '@/react';
 import { MAIN_CANVAS_ID } from '@/util';
+import { Component } from '@/types'
 
 export const CanvasContainer: Component = () => {
   return h(

@@ -1,4 +1,4 @@
-import { Component } from '@/react';
+import type { Component } from '@/types'
 import iconConfig from './icon';
 import type { BaseIconName } from '@/types';
 import { BaseIcon, BaseIconProps } from './BaseIcon';

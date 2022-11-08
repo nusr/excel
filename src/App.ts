@@ -1,21 +1,22 @@
-import { h, Component } from '@/react';
+import { h } from '@/react';
 import {
   CanvasContainer,
   SheetBarContainer,
   ToolbarContainer,
   FormulaBarContainer,
 } from '@/containers';
+import { SmartComponent } from '@/types';
 
-export const App: Component = () => {
+export const App: SmartComponent = (state, controller) => {
   return h(
     'div',
     {
       className: 'app-container',
     },
-    ToolbarContainer({}),
-    FormulaBarContainer({}),
+    ToolbarContainer(state, controller),
+    FormulaBarContainer(state, controller),
     CanvasContainer({}),
-    SheetBarContainer({}),
+    SheetBarContainer(state, controller),
   );
 };
 App.displayName = 'App';

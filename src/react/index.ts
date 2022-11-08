@@ -1,2 +1,1 @@
-export { render, h, text } from './react';
-export { Component } from './react';
+export { render, h } from './react';

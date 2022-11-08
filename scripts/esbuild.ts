@@ -77,7 +77,7 @@ async function buildBrowserConfig(options: BuildOptions): Promise<BuildResult> {
   const realOptions: BuildOptions = {
     bundle: true,
     watch: isDev,
-    entryPoints: ['src/index.tsx'],
+    entryPoints: ['src/index.ts'],
     tsconfig: 'tsconfig.json',
     define: {
       'process.env.NODE_ENV': JSON.stringify(nodeEnv),

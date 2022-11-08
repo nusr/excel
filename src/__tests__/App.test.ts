@@ -1,14 +1,14 @@
 import { App } from '../App';
 import { render } from '@/react';
-import { JSDOM } from 'jsdom';
-
-global.document = new JSDOM(`<div id="app"></div>`).window.document;
+import { DEFAULT_STORE_VALUE } from '@/util';
+import { initController } from '../init';
 
 describe('App.test.ts', () => {
   test('normal', () => {
-    render(document.getElementById('app')!, App({}));
-    expect(document.querySelector('.app-container')!.childNodes).toHaveLength(
-      4,
+    const dom = render(
+      document.body,
+      App(DEFAULT_STORE_VALUE, initController()),
     );
+    expect(dom.childNodes).toHaveLength(4);
   });
 });

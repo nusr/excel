@@ -1,5 +1,6 @@
-import { h, Component } from '@/react';
+import { h } from '@/react';
 import { classnames } from '@/util';
+import type { Component } from '@/types'
 type PathItem = {
   d: string;
   'fill-opacity'?: string;

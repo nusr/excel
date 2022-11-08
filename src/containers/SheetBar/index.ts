@@ -1,12 +1,10 @@
-import { Component, h, text } from '@/react';
+import { h } from '@/react';
 import { classnames } from '@/util';
-import globalStore from '@/store';
 import theme from '@/theme';
 import { Button, Icon } from '@/components';
+import { SmartComponent } from '@/types';
 
-export const SheetBarContainer: Component = () => {
-  const sheetList = globalStore.value.sheetList;
-  const currentSheetId = globalStore.value.currentSheetId;
+export const SheetBarContainer: SmartComponent = (state, controller) => {
   return h(
     'div',
     {
@@ -17,19 +15,19 @@ export const SheetBarContainer: Component = () => {
       {
         className: 'sheet-bar-list',
       },
-      ...sheetList.map((item) => {
+      ...state.sheetList.map((item) => {
         return h(
           'div',
           {
             key: item.sheetId,
             className: classnames('sheet-bar-item', {
-              active: currentSheetId === item.sheetId,
+              active: state.currentSheetId === item.sheetId,
             }),
             onclick: () => {
-              globalStore.controller.setCurrentSheetId(item.sheetId);
+              controller.setCurrentSheetId(item.sheetId);
             },
           },
-          text(item.name),
+          item.name,
         );
       }),
     ),
@@ -41,7 +39,7 @@ export const SheetBarContainer: Component = () => {
       Button(
         {
           onClick: () => {
-            globalStore.controller.addSheet();
+            controller.addSheet();
           },
           type: 'circle',
           style: `background-color: ${theme.buttonActiveColor};`,

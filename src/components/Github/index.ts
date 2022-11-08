@@ -1,4 +1,5 @@
-import { h, Component } from '@/react';
+import { h } from '@/react';
+import type { Component } from '@/types'
 
 const pathStyle = 'transform-origin:"130px 106px";';
 

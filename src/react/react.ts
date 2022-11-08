@@ -1,35 +1,4 @@
-type ReactElement = VNode | string | null | undefined | number;
-type KeyType = string | number;
-export interface PropsType {
-  className?: string;
-  id?: string;
-  children?: VNode[];
-  dangerouslySetInnerHTML?: string;
-  style?: string;
-  key?: KeyType;
-  onclick?: (event: MouseEvent) => void;
-  onblur?: (event: Event) => void;
-  onfocus?: (event: FocusEvent) => void;
-  onchange?: (event: Event) => void;
-  onmouseout?: (event: MouseEvent) => void;
-  onmouseleave?: (event: MouseEvent) => void;
-  onkeydown?: (event: KeyboardEvent) => void;
-  [key: string]: any;
-}
-interface VNode {
-  tag: string;
-  props: Record<string, any>;
-  children: VNode[];
-  type?: number;
-  node?: DomType;
-}
-
-export interface Component<T = {}> {
-  (props: T, ...children: VNode[]): VNode;
-  displayName: string;
-}
-
-type DomType = HTMLElement & { vdom?: VNode; events?: Record<string, any>; value?: any; selected?: boolean; checked?: boolean; };
+import type { VNode, DomType, KeyType, PropsType, ReactElement } from '@/types';
 
 const SSR_NODE = 1;
 const TEXT_NODE = 3;
@@ -74,12 +43,13 @@ const createNode = (vdom: VNode, isSvg?: boolean) => {
     console.log(vdom);
   }
   const props = vdom.props;
-  const node =
-    (vdom.type === TEXT_NODE
+  const node = (
+    vdom.type === TEXT_NODE
       ? document.createTextNode(vdom.tag)
       : (isSvg = isSvg || vdom.tag === 'svg')
-        ? document.createElementNS(SVG_NS, vdom.tag, { is: props.is })
-        : document.createElement(vdom.tag, { is: props.is })) as DomType;
+      ? document.createElementNS(SVG_NS, vdom.tag, { is: props.is })
+      : document.createElement(vdom.tag, { is: props.is })
+  ) as DomType;
 
   for (let k of Object.keys(props)) {
     patchProperty(node, k, null, props[k], isSvg);
@@ -121,12 +91,12 @@ const patchNode = (
     let oldVKid: VNode | null;
     let oldKey: KeyType | null;
     let newKey: KeyType | null;
-    let oldHead = 0
-    let newHead = 0
-    const oldProps = oldVNode.props
-    const newProps = newVNode.props
-    const oldVKids = oldVNode.children
-    const newVKids = newVNode.children
+    let oldHead = 0;
+    let newHead = 0;
+    const oldProps = oldVNode.props;
+    const newProps = newVNode.props;
+    const oldVKids = oldVNode.children;
+    const newVKids = newVNode.children;
     let oldTail = oldVKids.length - 1;
     let newTail = newVKids.length - 1;
 
@@ -228,7 +198,13 @@ const patchNode = (
           oldHead++;
         } else {
           if (oldKey === newKey) {
-            patchNode(containerDom, oldVKid.node!, oldVKid, newVKids[newHead], isSvg);
+            patchNode(
+              containerDom,
+              oldVKid.node!,
+              oldVKid,
+              newVKids[newHead],
+              isSvg,
+            );
             newKeyed[newKey] = true;
             oldHead++;
           } else {
@@ -281,12 +257,12 @@ const recycleNode = (node: DomType): VNode =>
   node.nodeType === TEXT_NODE
     ? text(node.nodeValue!, node)
     : createVNode(
-      node.nodeName.toLowerCase(),
-      EMPTY_OBJ,
-      [].map.call(node.childNodes, recycleNode) as VNode[],
-      SSR_NODE,
-      node,
-    );
+        node.nodeName.toLowerCase(),
+        EMPTY_OBJ,
+        [].map.call(node.childNodes, recycleNode) as VNode[],
+        SSR_NODE,
+        node,
+      );
 
 function createVNode(
   tag: string,
@@ -307,17 +283,21 @@ function createVNode(
 export const text = (value: string | number, node?: DomType) =>
   createVNode(String(value), EMPTY_OBJ, [], TEXT_NODE, node);
 
-export const h = (tag: string, props: PropsType, ...children: ReactElement[]) => {
+export const h = (
+  tag: string,
+  props: PropsType,
+  ...children: ReactElement[]
+) => {
   const result: VNode[] = [];
   for (const item of children) {
     if (typeof item == 'string' || typeof item === 'number') {
-      result.push(text(item))
+      result.push(text(item));
     } else if (item && typeof item === 'object') {
-      result.push(item)
+      result.push(item);
     }
   }
-  return createVNode(tag, props, result)
-}
+  return createVNode(tag, props, result);
+};
 
 export const render = (node: DomType, vdom: VNode) => {
   const result = patchNode(
@@ -325,7 +305,7 @@ export const render = (node: DomType, vdom: VNode) => {
     node,
     node.vdom || recycleNode(node),
     vdom,
-  )
+  );
   result.vdom = vdom;
   return result;
-}
+};

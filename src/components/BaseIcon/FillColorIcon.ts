@@ -1,4 +1,4 @@
-import { Component } from '@/react';
+import type { Component } from '@/types'
 import { BaseIcon } from './BaseIcon';
 
 export const FillColorIcon: Component = () => {

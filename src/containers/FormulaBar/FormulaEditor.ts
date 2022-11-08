@@ -1,11 +1,9 @@
-import { h, Component } from '@/react';
-import globalStore from '@/store';
+import { h } from '@/react';
+import { SmartComponent } from '@/types';
 const inputId = 'formula-editor';
 
-export const FormulaEditor: Component = () => {
-  const activeCell = globalStore.value.activeCell;
-  const editCellValue = globalStore.value.editCellValue;
-  const isCellEditing = globalStore.value.isCellEditing;
+export const FormulaEditor: SmartComponent = (state, controller) => {
+  const { activeCell, isCellEditing, editCellValue } = state;
   const initValue =
     (activeCell.formula ? `=${activeCell.formula}` : '') ||
     String(activeCell.value || '');
@@ -15,28 +13,24 @@ export const FormulaEditor: Component = () => {
     id: inputId,
     value: isCellEditing ? editCellValue : initValue,
     onfocus: () => {
-      globalStore.controller.enterEditing();
+      controller.enterEditing();
     },
     onblur: (event: any) => {
-      const controller = globalStore.controller;
-      const cell = globalStore.value.activeCell;
-      controller.setCellValue(cell, event.target.value);
+      controller.setCellValue(activeCell, event.target.value);
       const dom = document.querySelector<HTMLInputElement>('#' + inputId)!;
       if (event.target === dom) {
         dom.value = '';
-        controller.setActiveCell(cell.row + 1, cell.col, 1, 1);
+        controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
       }
-      globalStore.controller.quitEditing();
-      globalStore.set({ editCellValue: '' });
+      controller.quitEditing();
+      state.editCellValue = '';
     },
     onkeydown: (event: any) => {
       if (event.key === 'Enter') {
         const dom = document.querySelector<HTMLInputElement>('#' + inputId)!;
         dom.blur();
       } else {
-        globalStore.set({
-          editCellValue: event.target.value,
-        });
+        state.editCellValue = event.target.value;
       }
     },
   });

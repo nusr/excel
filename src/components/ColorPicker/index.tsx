@@ -1,5 +1,6 @@
-import { h, Component } from '@/react';
+import { h } from '@/react';
 import { classnames } from '@/util';
+import type { Component } from '@/types'
 export type ColorPickerProps = {
   color: string;
   style?: string;

@@ -1,10 +1,10 @@
-import { h, Component, text } from '@/react';
+import { h } from '@/react';
 import { FormulaEditor } from './FormulaEditor';
 import { intToColumnName } from '@/util';
-import globalStore from '@/store';
+import { SmartComponent } from '@/types';
 
-export const FormulaBarContainer: Component = () => {
-  const activeCell = globalStore.value.activeCell;
+export const FormulaBarContainer: SmartComponent = (state, controller) => {
+  const { activeCell } = state;
   return h(
     'div',
     {
@@ -13,9 +13,9 @@ export const FormulaBarContainer: Component = () => {
     h(
       'div',
       { className: 'formula-bar-name' },
-      text(`${intToColumnName(activeCell.col)}${activeCell.row + 1}`),
+      `${intToColumnName(activeCell.col)}${activeCell.row + 1}`,
     ),
-    h('div', { className: 'formula-bar-editor-wrapper' }, FormulaEditor({})),
+    h('div', { className: 'formula-bar-editor-wrapper' }, FormulaEditor(state, controller)),
   );
 };
 FormulaBarContainer.displayName = 'FormulaBarContainer';

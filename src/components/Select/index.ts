@@ -1,6 +1,6 @@
-import { h, text, Component } from '@/react';
+import { h } from '@/react';
 import { classnames } from '@/util';
-import { OptionItem } from '@/types';
+import { OptionItem, Component } from '@/types';
 
 export type SelectProps = {
   value?: string | number;
@@ -44,7 +44,7 @@ export const Select: Component<SelectProps> = (props) => {
           style: itemStyle,
           className: classnames('select-item', { disabled }),
         },
-        text(label),
+        label,
       );
     }),
   );

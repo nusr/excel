@@ -1,5 +1,6 @@
-import { Component, h } from '@/react';
+import {  h } from '@/react';
 import { classnames } from '@/util';
+import type { Component } from '@/types'
 
 export interface ButtonProps {
   type?: 'normal' | 'circle';

@@ -8,3 +8,4 @@ export * from './range';
 export * from './parser';
 export * from './formula';
 export * from './icons';
+export * from './react'

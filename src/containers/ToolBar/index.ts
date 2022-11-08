@@ -1,4 +1,4 @@
-import { h, Component, text } from '@/react';
+import { h } from '@/react';
 import {
   Icon,
   Button,
@@ -13,17 +13,19 @@ import {
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
 } from '@/util';
-import { StyleType, EWrap } from '@/types';
-import globalStore from '@/store';
+import { StyleType, EWrap, SmartComponent } from '@/types';
 
-export const ToolbarContainer: Component = () => {
+export const ToolbarContainer: SmartComponent = (
+  state,
+  controller,
+) => {
   const getItemStyle = (value: string | number) => {
     return `font-family:${value}`;
   };
   const setCellStyle = (value: Partial<StyleType>) => {
-    globalStore.controller.setCellStyle(value);
+    controller.setCellStyle(value);
   };
-  const activeCell = globalStore.value.activeCell;
+  const { activeCell, canRedo, canUndo, fontFamilyList } = state;
   const { style = {} } = activeCell;
   const {
     isBold,
@@ -41,21 +43,21 @@ export const ToolbarContainer: Component = () => {
     },
     Button(
       {
-        disabled: !globalStore.value.canUndo,
+        disabled: !canUndo,
         onClick() {
-          globalStore.controller.undo();
+          controller.undo();
         },
       },
-      Icon({ name: 'undo' })
+      Icon({ name: 'undo' }),
     ),
     Button(
       {
-        disabled: !globalStore.value.canRedo,
+        disabled: !canRedo,
         onClick() {
-          globalStore.controller.redo();
+          controller.redo();
         },
       },
-      Icon({ name: 'redo' })
+      Icon({ name: 'redo' }),
     ),
     Button(
       {
@@ -66,7 +68,7 @@ export const ToolbarContainer: Component = () => {
           });
         },
       },
-      Icon({ name: 'bold' })
+      Icon({ name: 'bold' }),
     ),
     Button(
       {
@@ -77,7 +79,7 @@ export const ToolbarContainer: Component = () => {
           });
         },
       },
-      Icon({ name: 'italic' })
+      Icon({ name: 'italic' }),
     ),
     Button(
       {
@@ -86,10 +88,10 @@ export const ToolbarContainer: Component = () => {
         },
         active: wrapText === EWrap.AUTO_WRAP,
       },
-      text('Wrap Text')
+      'Wrap Text',
     ),
     Select({
-      data: globalStore.value.fontFamilyList,
+      data: fontFamilyList,
       value: fontFamily,
       getItemStyle: getItemStyle,
       onChange: (value) => {
@@ -111,7 +113,7 @@ export const ToolbarContainer: Component = () => {
           setCellStyle({ fontColor: value });
         },
       },
-      Icon({ name: 'fontColor' })
+      Icon({ name: 'fontColor' }),
     ),
     ColorPicker(
       {
@@ -128,10 +130,3 @@ export const ToolbarContainer: Component = () => {
 };
 
 ToolbarContainer.displayName = 'ToolbarContainer';
-// ToolbarContainer.onceMount = () => {
-//   const list = FONT_FAMILY_LIST.map((v) => {
-//     const disabled = !isSupportFontFamily(v);
-//     return { label: v, value: v, disabled };
-//   });
-//   globalStore.set({ fontFamilyList: list });
-// };
