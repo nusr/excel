@@ -1,13 +1,12 @@
-// @ts-nocheck
 type ReactElement = VNode | string | null | undefined | number;
-type ChildrenType = Array<ReactElement>;
+type KeyType = string | number;
 export interface PropsType {
   className?: string;
   id?: string;
-  children?: ChildrenType;
+  children?: VNode[];
   dangerouslySetInnerHTML?: string;
   style?: string;
-  key?: string | number;
+  key?: KeyType;
   onclick?: (event: MouseEvent) => void;
   onblur?: (event: Event) => void;
   onfocus?: (event: FocusEvent) => void;
@@ -20,10 +19,9 @@ export interface PropsType {
 interface VNode {
   tag: string;
   props: Record<string, any>;
-  children: ChildrenType;
-  key?: string;
+  children: VNode[];
   type?: number;
-  node?: Element;
+  node?: DomType;
 }
 
 export interface Component<T = {}> {
@@ -31,25 +29,25 @@ export interface Component<T = {}> {
   displayName: string;
 }
 
-type DomType = Element;
+type DomType = HTMLElement & { vdom?: VNode; events?: Record<string, any>; value?: any; selected?: boolean; checked?: boolean; };
 
 const SSR_NODE = 1;
 const TEXT_NODE = 3;
 const EMPTY_OBJ = {};
-const EMPTY_ARR: ChildrenType = [];
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-const listener = function (event) {
+const listener = function (event: any) {
+  // @ts-ignore
   this.events[event.type](event);
 };
 
-const getKey = (vdom: any) => (vdom == null ? vdom : vdom.key);
+const getKey = (vdom: VNode): KeyType | null => vdom?.props?.key ?? null;
 
 const patchProperty = (
   node: DomType,
   key: string,
-  oldValue: VNode,
-  newValue: VNode,
+  oldValue: any,
+  newValue: any,
   isSvg?: boolean,
 ) => {
   if (key === 'key') {
@@ -62,6 +60,7 @@ const patchProperty = (
       node.addEventListener(key, listener);
     }
   } else if (!isSvg && key !== 'list' && key !== 'form' && key in node) {
+    // @ts-ignore
     node[key] = newValue == null ? '' : newValue;
   } else if (newValue == null || newValue === false) {
     node.removeAttribute(key);
@@ -76,17 +75,17 @@ const createNode = (vdom: VNode, isSvg?: boolean) => {
   }
   const props = vdom.props;
   const node =
-    vdom.type === TEXT_NODE
+    (vdom.type === TEXT_NODE
       ? document.createTextNode(vdom.tag)
       : (isSvg = isSvg || vdom.tag === 'svg')
-      ? document.createElementNS(SVG_NS, vdom.tag, { is: props.is })
-      : document.createElement(vdom.tag, { is: props.is });
+        ? document.createElementNS(SVG_NS, vdom.tag, { is: props.is })
+        : document.createElement(vdom.tag, { is: props.is })) as DomType;
 
-  for (var k in props) {
+  for (let k of Object.keys(props)) {
     patchProperty(node, k, null, props[k], isSvg);
   }
 
-  for (var i = 0; i < vdom.children.length; i++) {
+  for (let i = 0; i < vdom.children.length; i++) {
     node.appendChild(
       createNode((vdom.children[i] = vdomify(vdom.children[i])), isSvg),
     );
@@ -96,8 +95,8 @@ const createNode = (vdom: VNode, isSvg?: boolean) => {
 };
 
 const patchNode = (
-  parent: DomType,
-  node: DomType,
+  parentDom: DomType,
+  containerDom: DomType,
   oldVNode: VNode,
   newVNode: VNode,
   isSvg?: boolean,
@@ -108,38 +107,38 @@ const patchNode = (
     oldVNode.type === TEXT_NODE &&
     newVNode.type === TEXT_NODE
   ) {
-    if (oldVNode.tag !== newVNode.tag) node.nodeValue = newVNode.tag;
+    if (oldVNode.tag !== newVNode.tag) containerDom.nodeValue = newVNode.tag;
   } else if (oldVNode == null || oldVNode.tag !== newVNode.tag) {
-    node = parent.insertBefore(
+    containerDom = parentDom.insertBefore(
       createNode((newVNode = vdomify(newVNode)), isSvg),
-      node,
+      containerDom,
     );
     if (oldVNode != null) {
-      parent.removeChild(oldVNode.node);
+      parentDom.removeChild(oldVNode.node!);
     }
   } else {
-    var tmpVKid,
-      oldVKid,
-      oldKey,
-      newKey,
-      oldProps = oldVNode.props,
-      newProps = newVNode.props,
-      oldVKids = oldVNode.children,
-      newVKids = newVNode.children,
-      oldHead = 0,
-      newHead = 0,
-      oldTail = oldVKids.length - 1,
-      newTail = newVKids.length - 1;
+    let tmpVKid: VNode | null;
+    let oldVKid: VNode | null;
+    let oldKey: KeyType | null;
+    let newKey: KeyType | null;
+    let oldHead = 0
+    let newHead = 0
+    const oldProps = oldVNode.props
+    const newProps = newVNode.props
+    const oldVKids = oldVNode.children
+    const newVKids = newVNode.children
+    let oldTail = oldVKids.length - 1;
+    let newTail = newVKids.length - 1;
 
     isSvg = isSvg || newVNode.tag === 'svg';
 
-    for (var i in { ...oldProps, ...newProps }) {
+    for (let i of Object.keys({ ...oldProps, ...newProps })) {
       if (
         (i === 'value' || i === 'selected' || i === 'checked'
-          ? node[i]
+          ? containerDom[i]
           : oldProps[i]) !== newProps[i]
       ) {
-        patchProperty(node, i, oldProps[i], newProps[i], isSvg);
+        patchProperty(containerDom, i, oldProps[i], newProps[i], isSvg);
       }
     }
 
@@ -152,8 +151,8 @@ const patchNode = (
       }
 
       patchNode(
-        node,
-        oldVKids[oldHead].node,
+        containerDom,
+        oldVKids[oldHead].node!,
         oldVKids[oldHead++],
         (newVKids[newHead] = vdomify(newVKids[newHead++])),
         isSvg,
@@ -169,8 +168,8 @@ const patchNode = (
       }
 
       patchNode(
-        node,
-        oldVKids[oldTail].node,
+        containerDom,
+        oldVKids[oldTail].node!,
         oldVKids[oldTail--],
         (newVKids[newTail] = vdomify(newVKids[newTail--])),
         isSvg,
@@ -179,18 +178,21 @@ const patchNode = (
 
     if (oldHead > oldTail) {
       while (newHead <= newTail) {
-        node.insertBefore(
+        containerDom.insertBefore(
           createNode((newVKids[newHead] = vdomify(newVKids[newHead++])), isSvg),
+          // @ts-ignore
           (oldVKid = oldVKids[oldHead]) && oldVKid.node,
         );
       }
     } else if (newHead > newTail) {
       while (oldHead <= oldTail) {
-        node.removeChild(oldVKids[oldHead++].node);
+        containerDom.removeChild(oldVKids[oldHead++].node!);
       }
     } else {
-      for (var keyed = {}, newKeyed = {}, i = oldHead; i <= oldTail; i++) {
-        if ((oldKey = oldVKids[i].key) != null) {
+      let newKeyed: Record<string | number, any> = {};
+      let keyed: Record<string | number, any> = {};
+      for (let i = oldHead; i <= oldTail; i++) {
+        if ((oldKey = getKey(oldVKids[i])) != null) {
           keyed[oldKey] = oldVKids[i];
         }
       }
@@ -200,11 +202,12 @@ const patchNode = (
         newKey = getKey((newVKids[newHead] = vdomify(newVKids[newHead])));
 
         if (
+          // @ts-ignore
           newKeyed[oldKey] ||
           (newKey != null && newKey === getKey(oldVKids[oldHead + 1]))
         ) {
           if (oldKey == null) {
-            node.removeChild(oldVKid.node);
+            containerDom.removeChild(oldVKid.node!);
           }
           oldHead++;
           continue;
@@ -213,8 +216,9 @@ const patchNode = (
         if (newKey == null || oldVNode.type === SSR_NODE) {
           if (oldKey == null) {
             patchNode(
-              node,
-              oldVKid && oldVKid.node,
+              containerDom,
+              // @ts-ignore
+              oldVKid?.node,
               oldVKid,
               newVKids[newHead],
               isSvg,
@@ -224,14 +228,15 @@ const patchNode = (
           oldHead++;
         } else {
           if (oldKey === newKey) {
-            patchNode(node, oldVKid.node, oldVKid, newVKids[newHead], isSvg);
+            patchNode(containerDom, oldVKid.node!, oldVKid, newVKids[newHead], isSvg);
             newKeyed[newKey] = true;
             oldHead++;
           } else {
             if ((tmpVKid = keyed[newKey]) != null) {
               patchNode(
-                node,
-                node.insertBefore(tmpVKid.node, oldVKid && oldVKid.node),
+                containerDom,
+                // @ts-ignore
+                containerDom.insertBefore(tmpVKid.node, oldVKid?.node),
                 tmpVKid,
                 newVKids[newHead],
                 isSvg,
@@ -239,8 +244,9 @@ const patchNode = (
               newKeyed[newKey] = true;
             } else {
               patchNode(
-                node,
-                oldVKid && oldVKid.node,
+                containerDom,
+                // @ts-ignore
+                oldVKid?.node,
                 null,
                 newVKids[newHead],
                 isSvg,
@@ -253,46 +259,45 @@ const patchNode = (
 
       while (oldHead <= oldTail) {
         if (getKey((oldVKid = oldVKids[oldHead++])) == null) {
-          node.removeChild(oldVKid.node);
+          containerDom.removeChild(oldVKid.node!);
         }
       }
 
-      for (var i in keyed) {
+      for (let i of Object.keys(keyed)) {
         if (newKeyed[i] == null) {
-          node.removeChild(keyed[i].node);
+          containerDom.removeChild(keyed[i].node);
         }
       }
     }
   }
 
-  return (newVNode.node = node);
+  return (newVNode.node = containerDom);
 };
 
 const vdomify = (newVNode: any) =>
   newVNode !== true && newVNode !== false && newVNode ? newVNode : text('');
 
-const recycleNode = (node: DomType) =>
+const recycleNode = (node: DomType): VNode =>
   node.nodeType === TEXT_NODE
-    ? text(node.nodeValue, node)
+    ? text(node.nodeValue!, node)
     : createVNode(
-        node.nodeName.toLowerCase(),
-        EMPTY_OBJ,
-        EMPTY_ARR.map.call(node.childNodes, recycleNode),
-        SSR_NODE,
-        node,
-      );
+      node.nodeName.toLowerCase(),
+      EMPTY_OBJ,
+      [].map.call(node.childNodes, recycleNode) as VNode[],
+      SSR_NODE,
+      node,
+    );
 
 function createVNode(
   tag: string,
   props: any,
-  children: ChildrenType,
+  children: VNode[],
   type?: number,
   node?: DomType,
 ): VNode {
   return {
     tag,
     props,
-    key: props.key,
     children,
     type,
     node,
@@ -300,17 +305,27 @@ function createVNode(
 }
 
 export const text = (value: string | number, node?: DomType) =>
-  createVNode(String(value), EMPTY_OBJ, EMPTY_ARR, TEXT_NODE, node);
+  createVNode(String(value), EMPTY_OBJ, [], TEXT_NODE, node);
 
-export const h = (tag: string, props: PropsType, ...children: VNode[]) =>
-  createVNode(tag, props, children);
+export const h = (tag: string, props: PropsType, ...children: ReactElement[]) => {
+  const result: VNode[] = [];
+  for (const item of children) {
+    if (typeof item == 'string' || typeof item === 'number') {
+      result.push(text(item))
+    } else if (item && typeof item === 'object') {
+      result.push(item)
+    }
+  }
+  return createVNode(tag, props, result)
+}
 
-export const render = (node: DomType, vdom: ReactElement) => (
-  ((node = patchNode(
-    node.parentNode,
+export const render = (node: DomType, vdom: VNode) => {
+  const result = patchNode(
+    node.parentNode! as DomType,
     node,
     node.vdom || recycleNode(node),
     vdom,
-  )).vdom = vdom),
-  node
-);
+  )
+  result.vdom = vdom;
+  return result;
+}
