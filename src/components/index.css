@@ -98,7 +98,7 @@
   left: 0;
   display: none;
 }
-.color-picker-wrapper.show {
+.color-picker:hover .color-picker-wrapper {
   display: block;
 }
 .color-picker-list {

@@ -1,5 +1,4 @@
 import { h, Component, VNodeStyle } from '@/react';
-import { classnames } from '@/util';
 export type ColorPickerProps = {
   color: string;
   style?: VNodeStyle;
@@ -49,20 +48,11 @@ export const ColorPicker: Component<ColorPickerProps> = (
   ...children
 ) => {
   const { color, style = {}, onChange } = props;
-  // const [visible, setVisible] = useState(false);
-  // const toggleColorPicker = () => {
-  //   setVisible((v) => !v);
-  // };
-  // const handleBlur = () => {
-  //   setVisible(false);
-  // };
   return h(
     'div',
     {
-      className: 'relative',
+      className: 'relative color-picker',
       style: style,
-      // onblur: handleBlur,
-      // onmouseleave: handleBlur,
     },
     h(
       'div',
@@ -71,7 +61,6 @@ export const ColorPicker: Component<ColorPickerProps> = (
         style: {
           color,
         },
-        // onclick: toggleColorPicker,
       },
       ...children,
     ),
@@ -79,9 +68,7 @@ export const ColorPicker: Component<ColorPickerProps> = (
     h(
       'div',
       {
-        className: classnames('color-picker-wrapper', {
-          // show: visible,
-        }),
+        className: 'color-picker-wrapper'
       },
       h(
         'div',
@@ -97,7 +84,6 @@ export const ColorPicker: Component<ColorPickerProps> = (
             },
             onclick: () => {
               onChange(item);
-              // setVisible(false);
             },
           }),
         ),

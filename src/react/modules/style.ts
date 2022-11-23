@@ -5,7 +5,7 @@ export type VNodeStyle = Record<string, string>;
 
 function updateStyle(oldVNode: VNode, vNode: VNode): void {
   let name: string;
-  const elm = vNode.elm;
+  const elm: any = vNode.elm;
   let oldStyle = (oldVNode.data as VNodeData).style;
   let style = (vNode.data as VNodeData).style;
 
@@ -17,10 +17,15 @@ function updateStyle(oldVNode: VNode, vNode: VNode): void {
   for (name in oldStyle) {
     if (!style[name]) {
       if (name[0] === '-' && name[1] === '-') {
-        (elm as any).style.removeProperty(name);
+        elm.style.removeProperty(name);
       } else {
-        (elm as any).style[name] = '';
+        elm.style[name] = '';
       }
+    }
+  }
+  for (name in style) {
+    if (style[name] !== oldStyle[name]) {
+      elm.style[name] = style[name];
     }
   }
 }
