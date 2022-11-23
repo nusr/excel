@@ -19,7 +19,6 @@ import {
   DEFAULT_ACTIVE_CELL,
   assert,
 } from '@/util';
-import { parseFormula } from '@/parser';
 
 export class Controller implements IController {
   private model: IModel;
@@ -221,19 +220,8 @@ export class Controller implements IController {
     const { row, col } = data;
     const { model } = this;
     const { value, formula, style } = model.queryCell(row, col);
-    let realValue = value;
-    if (formula) {
-      const result = parseFormula(formula, {
-        get: (row: number, col: number, sheetId: string) => {
-          const temp = this.model.queryCell(row, col, sheetId);
-          return temp.value;
-        },
-        set: () => {},
-      });
-      realValue = result.error ? result.error : result.result;
-    }
     return {
-      value: realValue,
+      value,
       row,
       col,
       formula,

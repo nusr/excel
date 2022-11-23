@@ -20,6 +20,7 @@ import {
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
 } from '@/util';
+import { parseFormula } from '@/parser';
 
 export class Model implements IModel {
   private currentSheetId = '';
@@ -93,6 +94,7 @@ export class Model implements IModel {
     this.styles = styles;
     this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
     this.mergeCells = mergeCells;
+    this.computeAllCell();
   }
   toJSON(): WorkBookJSON {
     const { worksheets, styles, workbook, mergeCells } = this;
@@ -104,14 +106,14 @@ export class Model implements IModel {
     };
   }
 
-  setCellValue(value: ResultType, range: Range): void {
+  private setCellValue(value: ResultType, range: Range): void {
     const { row, col } = range;
     const configPath = `worksheets[${
       range.sheetId || this.currentSheetId
     }][${row}][${col}]`;
     setWith(this, `${configPath}.value`, value);
   }
-  setCellFormula(formula: string, range: Range): void {
+  private setCellFormula(formula: string, range: Range): void {
     const { row, col } = range;
     const configPath = `worksheets[${
       range.sheetId || this.currentSheetId
@@ -127,6 +129,7 @@ export class Model implements IModel {
       this.setCellFormula('', range);
       this.setCellValue(value, range);
     }
+    this.computeAllCell();
   }
   setCellStyle(style: Partial<StyleType>, ranges: Range[]): void {
     const [range] = ranges;
@@ -172,8 +175,33 @@ export class Model implements IModel {
     let temp = undefined;
     if (style && this.styles[style]) {
       temp = this.styles[style];
-      return {};
     }
     return { ...cellData, style: temp };
   };
+  private computeAllCell() {
+    const sheetData = this.worksheets[this.currentSheetId];
+    if (isEmpty(sheetData)) {
+      return [];
+    }
+    const rowKeys = Object.keys(sheetData);
+    for (const rowKey of rowKeys) {
+      const colKeys = Object.keys(sheetData[rowKey]);
+      for (const colKey of colKeys) {
+        const temp = sheetData[rowKey][colKey];
+        if (temp?.formula) {
+          temp.value = this.parseFormula(temp.formula);
+        }
+      }
+    }
+  }
+  private parseFormula(formula: string) {
+    const result = parseFormula(formula, {
+      get: (row: number, col: number, sheetId: string) => {
+        const temp = this.queryCell(row, col, sheetId);
+        return temp.value;
+      },
+      set: () => {},
+    });
+    return result.error ? result.error : result.result;
+  }
 }

@@ -41,8 +41,7 @@ function handleModelChange(
   };
   newStateValue.activeCell = cell;
   if (newStateValue.isCellEditing) {
-    newStateValue.editCellValue =
-      (cell.formula ? `=${cell.formula}` : '') || String(cell.value || '');
+    newStateValue.editCellValue = cell.formula || String(cell.value || '');
   }
   mainCanvas.checkChange({ changeSet: changeSet });
   Object.assign(stateValue, newStateValue);

@@ -69,11 +69,9 @@ export interface IModel {
   toJSON(): WorkBookJSON;
   fromJSON(json: WorkBookJSON): void;
   queryCell(row: number, col: number, sheetId?: string): QueryCellResult;
-  setCellFormula(formula: string, range: IRange): void;
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void;
   getSheetInfo(sheetId?: string): WorksheetType;
   setCellValues(value: string, ranges: IRange[]): void;
-  setCellValue(value: ResultType, range: IRange): void;
   getSheetList(): WorkBookJSON['workbook'];
 }
 

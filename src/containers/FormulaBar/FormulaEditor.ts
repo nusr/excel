@@ -4,9 +4,7 @@ const inputId = 'formula-editor';
 
 export const FormulaEditor: SmartComponent = (state, controller) => {
   const { activeCell, isCellEditing, editCellValue } = state;
-  const initValue =
-    (activeCell.formula ? `=${activeCell.formula}` : '') ||
-    String(activeCell.value || '');
+  const initValue = activeCell.formula || String(activeCell.value || '');
 
   return h('input', {
     className: 'base-editor',

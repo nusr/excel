@@ -6,12 +6,6 @@ export const CanvasContainer: Component = () => {
     'div',
     {
       className: 'relative canvas-container',
-      hook: {
-        init: () => {
-          console.log('CanvasContainer init');
-          return
-        },
-      }
     },
     h('canvas', {
       className: 'full',

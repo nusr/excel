@@ -1,53 +1,55 @@
-export interface DOMAPI {
+import { reactLog } from '@/util';
+
+export interface DOMOperation {
   createElement: (
     tagName: any,
-    options?: ElementCreationOptions
+    options?: ElementCreationOptions,
   ) => HTMLElement;
   createElementNS: (
     namespaceURI: string,
     qualifiedName: string,
-    options?: ElementCreationOptions
+    options?: ElementCreationOptions,
   ) => Element;
   createTextNode: (text: string) => Text;
   insertBefore: (
     parentNode: Node,
     newNode: Node,
-    referenceNode: Node | null
+    referenceNode: Node | null,
   ) => void;
   removeChild: (node: Node, child: Node) => void;
   appendChild: (node: Node, child: Node) => void;
   parentNode: (node: Node) => Node | null;
   nextSibling: (node: Node) => Node | null;
-  tagName: (elm: Element) => string;
   setTextContent: (node: Node, text: string | null) => void;
-  getTextContent: (node: Node) => string | null;
-  isElement: (node: any) => node is Element;
+  isElement: (node: Node) => node is Element;
 }
 
 function createElement(
   tagName: any,
-  options?: ElementCreationOptions
+  options?: ElementCreationOptions,
 ): HTMLElement {
+  reactLog('createElement');
   return document.createElement(tagName, options);
 }
 
 function createElementNS(
   namespaceURI: string,
   qualifiedName: string,
-  options?: ElementCreationOptions
+  options?: ElementCreationOptions,
 ): Element {
+  reactLog('createElementNS');
   return document.createElementNS(namespaceURI, qualifiedName, options);
 }
 
-
 function createTextNode(text: string): Text {
+  reactLog('createTextNode');
   return document.createTextNode(text);
 }
 
 function insertBefore(
   parentNode: Node,
   newNode: Node,
-  referenceNode: Node | null
+  referenceNode: Node | null,
 ): void {
   parentNode.insertBefore(newNode, referenceNode);
 }
@@ -68,23 +70,15 @@ function nextSibling(node: Node): Node | null {
   return node.nextSibling;
 }
 
-function tagName(elm: Element): string {
-  return elm.tagName;
-}
-
 function setTextContent(node: Node, text: string | null): void {
   node.textContent = text;
 }
 
-function getTextContent(node: Node): string | null {
-  return node.textContent;
+function isElement(node: Node): node is Element {
+  return node.nodeType === 1;
 }
 
-function isElement(node: any): node is Element {
-  return node?.nodeType === 1;
-}
-
-export const htmlDomApi: DOMAPI = {
+export const htmlDomApi: DOMOperation = {
   createElement,
   createElementNS,
   createTextNode,
@@ -93,8 +87,6 @@ export const htmlDomApi: DOMAPI = {
   appendChild,
   parentNode,
   nextSibling,
-  tagName,
   setTextContent,
-  getTextContent,
   isElement,
 };

@@ -23,7 +23,7 @@ class Debug {
     boolean
   >([
     ["model", false],
-    ["react", true],
+    ["react", false],
     ["interaction", false],
     ["history", false],
     ["canvas", false],
@@ -68,7 +68,3 @@ export const reactLog = new Debug("react").init();
 export const controllerLog = new Debug("controller").init();
 export const canvasLog = new Debug("canvas").init();
 export const modelLog = new Debug("model").init();
-export const utilLog = new Debug("util").init();
-export const interactionLog = new Debug("interaction").init();
-export const containersLog = new Debug("containers").init();
-export const historyLog = new Debug("history").init();

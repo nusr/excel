@@ -23,16 +23,16 @@ export const MOCK_MODEL: WorkBookJSON = {
       "0": {
         "0": {
           value: "",
-          formula: "SUM(1, sum(1,2))",
+          formula: "=SUM(1, SUM(1,2))",
           style: "1",
         },
         "1": {
           value: "",
-          formula: "SUM(1,4)",
+          formula: "=SUM(1,4)",
         },
         "2": {
           value: "",
-          formula: "SUM(A1)",
+          formula: "=SUM(A1)",
           style: "2",
         },
         "3": {

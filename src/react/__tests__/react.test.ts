@@ -1,4 +1,4 @@
-import { render, h, Component } from '../src';
+import { render, h, Component } from '..';
 
 describe('react.test.ts', () => {
   describe('h', () => {
