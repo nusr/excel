@@ -7,7 +7,7 @@ describe('Button.test.ts', () => {
       document.body,
       Button({ active: true, className: 'button_test' }, 'button'),
     );
-    expect(dom.textContent).toEqual('button');
+    expect(dom.elm!.textContent).toEqual('button');
   });
   test('icon button', () => {
     const dom = render(
@@ -21,7 +21,7 @@ describe('Button.test.ts', () => {
         'add',
       ),
     );
-    expect(dom.textContent).toEqual('add');
-    expect(dom.childNodes).toHaveLength(1);
+    expect(dom.elm!.textContent).toEqual('add');
+    expect(dom.elm!.childNodes).toHaveLength(1);
   });
 });

@@ -1,9 +1,8 @@
-import { h } from '@/react';
+import { h, Component, VNodeStyle } from '@/react';
 import { classnames } from '@/util';
-import type { Component } from '@/types'
 export type ColorPickerProps = {
   color: string;
-  style?: string;
+  style?: VNodeStyle;
   onChange: (value: string) => void;
 };
 export const COLOR_LIST = [
@@ -49,7 +48,7 @@ export const ColorPicker: Component<ColorPickerProps> = (
   props,
   ...children
 ) => {
-  const { color, style = '', onChange } = props;
+  const { color, style = {}, onChange } = props;
   // const [visible, setVisible] = useState(false);
   // const toggleColorPicker = () => {
   //   setVisible((v) => !v);
@@ -69,7 +68,9 @@ export const ColorPicker: Component<ColorPickerProps> = (
       'div',
       {
         className: 'color-picker-trigger',
-        style: `color:${color};`,
+        style: {
+          color,
+        },
         // onclick: toggleColorPicker,
       },
       ...children,
@@ -91,7 +92,9 @@ export const ColorPicker: Component<ColorPickerProps> = (
           h('div', {
             key: item,
             className: 'color-picker-item',
-            style: `background-color:${item};`,
+            style: {
+              'background-color': item,
+            },
             onclick: () => {
               onChange(item);
               // setVisible(false);

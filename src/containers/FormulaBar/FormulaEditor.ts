@@ -1,5 +1,5 @@
-import { h } from '@/react';
-import { SmartComponent } from '@/types';
+import { h, SmartComponent } from '@/react';
+
 const inputId = 'formula-editor';
 
 export const FormulaEditor: SmartComponent = (state, controller) => {

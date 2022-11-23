@@ -1,7 +1,8 @@
-import { h } from '@/react';
-import type { Component } from '@/types'
+import { h, Component } from '@/react';
 
-const pathStyle = 'transform-origin:"130px 106px";';
+const pathStyle = {
+  'transform-origin': '130px 106px',
+};
 
 export const Github: Component = () => {
   return h(

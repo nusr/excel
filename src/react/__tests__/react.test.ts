@@ -1,29 +1,38 @@
-import { h, render } from '../react';
-import type { Component } from '@/types'
+import { render, h, Component } from '../src';
 
 describe('react.test.ts', () => {
   describe('h', () => {
     test('normal', () => {
-      expect(h('div', {})).toEqual({ element: 'div', props: {}, children: [] });
-      expect(h('div', {}, 'hello')).toEqual({
-        element: 'div',
-        props: {},
-        children: ['hello'],
+      expect(h('div', {})).toEqual({
+        sel: 'div',
+        data: {},
+        children: [],
+        elm: undefined,
+        key: undefined,
+        text: undefined,
       });
-      expect(h('div', { a: 1 }, 'hello')).toEqual({
-        element: 'div',
-        props: { a: 1 },
-        children: ['hello'],
+      expect(h('div', {}, 'hello')).toEqual({
+        sel: 'div',
+        data: {},
+        children: [],
+        elm: undefined,
+        key: undefined,
+        text: 'hello',
+      });
+      expect(h('div', { className: '1' }, 'hello')).toEqual({
+        sel: 'div',
+        data: { className: '1' },
+        children: [],
+        elm: undefined,
+        key: undefined,
+        text: 'hello',
       });
     });
   });
   describe('render', () => {
     test('single stateless node', () => {
-      const dom = render(
-        document.body,
-        h('div', { className: 'simple' }, 'text'),
-      );
-      expect(dom.textContent).toEqual('text');
+      render(document.body, h('div', { className: 'simple' }, 'text'));
+      expect(document.querySelector('.simple')!.textContent).toEqual('text');
     });
     test('single stateless component', () => {
       const Hello: Component = () =>

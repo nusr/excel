@@ -3,10 +3,12 @@ import { render } from '@/react';
 
 describe('CanvasContainer.test.ts', () => {
   test('normal', () => {
-    const dom = render(document.body, CanvasContainer({}));
-    expect(dom.querySelector('.canvas-container')!.childNodes).toHaveLength(1);
+    render(document.body, CanvasContainer({}));
     expect(
-      dom.querySelector('.canvas-container')!.firstChild!.nodeName,
+      document.body.querySelector('.canvas-container')!.childNodes,
+    ).toHaveLength(1);
+    expect(
+      document.body.querySelector('.canvas-container')!.firstChild!.nodeName,
     ).toEqual('CANVAS');
   });
 });

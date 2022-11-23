@@ -1,8 +1,7 @@
-import { h } from '@/react';
+import { h, SmartComponent } from '@/react';
 import { classnames } from '@/util';
 import theme from '@/theme';
 import { Button, Icon } from '@/components';
-import { SmartComponent } from '@/types';
 
 export const SheetBarContainer: SmartComponent = (state, controller) => {
   return h(
@@ -42,7 +41,9 @@ export const SheetBarContainer: SmartComponent = (state, controller) => {
             controller.addSheet();
           },
           type: 'circle',
-          style: `background-color: ${theme.buttonActiveColor};`,
+          style: {
+            'background-color': theme.buttonActiveColor,
+          },
         },
         Icon({
           name: 'plus',

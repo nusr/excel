@@ -2,7 +2,7 @@ import { randomInt } from "@/lodash";
 import { assert } from "./assert";
 import { DEBUG_COLOR_LIST } from "./constant";
 type NameSpaceType =
-  | "store"
+  | "react"
   | "controller"
   | "canvas"
   | "model"
@@ -23,7 +23,7 @@ class Debug {
     boolean
   >([
     ["model", false],
-    ["store", true],
+    ["react", true],
     ["interaction", false],
     ["history", false],
     ["canvas", false],
@@ -64,7 +64,7 @@ class Debug {
   }
 }
 
-export const storeLog = new Debug("store").init();
+export const reactLog = new Debug("react").init();
 export const controllerLog = new Debug("controller").init();
 export const canvasLog = new Debug("canvas").init();
 export const modelLog = new Debug("model").init();

@@ -27,3 +27,4 @@ function init(containerDom: HTMLDivElement) {
 }
 
 init(document.querySelector<HTMLDivElement>('#root')!);
+

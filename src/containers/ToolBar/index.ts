@@ -1,4 +1,4 @@
-import { h } from '@/react';
+import { h, SmartComponent } from '@/react';
 import {
   Icon,
   Button,
@@ -13,14 +13,13 @@ import {
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
 } from '@/util';
-import { StyleType, EWrap, SmartComponent } from '@/types';
+import { StyleType, EWrap } from '@/types';
 
-export const ToolbarContainer: SmartComponent = (
-  state,
-  controller,
-) => {
+export const ToolbarContainer: SmartComponent = (state, controller) => {
   const getItemStyle = (value: string | number) => {
-    return `font-family:${value}`;
+    return {
+      'font-family': String(value),
+    };
   };
   const setCellStyle = (value: Partial<StyleType>) => {
     controller.setCellStyle(value);
@@ -108,7 +107,9 @@ export const ToolbarContainer: SmartComponent = (
     ColorPicker(
       {
         color: fontColor,
-        style: 'margin-left:8px',
+        style: {
+          'margin-left': '8px',
+        },
         onChange: (value) => {
           setCellStyle({ fontColor: value });
         },
@@ -118,7 +119,9 @@ export const ToolbarContainer: SmartComponent = (
     ColorPicker(
       {
         color: fillColor,
-        style: 'margin-left:8px',
+        style: {
+          'margin-left': '8px',
+        },
         onChange: (value) => {
           setCellStyle({ fillColor: value });
         },

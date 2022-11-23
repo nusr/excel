@@ -1,10 +1,9 @@
-import {  h } from '@/react';
+import { h, Component, VNodeStyle } from '@/react';
 import { classnames } from '@/util';
-import type { Component } from '@/types'
 
 export interface ButtonProps {
   type?: 'normal' | 'circle';
-  style?: string;
+  style?: VNodeStyle;
   active?: boolean;
   disabled?: boolean;
   onClick?: (event: MouseEvent) => void;
@@ -22,7 +21,7 @@ export const Button: Component<ButtonProps> = (props, ...children) => {
     disabled = false,
     active = false,
     type = 'normal',
-    style,
+    style = {},
   } = props;
   return h(
     'div',

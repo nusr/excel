@@ -1,12 +1,12 @@
-import { h } from '@/react';
+import { h, VNodeStyle, Component } from '@/react';
 import { classnames } from '@/util';
-import { OptionItem, Component } from '@/types';
+import { OptionItem } from '@/types';
 
 export type SelectProps = {
   value?: string | number;
-  style?: string;
+  style?: VNodeStyle;
   data: Array<string | number | OptionItem>;
-  getItemStyle?: (value: string | number) => string;
+  getItemStyle?: (value: string | number) => VNodeStyle;
   onChange: (value: string | number) => void;
 };
 
@@ -14,9 +14,9 @@ export const Select: Component<SelectProps> = (props) => {
   const {
     data,
     value: activeValue,
-    style = '',
+    style = {},
     onChange,
-    getItemStyle = () => '',
+    getItemStyle = () => ({}),
   } = props;
   const handleChange = (event: any) => {
     const { value } = event.target;

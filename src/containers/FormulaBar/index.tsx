@@ -1,7 +1,6 @@
-import { h } from '@/react';
+import { h, SmartComponent } from '@/react';
 import { FormulaEditor } from './FormulaEditor';
 import { intToColumnName } from '@/util';
-import { SmartComponent } from '@/types';
 
 export const FormulaBarContainer: SmartComponent = (state, controller) => {
   const { activeCell } = state;
@@ -15,7 +14,11 @@ export const FormulaBarContainer: SmartComponent = (state, controller) => {
       { className: 'formula-bar-name' },
       `${intToColumnName(activeCell.col)}${activeCell.row + 1}`,
     ),
-    h('div', { className: 'formula-bar-editor-wrapper' }, FormulaEditor(state, controller)),
+    h(
+      'div',
+      { className: 'formula-bar-editor-wrapper' },
+      FormulaEditor(state, controller),
+    ),
   );
 };
 FormulaBarContainer.displayName = 'FormulaBarContainer';

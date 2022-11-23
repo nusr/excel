@@ -1,11 +1,10 @@
-import { h } from '@/react';
+import { h, SmartComponent } from '@/react';
 import {
   CanvasContainer,
   SheetBarContainer,
   ToolbarContainer,
   FormulaBarContainer,
 } from '@/containers';
-import { SmartComponent } from '@/types';
 
 export const App: SmartComponent = (state, controller) => {
   return h(
