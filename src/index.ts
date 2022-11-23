@@ -1,7 +1,7 @@
-import { render } from '@/react';
+import { render } from './react';
 import { App } from './App';
-import { DEFAULT_STORE_VALUE } from '@/util';
-import { StoreValue } from '@/types';
+import { DEFAULT_STORE_VALUE } from './util';
+import { StoreValue } from './types';
 import { initCanvas, initController } from './init';
 import './global.css';
 import './components/index.css';

@@ -1,8 +1,8 @@
-import { StoreValue, IController, ChangeEventType } from '@/types';
-import { Controller, Scroll, History } from '@/controller';
-import { Model, MOCK_MODEL } from '@/Model';
-import { MainCanvas, RenderController } from '@/canvas';
-import { FONT_FAMILY_LIST, isSupportFontFamily, MAIN_CANVAS_ID } from '@/util';
+import { StoreValue, IController, ChangeEventType } from './types';
+import { Controller, Scroll, History } from './controller';
+import { Model, MOCK_MODEL } from './Model';
+import { MainCanvas, RenderController } from './canvas';
+import { FONT_FAMILY_LIST, isSupportFontFamily, MAIN_CANVAS_ID } from './util';
 
 import theme from '@/theme';
 
