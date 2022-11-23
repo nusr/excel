@@ -2,6 +2,7 @@ import * as path from 'path';
 
 const rootDir = process.cwd();
 const transformPath = path.join(__dirname, 'transform.js');
+console.log('rootDir:', rootDir);
 
 export default {
   rootDir,
