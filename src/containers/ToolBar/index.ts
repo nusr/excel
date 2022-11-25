@@ -46,6 +46,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
         onClick() {
           controller.undo();
         },
+        testId: 'toolbar-undo',
       },
       Icon({ name: 'undo' }),
     ),
@@ -55,6 +56,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
         onClick() {
           controller.redo();
         },
+        testId: 'toolbar-redo',
       },
       Icon({ name: 'redo' }),
     ),
@@ -66,6 +68,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
             isBold: !isBold,
           });
         },
+        testId: 'toolbar-bold',
       },
       Icon({ name: 'bold' }),
     ),
@@ -77,6 +80,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
             isItalic: !isItalic,
           });
         },
+        testId: 'toolbar-italic',
       },
       Icon({ name: 'italic' }),
     ),
@@ -86,6 +90,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
           setCellStyle({ wrapText: EWrap.AUTO_WRAP });
         },
         active: wrapText === EWrap.AUTO_WRAP,
+        testId: 'toolbar-wrap-text',
       },
       'Wrap Text',
     ),
@@ -100,6 +105,9 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     Select({
       data: FONT_SIZE_LIST,
       value: fontSize,
+      style: {
+        marginLeft: '8px',
+      },
       onChange: (value) => {
         setCellStyle({ fontSize: Number(value) });
       },
@@ -108,7 +116,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
       {
         color: fontColor,
         style: {
-          'margin-left': '8px',
+          marginLeft: '8px',
         },
         onChange: (value) => {
           setCellStyle({ fontColor: value });
@@ -120,7 +128,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
       {
         color: fillColor,
         style: {
-          'margin-left': '8px',
+          marginLeft: '8px',
         },
         onChange: (value) => {
           setCellStyle({ fillColor: value });

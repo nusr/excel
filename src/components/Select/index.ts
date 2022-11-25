@@ -1,16 +1,16 @@
-import { h, VNodeStyle, Component } from '@/react';
+import { h, CSSProperties, FunctionComponent } from '@/react';
 import { classnames } from '@/util';
 import { OptionItem } from '@/types';
 
 export type SelectProps = {
   value?: string | number;
-  style?: VNodeStyle;
+  style?: CSSProperties;
   data: Array<string | number | OptionItem>;
-  getItemStyle?: (value: string | number) => VNodeStyle;
+  getItemStyle?: (value: string | number) => CSSProperties;
   onChange: (value: string | number) => void;
 };
 
-export const Select: Component<SelectProps> = (props) => {
+export const Select: FunctionComponent<SelectProps> = (props) => {
   const {
     data,
     value: activeValue,

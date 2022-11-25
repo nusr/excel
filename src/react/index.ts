@@ -12,6 +12,7 @@ import { htmlDomApi } from './dom';
 interface DomType extends Element {
   vDom?: VNode;
 }
+
 const patch = init(
   [
     attributesModule,
@@ -35,9 +36,9 @@ export function render(container: Element, vNode: VNode): VNode {
   return temp;
 }
 
-export type { VNode, Component } from './vNode';
+export type { VNode, FunctionComponent } from './vNode';
 export { h } from './h';
-export type { VNodeStyle } from './modules/style';
+export type { CSSProperties } from './modules/style';
 
 export interface SmartComponent {
   (props: StoreValue, controller: IController): VNode;

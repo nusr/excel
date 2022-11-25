@@ -9,3 +9,4 @@ dist
 scripts/*.js
 .DS_Store
 lib
+output

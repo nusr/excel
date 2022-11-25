@@ -3,7 +3,7 @@ import { Module } from './module';
 
 export type Dataset = Record<string, string>;
 
-const CAPS_REGEX = /[A-Z]/g;
+export const CAPS_REGEX = /[A-Z]/g;
 
 function updateDataset(oldVNode: VNode, vNode: VNode): void {
   const elm: HTMLElement = vNode.elm as HTMLElement;

@@ -1,5 +1,5 @@
 import { Hooks } from './hooks';
-import { VNodeStyle } from './modules/style';
+import { CSSProperties } from './modules/style';
 import { On } from './modules/event';
 import { Attrs } from './modules/attributes';
 import { Props } from './modules/props';
@@ -16,7 +16,7 @@ export interface VNode {
   key: Key | undefined;
 }
 
-export interface Component<T = {}> {
+export interface FunctionComponent<T = {}> {
   (props: T, ...children: Array<VNode | string | number>): VNode;
   displayName: string;
 }
@@ -25,7 +25,7 @@ export interface VNodeData {
   props?: Props;
   attrs?: Attrs;
   className?: string;
-  style?: VNodeStyle;
+  style?: CSSProperties;
   dataset?: Dataset;
   on?: On;
   hook?: Hooks;

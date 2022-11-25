@@ -1,4 +1,4 @@
-import { h, Component } from '@/react';
+import { h, FunctionComponent } from '@/react';
 import { classnames } from '@/util';
 
 type PathItem = {
@@ -11,7 +11,7 @@ export interface BaseIconProps {
   paths: PathItem[];
 }
 
-export const BaseIcon: Component<BaseIconProps> = ({
+export const BaseIcon: FunctionComponent<BaseIconProps> = ({
   className = '',
   paths = [],
 }) => {

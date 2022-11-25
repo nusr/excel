@@ -1,4 +1,4 @@
-import type { Component } from '@/react'
+import type { FunctionComponent } from '@/react'
 import iconConfig from './icon';
 import type { BaseIconName } from '@/types';
 import { BaseIcon, BaseIconProps } from './BaseIcon';
@@ -8,7 +8,7 @@ export interface IconProps {
   className?: string;
 }
 
-export const Icon: Component<IconProps> = ({ name, className = '' }) => {
+export const Icon: FunctionComponent<IconProps> = ({ name, className = '' }) => {
   const paths = iconConfig[name].map((item) => ({ d: item }));
   return BaseIcon({ className, paths });
 };

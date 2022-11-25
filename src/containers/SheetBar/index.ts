@@ -42,7 +42,7 @@ export const SheetBarContainer: SmartComponent = (state, controller) => {
           },
           type: 'circle',
           style: {
-            'background-color': theme.buttonActiveColor,
+            backgroundColor: theme.buttonActiveColor,
           },
         },
         Icon({

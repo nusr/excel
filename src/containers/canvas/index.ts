@@ -1,7 +1,7 @@
-import { h, Component } from '@/react';
+import { h, FunctionComponent } from '@/react';
 import { MAIN_CANVAS_ID } from '@/util';
 
-export const CanvasContainer: Component = () => {
+export const CanvasContainer: FunctionComponent = () => {
   return h(
     'div',
     {

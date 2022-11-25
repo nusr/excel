@@ -1,20 +1,21 @@
-import { h, Component, VNodeStyle } from '@/react';
+import { h, FunctionComponent, CSSProperties } from '@/react';
 import { classnames } from '@/util';
 
 export interface ButtonProps {
   type?: 'normal' | 'circle';
-  style?: VNodeStyle;
+  style?: CSSProperties;
   active?: boolean;
   disabled?: boolean;
   onClick?: (event: MouseEvent) => void;
   className?: string;
+  testId?: string;
 }
 
 const defaultClick: (event: MouseEvent) => void = () => {
   console.log('add click event');
 };
 
-export const Button: Component<ButtonProps> = (props, ...children) => {
+export const Button: FunctionComponent<ButtonProps> = (props, ...children) => {
   const {
     className = '',
     onClick = defaultClick,
@@ -22,6 +23,7 @@ export const Button: Component<ButtonProps> = (props, ...children) => {
     active = false,
     type = 'normal',
     style = {},
+    testId = undefined,
   } = props;
   return h(
     'div',
@@ -33,6 +35,7 @@ export const Button: Component<ButtonProps> = (props, ...children) => {
         circle: type === 'circle',
       }),
       style,
+      'data-testId': testId,
     },
     ...children,
   );

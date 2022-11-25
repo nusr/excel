@@ -1,7 +1,11 @@
 import { VNode, VNodeData } from '../vNode';
 import { Module } from './module';
+import { CAPS_REGEX } from './dataset'
 
-export type VNodeStyle = Record<string, string>;
+export type CSSProperties = Partial<CSSStyleDeclaration>;
+
+
+const convertKey = (key: string) => key.replace(CAPS_REGEX, '-$&').toLowerCase()
 
 function updateStyle(oldVNode: VNode, vNode: VNode): void {
   let name: string;
@@ -16,16 +20,13 @@ function updateStyle(oldVNode: VNode, vNode: VNode): void {
 
   for (name in oldStyle) {
     if (!style[name]) {
-      if (name[0] === '-' && name[1] === '-') {
-        elm.style.removeProperty(name);
-      } else {
-        elm.style[name] = '';
-      }
+      elm.style[convertKey(name)] = '';
     }
   }
   for (name in style) {
     if (style[name] !== oldStyle[name]) {
-      elm.style[name] = style[name];
+      const key = convertKey(name);
+      elm.style[key] = style[name];
     }
   }
 }

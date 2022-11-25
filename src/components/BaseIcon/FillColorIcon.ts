@@ -1,7 +1,7 @@
-import type { Component } from '@/react'
+import type { FunctionComponent } from '@/react'
 import { BaseIcon } from './BaseIcon';
 
-export const FillColorIcon: Component = () => {
+export const FillColorIcon: FunctionComponent = () => {
   return BaseIcon({
     paths: [
       {

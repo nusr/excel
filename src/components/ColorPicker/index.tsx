@@ -1,7 +1,7 @@
-import { h, Component, VNodeStyle } from '@/react';
+import { h, FunctionComponent, CSSProperties } from '@/react';
 export type ColorPickerProps = {
   color: string;
-  style?: VNodeStyle;
+  style?: CSSProperties;
   onChange: (value: string) => void;
 };
 export const COLOR_LIST = [
@@ -43,7 +43,7 @@ export const COLOR_LIST = [
   '#AB149E',
 ];
 
-export const ColorPicker: Component<ColorPickerProps> = (
+export const ColorPicker: FunctionComponent<ColorPickerProps> = (
   props,
   ...children
 ) => {
@@ -68,7 +68,7 @@ export const ColorPicker: Component<ColorPickerProps> = (
     h(
       'div',
       {
-        className: 'color-picker-wrapper'
+        className: 'color-picker-wrapper',
       },
       h(
         'div',
@@ -80,7 +80,7 @@ export const ColorPicker: Component<ColorPickerProps> = (
             key: item,
             className: 'color-picker-item',
             style: {
-              'background-color': item,
+              backgroundColor: item,
             },
             onclick: () => {
               onChange(item);

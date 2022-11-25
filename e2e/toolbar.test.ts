@@ -1,4 +1,4 @@
-import { openPage, sleep } from './util';
+import { openPage, sleep, getTestIdSelector } from './util';
 
 describe('toolbar.test', () => {
   beforeAll(async () => {
@@ -11,16 +11,11 @@ describe('toolbar.test', () => {
     const result = await page.$eval(selector, (element) => element.className);
     return result;
   };
-
-  test('test italic', async () => {
-    expect(
-      await clickToolbar('.toolbar-wrapper > div:nth-child(3)'),
-    ).toContain('active');
-    expect(
-      await clickToolbar('.toolbar-wrapper > div:nth-child(4)'),
-    ).toContain('active');
-    expect(
-      await clickToolbar('.toolbar-wrapper > div:nth-child(5)'),
-    ).toContain('active');
-  });
+  for (const item of ['bold', 'italic', 'wrap-text']) {
+    test(`test toolbar ${item}`, async () => {
+      expect(
+        await clickToolbar(getTestIdSelector(`toolbar-${item}`)),
+      ).toContain('active');
+    });
+  }
 });

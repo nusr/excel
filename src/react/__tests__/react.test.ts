@@ -1,4 +1,4 @@
-import { render, h, Component } from '..';
+import { render, h, FunctionComponent } from '..';
 
 describe('react.test.ts', () => {
   describe('h', () => {
@@ -35,7 +35,7 @@ describe('react.test.ts', () => {
       expect(document.querySelector('.simple')!.textContent).toEqual('text');
     });
     test('single stateless component', () => {
-      const Hello: Component = () =>
+      const Hello: FunctionComponent = () =>
         h('div', { className: 'component' }, 'Hello');
       Hello.displayName = 'Hello';
       render(document.body, Hello({}));
@@ -44,21 +44,21 @@ describe('react.test.ts', () => {
       );
     });
     test('component with properties', () => {
-      const Text: Component<{ cls: string; text: string }> = ({ cls, text }) =>
+      const Text: FunctionComponent<{ cls: string; text: string }> = ({ cls, text }) =>
         h('p', { className: cls }, text);
       Text.displayName = 'Text';
       render(document.body, Text({ cls: 'foo', text: 'bar' }));
       expect(document.querySelector('.foo')!.textContent).toEqual('bar');
     });
     test('component with children', () => {
-      const A: Component = () => h('div', { className: 'a' }, 'A');
+      const A: FunctionComponent = () => h('div', { className: 'a' }, 'A');
       A.displayName = 'A';
-      const B: Component = () => h('div', { className: 'b' }, 'B');
+      const B: FunctionComponent = () => h('div', { className: 'b' }, 'B');
       B.displayName = 'B';
-      const C: Component = (_, ...children) =>
+      const C: FunctionComponent = (_, ...children) =>
         h('div', { className: 'c' }, ...children);
       C.displayName = 'C';
-      const D: Component = () => C({}, C({}, A({}), B({})));
+      const D: FunctionComponent = () => C({}, C({}, A({}), B({})));
       D.displayName = 'D';
       render(document.body, D({}));
       expect(document.querySelector('.c > .c > .a')!.textContent).toEqual('A');

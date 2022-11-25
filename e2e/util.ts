@@ -20,3 +20,7 @@ export async function openPage() {
   await page.goto(filePath);
   await sleep(200);
 }
+
+export function getTestIdSelector(testId: string) {
+  return `[data-test-id="${testId}"]`
+}

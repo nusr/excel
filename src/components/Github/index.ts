@@ -1,10 +1,10 @@
-import { h, Component } from '@/react';
+import { h, FunctionComponent } from '@/react';
 
 const pathStyle = {
   'transform-origin': '130px 106px',
 };
 
-export const Github: Component = () => {
+export const Github: FunctionComponent = () => {
   return h(
     'a',
     {
@@ -16,8 +16,7 @@ export const Github: Component = () => {
     h(
       'svg',
       {
-        xmlns: 'http://www.w3.org/2000/svg',
-        class: 'github-wrapper',
+        className: 'github-wrapper',
         viewBox: '0 0 250 250',
         'aria-hidden': true,
       },
