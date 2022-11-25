@@ -356,9 +356,12 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMOperation) {
       api.setTextContent(elm, vNode.text!);
     }
     hook?.postPatch?.(oldVNode, vNode);
+    if (hook?.ref) {
+      hook?.ref(vNode.elm! as Element);
+    }
   }
 
-  return function patch(oldVNode: VNode | Element, vNode: VNode): VNode {
+  function patch(oldVNode: VNode | Element, vNode: VNode): VNode {
     let i: number, elm: Node, parent: Node;
     const insertedVNodeQueue: VNodeQueue = [];
     for (i = 0; i < cbs.pre.length; ++i) cbs.pre[i]();
@@ -388,5 +391,6 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMOperation) {
     }
     for (i = 0; i < cbs.post.length; ++i) cbs.post[i]();
     return vNode;
-  };
+  }
+  return patch;
 }

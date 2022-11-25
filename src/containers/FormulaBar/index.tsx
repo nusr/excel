@@ -2,7 +2,10 @@ import { h, SmartComponent } from '@/react';
 import { FormulaEditor } from './FormulaEditor';
 import { intToColumnName } from '@/util';
 
-export const FormulaBarContainer: SmartComponent = (state, controller) => {
+export const FormulaBarContainer: SmartComponent = (
+  state,
+  controller,
+) => {
   const { activeCell } = state;
   return h(
     'div',

@@ -121,11 +121,13 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
         onChange: (value) => {
           setCellStyle({ fontColor: value });
         },
+        key: 'font-color',
       },
       Icon({ name: 'fontColor' }),
     ),
     ColorPicker(
       {
+        key: 'fill-color',
         color: fillColor,
         style: {
           marginLeft: '8px',

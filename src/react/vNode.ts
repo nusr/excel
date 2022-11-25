@@ -33,5 +33,3 @@ export interface VNodeData {
   ns?: string; // for SVGs
   is?: string; // for custom elements v1
 }
-
-

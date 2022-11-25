@@ -1,7 +1,9 @@
 import { h, FunctionComponent, CSSProperties } from '@/react';
+import { classnames } from '@/util';
 export type ColorPickerProps = {
   color: string;
   style?: CSSProperties;
+  key: string;
   onChange: (value: string) => void;
 };
 export const COLOR_LIST = [
@@ -43,15 +45,26 @@ export const COLOR_LIST = [
   '#AB149E',
 ];
 
+const baseClassName = 'color-picker-wrapper';
+
 export const ColorPicker: FunctionComponent<ColorPickerProps> = (
   props,
   ...children
 ) => {
-  const { color, style = {}, onChange } = props;
+  const { color, style = {}, onChange, key } = props;
+  let ref: Element;
+  const toggleVisible = (value: boolean) => {
+    let className = baseClassName;
+    if (value) {
+      className = className + ' ' + 'show';
+    }
+    ref.className = className;
+  };
   return h(
     'div',
     {
       className: 'relative color-picker',
+      key,
       style: style,
     },
     h(
@@ -61,6 +74,9 @@ export const ColorPicker: FunctionComponent<ColorPickerProps> = (
         style: {
           color,
         },
+        onclick: () => {
+          toggleVisible(true);
+        },
       },
       ...children,
     ),
@@ -68,7 +84,15 @@ export const ColorPicker: FunctionComponent<ColorPickerProps> = (
     h(
       'div',
       {
-        className: 'color-picker-wrapper',
+        className: baseClassName,
+        hook: {
+          ref: (dom) => {
+            ref = dom;
+          },
+        },
+        onmouseleave() {
+          toggleVisible(false);
+        },
       },
       h(
         'div',
@@ -83,6 +107,7 @@ export const ColorPicker: FunctionComponent<ColorPickerProps> = (
               backgroundColor: item,
             },
             onclick: () => {
+              toggleVisible(false);
               onChange(item);
             },
           }),

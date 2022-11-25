@@ -98,9 +98,12 @@
   left: 0;
   display: none;
 }
-.color-picker:hover .color-picker-wrapper {
+.color-picker-wrapper.show {
   display: block;
 }
+/* .color-picker:hover .color-picker-wrapper {
+  display: block;
+} */
 .color-picker-list {
   display: flex;
   flex-wrap: wrap;

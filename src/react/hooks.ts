@@ -10,6 +10,7 @@ export type PostPatchHook = (oldVNode: VNode, vNode: VNode) => any;
 export type DestroyHook = (vNode: VNode) => any;
 export type RemoveHook = (vNode: VNode, removeCallback: () => void) => any;
 export type PostHook = () => any;
+export type refHook = (dom: Element) => void;
 
 export interface Hooks {
   pre?: PreHook;
@@ -22,4 +23,5 @@ export interface Hooks {
   destroy?: DestroyHook;
   remove?: RemoveHook;
   post?: PostHook;
+  ref?: refHook;
 }
