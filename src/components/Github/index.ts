@@ -12,6 +12,7 @@ export const Github: FunctionComponent = () => {
       'aria-label': 'View source on Github',
       target: '_blank',
       rel: 'noreferrer',
+      title: 'github link'
     },
     h(
       'svg',

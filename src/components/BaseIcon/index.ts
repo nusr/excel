@@ -1,6 +1,6 @@
 import type { FunctionComponent } from '@/react'
 import iconConfig from './icon';
-import type { BaseIconName } from '@/types';
+import type { BaseIconName } from './icon';
 import { BaseIcon, BaseIconProps } from './BaseIcon';
 
 export interface IconProps {

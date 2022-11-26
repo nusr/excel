@@ -1,5 +1,4 @@
 import { h, FunctionComponent, CSSProperties } from '@/react';
-import { classnames } from '@/util';
 export type ColorPickerProps = {
   color: string;
   style?: CSSProperties;

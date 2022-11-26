@@ -42,6 +42,7 @@ export const Select: FunctionComponent<SelectProps> = (props) => {
           key: value,
           value,
           style: itemStyle,
+          disabled: !!disabled,
           className: classnames('select-item', { disabled }),
         },
         label,

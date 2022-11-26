@@ -8,7 +8,7 @@ export const CanvasContainer: FunctionComponent = () => {
       className: 'relative canvas-container',
     },
     h('canvas', {
-      className: 'full',
+      className: 'full canvas-content',
       id: MAIN_CANVAS_ID,
     }),
   );

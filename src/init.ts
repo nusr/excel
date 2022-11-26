@@ -6,16 +6,13 @@ import { FONT_FAMILY_LIST, isSupportFontFamily, MAIN_CANVAS_ID } from './util';
 
 import theme from './theme';
 
-function initTheme() {
+export function initTheme(dom: HTMLElement) {
   const keyList = Object.keys(theme) as Array<keyof typeof theme>;
   for (const key of keyList) {
-    document.documentElement.style.setProperty(
-      `--${key}`,
-      String(theme[key] || ''),
-    );
+    dom.style.setProperty(`--${key}`, String(theme[key] || ''));
   }
 }
-function initFontFamilyList() {
+export function initFontFamilyList() {
   const list = FONT_FAMILY_LIST.map((v) => {
     const disabled = !isSupportFontFamily(v);
     return { label: v, value: v, disabled };
@@ -48,8 +45,6 @@ function handleModelChange(
 }
 
 export function initCanvas(stateValue: StoreValue, controller: IController) {
-  initTheme();
-
   const canvas = document.querySelector<HTMLCanvasElement>(
     '#' + MAIN_CANVAS_ID,
   )!;
@@ -72,7 +67,6 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
     },
   });
   controller.fromJSON(MOCK_MODEL);
-  stateValue.fontFamilyList = initFontFamilyList();
 }
 export function initController(): IController {
   const controller = new Controller(new Model(), new Scroll(), new History());

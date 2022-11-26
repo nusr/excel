@@ -68,32 +68,10 @@
   background-color: #fff;
 }
 
-.base-editor {
-  height: 100%;
-  width: 100%;
-  padding: 0 4px;
-  margin: 0;
-  border: none;
-  border-radius: unset;
-  outline: none;
-  font: inherit;
-  overflow: hidden;
-}
-.cell-editor {
-  display: none;
-  position: absolute;
-  left: 0;
-  top: 0;
-  border: 1px solid var(--primaryColor);
-  border-radius: 2px;
-  background-color: #fff;
-  box-sizing: border-box;
-}
-
 .color-picker-wrapper {
   width: 228px;
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   top: 22px;
   left: 0;
   display: none;
@@ -101,9 +79,7 @@
 .color-picker-wrapper.show {
   display: block;
 }
-/* .color-picker:hover .color-picker-wrapper {
-  display: block;
-} */
+
 .color-picker-list {
   display: flex;
   flex-wrap: wrap;

@@ -1,11 +1,15 @@
 import { VNode, VNodeData } from '../vNode';
 import { Module } from './module';
-import { CAPS_REGEX } from './dataset'
+import { CAPS_REGEX } from './dataset';
 
-export type CSSProperties = Partial<CSSStyleDeclaration>;
+export type CSSProperties = {
+  [K in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[K] | number;
+} & {
+  [event: string]: string | number;
+};
 
-
-const convertKey = (key: string) => key.replace(CAPS_REGEX, '-$&').toLowerCase()
+const convertKey = (key: string) =>
+  key.replace(CAPS_REGEX, '-$&').toLowerCase();
 
 function updateStyle(oldVNode: VNode, vNode: VNode): void {
   let name: string;
@@ -20,13 +24,26 @@ function updateStyle(oldVNode: VNode, vNode: VNode): void {
 
   for (name in oldStyle) {
     if (!style[name]) {
-      elm.style[convertKey(name)] = '';
+      if (name.slice(0, 2) === '--') {
+        elm.style.removeProperty(name);
+      } else {
+        elm.style[convertKey(name)] = '';
+      }
     }
   }
   for (name in style) {
     if (style[name] !== oldStyle[name]) {
-      const key = convertKey(name);
-      elm.style[key] = style[name];
+      if (name.slice(0, 2) === '--') {
+        elm.style.setProperty(name, style[name]);
+      } else {
+        const key = convertKey(name);
+        const t = style[name];
+        if (typeof t === 'number') {
+          elm.style[key] = t + 'px';
+        } else {
+          elm.style[key] = t;
+        }
+      }
     }
   }
 }

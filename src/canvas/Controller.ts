@@ -88,11 +88,13 @@ export class RenderController {
     const cellSize = this.getCellSize(row, col);
     return { ...cellSize, top: resultY, left: resultX };
   }
-  getCanvasSize(): IWindowSize {
+  getCanvasSize(): CanvasOverlayPosition {
     const size = this.canvas.parentElement?.getBoundingClientRect();
     return {
       width: size?.width || 0,
       height: size?.height || 0,
+      top: size?.top || 0,
+      left: size?.left || 0,
     };
   }
   getDrawSize(): IWindowSize {

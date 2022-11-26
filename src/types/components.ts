@@ -27,5 +27,5 @@ export interface StoreValue {
   cellPosition: CanvasOverlayPosition;
   canRedo: boolean;
   canUndo: boolean;
-  fontFamilyList: OptionItem[]
+  fontFamilyList: OptionItem[];
 }

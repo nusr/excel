@@ -47,7 +47,10 @@ export class MainCanvas {
     this.checkChange({ changeSet: new Set(['contentChange']) });
   }
   queryCell(row: number, col: number): CanvasOverlayPosition {
-    return this.renderController.queryCell(row, col);
+    const temp = this.renderController.getCanvasSize();
+    const result = this.renderController.queryCell(row, col);
+    result.top = temp.top + result.top;
+    return result;
   }
   checkChange = (params: EventType['change']) => {
     this.render(params);
@@ -66,6 +69,7 @@ export class MainCanvas {
     canvas.addEventListener('mousedown', this.mouseDown);
     canvas.addEventListener('mousemove', this.mouseMove);
     canvas.addEventListener('mouseup', this.mouseUp);
+    canvas.addEventListener('contextmenu', this.contextMenu);
     window.addEventListener('resize', this.resize);
   }
   removeEvents(): void {
@@ -76,8 +80,13 @@ export class MainCanvas {
     canvas.removeEventListener('mousedown', this.mouseDown);
     canvas.removeEventListener('mousemove', this.mouseMove);
     canvas.removeEventListener('mouseup', this.mouseUp);
+    canvas.removeEventListener('contextmenu', this.contextMenu);
     window.removeEventListener('resize', this.resize);
   }
+  private contextMenu = (event: Event) => {
+    event.preventDefault();
+    return false;
+  };
   mouseDown = (event: MouseEvent): void => {
     const canvasRect = this.canvas.getBoundingClientRect();
     const { timeStamp, clientX, clientY } = event;
@@ -108,9 +117,7 @@ export class MainCanvas {
       controller.setActiveCell(position.row, position.col, 1, 1);
     }
     const delay = timeStamp - this.lastTimeStamp;
-    // const checkDelay = delay < DOUBLE_CLICK_TIME;
     if (delay < DOUBLE_CLICK_TIME) {
-      // interactionLog("mouseDown", check, checkDelay);
       controller.enterEditing();
     }
     this.lastTimeStamp = timeStamp;

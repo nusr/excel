@@ -30,6 +30,8 @@ interface VNodePropsData extends EventListener {
   'fill-opacity'?: string;
   hook?: Hooks;
   'data-testId'?: string;
+  disabled?: boolean;
+  title?: string;
 }
 
 function addNs(node: VNode) {

@@ -21,7 +21,9 @@ function SupportFontFamilyFactory(defaultFont = MUST_FONT_FAMILY) {
     ctx.clearRect(0, 0, width, width);
     ctx.font = `${width}px ${font},${defaultFont}`;
     ctx.fillText('宋a', width / 2, width / 2);
-    const imageData = ctx.getImageData(0, 0, width, width).data;
+    const imageData = ctx.getImageData(0, 0, width, width, {
+      colorSpace: 'srgb',
+    }).data;
     return imageData.join('');
   };
   const defaultImageData = getImageData(defaultFont);

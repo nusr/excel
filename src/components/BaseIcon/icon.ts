@@ -1,4 +1,16 @@
-import type { BaseIconName } from '@/types';
+export type BaseIconName =
+  | 'alignCenter'
+  | 'alignLeft'
+  | 'alignRight'
+  | 'bold'
+  | 'fontColor'
+  | 'italic'
+  | 'middleAlign'
+  | 'plus'
+  | 'redo'
+  | 'underline'
+  | 'undo';
+
 const icon: Record<BaseIconName, string[]> = {
   alignCenter: [
     'M142.2 227.6h739.6v56.9H142.2zM142.2 568.9h739.6v56.9H142.2zM256 398.2h512v56.9H256zM256 739.6h512v56.9H256z',

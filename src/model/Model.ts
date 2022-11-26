@@ -123,8 +123,7 @@ export class Model implements IModel {
   setCellValues(value: string, ranges: Range[]): void {
     const [range] = ranges;
     if (value.startsWith('=')) {
-      const formula = value.slice(1);
-      this.setCellFormula(formula, range);
+      this.setCellFormula(value, range);
     } else {
       this.setCellFormula('', range);
       this.setCellValue(value, range);
