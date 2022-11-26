@@ -42,7 +42,7 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
       if (!isCellEditing) {
         return;
       }
-      controller.enterEditing();
+      state.isCellEditing = true;
     },
     onblur: (event: any) => {
       controller.setCellValue(activeCell, event.target.value);
@@ -51,7 +51,6 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
         dom.value = '';
         controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
       }
-      controller.quitEditing();
       state.editCellValue = '';
       state.isCellEditing = false;
     },

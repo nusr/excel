@@ -12,8 +12,6 @@ export enum EBorderLineType {
   DOUBLE,
 }
 export type IHooks = {
-  focus: () => void;
-  blur: () => void;
   modelChange: (val: Set<ChangeEventType>) => void;
 };
 export interface IController extends IScrollValue {
@@ -34,17 +32,13 @@ export interface IController extends IScrollValue {
   selectAll(row: number, col: number): void;
   selectCol(row: number, col: number): void;
   selectRow(row: number, col: number): void;
-  setCellEditing(value: boolean): void;
-  getCellEditing(): boolean;
-  quitEditing(): void;
-  enterEditing(): void;
   fromJSON(json: WorkBookJSON): void;
   toJSON(): WorkBookJSON;
   updateSelection(row: number, col: number): void;
   windowResize(): void;
   setCellStyle(style: Partial<StyleType>, ranges?: IRange[]): void;
   setCellValue(data: Coordinate, value: string): void;
-  queryCell(data: Coordinate): CellInfo;
+  getCell(data: Coordinate): CellInfo;
   canRedo(): boolean;
   canUndo(): boolean;
   undo(): void;

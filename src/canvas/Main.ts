@@ -5,8 +5,6 @@ import {
   isRow,
   isSheet,
   canvasLog,
-  DOUBLE_CLICK_TIME,
-  isTestEnv,
 } from '@/util';
 import { Content } from './Content';
 import { CanvasOverlayPosition, EventType, IController } from '@/types';
@@ -16,7 +14,6 @@ import { strokeRect, resizeCanvas } from './util';
 import { RenderController } from './Controller';
 
 export class MainCanvas {
-  private lastTimeStamp = 0;
   private ctx: CanvasRenderingContext2D;
   private controller: IController;
   private canvas: HTMLCanvasElement;
@@ -46,12 +43,6 @@ export class MainCanvas {
     this.selection = selection;
     this.checkChange({ changeSet: new Set(['contentChange']) });
   }
-  queryCell(row: number, col: number): CanvasOverlayPosition {
-    const temp = this.renderController.getCanvasSize();
-    const result = this.renderController.queryCell(row, col);
-    result.top = temp.top + result.top;
-    return result;
-  }
   checkChange = (params: EventType['change']) => {
     this.render(params);
     if (this.renderController.isChanged) {
@@ -60,86 +51,6 @@ export class MainCanvas {
         changeSet: new Set(['contentChange', 'selectionChange']),
       });
     }
-  };
-  addEvents(): void {
-    if (isTestEnv()) {
-      return;
-    }
-    const { canvas } = this;
-    canvas.addEventListener('mousedown', this.mouseDown);
-    canvas.addEventListener('mousemove', this.mouseMove);
-    canvas.addEventListener('mouseup', this.mouseUp);
-    canvas.addEventListener('contextmenu', this.contextMenu);
-    window.addEventListener('resize', this.resize);
-  }
-  removeEvents(): void {
-    if (isTestEnv()) {
-      return;
-    }
-    const { canvas } = this;
-    canvas.removeEventListener('mousedown', this.mouseDown);
-    canvas.removeEventListener('mousemove', this.mouseMove);
-    canvas.removeEventListener('mouseup', this.mouseUp);
-    canvas.removeEventListener('contextmenu', this.contextMenu);
-    window.removeEventListener('resize', this.resize);
-  }
-  private contextMenu = (event: Event) => {
-    event.preventDefault();
-    return false;
-  };
-  mouseDown = (event: MouseEvent): void => {
-    const canvasRect = this.canvas.getBoundingClientRect();
-    const { timeStamp, clientX, clientY } = event;
-    const { controller } = this;
-    const { width, height } = this.renderController.getHeaderSize();
-    const x = clientX - canvasRect.left;
-    const y = clientY - canvasRect.top;
-    const position = this.renderController.getHitInfo(event);
-    if (width > x && height > y) {
-      controller.selectAll(position.row, position.col);
-      return;
-    }
-    if (width > x && height <= y) {
-      controller.selectRow(position.row, position.col);
-      return;
-    }
-    if (width <= x && height > y) {
-      controller.selectCol(position.row, position.col);
-      return;
-    }
-    const activeCell = controller.getActiveCell();
-    const check =
-      activeCell.row >= 0 &&
-      activeCell.row === position.row &&
-      activeCell.col === position.col;
-    if (!check) {
-      controller.quitEditing();
-      controller.setActiveCell(position.row, position.col, 1, 1);
-    }
-    const delay = timeStamp - this.lastTimeStamp;
-    if (delay < DOUBLE_CLICK_TIME) {
-      controller.enterEditing();
-    }
-    this.lastTimeStamp = timeStamp;
-  };
-  mouseMove = (event: MouseEvent): void => {
-    const rect = this.canvas.getBoundingClientRect();
-    const { clientX, clientY } = event;
-    const { controller } = this;
-    const { width, height } = this.renderController.getHeaderSize();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-    const checkMove = x > width && y > height && event.buttons === 1;
-    if (checkMove) {
-      const position = this.renderController.getHitInfo(event);
-      controller.updateSelection(position.row, position.col);
-    }
-  };
-  mouseUp = (): void => {
-    // console.log(event);
-  };
-  resize = (): void => {
-    this.controller.windowResize();
   };
 
   getSelection(

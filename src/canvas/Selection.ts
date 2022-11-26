@@ -67,7 +67,7 @@ export class Selection extends Base {
       return;
     }
 
-    const cellData = controller.queryCell(controller.getActiveCell());
+    const cellData = controller.getCell(controller.getActiveCell());
     const activeCell = renderController.queryCell(cellData.row, cellData.col);
     const activeCellFillColor = cellData.style?.fillColor || theme.white;
     this.renderFillRect(theme.selectionColor, selectAll);

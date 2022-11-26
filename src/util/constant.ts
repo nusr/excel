@@ -120,4 +120,5 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
   canRedo: false,
   canUndo: false,
   fontFamilyList: [],
+  contextMenuPosition: undefined,
 };

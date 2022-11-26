@@ -16,7 +16,7 @@
   height: 100%;
 }
 .canvas-content {
-  background-color: #fff;
+  background-color: var(--white);
 }
 
 .toolbar-wrapper {
@@ -104,6 +104,12 @@
   top: 0;
   border: 1px solid var(--primaryColor);
   border-radius: 2px;
-  background-color: #fff;
+  background-color: var(--white);
   box-sizing: border-box;
+}
+.context-menu {
+  position: fixed;
+  background-color: var(--white);
+  border: 1px solid var(--borderColor);
+  border-radius: var(--borderRadius);
 }

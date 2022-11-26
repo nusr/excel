@@ -18,7 +18,6 @@ function init(containerDom: HTMLDivElement) {
     set(obj, prop, value) {
       const res = Reflect.set(obj, prop, value);
       setState();
-
       return res;
     },
   });

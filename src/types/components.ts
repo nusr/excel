@@ -28,4 +28,5 @@ export interface StoreValue {
   canRedo: boolean;
   canUndo: boolean;
   fontFamilyList: OptionItem[];
+  contextMenuPosition?: CanvasOverlayPosition;
 }

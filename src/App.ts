@@ -4,6 +4,7 @@ import {
   SheetBarContainer,
   ToolbarContainer,
   FormulaBarContainer,
+  ContextMenuContainer,
 } from './containers';
 
 export const App: SmartComponent = (state, controller) => {
@@ -16,6 +17,7 @@ export const App: SmartComponent = (state, controller) => {
     FormulaBarContainer(state, controller),
     CanvasContainer({}),
     SheetBarContainer(state, controller),
+    ContextMenuContainer(state, controller),
   );
 };
 App.displayName = 'App';

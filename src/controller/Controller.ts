@@ -23,11 +23,8 @@ import {
 export class Controller implements IController {
   private model: IModel;
   private ranges: Array<Range> = [];
-  private isCellEditing = false;
   private changeSet = new Set<ChangeEventType>();
   private hooks: IHooks = {
-    focus() {},
-    blur() {},
     modelChange() {},
   };
   private scroll: IScrollValue;
@@ -143,27 +140,6 @@ export class Controller implements IController {
     this.setActiveCell(row, col, 0, sheetInfo.colCount);
     controllerLog('selectRow');
   }
-  setCellEditing(value: boolean): void {
-    this.isCellEditing = value;
-  }
-  getCellEditing(): boolean {
-    return this.isCellEditing;
-  }
-  quitEditing(): void {
-    controllerLog('quitEditing');
-    if (this.hooks) {
-      this.hooks.blur();
-    }
-    this.setCellEditing(false);
-  }
-  enterEditing(): void {
-    controllerLog('enterEditing');
-    if (this.hooks) {
-      this.hooks.focus();
-      this.setCellEditing(true);
-      this.emitChange();
-    }
-  }
   fromJSON(json: WorkBookJSON): void {
     const { model } = this;
     controllerLog('loadJSON', json);
@@ -216,7 +192,7 @@ export class Controller implements IController {
     this.changeSet.add('contentChange');
     this.emitChange();
   }
-  queryCell = (data: Coordinate): CellInfo => {
+  getCell = (data: Coordinate): CellInfo => {
     const { row, col } = data;
     const { model } = this;
     const { value, formula, style } = model.queryCell(row, col);
