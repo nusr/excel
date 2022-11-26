@@ -9,6 +9,6 @@ describe('App.test.ts', () => {
       document.body,
       App(DEFAULT_STORE_VALUE, initController()),
     );
-    expect(dom.elm!.childNodes).toHaveLength(4);
+    expect(dom.elm!.childNodes).toHaveLength(5);
   });
 });
