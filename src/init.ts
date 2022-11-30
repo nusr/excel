@@ -7,6 +7,7 @@ import {
   FONT_FAMILY_LIST,
   isSupportFontFamily,
   MAIN_CANVAS_ID,
+  FORMULA_EDITOR_ID,
 } from './util';
 import theme from './theme';
 
@@ -61,9 +62,15 @@ function addEvents(
   renderController: RenderController,
 ): void {
   let lastTimeStamp = 0;
-
+  const inputDom = document.querySelector<HTMLInputElement>(
+    `#${FORMULA_EDITOR_ID}`,
+  )!;
   window.addEventListener('resize', () => {
     controller.windowResize();
+  });
+  window.addEventListener('keydown', () => {
+    stateValue.isCellEditing = true;
+    inputDom.focus();
   });
 
   canvas.addEventListener('mousedown', (event) => {
@@ -97,11 +104,11 @@ function addEvents(
     }
     const delay = timeStamp - lastTimeStamp;
     if (delay < DOUBLE_CLICK_TIME) {
-      // controller.enterEditing();
       stateValue.isCellEditing = true;
     }
     lastTimeStamp = timeStamp;
   });
+
   canvas.addEventListener('mousemove', (event) => {
     const rect = canvas.getBoundingClientRect();
     const { clientX, clientY } = event;

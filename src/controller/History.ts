@@ -19,11 +19,11 @@ export class History implements IHistory {
   private addRedoData(sheetData: WorkBookJSON): void {
     this.redoList.push(JSON.stringify(sheetData));
   }
-  getUndoData(): WorkBookJSON | undefined {
+  private getUndoData(): WorkBookJSON | undefined {
     const temp = this.undoList.pop();
     return temp ? JSON.parse(temp) : temp;
   }
-  getRedoData(): WorkBookJSON | undefined {
+  private getRedoData(): WorkBookJSON | undefined {
     const temp = this.redoList.pop();
     return temp ? JSON.parse(temp) : temp;
   }
@@ -33,10 +33,18 @@ export class History implements IHistory {
   canUndo(): boolean {
     return this.undoList.length > 0;
   }
-  redo(sheetData: WorkBookJSON): void {
-    this.addUndoData(sheetData);
+  redo(sheetData: WorkBookJSON): WorkBookJSON | undefined {
+    if (this.canRedo()) {
+      this.addUndoData(sheetData);
+      return this.getRedoData();
+    }
+    return undefined;
   }
-  undo(sheetData: WorkBookJSON): void {
-    this.addRedoData(sheetData);
+  undo(sheetData: WorkBookJSON): WorkBookJSON | undefined {
+    if (this.canUndo()) {
+      this.addRedoData(sheetData);
+      return this.getUndoData();
+    }
+    return undefined;
   }
 }

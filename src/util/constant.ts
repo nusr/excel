@@ -7,6 +7,7 @@ export const DEFAULT_COL_COUNT = 30;
 export const XLSX_MAX_COL_COUNT = 16384; // XFD
 export const XLSX_MAX_ROW_COUNT = 1048575; // XFD
 export const MAIN_CANVAS_ID = 'main-canvas-id';
+export const FORMULA_EDITOR_ID = 'formula-editor';
 export const DOUBLE_CLICK_TIME = 300;
 export const TEST_ID_KEY = 'data-test-id';
 export const DEBUG_COLOR_LIST = [

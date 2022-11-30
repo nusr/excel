@@ -1,6 +1,11 @@
 import { h, SmartComponent, CSSProperties } from '@/react';
 import { QueryCellResult, CanvasOverlayPosition } from '@/types';
-import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE } from '@/util';
+import {
+  DEFAULT_FONT_COLOR,
+  makeFont,
+  DEFAULT_FONT_SIZE,
+  FORMULA_EDITOR_ID,
+} from '@/util';
 import { isEmpty } from '@/lodash';
 
 export function getEditorStyle(
@@ -24,20 +29,24 @@ export function getEditorStyle(
   };
 }
 
-const inputId = 'formula-editor';
-
 export const FormulaEditor: SmartComponent = (state, controller) => {
   const { activeCell, isCellEditing, editCellValue, cellPosition } = state;
   const initValue = activeCell.formula || String(activeCell.value || '');
-
+  let inputDom: HTMLInputElement;
+  const ref = (element: Element) => {
+    inputDom = element as HTMLInputElement;
+  };
   return h('input', {
     title: 'editor',
     className: 'base-editor',
-    id: inputId,
+    id: FORMULA_EDITOR_ID,
     value: isCellEditing ? editCellValue : initValue,
     style: isCellEditing
       ? getEditorStyle(activeCell.style, cellPosition)
       : undefined,
+    hook: {
+      ref,
+    },
     onfocus: () => {
       if (!isCellEditing) {
         return;
@@ -46,9 +55,8 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
     },
     onblur: (event: any) => {
       controller.setCellValue(activeCell, event.target.value);
-      const dom = document.querySelector<HTMLInputElement>('#' + inputId)!;
-      if (event.target === dom) {
-        dom.value = '';
+      if (event.target === inputDom) {
+        inputDom.value = '';
         controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
       }
       state.editCellValue = '';
@@ -56,8 +64,7 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
     },
     onkeydown: (event: any) => {
       if (event.key === 'Enter') {
-        const dom = document.querySelector<HTMLInputElement>('#' + inputId)!;
-        dom.blur();
+        inputDom.blur();
       } else {
         state.editCellValue = event.target.value;
       }

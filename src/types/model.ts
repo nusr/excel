@@ -78,9 +78,7 @@ export interface IModel {
 export interface IHistory {
   canRedo(): boolean;
   canUndo(): boolean;
-  undo(sheetData: WorkBookJSON): void;
-  redo(sheetData: WorkBookJSON): void;
+  undo(sheetData: WorkBookJSON): WorkBookJSON | undefined;
+  redo(sheetData: WorkBookJSON): WorkBookJSON | undefined;
   onChange(sheetData: WorkBookJSON): void;
-  getUndoData(): WorkBookJSON | undefined
-  getRedoData(): WorkBookJSON | undefined
 }

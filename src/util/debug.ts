@@ -1,15 +1,7 @@
-import { randomInt } from "@/lodash";
-import { assert } from "./assert";
-import { DEBUG_COLOR_LIST } from "./constant";
-type NameSpaceType =
-  | "react"
-  | "controller"
-  | "canvas"
-  | "model"
-  | "util"
-  | "interaction"
-  | "containers"
-  | "history";
+import { randomInt } from '@/lodash';
+import { assert } from './assert';
+import { DEBUG_COLOR_LIST } from './constant';
+type NameSpaceType = 'react' | 'controller' | 'canvas' | 'model';
 
 class Debug {
   namespace: NameSpaceType;
@@ -21,15 +13,7 @@ class Debug {
   static readonly enableMap: Map<NameSpaceType, boolean> = new Map<
     NameSpaceType,
     boolean
-  >([
-    ["model", false],
-    ["react", false],
-    ["interaction", false],
-    ["history", false],
-    ["canvas", false],
-    ["controller", true],
-    ["containers", true],
-  ]);
+  >([]);
   constructor(namespace: NameSpaceType) {
     this.namespace = namespace;
   }
@@ -55,7 +39,7 @@ class Debug {
     return this.checkEnable() && Debug.enableMap.get(this.namespace) !== false;
   }
   checkEnable(storage = window.localStorage) {
-    return storage.getItem("debug") === "*";
+    return storage.getItem('debug') === '*';
   }
   setColor() {
     if (!Debug.colorMap.has(this.namespace)) {
@@ -64,7 +48,7 @@ class Debug {
   }
 }
 
-export const reactLog = new Debug("react").init();
-export const controllerLog = new Debug("controller").init();
-export const canvasLog = new Debug("canvas").init();
-export const modelLog = new Debug("model").init();
+export const reactLog = new Debug('react').init();
+export const controllerLog = new Debug('controller').init();
+export const canvasLog = new Debug('canvas').init();
+export const modelLog = new Debug('model').init();

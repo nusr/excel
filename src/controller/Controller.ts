@@ -38,7 +38,7 @@ export class Controller implements IController {
         DEFAULT_ACTIVE_CELL.col,
         1,
         1,
-        this.model.getCurrentSheetId(),
+        this.getCurrentSheetId(),
       ),
     ];
     this.history = history;
@@ -73,16 +73,16 @@ export class Controller implements IController {
   setHooks(hooks: IHooks): void {
     this.hooks = hooks;
   }
-  emitChange(recordHistory = true): void {
+  private emitChange(recordHistory = true): void {
     controllerLog('emitChange', this.changeSet);
     if (recordHistory) {
-      this.history.onChange(this.model.toJSON());
+      this.history.onChange(this.toJSON());
     }
     this.hooks.modelChange(this.changeSet);
     this.changeSet = new Set<ChangeEventType>();
   }
   getActiveCell(): Coordinate {
-    const { activeCell } = this.model.getSheetInfo();
+    const { activeCell } = this.getSheetInfo();
     if (!activeCell) {
       return { ...DEFAULT_ACTIVE_CELL };
     }
@@ -106,13 +106,13 @@ export class Controller implements IController {
         position.col,
         colCount,
         rowCount,
-        this.model.getCurrentSheetId(),
+        this.getCurrentSheetId(),
       ),
     ];
     this.emitChange();
   }
   setCurrentSheetId(id: string): void {
-    if (id === this.model.getCurrentSheetId()) {
+    if (id === this.getCurrentSheetId()) {
       return;
     }
     this.model.setCurrentSheetId(id);
@@ -122,7 +122,7 @@ export class Controller implements IController {
   }
   addSheet(): void {
     this.model.addSheet();
-    this.setActiveCell(0, 0);
+    this.model.setActiveCell(0, 0);
     this.changeSet.add('contentChange');
     this.emitChange();
   }
@@ -141,12 +141,11 @@ export class Controller implements IController {
     controllerLog('selectRow');
   }
   fromJSON(json: WorkBookJSON): void {
-    const { model } = this;
     controllerLog('loadJSON', json);
-    model.fromJSON(json);
-    this.setActiveCell();
+    this.model.fromJSON(json);
+    this.model.setActiveCell(0, 0);
     this.changeSet.add('contentChange');
-    this.emitChange();
+    this.emitChange(false);
   }
   toJSON(): WorkBookJSON {
     return this.model.toJSON();
@@ -163,7 +162,7 @@ export class Controller implements IController {
       Math.min(activeCell.col, col),
       rowCount,
       colCount,
-      this.model.getCurrentSheetId(),
+      this.getCurrentSheetId(),
     );
     this.ranges = [temp];
     controllerLog('updateSelection', temp);
@@ -172,13 +171,13 @@ export class Controller implements IController {
   }
   windowResize(): void {
     this.changeSet.add('contentChange');
-    this.emitChange();
+    this.emitChange(false);
   }
 
   setCellValue(data: Coordinate, value: string): void {
     controllerLog('setCellValue', value);
     const temp = [
-      new Range(data.row, data.col, 1, 1, this.model.getCurrentSheetId()),
+      new Range(data.row, data.col, 1, 1, this.getCurrentSheetId()),
     ];
     this.model.setCellValues(value, temp);
     this.changeSet.add('contentChange');
@@ -211,25 +210,15 @@ export class Controller implements IController {
     return this.history.canUndo();
   }
   undo(): void {
-    if (!this.canUndo) {
-      return;
-    }
-    const temp = this.history.getUndoData();
-    if (temp !== undefined) {
-      this.history.undo(temp);
-      this.changeSet.add('contentChange');
-      this.emitChange();
+    const result = this.history.undo(this.toJSON());
+    if (result) {
+      this.fromJSON(result);
     }
   }
   redo(): void {
-    if (!this.canRedo()) {
-      return;
-    }
-    const temp = this.history.getRedoData();
-    if (temp !== undefined) {
-      this.history.redo(temp);
-      this.changeSet.add('contentChange');
-      this.emitChange(false);
+    const result = this.history.redo(this.toJSON());
+    if (result) {
+      this.fromJSON(result);
     }
   }
 }
