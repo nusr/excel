@@ -1,16 +1,16 @@
-import { StoreValue, IController, ChangeEventType } from "./types";
-import { Controller, Scroll, History } from "./controller";
-import { Model, MOCK_MODEL } from "./model";
-import { MainCanvas } from "./canvas";
+import { StoreValue, IController, ChangeEventType } from './types';
+import { Controller, Scroll, History } from './controller';
+import { Model, MOCK_MODEL } from './model';
+import { MainCanvas } from './canvas';
 import {
   DOUBLE_CLICK_TIME,
   FONT_FAMILY_LIST,
   isSupportFontFamily,
   MAIN_CANVAS_ID,
   FORMULA_EDITOR_ID,
-} from "./util";
-import theme from "./theme";
-import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, resizeCanvas } from "@/util";
+} from './util';
+import theme from './theme';
+import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, resizeCanvas } from '@/util';
 
 interface IHitInfo {
   width: number;
@@ -26,7 +26,7 @@ interface IHitInfo {
 export function initTheme(dom: HTMLElement) {
   const keyList = Object.keys(theme) as Array<keyof typeof theme>;
   for (const key of keyList) {
-    dom.style.setProperty(`--${key}`, String(theme[key] || ""));
+    dom.style.setProperty(`--${key}`, String(theme[key] || ''));
   }
 }
 export function initFontFamilyList() {
@@ -37,11 +37,7 @@ export function initFontFamilyList() {
   return list;
 }
 
-function handleModelChange(
-  stateValue: StoreValue,
-  controller: IController,
-  canvasTop: number
-) {
+function getStoreValue(controller: IController, canvasTop: number) {
   const cell = controller.getCell(controller.getActiveCell());
   const cellPosition = controller.computeCellPosition(cell.row, cell.col);
   cellPosition.top = canvasTop + cellPosition.top;
@@ -55,13 +51,13 @@ function handleModelChange(
     cellPosition: cellPosition,
   };
   newStateValue.activeCell = cell;
-  Object.assign(stateValue, newStateValue);
+  return newStateValue;
 }
 
 function getHitInfo(
   event: MouseEvent,
   canvas: HTMLCanvasElement,
-  controller: IController
+  controller: IController,
 ): IHitInfo {
   const { pageX, pageY } = event;
   const size = canvas.getBoundingClientRect();
@@ -86,21 +82,21 @@ function getHitInfo(
 function addEvents(
   stateValue: StoreValue,
   controller: IController,
-  canvas: HTMLCanvasElement
+  canvas: HTMLCanvasElement,
 ): void {
   let lastTimeStamp = 0;
   const inputDom = document.querySelector<HTMLInputElement>(
-    `#${FORMULA_EDITOR_ID}`
+    `#${FORMULA_EDITOR_ID}`,
   )!;
-  window.addEventListener("resize", () => {
+  window.addEventListener('resize', () => {
     controller.windowResize();
   });
-  window.addEventListener("keydown", () => {
+  window.addEventListener('keydown', () => {
     stateValue.isCellEditing = true;
     inputDom.focus();
   });
 
-  canvas.addEventListener("mousedown", (event) => {
+  canvas.addEventListener('mousedown', (event) => {
     stateValue.contextMenuPosition = undefined;
     const canvasRect = canvas.getBoundingClientRect();
     const { timeStamp, clientX, clientY } = event;
@@ -135,7 +131,7 @@ function addEvents(
     lastTimeStamp = timeStamp;
   });
 
-  canvas.addEventListener("mousemove", (event) => {
+  canvas.addEventListener('mousemove', (event) => {
     const rect = canvas.getBoundingClientRect();
     const { clientX, clientY } = event;
     const x = clientX - rect.left;
@@ -147,7 +143,7 @@ function addEvents(
       controller.updateSelection(position.row, position.col);
     }
   });
-  canvas.addEventListener("contextmenu", (event) => {
+  canvas.addEventListener('contextmenu', (event) => {
     event.preventDefault();
     console.log(event);
     stateValue.contextMenuPosition = {
@@ -162,9 +158,10 @@ function addEvents(
 
 export function initCanvas(stateValue: StoreValue, controller: IController) {
   const canvas = document.querySelector<HTMLCanvasElement>(
-    `#${MAIN_CANVAS_ID}`
+    `#${MAIN_CANVAS_ID}`,
   )!;
-  const mainCanvas = new MainCanvas(controller, canvas.getContext('2d')!);
+  const ctx = canvas.getContext('2d')!;
+  const mainCanvas = new MainCanvas(controller, ctx);
   addEvents(stateValue, controller, canvas);
   controller.setHooks({
     modelChange: (changeSet) => {
@@ -173,16 +170,16 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
         width: canvasPosition?.width || 0,
         height: canvasPosition?.height || 0,
       };
-      handleModelChange(stateValue, controller, canvasPosition?.top || 0);
+      const newStateValue = getStoreValue(controller, canvasPosition?.top || 0);
+      Object.assign(stateValue, newStateValue);
       resizeCanvas(canvas, canvasSize.width, canvasSize.height);
       mainCanvas.render({ changeSet: changeSet, canvasSize });
       if (controller.isChanged) {
         controller.isChanged = false;
         mainCanvas.render({
-          changeSet: new Set<ChangeEventType>(["contentChange"]),
+          changeSet: new Set<ChangeEventType>(['contentChange']),
           canvasSize,
         });
-        controller.isChanged = false;
       }
     },
   });

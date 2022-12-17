@@ -7,19 +7,19 @@ import {
   canvasLog,
   COL_TITLE_WIDTH,
   ROW_TITLE_HEIGHT,
-} from "@/util";
-import { Content } from "./Content";
+} from '@/util';
+import { Content } from './Content';
 import {
   CanvasOverlayPosition,
   EventType,
   IController,
   IWindowSize,
-} from "@/types";
-import theme from "@/theme";
-import { Selection } from "./Selection";
-import { strokeRect } from "./util";
+} from '@/types';
+import theme from '@/theme';
+import { Selection } from './Selection';
+import { strokeRect } from './util';
 
-type RenderParams = EventType["change"] & {
+type RenderParams = EventType['change'] & {
   canvasSize: IWindowSize;
 };
 
@@ -32,12 +32,14 @@ export class MainCanvas {
     controller: IController,
     ctx: CanvasRenderingContext2D,
     content: Content = new Content(controller),
-    selection: Selection = new Selection(controller)
+    selection: Selection = new Selection(controller),
   ) {
     this.controller = controller;
     this.ctx = ctx;
     this.content = content;
     this.selection = selection;
+    const size = dpr();
+    this.ctx.scale(size, size);
   }
 
   private getSelection(
@@ -94,22 +96,22 @@ export class MainCanvas {
     };
   }
   render = ({ changeSet, canvasSize }: RenderParams): void => {
-    console.log("isRendering");
-    const isContentChange = changeSet.has("contentChange");
+    console.log('isRendering');
+    const isContentChange = changeSet.has('contentChange');
     const { width, height } = canvasSize;
     if (isContentChange) {
-      canvasLog("render content");
+      canvasLog('render content');
       this.content.render(width, height);
     }
     const [range] = this.controller.getRanges();
     const activeCell = this.controller.computeCellPosition(
       range.row,
-      range.col
+      range.col,
     );
     const selectAll = this.getSelection(activeCell, canvasSize);
 
     this.selection.render(width, height, selectAll);
-    canvasLog("render selection");
+    canvasLog('render selection');
 
     this.ctx.drawImage(this.content.canvas, 0, 0);
     this.ctx.drawImage(this.selection.canvas, 0, 0);

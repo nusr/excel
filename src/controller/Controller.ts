@@ -37,7 +37,7 @@ export class Controller implements IController {
   private history: IHistory;
   private readonly rowMap: Map<number, number> = new Map([]);
   private readonly colMap: Map<number, number> = new Map([]);
-  isChanged = false;
+  isChanged = true;
   constructor(model: IModel, scroll: IScrollValue, history: IHistory) {
     this.model = model;
     this.scroll = scroll;

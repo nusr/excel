@@ -4,12 +4,11 @@ import {
   COL_TITLE_WIDTH,
   ROW_TITLE_HEIGHT,
   resizeCanvas,
-  isSheet,
-} from "@/util";
-import theme from "@/theme";
-import { Base } from "./Base";
-import { fillRect, renderCell, drawLines } from "./util";
-import type { CanvasOverlayPosition } from "@/types";
+} from '@/util';
+import theme from '@/theme';
+import { Base } from './Base';
+import { fillRect, renderCell, drawLines } from './util';
+import type { CanvasOverlayPosition } from '@/types';
 
 export class Selection extends Base {
   private renderFillRect(fillStyle: string, data: CanvasOverlayPosition): void {
@@ -21,7 +20,7 @@ export class Selection extends Base {
       data.left + temp,
       data.top + temp,
       data.width - temp,
-      data.height - temp
+      data.height - temp,
     );
   }
   private renderSelectedRange(): void {
@@ -49,30 +48,30 @@ export class Selection extends Base {
     this.ctx.lineWidth = dpr();
     pointList.push(
       [top.left, ROW_TITLE_HEIGHT],
-      [top.left + width, ROW_TITLE_HEIGHT]
+      [top.left + width, ROW_TITLE_HEIGHT],
     );
     pointList.push(
       [COL_TITLE_WIDTH, left.top],
-      [COL_TITLE_WIDTH, left.top + height]
+      [COL_TITLE_WIDTH, left.top + height],
     );
     drawLines(this.ctx, pointList);
   }
   render(
     width: number,
     height: number,
-    selectAll: CanvasOverlayPosition | null
+    selectAll: CanvasOverlayPosition | null,
   ): void {
     resizeCanvas(this.canvas, width, height);
     const { controller } = this;
+    this.renderSelectedRange();
     if (!selectAll) {
-      this.renderSelectedRange();
       return;
     }
 
     const cellData = controller.getCell(controller.getActiveCell());
     const activeCell = controller.computeCellPosition(
       cellData.row,
-      cellData.col
+      cellData.col,
     );
     const activeCellFillColor = cellData.style?.fillColor || theme.white;
     this.renderFillRect(theme.selectionColor, selectAll);

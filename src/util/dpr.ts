@@ -15,8 +15,7 @@ export function resizeCanvas(
   width: number,
   height: number
 ): void {
-  const size = dpr();
-  canvas.getContext("2d")!.scale(size, size);
+ 
 
   canvas.style.width = width + "px";
   canvas.style.height = height + "px";
