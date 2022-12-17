@@ -5,7 +5,6 @@ import {
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
   makeFont,
-  npxLine,
   assert,
   ERROR_SET,
   ERROR_FORMULA_COLOR,
@@ -44,7 +43,7 @@ export function fillRect(
   width: number,
   height: number
 ): void {
-  ctx.fillRect(npx(x) - 0.5, npx(y) - 0.5, npx(width), npx(height));
+  ctx.fillRect(npx(x), npx(y), npx(width), npx(height));
 }
 export function strokeRect(
   ctx: CanvasRenderingContext2D,
@@ -53,7 +52,7 @@ export function strokeRect(
   width: number,
   height: number
 ): void {
-  ctx.strokeRect(npx(x) - 0.5, npx(y) - 0.5, npx(width), npx(height));
+  ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
 }
 
 function getFontSizeHeight(ctx: CanvasRenderingContext2D, char: string) {
@@ -215,18 +214,21 @@ export function drawLines(
   for (let i = 0; i < pointList.length; i += 2) {
     const first = pointList[i];
     const second = pointList[i + 1];
-    ctx.moveTo(npxLine(first[0]), npxLine(first[1]));
-    ctx.lineTo(npxLine(second[0]), npxLine(second[1]));
+    ctx.moveTo(npx(first[0]), npx(first[1]));
+    ctx.lineTo(npx(second[0]), npx(second[1]));
   }
   ctx.stroke();
 }
-export function resizeCanvas(
-  canvas: HTMLCanvasElement,
-  width: number,
-  height: number
-): void {
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
-  canvas.width = npx(width);
-  canvas.height = npx(height);
+
+type Point = {
+  x: number;
+  y: number;
+}
+
+export function drawTriangle(ctx: CanvasRenderingContext2D, point1: Point, point2: Point, point3: Point,) {
+  ctx.beginPath();
+  ctx.moveTo(npx(point1.x), npx(point1.y));
+  ctx.lineTo(npx(point2.x), npx(point2.y));
+  ctx.lineTo(npx(point3.x), npx(point3.y));
+  ctx.fill();
 }

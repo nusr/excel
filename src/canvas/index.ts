@@ -1,2 +1,1 @@
-export * from "./Main";
-export * from "./Controller";
+export * from "./Main";

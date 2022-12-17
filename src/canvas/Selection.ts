@@ -1,74 +1,79 @@
-import { dpr, npxLine, isSheet } from '@/util';
-import theme from '@/theme';
-import { Base } from './Base';
-import { fillRect, renderCell, resizeCanvas, drawLines } from './util';
-import type { CanvasOverlayPosition } from '@/types';
+import {
+  dpr,
+  npx,
+  COL_TITLE_WIDTH,
+  ROW_TITLE_HEIGHT,
+  resizeCanvas,
+  isSheet,
+} from "@/util";
+import theme from "@/theme";
+import { Base } from "./Base";
+import { fillRect, renderCell, drawLines } from "./util";
+import type { CanvasOverlayPosition } from "@/types";
 
 export class Selection extends Base {
-  renderFillRect(fillStyle: string, data: CanvasOverlayPosition): void {
+  private renderFillRect(fillStyle: string, data: CanvasOverlayPosition): void {
     this.ctx.fillStyle = fillStyle;
     this.ctx.lineWidth = dpr();
-    const temp = npxLine(0.5);
+    const temp = npx(0.5);
     fillRect(
       this.ctx,
       data.left + temp,
       data.top + temp,
       data.width - temp,
-      data.height - temp,
+      data.height - temp
     );
   }
-  renderSelectedRange(): void {
-    const { controller, renderController } = this;
+  private renderSelectedRange(): void {
+    const { controller } = this;
 
     const ranges = controller.getRanges();
     const [range] = ranges;
-    const size = renderController.getHeaderSize();
     this.ctx.fillStyle = theme.selectionColor;
-
     const pointList: Array<[x: number, y: number]> = [];
-    if (isSheet(range)) {
-      const canvasSize = renderController.getCanvasSize();
-      fillRect(this.ctx, size.width, 0, canvasSize.width, size.height);
-      fillRect(this.ctx, 0, size.height, size.width, canvasSize.height);
-      return;
-    }
-    const top = renderController.queryCell(0, range.col);
-    const left = renderController.queryCell(range.row, 0);
+    const top = controller.computeCellPosition(0, range.col);
+    const left = controller.computeCellPosition(range.row, 0);
 
     let width = 0;
     let height = 0;
     for (let c = range.col, end = range.col + range.colCount; c < end; c++) {
-      width += renderController.getColWidth(c);
+      width += controller.getColWidth(c);
     }
     for (let r = range.row, end = range.row + range.rowCount; r < end; r++) {
-      height += renderController.getRowHeight(r);
+      height += controller.getRowHeight(r);
     }
-    fillRect(this.ctx, top.left, 0, width, size.height);
-    fillRect(this.ctx, 0, left.top, size.width, height);
+    fillRect(this.ctx, top.left, 0, width, ROW_TITLE_HEIGHT);
+    fillRect(this.ctx, 0, left.top, COL_TITLE_WIDTH, height);
 
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
-    pointList.push([top.left, size.height], [top.left + width, size.height]);
-    pointList.push([size.width, left.top], [size.width, left.top + height]);
+    pointList.push(
+      [top.left, ROW_TITLE_HEIGHT],
+      [top.left + width, ROW_TITLE_HEIGHT]
+    );
+    pointList.push(
+      [COL_TITLE_WIDTH, left.top],
+      [COL_TITLE_WIDTH, left.top + height]
+    );
     drawLines(this.ctx, pointList);
   }
   render(
     width: number,
     height: number,
-    selectAll: CanvasOverlayPosition | null,
+    selectAll: CanvasOverlayPosition | null
   ): void {
     resizeCanvas(this.canvas, width, height);
-
-    const { controller, renderController } = this;
-
-    this.renderSelectedRange();
-
+    const { controller } = this;
     if (!selectAll) {
+      this.renderSelectedRange();
       return;
     }
 
     const cellData = controller.getCell(controller.getActiveCell());
-    const activeCell = renderController.queryCell(cellData.row, cellData.col);
+    const activeCell = controller.computeCellPosition(
+      cellData.row,
+      cellData.col
+    );
     const activeCellFillColor = cellData.style?.fillColor || theme.white;
     this.renderFillRect(theme.selectionColor, selectAll);
     this.renderFillRect(activeCellFillColor, activeCell);

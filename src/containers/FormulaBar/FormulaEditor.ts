@@ -30,17 +30,18 @@ export function getEditorStyle(
 }
 
 export const FormulaEditor: SmartComponent = (state, controller) => {
-  const { activeCell, isCellEditing, editCellValue, cellPosition } = state;
+  const { activeCell, isCellEditing, cellPosition } = state;
   const initValue = activeCell.formula || String(activeCell.value || '');
   let inputDom: HTMLInputElement;
   const ref = (element: Element) => {
     inputDom = element as HTMLInputElement;
   };
+  let keyCode: string = '';
   return h('input', {
     title: 'editor',
     className: 'base-editor',
     id: FORMULA_EDITOR_ID,
-    value: isCellEditing ? editCellValue : initValue,
+    value: initValue,
     style: isCellEditing
       ? getEditorStyle(activeCell.style, cellPosition)
       : undefined,
@@ -54,19 +55,20 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
       state.isCellEditing = true;
     },
     onblur: (event: any) => {
-      controller.setCellValue(activeCell, event.target.value);
-      if (event.target === inputDom) {
-        inputDom.value = '';
-        controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
+      controller.setCellValue(activeCell, event.currentTarget.value);
+      inputDom.value = '';
+      if (event.currentTarget === inputDom) {
+        if (keyCode === 'Enter') {
+          controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
+        }
       }
-      state.editCellValue = '';
       state.isCellEditing = false;
     },
     onkeydown: (event: any) => {
+      inputDom.nextSibling!.textContent = event.currentTarget.value;
       if (event.key === 'Enter') {
+        keyCode = event.key;
         inputDom.blur();
-      } else {
-        state.editCellValue = event.target.value;
       }
     },
   });

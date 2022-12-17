@@ -1,4 +1,4 @@
-import { isEmpty } from '@/lodash';
+import { isEmpty } from "@/lodash";
 import {
   Coordinate,
   WorkBookJSON,
@@ -11,14 +11,20 @@ import {
   IScrollValue,
   WorksheetType,
   IHistory,
-} from '@/types';
+  IWindowSize,
+  CanvasOverlayPosition,
+} from "@/types";
 import {
   parseReference,
   controllerLog,
   Range,
   DEFAULT_ACTIVE_CELL,
   assert,
-} from '@/util';
+  CELL_WIDTH,
+  CELL_HEIGHT,
+  COL_TITLE_WIDTH,
+  ROW_TITLE_HEIGHT,
+} from "@/util";
 
 export class Controller implements IController {
   private model: IModel;
@@ -29,6 +35,9 @@ export class Controller implements IController {
   };
   private scroll: IScrollValue;
   private history: IHistory;
+  private readonly rowMap: Map<number, number> = new Map([]);
+  private readonly colMap: Map<number, number> = new Map([]);
+  isChanged = false;
   constructor(model: IModel, scroll: IScrollValue, history: IHistory) {
     this.model = model;
     this.scroll = scroll;
@@ -38,7 +47,7 @@ export class Controller implements IController {
         DEFAULT_ACTIVE_CELL.col,
         1,
         1,
-        this.getCurrentSheetId(),
+        this.getCurrentSheetId()
       ),
     ];
     this.history = history;
@@ -46,7 +55,7 @@ export class Controller implements IController {
   getCurrentSheetId(): string {
     return this.model.getCurrentSheetId();
   }
-  getSheetList(): WorkBookJSON['workbook'] {
+  getSheetList(): WorkBookJSON["workbook"] {
     return this.model.getSheetList();
   }
   getX(): number {
@@ -74,7 +83,7 @@ export class Controller implements IController {
     this.hooks = hooks;
   }
   private emitChange(recordHistory = true): void {
-    controllerLog('emitChange', this.changeSet);
+    controllerLog("emitChange", this.changeSet);
     if (recordHistory) {
       this.history.onChange(this.toJSON());
     }
@@ -92,7 +101,7 @@ export class Controller implements IController {
     return { row, col };
   }
   setActiveCell(row = -1, col = -1, colCount = 1, rowCount = 1): void {
-    this.changeSet.add('selectionChange');
+    this.changeSet.add("selectionChange");
     let position: Coordinate = { ...DEFAULT_ACTIVE_CELL };
     if (row === col && row === -1) {
       position = this.getActiveCell();
@@ -106,7 +115,7 @@ export class Controller implements IController {
         position.col,
         colCount,
         rowCount,
-        this.getCurrentSheetId(),
+        this.getCurrentSheetId()
       ),
     ];
     this.emitChange();
@@ -117,34 +126,34 @@ export class Controller implements IController {
     }
     this.model.setCurrentSheetId(id);
     this.setActiveCell();
-    this.changeSet.add('contentChange');
+    this.changeSet.add("contentChange");
     this.emitChange();
   }
   addSheet(): void {
     this.model.addSheet();
     this.model.setActiveCell(0, 0);
-    this.changeSet.add('contentChange');
+    this.changeSet.add("contentChange");
     this.emitChange();
   }
   selectAll(row: number, col: number): void {
     this.setActiveCell(row, col, 0, 0);
-    controllerLog('selectAll');
+    controllerLog("selectAll");
   }
   selectCol(row: number, col: number): void {
     const sheetInfo = this.model.getSheetInfo();
     this.setActiveCell(row, col, sheetInfo.rowCount, 0);
-    controllerLog('selectCol');
+    controllerLog("selectCol");
   }
   selectRow(row: number, col: number): void {
     const sheetInfo = this.model.getSheetInfo();
     this.setActiveCell(row, col, 0, sheetInfo.colCount);
-    controllerLog('selectRow');
+    controllerLog("selectRow");
   }
   fromJSON(json: WorkBookJSON): void {
-    controllerLog('loadJSON', json);
+    controllerLog("loadJSON", json);
     this.model.fromJSON(json);
     this.model.setActiveCell(0, 0);
-    this.changeSet.add('contentChange');
+    this.changeSet.add("contentChange");
     this.emitChange(false);
   }
   toJSON(): WorkBookJSON {
@@ -162,25 +171,25 @@ export class Controller implements IController {
       Math.min(activeCell.col, col),
       rowCount,
       colCount,
-      this.getCurrentSheetId(),
+      this.getCurrentSheetId()
     );
     this.ranges = [temp];
-    controllerLog('updateSelection', temp);
-    this.changeSet.add('selectionChange');
+    controllerLog("updateSelection", temp);
+    this.changeSet.add("selectionChange");
     this.emitChange();
   }
   windowResize(): void {
-    this.changeSet.add('contentChange');
+    this.changeSet.add("contentChange");
     this.emitChange(false);
   }
 
   setCellValue(data: Coordinate, value: string): void {
-    controllerLog('setCellValue', value);
+    controllerLog("setCellValue", value);
     const temp = [
       new Range(data.row, data.col, 1, 1, this.getCurrentSheetId()),
     ];
     this.model.setCellValues(value, temp);
-    this.changeSet.add('contentChange');
+    this.changeSet.add("contentChange");
     this.emitChange();
   }
   setCellStyle(style: Partial<StyleType>, ranges = this.ranges): void {
@@ -188,7 +197,7 @@ export class Controller implements IController {
       return;
     }
     this.model.setCellStyle(style, ranges);
-    this.changeSet.add('contentChange');
+    this.changeSet.add("contentChange");
     this.emitChange();
   }
   getCell = (data: Coordinate): CellInfo => {
@@ -220,5 +229,38 @@ export class Controller implements IController {
     if (result) {
       this.fromJSON(result);
     }
+  }
+  getColWidth(col: number): number {
+    return this.colMap.get(col) || CELL_WIDTH;
+  }
+  setColWidth(col: number, width: number): void {
+    this.colMap.set(col, width);
+    this.isChanged = true;
+  }
+  getRowHeight(row: number): number {
+    return this.rowMap.get(row) || CELL_HEIGHT;
+  }
+  setRowHeight(row: number, height: number) {
+    this.rowMap.set(row, height);
+    this.isChanged = true;
+  }
+  getCellSize(row: number, col: number): IWindowSize {
+    return { width: this.getColWidth(col), height: this.getRowHeight(row) };
+  }
+  computeCellPosition(row: number, col: number): CanvasOverlayPosition {
+    let resultX = COL_TITLE_WIDTH;
+    let resultY = ROW_TITLE_HEIGHT;
+    let r = 0;
+    let c = 0;
+    while (c < col) {
+      resultX += this.getColWidth(c);
+      c++;
+    }
+    while (r < row) {
+      resultY += this.getRowHeight(r);
+      r++;
+    }
+    const cellSize = this.getCellSize(row, col);
+    return { ...cellSize, top: resultY, left: resultX };
   }
 }

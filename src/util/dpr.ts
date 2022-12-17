@@ -7,9 +7,26 @@ export function npx(px: number): number {
 }
 
 export function thinLineWidth(): number {
-  return dpr() - 0.5;
+  return 1;
 }
-export function npxLine(px: number): number {
-  const n = npx(px);
-  return Math.max(0.5, n - 0.5);
+
+export function resizeCanvas(
+  canvas: HTMLCanvasElement,
+  width: number,
+  height: number
+): void {
+  const size = dpr();
+  canvas.getContext("2d")!.scale(size, size);
+
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+  canvas.width = npx(width);
+  canvas.height = npx(height);
+}
+
+export function createCanvas() {
+  const canvas = document.createElement("canvas");
+  canvas.style.display = "none";
+  document.body.appendChild(canvas);
+  return canvas;
 }

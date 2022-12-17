@@ -22,7 +22,6 @@ export interface StoreValue {
   sheetList: WorkBookJSON['workbook'];
   currentSheetId: string;
   isCellEditing: boolean;
-  editCellValue: string;
   activeCell: CellInfo;
   cellPosition: CanvasOverlayPosition;
   canRedo: boolean;

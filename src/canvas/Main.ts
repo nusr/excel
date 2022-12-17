@@ -5,56 +5,44 @@ import {
   isRow,
   isSheet,
   canvasLog,
-} from '@/util';
-import { Content } from './Content';
-import { CanvasOverlayPosition, EventType, IController } from '@/types';
-import theme from '@/theme';
-import { Selection } from './Selection';
-import { strokeRect, resizeCanvas } from './util';
-import { RenderController } from './Controller';
+  COL_TITLE_WIDTH,
+  ROW_TITLE_HEIGHT,
+} from "@/util";
+import { Content } from "./Content";
+import {
+  CanvasOverlayPosition,
+  EventType,
+  IController,
+  IWindowSize,
+} from "@/types";
+import theme from "@/theme";
+import { Selection } from "./Selection";
+import { strokeRect } from "./util";
+
+type RenderParams = EventType["change"] & {
+  canvasSize: IWindowSize;
+};
 
 export class MainCanvas {
   private ctx: CanvasRenderingContext2D;
   private controller: IController;
-  private canvas: HTMLCanvasElement;
   private content: Content;
   private selection: Selection;
-  private renderController: RenderController;
   constructor(
     controller: IController,
-    renderController: RenderController,
-    canvas: HTMLCanvasElement,
-    content: Content = new Content(controller, renderController, 'content'),
-    selection: Selection = new Selection(
-      controller,
-      renderController,
-      'selection',
-    ),
+    ctx: CanvasRenderingContext2D,
+    content: Content = new Content(controller),
+    selection: Selection = new Selection(controller)
   ) {
     this.controller = controller;
-    this.renderController = renderController;
-    this.canvas = canvas;
-    const ctx = canvas.getContext('2d');
-    assert(!!ctx);
     this.ctx = ctx;
-    const size = dpr();
-    this.ctx.scale(size, size);
     this.content = content;
     this.selection = selection;
-    this.checkChange({ changeSet: new Set(['contentChange']) });
   }
-  checkChange = (params: EventType['change']) => {
-    this.render(params);
-    if (this.renderController.isChanged) {
-      this.renderController.isChanged = false;
-      this.render({
-        changeSet: new Set(['contentChange', 'selectionChange']),
-      });
-    }
-  };
 
-  getSelection(
+  private getSelection(
     activeCell: CanvasOverlayPosition,
+    drawSize: IWindowSize,
   ): CanvasOverlayPosition | null {
     const { controller } = this;
     const ranges = controller.getRanges();
@@ -62,29 +50,31 @@ export class MainCanvas {
     if (range.rowCount === range.colCount && range.rowCount === 1) {
       return null;
     }
-    const drawSize = this.renderController.getDrawSize();
+    const contentWidth = drawSize.width - COL_TITLE_WIDTH;
+    const contentHeight = drawSize.height - ROW_TITLE_HEIGHT;
     if (isSheet(range)) {
       return {
-        ...drawSize,
+        width: contentWidth,
+        height: contentHeight,
         left: activeCell.left,
         top: activeCell.top,
       };
     }
     if (isCol(range)) {
-      const width = this.renderController.getColWidth(range.col);
+      const width = controller.getColWidth(range.col);
       return {
         left: activeCell.left,
         top: activeCell.top,
         width: width,
-        height: drawSize.height,
+        height: contentHeight,
       };
     }
     if (isRow(range)) {
-      const height = this.renderController.getRowHeight(range.row);
+      const height = controller.getRowHeight(range.row);
       return {
         left: activeCell.left,
         top: activeCell.top,
-        width: drawSize.width,
+        width: contentWidth,
         height,
       };
     }
@@ -92,7 +82,7 @@ export class MainCanvas {
     const endCellRow = range.row + range.rowCount - 1;
     const endCellCol = range.col + range.colCount - 1;
     assert(endCellRow >= 0 && endCellCol >= 0);
-    const endCell = this.renderController.queryCell(endCellRow, endCellCol);
+    const endCell = controller.computeCellPosition(endCellRow, endCellCol);
     const width = endCell.left + endCell.width - activeCell.left;
     const height = endCell.top + endCell.height - activeCell.top;
     assert(width >= 0 && height >= 0);
@@ -103,26 +93,23 @@ export class MainCanvas {
       height: height,
     };
   }
-  render = ({ changeSet }: EventType['change']): void => {
-    if (this.renderController.isRendering) {
-      console.log('isRendering');
-      return;
-    }
-    this.renderController.isChanged = false;
-    this.renderController.isRendering = true;
-    const isContentChange = changeSet.has('contentChange');
-    const { width, height } = this.renderController.getCanvasSize();
-    resizeCanvas(this.canvas, width, height);
+  render = ({ changeSet, canvasSize }: RenderParams): void => {
+    console.log("isRendering");
+    const isContentChange = changeSet.has("contentChange");
+    const { width, height } = canvasSize;
     if (isContentChange) {
-      canvasLog('render content');
+      canvasLog("render content");
       this.content.render(width, height);
     }
     const [range] = this.controller.getRanges();
-    const activeCell = this.renderController.queryCell(range.row, range.col);
-    const selectAll = this.getSelection(activeCell);
+    const activeCell = this.controller.computeCellPosition(
+      range.row,
+      range.col
+    );
+    const selectAll = this.getSelection(activeCell, canvasSize);
 
     this.selection.render(width, height, selectAll);
-    canvasLog('render selection');
+    canvasLog("render selection");
 
     this.ctx.drawImage(this.content.canvas, 0, 0);
     this.ctx.drawImage(this.selection.canvas, 0, 0);
@@ -131,6 +118,5 @@ export class MainCanvas {
     this.ctx.lineWidth = dpr();
     const line = selectAll ? selectAll : activeCell;
     strokeRect(this.ctx, line.left, line.top, line.width, line.height);
-    this.renderController.isRendering = false;
   };
 }

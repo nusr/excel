@@ -97,6 +97,9 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     Select({
       data: fontFamilyList,
       value: fontFamily,
+      style: {
+        width: '140px',
+      },
       getItemStyle: getItemStyle,
       onChange: (value) => {
         setCellStyle({ fontFamily: String(value) });

@@ -105,7 +105,6 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
   sheetList: [],
   currentSheetId: '',
   isCellEditing: false,
-  editCellValue: '',
   activeCell: {
     value: '',
     row: 0,

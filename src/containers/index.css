@@ -4,17 +4,21 @@
   display: flex;
   flex-direction: column;
 }
+
 .canvas-container {
   flex: 1;
   height: 0;
 }
+
 .relative {
   position: relative;
 }
+
 .full {
   width: 100%;
   height: 100%;
 }
+
 .canvas-content {
   background-color: var(--white);
 }
@@ -52,12 +56,21 @@
   background-color: var(--white);
   user-select: none;
 }
+
 .formula-bar-editor-wrapper {
   border: 1px solid var(--gridStrokeColor);
   flex: 1;
   height: 21px;
   border-radius: 2px;
   background-color: var(--white);
+}
+
+.formula-bar-value {
+  padding: 0 4px;
+  display: none;
+}
+.formula-bar-value.show {
+  display: block;
 }
 
 .sheet-bar-wrapper {
@@ -68,17 +81,20 @@
   display: flex;
   align-items: center;
 }
+
 .sheet-bar-list {
   display: flex;
   align-items: center;
   height: 30px;
   line-height: 30px;
 }
+
 .sheet-bar-item {
   padding: 0 10px;
   border-left: 1px solid var(--gridStrokeColor);
   user-select: none;
 }
+
 .sheet-bar-item.active {
   background-color: var(--white);
   color: var(--primaryColor);
@@ -97,6 +113,7 @@
   box-sizing: border-box;
   z-index: 1;
 }
+
 .cell-editor {
   display: none;
   position: absolute;
@@ -107,6 +124,7 @@
   background-color: var(--white);
   box-sizing: border-box;
 }
+
 .context-menu {
   position: fixed;
   background-color: var(--white);
