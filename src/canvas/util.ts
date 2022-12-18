@@ -9,13 +9,13 @@ import {
   ERROR_SET,
   ERROR_FORMULA_COLOR,
   isTestEnv,
-} from "@/util";
-import { isEmpty, isNil } from "@/lodash";
-import { CellInfo, ErrorTypes, EWrap } from "@/types";
+} from '@/util';
+import { isEmpty, isNil } from '@/lodash';
+import { CellInfo, ErrorTypes, EWrap } from '@/types';
 
 const getStyle = (
-  key: "lineHeight" | "letterSpacing",
-  dom: HTMLElement = document.body
+  key: 'lineHeight' | 'letterSpacing',
+  dom: HTMLElement = document.body,
 ): number => {
   if (isTestEnv()) {
     return 20;
@@ -41,7 +41,7 @@ export function fillRect(
   x: number,
   y: number,
   width: number,
-  height: number
+  height: number,
 ): void {
   ctx.fillRect(npx(x), npx(y), npx(width), npx(height));
 }
@@ -50,7 +50,7 @@ export function strokeRect(
   x: number,
   y: number,
   width: number,
-  height: number
+  height: number,
 ): void {
   ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
 }
@@ -58,7 +58,7 @@ export function strokeRect(
 function getFontSizeHeight(ctx: CanvasRenderingContext2D, char: string) {
   const { actualBoundingBoxDescent, actualBoundingBoxAscent } = measureText(
     ctx,
-    char
+    char,
   );
   const result = actualBoundingBoxDescent + actualBoundingBoxAscent;
   return Math.ceil(result);
@@ -68,7 +68,7 @@ export function fillText(
   ctx: CanvasRenderingContext2D,
   text: string,
   x: number,
-  y: number
+  y: number,
 ) {
   ctx.fillText(text, npx(x), npx(y));
 }
@@ -79,13 +79,14 @@ export function fillWrapText(
   x: number,
   y: number,
   cellWidth: number,
-  lineHeight: number
+  lineHeight: number,
 ): number {
-  let line = "";
-  const textList = text.split("");
+  let line = '';
+  const textList = text.split('');
   let testWidth = 0;
   const realCellWidth = cellWidth * 2;
   let wrapHeight = lineHeight;
+  y += lineHeight / 2;
   for (let i = 0; i < textList.length; i++) {
     const char = textList[i];
     const { width } = measureText(ctx, char);
@@ -100,6 +101,9 @@ export function fillWrapText(
       line = line + char;
     }
   }
+  if (line) {
+    fillText(ctx, line, x, y);
+  }
   return wrapHeight;
 }
 
@@ -108,10 +112,10 @@ export function fillTexts(
   text: string,
   x: number,
   y: number,
-  cellWidth: number
+  cellWidth: number,
 ) {
-  let line = "";
-  const textList = text.split("");
+  let line = '';
+  const textList = text.split('');
   let testWidth = 0;
   const realCellWidth = cellWidth * 2;
   let textWidth = 0;
@@ -146,9 +150,9 @@ export function renderCell(
     top: number;
     width: number;
     height: number;
-  }
+  },
 ): IRenderCellResult {
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
   assert(!!ctx);
   const { style, value, left, top, width, height } = cellInfo;
   const isNum = isNumber(value);
@@ -157,10 +161,10 @@ export function renderCell(
   if (!isEmpty(style)) {
     const fontSize = npx(style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE);
     font = makeFont(
-      style?.isItalic ? "italic" : "normal",
-      style?.isBold ? "bold" : "500",
+      style?.isItalic ? 'italic' : 'normal',
+      style?.isBold ? 'bold' : '500',
       fontSize,
-      style?.fontFamily
+      style?.fontFamily,
     );
     fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
     if (style?.fillColor) {
@@ -172,25 +176,25 @@ export function renderCell(
   if (ERROR_SET.has(text as ErrorTypes)) {
     fillStyle = ERROR_FORMULA_COLOR;
   } else if (
-    typeof value === "boolean" ||
-    ["TRUE", "FALSE"].includes(text.toUpperCase())
+    typeof value === 'boolean' ||
+    ['TRUE', 'FALSE'].includes(text.toUpperCase())
   ) {
     text = text.toUpperCase();
   } else if (isNil(value)) {
-    text = "";
+    text = '';
   }
 
-  ctx.textAlign = isNum ? "right" : "left";
+  ctx.textAlign = isNum ? 'right' : 'left';
   ctx.font = font;
   ctx.fillStyle = fillStyle;
-  ctx.textBaseline = "middle";
+  ctx.textBaseline = 'middle';
   const x = left + (isNum ? width : 0);
   const result: IRenderCellResult = {};
   const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
   const textHeight = Math.max(
     fontSizeHeight,
-    getStyle("lineHeight", canvas),
-    getStyle("lineHeight")
+    getStyle('lineHeight', canvas),
+    getStyle('lineHeight'),
   );
   if (style?.wrapText === EWrap.AUTO_WRAP) {
     const y = top;
@@ -207,7 +211,7 @@ export function renderCell(
 
 export function drawLines(
   ctx: CanvasRenderingContext2D,
-  pointList: Array<[x: number, y: number]>
+  pointList: Array<[x: number, y: number]>,
 ): void {
   assert(pointList.length > 0);
   ctx.beginPath();
@@ -223,9 +227,14 @@ export function drawLines(
 type Point = {
   x: number;
   y: number;
-}
+};
 
-export function drawTriangle(ctx: CanvasRenderingContext2D, point1: Point, point2: Point, point3: Point,) {
+export function drawTriangle(
+  ctx: CanvasRenderingContext2D,
+  point1: Point,
+  point2: Point,
+  point3: Point,
+) {
   ctx.beginPath();
   ctx.moveTo(npx(point1.x), npx(point1.y));
   ctx.lineTo(npx(point2.x), npx(point2.y));

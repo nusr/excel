@@ -1,4 +1,4 @@
-import { isEmpty } from "@/lodash";
+import { isEmpty } from '@/lodash';
 import {
   thinLineWidth,
   npx,
@@ -8,21 +8,22 @@ import {
   COL_TITLE_WIDTH,
   ROW_TITLE_HEIGHT,
   resizeCanvas,
-} from "@/util";
-import { Base } from "./Base";
-import theme from "@/theme";
+} from '@/util';
+import { Base } from './Base';
+import theme from '@/theme';
 import {
   fillRect,
   fillText,
   drawLines,
   renderCell,
   drawTriangle,
-} from "./util";
-import { HEADER_STYLE } from "./constant";
+} from './util';
+import { HEADER_STYLE } from './constant';
 
 export class Content extends Base {
   render(width: number, height: number): void {
     resizeCanvas(this.canvas, width, height);
+    this.ctx.clearRect(0, 0, npx(width), npx(height));
     const contentWidth = width - COL_TITLE_WIDTH;
     const contentHeight = height - ROW_TITLE_HEIGHT;
     this.renderGrid(contentWidth, contentHeight);
@@ -84,7 +85,7 @@ export class Content extends Base {
       {
         x: COL_TITLE_WIDTH - offset,
         y: offset,
-      }
+      },
     );
 
     this.ctx.restore();
@@ -160,7 +161,7 @@ export class Content extends Base {
     this.fillRowText(
       i + 1,
       COL_TITLE_WIDTH,
-      y + controller.getRowHeight(i) / 2
+      y + controller.getRowHeight(i) / 2,
     );
     pointList.push([0, y], [COL_TITLE_WIDTH, y], [0, 0], [0, y]);
     drawLines(this.ctx, pointList);
@@ -189,7 +190,7 @@ export class Content extends Base {
       this.fillColText(
         intToColumnName(i),
         temp + colWidth / 2,
-        ROW_TITLE_HEIGHT
+        ROW_TITLE_HEIGHT,
       );
       x += colWidth;
       if (x > width) {
@@ -199,7 +200,7 @@ export class Content extends Base {
     this.fillColText(
       intToColumnName(i),
       x + controller.getColWidth(i) / 2,
-      ROW_TITLE_HEIGHT
+      ROW_TITLE_HEIGHT,
     );
     pointList.push([x, 0], [x, ROW_TITLE_HEIGHT], [0, 0], [x, 0]);
     drawLines(this.ctx, pointList);

@@ -1,6 +1,7 @@
 import {
   assert,
   dpr,
+  npx,
   isCol,
   isRow,
   isSheet,
@@ -113,6 +114,7 @@ export class MainCanvas {
     this.selection.render(width, height, selectAll);
     canvasLog('render selection');
 
+    this.ctx.clearRect(0, 0, npx(width), npx(height));
     this.ctx.drawImage(this.content.canvas, 0, 0);
     this.ctx.drawImage(this.selection.canvas, 0, 0);
 
