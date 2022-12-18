@@ -97,6 +97,9 @@ export class MainCanvas {
     };
   }
   render = ({ changeSet, canvasSize }: RenderParams): void => {
+    if (changeSet.size === 0) {
+      return;
+    }
     const isContentChange = changeSet.has('contentChange');
     const { width, height } = canvasSize;
     if (isContentChange) {

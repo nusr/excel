@@ -10,6 +10,7 @@ export const MAIN_CANVAS_ID = 'main-canvas-id';
 export const FORMULA_EDITOR_ID = 'formula-editor';
 export const DOUBLE_CLICK_TIME = 300;
 export const TEST_ID_KEY = 'data-test-id';
+export const SCROLL_SIZE = 30;
 export const DEBUG_COLOR_LIST = [
   '#0000CC',
   '#0000FF',
@@ -121,4 +122,8 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
   canUndo: false,
   fontFamilyList: [],
   contextMenuPosition: undefined,
+  scroll: {
+    left: 0,
+    top: 0,
+  },
 };

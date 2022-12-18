@@ -221,6 +221,8 @@ export class Model implements IModel {
       };
       sheetData[rowKey] = {};
     }
+    const sheetInfo = this.getSheetInfo();
+    sheetInfo.rowCount += count;
   }
   addCol(colIndex: number, count: number): void {
     const sheetData = this.worksheets[this.currentSheetId];
@@ -243,5 +245,8 @@ export class Model implements IModel {
         sheetData[rowKey][colKey] = {};
       }
     }
+
+    const sheetInfo = this.getSheetInfo();
+    sheetInfo.colCount += count;
   }
 }

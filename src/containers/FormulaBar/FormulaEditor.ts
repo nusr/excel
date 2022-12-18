@@ -63,7 +63,6 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
       setValue(event.currentTarget.value);
     },
     onkeydown: (event: any) => {
-      console.log('input keydown');
       inputDom.nextSibling!.textContent = event.currentTarget.value;
       if (event.key === 'Enter' || event.key === 'Tab') {
         setValue(event.currentTarget.value);

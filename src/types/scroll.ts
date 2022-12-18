@@ -1,6 +1,7 @@
+import type { ScrollValue, Coordinate } from './components';
+
 export interface IScrollValue {
-  getX(): number;
-  getY(): number;
-  getRowIndex(): number;
-  getColIndex(): number;
+  getScrollRowAndCol(): Coordinate;
+  setScroll(scrollLeft: number, scrollTop: number): void;
+  getScroll(): ScrollValue;
 }

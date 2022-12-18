@@ -135,3 +135,35 @@
   border: 1px solid var(--borderColor);
   border-radius: var(--borderRadius);
 }
+
+.vertical-scroll-bar {
+  position: absolute;
+  width: 6px;
+  right: 2px;
+  bottom: 0;
+  top: 0;
+  border-radius: var(--borderRadius);
+}
+.vertical-scroll-bar-content {
+  position: relative;
+  cursor: pointer;
+  border-radius: var(--borderRadius);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.horizontal-scroll-bar {
+  position: absolute;
+  height: 6px;
+  right: 0;
+  left: 0;
+  bottom: 2px;
+  border-radius: var(--borderRadius);
+}
+
+.horizontal-scroll-bar-content {
+  position: relative;
+  cursor: pointer;
+  border-radius: var(--borderRadius);
+  background-color: rgba(0, 0, 0, 0.2);
+  height: 100%;
+}

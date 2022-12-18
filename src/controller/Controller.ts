@@ -8,11 +8,11 @@ import {
   IController,
   IHooks,
   IModel,
-  IScrollValue,
   WorksheetType,
   IHistory,
   IWindowSize,
   CanvasOverlayPosition,
+  ScrollValue,
 } from '@/types';
 import {
   parseReference,
@@ -27,20 +27,29 @@ import {
 } from '@/util';
 
 export class Controller implements IController {
+  private scrollLeft = 0;
+  private scrollTop = 0;
   private model: IModel;
   private ranges: Array<Range> = [];
   private changeSet = new Set<ChangeEventType>();
   private hooks: IHooks = {
     modelChange() {},
+    getCanvasSize() {
+      return {
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0,
+        contentWidth: 0,
+        contentHeight: 0,
+      };
+    },
   };
-  private scroll: IScrollValue;
   private history: IHistory;
   private readonly rowMap: Map<number, number> = new Map([]);
   private readonly colMap: Map<number, number> = new Map([]);
-  isChanged = true;
-  constructor(model: IModel, scroll: IScrollValue, history: IHistory) {
+  constructor(model: IModel, history: IHistory) {
     this.model = model;
-    this.scroll = scroll;
     this.ranges = [
       new Range(
         DEFAULT_ACTIVE_CELL.row,
@@ -57,18 +66,6 @@ export class Controller implements IController {
   }
   getSheetList(): WorkBookJSON['workbook'] {
     return this.model.getSheetList();
-  }
-  getX(): number {
-    return this.scroll.getX();
-  }
-  getY(): number {
-    return this.scroll.getY();
-  }
-  getColIndex(): number {
-    return this.scroll.getColIndex();
-  }
-  getRowIndex(): number {
-    return this.scroll.getRowIndex();
   }
   getCellsContent(sheetId?: string | undefined): Coordinate[] {
     return this.model.getCellsContent(sheetId);
@@ -235,14 +232,14 @@ export class Controller implements IController {
   }
   setColWidth(col: number, width: number): void {
     this.colMap.set(col, width);
-    this.isChanged = true;
+    this.changeSet.add('contentChange');
   }
   getRowHeight(row: number): number {
     return this.rowMap.get(row) || CELL_HEIGHT;
   }
   setRowHeight(row: number, height: number) {
     this.rowMap.set(row, height);
-    this.isChanged = true;
+    this.changeSet.add('contentChange');
   }
   getCellSize(row: number, col: number): IWindowSize {
     return { width: this.getColWidth(col), height: this.getRowHeight(row) };
@@ -271,6 +268,39 @@ export class Controller implements IController {
   }
   addCol(colIndex: number, count: number): void {
     this.model.addCol(colIndex, count);
+    this.changeSet.add('contentChange');
+    this.emitChange();
+  }
+  getChangeSet(): Set<ChangeEventType> {
+    const result = this.changeSet;
+    this.changeSet = new Set<ChangeEventType>();
+    return result;
+  }
+
+  getScrollRowAndCol(): Coordinate {
+    const size = this.hooks.getCanvasSize();
+    const sheetInfo = this.getSheetInfo();
+    const rowRadio = this.scrollTop / size.contentHeight;
+    const colRadio = this.scrollLeft / size.contentWidth;
+    const row = Math.floor(rowRadio * sheetInfo.rowCount);
+    const col = Math.floor(colRadio * sheetInfo.colCount);
+    return {
+      row: Math.min(row, sheetInfo.rowCount - 1),
+      col: Math.min(col, sheetInfo.colCount - 1),
+    };
+  }
+  getScroll(): ScrollValue {
+    return {
+      top: this.scrollTop,
+      left: this.scrollLeft,
+    };
+  }
+  setScroll(scrollLeft: number, scrollTop: number): void {
+    if (scrollLeft === this.scrollLeft && scrollTop === this.scrollTop) {
+      return;
+    }
+    this.scrollLeft = scrollLeft;
+    this.scrollTop = scrollTop;
     this.changeSet.add('contentChange');
     this.emitChange();
   }

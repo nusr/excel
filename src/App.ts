@@ -15,7 +15,7 @@ export const App: SmartComponent = (state, controller) => {
     },
     ToolbarContainer(state, controller),
     FormulaBarContainer(state, controller),
-    CanvasContainer({}),
+    CanvasContainer(state, controller),
     SheetBarContainer(state, controller),
     ContextMenuContainer(state, controller),
   );

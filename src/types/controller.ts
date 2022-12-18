@@ -11,11 +11,22 @@ export enum EBorderLineType {
   DOTTED,
   DOUBLE,
 }
+
+export type CanvasSize = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+  contentWidth: number;
+  contentHeight: number;
+};
+
 export type IHooks = {
   modelChange: (val: Set<ChangeEventType>) => void;
+  getCanvasSize: () => CanvasSize;
 };
+
 export interface IController extends IScrollValue {
-  isChanged: boolean;
   getSheetInfo(sheetId?: string): WorksheetType;
   getCellsContent(sheetId?: string): Array<Coordinate>;
   getRanges(): IRange[];
@@ -53,4 +64,5 @@ export interface IController extends IScrollValue {
   computeCellPosition(row: number, col: number): CanvasOverlayPosition;
   addRow(rowIndex: number, count: number): void;
   addCol(colIndex: number, count: number): void;
+  getChangeSet(): Set<ChangeEventType>;
 }

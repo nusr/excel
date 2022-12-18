@@ -1,27 +1,16 @@
-import { StoreValue, IController, ChangeEventType } from './types';
-import { Controller, Scroll, History } from './controller';
+import { StoreValue, IController } from './types';
+import { Controller, History } from './controller';
 import { Model, MOCK_MODEL } from './model';
-import { MainCanvas } from './canvas';
+import { MainCanvas, registerEvents } from './canvas';
 import {
-  DOUBLE_CLICK_TIME,
+  COL_TITLE_WIDTH,
   FONT_FAMILY_LIST,
   isSupportFontFamily,
   MAIN_CANVAS_ID,
-  FORMULA_EDITOR_ID,
+  ROW_TITLE_HEIGHT,
 } from './util';
 import theme from './theme';
-import { COL_TITLE_WIDTH, ROW_TITLE_HEIGHT, resizeCanvas } from '@/util';
-
-interface IHitInfo {
-  width: number;
-  height: number;
-  x: number;
-  y: number;
-  row: number;
-  col: number;
-  pageX: number;
-  pageY: number;
-}
+import { resizeCanvas } from '@/util';
 
 export function initTheme(dom: HTMLElement) {
   const keyList = Object.keys(theme) as Array<keyof typeof theme>;
@@ -49,128 +38,10 @@ function getStoreValue(controller: IController, canvasTop: number) {
     sheetList: controller.getSheetList(),
     currentSheetId: controller.getCurrentSheetId(),
     cellPosition: cellPosition,
+    scroll: controller.getScroll(),
   };
   newStateValue.activeCell = cell;
   return newStateValue;
-}
-
-function getHitInfo(
-  event: MouseEvent,
-  canvas: HTMLCanvasElement,
-  controller: IController,
-): IHitInfo {
-  const { pageX, pageY } = event;
-  const size = canvas.getBoundingClientRect();
-  const x = pageX - size.left;
-  const y = pageY - size.top;
-  let resultX = COL_TITLE_WIDTH;
-  let resultY = ROW_TITLE_HEIGHT;
-  let row = 0;
-  let col = 0;
-  while (resultX + controller.getColWidth(col) <= x) {
-    resultX += controller.getColWidth(col);
-    col++;
-  }
-  while (resultY + controller.getRowHeight(row) <= y) {
-    resultY += controller.getRowHeight(row);
-    row++;
-  }
-  const cellSize = controller.getCellSize(row, col);
-  return { ...cellSize, row, col, pageY, pageX, x, y };
-}
-
-function addEvents(
-  stateValue: StoreValue,
-  controller: IController,
-  canvas: HTMLCanvasElement,
-): void {
-  let lastTimeStamp = 0;
-  const inputDom = document.querySelector<HTMLInputElement>(
-    `#${FORMULA_EDITOR_ID}`,
-  )!;
-  window.addEventListener('resize', () => {
-    controller.windowResize();
-  });
-  window.addEventListener('keydown', function (event) {
-    if (event.key === 'Enter') {
-      controller.setActiveCell(
-        stateValue.activeCell.row + 1,
-        stateValue.activeCell.col,
-        1,
-        1,
-      );
-    } else if (event.key === 'Tab') {
-      controller.setActiveCell(
-        stateValue.activeCell.row,
-        stateValue.activeCell.col + 1,
-        1,
-        1,
-      );
-    }
-    if (inputDom === event.target) {
-      return;
-    }
-    stateValue.isCellEditing = true;
-    inputDom.focus();
-  });
-
-  canvas.addEventListener('mousedown', (event) => {
-    stateValue.contextMenuPosition = undefined;
-    const canvasRect = canvas.getBoundingClientRect();
-    const { timeStamp, clientX, clientY } = event;
-    const x = clientX - canvasRect.left;
-    const y = clientY - canvasRect.top;
-    const position = getHitInfo(event, canvas, controller);
-    if (COL_TITLE_WIDTH > x && ROW_TITLE_HEIGHT > y) {
-      controller.selectAll(position.row, position.col);
-      return;
-    }
-    if (COL_TITLE_WIDTH > x && ROW_TITLE_HEIGHT <= y) {
-      controller.selectRow(position.row, position.col);
-      return;
-    }
-    if (COL_TITLE_WIDTH <= x && ROW_TITLE_HEIGHT > y) {
-      controller.selectCol(position.row, position.col);
-      return;
-    }
-    const activeCell = controller.getActiveCell();
-    const check =
-      activeCell.row >= 0 &&
-      activeCell.row === position.row &&
-      activeCell.col === position.col;
-    if (!check) {
-      // stateValue.isCellEditing = false;
-      controller.setActiveCell(position.row, position.col, 1, 1);
-    }
-    const delay = timeStamp - lastTimeStamp;
-    if (delay < DOUBLE_CLICK_TIME) {
-      stateValue.isCellEditing = true;
-    }
-    lastTimeStamp = timeStamp;
-  });
-
-  canvas.addEventListener('mousemove', (event) => {
-    const rect = canvas.getBoundingClientRect();
-    const { clientX, clientY } = event;
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-    const checkMove =
-      x > COL_TITLE_WIDTH && y > ROW_TITLE_HEIGHT && event.buttons === 1;
-    if (checkMove) {
-      const position = getHitInfo(event, canvas, controller);
-      controller.updateSelection(position.row, position.col);
-    }
-  });
-  canvas.addEventListener('contextmenu', (event) => {
-    event.preventDefault();
-    stateValue.contextMenuPosition = {
-      top: event.clientY,
-      left: event.clientX,
-      width: 100,
-      height: 100,
-    };
-    return false;
-  });
 }
 
 export function initCanvas(stateValue: StoreValue, controller: IController) {
@@ -179,8 +50,19 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
   )!;
   const ctx = canvas.getContext('2d')!;
   const mainCanvas = new MainCanvas(controller, ctx);
-  addEvents(stateValue, controller, canvas);
+  registerEvents(stateValue, controller, canvas);
   controller.setHooks({
+    getCanvasSize() {
+      const size = canvas.getBoundingClientRect();
+      return {
+        top: size.top,
+        left: size.left,
+        width: size.width,
+        height: size.height,
+        contentWidth: size.width - COL_TITLE_WIDTH,
+        contentHeight: size.height - ROW_TITLE_HEIGHT,
+      };
+    },
     modelChange: (changeSet) => {
       const canvasPosition = canvas.parentElement?.getBoundingClientRect();
       const canvasSize = {
@@ -191,19 +73,16 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
       Object.assign(stateValue, newStateValue);
       resizeCanvas(canvas, canvasSize.width, canvasSize.height);
       mainCanvas.render({ changeSet: changeSet, canvasSize });
-      if (controller.isChanged) {
-        controller.isChanged = false;
-        mainCanvas.render({
-          changeSet: new Set<ChangeEventType>(['contentChange']),
-          canvasSize,
-        });
-      }
+      mainCanvas.render({
+        changeSet: controller.getChangeSet(),
+        canvasSize,
+      });
     },
   });
   controller.fromJSON(MOCK_MODEL);
 }
 export function initController(): IController {
-  const controller = new Controller(new Model(), new Scroll(), new History());
+  const controller = new Controller(new Model(), new History());
   controller.addSheet();
   return controller;
 }

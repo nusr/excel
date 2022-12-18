@@ -18,6 +18,11 @@ export interface Coordinate {
 
 export type CellInfo = QueryCellResult & Coordinate;
 
+export type ScrollValue = {
+  left: number;
+  top: number;
+}
+
 export interface StoreValue {
   sheetList: WorkBookJSON['workbook'];
   currentSheetId: string;
@@ -28,4 +33,5 @@ export interface StoreValue {
   canUndo: boolean;
   fontFamilyList: OptionItem[];
   contextMenuPosition?: CanvasOverlayPosition;
+  scroll: ScrollValue;
 }

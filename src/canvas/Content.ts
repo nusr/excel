@@ -39,8 +39,12 @@ export class Content extends Base {
       return;
     }
     this.ctx.save();
+    const { row: rowIndex, col: colIndex } = controller.getScrollRowAndCol();
     for (const item of data) {
       const { row, col } = item;
+      if (row < rowIndex || col < colIndex) {
+        continue;
+      }
       const result = controller.computeCellPosition(row, col);
       const cellInfo = this.controller.getCell(item);
       const {
@@ -93,8 +97,7 @@ export class Content extends Base {
 
   private renderGrid(width: number, height: number): void {
     const { controller } = this;
-    const rowIndex = controller.getRowIndex();
-    const colIndex = controller.getColIndex();
+    const { row: rowIndex, col: colIndex } = controller.getScrollRowAndCol();
     const { rowCount, colCount } = this.controller.getSheetInfo();
     const lineWidth = thinLineWidth();
     this.ctx.save();
@@ -134,7 +137,7 @@ export class Content extends Base {
   }
   private renderRowsHeader(height: number): void {
     const { controller } = this;
-    const rowIndex = controller.getRowIndex();
+    const { row: rowIndex } = controller.getScrollRowAndCol();
 
     const { rowCount } = controller.getSheetInfo();
     this.ctx.save();
@@ -170,7 +173,7 @@ export class Content extends Base {
   private renderColsHeader(width: number): void {
     const { controller } = this;
 
-    const colIndex = controller.getColIndex();
+    const { col: colIndex } = controller.getScrollRowAndCol();
     const { colCount } = controller.getSheetInfo();
     const pointList: Array<[x: number, y: number]> = [];
     this.ctx.save();
