@@ -19,12 +19,9 @@
   font-weight: bold;
   box-sizing: border-box;
   cursor: pointer;
-  display: inline-block;
   border-radius: var(--borderRadius);
   border: 1px solid transparent;
-}
-.button-wrapper + .button-wrapper {
-  margin-left: var(--mediumPadding);
+  /* display: flex; */
 }
 
 .button-wrapper.circle {
@@ -104,6 +101,7 @@
   padding: 0 8px;
   height: 20px;
   line-height: 20px;
+  border-radius: var(--borderRadius);
 }
 .color-picker-trigger:hover,
 .color-picker-trigger.active {

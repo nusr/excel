@@ -73,6 +73,8 @@ export interface IModel {
   getSheetInfo(sheetId?: string): WorksheetType;
   setCellValues(value: string, ranges: IRange[]): void;
   getSheetList(): WorkBookJSON['workbook'];
+  addRow(rowIndex: number, count: number): void;
+  addCol(colIndex: number, count: number): void;
 }
 
 export interface IHistory {

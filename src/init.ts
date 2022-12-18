@@ -91,7 +91,25 @@ function addEvents(
   window.addEventListener('resize', () => {
     controller.windowResize();
   });
-  window.addEventListener('keydown', () => {
+  window.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') {
+      controller.setActiveCell(
+        stateValue.activeCell.row + 1,
+        stateValue.activeCell.col,
+        1,
+        1,
+      );
+    } else if (event.key === 'Tab') {
+      controller.setActiveCell(
+        stateValue.activeCell.row,
+        stateValue.activeCell.col + 1,
+        1,
+        1,
+      );
+    }
+    if (inputDom === event.target) {
+      return;
+    }
     stateValue.isCellEditing = true;
     inputDom.focus();
   });
@@ -145,7 +163,6 @@ function addEvents(
   });
   canvas.addEventListener('contextmenu', (event) => {
     event.preventDefault();
-    console.log(event);
     stateValue.contextMenuPosition = {
       top: event.clientY,
       left: event.clientX,

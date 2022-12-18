@@ -1,5 +1,3 @@
-import { h } from "@/react";
-
 export function dpr(data = window.devicePixelRatio): number {
   return Math.max(Math.floor(data || 1), 1);
 }

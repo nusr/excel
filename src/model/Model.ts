@@ -203,4 +203,45 @@ export class Model implements IModel {
     });
     return result.error ? result.error : result.result;
   }
+  addRow(rowIndex: number, count: number): void {
+    const sheetData = this.worksheets[this.currentSheetId];
+    if (isEmpty(sheetData)) {
+      return;
+    }
+    const rowKeys = Object.keys(sheetData);
+    for (let i = rowKeys.length - 1; i >= 0; i--) {
+      const rowKey = rowKeys[i];
+      const item = Number(rowKeys[i]);
+      if (item < rowIndex) {
+        continue;
+      }
+      const key = String(item + count);
+      sheetData[key] = {
+        ...sheetData[rowKey],
+      };
+      sheetData[rowKey] = {};
+    }
+  }
+  addCol(colIndex: number, count: number): void {
+    const sheetData = this.worksheets[this.currentSheetId];
+    if (isEmpty(sheetData)) {
+      return;
+    }
+    const rowKeys = Object.keys(sheetData);
+    for (const rowKey of rowKeys) {
+      const colKeys = Object.keys(sheetData[rowKey]);
+      for (let i = colKeys.length - 1; i >= 0; i--) {
+        const colKey = colKeys[i];
+        const col = Number(colKey);
+        if (col < colIndex) {
+          continue;
+        }
+        const key = String(col + count);
+        sheetData[rowKey][key] = {
+          ...sheetData[rowKey][colKey],
+        };
+        sheetData[rowKey][colKey] = {};
+      }
+    }
+  }
 }

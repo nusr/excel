@@ -108,9 +108,6 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     Select({
       data: FONT_SIZE_LIST,
       value: fontSize,
-      style: {
-        marginLeft: '8px',
-      },
       onChange: (value) => {
         setCellStyle({ fontSize: Number(value) });
       },
@@ -118,9 +115,6 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     ColorPicker(
       {
         color: fontColor,
-        style: {
-          marginLeft: '8px',
-        },
         onChange: (value) => {
           setCellStyle({ fontColor: value });
         },
@@ -132,9 +126,6 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
       {
         key: 'fill-color',
         color: fillColor,
-        style: {
-          marginLeft: '8px',
-        },
         onChange: (value) => {
           setCellStyle({ fillColor: value });
         },

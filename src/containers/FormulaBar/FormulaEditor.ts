@@ -36,7 +36,12 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
   const ref = (element: Element) => {
     inputDom = element as HTMLInputElement;
   };
-  let keyCode: string = '';
+
+  const setValue = (value: string) => {
+    controller.setCellValue(activeCell, value);
+    inputDom.value = '';
+    state.isCellEditing = false;
+  };
   return h('input', {
     title: 'editor',
     className: 'base-editor',
@@ -55,20 +60,13 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
       state.isCellEditing = true;
     },
     onblur: (event: any) => {
-      controller.setCellValue(activeCell, event.currentTarget.value);
-      inputDom.value = '';
-      if (event.currentTarget === inputDom) {
-        if (keyCode === 'Enter') {
-          controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
-        }
-      }
-      state.isCellEditing = false;
+      setValue(event.currentTarget.value);
     },
     onkeydown: (event: any) => {
+      console.log('input keydown');
       inputDom.nextSibling!.textContent = event.currentTarget.value;
-      if (event.key === 'Enter') {
-        keyCode = event.key;
-        inputDom.blur();
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        setValue(event.currentTarget.value);
       }
     },
   });

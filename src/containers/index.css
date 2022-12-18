@@ -34,6 +34,10 @@
   align-items: center;
 }
 
+.toolbar-wrapper > * {
+  margin-right: 8px;
+}
+
 .formula-bar-wrapper {
   width: 100%;
   box-sizing: border-box;
