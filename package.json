@@ -34,7 +34,5 @@
   "engines": {
     "node": ">=16"
   },
-  "dependencies": {
-    "@types/react": "^18.0.26"
-  }
+  "dependencies": {}
 }
