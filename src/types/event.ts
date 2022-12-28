@@ -1,5 +1,5 @@
-import { CellInfo } from "./components";
-export type ChangeEventType = "contentChange" | "selectionChange";
+import type { CanvasOverlayPosition } from './components';
+export type ChangeEventType = 'contentChange' | 'selectionChange';
 
 export type IWindowSize = {
   width: number;
@@ -7,8 +7,8 @@ export type IWindowSize = {
 };
 
 export type EventType = {
-  change: {
-    changeSet: Set<ChangeEventType>;
-    payload?: CellInfo;
-  };
+  changeSet: Set<ChangeEventType>;
+  width: number;
+  height: number;
+  selectAll?: CanvasOverlayPosition;
 };

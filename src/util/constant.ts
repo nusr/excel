@@ -1,11 +1,8 @@
 import type { ErrorTypes, StoreValue } from '@/types';
-import { CELL_WIDTH, CELL_HEIGHT } from './cell';
 export const SHEET_NAME_PREFIX = 'Sheet';
 export const STYLE_ID_PREFIX = 'style';
 export const DEFAULT_ROW_COUNT = 200;
 export const DEFAULT_COL_COUNT = 30;
-export const XLSX_MAX_COL_COUNT = 16384; // XFD
-export const XLSX_MAX_ROW_COUNT = 1048575; // XFD
 export const MAIN_CANVAS_ID = 'main-canvas-id';
 export const FORMULA_EDITOR_ID = 'formula-editor';
 export const DOUBLE_CLICK_TIME = 300;
@@ -115,8 +112,8 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
   cellPosition: {
     left: -999,
     top: -999,
-    width: CELL_WIDTH,
-    height: CELL_HEIGHT,
+    width: 0,
+    height: 0,
   },
   canRedo: false,
   canUndo: false,
@@ -125,5 +122,9 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
   scroll: {
     left: 0,
     top: 0,
+    row: 0,
+    col: 0,
+    scrollLeft: 0,
+    scrollTop: 0,
   },
 };

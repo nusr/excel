@@ -1,13 +1,12 @@
-import { StoreValue, IController } from './types';
+import { StoreValue, IController, ChangeEventType } from './types';
 import { Controller, History } from './controller';
 import { Model, MOCK_MODEL } from './model';
-import { MainCanvas, registerEvents } from './canvas';
+import { MainCanvas, registerEvents, Selection, Content } from './canvas';
 import {
-  COL_TITLE_WIDTH,
   FONT_FAMILY_LIST,
   isSupportFontFamily,
   MAIN_CANVAS_ID,
-  ROW_TITLE_HEIGHT,
+  createCanvas,
 } from './util';
 import theme from './theme';
 import { resizeCanvas } from '@/util';
@@ -48,21 +47,21 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
   const canvas = document.querySelector<HTMLCanvasElement>(
     `#${MAIN_CANVAS_ID}`,
   )!;
-  const ctx = canvas.getContext('2d')!;
-  const mainCanvas = new MainCanvas(controller, ctx);
-  registerEvents(stateValue, controller, canvas);
+  const content = new Content(controller, createCanvas());
+  const selection = new Selection(controller, createCanvas());
+  const mainCanvas = new MainCanvas(controller, canvas, content, selection);
+  const resize = () => {
+    const canvasPosition = canvas.parentElement!.getBoundingClientRect();
+    mainCanvas.resize(canvasPosition.width, canvasPosition.height);
+    mainCanvas.render({
+      width: canvasPosition.width,
+      height: canvasPosition.height,
+      changeSet: new Set<ChangeEventType>(['contentChange']),
+    });
+  };
+  resize();
+  registerEvents(stateValue, controller, canvas, resize);
   controller.setHooks({
-    getCanvasSize() {
-      const size = canvas.getBoundingClientRect();
-      return {
-        top: size.top,
-        left: size.left,
-        width: size.width,
-        height: size.height,
-        contentWidth: size.width - COL_TITLE_WIDTH,
-        contentHeight: size.height - ROW_TITLE_HEIGHT,
-      };
-    },
     modelChange: (changeSet) => {
       const canvasPosition = canvas.parentElement?.getBoundingClientRect();
       const canvasSize = {
@@ -72,10 +71,10 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
       const newStateValue = getStoreValue(controller, canvasPosition?.top || 0);
       Object.assign(stateValue, newStateValue);
       resizeCanvas(canvas, canvasSize.width, canvasSize.height);
-      mainCanvas.render({ changeSet: changeSet, canvasSize });
+      mainCanvas.render({ ...canvasSize, changeSet: changeSet });
       mainCanvas.render({
+        ...canvasSize,
         changeSet: controller.getChangeSet(),
-        canvasSize,
       });
     },
   });
@@ -83,6 +82,5 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
 }
 export function initController(): IController {
   const controller = new Controller(new Model(), new History());
-  controller.addSheet();
   return controller;
 }

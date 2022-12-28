@@ -19,8 +19,12 @@ export interface Coordinate {
 export type CellInfo = QueryCellResult & Coordinate;
 
 export type ScrollValue = {
-  left: number;
+  left: number; // 
   top: number;
+  row: number;
+  col: number;
+  scrollLeft: number;
+  scrollTop: number;
 }
 
 export interface StoreValue {
@@ -35,3 +39,5 @@ export interface StoreValue {
   contextMenuPosition?: CanvasOverlayPosition;
   scroll: ScrollValue;
 }
+
+export type Point = [x: number, y: number];

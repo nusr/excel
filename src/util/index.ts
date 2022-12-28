@@ -1,7 +1,6 @@
 export * from './style';
 export * from './dpr';
 export * from './assert';
-export * from './cell';
 export * from './util';
 export * from './convert';
 export * from './constant';

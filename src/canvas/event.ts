@@ -1,11 +1,6 @@
-import { StoreValue, IController } from '@/types';
-import {
-  COL_TITLE_WIDTH,
-  ROW_TITLE_HEIGHT,
-  FORMULA_EDITOR_ID,
-  DOUBLE_CLICK_TIME,
-  SCROLL_SIZE,
-} from '@/util';
+import { StoreValue, IController, ScrollValue } from '@/types';
+import { FORMULA_EDITOR_ID, DOUBLE_CLICK_TIME, SCROLL_SIZE } from '@/util';
+import { debounce } from '@/lodash';
 
 interface IHitInfo {
   width: number;
@@ -20,17 +15,19 @@ interface IHitInfo {
 
 function getHitInfo(
   event: MouseEvent,
-  canvas: HTMLCanvasElement,
   controller: IController,
-): IHitInfo {
+  canvasSize: DOMRect,
+  scroll: ScrollValue,
+): IHitInfo | null {
+  const sheetInfo = controller.getSheetInfo();
+  const headerSize = controller.getHeaderSize();
   const { pageX, pageY } = event;
-  const size = canvas.getBoundingClientRect();
-  const x = pageX - size.left;
-  const y = pageY - size.top;
-  let resultX = COL_TITLE_WIDTH;
-  let resultY = ROW_TITLE_HEIGHT;
-  let row = 0;
-  let col = 0;
+  const x = pageX - canvasSize.left;
+  const y = pageY - canvasSize.top;
+  let resultX = headerSize.width;
+  let resultY = headerSize.height;
+  let row = scroll.row;
+  let col = scroll.col;
   while (resultX + controller.getColWidth(col) <= x) {
     resultX += controller.getColWidth(col);
     col++;
@@ -39,21 +36,27 @@ function getHitInfo(
     resultY += controller.getRowHeight(row);
     row++;
   }
+  if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
+    return null;
+  }
   const cellSize = controller.getCellSize(row, col);
   return { ...cellSize, row, col, pageY, pageX, x, y };
 }
+
+const BOTTOM_BUFF = 100;
 
 export function registerEvents(
   stateValue: StoreValue,
   controller: IController,
   canvas: HTMLCanvasElement,
+  resizeWindow: () => void,
 ): void {
   let lastTimeStamp = 0;
   const inputDom = document.querySelector<HTMLInputElement>(
     `#${FORMULA_EDITOR_ID}`,
   )!;
   window.addEventListener('resize', () => {
-    controller.windowResize();
+    resizeWindow();
   });
   window.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
@@ -78,48 +81,88 @@ export function registerEvents(
     inputDom.focus();
   });
 
-  document.body.addEventListener('wheel', (event) => {
-    if (event.target !== canvas) {
-      return;
-    }
-    let scrollTop = stateValue.scroll.top;
-    let scrollLeft = stateValue.scroll.left;
-    const canvasRect = canvas.getBoundingClientRect();
-    if (event.deltaY > 0) {
-      scrollTop = stateValue.scroll.top + event.deltaY;
-      if (scrollTop < 0) {
-        scrollTop = 0;
-      } else if (scrollTop > canvasRect.height - SCROLL_SIZE) {
-        scrollTop = canvasRect.height - SCROLL_SIZE;
+  document.body.addEventListener(
+    'wheel',
+    debounce((event) => {
+      if (event.target !== canvas) {
+        return;
       }
-    }
-    if (event.deltaX > 0) {
-      scrollLeft = stateValue.scroll.left + event.deltaX;
-      if (scrollLeft < 0) {
-        scrollLeft = 0;
-      } else if (scrollLeft > canvasRect.width - SCROLL_SIZE) {
-        scrollLeft = canvasRect.width - SCROLL_SIZE;
+      const headerSize = controller.getHeaderSize();
+      const canvasRect = canvas.getBoundingClientRect();
+      const sheetInfo = controller.getSheetInfo();
+      const viewSize = controller.getViewSize();
+
+      const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
+      const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
+
+      const maxScrollHeight =
+        canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
+      const maxScrollWidth = canvasRect.width - headerSize.width - SCROLL_SIZE;
+      let top = stateValue.scroll.top + event.deltaY;
+      if (top < 0) {
+        top = 0;
+      } else if (top > maxHeight) {
+        top = maxHeight;
       }
-    }
-    controller.setScroll(scrollLeft, scrollTop);
-  });
+
+      let left = stateValue.scroll.left + event.deltaX;
+      if (left < 0) {
+        left = 0;
+      } else if (left > maxWidth) {
+        left = maxWidth;
+      }
+
+      let resultX = 0;
+      let resultY = 0;
+      let r = 0;
+      let c = 0;
+      while (resultX < left && c < sheetInfo.colCount) {
+        resultX += controller.getColWidth(c);
+        c++;
+      }
+      while (resultY < top && r < sheetInfo.rowCount) {
+        resultY += controller.getRowHeight(r);
+        r++;
+      }
+
+      const scrollTop = (top * maxScrollHeight) / maxHeight;
+      const scrollLeft = (left * maxScrollWidth) / maxWidth;
+      controller.setScroll({
+        top: top,
+        left: left,
+        row: r,
+        col: c,
+        scrollLeft,
+        scrollTop,
+      });
+    }),
+  );
 
   canvas.addEventListener('mousedown', (event) => {
+    const headerSize = controller.getHeaderSize();
     stateValue.contextMenuPosition = undefined;
     const canvasRect = canvas.getBoundingClientRect();
     const { timeStamp, clientX, clientY } = event;
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;
-    const position = getHitInfo(event, canvas, controller);
-    if (COL_TITLE_WIDTH > x && ROW_TITLE_HEIGHT > y) {
+    const position = getHitInfo(
+      event,
+      controller,
+      canvasRect,
+      stateValue.scroll,
+    );
+    if (!position) {
+      return;
+    }
+    if (headerSize.width > x && headerSize.height > y) {
       controller.selectAll(position.row, position.col);
       return;
     }
-    if (COL_TITLE_WIDTH > x && ROW_TITLE_HEIGHT <= y) {
+    if (headerSize.width > x && headerSize.height <= y) {
       controller.selectRow(position.row, position.col);
       return;
     }
-    if (COL_TITLE_WIDTH <= x && ROW_TITLE_HEIGHT > y) {
+    if (headerSize.width <= x && headerSize.height > y) {
       controller.selectCol(position.row, position.col);
       return;
     }
@@ -139,14 +182,18 @@ export function registerEvents(
   });
 
   canvas.addEventListener('mousemove', (event) => {
+    const headerSize = controller.getHeaderSize();
     const rect = canvas.getBoundingClientRect();
     const { clientX, clientY } = event;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     const checkMove =
-      x > COL_TITLE_WIDTH && y > ROW_TITLE_HEIGHT && event.buttons === 1;
+      x > headerSize.width && y > headerSize.height && event.buttons === 1;
     if (checkMove) {
-      const position = getHitInfo(event, canvas, controller);
+      const position = getHitInfo(event, controller, rect, stateValue.scroll);
+      if (!position) {
+        return;
+      }
       controller.updateSelection(position.row, position.col);
     }
   });
@@ -160,48 +207,4 @@ export function registerEvents(
     };
     return false;
   });
-}
-
-export function makeScroll(prop: 'scrollLeft' | 'scrollTop') {
-  return function scroll(
-    el: Element,
-    to: number,
-    cb: (err: Error | null, scroll: number) => void,
-  ) {
-    const start = Date.now();
-    const from = el[prop];
-    const duration = 350;
-    let cancelled = false;
-
-    return (
-      from === to
-        ? cb(new Error('Element already at target scroll position'), el[prop])
-        : requestAnimationFrame(animate),
-      cancel
-    );
-
-    function cancel() {
-      cancelled = true;
-    }
-
-    function animate() {
-      if (cancelled) return cb(new Error('Scroll cancelled'), el[prop]);
-
-      const now = Date.now();
-      const time = Math.min(1, (now - start) / duration);
-      const eased = inOutSine(time);
-
-      el[prop] = eased * (to - from) + from;
-
-      time < 1
-        ? requestAnimationFrame(animate)
-        : requestAnimationFrame(function () {
-            cb(null, el[prop]);
-          });
-    }
-  };
-}
-
-function inOutSine(n: number) {
-  return 0.5 * (1 - Math.cos(Math.PI * n));
 }

@@ -22,6 +22,9 @@ import {
 } from '@/util';
 import { parseFormula } from '@/parser';
 
+// const XLSX_MAX_COL_COUNT = 16384; // XFD
+// const XLSX_MAX_ROW_COUNT = 1048575; // XFD
+
 export class Model implements IModel {
   private currentSheetId = '';
   private workbook: WorkBookJSON['workbook'] = [];
@@ -229,6 +232,8 @@ export class Model implements IModel {
     if (isEmpty(sheetData)) {
       return;
     }
+    const sheetInfo = this.getSheetInfo();
+
     const rowKeys = Object.keys(sheetData);
     for (const rowKey of rowKeys) {
       const colKeys = Object.keys(sheetData[rowKey]);
@@ -246,7 +251,6 @@ export class Model implements IModel {
       }
     }
 
-    const sheetInfo = this.getSheetInfo();
     sheetInfo.colCount += count;
   }
 }

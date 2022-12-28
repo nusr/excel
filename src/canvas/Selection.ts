@@ -1,16 +1,29 @@
-import {
-  dpr,
-  npx,
-  COL_TITLE_WIDTH,
-  ROW_TITLE_HEIGHT,
-  resizeCanvas,
-} from '@/util';
+import { dpr, npx, resizeCanvas } from '@/util';
 import theme from '@/theme';
-import { Base } from './Base';
 import { fillRect, renderCell, drawLines } from './util';
-import type { CanvasOverlayPosition } from '@/types';
+import type {
+  CanvasOverlayPosition,
+  Point,
+  ContentView,
+  IController,
+  EventType,
+} from '@/types';
 
-export class Selection extends Base {
+export class Selection implements ContentView {
+  canvas: HTMLCanvasElement;
+  protected ctx: CanvasRenderingContext2D;
+  protected controller: IController;
+  constructor(controller: IController, canvas: HTMLCanvasElement) {
+    this.controller = controller;
+    this.canvas = canvas;
+    const ctx = this.canvas.getContext('2d')!;
+    this.ctx = ctx;
+    const size = dpr();
+    this.ctx.scale(size, size);
+  }
+  resize(width: number, height: number) {
+    resizeCanvas(this.canvas, width, height);
+  }
   private renderFillRect(fillStyle: string, data: CanvasOverlayPosition): void {
     this.ctx.fillStyle = fillStyle;
     this.ctx.lineWidth = dpr();
@@ -25,11 +38,12 @@ export class Selection extends Base {
   }
   private renderSelectedRange(): void {
     const { controller } = this;
-
+    const headerSize = controller.getHeaderSize();
     const ranges = controller.getRanges();
+    const scroll = controller.getScroll();
     const [range] = ranges;
     this.ctx.fillStyle = theme.selectionColor;
-    const pointList: Array<[x: number, y: number]> = [];
+    const pointList: Array<Point> = [];
     const top = controller.computeCellPosition(0, range.col);
     const left = controller.computeCellPosition(range.row, 0);
 
@@ -41,26 +55,26 @@ export class Selection extends Base {
     for (let r = range.row, end = range.row + range.rowCount; r < end; r++) {
       height += controller.getRowHeight(r);
     }
-    fillRect(this.ctx, top.left, 0, width, ROW_TITLE_HEIGHT);
-    fillRect(this.ctx, 0, left.top, COL_TITLE_WIDTH, height);
+    top.left -= scroll.left;
+    left.top -= scroll.top;
+    width -= scroll.left;
+    height -= scroll.top;
+    fillRect(this.ctx, top.left, 0, width, headerSize.height);
+    fillRect(this.ctx, 0, left.top, headerSize.width, height);
 
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
     pointList.push(
-      [top.left, ROW_TITLE_HEIGHT],
-      [top.left + width, ROW_TITLE_HEIGHT],
+      [top.left, headerSize.height],
+      [top.left + width, headerSize.height],
     );
     pointList.push(
-      [COL_TITLE_WIDTH, left.top],
-      [COL_TITLE_WIDTH, left.top + height],
+      [headerSize.width, left.top],
+      [headerSize.width, left.top + height],
     );
     drawLines(this.ctx, pointList);
   }
-  render(
-    width: number,
-    height: number,
-    selectAll: CanvasOverlayPosition | null,
-  ): void {
+  render({ width, height, selectAll }: EventType): void {
     resizeCanvas(this.canvas, width, height);
     const { controller } = this;
     this.renderSelectedRange();

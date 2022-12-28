@@ -34,7 +34,7 @@
   align-items: center;
 }
 
-.toolbar-wrapper > * {
+.toolbar-wrapper>* {
   margin-right: 8px;
 }
 
@@ -73,6 +73,7 @@
   padding: 0 4px;
   display: none;
 }
+
 .formula-bar-value.show {
   display: block;
 }
@@ -139,11 +140,15 @@
 .vertical-scroll-bar {
   position: absolute;
   width: 6px;
-  right: 2px;
+  right: 0;
   bottom: 0;
   top: 0;
-  border-radius: var(--borderRadius);
+  background-color: var(--white);
+  box-sizing: content-box;
+  padding: 0 3px;
+  border: 1px solid #ccc;
 }
+
 .vertical-scroll-bar-content {
   position: relative;
   cursor: pointer;
@@ -156,8 +161,11 @@
   height: 6px;
   right: 0;
   left: 0;
-  bottom: 2px;
-  border-radius: var(--borderRadius);
+  bottom: 0;
+  box-sizing: content-box;
+  padding: 3px 0;
+  border: 1px solid #ccc;
+  background-color: var(--white);
 }
 
 .horizontal-scroll-bar-content {
@@ -166,4 +174,4 @@
   border-radius: var(--borderRadius);
   background-color: rgba(0, 0, 0, 0.2);
   height: 100%;
-}
+}

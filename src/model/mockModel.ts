@@ -1,4 +1,4 @@
-import { WorkBookJSON, EWrap } from '@/types';
+import { WorkBookJSON } from '@/types';
 import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from '@/util';
 
 export const MOCK_MODEL: WorkBookJSON = {
@@ -83,10 +83,10 @@ export const MOCK_MODEL: WorkBookJSON = {
       fillColor: 'red',
     },
     '3': {
-      fontSize: 36,
+      // fontSize: 36,
     },
     4: {
-      wrapText: EWrap.AUTO_WRAP,
+      // wrapText: EWrap.AUTO_WRAP,
     },
   },
   mergeCells: ['D2:E3'],

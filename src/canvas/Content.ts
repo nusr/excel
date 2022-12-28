@@ -5,11 +5,8 @@ import {
   dpr,
   intToColumnName,
   isTestEnv,
-  COL_TITLE_WIDTH,
-  ROW_TITLE_HEIGHT,
   resizeCanvas,
 } from '@/util';
-import { Base } from './Base';
 import theme from '@/theme';
 import {
   fillRect,
@@ -19,33 +16,59 @@ import {
   drawTriangle,
 } from './util';
 import { HEADER_STYLE } from './constant';
+import type { Point, ContentView, IController, EventType } from '@/types';
 
-export class Content extends Base {
-  render(width: number, height: number): void {
+export class Content implements ContentView {
+  canvas: HTMLCanvasElement;
+  protected ctx: CanvasRenderingContext2D;
+  protected controller: IController;
+  constructor(controller: IController, canvas: HTMLCanvasElement) {
+    this.controller = controller;
+    this.canvas = canvas;
+    const ctx = this.canvas.getContext('2d')!;
+    this.ctx = ctx;
+    const size = dpr();
+    this.ctx.scale(size, size);
+  }
+  resize(width: number, height: number) {
     resizeCanvas(this.canvas, width, height);
+  }
+  private clear(width: number, height: number) {
     this.ctx.clearRect(0, 0, npx(width), npx(height));
-    const contentWidth = width - COL_TITLE_WIDTH;
-    const contentHeight = height - ROW_TITLE_HEIGHT;
+  }
+
+  render({ changeSet, width, height }: EventType): void {
+    if (!changeSet.has('contentChange')) {
+      return;
+    }
+    const headerSize = this.controller.getHeaderSize();
+    this.clear(width, height);
+    const contentWidth = width - headerSize.width;
+    const contentHeight = height - headerSize.height;
     this.renderGrid(contentWidth, contentHeight);
     this.renderRowsHeader(contentHeight);
     this.renderColsHeader(contentWidth);
     this.renderTriangle();
-    this.renderContent();
+    this.renderContent(width, height);
   }
-  private renderContent(): void {
+  private renderContent(width: number, height: number): void {
     const { controller } = this;
     const data = controller.getCellsContent();
     if (isEmpty(data)) {
       return;
     }
     this.ctx.save();
-    const { row: rowIndex, col: colIndex } = controller.getScrollRowAndCol();
+    const { row: rowIndex, col: colIndex } = controller.getScroll();
     for (const item of data) {
       const { row, col } = item;
       if (row < rowIndex || col < colIndex) {
         continue;
       }
       const result = controller.computeCellPosition(row, col);
+      if (result.top > height || result.left > width) {
+        continue;
+      }
+
       const cellInfo = this.controller.getCell(item);
       const {
         wrapHeight = 0,
@@ -55,12 +78,12 @@ export class Content extends Base {
         ...cellInfo,
         ...result,
       });
-      const height = Math.max(wrapHeight, fontSizeHeight);
-      if (height > result.height) {
-        controller.setRowHeight(row, height);
+      const t = Math.max(wrapHeight, fontSizeHeight);
+      if (t > result.height) {
+        controller.setRowHeight(row, t);
       }
       if (textWidth > result.width) {
-        controller.setRowHeight(col, textWidth);
+        controller.setColWidth(col, textWidth);
       }
     }
     this.ctx.restore();
@@ -69,27 +92,18 @@ export class Content extends Base {
     if (isTestEnv()) {
       return;
     }
-
+    const headerSize = this.controller.getHeaderSize();
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
 
-    fillRect(this.ctx, 0, 0, COL_TITLE_WIDTH, ROW_TITLE_HEIGHT);
+    fillRect(this.ctx, 0, 0, headerSize.width, headerSize.height);
     this.ctx.fillStyle = theme.triangleFillColor;
     const offset = 2;
     drawTriangle(
       this.ctx,
-      {
-        x: COL_TITLE_WIDTH / 2 - offset,
-        y: ROW_TITLE_HEIGHT - offset,
-      },
-      {
-        x: COL_TITLE_WIDTH - offset,
-        y: ROW_TITLE_HEIGHT - offset,
-      },
-      {
-        x: COL_TITLE_WIDTH - offset,
-        y: offset,
-      },
+      [headerSize.width / 2 - offset, headerSize.height - offset],
+      [headerSize.width - offset, headerSize.height - offset],
+      [headerSize.width - offset, offset],
     );
 
     this.ctx.restore();
@@ -97,32 +111,42 @@ export class Content extends Base {
 
   private renderGrid(width: number, height: number): void {
     const { controller } = this;
-    const { row: rowIndex, col: colIndex } = controller.getScrollRowAndCol();
+    const headerSize = controller.getHeaderSize();
+    const { row: rowIndex, col: colIndex } = controller.getScroll();
     const { rowCount, colCount } = this.controller.getSheetInfo();
     const lineWidth = thinLineWidth();
     this.ctx.save();
     this.ctx.fillStyle = theme.white;
     this.ctx.lineWidth = lineWidth;
     this.ctx.strokeStyle = theme.gridStrokeColor;
-    this.ctx.translate(npx(COL_TITLE_WIDTH), npx(ROW_TITLE_HEIGHT));
-    const pointList: Array<[x: number, y: number]> = [];
+    this.ctx.translate(npx(headerSize.width), npx(headerSize.height));
+    const pointList: Array<Point> = [];
     let y = 0;
     let x = 0;
-    for (let i = rowIndex; i <= rowCount; i++) {
-      pointList.push([0, y], [width, y]);
+    let maxX = 0;
+    for (let i = colIndex; i < colCount; i++) {
+      maxX += controller.getColWidth(i);
+      if (maxX > width) {
+        break;
+      }
+    }
+    const realWidth = Math.min(maxX, width);
+    for (let i = rowIndex; i < rowCount; i++) {
+      pointList.push([0, y], [realWidth, y]);
       y += controller.getRowHeight(i);
       if (y > height) {
         break;
       }
     }
-    for (let i = colIndex; i <= colCount; i++) {
+    for (let i = colIndex; i < colCount; i++) {
       pointList.push([x, 0], [x, y]);
       x += controller.getColWidth(i);
-      if (x > width) {
+      if (x > realWidth) {
         break;
       }
     }
-    pointList.push([0, height], [width, height], [width, 0], [width, height]);
+    pointList.push([0, y], [x, y]);
+    pointList.push([x, 0], [x, y]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
   }
@@ -137,15 +161,15 @@ export class Content extends Base {
   }
   private renderRowsHeader(height: number): void {
     const { controller } = this;
-    const { row: rowIndex } = controller.getScrollRowAndCol();
-
+    const { row: rowIndex } = controller.getScroll();
+    const headerSize = controller.getHeaderSize();
     const { rowCount } = controller.getSheetInfo();
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
-    fillRect(this.ctx, 0, ROW_TITLE_HEIGHT, COL_TITLE_WIDTH, height);
+    fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
     Object.assign(this.ctx, HEADER_STYLE);
-    const pointList: Array<[x: number, y: number]> = [];
-    let y = ROW_TITLE_HEIGHT;
+    const pointList: Array<Point> = [];
+    let y = headerSize.height;
     let i = rowIndex;
 
     for (; i < rowCount; i++) {
@@ -154,34 +178,31 @@ export class Content extends Base {
       if (i === rowIndex) {
         temp += thinLineWidth() / 2;
       }
-      pointList.push([0, temp], [COL_TITLE_WIDTH, temp]);
-      this.fillRowText(i + 1, COL_TITLE_WIDTH, temp + rowHeight / 2);
+      pointList.push([0, temp], [headerSize.width, temp]);
+      this.fillRowText(i + 1, headerSize.width, temp + rowHeight / 2);
       y += rowHeight;
       if (y > height) {
         break;
       }
     }
-    this.fillRowText(
-      i + 1,
-      COL_TITLE_WIDTH,
-      y + controller.getRowHeight(i) / 2,
-    );
-    pointList.push([0, y], [COL_TITLE_WIDTH, y], [0, 0], [0, y]);
+    pointList.push([0, y], [headerSize.width, y]);
+    pointList.push([0, 0], [0, y]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
   }
   private renderColsHeader(width: number): void {
     const { controller } = this;
 
-    const { col: colIndex } = controller.getScrollRowAndCol();
+    const { col: colIndex } = controller.getScroll();
+    const headerSize = controller.getHeaderSize();
     const { colCount } = controller.getSheetInfo();
-    const pointList: Array<[x: number, y: number]> = [];
+    const pointList: Array<Point> = [];
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
-    fillRect(this.ctx, COL_TITLE_WIDTH, 0, width, ROW_TITLE_HEIGHT);
+    fillRect(this.ctx, headerSize.width, 0, width, headerSize.height);
     Object.assign(this.ctx, HEADER_STYLE);
 
-    let x = COL_TITLE_WIDTH;
+    let x = headerSize.width;
     let i = colIndex;
     for (; i < colCount; i++) {
       const colWidth = controller.getColWidth(i);
@@ -189,23 +210,19 @@ export class Content extends Base {
       if (i === colIndex) {
         temp += thinLineWidth() / 2;
       }
-      pointList.push([temp, 0], [temp, ROW_TITLE_HEIGHT]);
+      pointList.push([temp, 0], [temp, headerSize.height]);
       this.fillColText(
         intToColumnName(i),
         temp + colWidth / 2,
-        ROW_TITLE_HEIGHT,
+        headerSize.height,
       );
       x += colWidth;
       if (x > width) {
         break;
       }
     }
-    this.fillColText(
-      intToColumnName(i),
-      x + controller.getColWidth(i) / 2,
-      ROW_TITLE_HEIGHT,
-    );
-    pointList.push([x, 0], [x, ROW_TITLE_HEIGHT], [0, 0], [x, 0]);
+    pointList.push([x, 0], [x, headerSize.height]);
+    pointList.push([0, 0], [x, 0]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
   }

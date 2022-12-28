@@ -5,38 +5,34 @@ import {
   isCol,
   isRow,
   isSheet,
-  canvasLog,
-  COL_TITLE_WIDTH,
-  ROW_TITLE_HEIGHT,
+  resizeCanvas,
 } from '@/util';
-import { Content } from './Content';
 import {
   CanvasOverlayPosition,
   EventType,
   IController,
   IWindowSize,
+  BaseView,
+  ContentView,
 } from '@/types';
 import theme from '@/theme';
-import { Selection } from './Selection';
 import { strokeRect } from './util';
 
-type RenderParams = EventType['change'] & {
-  canvasSize: IWindowSize;
-};
-
-export class MainCanvas {
+export class MainCanvas implements BaseView {
   private ctx: CanvasRenderingContext2D;
   private controller: IController;
-  private content: Content;
-  private selection: Selection;
+  private content: ContentView;
+  private selection: ContentView;
+  private canvas: HTMLCanvasElement;
   constructor(
     controller: IController,
-    ctx: CanvasRenderingContext2D,
-    content: Content = new Content(controller),
-    selection: Selection = new Selection(controller),
+    canvas: HTMLCanvasElement,
+    content: ContentView,
+    selection: ContentView,
   ) {
     this.controller = controller;
-    this.ctx = ctx;
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d')!;
     this.content = content;
     this.selection = selection;
     const size = dpr();
@@ -46,15 +42,16 @@ export class MainCanvas {
   private getSelection(
     activeCell: CanvasOverlayPosition,
     drawSize: IWindowSize,
-  ): CanvasOverlayPosition | null {
+  ): CanvasOverlayPosition | undefined {
     const { controller } = this;
     const ranges = controller.getRanges();
     const [range] = ranges;
     if (range.rowCount === range.colCount && range.rowCount === 1) {
-      return null;
+      return undefined;
     }
-    const contentWidth = drawSize.width - COL_TITLE_WIDTH;
-    const contentHeight = drawSize.height - ROW_TITLE_HEIGHT;
+    const headerSize = controller.getHeaderSize();
+    const contentWidth = drawSize.width - headerSize.width;
+    const contentHeight = drawSize.height - headerSize.height;
     if (isSheet(range)) {
       return {
         width: contentWidth,
@@ -96,27 +93,31 @@ export class MainCanvas {
       height: height,
     };
   }
-  render = ({ changeSet, canvasSize }: RenderParams): void => {
+  resize(width: number, height: number) {
+    resizeCanvas(this.canvas, width, height);
+    this.content.resize(width, height);
+    this.selection.resize(width, height);
+  }
+  private clear(width: number, height: number) {
+    this.ctx.clearRect(0, 0, npx(width), npx(height));
+  }
+  render = (params: EventType): void => {
+    const { changeSet, width, height } = params;
     if (changeSet.size === 0) {
       return;
-    }
-    const isContentChange = changeSet.has('contentChange');
-    const { width, height } = canvasSize;
-    if (isContentChange) {
-      canvasLog('render content');
-      this.content.render(width, height);
     }
     const [range] = this.controller.getRanges();
     const activeCell = this.controller.computeCellPosition(
       range.row,
       range.col,
     );
-    const selectAll = this.getSelection(activeCell, canvasSize);
-
-    this.selection.render(width, height, selectAll);
-    canvasLog('render selection');
-
-    this.ctx.clearRect(0, 0, npx(width), npx(height));
+    const selectAll = this.getSelection(activeCell, { width, height });
+    this.content.render(params);
+    this.selection.render({
+      ...params,
+      selectAll: selectAll,
+    });
+    this.clear(width, height);
     this.ctx.drawImage(this.content.canvas, 0, 0);
     this.ctx.drawImage(this.selection.canvas, 0, 0);
 

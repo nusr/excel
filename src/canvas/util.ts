@@ -10,8 +10,8 @@ import {
   ERROR_FORMULA_COLOR,
   isTestEnv,
 } from '@/util';
-import { isEmpty, isNil } from '@/lodash';
-import { CellInfo, ErrorTypes, EWrap } from '@/types';
+import { isEmpty } from '@/lodash';
+import { CellInfo, ErrorTypes, EWrap, Point } from '@/types';
 
 const getStyle = (
   key: 'lineHeight' | 'letterSpacing',
@@ -180,7 +180,7 @@ export function renderCell(
     ['TRUE', 'FALSE'].includes(text.toUpperCase())
   ) {
     text = text.toUpperCase();
-  } else if (isNil(value)) {
+  } else if (value === undefined || value === null) {
     text = '';
   }
 
@@ -211,7 +211,7 @@ export function renderCell(
 
 export function drawLines(
   ctx: CanvasRenderingContext2D,
-  pointList: Array<[x: number, y: number]>,
+  pointList: Array<Point>,
 ): void {
   assert(pointList.length > 0);
   ctx.beginPath();
@@ -224,11 +224,6 @@ export function drawLines(
   ctx.stroke();
 }
 
-type Point = {
-  x: number;
-  y: number;
-};
-
 export function drawTriangle(
   ctx: CanvasRenderingContext2D,
   point1: Point,
@@ -236,8 +231,10 @@ export function drawTriangle(
   point3: Point,
 ) {
   ctx.beginPath();
-  ctx.moveTo(npx(point1.x), npx(point1.y));
-  ctx.lineTo(npx(point2.x), npx(point2.y));
-  ctx.lineTo(npx(point3.x), npx(point3.y));
+  ctx.moveTo(npx(point1[0]), npx(point1[1]));
+  ctx.lineTo(npx(point2[0]), npx(point2[1]));
+  ctx.lineTo(npx(point3[0]), npx(point3[1]));
   ctx.fill();
 }
+
+

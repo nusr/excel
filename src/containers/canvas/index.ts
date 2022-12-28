@@ -1,12 +1,8 @@
 import { h, SmartComponent } from '@/react';
-import {
-  MAIN_CANVAS_ID,
-  SCROLL_SIZE,
-  ROW_TITLE_HEIGHT,
-  COL_TITLE_WIDTH,
-} from '@/util';
+import { MAIN_CANVAS_ID, SCROLL_SIZE } from '@/util';
 
-export const CanvasContainer: SmartComponent = (state) => {
+export const CanvasContainer: SmartComponent = (state, controller) => {
+  const headerSize = controller.getHeaderSize();
   return h(
     'div',
     {
@@ -21,14 +17,14 @@ export const CanvasContainer: SmartComponent = (state) => {
       {
         className: 'vertical-scroll-bar',
         style: {
-          top: ROW_TITLE_HEIGHT,
+          top: headerSize.height,
         },
       },
       h('div', {
         className: 'vertical-scroll-bar-content',
         style: {
           height: SCROLL_SIZE,
-          transform: `translateY(${state.scroll.top}px)`,
+          transform: `translateY(${state.scroll.scrollTop}px)`,
         },
       }),
     ),
@@ -37,14 +33,14 @@ export const CanvasContainer: SmartComponent = (state) => {
       {
         className: 'horizontal-scroll-bar',
         style: {
-          left: COL_TITLE_WIDTH,
+          left: headerSize.height,
         },
       },
       h('div', {
         className: 'horizontal-scroll-bar-content',
         style: {
           width: SCROLL_SIZE,
-          transform: `translateX(${state.scroll.left}px)`,
+          transform: `translateX(${state.scroll.scrollLeft}px)`,
         },
       }),
     ),

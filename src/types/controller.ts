@@ -23,10 +23,11 @@ export type CanvasSize = {
 
 export type IHooks = {
   modelChange: (val: Set<ChangeEventType>) => void;
-  getCanvasSize: () => CanvasSize;
 };
 
 export interface IController extends IScrollValue {
+  getViewSize(): IWindowSize;
+  getHeaderSize(): IWindowSize;
   getSheetInfo(sheetId?: string): WorksheetType;
   getCellsContent(sheetId?: string): Array<Coordinate>;
   getRanges(): IRange[];
@@ -47,7 +48,6 @@ export interface IController extends IScrollValue {
   fromJSON(json: WorkBookJSON): void;
   toJSON(): WorkBookJSON;
   updateSelection(row: number, col: number): void;
-  windowResize(): void;
   setCellStyle(style: Partial<StyleType>, ranges?: IRange[]): void;
   setCellValue(data: Coordinate, value: string): void;
   getCell(data: Coordinate): CellInfo;
