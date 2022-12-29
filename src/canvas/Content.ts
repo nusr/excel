@@ -1,4 +1,4 @@
-import { isEmpty } from '@/lodash';
+import { isEmpty } from "@/lodash";
 import {
   thinLineWidth,
   npx,
@@ -6,43 +6,68 @@ import {
   intToColumnName,
   isTestEnv,
   resizeCanvas,
-} from '@/util';
-import theme from '@/theme';
+} from "@/util";
+import theme from "@/theme";
 import {
   fillRect,
   fillText,
   drawLines,
   renderCell,
   drawTriangle,
-} from './util';
-import { HEADER_STYLE } from './constant';
-import type { Point, ContentView, IController, EventType } from '@/types';
+  getStyle,
+} from "./util";
+import { HEADER_STYLE } from "./constant";
+import type {
+  Point,
+  ContentView,
+  IController,
+  EventType,
+  IWindowSize,
+} from "@/types";
 
 export class Content implements ContentView {
-  canvas: HTMLCanvasElement;
-  protected ctx: CanvasRenderingContext2D;
-  protected controller: IController;
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private controller: IController;
+  private canvasSize: IWindowSize = {
+    width: 0,
+    height: 0,
+  };
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
-    const ctx = this.canvas.getContext('2d')!;
+    const ctx = this.canvas.getContext("2d")!;
     this.ctx = ctx;
     const size = dpr();
     this.ctx.scale(size, size);
   }
+  getCanvas() {
+    return this.canvas;
+  }
   resize(width: number, height: number) {
+    this.canvasSize = {
+      width,
+      height,
+    };
     resizeCanvas(this.canvas, width, height);
   }
-  private clear(width: number, height: number) {
-    this.ctx.clearRect(0, 0, npx(width), npx(height));
+
+  private clear() {
+    this.ctx.clearRect(
+      0,
+      0,
+      npx(this.canvasSize.width),
+      npx(this.canvasSize.height)
+    );
   }
 
-  render({ changeSet, width, height }: EventType): void {
-    if (!changeSet.has('contentChange')) {
+  render({ changeSet }: EventType): void {
+    const { width, height } = this.canvasSize;
+    if (!changeSet.has("contentChange")) {
       return;
     }
     const headerSize = this.controller.getHeaderSize();
-    this.clear(width, height);
+    this.clear();
     const contentWidth = width - headerSize.width;
     const contentHeight = height - headerSize.height;
     this.renderGrid(contentWidth, contentHeight);
@@ -74,10 +99,14 @@ export class Content implements ContentView {
         wrapHeight = 0,
         fontSizeHeight = 0,
         textWidth = 0,
-      } = renderCell(this.canvas, {
-        ...cellInfo,
-        ...result,
-      });
+      } = renderCell(
+        this.ctx,
+        {
+          ...cellInfo,
+          ...result,
+        },
+        getStyle("lineHeight", this.canvas)
+      );
       const t = Math.max(wrapHeight, fontSizeHeight);
       if (t > result.height) {
         controller.setRowHeight(row, t);
@@ -103,7 +132,7 @@ export class Content implements ContentView {
       this.ctx,
       [headerSize.width / 2 - offset, headerSize.height - offset],
       [headerSize.width - offset, headerSize.height - offset],
-      [headerSize.width - offset, offset],
+      [headerSize.width - offset, offset]
     );
 
     this.ctx.restore();
@@ -214,7 +243,7 @@ export class Content implements ContentView {
       this.fillColText(
         intToColumnName(i),
         temp + colWidth / 2,
-        headerSize.height,
+        headerSize.height
       );
       x += colWidth;
       if (x > width) {

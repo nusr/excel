@@ -17,8 +17,8 @@ function getHitInfo(
   event: MouseEvent,
   controller: IController,
   canvasSize: DOMRect,
-  scroll: ScrollValue,
 ): IHitInfo | null {
+  const scroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo();
   const headerSize = controller.getHeaderSize();
   const { pageX, pageY } = event;
@@ -91,21 +91,23 @@ export function registerEvents(
       const canvasRect = canvas.getBoundingClientRect();
       const sheetInfo = controller.getSheetInfo();
       const viewSize = controller.getViewSize();
+      const oldScroll = controller.getScroll();
 
       const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
       const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
 
       const maxScrollHeight =
         canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
-      const maxScrollWidth = canvasRect.width - headerSize.width - SCROLL_SIZE;
-      let top = stateValue.scroll.top + event.deltaY;
+      const maxScrollWidth =
+        canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
+      let top = oldScroll.top + event.deltaY;
       if (top < 0) {
         top = 0;
       } else if (top > maxHeight) {
         top = maxHeight;
       }
 
-      let left = stateValue.scroll.left + event.deltaX;
+      let left = oldScroll.left + event.deltaX;
       if (left < 0) {
         left = 0;
       } else if (left > maxWidth) {
@@ -145,17 +147,12 @@ export function registerEvents(
     const { timeStamp, clientX, clientY } = event;
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;
-    const position = getHitInfo(
-      event,
-      controller,
-      canvasRect,
-      stateValue.scroll,
-    );
+    const position = getHitInfo(event, controller, canvasRect);
     if (!position) {
       return;
     }
     if (headerSize.width > x && headerSize.height > y) {
-      controller.selectAll(position.row, position.col);
+      controller.selectAll(0, 0);
       return;
     }
     if (headerSize.width > x && headerSize.height <= y) {
@@ -190,7 +187,7 @@ export function registerEvents(
     const checkMove =
       x > headerSize.width && y > headerSize.height && event.buttons === 1;
     if (checkMove) {
-      const position = getHitInfo(event, controller, rect, stateValue.scroll);
+      const position = getHitInfo(event, controller, rect);
       if (!position) {
         return;
       }

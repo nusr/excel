@@ -22,15 +22,17 @@ const CELL_WIDTH = 68;
 const ROW_TITLE_HEIGHT = 20;
 const COL_TITLE_WIDTH = 34;
 
+const defaultScrollValue: ScrollValue = {
+  top: 0,
+  left: 0,
+  row: 0,
+  col: 0,
+  scrollLeft: 0,
+  scrollTop: 0,
+};
+
 export class Controller implements IController {
-  private scrollValue: ScrollValue = {
-    top: 0,
-    left: 0,
-    row: 0,
-    col: 0,
-    scrollLeft: 0,
-    scrollTop: 0,
-  };
+  private scrollValue: Record<string, ScrollValue> = {};
   private model: IModel;
   private ranges: Array<Range> = [];
   private changeSet = new Set<ChangeEventType>();
@@ -56,8 +58,6 @@ export class Controller implements IController {
       ),
     ];
     this.history = history;
-    this.addSheet();
-    this.computeViewSize();
   }
   getCurrentSheetId(): string {
     return this.model.getCurrentSheetId();
@@ -122,10 +122,12 @@ export class Controller implements IController {
     this.model.setCurrentSheetId(id);
     this.setActiveCell();
     this.changeSet.add('contentChange');
+    this.computeViewSize();
     this.emitChange();
   }
   addSheet(): void {
     this.model.addSheet();
+    this.computeViewSize();
     this.model.setActiveCell(0, 0);
     this.setScroll({
       top: 0,
@@ -275,7 +277,7 @@ export class Controller implements IController {
   }
   computeCellPosition(row: number, col: number): CanvasOverlayPosition {
     const size = this.getHeaderSize();
-    const scroll = this.scrollValue;
+    const scroll = this.getScroll();
     let resultX = size.width;
     let resultY = size.height;
     let r = scroll.row;
@@ -309,14 +311,15 @@ export class Controller implements IController {
   }
 
   getScroll(): ScrollValue {
-    return {
-      ...this.scrollValue,
-    };
+    const sheetId = this.model.getCurrentSheetId()
+    const result = this.scrollValue[sheetId] || defaultScrollValue;
+    return result;
   }
   setScroll(data: ScrollValue): void {
-    this.scrollValue = {
-      ...data,
-    };
+    const sheetId = this.model.getCurrentSheetId()
+    this.scrollValue[sheetId] = {
+      ...data
+    }
     this.changeSet.add('contentChange');
     this.emitChange();
   }

@@ -147,6 +147,7 @@
   box-sizing: content-box;
   padding: 0 3px;
   border: 1px solid #ccc;
+  border-top-color: var(--white);
 }
 
 .vertical-scroll-bar-content {
@@ -165,6 +166,7 @@
   box-sizing: content-box;
   padding: 3px 0;
   border: 1px solid #ccc;
+  border-left-color: var(--white);
   background-color: var(--white);
 }
 
@@ -174,4 +176,8 @@
   border-radius: var(--borderRadius);
   background-color: rgba(0, 0, 0, 0.2);
   height: 100%;
-}
+}
+
+.sheet-bar-add {
+  margin-left: var(--mediumPadding);
+}

@@ -13,7 +13,7 @@ import {
 import { isEmpty } from '@/lodash';
 import { CellInfo, ErrorTypes, EWrap, Point } from '@/types';
 
-const getStyle = (
+export const getStyle = (
   key: 'lineHeight' | 'letterSpacing',
   dom: HTMLElement = document.body,
 ): number => {
@@ -144,16 +144,15 @@ interface IRenderCellResult {
 }
 
 export function renderCell(
-  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
   cellInfo: CellInfo & {
     left: number;
     top: number;
     width: number;
     height: number;
   },
+  canvasLineHeight: number,
 ): IRenderCellResult {
-  const ctx = canvas.getContext('2d');
-  assert(!!ctx);
   const { style, value, left, top, width, height } = cellInfo;
   const isNum = isNumber(value);
   let font = DEFAULT_FONT_CONFIG;
@@ -193,7 +192,7 @@ export function renderCell(
   const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
   const textHeight = Math.max(
     fontSizeHeight,
-    getStyle('lineHeight', canvas),
+    canvasLineHeight,
     getStyle('lineHeight'),
   );
   if (style?.wrapText === EWrap.AUTO_WRAP) {

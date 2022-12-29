@@ -1,11 +1,7 @@
-import type { EventType } from './event';
-export interface BaseView {
-  resize(width: number, height: number): void;
-  render(value: EventType): void;
-}
+import type { EventType } from "./event";
 
 export interface ContentView {
-  canvas: HTMLCanvasElement;
+  getCanvas(): HTMLCanvasElement;
   resize(width: number, height: number): void;
   render(value: EventType): void;
 }

@@ -37,7 +37,8 @@ export interface StoreValue {
   canUndo: boolean;
   fontFamilyList: OptionItem[];
   contextMenuPosition?: CanvasOverlayPosition;
-  scroll: ScrollValue;
+  scrollTop: number;
+  scrollLeft: number;
 }
 
-export type Point = [x: number, y: number];
+export type Point = [x: number, y: number];

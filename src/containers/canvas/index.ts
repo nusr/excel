@@ -24,7 +24,7 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
         className: 'vertical-scroll-bar-content',
         style: {
           height: SCROLL_SIZE,
-          transform: `translateY(${state.scroll.scrollTop}px)`,
+          transform: `translateY(${state.scrollTop}px)`,
         },
       }),
     ),
@@ -33,14 +33,14 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
       {
         className: 'horizontal-scroll-bar',
         style: {
-          left: headerSize.height,
+          left: headerSize.width,
         },
       },
       h('div', {
         className: 'horizontal-scroll-bar-content',
         style: {
           width: SCROLL_SIZE,
-          transform: `translateX(${state.scroll.scrollLeft}px)`,
+          transform: `translateX(${state.scrollLeft}px)`,
         },
       }),
     ),

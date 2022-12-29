@@ -1,20 +1,19 @@
-import { StoreValue, IController, ChangeEventType } from './types';
-import { Controller, History } from './controller';
-import { Model, MOCK_MODEL } from './model';
-import { MainCanvas, registerEvents, Selection, Content } from './canvas';
+import { StoreValue, IController, ChangeEventType } from "./types";
+import { Controller, History } from "./controller";
+import { Model, MOCK_MODEL } from "./model";
+import { MainCanvas, registerEvents, Selection, Content } from "./canvas";
 import {
   FONT_FAMILY_LIST,
   isSupportFontFamily,
   MAIN_CANVAS_ID,
   createCanvas,
-} from './util';
-import theme from './theme';
-import { resizeCanvas } from '@/util';
+} from "./util";
+import theme from "./theme";
 
 export function initTheme(dom: HTMLElement) {
   const keyList = Object.keys(theme) as Array<keyof typeof theme>;
   for (const key of keyList) {
-    dom.style.setProperty(`--${key}`, String(theme[key] || ''));
+    dom.style.setProperty(`--${key}`, String(theme[key] || ""));
   }
 }
 export function initFontFamilyList() {
@@ -29,7 +28,7 @@ function getStoreValue(controller: IController, canvasTop: number) {
   const cell = controller.getCell(controller.getActiveCell());
   const cellPosition = controller.computeCellPosition(cell.row, cell.col);
   cellPosition.top = canvasTop + cellPosition.top;
-
+  const scroll = controller.getScroll();
   const newStateValue: Partial<StoreValue> = {
     isCellEditing: false,
     canRedo: controller.canRedo(),
@@ -37,7 +36,8 @@ function getStoreValue(controller: IController, canvasTop: number) {
     sheetList: controller.getSheetList(),
     currentSheetId: controller.getCurrentSheetId(),
     cellPosition: cellPosition,
-    scroll: controller.getScroll(),
+    scrollLeft: scroll.scrollLeft,
+    scrollTop: scroll.scrollTop,
   };
   newStateValue.activeCell = cell;
   return newStateValue;
@@ -45,35 +45,25 @@ function getStoreValue(controller: IController, canvasTop: number) {
 
 export function initCanvas(stateValue: StoreValue, controller: IController) {
   const canvas = document.querySelector<HTMLCanvasElement>(
-    `#${MAIN_CANVAS_ID}`,
+    `#${MAIN_CANVAS_ID}`
   )!;
-  const content = new Content(controller, createCanvas());
-  const selection = new Selection(controller, createCanvas());
-  const mainCanvas = new MainCanvas(controller, canvas, content, selection);
+  const mainCanvas = new MainCanvas(canvas, new Content(controller, createCanvas()), new Selection(controller, createCanvas()));
   const resize = () => {
-    const canvasPosition = canvas.parentElement!.getBoundingClientRect();
-    mainCanvas.resize(canvasPosition.width, canvasPosition.height);
+    const size = canvas.parentElement!.getBoundingClientRect();
+    mainCanvas.resize(size.width, size.height);
     mainCanvas.render({
-      width: canvasPosition.width,
-      height: canvasPosition.height,
-      changeSet: new Set<ChangeEventType>(['contentChange']),
+      changeSet: new Set<ChangeEventType>(["contentChange"]),
     });
   };
   resize();
   registerEvents(stateValue, controller, canvas, resize);
+  const canvasPosition = canvas.parentElement!.getBoundingClientRect();
   controller.setHooks({
     modelChange: (changeSet) => {
-      const canvasPosition = canvas.parentElement?.getBoundingClientRect();
-      const canvasSize = {
-        width: canvasPosition?.width || 0,
-        height: canvasPosition?.height || 0,
-      };
-      const newStateValue = getStoreValue(controller, canvasPosition?.top || 0);
+      const newStateValue = getStoreValue(controller, canvasPosition.top);
       Object.assign(stateValue, newStateValue);
-      resizeCanvas(canvas, canvasSize.width, canvasSize.height);
-      mainCanvas.render({ ...canvasSize, changeSet: changeSet });
+      mainCanvas.render({ changeSet: changeSet });
       mainCanvas.render({
-        ...canvasSize,
         changeSet: controller.getChangeSet(),
       });
     },
@@ -82,5 +72,6 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
 }
 export function initController(): IController {
   const controller = new Controller(new Model(), new History());
+  controller.addSheet();
   return controller;
 }
