@@ -14,6 +14,8 @@ const licenseText = fs.readFileSync(
 );
 const distDir = path.join(process.cwd(), 'dist');
 
+console.log('distDir--->:', distDir);
+
 function getEnv(): Record<string, string> {
   const result: Record<string, string> = {};
   const rest = process.argv.slice(2);
