@@ -1,0 +1,4731 @@
+/* 
+MIT License
+
+Copyright (c) 2020 Steve Xu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ 
+*/(function (global, factory) {
+            typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+            typeof define === 'function' && define.amd ? define(['exports'], factory) :
+              (global = global || self, factory(global.excel = {}));
+       })(this, (function (exports) { 'use strict';
+"use strict";
+var __export__ = (() => {
+  var __defProp = Object.defineProperty;
+  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __publicField = (obj, key, value) => {
+    __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+    return value;
+  };
+
+  // src/util/dpr.ts
+  function dpr(data = window.devicePixelRatio) {
+    return Math.max(Math.floor(data || 1), 1);
+  }
+  function npx(px) {
+    return Math.floor(px * dpr());
+  }
+  function thinLineWidth() {
+    return 1;
+  }
+  function resizeCanvas(canvas, width, height) {
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    const realWidth = npx(width);
+    const realHeight = npx(height);
+    canvas.width = realWidth;
+    canvas.height = realHeight;
+  }
+  function createCanvas() {
+    const canvas = document.createElement("canvas");
+    canvas.style.display = "none";
+    document.body.appendChild(canvas);
+    return canvas;
+  }
+
+  // src/util/style.ts
+  var DEFAULT_FONT_SIZE = 11;
+  var DEFAULT_FONT_COLOR = "#333333";
+  var ERROR_FORMULA_COLOR = "#ff0000";
+  var MUST_FONT_FAMILY = "sans-serif";
+  var DEFAULT_FONT_FAMILY = "\u5B8B\u4F53";
+  var FONT_SIZE_LIST = [
+    6,
+    8,
+    9,
+    10,
+    DEFAULT_FONT_SIZE,
+    12,
+    14,
+    16,
+    18,
+    20,
+    22,
+    24,
+    26,
+    28,
+    36,
+    48,
+    72
+  ];
+  var FONT_FAMILY_LIST = [
+    DEFAULT_FONT_FAMILY,
+    "Times New Roman",
+    "Arial",
+    "Tahoma",
+    "Verdana",
+    "\u5FAE\u8F6F\u96C5\u9ED1",
+    "\u9ED1\u4F53",
+    "\u6977\u4F53",
+    "\u4EFF\u5B8B",
+    "\u65B0\u5B8B\u4F53",
+    "\u534E\u6587\u65B0\u9B4F",
+    "\u534E\u6587\u884C\u6977",
+    "\u534E\u6587\u96B6\u4E66",
+    "\u82F9\u65B9"
+  ];
+  function makeFont(fontStyle = "normal", fontWeight = "normal", fontSize = 12, fontFamily = DEFAULT_FONT_FAMILY) {
+    return `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily},${MUST_FONT_FAMILY}`;
+  }
+  var DEFAULT_FONT_CONFIG = makeFont(
+    void 0,
+    "500",
+    npx(DEFAULT_FONT_SIZE)
+  );
+
+  // src/util/assert.ts
+  function assert(condition, message = "assert error", env = "production") {
+    if (!condition) {
+      if (env === "production") {
+        console.error(message);
+        return;
+      }
+      throw new Error(message);
+    }
+  }
+
+  // src/util/constant.ts
+  var SHEET_NAME_PREFIX = "Sheet";
+  var STYLE_ID_PREFIX = "style";
+  var DEFAULT_ROW_COUNT = 200;
+  var DEFAULT_COL_COUNT = 30;
+  var MAIN_CANVAS_ID = "main-canvas-id";
+  var FORMULA_EDITOR_ID = "formula-editor";
+  var DOUBLE_CLICK_TIME = 300;
+  var SCROLL_SIZE = 30;
+  var DEBUG_COLOR_LIST = [
+    "#0000CC",
+    "#0000FF",
+    "#0033CC",
+    "#0033FF",
+    "#0066CC",
+    "#0066FF",
+    "#0099CC",
+    "#0099FF",
+    "#00CC00",
+    "#00CC33",
+    "#00CC66",
+    "#00CC99",
+    "#00CCCC",
+    "#00CCFF",
+    "#3300CC",
+    "#3300FF",
+    "#3333CC",
+    "#3333FF",
+    "#3366CC",
+    "#3366FF",
+    "#3399CC",
+    "#3399FF",
+    "#33CC00",
+    "#33CC33",
+    "#33CC66",
+    "#33CC99",
+    "#33CCCC",
+    "#33CCFF",
+    "#6600CC",
+    "#6600FF",
+    "#6633CC",
+    "#6633FF",
+    "#66CC00",
+    "#66CC33",
+    "#9900CC",
+    "#9900FF",
+    "#9933CC",
+    "#9933FF",
+    "#99CC00",
+    "#99CC33",
+    "#CC0000",
+    "#CC0033",
+    "#CC0066",
+    "#CC0099",
+    "#CC00CC",
+    "#CC00FF",
+    "#CC3300",
+    "#CC3333",
+    "#CC3366",
+    "#CC3399",
+    "#CC33CC",
+    "#CC33FF",
+    "#CC6600",
+    "#CC6633",
+    "#CC9900",
+    "#CC9933",
+    "#CCCC00",
+    "#CCCC33",
+    "#FF0000",
+    "#FF0033",
+    "#FF0066",
+    "#FF0099",
+    "#FF00CC",
+    "#FF00FF",
+    "#FF3300",
+    "#FF3333",
+    "#FF3366",
+    "#FF3399",
+    "#FF33CC",
+    "#FF33FF",
+    "#FF6600",
+    "#FF6633",
+    "#FF9900",
+    "#FF9933",
+    "#FFCC00",
+    "#FFCC33"
+  ];
+  var MAX_PARAMS_COUNT = 256;
+  var ERROR_SET = /* @__PURE__ */ new Set([
+    "#ERROR!",
+    "#DIV/0!",
+    "#NULL!",
+    "#NUM!",
+    "#REF!",
+    "#VALUE!",
+    "#N/A",
+    "#NAME?"
+  ]);
+  var DEFAULT_STORE_VALUE = {
+    sheetList: [],
+    currentSheetId: "",
+    isCellEditing: false,
+    activeCell: {
+      value: "",
+      row: 0,
+      col: 0,
+      style: {}
+    },
+    cellPosition: {
+      left: -999,
+      top: -999,
+      width: 0,
+      height: 0
+    },
+    canRedo: false,
+    canUndo: false,
+    fontFamilyList: [],
+    contextMenuPosition: void 0,
+    scrollLeft: 0,
+    scrollTop: 0
+  };
+
+  // src/util/util.ts
+  var isString = (value) => {
+    return typeof value === "string";
+  };
+  function isNumber(value) {
+    if (typeof value === "number" && !window.isNaN(value)) {
+      return true;
+    }
+    if (typeof value !== "string") {
+      return false;
+    }
+    const temp = parseFloat(value);
+    return !window.isNaN(temp) && temp === Number(value);
+  }
+  function parseNumber(value) {
+    if (isNumber(value)) {
+      return Number(value);
+    }
+    return 0;
+  }
+  function parseNumberArray(list) {
+    const result = [];
+    for (let i = 0; i < list.length; i++) {
+      const temp = parseNumber(list[i]);
+      if (!window.isNaN(temp)) {
+        result.push(temp);
+      }
+    }
+    return result;
+  }
+  function getListMaxNum(list = [], prefix = "") {
+    const idList = list.map((item) => {
+      if (isNumber(item) || prefix.length === 0) {
+        return parseInt(item, 10);
+      }
+      return parseInt(
+        item.includes(prefix) ? item.slice(prefix.length) : item,
+        10
+      );
+    }).filter((v) => !isNaN(v));
+    return Math.max(Math.max(...idList), 0);
+  }
+  function getDefaultSheetInfo(list = []) {
+    const sheetNum = getListMaxNum(
+      list.map((item) => item.name),
+      SHEET_NAME_PREFIX
+    );
+    const sheetId = getListMaxNum(list.map((item) => item.sheetId)) + 1;
+    return {
+      name: `${SHEET_NAME_PREFIX}${sheetNum + 1}`,
+      sheetId: String(sheetId)
+    };
+  }
+  function isTestEnv() {
+    return false;
+  }
+
+  // src/util/convert.ts
+  function columnNameToInt(columnName = "") {
+    const temp = columnName.toUpperCase();
+    let num = 0;
+    for (let i = 0; i < temp.length; i++) {
+      num = temp.charCodeAt(i) - 64 + num * 26;
+    }
+    return num - 1;
+  }
+  function intToColumnName(temp) {
+    const num = temp + 1;
+    let columnName = "";
+    let dividend = Math.floor(Math.abs(num));
+    let rest;
+    while (dividend > 0) {
+      rest = (dividend - 1) % 26;
+      columnName = String.fromCharCode(65 + rest) + columnName;
+      dividend = Math.floor((dividend - rest) / 26);
+    }
+    return columnName.toUpperCase();
+  }
+  function rowLabelToInt(label) {
+    let result = parseInt(label, 10);
+    if (window.isNaN(result)) {
+      result = -1;
+    } else {
+      result = Math.max(result - 1, -1);
+    }
+    return result;
+  }
+
+  // src/util/classnames.ts
+  function classnames(...rest) {
+    let result = "";
+    for (const temp of rest) {
+      if (typeof temp === "string" && temp) {
+        result += `${temp} `;
+      }
+      if (typeof temp === "object") {
+        for (const key of Object.keys(temp)) {
+          if (temp[key]) {
+            result += `${key} `;
+          }
+        }
+      }
+    }
+    return result.trim();
+  }
+
+  // src/util/range.ts
+  function isSheet(range) {
+    return isRow(range) && isCol(range);
+  }
+  function isRow(range) {
+    return range.col === range.rowCount && range.rowCount === 0;
+  }
+  function isCol(range) {
+    return range.row === range.colCount && range.colCount === 0;
+  }
+  var Range = class {
+    row = 0;
+    col = 0;
+    colCount = 0;
+    rowCount = 0;
+    sheetId = "";
+    constructor(row, col, rowCount, colCount, sheetId) {
+      this.row = row;
+      this.col = col;
+      this.colCount = colCount;
+      this.rowCount = rowCount;
+      this.sheetId = sheetId;
+    }
+    isValid() {
+      return this.row >= 0 && this.col >= 0 && this.colCount >= 0 && this.rowCount >= 0;
+    }
+    static makeRange(range) {
+      return new Range(
+        range.row,
+        range.col,
+        range.rowCount,
+        range.colCount,
+        range.sheetId
+      );
+    }
+  };
+
+  // src/util/reference.ts
+  var isCharacter = (char) => char >= "a" && char <= "z" || char >= "A" && char <= "Z";
+  var isNum = (char) => char >= "0" && char <= "9";
+  function parseCell(ref) {
+    if (typeof ref !== "string" || !ref) {
+      return null;
+    }
+    const realRef = ref.trim();
+    let [sheetName, other = ""] = realRef.split("!");
+    if (!realRef.includes("!")) {
+      sheetName = "";
+      other = realRef;
+    }
+    let i = 0;
+    let rowText = "";
+    let colText = "";
+    if (other[i] === "$") {
+      i++;
+    }
+    while (isCharacter(other[i])) {
+      colText += other[i++];
+    }
+    if (other[i] === "$") {
+      i++;
+    }
+    while (isNum(other[i])) {
+      rowText += other[i++];
+    }
+    if (i !== other.length) {
+      return null;
+    }
+    if (!rowText && !colText) {
+      return null;
+    }
+    let rowCount = 1;
+    let colCount = 1;
+    let row = 0;
+    let col = 0;
+    if (rowText === "") {
+      colCount = 0;
+      rowCount = DEFAULT_ROW_COUNT;
+    } else {
+      row = rowLabelToInt(rowText);
+    }
+    if (colText === "") {
+      colCount = DEFAULT_COL_COUNT;
+      rowCount = 0;
+    } else {
+      col = columnNameToInt(colText);
+    }
+    if (row === -1 || col === -1) {
+      return null;
+    }
+    const range = new Range(row, col, rowCount, colCount, sheetName);
+    return range;
+  }
+  function parseReference(text) {
+    const [cell1, cell2] = text.split(":");
+    const startCell = parseCell(cell1);
+    if (!startCell) {
+      return null;
+    }
+    const endCell = parseCell(cell2);
+    if (!endCell) {
+      return startCell;
+    }
+    const rowCount = endCell.row - startCell.row + 1;
+    const colCount = endCell.col - startCell.col + 1;
+    return new Range(
+      startCell.row,
+      startCell.col,
+      rowCount,
+      colCount,
+      endCell.sheetId
+    );
+  }
+
+  // src/lodash/isEmpty.ts
+  function isEmpty(value) {
+    const temp = value || {};
+    return [Object, Array].includes(temp.constructor) && !Object.entries(temp).length;
+  }
+
+  // src/lodash/randomInt.ts
+  function randomInt(min, max) {
+    const t1 = Math.min(min, max);
+    const t2 = Math.max(min, max);
+    return Math.floor(t1 + Math.random() * (t2 - t1 + 1));
+  }
+
+  // src/lodash/get.ts
+  function get(obj, path, defaultValue) {
+    const result = obj == null ? void 0 : path.replace(/\[/g, ".").replace(/\]/g, "").split(".").reduce((res, key) => {
+      return res == null ? res : res[key];
+    }, obj);
+    return result === void 0 ? defaultValue : result;
+  }
+
+  // src/lodash/setWith.ts
+  function setWith(obj, path, value) {
+    if (obj == null || typeof obj !== "object") {
+      return obj;
+    }
+    path.replace(/\[/g, ".").replace(/\]/g, "").split(".").reduce((res, key, index, arr) => {
+      if (index === arr.length - 1) {
+        res[key] = value;
+      } else {
+        if (res[key] == null) {
+          res[key] = {};
+        }
+      }
+      return res[key];
+    }, obj);
+    return obj;
+  }
+
+  // src/lodash/debounce.ts
+  function debounce(fn) {
+    let timer;
+    return (...rest) => {
+      cancelAnimationFrame(timer);
+      timer = requestAnimationFrame(() => {
+        fn(...rest);
+      });
+    };
+  }
+
+  // src/util/debug.ts
+  var _Debug = class {
+    namespace;
+    constructor(namespace) {
+      this.namespace = namespace;
+    }
+    init = () => {
+      this.setColor();
+      return this.log;
+    };
+    log = (...rest) => {
+      if (!this.enable()) {
+        return;
+      }
+      const { namespace } = this;
+      const color2 = _Debug.colorMap.get(namespace);
+      const result = [`%c ${namespace}:`, `color:${color2};`, ...rest];
+      console.log(...result);
+    };
+    getRandomColor = () => {
+      const index = randomInt(0, DEBUG_COLOR_LIST.length - 1);
+      assert(index >= 0 && index < DEBUG_COLOR_LIST.length, String(index));
+      return DEBUG_COLOR_LIST[index];
+    };
+    enable() {
+      return this.checkEnable() && _Debug.enableMap.get(this.namespace) !== false;
+    }
+    checkEnable(storage = window.localStorage) {
+      return storage.getItem("debug") === "*";
+    }
+    setColor() {
+      if (!_Debug.colorMap.has(this.namespace)) {
+        _Debug.colorMap.set(this.namespace, this.getRandomColor());
+      }
+    }
+  };
+  var Debug = _Debug;
+  __publicField(Debug, "colorMap", /* @__PURE__ */ new Map());
+  __publicField(Debug, "enableMap", /* @__PURE__ */ new Map([]));
+  var reactLog = new Debug("react").init();
+  var controllerLog = new Debug("controller").init();
+  var canvasLog = new Debug("canvas").init();
+  var modelLog = new Debug("model").init();
+
+  // src/util/isSupportFontFamily.ts
+  function SupportFontFamilyFactory(defaultFont = MUST_FONT_FAMILY) {
+    if (isTestEnv()) {
+      return {
+        isSupportFontFamily: () => true
+      };
+    }
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    assert(ctx !== null);
+    const getImageData = function(font) {
+      const width = 50;
+      canvas.width = width;
+      canvas.height = width;
+      ctx.textAlign = "center";
+      ctx.fillStyle = "black";
+      ctx.textBaseline = "middle";
+      ctx.clearRect(0, 0, width, width);
+      ctx.font = `${width}px ${font},${defaultFont}`;
+      ctx.fillText("\u5B8Ba", width / 2, width / 2);
+      const imageData = ctx.getImageData(0, 0, width, width, {
+        colorSpace: "srgb"
+      }).data;
+      return imageData.join("");
+    };
+    const defaultImageData = getImageData(defaultFont);
+    const isSupportFontFamily2 = (fontFamily) => {
+      if (typeof fontFamily != "string") {
+        return false;
+      }
+      if (fontFamily.toLowerCase() == defaultFont.toLowerCase()) {
+        return true;
+      }
+      return defaultImageData !== getImageData(fontFamily);
+    };
+    return {
+      isSupportFontFamily: isSupportFontFamily2
+    };
+  }
+  var { isSupportFontFamily } = SupportFontFamilyFactory();
+
+  // src/react/dom.ts
+  function createElement(tagName, options) {
+    reactLog("createElement");
+    return document.createElement(tagName, options);
+  }
+  function createElementNS(namespaceURI, qualifiedName, options) {
+    reactLog("createElementNS");
+    return document.createElementNS(namespaceURI, qualifiedName, options);
+  }
+  function createTextNode(text) {
+    reactLog("createTextNode");
+    return document.createTextNode(text);
+  }
+  function insertBefore(parentNode2, newNode, referenceNode) {
+    parentNode2.insertBefore(newNode, referenceNode);
+  }
+  function removeChild(node, child) {
+    node.removeChild(child);
+  }
+  function appendChild(node, child) {
+    node.appendChild(child);
+  }
+  function parentNode(node) {
+    return node.parentNode;
+  }
+  function nextSibling(node) {
+    return node.nextSibling;
+  }
+  function setTextContent(node, text) {
+    node.textContent = text;
+  }
+  function isElement(node) {
+    return node.nodeType === 1;
+  }
+  var htmlDomApi = {
+    createElement,
+    createElementNS,
+    createTextNode,
+    insertBefore,
+    removeChild,
+    appendChild,
+    parentNode,
+    nextSibling,
+    setTextContent,
+    isElement
+  };
+
+  // src/react/h.ts
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  function addNs(node) {
+    node.data.ns = SVG_NS;
+    if (node.data?.props) {
+      node.data.attrs = Object.assign(
+        node.data.props || {},
+        node.data?.attrs || {}
+      );
+      node.data.props = void 0;
+    } else {
+      node.data.attrs = {};
+    }
+    node.data.attrs.class = node.data.className || "";
+    node.data.className = void 0;
+    if (node.children) {
+      for (const item of node.children) {
+        if (item) {
+          addNs(item);
+        }
+      }
+    }
+  }
+  function h(sel, data, ...children) {
+    const key = data.key === void 0 ? void 0 : data.key;
+    const nodeData = {
+      hook: data.hook,
+      style: data.style,
+      key: data.key,
+      className: data.className
+    };
+    const nodeList = [];
+    const textList = [];
+    const list = children || [];
+    for (const item of list) {
+      if (typeof item === "string" || typeof item === "number") {
+        const t = String(item);
+        if (t) {
+          textList.push(t);
+        }
+      } else if (item && typeof item === "object") {
+        nodeList.push(item);
+      }
+    }
+    const keyList = Object.keys(data);
+    for (const key2 of keyList) {
+      if (["className", "style", "key", "ns", "is"].includes(key2)) {
+        continue;
+      }
+      const item = data[key2];
+      if (key2 === "data-testId") {
+        if (!nodeData.dataset) {
+          nodeData.dataset = {};
+        }
+        nodeData.dataset[key2.slice(5)] = item;
+      } else if (key2.startsWith("on")) {
+        if (!nodeData.on) {
+          nodeData.on = {};
+        }
+        nodeData.on[key2.slice(2)] = item;
+      } else {
+        if (!nodeData.props) {
+          nodeData.props = {};
+        }
+        nodeData.props[key2] = item;
+      }
+    }
+    const result = {
+      sel,
+      data: nodeData,
+      key,
+      elm: void 0,
+      children: [],
+      text: void 0
+    };
+    if (textList.length > 0 && nodeList.length > 0) {
+      throw new Error("error node");
+    }
+    if (textList.length > 0) {
+      result.text = textList.join(" ");
+    }
+    if (nodeList.length > 0) {
+      result.children = nodeList;
+    }
+    if (result.sel === "svg") {
+      addNs(result);
+    }
+    return result;
+  }
+
+  // src/react/init.ts
+  function isUndef(s) {
+    return s === void 0;
+  }
+  function isDef(s) {
+    return s !== void 0;
+  }
+  var emptyNode = h("", {});
+  function sameVNode(vNode1, vNode2) {
+    const isSameKey = vNode1.key === vNode2.key;
+    const isSameIs = vNode1.data?.is === vNode2.data?.is;
+    const isSameSel = vNode1.sel === vNode2.sel;
+    const isSameTextOrFragment = !vNode1.sel && vNode1.sel === vNode2.sel ? typeof vNode1.text === typeof vNode2.text : true;
+    return isSameSel && isSameKey && isSameIs && isSameTextOrFragment;
+  }
+  function isElement2(api, vNode) {
+    return api.isElement(vNode);
+  }
+  function createKeyToOldIdx(children, beginIdx, endIdx) {
+    const map = {};
+    for (let i = beginIdx; i <= endIdx; ++i) {
+      const key = children[i]?.key;
+      if (key !== void 0) {
+        map[key] = i;
+      }
+    }
+    return map;
+  }
+  var hooks = [
+    "create",
+    "update",
+    "remove",
+    "destroy",
+    "pre",
+    "post"
+  ];
+  function init(modules, domApi) {
+    const cbs = {
+      create: [],
+      update: [],
+      remove: [],
+      destroy: [],
+      pre: [],
+      post: []
+    };
+    const api = domApi !== void 0 ? domApi : htmlDomApi;
+    for (const hook of hooks) {
+      for (const module of modules) {
+        const currentHook = module[hook];
+        if (currentHook !== void 0) {
+          cbs[hook].push(currentHook);
+        }
+      }
+    }
+    function createRmCb(childElm, listeners) {
+      return function rmCb() {
+        if (--listeners === 0) {
+          const parent = api.parentNode(childElm);
+          api.removeChild(parent, childElm);
+        }
+      };
+    }
+    function createElm(vNode, insertedVNodeQueue) {
+      let i;
+      let data = vNode.data;
+      if (data !== void 0) {
+        const init3 = data.hook?.init;
+        if (init3) {
+          init3(vNode);
+          data = vNode.data;
+        }
+      }
+      const children = vNode.children;
+      const sel = vNode.sel;
+      if (sel !== void 0) {
+        const elm = vNode.elm = isDef(data) && isDef(i = data.ns) ? api.createElementNS(i, sel, data) : api.createElement(sel, data);
+        for (i = 0; i < cbs.create.length; ++i)
+          cbs.create[i](emptyNode, vNode);
+        if (Array.isArray(children) && children.length > 0) {
+          for (i = 0; i < children.length; ++i) {
+            const ch = children[i];
+            if (ch != null) {
+              api.appendChild(elm, createElm(ch, insertedVNodeQueue));
+            }
+          }
+        } else if (typeof vNode.text === "string" || typeof vNode.text === "number") {
+          api.appendChild(elm, api.createTextNode(vNode.text));
+        }
+        const hook = vNode.data.hook;
+        if (isDef(hook)) {
+          hook.create?.(emptyNode, vNode);
+          if (hook.insert) {
+            insertedVNodeQueue.push(vNode);
+          }
+        }
+      } else {
+        vNode.elm = api.createTextNode(vNode.text);
+      }
+      return vNode.elm;
+    }
+    function addVNodes(parentElm, before, vNodes, startIdx, endIdx, insertedVNodeQueue) {
+      for (; startIdx <= endIdx; ++startIdx) {
+        const ch = vNodes[startIdx];
+        if (ch != null) {
+          api.insertBefore(parentElm, createElm(ch, insertedVNodeQueue), before);
+        }
+      }
+    }
+    function invokeDestroyHook(vNode) {
+      const data = vNode.data;
+      if (data !== void 0) {
+        data?.hook?.destroy?.(vNode);
+        for (let i = 0; i < cbs.destroy.length; ++i)
+          cbs.destroy[i](vNode);
+        if (vNode.children !== void 0) {
+          for (let j = 0; j < vNode.children.length; ++j) {
+            const child = vNode.children[j];
+            if (child != null && typeof child !== "string") {
+              invokeDestroyHook(child);
+            }
+          }
+        }
+      }
+    }
+    function removeVNodes(parentElm, vNodes, startIdx, endIdx) {
+      for (; startIdx <= endIdx; ++startIdx) {
+        let listeners;
+        let rm;
+        const ch = vNodes[startIdx];
+        if (ch != null) {
+          if (isDef(ch.sel)) {
+            invokeDestroyHook(ch);
+            listeners = cbs.remove.length + 1;
+            rm = createRmCb(ch.elm, listeners);
+            for (let i = 0; i < cbs.remove.length; ++i)
+              cbs.remove[i](ch, rm);
+            const removeHook = ch?.data?.hook?.remove;
+            if (isDef(removeHook)) {
+              removeHook(ch, rm);
+            } else {
+              rm();
+            }
+          } else if (ch.children) {
+            invokeDestroyHook(ch);
+            removeVNodes(
+              parentElm,
+              ch.children,
+              0,
+              ch.children.length - 1
+            );
+          } else {
+            api.removeChild(parentElm, ch.elm);
+          }
+        }
+      }
+    }
+    function updateChildren(parentElm, oldCh, newCh, insertedVNodeQueue) {
+      let oldStartIdx = 0;
+      let newStartIdx = 0;
+      let oldEndIdx = oldCh.length - 1;
+      let oldStartVNode = oldCh[0];
+      let oldEndVNode = oldCh[oldEndIdx];
+      let newEndIdx = newCh.length - 1;
+      let newStartVNode = newCh[0];
+      let newEndVNode = newCh[newEndIdx];
+      let oldKeyToIdx;
+      let idxInOld;
+      let elmToMove;
+      let before;
+      while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+        if (oldStartVNode == null) {
+          oldStartVNode = oldCh[++oldStartIdx];
+        } else if (oldEndVNode == null) {
+          oldEndVNode = oldCh[--oldEndIdx];
+        } else if (newStartVNode == null) {
+          newStartVNode = newCh[++newStartIdx];
+        } else if (newEndVNode == null) {
+          newEndVNode = newCh[--newEndIdx];
+        } else if (sameVNode(oldStartVNode, newStartVNode)) {
+          patchVNode(oldStartVNode, newStartVNode, insertedVNodeQueue);
+          oldStartVNode = oldCh[++oldStartIdx];
+          newStartVNode = newCh[++newStartIdx];
+        } else if (sameVNode(oldEndVNode, newEndVNode)) {
+          patchVNode(oldEndVNode, newEndVNode, insertedVNodeQueue);
+          oldEndVNode = oldCh[--oldEndIdx];
+          newEndVNode = newCh[--newEndIdx];
+        } else if (sameVNode(oldStartVNode, newEndVNode)) {
+          patchVNode(oldStartVNode, newEndVNode, insertedVNodeQueue);
+          api.insertBefore(
+            parentElm,
+            oldStartVNode.elm,
+            api.nextSibling(oldEndVNode.elm)
+          );
+          oldStartVNode = oldCh[++oldStartIdx];
+          newEndVNode = newCh[--newEndIdx];
+        } else if (sameVNode(oldEndVNode, newStartVNode)) {
+          patchVNode(oldEndVNode, newStartVNode, insertedVNodeQueue);
+          api.insertBefore(parentElm, oldEndVNode.elm, oldStartVNode.elm);
+          oldEndVNode = oldCh[--oldEndIdx];
+          newStartVNode = newCh[++newStartIdx];
+        } else {
+          if (oldKeyToIdx === void 0) {
+            oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx);
+          }
+          idxInOld = oldKeyToIdx[newStartVNode.key];
+          if (isUndef(idxInOld)) {
+            api.insertBefore(
+              parentElm,
+              createElm(newStartVNode, insertedVNodeQueue),
+              oldStartVNode.elm
+            );
+          } else {
+            elmToMove = oldCh[idxInOld];
+            if (elmToMove.sel !== newStartVNode.sel) {
+              api.insertBefore(
+                parentElm,
+                createElm(newStartVNode, insertedVNodeQueue),
+                oldStartVNode.elm
+              );
+            } else {
+              patchVNode(elmToMove, newStartVNode, insertedVNodeQueue);
+              oldCh[idxInOld] = void 0;
+              api.insertBefore(parentElm, elmToMove.elm, oldStartVNode.elm);
+            }
+          }
+          newStartVNode = newCh[++newStartIdx];
+        }
+      }
+      if (newStartIdx <= newEndIdx) {
+        before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm;
+        addVNodes(
+          parentElm,
+          before,
+          newCh,
+          newStartIdx,
+          newEndIdx,
+          insertedVNodeQueue
+        );
+      }
+      if (oldStartIdx <= oldEndIdx) {
+        removeVNodes(parentElm, oldCh, oldStartIdx, oldEndIdx);
+      }
+    }
+    function patchVNode(oldVNode, vNode, insertedVNodeQueue) {
+      const hook = vNode.data?.hook;
+      hook?.prePatch?.(oldVNode, vNode);
+      const elm = vNode.elm = oldVNode.elm;
+      if (oldVNode === vNode)
+        return;
+      if (vNode.data !== void 0 || isDef(vNode.text) && vNode.text !== oldVNode.text) {
+        vNode.data ??= {};
+        oldVNode.data ??= {};
+        for (let i = 0; i < cbs.update.length; ++i)
+          cbs.update[i](oldVNode, vNode);
+        vNode.data?.hook?.update?.(oldVNode, vNode);
+      }
+      const oldCh = oldVNode.children;
+      const ch = vNode.children;
+      if (isUndef(vNode.text)) {
+        if (isDef(oldCh) && isDef(ch)) {
+          if (oldCh !== ch)
+            updateChildren(elm, oldCh, ch, insertedVNodeQueue);
+        } else if (isDef(ch)) {
+          if (isDef(oldVNode.text))
+            api.setTextContent(elm, "");
+          addVNodes(elm, null, ch, 0, ch.length - 1, insertedVNodeQueue);
+        } else if (isDef(oldCh)) {
+          removeVNodes(elm, oldCh, 0, oldCh.length - 1);
+        } else if (isDef(oldVNode.text)) {
+          api.setTextContent(elm, "");
+        }
+      } else if (oldVNode.text !== vNode.text) {
+        if (isDef(oldCh)) {
+          removeVNodes(elm, oldCh, 0, oldCh.length - 1);
+        }
+        api.setTextContent(elm, vNode.text);
+      }
+      hook?.postPatch?.(oldVNode, vNode);
+      if (hook?.ref) {
+        hook?.ref(vNode.elm);
+      }
+    }
+    function patch2(oldVNode, vNode) {
+      let i, elm, parent;
+      const insertedVNodeQueue = [];
+      for (i = 0; i < cbs.pre.length; ++i)
+        cbs.pre[i]();
+      if (isElement2(api, oldVNode)) {
+        createElm(vNode, insertedVNodeQueue);
+        api.appendChild(oldVNode, vNode.elm);
+        return vNode;
+      }
+      if (sameVNode(oldVNode, vNode)) {
+        patchVNode(oldVNode, vNode, insertedVNodeQueue);
+      } else {
+        elm = oldVNode.elm;
+        parent = api.parentNode(elm);
+        createElm(vNode, insertedVNodeQueue);
+        if (parent !== null) {
+          api.insertBefore(parent, vNode.elm, api.nextSibling(elm));
+          removeVNodes(parent, [oldVNode], 0, 0);
+        }
+      }
+      for (i = 0; i < insertedVNodeQueue.length; ++i) {
+        insertedVNodeQueue[i].data.hook.insert(insertedVNodeQueue[i]);
+      }
+      for (i = 0; i < cbs.post.length; ++i)
+        cbs.post[i]();
+      return vNode;
+    }
+    return patch2;
+  }
+
+  // src/react/modules/attributes.ts
+  var xLinkNS = "http://www.w3.org/1999/xlink";
+  var xmlNS = "http://www.w3.org/XML/1998/namespace";
+  var colonChar = 58;
+  var xChar = 120;
+  function updateAttrs(oldVNode, vNode) {
+    let key;
+    const elm = vNode.elm;
+    let oldAttrs = oldVNode.data.attrs;
+    let attrs = vNode.data.attrs;
+    if (!oldAttrs && !attrs)
+      return;
+    if (oldAttrs === attrs)
+      return;
+    oldAttrs = oldAttrs || {};
+    attrs = attrs || {};
+    for (key in attrs) {
+      const cur = attrs[key];
+      const old = oldAttrs[key];
+      if (old !== cur) {
+        if (cur === true) {
+          elm.setAttribute(key, "");
+        } else if (cur === false) {
+          elm.removeAttribute(key);
+        } else {
+          if (key.charCodeAt(0) !== xChar) {
+            elm.setAttribute(key, cur);
+          } else if (key.charCodeAt(3) === colonChar) {
+            elm.setAttributeNS(xmlNS, key, cur);
+          } else if (key.charCodeAt(5) === colonChar) {
+            elm.setAttributeNS(xLinkNS, key, cur);
+          } else {
+            elm.setAttribute(key, cur);
+          }
+        }
+      }
+    }
+    for (key in oldAttrs) {
+      if (!(key in attrs)) {
+        elm.removeAttribute(key);
+      }
+    }
+  }
+  var attributesModule = {
+    create: updateAttrs,
+    update: updateAttrs
+  };
+
+  // src/react/modules/class.ts
+  function updateClass(oldVNode, vNode) {
+    const elm = vNode.elm;
+    const oldClass = oldVNode.data.className;
+    const newClass = vNode.data.className;
+    if (oldClass === newClass)
+      return;
+    elm.className = newClass || "";
+  }
+  var classModule = { create: updateClass, update: updateClass };
+
+  // src/react/modules/dataset.ts
+  var CAPS_REGEX = /[A-Z]/g;
+  function updateDataset(oldVNode, vNode) {
+    const elm = vNode.elm;
+    let oldDataset = oldVNode.data.dataset;
+    let dataset = vNode.data.dataset;
+    let key;
+    if (!oldDataset && !dataset)
+      return;
+    if (oldDataset === dataset)
+      return;
+    oldDataset = oldDataset || {};
+    dataset = dataset || {};
+    const d = elm.dataset;
+    for (key in oldDataset) {
+      if (!dataset[key]) {
+        if (d) {
+          if (key in d) {
+            delete d[key];
+          }
+        } else {
+          elm.removeAttribute(
+            "data-" + key.replace(CAPS_REGEX, "-$&").toLowerCase()
+          );
+        }
+      }
+    }
+    for (key in dataset) {
+      if (oldDataset[key] !== dataset[key]) {
+        if (d) {
+          d[key] = dataset[key];
+        } else {
+          elm.setAttribute(
+            "data-" + key.replace(CAPS_REGEX, "-$&").toLowerCase(),
+            dataset[key]
+          );
+        }
+      }
+    }
+  }
+  var datasetModule = {
+    create: updateDataset,
+    update: updateDataset
+  };
+
+  // src/react/modules/event.ts
+  function invokeHandler(handler, vNode, event) {
+    if (typeof handler === "function") {
+      const temp = event || {};
+      handler.call(vNode, temp, vNode);
+    } else if (typeof handler === "object") {
+      for (let i = 0; i < handler.length; i++) {
+        invokeHandler(handler[i], vNode, event);
+      }
+    }
+  }
+  function handleEvent(event, vNode) {
+    const name = event.type;
+    const on = vNode.data?.on;
+    if (on && on[name]) {
+      invokeHandler(on[name], vNode, event);
+    }
+  }
+  function createListener() {
+    return function handler(event) {
+      handleEvent(event, handler.vNode);
+    };
+  }
+  function updateEventListeners(oldVNode, vNode) {
+    const oldOn = oldVNode.data?.on;
+    const oldListener = oldVNode.listener;
+    const oldElm = oldVNode.elm;
+    const on = vNode?.data?.on;
+    const elm = vNode && vNode.elm;
+    let name;
+    if (oldOn === on) {
+      return;
+    }
+    if (oldOn && oldListener) {
+      if (!on) {
+        for (name in oldOn) {
+          oldElm.removeEventListener(name, oldListener, false);
+        }
+      } else {
+        for (name in oldOn) {
+          if (!on[name]) {
+            oldElm.removeEventListener(name, oldListener, false);
+          }
+        }
+      }
+    }
+    if (on) {
+      const listener = vNode.listener = oldVNode.listener || createListener();
+      listener.vNode = vNode;
+      if (!oldOn) {
+        for (name in on) {
+          elm.addEventListener(name, listener, false);
+        }
+      } else {
+        for (name in on) {
+          if (!oldOn[name]) {
+            elm.addEventListener(name, listener, false);
+          }
+        }
+      }
+    }
+  }
+  var eventListenersModule = {
+    create: updateEventListeners,
+    update: updateEventListeners,
+    destroy: updateEventListeners
+  };
+
+  // src/react/modules/props.ts
+  function updateProps(oldVNode, vNode) {
+    let key;
+    let cur;
+    let old;
+    const elm = vNode.elm;
+    let oldProps = oldVNode.data.props;
+    let props = vNode.data.props;
+    if (!oldProps && !props)
+      return;
+    if (oldProps === props)
+      return;
+    oldProps = oldProps || {};
+    props = props || {};
+    for (key in props) {
+      cur = props[key];
+      old = oldProps[key];
+      if (old !== cur && (key !== "value" || elm[key] !== cur)) {
+        elm[key] = cur;
+      }
+    }
+  }
+  var propsModule = { create: updateProps, update: updateProps };
+
+  // src/react/modules/style.ts
+  var convertKey = (key) => key.replace(CAPS_REGEX, "-$&").toLowerCase();
+  function updateStyle(oldVNode, vNode) {
+    let name;
+    const elm = vNode.elm;
+    let oldStyle = oldVNode.data.style;
+    let style = vNode.data.style;
+    if (!oldStyle && !style)
+      return;
+    if (oldStyle === style)
+      return;
+    oldStyle = oldStyle || {};
+    style = style || {};
+    for (name in oldStyle) {
+      if (!style[name]) {
+        if (name.slice(0, 2) === "--") {
+          elm.style.removeProperty(name);
+        } else {
+          elm.style[convertKey(name)] = "";
+        }
+      }
+    }
+    for (name in style) {
+      if (style[name] !== oldStyle[name]) {
+        if (name.slice(0, 2) === "--") {
+          elm.style.setProperty(name, style[name]);
+        } else {
+          const key = convertKey(name);
+          const t = style[name];
+          if (typeof t === "number") {
+            elm.style[key] = t + "px";
+          } else {
+            elm.style[key] = t;
+          }
+        }
+      }
+    }
+  }
+  var styleModule = {
+    create: updateStyle,
+    update: updateStyle
+  };
+
+  // src/react/index.ts
+  var patch = init(
+    [
+      attributesModule,
+      classModule,
+      datasetModule,
+      eventListenersModule,
+      propsModule,
+      styleModule
+    ],
+    htmlDomApi
+  );
+  function render(container, vNode) {
+    const dom = container;
+    let temp;
+    if (dom.vDom) {
+      temp = patch(dom.vDom, vNode);
+    } else {
+      temp = patch(dom, vNode);
+    }
+    dom.vDom = temp;
+    return temp;
+  }
+
+  // src/containers/canvas/index.ts
+  var CanvasContainer = (state, controller) => {
+    const headerSize = controller.getHeaderSize();
+    return h(
+      "div",
+      {
+        className: "relative canvas-container"
+      },
+      h("canvas", {
+        className: "full canvas-content",
+        id: MAIN_CANVAS_ID
+      }),
+      h(
+        "div",
+        {
+          className: "vertical-scroll-bar",
+          style: {
+            top: headerSize.height
+          }
+        },
+        h("div", {
+          className: "vertical-scroll-bar-content",
+          style: {
+            height: SCROLL_SIZE,
+            transform: `translateY(${state.scrollTop}px)`
+          }
+        })
+      ),
+      h(
+        "div",
+        {
+          className: "horizontal-scroll-bar",
+          style: {
+            left: headerSize.width
+          }
+        },
+        h("div", {
+          className: "horizontal-scroll-bar-content",
+          style: {
+            width: SCROLL_SIZE,
+            transform: `translateX(${state.scrollLeft}px)`
+          }
+        })
+      )
+    );
+  };
+  CanvasContainer.displayName = "CanvasContainer";
+
+  // src/containers/FormulaBar/FormulaEditor.ts
+  function getEditorStyle(style, cellPosition) {
+    if (isEmpty(style)) {
+      return cellPosition;
+    }
+    const font = makeFont(
+      style?.isItalic ? "italic" : "normal",
+      style?.isBold ? "bold" : "500",
+      style?.fontSize || DEFAULT_FONT_SIZE,
+      style?.fontFamily
+    );
+    return {
+      ...cellPosition,
+      backgroundColor: style?.fillColor || "inherit",
+      color: style?.fontColor || DEFAULT_FONT_COLOR,
+      font
+    };
+  }
+  var FormulaEditor = (state, controller) => {
+    const { activeCell, isCellEditing, cellPosition } = state;
+    const initValue = activeCell.formula || String(activeCell.value || "");
+    let inputDom;
+    const ref = (element) => {
+      inputDom = element;
+    };
+    const setValue = (value) => {
+      controller.setCellValue(activeCell, value);
+      inputDom.value = "";
+      state.isCellEditing = false;
+    };
+    return h("input", {
+      title: "editor",
+      className: "base-editor",
+      id: FORMULA_EDITOR_ID,
+      value: initValue,
+      style: isCellEditing ? getEditorStyle(activeCell.style, cellPosition) : void 0,
+      hook: {
+        ref
+      },
+      onfocus: () => {
+        if (!isCellEditing) {
+          return;
+        }
+        state.isCellEditing = true;
+      },
+      onblur: (event) => {
+        setValue(event.currentTarget.value);
+      },
+      onkeydown: (event) => {
+        inputDom.nextSibling.textContent = event.currentTarget.value;
+        if (event.key === "Enter" || event.key === "Tab") {
+          setValue(event.currentTarget.value);
+        }
+      }
+    });
+  };
+  FormulaEditor.displayName = "FormulaEditor";
+
+  // src/containers/FormulaBar/index.tsx
+  var FormulaBarContainer = (state, controller) => {
+    const { activeCell } = state;
+    return h(
+      "div",
+      {
+        className: "formula-bar-wrapper"
+      },
+      h(
+        "div",
+        { className: "formula-bar-name" },
+        `${intToColumnName(activeCell.col)}${activeCell.row + 1}`
+      ),
+      h(
+        "div",
+        { className: "formula-bar-editor-wrapper" },
+        FormulaEditor(state, controller),
+        h("div", {
+          className: classnames("formula-bar-value", {
+            show: state.isCellEditing
+          })
+        }, activeCell.formula || String(activeCell.value || ""))
+      )
+    );
+  };
+  FormulaBarContainer.displayName = "FormulaBarContainer";
+
+  // src/components/Button/index.tsx
+  var defaultClick = () => {
+    console.log("add click event");
+  };
+  var Button = (props, ...children) => {
+    const {
+      className = "",
+      onClick = defaultClick,
+      disabled = false,
+      active = false,
+      type = "normal",
+      style = {},
+      testId = void 0
+    } = props;
+    return h(
+      "div",
+      {
+        onclick: onClick,
+        className: classnames("button-wrapper", className, {
+          disabled,
+          active,
+          circle: type === "circle"
+        }),
+        style,
+        "data-testId": testId
+      },
+      ...children
+    );
+  };
+  Button.displayName = "Button";
+
+  // src/components/Github/index.ts
+  var pathStyle = {
+    "transform-origin": "130px 106px"
+  };
+  var Github = () => {
+    return h(
+      "a",
+      {
+        href: "https://github.com/nusr/excel",
+        "aria-label": "View source on Github",
+        target: "_blank",
+        rel: "noreferrer",
+        title: "github link"
+      },
+      h(
+        "svg",
+        {
+          className: "github-wrapper",
+          viewBox: "0 0 250 250",
+          "aria-hidden": true
+        },
+        h("path", {
+          d: "M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"
+        }),
+        h("path", {
+          d: "M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2",
+          fill: "currentColor",
+          style: pathStyle
+        }),
+        h("path", {
+          style: pathStyle,
+          fill: "currentColor",
+          d: "M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+        })
+      )
+    );
+  };
+  Github.displayName = "Github";
+
+  // src/components/BaseIcon/icon.ts
+  var icon = {
+    alignCenter: [
+      "M142.2 227.6h739.6v56.9H142.2zM142.2 568.9h739.6v56.9H142.2zM256 398.2h512v56.9H256zM256 739.6h512v56.9H256z"
+    ],
+    alignLeft: [
+      "M627.712 788.48c11.305 0 20.48-9.155 20.48-20.48s-9.175-20.48-20.48-20.48H218.46c-11.305 0-20.48 9.155-20.48 20.48s9.175 20.48 20.48 20.48h409.252zM832.86 583.68h-614.4c-11.305 0-20.48 9.155-20.48 20.48s9.175 20.48 20.48 20.48h614.4c11.305 0 20.48-9.155 20.48-20.48s-9.175-20.48-20.48-20.48zM832.86 256h-614.4c-11.305 0-20.48 9.155-20.48 20.48s9.175 20.48 20.48 20.48h614.4c11.305 0 20.48-9.155 20.48-20.48S844.165 256 832.86 256zM218.46 460.8h409.252c11.305 0 20.48-9.155 20.48-20.48s-9.175-20.48-20.48-20.48H218.46c-11.305 0-20.48 9.155-20.48 20.48s9.155 20.48 20.48 20.48z"
+    ],
+    alignRight: [
+      "M832.86 747.52H423.588a20.48 20.48 0 1 0 0 40.96H832.84a20.48 20.48 0 0 0 0.02-40.96z m20.48-143.36a20.48 20.48 0 0 0-20.48-20.48h-614.4a20.48 20.48 0 1 0 0 40.96h614.4a20.48 20.48 0 0 0 20.48-20.48zM832.86 256h-614.4a20.48 20.48 0 1 0 0 40.96h614.4a20.48 20.48 0 1 0 0-40.96z m0 163.84H423.588a20.48 20.48 0 1 0 0 40.96H832.84a20.48 20.48 0 0 0 0.02-40.96z"
+    ],
+    bold: [
+      "M724.342857 477.028571c38.4-40 61.942857-94.057143 61.942857-153.485714v-11.657143C786.285714 188.914286 685.6 89.142857 561.485714 89.142857H223.314286c-17.257143 0-31.314286 14.057143-31.314286 31.314286v776.114286c0 18.628571 15.085714 33.714286 33.714286 33.714285h364.228571c133.714286 0 242.057143-107.657143 242.057143-240.571428v-12.571429c0-83.428571-42.742857-156.914286-107.657143-200.114286zM301.714286 198.857143h256.8c65.257143 0 118.057143 50.742857 118.057143 113.485714v10.857143c0 62.628571-52.914286 113.485714-118.057143 113.485714H301.714286V198.857143z m418.971428 490.742857c0 71.885714-59.085714 130.171429-132 130.171429H301.714286V547.085714h286.971428c72.914286 0 132 58.285714 132 130.171429v12.342857z"
+    ],
+    fontColor: [
+      "M650.496 597.333333H373.504l-68.266667 170.666667H213.333333l256-640h85.333334l256 640h-91.904l-68.266667-170.666667z m-34.133333-85.333333L512 251.093333 407.637333 512h208.725334zM128 853.333333h768v85.333334H128v-85.333334z"
+    ],
+    italic: [
+      "M219.428571 949.714286l9.714286-48.571429q3.428571-1.142857 46.571429-12.285714t63.714286-21.428571q16-20 23.428571-57.714286 0.571429-4 35.428571-165.142857t65.142857-310.571429 29.714286-169.428571l0-14.285714q-13.714286-7.428571-31.142857-10.571429t-39.714286-4.571429-33.142857-3.142857l10.857143-58.857143q18.857143 1.142857 68.571429 3.714286t85.428571 4 68.857143 1.428571q27.428571 0 56.285714-1.428571t69.142857-4 56.285714-3.714286q-2.857143 22.285714-10.857143 50.857143-17.142857 5.714286-58 16.285714t-62 19.142857q-4.571429 10.857143-8 24.285714t-5.142857 22.857143-4.285714 26-3.714286 24q-15.428571 84.571429-50 239.714286t-44.285714 203.142857q-1.142857 5.142857-7.428571 33.142857t-11.428571 51.428571-9.142857 47.714286-3.428571 32.857143l0.571429 10.285714q9.714286 2.285714 105.714286 17.714286-1.714286 25.142857-9.142857 56.571429-6.285714 0-18.571429 0.857143t-18.571429 0.857143q-16.571429 0-49.714286-5.714286t-49.142857-5.714286q-78.857143-1.142857-117.714286-1.142857-29.142857 0-81.714286 5.142857t-69.142857 6.285714z"
+    ],
+    middleAlign: [
+      "M740.43392 788.48c11.30496 0 20.48-9.15456 20.48-20.48s-9.17504-20.48-20.48-20.48L331.18208 747.52c-11.30496 0-20.48 9.15456-20.48 20.48s9.17504 20.48 20.48 20.48L740.43392 788.48zM863.49824 604.16c0-11.32544-9.17504-20.48-20.48-20.48l-614.4 0c-11.30496 0-20.48 9.15456-20.48 20.48s9.17504 20.48 20.48 20.48l614.4 0C854.3232 624.64 863.49824 615.48544 863.49824 604.16zM208.13824 276.48c0 11.32544 9.17504 20.48 20.48 20.48l614.4 0c11.30496 0 20.48-9.15456 20.48-20.48s-9.17504-20.48-20.48-20.48l-614.4 0C217.2928 256 208.13824 265.15456 208.13824 276.48zM740.43392 460.8c11.30496 0 20.48-9.15456 20.48-20.48s-9.17504-20.48-20.48-20.48L331.18208 419.84c-11.30496 0-20.48 9.15456-20.48 20.48s9.17504 20.48 20.48 20.48L740.43392 460.8z"
+    ],
+    plus: [
+      "M896 468.571429H555.428571V100.571429h-86.857142v368H128c-5.028571 0-9.142857 4.114286-9.142857 9.142857v68.571428c0 5.028571 4.114286 9.142857 9.142857 9.142857h340.571429v368h86.857142V555.428571h340.571429c5.028571 0 9.142857-4.114286 9.142857-9.142857v-68.571428c0-5.028571-4.114286-9.142857-9.142857-9.142857z"
+    ],
+    redo: [
+      "M611.783111 569.344L549.622519 644.740741h284.444444l-65.498074-265.481482-59.922963 72.666074c-35.422815-28.48237-108.278519-68.342519-238.667852-68.342518-202.827852 0-280.651852 206.01363-280.651852 206.013629s116.318815-132.778667 246.215111-132.778666c97.204148-0.037926 153.865481 74.827852 176.241778 112.526222z"
+    ],
+    underline: [
+      "M512 725.333333c166.4 0 298.666667-132.266667 298.666667-298.666666V128c0-25.6-17.066667-42.666667-42.666667-42.666667s-42.666667 17.066667-42.666667 42.666667v298.666667c0 119.466667-93.866667 213.333333-213.333333 213.333333s-213.333333-93.866667-213.333333-213.333333V128c0-25.6-17.066667-42.666667-42.666667-42.666667s-42.666667 17.066667-42.666667 42.666667v298.666667c0 166.4 132.266667 298.666667 298.666667 298.666666zM853.333333 853.333333H170.666667c-25.6 0-42.666667 17.066667-42.666667 42.666667s17.066667 42.666667 42.666667 42.666667h682.666666c25.6 0 42.666667-17.066667 42.666667-42.666667s-17.066667-42.666667-42.666667-42.666667z"
+    ],
+    undo: [
+      "M489.244444 568.888889l60.681482 75.851852H265.481481l64.474075-265.481482 60.681481 72.05926c34.133333-30.340741 109.985185-68.266667 238.933333-68.266667 201.007407 0 280.651852 204.8 280.651852 204.8S792.651852 455.111111 663.703704 455.111111c-98.607407 0-155.496296 75.851852-174.45926 113.777778z"
+    ]
+  };
+  var icon_default = icon;
+
+  // src/components/BaseIcon/BaseIcon.ts
+  var BaseIcon = ({
+    className = "",
+    paths = []
+  }) => {
+    return h(
+      "svg",
+      {
+        className: classnames("base-icon", className),
+        viewBox: "0 0 1137 1024",
+        "aria-hidden": true
+      },
+      ...paths.map((item) => h("path", item))
+    );
+  };
+  BaseIcon.displayName = "BaseIcon";
+
+  // src/components/BaseIcon/FillColorIcon.ts
+  var FillColorIcon = () => {
+    return BaseIcon({
+      paths: [
+        {
+          d: "M0 0h1024v1024H0z",
+          "fill-opacity": ".01"
+        },
+        {
+          d: "M496.512 32a128 128 0 0 1 127.84 121.6l0.16 6.4-0.032 113.504 264.256 264.256a32 32 0 0 1-8.16 51.2l-144.064 72.96-269.12 269.12a64 64 0 0 1-90.496 0l-294.144-294.176a64 64 0 0 1 0-90.496l286.016-286.08-0.192-2.048-0.064-2.08V160a128 128 0 0 1 128-128z m-6.464 197.568L128 591.616l294.144 294.144 276.32-276.32 113.792-57.632-187.776-187.776V416a32 32 0 0 1-28.256 31.776l-3.712 0.224a32 32 0 0 1-31.808-28.256L560.512 416l-0.032-115.968-70.432-70.464z m402.016 395.936l1.792 2.24 5.472 8.416c30.112 46.752 45.184 80.032 45.184 99.84a64 64 0 1 1-128 0c0-20.96 16.864-57.024 50.624-108.224a16 16 0 0 1 24.928-2.24zM496.512 96a64 64 0 0 0-63.84 59.2l-0.16 4.8-0.032 36.576 34.944-34.88a32 32 0 0 1 45.248 0l47.808 47.808V160a64 64 0 0 0-59.2-63.84L496.48 96z"
+        }
+      ]
+    });
+  };
+  FillColorIcon.displayName = "FillColorIcon";
+
+  // src/components/BaseIcon/index.ts
+  var Icon = ({ name, className = "" }) => {
+    const paths = icon_default[name].map((item) => ({ d: item }));
+    return BaseIcon({ className, paths });
+  };
+  Icon.displayName = "Icon";
+
+  // src/components/Select/index.ts
+  var Select = (props) => {
+    const {
+      data,
+      value: activeValue,
+      style = {},
+      onChange,
+      getItemStyle = () => ({})
+    } = props;
+    const handleChange = (event) => {
+      const { value } = event.target;
+      onChange(value);
+    };
+    return h(
+      "select",
+      {
+        onchange: handleChange,
+        value: activeValue,
+        style,
+        name: "select",
+        className: "select-list"
+      },
+      ...data.map((item) => {
+        const value = typeof item === "object" ? item.value : item;
+        const label = typeof item === "object" ? item.label : item;
+        const disabled = typeof item === "object" ? item.disabled : false;
+        const itemStyle = getItemStyle(value);
+        return h(
+          "option",
+          {
+            key: value,
+            value,
+            style: itemStyle,
+            disabled: !!disabled,
+            className: classnames("select-item", { disabled })
+          },
+          label
+        );
+      })
+    );
+  };
+  Select.displayName = "Select";
+
+  // src/components/ColorPicker/index.tsx
+  var COLOR_LIST = [
+    "#4D4D4D",
+    "#999999",
+    "#FFFFFF",
+    "#F44E3B",
+    "#FE9200",
+    "#FCDC00",
+    "#DBDF00",
+    "#A4DD00",
+    "#68CCCA",
+    "#73D8FF",
+    "#AEA1FF",
+    "#FDA1FF",
+    "#333333",
+    "#808080",
+    "#cccccc",
+    "#D33115",
+    "#E27300",
+    "#FCC400",
+    "#B0BC00",
+    "#68BC00",
+    "#16A5A5",
+    "#009CE0",
+    "#7B64FF",
+    "#FA28FF",
+    "#000000",
+    "#666666",
+    "#B3B3B3",
+    "#9F0500",
+    "#C45100",
+    "#FB9E00",
+    "#808900",
+    "#194D33",
+    "#0C797D",
+    "#0062B1",
+    "#653294",
+    "#AB149E"
+  ];
+  var baseClassName = "color-picker-wrapper";
+  var ColorPicker = (props, ...children) => {
+    const { color: color2, style = {}, onChange, key } = props;
+    let ref;
+    const toggleVisible = (value) => {
+      let className = baseClassName;
+      if (value) {
+        className = className + " show";
+      }
+      ref.className = className;
+    };
+    return h(
+      "div",
+      {
+        className: "relative color-picker",
+        key,
+        style
+      },
+      h(
+        "div",
+        {
+          className: "color-picker-trigger",
+          style: {
+            color: color2
+          },
+          onclick: () => {
+            toggleVisible(true);
+          }
+        },
+        ...children
+      ),
+      h(
+        "div",
+        {
+          className: baseClassName,
+          hook: {
+            ref: (dom) => {
+              ref = dom;
+            }
+          },
+          onmouseleave() {
+            toggleVisible(false);
+          }
+        },
+        h(
+          "div",
+          {
+            className: "color-picker-list"
+          },
+          ...COLOR_LIST.map(
+            (item) => h("div", {
+              key: item,
+              className: "color-picker-item",
+              style: {
+                backgroundColor: item
+              },
+              onclick: () => {
+                toggleVisible(false);
+                onChange(item);
+              }
+            })
+          )
+        )
+      )
+    );
+  };
+  ColorPicker.displayName = "ColorPicker";
+
+  // src/containers/ToolBar/index.ts
+  var ToolbarContainer = (state, controller) => {
+    const getItemStyle = (value) => {
+      return {
+        "font-family": String(value)
+      };
+    };
+    const setCellStyle = (value) => {
+      controller.setCellStyle(value);
+    };
+    const { activeCell, canRedo, canUndo, fontFamilyList } = state;
+    const { style = {} } = activeCell;
+    const {
+      isBold,
+      isItalic,
+      fontSize = DEFAULT_FONT_SIZE,
+      fontColor = DEFAULT_FONT_COLOR,
+      fillColor = "",
+      fontFamily = DEFAULT_FONT_FAMILY,
+      wrapText
+    } = style;
+    return h(
+      "div",
+      {
+        className: "toolbar-wrapper"
+      },
+      Button(
+        {
+          disabled: !canUndo,
+          onClick() {
+            controller.undo();
+          },
+          testId: "toolbar-undo"
+        },
+        Icon({ name: "undo" })
+      ),
+      Button(
+        {
+          disabled: !canRedo,
+          onClick() {
+            controller.redo();
+          },
+          testId: "toolbar-redo"
+        },
+        Icon({ name: "redo" })
+      ),
+      Button(
+        {
+          active: isBold,
+          onClick: () => {
+            setCellStyle({
+              isBold: !isBold
+            });
+          },
+          testId: "toolbar-bold"
+        },
+        Icon({ name: "bold" })
+      ),
+      Button(
+        {
+          active: isItalic,
+          onClick: () => {
+            setCellStyle({
+              isItalic: !isItalic
+            });
+          },
+          testId: "toolbar-italic"
+        },
+        Icon({ name: "italic" })
+      ),
+      Button(
+        {
+          onClick: () => {
+            setCellStyle({ wrapText: 1 /* AUTO_WRAP */ });
+          },
+          active: wrapText === 1 /* AUTO_WRAP */,
+          testId: "toolbar-wrap-text"
+        },
+        "Wrap Text"
+      ),
+      Select({
+        data: fontFamilyList,
+        value: fontFamily,
+        style: {
+          width: "140px"
+        },
+        getItemStyle,
+        onChange: (value) => {
+          setCellStyle({ fontFamily: String(value) });
+        }
+      }),
+      Select({
+        data: FONT_SIZE_LIST,
+        value: fontSize,
+        onChange: (value) => {
+          setCellStyle({ fontSize: Number(value) });
+        }
+      }),
+      ColorPicker(
+        {
+          color: fontColor,
+          onChange: (value) => {
+            setCellStyle({ fontColor: value });
+          },
+          key: "font-color"
+        },
+        Icon({ name: "fontColor" })
+      ),
+      ColorPicker(
+        {
+          key: "fill-color",
+          color: fillColor,
+          onChange: (value) => {
+            setCellStyle({ fillColor: value });
+          }
+        },
+        FillColorIcon({})
+      ),
+      Github({})
+    );
+  };
+  ToolbarContainer.displayName = "ToolbarContainer";
+
+  // src/theme/size.ts
+  var size = {
+    smallFont: "10px",
+    font: "12px",
+    largeFont: "14px",
+    padding: "12px",
+    fontFamily: `${DEFAULT_FONT_FAMILY},${MUST_FONT_FAMILY}`,
+    lineHeight: "1.5",
+    mediumPadding: "8px",
+    borderRadius: "4px",
+    tinyPadding: "4px"
+  };
+  var size_default = size;
+
+  // src/theme/color.ts
+  var color = {
+    primaryColor: "#217346",
+    buttonActiveColor: "rgb(198,198,198)",
+    selectionColor: "rgba(198,198,198,0.3)",
+    backgroundColor: "#e6e6e6",
+    white: "#ffffff",
+    black: "#000000",
+    gridStrokeColor: "#d4d4d4",
+    triangleFillColor: "#b4b4b4",
+    contentColor: DEFAULT_FONT_COLOR,
+    borderColor: "#cccccc",
+    activeBorderColor: "#808080",
+    disabledColor: "#ccc"
+  };
+  var color_default = color;
+
+  // src/theme/index.ts
+  var theme = {
+    ...size_default,
+    ...color_default
+  };
+  var theme_default = theme;
+
+  // src/containers/SheetBar/index.ts
+  var SheetBarContainer = (state, controller) => {
+    return h(
+      "div",
+      {
+        className: "sheet-bar-wrapper"
+      },
+      h(
+        "div",
+        {
+          className: "sheet-bar-list"
+        },
+        ...state.sheetList.map((item) => {
+          return h(
+            "div",
+            {
+              key: item.sheetId,
+              className: classnames("sheet-bar-item", {
+                active: state.currentSheetId === item.sheetId
+              }),
+              onclick: () => {
+                controller.setCurrentSheetId(item.sheetId);
+              }
+            },
+            item.name
+          );
+        })
+      ),
+      h(
+        "div",
+        {
+          className: "sheet-bar-add"
+        },
+        Button(
+          {
+            onClick: () => {
+              controller.addSheet();
+            },
+            type: "circle",
+            style: {
+              backgroundColor: theme_default.buttonActiveColor
+            }
+          },
+          Icon({
+            name: "plus"
+          })
+        )
+      )
+    );
+  };
+  SheetBarContainer.displayName = "SheetBarContainer";
+
+  // src/containers/ContextMenu/index.ts
+  var defaultStyle = {
+    display: "none"
+  };
+  var ContextMenuContainer = (state, controller) => {
+    const { contextMenuPosition } = state;
+    const style = contextMenuPosition === void 0 ? defaultStyle : {
+      top: contextMenuPosition.top,
+      left: contextMenuPosition.left
+    };
+    const hideContextMenu = () => {
+      state.contextMenuPosition = void 0;
+    };
+    return h(
+      "div",
+      {
+        className: "context-menu",
+        style
+      },
+      Button(
+        {
+          onClick() {
+            controller.addCol(controller.getActiveCell().col, 1);
+            hideContextMenu();
+          }
+        },
+        "\u65B0\u589E\u4E00\u5217"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.addRow(controller.getActiveCell().row, 1);
+            hideContextMenu();
+          }
+        },
+        "\u65B0\u589E\u4E00\u884C"
+      )
+    );
+  };
+  ContextMenuContainer.displayName = "ContextMenuContainer";
+
+  // src/App.ts
+  var App = (state, controller) => {
+    return h(
+      "div",
+      {
+        className: "app-container"
+      },
+      ToolbarContainer(state, controller),
+      FormulaBarContainer(state, controller),
+      CanvasContainer(state, controller),
+      SheetBarContainer(state, controller),
+      ContextMenuContainer(state, controller)
+    );
+  };
+  App.displayName = "App";
+
+  // src/controller/Controller.ts
+  var DEFAULT_ACTIVE_CELL = { row: 0, col: 0 };
+  var CELL_HEIGHT = 20;
+  var CELL_WIDTH = 68;
+  var ROW_TITLE_HEIGHT = 20;
+  var COL_TITLE_WIDTH = 34;
+  var defaultScrollValue = {
+    top: 0,
+    left: 0,
+    row: 0,
+    col: 0,
+    scrollLeft: 0,
+    scrollTop: 0
+  };
+  var Controller = class {
+    scrollValue = {};
+    model;
+    ranges = [];
+    changeSet = /* @__PURE__ */ new Set();
+    hooks = {
+      modelChange() {
+      }
+    };
+    history;
+    rowMap = /* @__PURE__ */ new Map([]);
+    colMap = /* @__PURE__ */ new Map([]);
+    viewSize = {
+      width: 0,
+      height: 0
+    };
+    constructor(model, history) {
+      this.model = model;
+      this.ranges = [
+        new Range(
+          DEFAULT_ACTIVE_CELL.row,
+          DEFAULT_ACTIVE_CELL.col,
+          1,
+          1,
+          this.getCurrentSheetId()
+        )
+      ];
+      this.history = history;
+    }
+    getCurrentSheetId() {
+      return this.model.getCurrentSheetId();
+    }
+    getSheetList() {
+      return this.model.getSheetList();
+    }
+    getCellsContent(sheetId) {
+      return this.model.getCellsContent(sheetId);
+    }
+    getSheetInfo(sheetId) {
+      return this.model.getSheetInfo(sheetId);
+    }
+    getRanges() {
+      return this.ranges;
+    }
+    setHooks(hooks2) {
+      this.hooks = hooks2;
+    }
+    emitChange(recordHistory = true) {
+      controllerLog("emitChange", this.changeSet);
+      if (recordHistory) {
+        this.history.onChange(this.toJSON());
+      }
+      this.hooks.modelChange(this.changeSet);
+      this.changeSet = /* @__PURE__ */ new Set();
+    }
+    getActiveCell() {
+      const { activeCell } = this.getSheetInfo();
+      if (!activeCell) {
+        return { ...DEFAULT_ACTIVE_CELL };
+      }
+      const result = parseReference(activeCell);
+      assert(!!result);
+      const { row, col } = result;
+      return { row, col };
+    }
+    setActiveCell(row = -1, col = -1, colCount = 1, rowCount = 1) {
+      this.changeSet.add("selectionChange");
+      let position = { ...DEFAULT_ACTIVE_CELL };
+      if (row === col && row === -1) {
+        position = this.getActiveCell();
+      } else {
+        position = { row, col };
+      }
+      this.model.setActiveCell(position.row, position.col);
+      this.ranges = [
+        new Range(
+          position.row,
+          position.col,
+          colCount,
+          rowCount,
+          this.getCurrentSheetId()
+        )
+      ];
+      this.emitChange();
+    }
+    setCurrentSheetId(id) {
+      if (id === this.getCurrentSheetId()) {
+        return;
+      }
+      this.model.setCurrentSheetId(id);
+      this.setActiveCell();
+      this.changeSet.add("contentChange");
+      this.computeViewSize();
+      this.emitChange();
+    }
+    addSheet() {
+      this.model.addSheet();
+      this.computeViewSize();
+      this.model.setActiveCell(0, 0);
+      this.setScroll({
+        top: 0,
+        left: 0,
+        row: 0,
+        col: 0,
+        scrollLeft: 0,
+        scrollTop: 0
+      });
+    }
+    selectAll(row, col) {
+      this.setActiveCell(row, col, 0, 0);
+      controllerLog("selectAll");
+    }
+    selectCol(row, col) {
+      const sheetInfo = this.model.getSheetInfo();
+      this.setActiveCell(row, col, sheetInfo.rowCount, 0);
+      controllerLog("selectCol");
+    }
+    selectRow(row, col) {
+      const sheetInfo = this.model.getSheetInfo();
+      this.setActiveCell(row, col, 0, sheetInfo.colCount);
+      controllerLog("selectRow");
+    }
+    fromJSON(json) {
+      controllerLog("loadJSON", json);
+      this.model.fromJSON(json);
+      this.model.setActiveCell(0, 0);
+      this.changeSet.add("contentChange");
+      this.emitChange(false);
+    }
+    toJSON() {
+      return this.model.toJSON();
+    }
+    updateSelection(row, col) {
+      const activeCell = this.getActiveCell();
+      if (activeCell.row === row && activeCell.col === col) {
+        return;
+      }
+      const colCount = Math.abs(col - activeCell.col) + 1;
+      const rowCount = Math.abs(row - activeCell.row) + 1;
+      const temp = new Range(
+        Math.min(activeCell.row, row),
+        Math.min(activeCell.col, col),
+        rowCount,
+        colCount,
+        this.getCurrentSheetId()
+      );
+      this.ranges = [temp];
+      controllerLog("updateSelection", temp);
+      this.changeSet.add("selectionChange");
+      this.emitChange();
+    }
+    setCellValue(data, value) {
+      controllerLog("setCellValue", value);
+      const temp = [
+        new Range(data.row, data.col, 1, 1, this.getCurrentSheetId())
+      ];
+      this.model.setCellValues(value, temp);
+      this.changeSet.add("contentChange");
+      this.emitChange();
+    }
+    setCellStyle(style, ranges = this.ranges) {
+      if (isEmpty(style)) {
+        return;
+      }
+      this.model.setCellStyle(style, ranges);
+      this.changeSet.add("contentChange");
+      this.emitChange();
+    }
+    getCell = (data) => {
+      const { row, col } = data;
+      const { model } = this;
+      const { value, formula, style } = model.queryCell(row, col);
+      return {
+        value,
+        row,
+        col,
+        formula,
+        style
+      };
+    };
+    canRedo() {
+      return this.history.canRedo();
+    }
+    canUndo() {
+      return this.history.canUndo();
+    }
+    undo() {
+      const result = this.history.undo(this.toJSON());
+      if (result) {
+        this.fromJSON(result);
+      }
+    }
+    redo() {
+      const result = this.history.redo(this.toJSON());
+      if (result) {
+        this.fromJSON(result);
+      }
+    }
+    getColWidth(col) {
+      return this.colMap.get(col) || CELL_WIDTH;
+    }
+    setColWidth(col, width) {
+      this.colMap.set(col, width);
+      this.computeViewSize();
+      this.changeSet.add("contentChange");
+    }
+    getRowHeight(row) {
+      return this.rowMap.get(row) || CELL_HEIGHT;
+    }
+    setRowHeight(row, height) {
+      this.rowMap.set(row, height);
+      this.computeViewSize();
+      this.changeSet.add("contentChange");
+    }
+    computeViewSize() {
+      const headerSize = this.getHeaderSize();
+      const sheetInfo = this.model.getSheetInfo();
+      let width = headerSize.width;
+      let height = headerSize.height;
+      for (let i = 0; i < sheetInfo.colCount; i++) {
+        width += this.getColWidth(i);
+      }
+      for (let i = 0; i < sheetInfo.rowCount; i++) {
+        height += this.getRowHeight(i);
+      }
+      this.viewSize = {
+        width,
+        height
+      };
+    }
+    getViewSize() {
+      return {
+        ...this.viewSize
+      };
+    }
+    getCellSize(row, col) {
+      return { width: this.getColWidth(col), height: this.getRowHeight(row) };
+    }
+    getHeaderSize() {
+      return {
+        width: COL_TITLE_WIDTH,
+        height: ROW_TITLE_HEIGHT
+      };
+    }
+    computeCellPosition(row, col) {
+      const size2 = this.getHeaderSize();
+      const scroll = this.getScroll();
+      let resultX = size2.width;
+      let resultY = size2.height;
+      let r = scroll.row;
+      let c = scroll.col;
+      while (c < col) {
+        resultX += this.getColWidth(c);
+        c++;
+      }
+      while (r < row) {
+        resultY += this.getRowHeight(r);
+        r++;
+      }
+      const cellSize = this.getCellSize(row, col);
+      return { ...cellSize, top: resultY, left: resultX };
+    }
+    addRow(rowIndex, count) {
+      this.model.addRow(rowIndex, count);
+      this.changeSet.add("contentChange");
+      this.emitChange();
+    }
+    addCol(colIndex, count) {
+      this.model.addCol(colIndex, count);
+      this.changeSet.add("contentChange");
+      this.emitChange();
+    }
+    getChangeSet() {
+      const result = this.changeSet;
+      this.changeSet = /* @__PURE__ */ new Set();
+      return result;
+    }
+    getScroll() {
+      const sheetId = this.model.getCurrentSheetId();
+      const result = this.scrollValue[sheetId] || defaultScrollValue;
+      return result;
+    }
+    setScroll(data) {
+      const sheetId = this.model.getCurrentSheetId();
+      this.scrollValue[sheetId] = {
+        ...data
+      };
+      this.changeSet.add("contentChange");
+      this.emitChange();
+    }
+  };
+
+  // src/controller/History.ts
+  var History = class {
+    undoList = [];
+    redoList = [];
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.undoList = [];
+      this.redoList = [];
+    }
+    onChange(sheetData) {
+      this.addUndoData(sheetData);
+      this.redoList = [];
+    }
+    addUndoData(sheetData) {
+      this.undoList.push(JSON.stringify(sheetData));
+    }
+    addRedoData(sheetData) {
+      this.redoList.push(JSON.stringify(sheetData));
+    }
+    getUndoData() {
+      const temp = this.undoList.pop();
+      return temp ? JSON.parse(temp) : temp;
+    }
+    getRedoData() {
+      const temp = this.redoList.pop();
+      return temp ? JSON.parse(temp) : temp;
+    }
+    canRedo() {
+      return this.redoList.length > 0;
+    }
+    canUndo() {
+      return this.undoList.length > 0;
+    }
+    redo(sheetData) {
+      if (this.canRedo()) {
+        this.addUndoData(sheetData);
+        return this.getRedoData();
+      }
+      return void 0;
+    }
+    undo(sheetData) {
+      if (this.canUndo()) {
+        this.addRedoData(sheetData);
+        return this.getUndoData();
+      }
+      return void 0;
+    }
+  };
+
+  // src/parser/token.ts
+  var Token = class {
+    type;
+    value;
+    constructor(type, value) {
+      this.type = type;
+      this.value = value;
+    }
+    error() {
+      return `type:${this.type},value:${this.value}`;
+    }
+  };
+
+  // src/parser/error.ts
+  var CustomError = class extends Error {
+    value;
+    constructor(value) {
+      super(value);
+      this.value = value;
+    }
+  };
+
+  // src/parser/scanner.ts
+  var emptyData = "";
+  var identifierMap = /* @__PURE__ */ new Map([
+    ["TRUE", 19 /* TRUE */],
+    ["FALSE", 20 /* FALSE */]
+  ]);
+  var Scanner = class {
+    list;
+    current = 0;
+    start = 0;
+    tokens = [];
+    constructor(source) {
+      this.list = [...source];
+    }
+    scan() {
+      while (!this.isAtEnd()) {
+        this.start = this.current;
+        this.scanToken();
+      }
+      this.tokens.push(new Token(26 /* EOF */, ""));
+      if (this.tokens.length > 0 && this.tokens[0].type === 0 /* EQUAL */) {
+        this.tokens.shift();
+      }
+      return this.tokens;
+    }
+    peek() {
+      if (this.isAtEnd()) {
+        return emptyData;
+      }
+      return this.list[this.current];
+    }
+    match(text) {
+      if (this.peek() !== text) {
+        return false;
+      }
+      this.next();
+      return true;
+    }
+    next() {
+      if (this.isAtEnd()) {
+        return emptyData;
+      }
+      return this.list[this.current++];
+    }
+    isAtEnd() {
+      return this.current >= this.list.length;
+    }
+    addToken(type) {
+      const text = this.list.slice(this.start, this.current).join("");
+      this.tokens.push(new Token(type, text));
+    }
+    string(end) {
+      while (!this.isAtEnd() && this.peek() !== end) {
+        this.next();
+      }
+      if (this.peek() !== end) {
+        throw new CustomError("#VALUE!");
+      } else {
+        this.next();
+      }
+      const text = this.list.slice(this.start + 1, this.current - 1).join("");
+      this.tokens.push(new Token(17 /* STRING */, text));
+    }
+    number() {
+      while (!this.isAtEnd() && this.isDigit(this.peek())) {
+        this.next();
+      }
+      if (this.match(".")) {
+        while (!this.isAtEnd() && this.isDigit(this.peek())) {
+          this.next();
+        }
+      }
+      this.addToken(18 /* NUMBER */);
+    }
+    isDigit(char) {
+      return char >= "0" && char <= "9";
+    }
+    identifier() {
+      while (!this.isAtEnd() && this.anyChar(this.peek())) {
+        this.next();
+      }
+      let text = this.list.slice(this.start, this.current).join("");
+      const temp = identifierMap.get(text.toUpperCase());
+      let type = 16 /* IDENTIFIER */;
+      if (temp) {
+        text = text.toUpperCase();
+        type = temp;
+      }
+      this.tokens.push(new Token(type, text));
+    }
+    scanToken() {
+      const c = this.next();
+      switch (c) {
+        case "(":
+          this.addToken(21 /* LEFT_BRACKET */);
+          break;
+        case ")":
+          this.addToken(22 /* RIGHT_BRACKET */);
+          break;
+        case ",":
+          this.addToken(11 /* COMMA */);
+          break;
+        case ":":
+          this.addToken(10 /* COLON */);
+          break;
+        case "=":
+          this.addToken(0 /* EQUAL */);
+          break;
+        case "<":
+          if (this.match(">")) {
+            this.addToken(1 /* NOT_EQUAL */);
+          } else if (this.match("=")) {
+            this.addToken(15 /* LESS_EQUAL */);
+          } else {
+            this.addToken(14 /* LESS */);
+          }
+          break;
+        case ">":
+          if (this.match("=")) {
+            this.addToken(8 /* GREATER_EQUAL */);
+          } else {
+            this.addToken(7 /* GREATER */);
+          }
+          break;
+        case "+":
+          this.addToken(2 /* PLUS */);
+          break;
+        case "-":
+          this.addToken(3 /* MINUS */);
+          break;
+        case "*":
+          this.addToken(4 /* STAR */);
+          break;
+        case "/":
+          this.addToken(5 /* SLASH */);
+          break;
+        case "^":
+          this.addToken(6 /* EXPONENT */);
+          break;
+        case "&":
+          this.addToken(9 /* CONCATENATE */);
+          break;
+        case "%":
+          this.addToken(13 /* PERCENT */);
+          break;
+        case '"':
+          this.string(c);
+          break;
+        case ";":
+          this.addToken(25 /* SEMICOLON */);
+          break;
+        case "{":
+          this.addToken(23 /* lEFT_BRACE */);
+          break;
+        case "}":
+          this.addToken(24 /* RIGHT_BRACE */);
+          break;
+        case " ":
+          break;
+        case "\r":
+        case "	":
+        case "\n":
+          break;
+        default:
+          if (this.isDigit(c)) {
+            this.number();
+          } else if (this.anyChar(c)) {
+            this.identifier();
+          } else {
+            throw new CustomError("#ERROR!");
+          }
+          break;
+      }
+    }
+    anyChar(c) {
+      const text = '(),:=<>+-*/^&%"{}';
+      return !text.includes(c) && !this.isWhiteSpace(c);
+    }
+    isWhiteSpace(c) {
+      return c === " " || c === "\r" || c === "\n" || c === "	";
+    }
+  };
+
+  // src/parser/expression.ts
+  var BinaryExpression = class {
+    left;
+    right;
+    operator;
+    constructor(left, operator, right) {
+      this.left = left;
+      this.operator = operator;
+      this.right = right;
+    }
+    accept(visitor) {
+      return visitor.visitBinaryExpression(this);
+    }
+    toString() {
+      return "";
+    }
+  };
+  var UnaryExpression = class {
+    right;
+    operator;
+    constructor(operator, right) {
+      this.operator = operator;
+      this.right = right;
+    }
+    accept(visitor) {
+      return visitor.visitUnaryExpression(this);
+    }
+    toString() {
+      return "";
+    }
+  };
+  var PostUnaryExpression = class {
+    left;
+    operator;
+    constructor(operator, left) {
+      this.operator = operator;
+      this.left = left;
+    }
+    accept(visitor) {
+      return visitor.visitPostUnaryExpression(this);
+    }
+    toString() {
+      return "";
+    }
+  };
+  var LiteralExpression = class {
+    value;
+    constructor(value) {
+      this.value = value;
+    }
+    accept(visitor) {
+      return visitor.visitLiteralExpression(this);
+    }
+    toString() {
+      return "";
+    }
+  };
+  var CellExpression = class {
+    value;
+    sheetName;
+    type;
+    constructor(value, type, sheetName) {
+      this.value = value;
+      this.sheetName = sheetName;
+      this.type = type;
+    }
+    accept(visitor) {
+      return visitor.visitCellExpression(this);
+    }
+    toString() {
+      return "";
+    }
+  };
+  var CallExpression = class {
+    name;
+    params;
+    constructor(name, params) {
+      this.name = name;
+      this.params = params;
+    }
+    accept(visitor) {
+      return visitor.visitCallExpression(this);
+    }
+    toString() {
+      return "";
+    }
+  };
+  var ErrorExpression = class {
+    value;
+    constructor(value) {
+      this.value = value;
+    }
+    accept(visitor) {
+      return visitor.visitErrorExpression(this);
+    }
+    toString() {
+      return "";
+    }
+  };
+  var CellRangeExpression = class {
+    left;
+    right;
+    operator;
+    constructor(left, operator, right) {
+      this.left = left;
+      this.operator = operator;
+      this.right = right;
+    }
+    accept(visitor) {
+      return visitor.visitCellRangeExpression(this);
+    }
+    toString() {
+      return "";
+    }
+  };
+  var GroupExpression = class {
+    value;
+    constructor(value) {
+      this.value = value;
+    }
+    accept(visitor) {
+      return visitor.visitGroupExpression(this);
+    }
+    toString() {
+      return "";
+    }
+  };
+  var DefineNameExpression = class {
+    value;
+    constructor(value) {
+      this.value = value;
+    }
+    accept(visitor) {
+      return visitor.visitDefineNameExpression(this);
+    }
+    toString() {
+      return "";
+    }
+  };
+
+  // src/parser/parser.ts
+  var errorSet = /* @__PURE__ */ new Set([
+    "#ERROR!",
+    "#DIV/0!",
+    "#NULL!",
+    "#NUM!",
+    "#REF!",
+    "#VALUE!",
+    "#N/A",
+    "#NAME?"
+  ]);
+  var Parser = class {
+    tokens;
+    current = 0;
+    constructor(tokens) {
+      this.tokens = tokens;
+    }
+    parse() {
+      const result = [];
+      while (!this.isAtEnd()) {
+        result.push(this.expression());
+      }
+      return result;
+    }
+    expression() {
+      return this.comparison();
+    }
+    comparison() {
+      let expr = this.concatenate();
+      while (this.match(
+        0 /* EQUAL */,
+        1 /* NOT_EQUAL */,
+        7 /* GREATER */,
+        8 /* GREATER_EQUAL */,
+        14 /* LESS */,
+        15 /* LESS_EQUAL */
+      )) {
+        const operator = this.previous();
+        const right = this.concatenate();
+        expr = new BinaryExpression(expr, operator, right);
+      }
+      return expr;
+    }
+    concatenate() {
+      let expr = this.term();
+      while (this.match(9 /* CONCATENATE */)) {
+        const operator = this.previous();
+        const right = this.term();
+        expr = new BinaryExpression(expr, operator, right);
+      }
+      return expr;
+    }
+    term() {
+      let expr = this.factor();
+      while (this.match(2 /* PLUS */, 3 /* MINUS */)) {
+        const operator = this.previous();
+        const right = this.factor();
+        expr = new BinaryExpression(expr, operator, right);
+      }
+      return expr;
+    }
+    factor() {
+      let expr = this.expo();
+      while (this.match(5 /* SLASH */, 4 /* STAR */)) {
+        const operator = this.previous();
+        const right = this.expo();
+        expr = new BinaryExpression(expr, operator, right);
+      }
+      return expr;
+    }
+    expo() {
+      let expr = this.unary();
+      while (this.match(6 /* EXPONENT */)) {
+        const operator = this.previous();
+        const right = this.unary();
+        expr = new BinaryExpression(expr, operator, right);
+      }
+      return expr;
+    }
+    unary() {
+      if (this.match(2 /* PLUS */, 3 /* MINUS */)) {
+        const operator = this.previous();
+        const right = this.unary();
+        return new UnaryExpression(operator, right);
+      }
+      return this.postUnary();
+    }
+    postUnary() {
+      let expr = this.spread();
+      if (this.match(13 /* PERCENT */)) {
+        const operator = this.previous();
+        expr = new PostUnaryExpression(operator, expr);
+      }
+      return expr;
+    }
+    spread() {
+      let expr = this.call();
+      while (this.match(10 /* COLON */)) {
+        const operator = this.previous();
+        const right = this.call();
+        expr = new CellRangeExpression(expr, operator, right);
+      }
+      return expr;
+    }
+    call() {
+      let expr = this.primary();
+      if (this.match(21 /* LEFT_BRACKET */)) {
+        if (expr instanceof DefineNameExpression) {
+          expr = this.finishCall(expr.value);
+        } else {
+          throw new CustomError("#NAME?");
+        }
+      }
+      return expr;
+    }
+    finishCall(name) {
+      const params = [];
+      if (!this.check(22 /* RIGHT_BRACKET */)) {
+        do {
+          params.push(this.expression());
+        } while (this.match(11 /* COMMA */));
+      }
+      this.expect(22 /* RIGHT_BRACKET */);
+      let realName = name;
+      if (name.value[0] === "@") {
+        realName = new Token(16 /* IDENTIFIER */, name.value.slice(1));
+      }
+      return new CallExpression(realName, params);
+    }
+    primary() {
+      if (this.match(
+        18 /* NUMBER */,
+        17 /* STRING */,
+        19 /* TRUE */,
+        20 /* FALSE */
+      )) {
+        return new LiteralExpression(this.previous());
+      }
+      if (this.match(16 /* IDENTIFIER */)) {
+        const name = this.previous();
+        const { value, type } = name;
+        const realValue = value.toUpperCase();
+        const newToken = new Token(type, realValue);
+        if (errorSet.has(realValue)) {
+          return new ErrorExpression(new Token(type, realValue));
+        }
+        if (realValue && realValue[realValue.length - 1] === "!") {
+          const expr = this.expression();
+          if (expr instanceof CellExpression) {
+            return new CellExpression(expr.value, expr.type, name);
+          }
+          throw new CustomError("#REF!");
+        }
+        if (/^[a-z]+$/i.test(value)) {
+          return new DefineNameExpression(name);
+        }
+        if (/^\$[A-Z]+\$\d+$/.test(realValue) || /^\$[A-Z]+$/.test(realValue) || /^\$\d+$/.test(realValue)) {
+          return new CellExpression(newToken, "absolute", null);
+        }
+        if (/^\$[A-Z]+\d+$/.test(realValue) || /^[A-Z]+\$\d+$/.test(realValue)) {
+          return new CellExpression(newToken, "mixed", null);
+        }
+        if (/^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue)) {
+          return new CellExpression(newToken, "relative", null);
+        }
+      }
+      if (this.match(21 /* LEFT_BRACKET */)) {
+        const value = this.expression();
+        this.expect(22 /* RIGHT_BRACKET */);
+        return new GroupExpression(value);
+      }
+      throw new CustomError("#ERROR!");
+    }
+    match(...types) {
+      const type = this.peek().type;
+      if (types.includes(type)) {
+        this.next();
+        return true;
+      }
+      return false;
+    }
+    previous() {
+      return this.tokens[this.current - 1];
+    }
+    check(type) {
+      return this.peek().type === type;
+    }
+    expect(type) {
+      if (this.check(type)) {
+        this.next();
+        return this.previous();
+      } else {
+        throw new CustomError("#ERROR!");
+      }
+    }
+    next() {
+      this.current++;
+    }
+    isAtEnd() {
+      return this.peek().type === 26 /* EOF */;
+    }
+    peek() {
+      if (this.current < this.tokens.length) {
+        return this.tokens[this.current];
+      }
+      return new Token(26 /* EOF */, "");
+    }
+  };
+
+  // src/formula/text.ts
+  var T = (value) => {
+    return typeof value === "string" ? value : "";
+  };
+  var LOWER = (value) => value.toLowerCase();
+  var CHAR = (value) => String.fromCharCode(value);
+  var CODE = (value) => value.charCodeAt(0);
+  var LEN = (value) => value.length;
+  var UNICHAR = CHAR;
+  var UNICODE = CODE;
+  var UPPER = (value) => value.toUpperCase();
+  var TRIM = (value) => value.replace(/ +/g, " ").trim();
+  var textFormulas = {
+    ASC: null,
+    BAHTTEXT: null,
+    CONCATENATE: null,
+    CLEAN: null,
+    DBCS: null,
+    DOLLAR: null,
+    EXACT: null,
+    FIND: null,
+    FIXED: null,
+    HTML2TEXT: null,
+    LEFT: null,
+    MID: null,
+    NUMBERVALUE: null,
+    PRONETIC: null,
+    PROPER: null,
+    REGEXEXTRACT: null,
+    REGEXMATCH: null,
+    REGREPLACE: null,
+    REPLACE: null,
+    REPT: null,
+    RIGHT: null,
+    SEARCH: null,
+    SPLIT: null,
+    SUBSTITUTE: null,
+    TEXT: null,
+    VALUE: null,
+    CHAR: {
+      func: CHAR,
+      options: {
+        paramsType: "string",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "string"
+      }
+    },
+    CODE: {
+      func: CODE,
+      options: {
+        paramsType: "string",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    UNICHAR: {
+      func: UNICHAR,
+      options: {
+        paramsType: "string",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "string"
+      }
+    },
+    UNICODE: {
+      func: UNICODE,
+      options: {
+        paramsType: "string",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    LEN: {
+      func: LEN,
+      options: {
+        paramsType: "string",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    LOWER: {
+      func: LOWER,
+      options: {
+        paramsType: "string",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "string"
+      }
+    },
+    UPPER: {
+      func: UPPER,
+      options: {
+        paramsType: "string",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "string"
+      }
+    },
+    TRIM: {
+      func: TRIM,
+      options: {
+        paramsType: "string",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "string"
+      }
+    },
+    T: {
+      func: T,
+      options: {
+        paramsType: "any",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "string"
+      }
+    }
+  };
+  var text_default = textFormulas;
+
+  // src/formula/math.ts
+  var ABS = (data) => {
+    return Math.abs(data);
+  };
+  var ACOS = (data) => {
+    return Math.acos(data);
+  };
+  var ACOSH = (data) => {
+    return Math.log(data + Math.sqrt(data * data - 1));
+  };
+  var ACOT = (data) => {
+    return Math.atan(1 / data);
+  };
+  var ACOTH = (data) => {
+    return 0.5 * Math.log((data + 1) / (data - 1));
+  };
+  var ASIN = (data) => {
+    return Math.asin(data);
+  };
+  var ASINH = (data) => {
+    return Math.log(data + Math.sqrt(data * data + 1));
+  };
+  var ATAN = (data) => Math.atan(data);
+  var ATANH = (data) => Math.log((1 + data) / (data + 1)) / 2;
+  var COS = (data) => Math.cos(data);
+  var COT = (data) => 1 / Math.tan(data);
+  var EXP = (data) => Math.exp(data);
+  var INT = (data) => Math.floor(data);
+  var PI = () => Math.PI;
+  var SIN = (data) => Math.sin(data);
+  var SUM = (...rest) => {
+    const list = parseNumberArray(rest);
+    return list.reduce((sum, cur) => sum + cur, 0);
+  };
+  var formulas = {
+    ABS: {
+      func: ABS,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    ACOS: {
+      func: ACOS,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    ACOSH: {
+      func: ACOSH,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    ACOT: {
+      func: ACOT,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    ACOTH: {
+      func: ACOTH,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    ASIN: {
+      func: ASIN,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    ASINH: {
+      func: ASINH,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    ATAN: {
+      func: ATAN,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    ATANH: {
+      func: ATANH,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    COT: {
+      func: COT,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    COS: {
+      func: COS,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    EXP: {
+      func: EXP,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    INT: {
+      func: INT,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    PI: {
+      func: PI,
+      options: {
+        paramsType: "any",
+        minParamsCount: 0,
+        maxParamsCount: 0,
+        resultType: "number"
+      }
+    },
+    E: {
+      func: INT,
+      options: {
+        paramsType: "any",
+        minParamsCount: 0,
+        maxParamsCount: 0,
+        resultType: "number"
+      }
+    },
+    SIN: {
+      func: SIN,
+      options: {
+        paramsType: "number",
+        minParamsCount: 1,
+        maxParamsCount: 1,
+        resultType: "number"
+      }
+    },
+    SUM: {
+      func: SUM,
+      options: {
+        paramsType: "any",
+        minParamsCount: 1,
+        maxParamsCount: MAX_PARAMS_COUNT,
+        resultType: "number"
+      }
+    }
+  };
+  var math_default = formulas;
+
+  // src/formula/index.ts
+  var formulas2 = {
+    ...text_default,
+    ...math_default
+  };
+  var formula_default = formulas2;
+
+  // src/parser/interpreter.ts
+  var Interpreter = class {
+    expressions;
+    functionMap;
+    cellDataMap;
+    variableMap;
+    constructor(expressions, functionMap, cellDataMap, variableMap) {
+      this.expressions = expressions;
+      this.functionMap = functionMap;
+      this.cellDataMap = cellDataMap;
+      this.variableMap = variableMap;
+    }
+    interpret() {
+      const result = [];
+      for (const item of this.expressions) {
+        result.push(this.evaluate(item));
+      }
+      if (result.length === 1) {
+        return this.getRangeCellValue(result[0]);
+      } else {
+        throw new CustomError("#ERROR!");
+      }
+    }
+    getRangeCellValue(value) {
+      if (value instanceof Range) {
+        if (value.colCount === value.rowCount && value.colCount === 1) {
+          return this.cellDataMap.get(value.row, value.col, value.sheetId);
+        } else {
+          throw new CustomError("#REF!");
+        }
+      }
+      return value;
+    }
+    checkNumber(value) {
+      if (typeof value !== "number") {
+        throw new CustomError("#VALUE!");
+      }
+    }
+    visitBinaryExpression(data) {
+      let left = this.evaluate(data.left);
+      let right = this.evaluate(data.right);
+      left = this.getRangeCellValue(left);
+      right = this.getRangeCellValue(right);
+      switch (data.operator.type) {
+        case 3 /* MINUS */:
+          this.checkNumber(left);
+          this.checkNumber(right);
+          return left - right;
+        case 2 /* PLUS */:
+          this.checkNumber(left);
+          this.checkNumber(right);
+          return left + right;
+        case 5 /* SLASH */:
+          this.checkNumber(left);
+          this.checkNumber(right);
+          if (right === 0) {
+            throw new CustomError("#DIV/0!");
+          }
+          return left / right;
+        case 4 /* STAR */:
+          this.checkNumber(left);
+          this.checkNumber(right);
+          return left * right;
+        case 6 /* EXPONENT */:
+          this.checkNumber(left);
+          this.checkNumber(right);
+          return Math.pow(left, right);
+        case 0 /* EQUAL */:
+          return left === right;
+        case 1 /* NOT_EQUAL */:
+          return left !== right;
+        case 7 /* GREATER */:
+          return left > right;
+        case 8 /* GREATER_EQUAL */:
+          return left >= right;
+        case 14 /* LESS */:
+          return left < right;
+        case 15 /* LESS_EQUAL */:
+          return left <= right;
+        case 9 /* CONCATENATE */:
+          return `${left}${right}`;
+        default:
+          throw new CustomError("#VALUE!");
+      }
+    }
+    visitCallExpression(expr) {
+      const callee = this.functionMap.get(expr.name.value);
+      if (callee && typeof callee === "function") {
+        const params = [];
+        for (const item of expr.params) {
+          const t = this.evaluate(item);
+          if (t instanceof Range) {
+            const { row, col, rowCount, colCount, sheetId } = t;
+            for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+              for (let c = col, endCol = col + colCount; c < endCol; c++) {
+                params.push(this.cellDataMap.get(r, c, sheetId));
+              }
+            }
+          } else {
+            params.push(t);
+          }
+        }
+        return callee(...params);
+      }
+      throw new CustomError("#NAME?");
+    }
+    visitCellExpression(data) {
+      const t = parseCell(data.value.value);
+      if (t === null) {
+        throw new CustomError("#REF!");
+      }
+      return t;
+    }
+    visitErrorExpression(data) {
+      throw new CustomError(data.value.value);
+    }
+    visitLiteralExpression(expr) {
+      const { type, value } = expr.value;
+      switch (type) {
+        case 17 /* STRING */:
+          return value;
+        case 18 /* NUMBER */:
+          return parseFloat(value);
+        case 19 /* TRUE */:
+          return true;
+        case 20 /* FALSE */:
+          return false;
+        default:
+          throw new CustomError("#ERROR!");
+      }
+    }
+    visitDefineNameExpression(expr) {
+      if (!this.variableMap.has(expr.value.value)) {
+        throw new CustomError("#NAME?");
+      }
+      const result = this.variableMap.get(expr.value.value);
+      return result;
+    }
+    visitUnaryExpression(data) {
+      const value = this.evaluate(data.right);
+      switch (data.operator.type) {
+        case 3 /* MINUS */:
+          return -value;
+        case 2 /* PLUS */:
+          return value;
+        default:
+          throw new CustomError("#VALUE!");
+      }
+    }
+    convertToCellExpression(expr) {
+      if (expr instanceof CellExpression) {
+        return expr;
+      }
+      if (expr instanceof DefineNameExpression) {
+        return new CellExpression(
+          new Token(16 /* IDENTIFIER */, expr.value.value.toUpperCase()),
+          "relative",
+          null
+        );
+      }
+      if (expr instanceof LiteralExpression) {
+        if (expr.value.type === 18 /* NUMBER */ && /^\d+$/.test(expr.value.value)) {
+          return new CellExpression(
+            new Token(16 /* IDENTIFIER */, expr.value.value),
+            "relative",
+            null
+          );
+        }
+      }
+      return null;
+    }
+    visitCellRangeExpression(expr) {
+      switch (expr.operator.type) {
+        case 10 /* COLON */: {
+          const left = this.convertToCellExpression(expr.left);
+          const right = this.convertToCellExpression(expr.right);
+          if (left !== null && right !== null) {
+            const result = parseReference(
+              `${left.value.value}:${right.value.value}`
+            );
+            if (result === null) {
+              throw new CustomError("#REF!");
+            }
+            return result;
+          } else {
+            throw new CustomError("#REF!");
+          }
+          break;
+        }
+        default:
+          throw new CustomError("#REF!");
+      }
+    }
+    visitGroupExpression(expr) {
+      return this.evaluate(expr.value);
+    }
+    visitPostUnaryExpression(expr) {
+      const value = this.evaluate(expr.left);
+      switch (expr.operator.type) {
+        case 13 /* PERCENT */:
+          this.checkNumber(value);
+          return value * 0.01;
+        default:
+          throw new CustomError("#VALUE!");
+      }
+    }
+    evaluate(expr) {
+      return expr.accept(this);
+    }
+  };
+
+  // src/parser/eval.ts
+  function parseFormula(source, cellData = new CellDataMapImpl(), variableMap = new VariableMapImpl()) {
+    const func = new FunctionMapImpl();
+    const list = Object.keys(formula_default);
+    for (const key of list) {
+      func.set(key, (...args) => {
+        const item = formula_default[key];
+        if (item === null) {
+          throw new CustomError("#NAME?");
+        }
+        const { func: func2, options } = item;
+        const { paramsType, minParamsCount, maxParamsCount, resultType } = options;
+        if (paramsType === "number") {
+          if (!args.every(isNumber)) {
+            throw new CustomError("#VALUE!");
+          }
+        } else if (paramsType === "string") {
+          if (!args.every(isString)) {
+            throw new CustomError("#VALUE!");
+          }
+        }
+        if (args.length > maxParamsCount || args.length < minParamsCount) {
+          throw new CustomError("#VALUE!");
+        }
+        const result = func2(...args);
+        if (resultType === "number") {
+          if (!isNumber(result)) {
+            throw new CustomError("#NUM!");
+          }
+        } else if (resultType === "string") {
+          if (!isString(result)) {
+            throw new CustomError("#NUM!");
+          }
+        }
+        return result;
+      });
+    }
+    return interpret(source, func, cellData, variableMap);
+  }
+  function interpret(source, func, cellData, variableMap) {
+    try {
+      const list = new Scanner(source).scan();
+      const expressions = new Parser(list).parse();
+      const result = new Interpreter(
+        expressions,
+        func,
+        cellData,
+        variableMap
+      ).interpret();
+      return {
+        result,
+        error: null
+      };
+    } catch (error) {
+      if (error instanceof CustomError) {
+        return {
+          result: null,
+          error: error.value
+        };
+      }
+    }
+    return {
+      result: null,
+      error: "#ERROR!"
+    };
+  }
+  var FunctionMapImpl = class {
+    map = /* @__PURE__ */ new Map();
+    set(name, value) {
+      this.map.set(name.toLowerCase(), value);
+    }
+    get(name) {
+      return this.map.get(name.toLowerCase());
+    }
+  };
+  var CellDataMapImpl = class {
+    map = /* @__PURE__ */ new Map();
+    getKey(row, col, sheetId = "") {
+      const key = `${row}_${col}_${sheetId}`;
+      return key;
+    }
+    set(row, col, sheetId, value) {
+      const key = this.getKey(row, col, sheetId);
+      this.map.set(key, value);
+    }
+    get(row, col, sheetId = "") {
+      const key = this.getKey(row, col, sheetId);
+      return this.map.get(key);
+    }
+  };
+  var VariableMapImpl = class {
+    map = /* @__PURE__ */ new Map();
+    set(name, value) {
+      this.map.set(name, value);
+    }
+    get(name) {
+      return this.map.get(name);
+    }
+    has(name) {
+      return this.map.has(name);
+    }
+  };
+
+  // src/model/Model.ts
+  var Model = class {
+    currentSheetId = "";
+    workbook = [];
+    worksheets = {};
+    styles = {};
+    mergeCells = [];
+    getSheetList() {
+      return this.workbook;
+    }
+    setActiveCell(row, col) {
+      const index = this.workbook.findIndex(
+        (v) => v.sheetId === this.currentSheetId
+      );
+      if (index >= 0) {
+        const tempList = Array.from(this.workbook);
+        const activeCell = `${intToColumnName(col)}${row + 1}`;
+        tempList.splice(index, 1, { ...this.workbook[index], activeCell });
+        this.workbook = tempList;
+      }
+    }
+    addSheet() {
+      const item = getDefaultSheetInfo(this.workbook);
+      this.workbook = [
+        ...this.workbook,
+        { ...item, colCount: DEFAULT_COL_COUNT, rowCount: DEFAULT_ROW_COUNT }
+      ];
+      this.currentSheetId = item.sheetId;
+    }
+    getSheetInfo(id = this.currentSheetId) {
+      const item = this.workbook.find((item2) => item2.sheetId === id);
+      assert(item !== void 0);
+      return item;
+    }
+    setCurrentSheetId(id) {
+      this.currentSheetId = id;
+    }
+    getCurrentSheetId() {
+      return this.currentSheetId;
+    }
+    getCellsContent() {
+      const sheetData = this.worksheets[this.currentSheetId];
+      if (isEmpty(sheetData)) {
+        return [];
+      }
+      const result = [];
+      const rowKeys = Object.keys(sheetData);
+      for (const rowKey of rowKeys) {
+        const colKeys = Object.keys(sheetData[rowKey]);
+        for (const colKey of colKeys) {
+          const row = Number(rowKey);
+          const col = Number(colKey);
+          result.push({
+            row,
+            col
+          });
+        }
+      }
+      return result;
+    }
+    fromJSON(json) {
+      modelLog("fromJSON", json);
+      const {
+        worksheets = {},
+        workbook = [],
+        styles = {},
+        mergeCells = []
+      } = json;
+      this.worksheets = worksheets;
+      this.workbook = workbook;
+      this.styles = styles;
+      this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
+      this.mergeCells = mergeCells;
+      this.computeAllCell();
+    }
+    toJSON() {
+      const { worksheets, styles, workbook, mergeCells } = this;
+      return {
+        workbook,
+        styles,
+        worksheets,
+        mergeCells
+      };
+    }
+    setCellValue(value, range) {
+      const { row, col } = range;
+      const configPath = `worksheets[${range.sheetId || this.currentSheetId}][${row}][${col}]`;
+      setWith(this, `${configPath}.value`, value);
+    }
+    setCellFormula(formula, range) {
+      const { row, col } = range;
+      const configPath = `worksheets[${range.sheetId || this.currentSheetId}][${row}][${col}]`;
+      setWith(this, `${configPath}.formula`, formula);
+    }
+    setCellValues(value, ranges) {
+      const [range] = ranges;
+      if (value.startsWith("=")) {
+        this.setCellFormula(value, range);
+      } else {
+        this.setCellFormula("", range);
+        this.setCellValue(value, range);
+      }
+      this.computeAllCell();
+    }
+    setCellStyle(style, ranges) {
+      const [range] = ranges;
+      const { row, col, rowCount, colCount } = range;
+      for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+        for (let c = col, endCol = col + colCount; c < endCol; c++) {
+          const stylePath = `worksheets[${this.currentSheetId}][${r}][${c}].style`;
+          const oldStyleId = get(this, stylePath, "");
+          if (oldStyleId) {
+            const oldStyle = this.styles[oldStyleId];
+            if (isEmpty(oldStyle)) {
+              this.styles[oldStyleId] = { ...style };
+            } else {
+              this.styles[oldStyleId] = {
+                ...oldStyle,
+                ...style
+              };
+            }
+          } else {
+            const styleNum = getListMaxNum(
+              Object.keys(this.styles),
+              STYLE_ID_PREFIX
+            );
+            const styleId = `${STYLE_ID_PREFIX}${styleNum + 1}`;
+            this.styles[styleId] = { ...style };
+            setWith(this, stylePath, styleId);
+          }
+        }
+      }
+    }
+    queryCell = (row, col, sheetId = "") => {
+      const realSheetId = sheetId || this.currentSheetId;
+      const cellData = get(
+        this,
+        `worksheets[${realSheetId}][${row}][${col}]`,
+        {}
+      );
+      const { style } = cellData;
+      let temp = void 0;
+      if (style && this.styles[style]) {
+        temp = this.styles[style];
+      }
+      return { ...cellData, style: temp };
+    };
+    computeAllCell() {
+      const sheetData = this.worksheets[this.currentSheetId];
+      if (isEmpty(sheetData)) {
+        return [];
+      }
+      const rowKeys = Object.keys(sheetData);
+      for (const rowKey of rowKeys) {
+        const colKeys = Object.keys(sheetData[rowKey]);
+        for (const colKey of colKeys) {
+          const temp = sheetData[rowKey][colKey];
+          if (temp?.formula) {
+            temp.value = this.parseFormula(temp.formula);
+          }
+        }
+      }
+    }
+    parseFormula(formula) {
+      const result = parseFormula(formula, {
+        get: (row, col, sheetId) => {
+          const temp = this.queryCell(row, col, sheetId);
+          return temp.value;
+        },
+        set: () => {
+        }
+      });
+      return result.error ? result.error : result.result;
+    }
+    addRow(rowIndex, count) {
+      const sheetData = this.worksheets[this.currentSheetId];
+      if (isEmpty(sheetData)) {
+        return;
+      }
+      const rowKeys = Object.keys(sheetData);
+      for (let i = rowKeys.length - 1; i >= 0; i--) {
+        const rowKey = rowKeys[i];
+        const item = Number(rowKeys[i]);
+        if (item < rowIndex) {
+          continue;
+        }
+        const key = String(item + count);
+        sheetData[key] = {
+          ...sheetData[rowKey]
+        };
+        sheetData[rowKey] = {};
+      }
+      const sheetInfo = this.getSheetInfo();
+      sheetInfo.rowCount += count;
+    }
+    addCol(colIndex, count) {
+      const sheetData = this.worksheets[this.currentSheetId];
+      if (isEmpty(sheetData)) {
+        return;
+      }
+      const sheetInfo = this.getSheetInfo();
+      const rowKeys = Object.keys(sheetData);
+      for (const rowKey of rowKeys) {
+        const colKeys = Object.keys(sheetData[rowKey]);
+        for (let i = colKeys.length - 1; i >= 0; i--) {
+          const colKey = colKeys[i];
+          const col = Number(colKey);
+          if (col < colIndex) {
+            continue;
+          }
+          const key = String(col + count);
+          sheetData[rowKey][key] = {
+            ...sheetData[rowKey][colKey]
+          };
+          sheetData[rowKey][colKey] = {};
+        }
+      }
+      sheetInfo.colCount += count;
+    }
+  };
+
+  // src/model/mockModel.ts
+  var MOCK_MODEL = {
+    workbook: [
+      {
+        sheetId: "Sheet1",
+        name: "Sheet1",
+        activeCell: "B2",
+        colCount: DEFAULT_COL_COUNT,
+        rowCount: DEFAULT_ROW_COUNT
+      },
+      {
+        sheetId: "2",
+        name: "test",
+        colCount: DEFAULT_COL_COUNT,
+        rowCount: DEFAULT_ROW_COUNT,
+        activeCell: "F5"
+      }
+    ],
+    worksheets: {
+      Sheet1: {
+        "0": {
+          "0": {
+            value: "",
+            formula: "=SUM(1, SUM(1,2))",
+            style: "1"
+          },
+          "1": {
+            value: "",
+            formula: "=SUM(1,4)"
+          },
+          "2": {
+            value: "",
+            formula: "=SUM(A1)",
+            style: "2"
+          },
+          "3": {
+            value: "\u8D85\u5927\u5B57",
+            style: "3"
+          },
+          4: {
+            value: "\u8FD9\u662F\u4E00\u6BB5\u975E\u5E38\u957F\u7684\u6587\u6848\uFF0C\u9700\u8981\u6362\u884C\u5C55\u793A",
+            style: "4"
+          }
+        },
+        "3": {
+          0: {
+            style: "style1"
+          },
+          1: {
+            style: "style1"
+          },
+          2: {
+            style: "style1"
+          },
+          3: {
+            style: "style1"
+          }
+        },
+        "4": {
+          0: {
+            style: "style1"
+          },
+          1: {
+            style: "style1"
+          },
+          2: {
+            style: "style1"
+          },
+          3: {
+            style: "style1"
+          }
+        }
+      }
+    },
+    styles: {
+      "1": {
+        fontColor: "#ff0000"
+      },
+      "2": {},
+      style1: {
+        fillColor: "red"
+      },
+      "3": {},
+      4: {}
+    },
+    mergeCells: ["D2:E3"]
+  };
+
+  // src/canvas/Main.ts
+  var MainCanvas = class {
+    ctx;
+    content;
+    selection;
+    canvas;
+    canvasSize = {
+      width: 0,
+      height: 0
+    };
+    constructor(canvas, content, selection) {
+      this.canvas = canvas;
+      this.ctx = canvas.getContext("2d");
+      this.content = content;
+      this.selection = selection;
+      const size2 = dpr();
+      this.ctx.scale(size2, size2);
+    }
+    getCanvas() {
+      return this.canvas;
+    }
+    resize(width, height) {
+      this.canvasSize = {
+        width,
+        height
+      };
+      resizeCanvas(this.canvas, width, height);
+      this.content.resize(width, height);
+      this.selection.resize(width, height);
+    }
+    clear() {
+      this.ctx.clearRect(
+        0,
+        0,
+        npx(this.canvasSize.width),
+        npx(this.canvasSize.height)
+      );
+    }
+    render = (params) => {
+      if (params.changeSet.size === 0) {
+        return;
+      }
+      this.content.render(params);
+      this.selection.render(params);
+      this.clear();
+      this.ctx.drawImage(this.content.getCanvas(), 0, 0);
+      this.ctx.drawImage(this.selection.getCanvas(), 0, 0);
+    };
+  };
+
+  // src/canvas/event.ts
+  function getHitInfo(event, controller, canvasSize) {
+    const scroll = controller.getScroll();
+    const sheetInfo = controller.getSheetInfo();
+    const headerSize = controller.getHeaderSize();
+    const { pageX, pageY } = event;
+    const x = pageX - canvasSize.left;
+    const y = pageY - canvasSize.top;
+    let resultX = headerSize.width;
+    let resultY = headerSize.height;
+    let row = scroll.row;
+    let col = scroll.col;
+    while (resultX + controller.getColWidth(col) <= x) {
+      resultX += controller.getColWidth(col);
+      col++;
+    }
+    while (resultY + controller.getRowHeight(row) <= y) {
+      resultY += controller.getRowHeight(row);
+      row++;
+    }
+    if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
+      return null;
+    }
+    const cellSize = controller.getCellSize(row, col);
+    return { ...cellSize, row, col, pageY, pageX, x, y };
+  }
+  var BOTTOM_BUFF = 100;
+  function registerEvents(stateValue, controller, canvas, resizeWindow) {
+    let lastTimeStamp = 0;
+    const inputDom = document.querySelector(
+      `#${FORMULA_EDITOR_ID}`
+    );
+    window.addEventListener("resize", () => {
+      resizeWindow();
+    });
+    window.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        controller.setActiveCell(
+          stateValue.activeCell.row + 1,
+          stateValue.activeCell.col,
+          1,
+          1
+        );
+      } else if (event.key === "Tab") {
+        controller.setActiveCell(
+          stateValue.activeCell.row,
+          stateValue.activeCell.col + 1,
+          1,
+          1
+        );
+      }
+      if (inputDom === event.target) {
+        return;
+      }
+      stateValue.isCellEditing = true;
+      inputDom.focus();
+    });
+    document.body.addEventListener(
+      "wheel",
+      debounce((event) => {
+        if (event.target !== canvas) {
+          return;
+        }
+        const headerSize = controller.getHeaderSize();
+        const canvasRect = canvas.getBoundingClientRect();
+        const sheetInfo = controller.getSheetInfo();
+        const viewSize = controller.getViewSize();
+        const oldScroll = controller.getScroll();
+        const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
+        const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
+        const maxScrollHeight = canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
+        const maxScrollWidth = canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
+        let top = oldScroll.top + event.deltaY;
+        if (top < 0) {
+          top = 0;
+        } else if (top > maxHeight) {
+          top = maxHeight;
+        }
+        let left = oldScroll.left + event.deltaX;
+        if (left < 0) {
+          left = 0;
+        } else if (left > maxWidth) {
+          left = maxWidth;
+        }
+        let resultX = 0;
+        let resultY = 0;
+        let r = 0;
+        let c = 0;
+        while (resultX < left && c < sheetInfo.colCount) {
+          resultX += controller.getColWidth(c);
+          c++;
+        }
+        while (resultY < top && r < sheetInfo.rowCount) {
+          resultY += controller.getRowHeight(r);
+          r++;
+        }
+        const scrollTop = top * maxScrollHeight / maxHeight;
+        const scrollLeft = left * maxScrollWidth / maxWidth;
+        controller.setScroll({
+          top,
+          left,
+          row: r,
+          col: c,
+          scrollLeft,
+          scrollTop
+        });
+      })
+    );
+    canvas.addEventListener("mousedown", (event) => {
+      const headerSize = controller.getHeaderSize();
+      stateValue.contextMenuPosition = void 0;
+      const canvasRect = canvas.getBoundingClientRect();
+      const { timeStamp, clientX, clientY } = event;
+      const x = clientX - canvasRect.left;
+      const y = clientY - canvasRect.top;
+      const position = getHitInfo(event, controller, canvasRect);
+      if (!position) {
+        return;
+      }
+      if (headerSize.width > x && headerSize.height > y) {
+        controller.selectAll(0, 0);
+        return;
+      }
+      if (headerSize.width > x && headerSize.height <= y) {
+        controller.selectRow(position.row, position.col);
+        return;
+      }
+      if (headerSize.width <= x && headerSize.height > y) {
+        controller.selectCol(position.row, position.col);
+        return;
+      }
+      const activeCell = controller.getActiveCell();
+      const check = activeCell.row >= 0 && activeCell.row === position.row && activeCell.col === position.col;
+      if (!check) {
+        controller.setActiveCell(position.row, position.col, 1, 1);
+      }
+      const delay = timeStamp - lastTimeStamp;
+      if (delay < DOUBLE_CLICK_TIME) {
+        stateValue.isCellEditing = true;
+      }
+      lastTimeStamp = timeStamp;
+    });
+    canvas.addEventListener("mousemove", (event) => {
+      const headerSize = controller.getHeaderSize();
+      const rect = canvas.getBoundingClientRect();
+      const { clientX, clientY } = event;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const checkMove = x > headerSize.width && y > headerSize.height && event.buttons === 1;
+      if (checkMove) {
+        const position = getHitInfo(event, controller, rect);
+        if (!position) {
+          return;
+        }
+        controller.updateSelection(position.row, position.col);
+      }
+    });
+    canvas.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      stateValue.contextMenuPosition = {
+        top: event.clientY,
+        left: event.clientX,
+        width: 100,
+        height: 100
+      };
+      return false;
+    });
+  }
+
+  // src/canvas/util.ts
+  var getStyle = (key, dom = document.body) => {
+    if (isTestEnv()) {
+      return 20;
+    }
+    return parseInt(window.getComputedStyle(dom)[key]);
+  };
+  var measureTextMap = /* @__PURE__ */ new Map();
+  function measureText(ctx, char) {
+    const mapKey = `${char}__${ctx.font}`;
+    let temp = measureTextMap.get(mapKey);
+    if (!temp) {
+      const metrics = ctx.measureText(char);
+      measureTextMap.set(mapKey, metrics);
+      temp = metrics;
+    }
+    return temp;
+  }
+  function fillRect(ctx, x, y, width, height) {
+    ctx.fillRect(npx(x), npx(y), npx(width), npx(height));
+  }
+  function strokeRect(ctx, x, y, width, height) {
+    ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
+  }
+  function getFontSizeHeight(ctx, char) {
+    const { actualBoundingBoxDescent, actualBoundingBoxAscent } = measureText(
+      ctx,
+      char
+    );
+    const result = actualBoundingBoxDescent + actualBoundingBoxAscent;
+    return Math.ceil(result);
+  }
+  function fillText(ctx, text, x, y) {
+    ctx.fillText(text, npx(x), npx(y));
+  }
+  function fillWrapText(ctx, text, x, y, cellWidth, lineHeight) {
+    let line = "";
+    const textList = text.split("");
+    let testWidth = 0;
+    const realCellWidth = cellWidth * 2;
+    let wrapHeight = lineHeight;
+    y += lineHeight / 2;
+    for (let i = 0; i < textList.length; i++) {
+      const char = textList[i];
+      const { width } = measureText(ctx, char);
+      if (testWidth + width > realCellWidth) {
+        fillText(ctx, line, x, y);
+        line = char;
+        y += lineHeight;
+        testWidth = width;
+        wrapHeight += lineHeight;
+      } else {
+        testWidth += width;
+        line = line + char;
+      }
+    }
+    if (line) {
+      fillText(ctx, line, x, y);
+    }
+    return wrapHeight;
+  }
+  function fillTexts(ctx, text, x, y, cellWidth) {
+    let line = "";
+    const textList = text.split("");
+    let testWidth = 0;
+    const realCellWidth = cellWidth * 2;
+    let textWidth = 0;
+    for (let i = 0; i < textList.length; i++) {
+      const char = textList[i];
+      const { width } = measureText(ctx, char);
+      if (testWidth + width > realCellWidth) {
+        if (i === 0) {
+          textWidth = width;
+          line = char;
+        }
+        break;
+      } else {
+        testWidth += width;
+        line = line + char;
+      }
+    }
+    fillText(ctx, line, x, y);
+    return textWidth;
+  }
+  function renderCell(ctx, cellInfo, canvasLineHeight) {
+    const { style, value, left, top, width, height } = cellInfo;
+    const isNum2 = isNumber(value);
+    let font = DEFAULT_FONT_CONFIG;
+    let fillStyle = DEFAULT_FONT_COLOR;
+    if (!isEmpty(style)) {
+      const fontSize = npx(style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE);
+      font = makeFont(
+        style?.isItalic ? "italic" : "normal",
+        style?.isBold ? "bold" : "500",
+        fontSize,
+        style?.fontFamily
+      );
+      fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
+      if (style?.fillColor) {
+        ctx.fillStyle = style?.fillColor;
+        fillRect(ctx, left, top, width, height);
+      }
+    }
+    let text = String(value);
+    if (ERROR_SET.has(text)) {
+      fillStyle = ERROR_FORMULA_COLOR;
+    } else if (typeof value === "boolean" || ["TRUE", "FALSE"].includes(text.toUpperCase())) {
+      text = text.toUpperCase();
+    } else if (value === void 0 || value === null) {
+      text = "";
+    }
+    ctx.textAlign = isNum2 ? "right" : "left";
+    ctx.font = font;
+    ctx.fillStyle = fillStyle;
+    ctx.textBaseline = "middle";
+    const x = left + (isNum2 ? width : 0);
+    const result = {};
+    const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
+    const textHeight = Math.max(
+      fontSizeHeight,
+      canvasLineHeight,
+      getStyle("lineHeight")
+    );
+    if (style?.wrapText === 1 /* AUTO_WRAP */) {
+      const y = top;
+      result.wrapHeight = fillWrapText(ctx, text, x, y, width, textHeight);
+    } else {
+      const y = Math.floor(top + height / 2);
+      result.textWidth = fillTexts(ctx, text, x, y, width);
+    }
+    return {
+      ...result,
+      fontSizeHeight: textHeight
+    };
+  }
+  function drawLines(ctx, pointList) {
+    assert(pointList.length > 0);
+    ctx.beginPath();
+    for (let i = 0; i < pointList.length; i += 2) {
+      const first = pointList[i];
+      const second = pointList[i + 1];
+      ctx.moveTo(npx(first[0]), npx(first[1]));
+      ctx.lineTo(npx(second[0]), npx(second[1]));
+    }
+    ctx.stroke();
+  }
+  function drawTriangle(ctx, point1, point2, point3) {
+    ctx.beginPath();
+    ctx.moveTo(npx(point1[0]), npx(point1[1]));
+    ctx.lineTo(npx(point2[0]), npx(point2[1]));
+    ctx.lineTo(npx(point3[0]), npx(point3[1]));
+    ctx.fill();
+  }
+
+  // src/canvas/Selection.ts
+  var Selection = class {
+    canvas;
+    ctx;
+    controller;
+    canvasSize = {
+      width: 0,
+      height: 0
+    };
+    constructor(controller, canvas) {
+      this.controller = controller;
+      this.canvas = canvas;
+      const ctx = this.canvas.getContext("2d");
+      this.ctx = ctx;
+      const size2 = dpr();
+      this.ctx.scale(size2, size2);
+    }
+    getCanvas() {
+      return this.canvas;
+    }
+    resize(width, height) {
+      this.canvasSize = {
+        width,
+        height
+      };
+      resizeCanvas(this.canvas, width, height);
+    }
+    clear() {
+      this.ctx.clearRect(
+        0,
+        0,
+        npx(this.canvasSize.width),
+        npx(this.canvasSize.height)
+      );
+    }
+    render() {
+      this.clear();
+      const { controller } = this;
+      const ranges = controller.getRanges();
+      const [range] = ranges;
+      if (isSheet(range)) {
+        this.renderSelectAll();
+        return;
+      }
+      if (isCol(range)) {
+        this.renderSelectCol();
+        return;
+      }
+      if (isRow(range)) {
+        this.renderSelectRow();
+        return;
+      }
+      this.renderSelectRange();
+    }
+    renderSelectRange() {
+      const { controller } = this;
+      const headerSize = controller.getHeaderSize();
+      const ranges = controller.getRanges();
+      const [range] = ranges;
+      const activeCell = controller.computeCellPosition(range.row, range.col);
+      const endCellRow = range.row + range.rowCount - 1;
+      const endCellCol = range.col + range.colCount - 1;
+      assert(endCellRow >= 0 && endCellCol >= 0);
+      const endCell = controller.computeCellPosition(endCellRow, endCellCol);
+      const width = endCell.left + endCell.width - activeCell.left;
+      const height = endCell.top + endCell.height - activeCell.top;
+      this.ctx.fillStyle = theme_default.selectionColor;
+      fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
+      fillRect(this.ctx, 0, activeCell.top, headerSize.width, height);
+      this.ctx.strokeStyle = theme_default.primaryColor;
+      this.ctx.lineWidth = dpr();
+      assert(width >= 0 && height >= 0);
+      strokeRect(this.ctx, activeCell.left, activeCell.top, width, height);
+    }
+    renderSelectAll() {
+      const { controller } = this;
+      this.ctx.fillStyle = theme_default.selectionColor;
+      fillRect(this.ctx, 0, 0, this.canvasSize.width, this.canvasSize.height);
+      const cellData = controller.getCell(controller.getActiveCell());
+      const activeCell = controller.computeCellPosition(
+        cellData.row,
+        cellData.col
+      );
+      renderCell(
+        this.ctx,
+        { ...cellData, ...activeCell },
+        getStyle("lineHeight", this.canvas)
+      );
+      const headerSize = controller.getHeaderSize();
+      this.ctx.strokeStyle = theme_default.primaryColor;
+      this.ctx.lineWidth = dpr();
+      strokeRect(
+        this.ctx,
+        headerSize.width,
+        headerSize.height,
+        this.canvasSize.width - headerSize.width,
+        this.canvasSize.height - headerSize.height
+      );
+    }
+    renderSelectCol() {
+      const { controller } = this;
+      const headerSize = controller.getHeaderSize();
+      const ranges = controller.getRanges();
+      const [range] = ranges;
+      this.ctx.fillStyle = theme_default.selectionColor;
+      const activeCell = controller.computeCellPosition(range.row, range.col);
+      fillRect(this.ctx, activeCell.left, 0, activeCell.width, headerSize.height);
+      fillRect(
+        this.ctx,
+        0,
+        activeCell.top,
+        headerSize.width,
+        this.canvasSize.height
+      );
+      fillRect(
+        this.ctx,
+        activeCell.left,
+        activeCell.top + activeCell.height,
+        activeCell.width,
+        this.canvasSize.height - activeCell.height
+      );
+      this.ctx.strokeStyle = theme_default.primaryColor;
+      this.ctx.lineWidth = dpr();
+      strokeRect(
+        this.ctx,
+        activeCell.left,
+        activeCell.top,
+        activeCell.width,
+        this.canvasSize.height
+      );
+    }
+    renderSelectRow() {
+      const { controller } = this;
+      const headerSize = controller.getHeaderSize();
+      const ranges = controller.getRanges();
+      const [range] = ranges;
+      this.ctx.fillStyle = theme_default.selectionColor;
+      const activeCell = controller.computeCellPosition(range.row, range.col);
+      fillRect(
+        this.ctx,
+        activeCell.left,
+        0,
+        this.canvasSize.width,
+        headerSize.height
+      );
+      fillRect(this.ctx, 0, activeCell.top, headerSize.width, activeCell.height);
+      fillRect(
+        this.ctx,
+        activeCell.left + activeCell.width,
+        activeCell.top,
+        this.canvasSize.width - activeCell.width,
+        activeCell.height
+      );
+      this.ctx.strokeStyle = theme_default.primaryColor;
+      this.ctx.lineWidth = dpr();
+      strokeRect(
+        this.ctx,
+        activeCell.left,
+        activeCell.top,
+        activeCell.width,
+        this.canvasSize.height
+      );
+    }
+  };
+
+  // src/canvas/constant.ts
+  var HEADER_STYLE = {
+    textAlign: "center",
+    textBaseline: "middle",
+    font: DEFAULT_FONT_CONFIG,
+    fillStyle: theme_default.black,
+    lineWidth: thinLineWidth(),
+    strokeStyle: theme_default.gridStrokeColor
+  };
+
+  // src/canvas/Content.ts
+  var Content = class {
+    canvas;
+    ctx;
+    controller;
+    canvasSize = {
+      width: 0,
+      height: 0
+    };
+    constructor(controller, canvas) {
+      this.controller = controller;
+      this.canvas = canvas;
+      const ctx = this.canvas.getContext("2d");
+      this.ctx = ctx;
+      const size2 = dpr();
+      this.ctx.scale(size2, size2);
+    }
+    getCanvas() {
+      return this.canvas;
+    }
+    resize(width, height) {
+      this.canvasSize = {
+        width,
+        height
+      };
+      resizeCanvas(this.canvas, width, height);
+    }
+    clear() {
+      this.ctx.clearRect(
+        0,
+        0,
+        npx(this.canvasSize.width),
+        npx(this.canvasSize.height)
+      );
+    }
+    render({ changeSet }) {
+      const { width, height } = this.canvasSize;
+      if (!changeSet.has("contentChange")) {
+        return;
+      }
+      const headerSize = this.controller.getHeaderSize();
+      this.clear();
+      const contentWidth = width - headerSize.width;
+      const contentHeight = height - headerSize.height;
+      this.renderGrid(contentWidth, contentHeight);
+      this.renderRowsHeader(contentHeight);
+      this.renderColsHeader(contentWidth);
+      this.renderTriangle();
+      this.renderContent(width, height);
+    }
+    renderContent(width, height) {
+      const { controller } = this;
+      const data = controller.getCellsContent();
+      if (isEmpty(data)) {
+        return;
+      }
+      this.ctx.save();
+      const { row: rowIndex, col: colIndex } = controller.getScroll();
+      for (const item of data) {
+        const { row, col } = item;
+        if (row < rowIndex || col < colIndex) {
+          continue;
+        }
+        const result = controller.computeCellPosition(row, col);
+        if (result.top > height || result.left > width) {
+          continue;
+        }
+        const cellInfo = this.controller.getCell(item);
+        const {
+          wrapHeight = 0,
+          fontSizeHeight = 0,
+          textWidth = 0
+        } = renderCell(
+          this.ctx,
+          {
+            ...cellInfo,
+            ...result
+          },
+          getStyle("lineHeight", this.canvas)
+        );
+        const t = Math.max(wrapHeight, fontSizeHeight);
+        if (t > result.height) {
+          controller.setRowHeight(row, t);
+        }
+        if (textWidth > result.width) {
+          controller.setColWidth(col, textWidth);
+        }
+      }
+      this.ctx.restore();
+    }
+    renderTriangle() {
+      if (isTestEnv()) {
+        return;
+      }
+      const headerSize = this.controller.getHeaderSize();
+      this.ctx.save();
+      this.ctx.fillStyle = theme_default.backgroundColor;
+      fillRect(this.ctx, 0, 0, headerSize.width, headerSize.height);
+      this.ctx.fillStyle = theme_default.triangleFillColor;
+      const offset = 2;
+      drawTriangle(
+        this.ctx,
+        [headerSize.width / 2 - offset, headerSize.height - offset],
+        [headerSize.width - offset, headerSize.height - offset],
+        [headerSize.width - offset, offset]
+      );
+      this.ctx.restore();
+    }
+    renderGrid(width, height) {
+      const { controller } = this;
+      const headerSize = controller.getHeaderSize();
+      const { row: rowIndex, col: colIndex } = controller.getScroll();
+      const { rowCount, colCount } = this.controller.getSheetInfo();
+      const lineWidth = thinLineWidth();
+      this.ctx.save();
+      this.ctx.fillStyle = theme_default.white;
+      this.ctx.lineWidth = lineWidth;
+      this.ctx.strokeStyle = theme_default.gridStrokeColor;
+      this.ctx.translate(npx(headerSize.width), npx(headerSize.height));
+      const pointList = [];
+      let y = 0;
+      let x = 0;
+      let maxX = 0;
+      for (let i = colIndex; i < colCount; i++) {
+        maxX += controller.getColWidth(i);
+        if (maxX > width) {
+          break;
+        }
+      }
+      const realWidth = Math.min(maxX, width);
+      for (let i = rowIndex; i < rowCount; i++) {
+        pointList.push([0, y], [realWidth, y]);
+        y += controller.getRowHeight(i);
+        if (y > height) {
+          break;
+        }
+      }
+      for (let i = colIndex; i < colCount; i++) {
+        pointList.push([x, 0], [x, y]);
+        x += controller.getColWidth(i);
+        if (x > realWidth) {
+          break;
+        }
+      }
+      pointList.push([0, y], [x, y]);
+      pointList.push([x, 0], [x, y]);
+      drawLines(this.ctx, pointList);
+      this.ctx.restore();
+    }
+    fillRowText(row, rowWidth, y) {
+      this.ctx.fillStyle = theme_default.black;
+      fillText(this.ctx, String(row), rowWidth / 2, y);
+    }
+    fillColText(colText, x, colHeight) {
+      this.ctx.fillStyle = theme_default.black;
+      fillText(this.ctx, colText, x, colHeight / 2 + dpr());
+    }
+    renderRowsHeader(height) {
+      const { controller } = this;
+      const { row: rowIndex } = controller.getScroll();
+      const headerSize = controller.getHeaderSize();
+      const { rowCount } = controller.getSheetInfo();
+      this.ctx.save();
+      this.ctx.fillStyle = theme_default.backgroundColor;
+      fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
+      Object.assign(this.ctx, HEADER_STYLE);
+      const pointList = [];
+      let y = headerSize.height;
+      let i = rowIndex;
+      for (; i < rowCount; i++) {
+        const rowHeight = controller.getRowHeight(i);
+        let temp = y;
+        if (i === rowIndex) {
+          temp += thinLineWidth() / 2;
+        }
+        pointList.push([0, temp], [headerSize.width, temp]);
+        this.fillRowText(i + 1, headerSize.width, temp + rowHeight / 2);
+        y += rowHeight;
+        if (y > height) {
+          break;
+        }
+      }
+      pointList.push([0, y], [headerSize.width, y]);
+      pointList.push([0, 0], [0, y]);
+      drawLines(this.ctx, pointList);
+      this.ctx.restore();
+    }
+    renderColsHeader(width) {
+      const { controller } = this;
+      const { col: colIndex } = controller.getScroll();
+      const headerSize = controller.getHeaderSize();
+      const { colCount } = controller.getSheetInfo();
+      const pointList = [];
+      this.ctx.save();
+      this.ctx.fillStyle = theme_default.backgroundColor;
+      fillRect(this.ctx, headerSize.width, 0, width, headerSize.height);
+      Object.assign(this.ctx, HEADER_STYLE);
+      let x = headerSize.width;
+      let i = colIndex;
+      for (; i < colCount; i++) {
+        const colWidth = controller.getColWidth(i);
+        let temp = x;
+        if (i === colIndex) {
+          temp += thinLineWidth() / 2;
+        }
+        pointList.push([temp, 0], [temp, headerSize.height]);
+        this.fillColText(
+          intToColumnName(i),
+          temp + colWidth / 2,
+          headerSize.height
+        );
+        x += colWidth;
+        if (x > width) {
+          break;
+        }
+      }
+      pointList.push([x, 0], [x, headerSize.height]);
+      pointList.push([0, 0], [x, 0]);
+      drawLines(this.ctx, pointList);
+      this.ctx.restore();
+    }
+  };
+
+  // src/init.ts
+  function initTheme(dom) {
+    const keyList = Object.keys(theme_default);
+    for (const key of keyList) {
+      dom.style.setProperty(`--${key}`, String(theme_default[key] || ""));
+    }
+  }
+  function initFontFamilyList() {
+    const list = FONT_FAMILY_LIST.map((v) => {
+      const disabled = !isSupportFontFamily(v);
+      return { label: v, value: v, disabled };
+    });
+    return list;
+  }
+  function getStoreValue(controller, canvasTop) {
+    const cell = controller.getCell(controller.getActiveCell());
+    const cellPosition = controller.computeCellPosition(cell.row, cell.col);
+    cellPosition.top = canvasTop + cellPosition.top;
+    const scroll = controller.getScroll();
+    const newStateValue = {
+      isCellEditing: false,
+      canRedo: controller.canRedo(),
+      canUndo: controller.canUndo(),
+      sheetList: controller.getSheetList(),
+      currentSheetId: controller.getCurrentSheetId(),
+      cellPosition,
+      scrollLeft: scroll.scrollLeft,
+      scrollTop: scroll.scrollTop
+    };
+    newStateValue.activeCell = cell;
+    return newStateValue;
+  }
+  function initCanvas(stateValue, controller) {
+    const canvas = document.querySelector(
+      `#${MAIN_CANVAS_ID}`
+    );
+    const mainCanvas = new MainCanvas(canvas, new Content(controller, createCanvas()), new Selection(controller, createCanvas()));
+    const resize = () => {
+      const size2 = canvas.parentElement.getBoundingClientRect();
+      mainCanvas.resize(size2.width, size2.height);
+      mainCanvas.render({
+        changeSet: /* @__PURE__ */ new Set(["contentChange"])
+      });
+    };
+    resize();
+    registerEvents(stateValue, controller, canvas, resize);
+    const canvasPosition = canvas.parentElement.getBoundingClientRect();
+    controller.setHooks({
+      modelChange: (changeSet) => {
+        const newStateValue = getStoreValue(controller, canvasPosition.top);
+        Object.assign(stateValue, newStateValue);
+        mainCanvas.render({ changeSet });
+        mainCanvas.render({
+          changeSet: controller.getChangeSet()
+        });
+      }
+    });
+    controller.fromJSON(MOCK_MODEL);
+  }
+  function initController() {
+    const controller = new Controller(new Model(), new History());
+    controller.addSheet();
+    return controller;
+  }
+
+  // src/index.ts
+  function init2(containerDom) {
+    initTheme(document.documentElement);
+    const controller = initController();
+    const stateValue = new Proxy(DEFAULT_STORE_VALUE, {
+      set(obj, prop, value) {
+        const res = Reflect.set(obj, prop, value);
+        setState();
+        return res;
+      }
+    });
+    const setState = () => {
+      render(containerDom, App(stateValue, controller));
+    };
+    setState();
+    stateValue.fontFamilyList = initFontFamilyList();
+    initCanvas(stateValue, controller);
+  }
+  init2(document.querySelector("#root"));
+})();
+
+    for(var key in __export__) {
+            exports[key] = __export__[key]
+        }
+    }));
+//# sourceMappingURL=excel.umd.js.map
