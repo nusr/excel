@@ -1,4 +1,4 @@
-import { StoreValue, IController, ScrollValue } from '@/types';
+import { StoreValue, IController } from '@/types';
 import { FORMULA_EDITOR_ID, DOUBLE_CLICK_TIME, SCROLL_SIZE } from '@/util';
 import { debounce } from '@/lodash';
 
