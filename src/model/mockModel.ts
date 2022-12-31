@@ -7,8 +7,8 @@ export const MOCK_MODEL: WorkBookJSON = {
       sheetId: 'Sheet1',
       name: 'Sheet1',
       activeCell: 'B2',
-      colCount: DEFAULT_COL_COUNT,
-      rowCount: DEFAULT_ROW_COUNT,
+      colCount: 16384,
+      rowCount: 1048576,
     },
     {
       sheetId: '2',

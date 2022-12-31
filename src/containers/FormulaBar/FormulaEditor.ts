@@ -38,7 +38,7 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
   };
 
   const setValue = (value: string) => {
-    controller.setCellValue(activeCell, value);
+    controller.setCellValues(value, controller.getRanges());
     inputDom.value = '';
     state.isCellEditing = false;
   };

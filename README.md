@@ -1,7 +1,11 @@
-# Web Excel
+# Online Excel
+
+Zero dependencies
 
 [![CI](https://github.com/nusr/excel/actions/workflows/main.yml/badge.svg)](https://github.com/nusr/excel/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/nusr/excel/branch/main/graph/badge.svg?token=ZOC8RHD3Z1)](https://codecov.io/gh/nusr/excel)
+![GitHub](https://img.shields.io/github/license/nusr/excel.svg)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/nusr/excel.svg)
 
 [online demo](https://nusr.github.io/excel/)
 
@@ -15,71 +19,48 @@ npm install
 npm run start
 ```
 
-## Test
+## Features
 
-```bash
-npm run test
-```
+- Font
+- Font size
+- Font bold
+- Font italic
+- Text color
+- Fill color
+- Text wrapping
+- Formulas
+- Insert row, column
+- Delete row, column
+- multiple sheets
 
-## build
-
-```bash
-npm run build
-```
-
-## Formula
-
-26/52
+### Formulas
 
 1. [x] ABS
 2. [x] ACOS
 3. [x] ACOSH
 4. [x] ACOT
 5. [x] ACOTH
-6. [ ] ASC
-7. [x] ASIN
-8. [x] ASINH
-9. [x] ATAN
-10. [x] ATANH
-11. [ ] BAHTTEXT
-12. [x] CHAR
-13. [ ] CLEAN
-14. [x] CODE
-15. [ ] CONCATENATE
-16. [x] COS
-17. [x] COT
-18. [ ] DBCS
-19. [ ] DOLLAR
-20. [x] E
-21. [ ] EXACT
-22. [x] EXP
-23. [ ] FIND
-24. [ ] FIXED
-25. [ ] HTML2TEXT
-26. [x] INT
-27. [ ] LEFT
-28. [x] LEN
-29. [x] LOWER
-30. [ ] MID
-31. [ ] NUMBERVALUE
-32. [x] PI
-33. [ ] PRONETIC
-34. [ ] PROPER
-35. [ ] REGEXEXTRACT
-36. [ ] REGEXMATCH
-37. [ ] REGREPLACE
-38. [ ] REPLACE
-39. [ ] REPT
-40. [ ] RIGHT
-41. [ ] SEARCH
-42. [x] SIN
-43. [ ] SPLIT
-44. [ ] SUBSTITUTE
-45. [x] SUM
-46. [x] T
-47. [ ] TEXT
-48. [x] TRIM
-49. [x] UNICHAR
-50. [x] UNICODE
-51. [x] UPPER
-52. [ ] VALUE
+6. [x] ASIN
+7. [x] ASINH
+8. [x] ATAN
+9. [x] ATANH
+10. [x] CHAR
+11. [x] CODE
+12. [x] CONCAT
+13. [x] CONCATENATE
+14. [x] COS
+15. [x] COT
+16. [x] E
+17. [x] EXP
+18. [x] INT
+19. [x] LEN
+20. [x] LOWER
+21. [x] PI
+22. [x] SIN
+23. [x] SPLIT
+24. [x] SUM
+25. [x] T
+26. [x] TRIM
+27. [x] UNICHAR
+28. [x] UNICODE
+29. [x] UPPER

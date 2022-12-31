@@ -22,7 +22,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     };
   };
   const setCellStyle = (value: Partial<StyleType>) => {
-    controller.setCellStyle(value);
+    controller.setCellStyle(value, controller.getRanges());
   };
   const { activeCell, canRedo, canUndo, fontFamilyList } = state;
   const { style = {} } = activeCell;

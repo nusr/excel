@@ -73,5 +73,6 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
 export function initController(): IController {
   const controller = new Controller(new Model(), new History());
   controller.addSheet();
+  (window as any).controller = controller;
   return controller;
 }

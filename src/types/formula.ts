@@ -1,72 +1,48 @@
 interface IFormulaOptions {
-  paramsType: "number" | "string" | "any";
+  paramsType: 'number' | 'string' | 'any';
   minParamsCount: number;
   maxParamsCount: number;
-  resultType: "number" | "string";
+  resultType: 'number' | 'string' | 'array string';
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type FormulaFunction = (...data: any[]) => number | string | boolean;
+type FormulaFunction = (...data: any[]) => number | string | boolean | string[];
 export type FormulaContent = {
   func: FormulaFunction;
   options: IFormulaOptions;
 } | null;
 
 export type TextFormulaKeys =
-  | "ASC"
-  | "BAHTTEXT"
-  | "CLEAN"
-  | "CONCATENATE"
-  | "DBCS"
-  | "DOLLAR"
-  | "EXACT"
-  | "FIND"
-  | "FIXED"
-  | "HTML2TEXT"
-  | "LEFT"
-  | "MID"
-  | "NUMBERVALUE"
-  | "PRONETIC"
-  | "PROPER"
-  | "REGEXEXTRACT"
-  | "REGEXMATCH"
-  | "REGREPLACE"
-  | "REPLACE"
-  | "REPT"
-  | "RIGHT"
-  | "SEARCH"
-  | "SPLIT"
-  | "SUBSTITUTE"
-  | "TEXT"
-  | "VALUE"
-  | "T"
-  | "LOWER"
-  | "CHAR"
-  | "CODE"
-  | "LEN"
-  | "UNICHAR"
-  | "UNICODE"
-  | "UPPER"
-  | "TRIM";
+  | 'CONCATENATE'
+  | 'CONCAT'
+  | 'SPLIT'
+  | 'T'
+  | 'LOWER'
+  | 'CHAR'
+  | 'CODE'
+  | 'LEN'
+  | 'UNICHAR'
+  | 'UNICODE'
+  | 'UPPER'
+  | 'TRIM';
 export type MathFormulaKeys =
-  | "ABS"
-  | "ACOS"
-  | "ACOSH"
-  | "ACOT"
-  | "ACOTH"
-  | "ASIN"
-  | "ASINH"
-  | "ATAN"
-  | "ATANH"
-  | "COS"
-  | "COT"
-  | "COS"
-  // | "DECIMAL"
-  | "EXP"
-  | "INT"
-  | "PI"
-  | "E"
-  | "SIN"
-  | "SUM";
+  | 'ABS'
+  | 'ACOS'
+  | 'ACOSH'
+  | 'ACOT'
+  | 'ACOTH'
+  | 'ASIN'
+  | 'ASINH'
+  | 'ATAN'
+  | 'ATANH'
+  | 'COS'
+  | 'COT'
+  | 'COS'
+  | 'EXP'
+  | 'INT'
+  | 'PI'
+  | 'E'
+  | 'SIN'
+  | 'SUM';
 
 export type FormulaKeys = TextFormulaKeys | MathFormulaKeys;
 

@@ -60,21 +60,31 @@ export type WorkBookJSON = {
   mergeCells?: string[];
 };
 
-export interface IModel {
+export interface IModel extends IBaseModel {
+  queryCell(row: number, col: number, sheetId?: string): QueryCellResult;
+}
+
+export interface IBaseModel {
+  setCellValues(value: string, ranges: IRange[]): void;
+  setActiveCell(
+    row: number,
+    col: number,
+    rowCount: number,
+    colCount: number,
+  ): void;
+  setCurrentSheetId(id: string): void;
   getCurrentSheetId(): string;
   addSheet(): void;
-  setCurrentSheetId(id: string): void;
-  getCellsContent(sheetId?: string): Array<Coordinate>;
-  setActiveCell(row: number, col: number): void;
+  getCellsContent(sheetId: string): Array<Coordinate>;
   toJSON(): WorkBookJSON;
   fromJSON(json: WorkBookJSON): void;
-  queryCell(row: number, col: number, sheetId?: string): QueryCellResult;
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void;
-  getSheetInfo(sheetId?: string): WorksheetType;
-  setCellValues(value: string, ranges: IRange[]): void;
+  getSheetInfo(sheetId: string): WorksheetType;
   getSheetList(): WorkBookJSON['workbook'];
   addRow(rowIndex: number, count: number): void;
   addCol(colIndex: number, count: number): void;
+  deleteCol(colIndex: number, count: number): void;
+  deleteRow(rowIndex: number, count: number): void;
 }
 
 export interface IHistory {

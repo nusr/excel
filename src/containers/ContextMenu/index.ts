@@ -30,7 +30,16 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
           hideContextMenu();
         },
       },
-      '新增一列',
+      'add a column',
+    ),
+    Button(
+      {
+        onClick() {
+          controller.deleteCol(controller.getActiveCell().col, 1);
+          hideContextMenu();
+        },
+      },
+      'delete a column',
     ),
     Button(
       {
@@ -39,7 +48,16 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
           hideContextMenu();
         },
       },
-      '新增一行',
+      'add a row',
+    ),
+    Button(
+      {
+        onClick() {
+          controller.deleteRow(controller.getActiveCell().row, 1);
+          hideContextMenu();
+        },
+      },
+      'delete a row',
     ),
   );
 };

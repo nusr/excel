@@ -78,7 +78,7 @@ export class Content implements ContentView {
   }
   private renderContent(width: number, height: number): void {
     const { controller } = this;
-    const data = controller.getCellsContent();
+    const data = controller.getCellsContent(controller.getCurrentSheetId());
     if (isEmpty(data)) {
       return;
     }
@@ -142,7 +142,7 @@ export class Content implements ContentView {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
     const { row: rowIndex, col: colIndex } = controller.getScroll();
-    const { rowCount, colCount } = this.controller.getSheetInfo();
+    const { rowCount, colCount } = this.controller.getSheetInfo(this.controller.getCurrentSheetId());
     const lineWidth = thinLineWidth();
     this.ctx.save();
     this.ctx.fillStyle = theme.white;
@@ -192,7 +192,7 @@ export class Content implements ContentView {
     const { controller } = this;
     const { row: rowIndex } = controller.getScroll();
     const headerSize = controller.getHeaderSize();
-    const { rowCount } = controller.getSheetInfo();
+    const { rowCount } = controller.getSheetInfo(controller.getCurrentSheetId());
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
     fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
@@ -224,7 +224,7 @@ export class Content implements ContentView {
 
     const { col: colIndex } = controller.getScroll();
     const headerSize = controller.getHeaderSize();
-    const { colCount } = controller.getSheetInfo();
+    const { colCount } = controller.getSheetInfo(controller.getCurrentSheetId());
     const pointList: Array<Point> = [];
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;

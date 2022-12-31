@@ -41,6 +41,12 @@ export function parseFormula(
         throw new CustomError('#VALUE!');
       }
       const result = func(...args);
+      if (Array.isArray(result)) {
+        if (resultType !== 'array string') {
+          throw new CustomError('#NUM!');
+        }
+        return result;
+      }
       if (resultType === 'number') {
         if (!isNumber(result)) {
           throw new CustomError('#NUM!');

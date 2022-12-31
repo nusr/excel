@@ -19,7 +19,7 @@ function getHitInfo(
   canvasSize: DOMRect,
 ): IHitInfo | null {
   const scroll = controller.getScroll();
-  const sheetInfo = controller.getSheetInfo();
+  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
   const headerSize = controller.getHeaderSize();
   const { pageX, pageY } = event;
   const x = pageX - canvasSize.left;
@@ -45,6 +45,100 @@ function getHitInfo(
 
 const BOTTOM_BUFF = 100;
 
+function scrollBar(
+  controller: IController,
+  canvas: HTMLCanvasElement,
+  scrollX: number,
+  scrollY: number,
+) {
+  const headerSize = controller.getHeaderSize();
+  const canvasRect = canvas.getBoundingClientRect();
+  const viewSize = controller.getViewSize();
+  const oldScroll = controller.getScroll();
+
+  const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
+  const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
+
+  const maxScrollHeight =
+    canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
+  const maxScrollWidth =
+    canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
+  let top = oldScroll.top + scrollY;
+  if (top < 0) {
+    top = 0;
+  } else if (top > maxHeight) {
+    top = maxHeight;
+  }
+
+  let left = oldScroll.left + scrollX;
+  if (left < 0) {
+    left = 0;
+  } else if (left > maxScrollWidth) {
+    left = maxScrollWidth;
+  }
+  const realDeltaY = top - oldScroll.top;
+  const realDeltaX = left - oldScroll.left;
+  let { row, col } = oldScroll;
+
+  if (Math.abs(realDeltaY) > 0) {
+    if (realDeltaY > 0) {
+      let t = realDeltaY;
+      while (t > 0) {
+        const a = controller.getRowHeight(row + 1);
+        if (a > t) {
+          break;
+        }
+        t -= a;
+        row++;
+      }
+    } else {
+      let t = -realDeltaY;
+      while (t > 0) {
+        const a = controller.getRowHeight(row - 1);
+        if (a > t) {
+          break;
+        }
+        t -= a;
+        row--;
+      }
+    }
+  }
+  if (Math.abs(realDeltaX) > 0) {
+    if (realDeltaX > 0) {
+      let t = realDeltaX;
+      while (t > 0) {
+        const a = controller.getColWidth(col + 1);
+        if (a > t) {
+          break;
+        }
+        t -= a;
+        col++;
+      }
+    } else {
+      let t = -realDeltaX;
+      while (t > 0) {
+        const a = controller.getColWidth(col - 1);
+        if (a > t) {
+          break;
+        }
+        t -= a;
+        col--;
+      }
+    }
+  }
+
+  const scrollTop = (top * maxScrollHeight) / maxHeight;
+  const scrollLeft = (left * maxScrollWidth) / maxWidth;
+  controller.setScroll({
+    top,
+    left,
+    row,
+    col,
+    scrollLeft: Math.floor(scrollLeft),
+    scrollTop: Math.floor(scrollTop),
+  });
+}
+
 export function registerEvents(
   stateValue: StoreValue,
   controller: IController,
@@ -59,14 +153,14 @@ export function registerEvents(
     resizeWindow();
   });
   window.addEventListener('keydown', function (event) {
-    if (event.key === 'Enter') {
+    if (event.code === 'Enter') {
       controller.setActiveCell(
         stateValue.activeCell.row + 1,
         stateValue.activeCell.col,
         1,
         1,
       );
-    } else if (event.key === 'Tab') {
+    } else if (event.code === 'Tab') {
       controller.setActiveCell(
         stateValue.activeCell.row,
         stateValue.activeCell.col + 1,
@@ -74,69 +168,37 @@ export function registerEvents(
         1,
       );
     }
+    if (event.ctrlKey) {
+      if (event.code === 'ArrowDown') {
+        const canvasRect = canvas.getBoundingClientRect();
+        const viewSize = controller.getViewSize();
+        const maxHeight = viewSize.height - canvasRect.height;
+        scrollBar(controller, canvas, 0, maxHeight);
+        return;
+      }
+      if (event.code === 'ArrowRight') {
+        const canvasRect = canvas.getBoundingClientRect();
+        const viewSize = controller.getViewSize();
+        const maxWidth = viewSize.width - canvasRect.width;
+        scrollBar(controller, canvas, maxWidth, 0);
+        return;
+      }
+    }
     if (inputDom === event.target) {
       return;
     }
+
     stateValue.isCellEditing = true;
     inputDom.focus();
   });
 
   document.body.addEventListener(
     'wheel',
-    debounce((event) => {
+    debounce((event: WheelEvent) => {
       if (event.target !== canvas) {
         return;
       }
-      const headerSize = controller.getHeaderSize();
-      const canvasRect = canvas.getBoundingClientRect();
-      const sheetInfo = controller.getSheetInfo();
-      const viewSize = controller.getViewSize();
-      const oldScroll = controller.getScroll();
-
-      const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
-      const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-
-      const maxScrollHeight =
-        canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
-      const maxScrollWidth =
-        canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
-      let top = oldScroll.top + event.deltaY;
-      if (top < 0) {
-        top = 0;
-      } else if (top > maxHeight) {
-        top = maxHeight;
-      }
-
-      let left = oldScroll.left + event.deltaX;
-      if (left < 0) {
-        left = 0;
-      } else if (left > maxWidth) {
-        left = maxWidth;
-      }
-
-      let resultX = 0;
-      let resultY = 0;
-      let r = 0;
-      let c = 0;
-      while (resultX < left && c < sheetInfo.colCount) {
-        resultX += controller.getColWidth(c);
-        c++;
-      }
-      while (resultY < top && r < sheetInfo.rowCount) {
-        resultY += controller.getRowHeight(r);
-        r++;
-      }
-
-      const scrollTop = (top * maxScrollHeight) / maxHeight;
-      const scrollLeft = (left * maxScrollWidth) / maxWidth;
-      controller.setScroll({
-        top: top,
-        left: left,
-        row: r,
-        col: c,
-        scrollLeft,
-        scrollTop,
-      });
+      scrollBar(controller, canvas, event.deltaX, event.deltaY);
     }),
   );
 
@@ -152,15 +214,27 @@ export function registerEvents(
       return;
     }
     if (headerSize.width > x && headerSize.height > y) {
-      controller.selectAll(0, 0);
+      controller.setActiveCell(0, 0, 0, 0);
       return;
     }
     if (headerSize.width > x && headerSize.height <= y) {
-      controller.selectRow(position.row, position.col);
+      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+      controller.setActiveCell(
+        position.row,
+        position.col,
+        0,
+        sheetInfo.colCount,
+      );
       return;
     }
     if (headerSize.width <= x && headerSize.height > y) {
-      controller.selectCol(position.row, position.col);
+      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+      controller.setActiveCell(
+        position.row,
+        position.col,
+        sheetInfo.rowCount,
+        0,
+      );
       return;
     }
     const activeCell = controller.getActiveCell();
@@ -184,14 +258,28 @@ export function registerEvents(
     const { clientX, clientY } = event;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
-    const checkMove =
-      x > headerSize.width && y > headerSize.height && event.buttons === 1;
-    if (checkMove) {
-      const position = getHitInfo(event, controller, rect);
-      if (!position) {
-        return;
+    if (event.buttons === 1) {
+      if (x > headerSize.width && y > headerSize.height) {
+        const position = getHitInfo(event, controller, rect);
+        if (!position) {
+          return;
+        }
+        const activeCell = controller.getActiveCell();
+        if (
+          activeCell.row === position.row &&
+          activeCell.col === position.col
+        ) {
+          return;
+        }
+        const colCount = Math.abs(position.col - activeCell.col) + 1;
+        const rowCount = Math.abs(position.row - activeCell.row) + 1;
+        controller.setActiveCell(
+          Math.min(position.row, activeCell.row),
+          Math.min(position.col, activeCell.col),
+          rowCount,
+          colCount,
+        );
       }
-      controller.updateSelection(position.row, position.col);
     }
   });
   canvas.addEventListener('contextmenu', (event) => {

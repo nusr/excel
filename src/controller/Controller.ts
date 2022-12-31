@@ -13,6 +13,7 @@ import {
   IWindowSize,
   CanvasOverlayPosition,
   ScrollValue,
+  IRange,
 } from '@/types';
 import { parseReference, controllerLog, Range, assert } from '@/util';
 
@@ -65,10 +66,10 @@ export class Controller implements IController {
   getSheetList(): WorkBookJSON['workbook'] {
     return this.model.getSheetList();
   }
-  getCellsContent(sheetId?: string | undefined): Coordinate[] {
+  getCellsContent(sheetId: string): Coordinate[] {
     return this.model.getCellsContent(sheetId);
   }
-  getSheetInfo(sheetId?: string | undefined): WorksheetType {
+  getSheetInfo(sheetId: string): WorksheetType {
     return this.model.getSheetInfo(sheetId);
   }
   getRanges(): Range[] {
@@ -86,7 +87,7 @@ export class Controller implements IController {
     this.changeSet = new Set<ChangeEventType>();
   }
   getActiveCell(): Coordinate {
-    const { activeCell } = this.getSheetInfo();
+    const { activeCell } = this.getSheetInfo(this.model.getCurrentSheetId());
     if (!activeCell) {
       return { ...DEFAULT_ACTIVE_CELL };
     }
@@ -95,23 +96,16 @@ export class Controller implements IController {
     const { row, col } = result;
     return { row, col };
   }
-  setActiveCell(row = -1, col = -1, colCount = 1, rowCount = 1): void {
+  setActiveCell(
+    row: number,
+    col: number,
+    rowCount: number,
+    colCount: number,
+  ): void {
     this.changeSet.add('selectionChange');
-    let position: Coordinate = { ...DEFAULT_ACTIVE_CELL };
-    if (row === col && row === -1) {
-      position = this.getActiveCell();
-    } else {
-      position = { row, col };
-    }
-    this.model.setActiveCell(position.row, position.col);
+    this.model.setActiveCell(row, col, rowCount, colCount);
     this.ranges = [
-      new Range(
-        position.row,
-        position.col,
-        colCount,
-        rowCount,
-        this.getCurrentSheetId(),
-      ),
+      new Range(row, col, rowCount, colCount, this.getCurrentSheetId()),
     ];
     this.emitChange();
   }
@@ -120,7 +114,8 @@ export class Controller implements IController {
       return;
     }
     this.model.setCurrentSheetId(id);
-    this.setActiveCell();
+    const pos = this.getActiveCell();
+    this.setActiveCell(pos.row, pos.col, 1, 1);
     this.changeSet.add('contentChange');
     this.computeViewSize();
     this.emitChange();
@@ -128,7 +123,7 @@ export class Controller implements IController {
   addSheet(): void {
     this.model.addSheet();
     this.computeViewSize();
-    this.model.setActiveCell(0, 0);
+    this.model.setActiveCell(0, 0, 1, 1);
     this.setScroll({
       top: 0,
       left: 0,
@@ -138,60 +133,25 @@ export class Controller implements IController {
       scrollTop: 0,
     });
   }
-  selectAll(row: number, col: number): void {
-    this.setActiveCell(row, col, 0, 0);
-    controllerLog('selectAll');
-  }
-  selectCol(row: number, col: number): void {
-    const sheetInfo = this.model.getSheetInfo();
-    this.setActiveCell(row, col, sheetInfo.rowCount, 0);
-    controllerLog('selectCol');
-  }
-  selectRow(row: number, col: number): void {
-    const sheetInfo = this.model.getSheetInfo();
-    this.setActiveCell(row, col, 0, sheetInfo.colCount);
-    controllerLog('selectRow');
-  }
   fromJSON(json: WorkBookJSON): void {
     controllerLog('loadJSON', json);
     this.model.fromJSON(json);
-    this.model.setActiveCell(0, 0);
+    this.model.setActiveCell(0, 0, 1, 1);
+    this.computeViewSize();
     this.changeSet.add('contentChange');
     this.emitChange(false);
   }
   toJSON(): WorkBookJSON {
     return this.model.toJSON();
   }
-  updateSelection(row: number, col: number): void {
-    const activeCell = this.getActiveCell();
-    if (activeCell.row === row && activeCell.col === col) {
-      return;
-    }
-    const colCount = Math.abs(col - activeCell.col) + 1;
-    const rowCount = Math.abs(row - activeCell.row) + 1;
-    const temp = new Range(
-      Math.min(activeCell.row, row),
-      Math.min(activeCell.col, col),
-      rowCount,
-      colCount,
-      this.getCurrentSheetId(),
-    );
-    this.ranges = [temp];
-    controllerLog('updateSelection', temp);
-    this.changeSet.add('selectionChange');
-    this.emitChange();
-  }
 
-  setCellValue(data: Coordinate, value: string): void {
+  setCellValues(value: string, ranges: IRange[]): void {
     controllerLog('setCellValue', value);
-    const temp = [
-      new Range(data.row, data.col, 1, 1, this.getCurrentSheetId()),
-    ];
-    this.model.setCellValues(value, temp);
+    this.model.setCellValues(value, ranges);
     this.changeSet.add('contentChange');
     this.emitChange();
   }
-  setCellStyle(style: Partial<StyleType>, ranges = this.ranges): void {
+  setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
     if (isEmpty(style)) {
       return;
     }
@@ -234,7 +194,7 @@ export class Controller implements IController {
   }
   setColWidth(col: number, width: number): void {
     this.colMap.set(col, width);
-    this.computeViewSize();
+    this.computeViewSize(true);
     this.changeSet.add('contentChange');
   }
   getRowHeight(row: number): number {
@@ -242,12 +202,19 @@ export class Controller implements IController {
   }
   setRowHeight(row: number, height: number) {
     this.rowMap.set(row, height);
-    this.computeViewSize();
+    this.computeViewSize(true);
     this.changeSet.add('contentChange');
   }
-  private computeViewSize() {
+  private computeViewSize(isContentChange = false) {
     const headerSize = this.getHeaderSize();
-    const sheetInfo = this.model.getSheetInfo();
+    const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
+    if (!isContentChange) {
+      this.viewSize = {
+        width: headerSize.width + this.getColWidth(0) * sheetInfo.colCount,
+        height: headerSize.height + this.getRowHeight(0) * sheetInfo.rowCount,
+      };
+      return;
+    }
     let width = headerSize.width;
     let height = headerSize.height;
     for (let i = 0; i < sheetInfo.colCount; i++) {
@@ -304,6 +271,16 @@ export class Controller implements IController {
     this.changeSet.add('contentChange');
     this.emitChange();
   }
+  deleteCol(colIndex: number, count: number): void {
+    this.model.deleteCol(colIndex, count);
+    this.changeSet.add('contentChange');
+    this.emitChange();
+  }
+  deleteRow(rowIndex: number, count: number): void {
+    this.model.deleteRow(rowIndex, count);
+    this.changeSet.add('contentChange');
+    this.emitChange();
+  }
   getChangeSet(): Set<ChangeEventType> {
     const result = this.changeSet;
     this.changeSet = new Set<ChangeEventType>();
@@ -311,15 +288,15 @@ export class Controller implements IController {
   }
 
   getScroll(): ScrollValue {
-    const sheetId = this.model.getCurrentSheetId()
+    const sheetId = this.model.getCurrentSheetId();
     const result = this.scrollValue[sheetId] || defaultScrollValue;
     return result;
   }
   setScroll(data: ScrollValue): void {
-    const sheetId = this.model.getCurrentSheetId()
+    const sheetId = this.model.getCurrentSheetId();
     this.scrollValue[sheetId] = {
-      ...data
-    }
+      ...data,
+    };
     this.changeSet.add('contentChange');
     this.emitChange();
   }

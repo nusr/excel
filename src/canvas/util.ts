@@ -55,6 +55,16 @@ export function strokeRect(
   ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
 }
 
+export function clearRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): void {
+  ctx.clearRect(npx(x), npx(y), npx(width), npx(height));
+}
+
 function getFontSizeHeight(ctx: CanvasRenderingContext2D, char: string) {
   const { actualBoundingBoxDescent, actualBoundingBoxAscent } = measureText(
     ctx,

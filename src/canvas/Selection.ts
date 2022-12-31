@@ -1,7 +1,14 @@
 import { dpr, npx, resizeCanvas, assert, isCol, isRow, isSheet } from '@/util';
 import theme from '@/theme';
-import { fillRect, renderCell, getStyle, strokeRect } from './util';
-import type { ContentView, IController, IWindowSize } from '@/types';
+import {
+  fillRect,
+  renderCell,
+  getStyle,
+  strokeRect,
+  drawLines,
+  clearRect,
+} from './util';
+import type { ContentView, IController, IWindowSize, Point } from '@/types';
 
 export class Selection implements ContentView {
   private canvas: HTMLCanvasElement;
@@ -57,6 +64,26 @@ export class Selection implements ContentView {
     }
     this.renderSelectRange();
   }
+  private renderActiveCell() {
+    const { controller } = this;
+    const cellData = controller.getCell(controller.getActiveCell());
+    const activeCell = controller.computeCellPosition(
+      cellData.row,
+      cellData.col,
+    );
+    clearRect(
+      this.ctx,
+      activeCell.left,
+      activeCell.top,
+      activeCell.width,
+      activeCell.height,
+    );
+    renderCell(
+      this.ctx,
+      { ...cellData, ...activeCell },
+      getStyle('lineHeight', this.canvas),
+    );
+  }
   private renderSelectRange() {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
@@ -74,31 +101,39 @@ export class Selection implements ContentView {
 
     fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
     fillRect(this.ctx, 0, activeCell.top, headerSize.width, height);
+    const check = range.rowCount > 1 || range.colCount > 1;
+    if (check) {
+      fillRect(this.ctx, activeCell.left, activeCell.top, width, height);
+    }
 
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
 
     assert(width >= 0 && height >= 0);
+    const list: Point[] = [
+      [activeCell.left, headerSize.height],
+      [activeCell.left + width, headerSize.height],
+    ];
+    list.push(
+      [headerSize.width, activeCell.top],
+      [headerSize.width, activeCell.top + height],
+    );
+    drawLines(this.ctx, list);
+    if (check) {
+      this.renderActiveCell();
+    }
+
     strokeRect(this.ctx, activeCell.left, activeCell.top, width, height);
   }
   private renderSelectAll(): void {
     const { controller } = this;
     this.ctx.fillStyle = theme.selectionColor;
     fillRect(this.ctx, 0, 0, this.canvasSize.width, this.canvasSize.height);
-    const cellData = controller.getCell(controller.getActiveCell());
-    const activeCell = controller.computeCellPosition(
-      cellData.row,
-      cellData.col,
-    );
-    renderCell(
-      this.ctx,
-      { ...cellData, ...activeCell },
-      getStyle('lineHeight', this.canvas),
-    );
 
     const headerSize = controller.getHeaderSize();
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
+    this.renderActiveCell();
     strokeRect(
       this.ctx,
       headerSize.width,
@@ -132,6 +167,11 @@ export class Selection implements ContentView {
 
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
+    const list: Point[] = [
+      [headerSize.width, headerSize.height],
+      [headerSize.width, this.canvasSize.height - headerSize.height],
+    ];
+    drawLines(this.ctx, list);
     strokeRect(
       this.ctx,
       activeCell.left,
@@ -166,12 +206,17 @@ export class Selection implements ContentView {
 
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
+    const list: Point[] = [
+      [activeCell.left, headerSize.height],
+      [this.canvasSize.width - headerSize.width, headerSize.height],
+    ];
+    drawLines(this.ctx, list);
     strokeRect(
       this.ctx,
       activeCell.left,
       activeCell.top,
-      activeCell.width,
-      this.canvasSize.height,
+      this.canvasSize.width,
+      activeCell.height,
     );
   }
 }

@@ -22,8 +22,16 @@ import {
 } from '@/util';
 import { parseFormula } from '@/parser';
 
-// const XLSX_MAX_COL_COUNT = 16384; // XFD
-// const XLSX_MAX_ROW_COUNT = 1048575; // XFD
+const XLSX_MAX_COL_COUNT = 16384; // XFD
+const XLSX_MAX_ROW_COUNT = 1048576;
+
+function convertToNumber(list: string[]) {
+  const result = list
+    .map((item) => parseInt(item, 10))
+    .filter((v) => !isNaN(v));
+  result.sort((a, b) => a - b);
+  return result;
+}
 
 export class Model implements IModel {
   private currentSheetId = '';
@@ -64,8 +72,8 @@ export class Model implements IModel {
   getCurrentSheetId(): string {
     return this.currentSheetId;
   }
-  getCellsContent(): Array<Coordinate> {
-    const sheetData = this.worksheets[this.currentSheetId];
+  getCellsContent(sheetId: string): Array<Coordinate> {
+    const sheetData = this.worksheets[sheetId];
     if (isEmpty(sheetData)) {
       return [];
     }
@@ -211,20 +219,22 @@ export class Model implements IModel {
     if (isEmpty(sheetData)) {
       return;
     }
-    const rowKeys = Object.keys(sheetData);
+    const rowKeys = convertToNumber(Object.keys(sheetData));
     for (let i = rowKeys.length - 1; i >= 0; i--) {
       const rowKey = rowKeys[i];
-      const item = Number(rowKeys[i]);
-      if (item < rowIndex) {
+      if (rowKey < rowIndex) {
         continue;
       }
-      const key = String(item + count);
+      const key = String(rowKey + count);
       sheetData[key] = {
         ...sheetData[rowKey],
       };
       sheetData[rowKey] = {};
     }
     const sheetInfo = this.getSheetInfo();
+    if (sheetInfo.rowCount >= XLSX_MAX_ROW_COUNT) {
+      return;
+    }
     sheetInfo.rowCount += count;
   }
   addCol(colIndex: number, count: number): void {
@@ -236,14 +246,40 @@ export class Model implements IModel {
 
     const rowKeys = Object.keys(sheetData);
     for (const rowKey of rowKeys) {
-      const colKeys = Object.keys(sheetData[rowKey]);
+      const colKeys = convertToNumber(Object.keys(sheetData[rowKey]));
       for (let i = colKeys.length - 1; i >= 0; i--) {
         const colKey = colKeys[i];
-        const col = Number(colKey);
-        if (col < colIndex) {
+        if (colKey < colIndex) {
           continue;
         }
-        const key = String(col + count);
+        const key = String(colKey + count);
+        sheetData[rowKey][key] = {
+          ...sheetData[rowKey][colKey],
+        };
+        sheetData[rowKey][colKey] = {};
+      }
+    }
+    if (sheetInfo.colCount >= XLSX_MAX_COL_COUNT) {
+      return;
+    }
+    sheetInfo.colCount += count;
+  }
+  deleteCol(colIndex: number, count: number): void {
+    const sheetData = this.worksheets[this.currentSheetId];
+    if (isEmpty(sheetData)) {
+      return;
+    }
+    const sheetInfo = this.getSheetInfo();
+
+    const rowKeys = Object.keys(sheetData);
+    for (const rowKey of rowKeys) {
+      const colKeys = convertToNumber(Object.keys(sheetData[rowKey]));
+      for (let i = 0; i < colKeys.length; i++) {
+        const colKey = colKeys[i];
+        if (colKey < colIndex) {
+          continue;
+        }
+        const key = String(colKey - count);
         sheetData[rowKey][key] = {
           ...sheetData[rowKey][colKey],
         };
@@ -251,6 +287,26 @@ export class Model implements IModel {
       }
     }
 
-    sheetInfo.colCount += count;
+    sheetInfo.colCount -= count;
+  }
+  deleteRow(rowIndex: number, count: number): void {
+    const sheetData = this.worksheets[this.currentSheetId];
+    if (isEmpty(sheetData)) {
+      return;
+    }
+    const rowKeys = convertToNumber(Object.keys(sheetData));
+    for (let i = 0; i < rowKeys.length; i++) {
+      const rowKey = rowKeys[i];
+      if (rowKey < rowIndex) {
+        continue;
+      }
+      const key = String(rowKey - count);
+      sheetData[key] = {
+        ...sheetData[rowKey],
+      };
+      sheetData[rowKey] = {};
+    }
+    const sheetInfo = this.getSheetInfo();
+    sheetInfo.rowCount -= count;
   }
 }
