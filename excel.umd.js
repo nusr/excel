@@ -1385,7 +1385,7 @@ var __export__ = (() => {
       inputDom = element;
     };
     const setValue = (value) => {
-      controller.setCellValue(activeCell, value);
+      controller.setCellValues(value, controller.getRanges());
       inputDom.value = "";
       state.isCellEditing = false;
     };
@@ -1750,7 +1750,7 @@ var __export__ = (() => {
       };
     };
     const setCellStyle = (value) => {
-      controller.setCellStyle(value);
+      controller.setCellStyle(value, controller.getRanges());
     };
     const { activeCell, canRedo, canUndo, fontFamilyList } = state;
     const { style = {} } = activeCell;
@@ -1981,7 +1981,16 @@ var __export__ = (() => {
             hideContextMenu();
           }
         },
-        "\u65B0\u589E\u4E00\u5217"
+        "add a column"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.deleteCol(controller.getActiveCell().col, 1);
+            hideContextMenu();
+          }
+        },
+        "delete a column"
       ),
       Button(
         {
@@ -1990,7 +1999,16 @@ var __export__ = (() => {
             hideContextMenu();
           }
         },
-        "\u65B0\u589E\u4E00\u884C"
+        "add a row"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.deleteRow(controller.getActiveCell().row, 1);
+            hideContextMenu();
+          }
+        },
+        "delete a row"
       )
     );
   };
@@ -2082,7 +2100,7 @@ var __export__ = (() => {
       this.changeSet = /* @__PURE__ */ new Set();
     }
     getActiveCell() {
-      const { activeCell } = this.getSheetInfo();
+      const { activeCell } = this.getSheetInfo(this.model.getCurrentSheetId());
       if (!activeCell) {
         return { ...DEFAULT_ACTIVE_CELL };
       }
@@ -2091,23 +2109,11 @@ var __export__ = (() => {
       const { row, col } = result;
       return { row, col };
     }
-    setActiveCell(row = -1, col = -1, colCount = 1, rowCount = 1) {
+    setActiveCell(row, col, rowCount, colCount) {
       this.changeSet.add("selectionChange");
-      let position = { ...DEFAULT_ACTIVE_CELL };
-      if (row === col && row === -1) {
-        position = this.getActiveCell();
-      } else {
-        position = { row, col };
-      }
-      this.model.setActiveCell(position.row, position.col);
+      this.model.setActiveCell(row, col, rowCount, colCount);
       this.ranges = [
-        new Range(
-          position.row,
-          position.col,
-          colCount,
-          rowCount,
-          this.getCurrentSheetId()
-        )
+        new Range(row, col, rowCount, colCount, this.getCurrentSheetId())
       ];
       this.emitChange();
     }
@@ -2116,7 +2122,8 @@ var __export__ = (() => {
         return;
       }
       this.model.setCurrentSheetId(id);
-      this.setActiveCell();
+      const pos = this.getActiveCell();
+      this.setActiveCell(pos.row, pos.col, 1, 1);
       this.changeSet.add("contentChange");
       this.computeViewSize();
       this.emitChange();
@@ -2124,7 +2131,7 @@ var __export__ = (() => {
     addSheet() {
       this.model.addSheet();
       this.computeViewSize();
-      this.model.setActiveCell(0, 0);
+      this.model.setActiveCell(0, 0, 1, 1);
       this.setScroll({
         top: 0,
         left: 0,
@@ -2134,59 +2141,24 @@ var __export__ = (() => {
         scrollTop: 0
       });
     }
-    selectAll(row, col) {
-      this.setActiveCell(row, col, 0, 0);
-      controllerLog("selectAll");
-    }
-    selectCol(row, col) {
-      const sheetInfo = this.model.getSheetInfo();
-      this.setActiveCell(row, col, sheetInfo.rowCount, 0);
-      controllerLog("selectCol");
-    }
-    selectRow(row, col) {
-      const sheetInfo = this.model.getSheetInfo();
-      this.setActiveCell(row, col, 0, sheetInfo.colCount);
-      controllerLog("selectRow");
-    }
     fromJSON(json) {
       controllerLog("loadJSON", json);
       this.model.fromJSON(json);
-      this.model.setActiveCell(0, 0);
+      this.model.setActiveCell(0, 0, 1, 1);
+      this.computeViewSize();
       this.changeSet.add("contentChange");
       this.emitChange(false);
     }
     toJSON() {
       return this.model.toJSON();
     }
-    updateSelection(row, col) {
-      const activeCell = this.getActiveCell();
-      if (activeCell.row === row && activeCell.col === col) {
-        return;
-      }
-      const colCount = Math.abs(col - activeCell.col) + 1;
-      const rowCount = Math.abs(row - activeCell.row) + 1;
-      const temp = new Range(
-        Math.min(activeCell.row, row),
-        Math.min(activeCell.col, col),
-        rowCount,
-        colCount,
-        this.getCurrentSheetId()
-      );
-      this.ranges = [temp];
-      controllerLog("updateSelection", temp);
-      this.changeSet.add("selectionChange");
-      this.emitChange();
-    }
-    setCellValue(data, value) {
+    setCellValues(value, ranges) {
       controllerLog("setCellValue", value);
-      const temp = [
-        new Range(data.row, data.col, 1, 1, this.getCurrentSheetId())
-      ];
-      this.model.setCellValues(value, temp);
+      this.model.setCellValues(value, ranges);
       this.changeSet.add("contentChange");
       this.emitChange();
     }
-    setCellStyle(style, ranges = this.ranges) {
+    setCellStyle(style, ranges) {
       if (isEmpty(style)) {
         return;
       }
@@ -2229,7 +2201,7 @@ var __export__ = (() => {
     }
     setColWidth(col, width) {
       this.colMap.set(col, width);
-      this.computeViewSize();
+      this.computeViewSize(true);
       this.changeSet.add("contentChange");
     }
     getRowHeight(row) {
@@ -2237,12 +2209,19 @@ var __export__ = (() => {
     }
     setRowHeight(row, height) {
       this.rowMap.set(row, height);
-      this.computeViewSize();
+      this.computeViewSize(true);
       this.changeSet.add("contentChange");
     }
-    computeViewSize() {
+    computeViewSize(isContentChange = false) {
       const headerSize = this.getHeaderSize();
-      const sheetInfo = this.model.getSheetInfo();
+      const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
+      if (!isContentChange) {
+        this.viewSize = {
+          width: headerSize.width + this.getColWidth(0) * sheetInfo.colCount,
+          height: headerSize.height + this.getRowHeight(0) * sheetInfo.rowCount
+        };
+        return;
+      }
       let width = headerSize.width;
       let height = headerSize.height;
       for (let i = 0; i < sheetInfo.colCount; i++) {
@@ -2295,6 +2274,16 @@ var __export__ = (() => {
     }
     addCol(colIndex, count) {
       this.model.addCol(colIndex, count);
+      this.changeSet.add("contentChange");
+      this.emitChange();
+    }
+    deleteCol(colIndex, count) {
+      this.model.deleteCol(colIndex, count);
+      this.changeSet.add("contentChange");
+      this.emitChange();
+    }
+    deleteRow(rowIndex, count) {
+      this.model.deleteRow(rowIndex, count);
       this.changeSet.add("contentChange");
       this.emitChange();
     }
@@ -2931,37 +2920,42 @@ var __export__ = (() => {
   var CHAR = (value) => String.fromCharCode(value);
   var CODE = (value) => value.charCodeAt(0);
   var LEN = (value) => value.length;
+  var SPLIT = (value, sep) => value.split(sep);
   var UNICHAR = CHAR;
   var UNICODE = CODE;
   var UPPER = (value) => value.toUpperCase();
   var TRIM = (value) => value.replace(/ +/g, " ").trim();
+  var CONCAT = (...value) => {
+    return value.join("");
+  };
   var textFormulas = {
-    ASC: null,
-    BAHTTEXT: null,
-    CONCATENATE: null,
-    CLEAN: null,
-    DBCS: null,
-    DOLLAR: null,
-    EXACT: null,
-    FIND: null,
-    FIXED: null,
-    HTML2TEXT: null,
-    LEFT: null,
-    MID: null,
-    NUMBERVALUE: null,
-    PRONETIC: null,
-    PROPER: null,
-    REGEXEXTRACT: null,
-    REGEXMATCH: null,
-    REGREPLACE: null,
-    REPLACE: null,
-    REPT: null,
-    RIGHT: null,
-    SEARCH: null,
-    SPLIT: null,
-    SUBSTITUTE: null,
-    TEXT: null,
-    VALUE: null,
+    CONCAT: {
+      func: CONCAT,
+      options: {
+        paramsType: "any",
+        minParamsCount: 1,
+        maxParamsCount: 100,
+        resultType: "string"
+      }
+    },
+    CONCATENATE: {
+      func: CONCAT,
+      options: {
+        paramsType: "any",
+        minParamsCount: 1,
+        maxParamsCount: 100,
+        resultType: "string"
+      }
+    },
+    SPLIT: {
+      func: SPLIT,
+      options: {
+        paramsType: "string",
+        minParamsCount: 2,
+        maxParamsCount: 2,
+        resultType: "array string"
+      }
+    },
     CHAR: {
       func: CHAR,
       options: {
@@ -3480,6 +3474,12 @@ var __export__ = (() => {
           throw new CustomError("#VALUE!");
         }
         const result = func2(...args);
+        if (Array.isArray(result)) {
+          if (resultType !== "array string") {
+            throw new CustomError("#NUM!");
+          }
+          return result;
+        }
         if (resultType === "number") {
           if (!isNumber(result)) {
             throw new CustomError("#NUM!");
@@ -3559,6 +3559,13 @@ var __export__ = (() => {
   };
 
   // src/model/Model.ts
+  var XLSX_MAX_COL_COUNT = 16384;
+  var XLSX_MAX_ROW_COUNT = 1048576;
+  function convertToNumber(list) {
+    const result = list.map((item) => parseInt(item, 10)).filter((v) => !isNaN(v));
+    result.sort((a, b) => a - b);
+    return result;
+  }
   var Model = class {
     currentSheetId = "";
     workbook = [];
@@ -3598,8 +3605,8 @@ var __export__ = (() => {
     getCurrentSheetId() {
       return this.currentSheetId;
     }
-    getCellsContent() {
-      const sheetData = this.worksheets[this.currentSheetId];
+    getCellsContent(sheetId) {
+      const sheetData = this.worksheets[sheetId];
       if (isEmpty(sheetData)) {
         return [];
       }
@@ -3737,20 +3744,22 @@ var __export__ = (() => {
       if (isEmpty(sheetData)) {
         return;
       }
-      const rowKeys = Object.keys(sheetData);
+      const rowKeys = convertToNumber(Object.keys(sheetData));
       for (let i = rowKeys.length - 1; i >= 0; i--) {
         const rowKey = rowKeys[i];
-        const item = Number(rowKeys[i]);
-        if (item < rowIndex) {
+        if (rowKey < rowIndex) {
           continue;
         }
-        const key = String(item + count);
+        const key = String(rowKey + count);
         sheetData[key] = {
           ...sheetData[rowKey]
         };
         sheetData[rowKey] = {};
       }
       const sheetInfo = this.getSheetInfo();
+      if (sheetInfo.rowCount >= XLSX_MAX_ROW_COUNT) {
+        return;
+      }
       sheetInfo.rowCount += count;
     }
     addCol(colIndex, count) {
@@ -3761,21 +3770,66 @@ var __export__ = (() => {
       const sheetInfo = this.getSheetInfo();
       const rowKeys = Object.keys(sheetData);
       for (const rowKey of rowKeys) {
-        const colKeys = Object.keys(sheetData[rowKey]);
+        const colKeys = convertToNumber(Object.keys(sheetData[rowKey]));
         for (let i = colKeys.length - 1; i >= 0; i--) {
           const colKey = colKeys[i];
-          const col = Number(colKey);
-          if (col < colIndex) {
+          if (colKey < colIndex) {
             continue;
           }
-          const key = String(col + count);
+          const key = String(colKey + count);
           sheetData[rowKey][key] = {
             ...sheetData[rowKey][colKey]
           };
           sheetData[rowKey][colKey] = {};
         }
       }
+      if (sheetInfo.colCount >= XLSX_MAX_COL_COUNT) {
+        return;
+      }
       sheetInfo.colCount += count;
+    }
+    deleteCol(colIndex, count) {
+      const sheetData = this.worksheets[this.currentSheetId];
+      if (isEmpty(sheetData)) {
+        return;
+      }
+      const sheetInfo = this.getSheetInfo();
+      const rowKeys = Object.keys(sheetData);
+      for (const rowKey of rowKeys) {
+        const colKeys = convertToNumber(Object.keys(sheetData[rowKey]));
+        for (let i = 0; i < colKeys.length; i++) {
+          const colKey = colKeys[i];
+          if (colKey < colIndex) {
+            continue;
+          }
+          const key = String(colKey - count);
+          sheetData[rowKey][key] = {
+            ...sheetData[rowKey][colKey]
+          };
+          sheetData[rowKey][colKey] = {};
+        }
+      }
+      sheetInfo.colCount -= count;
+    }
+    deleteRow(rowIndex, count) {
+      const sheetData = this.worksheets[this.currentSheetId];
+      if (isEmpty(sheetData)) {
+        return;
+      }
+      const rowKeys = convertToNumber(Object.keys(sheetData));
+      for (let i = 0; i < rowKeys.length; i++) {
+        const rowKey = rowKeys[i];
+        if (rowKey < rowIndex) {
+          continue;
+        }
+        const key = String(rowKey - count);
+        sheetData[key] = {
+          ...sheetData[rowKey]
+        };
+        sheetData[rowKey] = {};
+      }
+      const sheetInfo = this.getSheetInfo();
+      sheetInfo.rowCount -= count;
     }
   };
 
@@ -3786,8 +3840,8 @@ var __export__ = (() => {
         sheetId: "Sheet1",
         name: "Sheet1",
         activeCell: "B2",
-        colCount: DEFAULT_COL_COUNT,
-        rowCount: DEFAULT_ROW_COUNT
+        colCount: 16384,
+        rowCount: 1048576
       },
       {
         sheetId: "2",
@@ -3920,7 +3974,7 @@ var __export__ = (() => {
   // src/canvas/event.ts
   function getHitInfo(event, controller, canvasSize) {
     const scroll = controller.getScroll();
-    const sheetInfo = controller.getSheetInfo();
+    const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
     const headerSize = controller.getHeaderSize();
     const { pageX, pageY } = event;
     const x = pageX - canvasSize.left;
@@ -3944,6 +3998,87 @@ var __export__ = (() => {
     return { ...cellSize, row, col, pageY, pageX, x, y };
   }
   var BOTTOM_BUFF = 100;
+  function scrollBar(controller, canvas, scrollX, scrollY) {
+    const headerSize = controller.getHeaderSize();
+    const canvasRect = canvas.getBoundingClientRect();
+    const viewSize = controller.getViewSize();
+    const oldScroll = controller.getScroll();
+    const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
+    const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
+    const maxScrollHeight = canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
+    const maxScrollWidth = canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
+    let top = oldScroll.top + scrollY;
+    if (top < 0) {
+      top = 0;
+    } else if (top > maxHeight) {
+      top = maxHeight;
+    }
+    let left = oldScroll.left + scrollX;
+    if (left < 0) {
+      left = 0;
+    } else if (left > maxScrollWidth) {
+      left = maxScrollWidth;
+    }
+    const realDeltaY = top - oldScroll.top;
+    const realDeltaX = left - oldScroll.left;
+    let { row, col } = oldScroll;
+    if (Math.abs(realDeltaY) > 0) {
+      if (realDeltaY > 0) {
+        let t = realDeltaY;
+        while (t > 0) {
+          const a = controller.getRowHeight(row + 1);
+          if (a > t) {
+            break;
+          }
+          t -= a;
+          row++;
+        }
+      } else {
+        let t = -realDeltaY;
+        while (t > 0) {
+          const a = controller.getRowHeight(row - 1);
+          if (a > t) {
+            break;
+          }
+          t -= a;
+          row--;
+        }
+      }
+    }
+    if (Math.abs(realDeltaX) > 0) {
+      if (realDeltaX > 0) {
+        let t = realDeltaX;
+        while (t > 0) {
+          const a = controller.getColWidth(col + 1);
+          if (a > t) {
+            break;
+          }
+          t -= a;
+          col++;
+        }
+      } else {
+        let t = -realDeltaX;
+        while (t > 0) {
+          const a = controller.getColWidth(col - 1);
+          if (a > t) {
+            break;
+          }
+          t -= a;
+          col--;
+        }
+      }
+    }
+    const scrollTop = top * maxScrollHeight / maxHeight;
+    const scrollLeft = left * maxScrollWidth / maxWidth;
+    controller.setScroll({
+      top,
+      left,
+      row,
+      col,
+      scrollLeft: Math.floor(scrollLeft),
+      scrollTop: Math.floor(scrollTop)
+    });
+  }
   function registerEvents(stateValue, controller, canvas, resizeWindow) {
     let lastTimeStamp = 0;
     const inputDom = document.querySelector(
@@ -3953,20 +4088,36 @@ var __export__ = (() => {
       resizeWindow();
     });
     window.addEventListener("keydown", function(event) {
-      if (event.key === "Enter") {
+      if (event.code === "Enter") {
         controller.setActiveCell(
           stateValue.activeCell.row + 1,
           stateValue.activeCell.col,
           1,
           1
         );
-      } else if (event.key === "Tab") {
+      } else if (event.code === "Tab") {
         controller.setActiveCell(
           stateValue.activeCell.row,
           stateValue.activeCell.col + 1,
           1,
           1
         );
+      }
+      if (event.ctrlKey) {
+        if (event.code === "ArrowDown") {
+          const canvasRect = canvas.getBoundingClientRect();
+          const viewSize = controller.getViewSize();
+          const maxHeight = viewSize.height - canvasRect.height;
+          scrollBar(controller, canvas, 0, maxHeight);
+          return;
+        }
+        if (event.code === "ArrowRight") {
+          const canvasRect = canvas.getBoundingClientRect();
+          const viewSize = controller.getViewSize();
+          const maxWidth = viewSize.width - canvasRect.width;
+          scrollBar(controller, canvas, maxWidth, 0);
+          return;
+        }
       }
       if (inputDom === event.target) {
         return;
@@ -3980,49 +4131,7 @@ var __export__ = (() => {
         if (event.target !== canvas) {
           return;
         }
-        const headerSize = controller.getHeaderSize();
-        const canvasRect = canvas.getBoundingClientRect();
-        const sheetInfo = controller.getSheetInfo();
-        const viewSize = controller.getViewSize();
-        const oldScroll = controller.getScroll();
-        const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
-        const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-        const maxScrollHeight = canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
-        const maxScrollWidth = canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
-        let top = oldScroll.top + event.deltaY;
-        if (top < 0) {
-          top = 0;
-        } else if (top > maxHeight) {
-          top = maxHeight;
-        }
-        let left = oldScroll.left + event.deltaX;
-        if (left < 0) {
-          left = 0;
-        } else if (left > maxWidth) {
-          left = maxWidth;
-        }
-        let resultX = 0;
-        let resultY = 0;
-        let r = 0;
-        let c = 0;
-        while (resultX < left && c < sheetInfo.colCount) {
-          resultX += controller.getColWidth(c);
-          c++;
-        }
-        while (resultY < top && r < sheetInfo.rowCount) {
-          resultY += controller.getRowHeight(r);
-          r++;
-        }
-        const scrollTop = top * maxScrollHeight / maxHeight;
-        const scrollLeft = left * maxScrollWidth / maxWidth;
-        controller.setScroll({
-          top,
-          left,
-          row: r,
-          col: c,
-          scrollLeft,
-          scrollTop
-        });
+        scrollBar(controller, canvas, event.deltaX, event.deltaY);
       })
     );
     canvas.addEventListener("mousedown", (event) => {
@@ -4037,15 +4146,27 @@ var __export__ = (() => {
         return;
       }
       if (headerSize.width > x && headerSize.height > y) {
-        controller.selectAll(0, 0);
+        controller.setActiveCell(0, 0, 0, 0);
         return;
       }
       if (headerSize.width > x && headerSize.height <= y) {
-        controller.selectRow(position.row, position.col);
+        const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+        controller.setActiveCell(
+          position.row,
+          position.col,
+          0,
+          sheetInfo.colCount
+        );
         return;
       }
       if (headerSize.width <= x && headerSize.height > y) {
-        controller.selectCol(position.row, position.col);
+        const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+        controller.setActiveCell(
+          position.row,
+          position.col,
+          sheetInfo.rowCount,
+          0
+        );
         return;
       }
       const activeCell = controller.getActiveCell();
@@ -4065,13 +4186,25 @@ var __export__ = (() => {
       const { clientX, clientY } = event;
       const x = clientX - rect.left;
       const y = clientY - rect.top;
-      const checkMove = x > headerSize.width && y > headerSize.height && event.buttons === 1;
-      if (checkMove) {
-        const position = getHitInfo(event, controller, rect);
-        if (!position) {
-          return;
+      if (event.buttons === 1) {
+        if (x > headerSize.width && y > headerSize.height) {
+          const position = getHitInfo(event, controller, rect);
+          if (!position) {
+            return;
+          }
+          const activeCell = controller.getActiveCell();
+          if (activeCell.row === position.row && activeCell.col === position.col) {
+            return;
+          }
+          const colCount = Math.abs(position.col - activeCell.col) + 1;
+          const rowCount = Math.abs(position.row - activeCell.row) + 1;
+          controller.setActiveCell(
+            Math.min(position.row, activeCell.row),
+            Math.min(position.col, activeCell.col),
+            rowCount,
+            colCount
+          );
         }
-        controller.updateSelection(position.row, position.col);
       }
     });
     canvas.addEventListener("contextmenu", (event) => {
@@ -4109,6 +4242,9 @@ var __export__ = (() => {
   }
   function strokeRect(ctx, x, y, width, height) {
     ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
+  }
+  function clearRect(ctx, x, y, width, height) {
+    ctx.clearRect(npx(x), npx(y), npx(width), npx(height));
   }
   function getFontSizeHeight(ctx, char) {
     const { actualBoundingBoxDescent, actualBoundingBoxAscent } = measureText(
@@ -4294,6 +4430,26 @@ var __export__ = (() => {
       }
       this.renderSelectRange();
     }
+    renderActiveCell() {
+      const { controller } = this;
+      const cellData = controller.getCell(controller.getActiveCell());
+      const activeCell = controller.computeCellPosition(
+        cellData.row,
+        cellData.col
+      );
+      clearRect(
+        this.ctx,
+        activeCell.left,
+        activeCell.top,
+        activeCell.width,
+        activeCell.height
+      );
+      renderCell(
+        this.ctx,
+        { ...cellData, ...activeCell },
+        getStyle("lineHeight", this.canvas)
+      );
+    }
     renderSelectRange() {
       const { controller } = this;
       const headerSize = controller.getHeaderSize();
@@ -4309,28 +4465,35 @@ var __export__ = (() => {
       this.ctx.fillStyle = theme_default.selectionColor;
       fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
       fillRect(this.ctx, 0, activeCell.top, headerSize.width, height);
+      const check = range.rowCount > 1 || range.colCount > 1;
+      if (check) {
+        fillRect(this.ctx, activeCell.left, activeCell.top, width, height);
+      }
       this.ctx.strokeStyle = theme_default.primaryColor;
       this.ctx.lineWidth = dpr();
       assert(width >= 0 && height >= 0);
+      const list = [
+        [activeCell.left, headerSize.height],
+        [activeCell.left + width, headerSize.height]
+      ];
+      list.push(
+        [headerSize.width, activeCell.top],
+        [headerSize.width, activeCell.top + height]
+      );
+      drawLines(this.ctx, list);
+      if (check) {
+        this.renderActiveCell();
+      }
       strokeRect(this.ctx, activeCell.left, activeCell.top, width, height);
     }
     renderSelectAll() {
       const { controller } = this;
       this.ctx.fillStyle = theme_default.selectionColor;
       fillRect(this.ctx, 0, 0, this.canvasSize.width, this.canvasSize.height);
-      const cellData = controller.getCell(controller.getActiveCell());
-      const activeCell = controller.computeCellPosition(
-        cellData.row,
-        cellData.col
-      );
-      renderCell(
-        this.ctx,
-        { ...cellData, ...activeCell },
-        getStyle("lineHeight", this.canvas)
-      );
       const headerSize = controller.getHeaderSize();
       this.ctx.strokeStyle = theme_default.primaryColor;
       this.ctx.lineWidth = dpr();
+      this.renderActiveCell();
       strokeRect(
         this.ctx,
         headerSize.width,
@@ -4363,6 +4526,11 @@ var __export__ = (() => {
       );
       this.ctx.strokeStyle = theme_default.primaryColor;
       this.ctx.lineWidth = dpr();
+      const list = [
+        [headerSize.width, headerSize.height],
+        [headerSize.width, this.canvasSize.height - headerSize.height]
+      ];
+      drawLines(this.ctx, list);
       strokeRect(
         this.ctx,
         activeCell.left,
@@ -4395,12 +4563,17 @@ var __export__ = (() => {
       );
       this.ctx.strokeStyle = theme_default.primaryColor;
       this.ctx.lineWidth = dpr();
+      const list = [
+        [activeCell.left, headerSize.height],
+        [this.canvasSize.width - headerSize.width, headerSize.height]
+      ];
+      drawLines(this.ctx, list);
       strokeRect(
         this.ctx,
         activeCell.left,
         activeCell.top,
-        activeCell.width,
-        this.canvasSize.height
+        this.canvasSize.width,
+        activeCell.height
       );
     }
   };
@@ -4467,7 +4640,7 @@ var __export__ = (() => {
     }
     renderContent(width, height) {
       const { controller } = this;
-      const data = controller.getCellsContent();
+      const data = controller.getCellsContent(controller.getCurrentSheetId());
       if (isEmpty(data)) {
         return;
       }
@@ -4527,7 +4700,7 @@ var __export__ = (() => {
       const { controller } = this;
       const headerSize = controller.getHeaderSize();
       const { row: rowIndex, col: colIndex } = controller.getScroll();
-      const { rowCount, colCount } = this.controller.getSheetInfo();
+      const { rowCount, colCount } = this.controller.getSheetInfo(this.controller.getCurrentSheetId());
       const lineWidth = thinLineWidth();
       this.ctx.save();
       this.ctx.fillStyle = theme_default.white;
@@ -4576,7 +4749,7 @@ var __export__ = (() => {
       const { controller } = this;
       const { row: rowIndex } = controller.getScroll();
       const headerSize = controller.getHeaderSize();
-      const { rowCount } = controller.getSheetInfo();
+      const { rowCount } = controller.getSheetInfo(controller.getCurrentSheetId());
       this.ctx.save();
       this.ctx.fillStyle = theme_default.backgroundColor;
       fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
@@ -4606,7 +4779,7 @@ var __export__ = (() => {
       const { controller } = this;
       const { col: colIndex } = controller.getScroll();
       const headerSize = controller.getHeaderSize();
-      const { colCount } = controller.getSheetInfo();
+      const { colCount } = controller.getSheetInfo(controller.getCurrentSheetId());
       const pointList = [];
       this.ctx.save();
       this.ctx.fillStyle = theme_default.backgroundColor;
@@ -4700,6 +4873,7 @@ var __export__ = (() => {
   function initController() {
     const controller = new Controller(new Model(), new History());
     controller.addSheet();
+    window.controller = controller;
     return controller;
   }
 
