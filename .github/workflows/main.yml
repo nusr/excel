@@ -6,21 +6,6 @@ on:
   - push
   - pull_request
 jobs:
-  mac:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - name: Test
-        run: |
-          npm install
-          npm run coverage
-      - name: E2E
-        run: |
-          npm run build
-          npm run e2e
   build:
     runs-on: ubuntu-latest
     steps:
