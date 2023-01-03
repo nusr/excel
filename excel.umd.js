@@ -4872,7 +4872,6 @@ var __export__ = (() => {
   function initController() {
     const controller = new Controller(new Model(), new History());
     controller.addSheet();
-    window.controller = controller;
     return controller;
   }
 
