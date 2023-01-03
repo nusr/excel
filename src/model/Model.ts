@@ -117,27 +117,33 @@ export class Model implements IModel {
     };
   }
 
-  private setCellValue(value: ResultType, range: Range): void {
+  private setCellValue(value: ResultType, range: Coordinate): void {
     const { row, col } = range;
-    const configPath = `worksheets[${
-      range.sheetId || this.currentSheetId
-    }][${row}][${col}]`;
+    const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
     setWith(this, `${configPath}.value`, value);
   }
-  private setCellFormula(formula: string, range: Range): void {
+  private setCellFormula(formula: string, range: Coordinate): void {
     const { row, col } = range;
-    const configPath = `worksheets[${
-      range.sheetId || this.currentSheetId
-    }][${row}][${col}]`;
+    const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
     setWith(this, `${configPath}.formula`, formula);
   }
-  setCellValues(value: string, ranges: Range[]): void {
+  setCellValues(value: string[][], ranges: Range[]): void {
     const [range] = ranges;
-    if (value.startsWith('=')) {
-      this.setCellFormula(value, range);
-    } else {
-      this.setCellFormula('', range);
-      this.setCellValue(value, range);
+    const { row, col } = range;
+    for (let r = 0; r < value.length; r++) {
+      for (let c = 0; c < value[r].length; c++) {
+        const t = value[r][c];
+        const temp: Coordinate = {
+          row: row + r,
+          col: col + c,
+        };
+        if (t.startsWith('=')) {
+          this.setCellFormula(t, temp);
+        } else {
+          this.setCellFormula('', temp);
+          this.setCellValue(t, temp);
+        }
+      }
     }
     this.computeAllCell();
   }

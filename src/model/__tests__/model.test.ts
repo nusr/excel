@@ -12,9 +12,10 @@ describe('model.test.ts', () => {
     const model = new Model();
     model.addSheet();
     expect(model.queryCell(0, 0)).toEqual({ style: undefined });
-    model.setCellValues('test', [
-      new Range(0, 0, 1, 1, model.getCurrentSheetId()),
-    ]);
+    model.setCellValues(
+      [['test']],
+      [new Range(0, 0, 1, 1, model.getCurrentSheetId())],
+    );
     expect(model.queryCell(0, 0)).toEqual({
       style: undefined,
       value: 'test',

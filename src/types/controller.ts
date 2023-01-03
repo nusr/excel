@@ -43,4 +43,6 @@ export interface IController extends IScrollValue, IBaseModel {
   getCellSize(row: number, col: number): IWindowSize;
   computeCellPosition(row: number, col: number): CanvasOverlayPosition;
   getChangeSet(): Set<ChangeEventType>;
+  paste(event?: ClipboardEvent): void;
+  copy(): void
 }

@@ -198,7 +198,7 @@ export function registerEvents(
     inputDom.focus();
   });
 
-  document.body.addEventListener(
+  window.addEventListener(
     'wheel',
     debounce((event: WheelEvent) => {
       if (event.target !== canvas) {
@@ -207,6 +207,12 @@ export function registerEvents(
       scrollBar(controller, canvas, event.deltaX, event.deltaY);
     }),
   );
+  document.body.addEventListener('paste', function(event: ClipboardEvent) {
+    console.log(event);
+    event.stopPropagation();
+    event.preventDefault();
+    controller.paste(event);
+  })
 
   canvas.addEventListener('mousedown', (event) => {
     const headerSize = controller.getHeaderSize();

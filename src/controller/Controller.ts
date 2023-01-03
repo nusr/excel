@@ -22,6 +22,7 @@ const CELL_HEIGHT = 20;
 const CELL_WIDTH = 68;
 const ROW_TITLE_HEIGHT = 20;
 const COL_TITLE_WIDTH = 34;
+const PLAIN_TEXT = 'text/plain';
 
 const defaultScrollValue: ScrollValue = {
   top: 0,
@@ -145,7 +146,7 @@ export class Controller implements IController {
     return this.model.toJSON();
   }
 
-  setCellValues(value: string, ranges: IRange[]): void {
+  setCellValues(value: string[][], ranges: IRange[]): void {
     controllerLog('setCellValue', value);
     this.model.setCellValues(value, ranges);
     this.changeSet.add('contentChange');
@@ -292,5 +293,38 @@ export class Controller implements IController {
     };
     this.changeSet.add('contentChange');
     this.emitChange();
+  }
+  private parseText(text: string) {
+    const list = text
+      .split('\n')
+      .map((item) => item)
+      .map((item) => item.split('\t'));
+    const rowCount = list.length;
+    let colCount = 0;
+    for (let item of list) {
+      if (item.length > colCount) {
+        colCount = item.length;
+      }
+    }
+    console.log(list);
+    const activeCell = this.getActiveCell();
+    this.model.setCellValues(list, this.ranges);
+    this.changeSet.add('contentChange');
+    this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
+  }
+  // private parseHTML(html: string) {}
+  paste(event?: ClipboardEvent): void {
+    if (!event) {
+      return;
+    }
+    const text = event.clipboardData?.getData(PLAIN_TEXT) || '';
+    // const html = event.clipboardData?.getData('text/html') || '';
+    // if (html) {
+    //   this.parseHTML(html);
+    // }
+    this.parseText(text);
+  }
+  copy(): void {
+
   }
 }

@@ -65,7 +65,7 @@ export interface IModel extends IBaseModel {
 }
 
 export interface IBaseModel {
-  setCellValues(value: string, ranges: IRange[]): void;
+  setCellValues(value: string[][], ranges: IRange[]): void;
   setActiveCell(
     row: number,
     col: number,
