@@ -43,7 +43,7 @@ function getHitInfo(
   return { ...cellSize, row, col, pageY, pageX, x, y };
 }
 
-const BOTTOM_BUFF = 100;
+const BOTTOM_BUFF = 200;
 
 function scrollBar(
   controller: IController,
@@ -73,8 +73,8 @@ function scrollBar(
   let left = oldScroll.left + scrollX;
   if (left < 0) {
     left = 0;
-  } else if (left > maxScrollWidth) {
-    left = maxScrollWidth;
+  } else if (left > maxWidth) {
+    left = maxWidth;
   }
   const realDeltaY = top - oldScroll.top;
   const realDeltaX = left - oldScroll.left;
@@ -168,19 +168,25 @@ export function registerEvents(
         1,
       );
     }
-    if (event.ctrlKey) {
-      if (event.code === 'ArrowDown') {
-        const canvasRect = canvas.getBoundingClientRect();
+    if (event.ctrlKey || event.metaKey) {
+      if (event.code === 'ArrowDown' || event.code === 'ArrowUp') {
         const viewSize = controller.getViewSize();
-        const maxHeight = viewSize.height - canvasRect.height;
-        scrollBar(controller, canvas, 0, maxHeight);
+        scrollBar(
+          controller,
+          canvas,
+          0,
+          event.code === 'ArrowUp' ? -viewSize.height : viewSize.height,
+        );
         return;
       }
-      if (event.code === 'ArrowRight') {
-        const canvasRect = canvas.getBoundingClientRect();
+      if (event.code === 'ArrowRight' || event.code === 'ArrowLeft') {
         const viewSize = controller.getViewSize();
-        const maxWidth = viewSize.width - canvasRect.width;
-        scrollBar(controller, canvas, maxWidth, 0);
+        scrollBar(
+          controller,
+          canvas,
+          event.code === 'ArrowLeft' ? -viewSize.width : viewSize.width,
+          0,
+        );
         return;
       }
     }

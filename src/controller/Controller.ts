@@ -194,7 +194,7 @@ export class Controller implements IController {
   }
   setColWidth(col: number, width: number): void {
     this.colMap.set(col, width);
-    this.computeViewSize(true);
+    this.computeViewSize();
     this.changeSet.add('contentChange');
   }
   getRowHeight(row: number): number {
@@ -202,19 +202,12 @@ export class Controller implements IController {
   }
   setRowHeight(row: number, height: number) {
     this.rowMap.set(row, height);
-    this.computeViewSize(true);
+    this.computeViewSize();
     this.changeSet.add('contentChange');
   }
-  private computeViewSize(isContentChange = false) {
+  private computeViewSize() {
     const headerSize = this.getHeaderSize();
     const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
-    if (!isContentChange) {
-      this.viewSize = {
-        width: headerSize.width + this.getColWidth(0) * sheetInfo.colCount,
-        height: headerSize.height + this.getRowHeight(0) * sheetInfo.rowCount,
-      };
-      return;
-    }
     let width = headerSize.width;
     let height = headerSize.height;
     for (let i = 0; i < sheetInfo.colCount; i++) {

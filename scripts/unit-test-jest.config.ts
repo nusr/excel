@@ -13,8 +13,8 @@ export default {
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
-    '!src/theme/*.{ts,tsx}',
-    '!src/canvas/*.{ts,tsx}',
+    // '!src/theme/*.{ts,tsx}',
+    '!src/types/*.{ts,tsx}',
   ],
 
   coverageReporters: [
@@ -29,6 +29,6 @@ export default {
   moduleNameMapper: {
     '@/(.*)': '<rootDir>/src/$1',
   },
-  maxConcurrency: 1,
-  maxWorkers: '50%',
+  // maxConcurrency: 1,
+  // maxWorkers: '50%',
 };
