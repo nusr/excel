@@ -1385,7 +1385,7 @@ var __export__ = (() => {
       inputDom = element;
     };
     const setValue = (value) => {
-      controller.setCellValues(value, controller.getRanges());
+      controller.setCellValues([[value]], controller.getRanges());
       inputDom.value = "";
       state.isCellEditing = false;
     };
@@ -2036,6 +2036,7 @@ var __export__ = (() => {
   var CELL_WIDTH = 68;
   var ROW_TITLE_HEIGHT = 20;
   var COL_TITLE_WIDTH = 34;
+  var PLAIN_TEXT = "text/plain";
   var defaultScrollValue = {
     top: 0,
     left: 0,
@@ -2297,6 +2298,30 @@ var __export__ = (() => {
       };
       this.changeSet.add("contentChange");
       this.emitChange();
+    }
+    parseText(text) {
+      const list = text.split("\n").map((item) => item).map((item) => item.split("	"));
+      const rowCount = list.length;
+      let colCount = 0;
+      for (let item of list) {
+        if (item.length > colCount) {
+          colCount = item.length;
+        }
+      }
+      console.log(list);
+      const activeCell = this.getActiveCell();
+      this.model.setCellValues(list, this.ranges);
+      this.changeSet.add("contentChange");
+      this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
+    }
+    paste(event) {
+      if (!event) {
+        return;
+      }
+      const text = event.clipboardData?.getData(PLAIN_TEXT) || "";
+      this.parseText(text);
+    }
+    copy() {
     }
   };
 
@@ -3644,21 +3669,31 @@ var __export__ = (() => {
     }
     setCellValue(value, range) {
       const { row, col } = range;
-      const configPath = `worksheets[${range.sheetId || this.currentSheetId}][${row}][${col}]`;
+      const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
       setWith(this, `${configPath}.value`, value);
     }
     setCellFormula(formula, range) {
       const { row, col } = range;
-      const configPath = `worksheets[${range.sheetId || this.currentSheetId}][${row}][${col}]`;
+      const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
       setWith(this, `${configPath}.formula`, formula);
     }
     setCellValues(value, ranges) {
       const [range] = ranges;
-      if (value.startsWith("=")) {
-        this.setCellFormula(value, range);
-      } else {
-        this.setCellFormula("", range);
-        this.setCellValue(value, range);
+      const { row, col } = range;
+      for (let r = 0; r < value.length; r++) {
+        for (let c = 0; c < value[r].length; c++) {
+          const t = value[r][c];
+          const temp = {
+            row: row + r,
+            col: col + c
+          };
+          if (t.startsWith("=")) {
+            this.setCellFormula(t, temp);
+          } else {
+            this.setCellFormula("", temp);
+            this.setCellValue(t, temp);
+          }
+        }
       }
       this.computeAllCell();
     }
@@ -4124,7 +4159,7 @@ var __export__ = (() => {
       stateValue.isCellEditing = true;
       inputDom.focus();
     });
-    document.body.addEventListener(
+    window.addEventListener(
       "wheel",
       debounce((event) => {
         if (event.target !== canvas) {
@@ -4133,6 +4168,12 @@ var __export__ = (() => {
         scrollBar(controller, canvas, event.deltaX, event.deltaY);
       })
     );
+    document.body.addEventListener("paste", function(event) {
+      console.log(event);
+      event.stopPropagation();
+      event.preventDefault();
+      controller.paste(event);
+    });
     canvas.addEventListener("mousedown", (event) => {
       const headerSize = controller.getHeaderSize();
       stateValue.contextMenuPosition = void 0;
