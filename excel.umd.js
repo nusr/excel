@@ -2201,7 +2201,7 @@ var __export__ = (() => {
     }
     setColWidth(col, width) {
       this.colMap.set(col, width);
-      this.computeViewSize(true);
+      this.computeViewSize();
       this.changeSet.add("contentChange");
     }
     getRowHeight(row) {
@@ -2209,19 +2209,12 @@ var __export__ = (() => {
     }
     setRowHeight(row, height) {
       this.rowMap.set(row, height);
-      this.computeViewSize(true);
+      this.computeViewSize();
       this.changeSet.add("contentChange");
     }
-    computeViewSize(isContentChange = false) {
+    computeViewSize() {
       const headerSize = this.getHeaderSize();
       const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
-      if (!isContentChange) {
-        this.viewSize = {
-          width: headerSize.width + this.getColWidth(0) * sheetInfo.colCount,
-          height: headerSize.height + this.getRowHeight(0) * sheetInfo.rowCount
-        };
-        return;
-      }
       let width = headerSize.width;
       let height = headerSize.height;
       for (let i = 0; i < sheetInfo.colCount; i++) {
@@ -3997,7 +3990,7 @@ var __export__ = (() => {
     const cellSize = controller.getCellSize(row, col);
     return { ...cellSize, row, col, pageY, pageX, x, y };
   }
-  var BOTTOM_BUFF = 100;
+  var BOTTOM_BUFF = 200;
   function scrollBar(controller, canvas, scrollX, scrollY) {
     const headerSize = controller.getHeaderSize();
     const canvasRect = canvas.getBoundingClientRect();
@@ -4016,8 +4009,8 @@ var __export__ = (() => {
     let left = oldScroll.left + scrollX;
     if (left < 0) {
       left = 0;
-    } else if (left > maxScrollWidth) {
-      left = maxScrollWidth;
+    } else if (left > maxWidth) {
+      left = maxWidth;
     }
     const realDeltaY = top - oldScroll.top;
     const realDeltaX = left - oldScroll.left;
@@ -4103,19 +4096,25 @@ var __export__ = (() => {
           1
         );
       }
-      if (event.ctrlKey) {
-        if (event.code === "ArrowDown") {
-          const canvasRect = canvas.getBoundingClientRect();
+      if (event.ctrlKey || event.metaKey) {
+        if (event.code === "ArrowDown" || event.code === "ArrowUp") {
           const viewSize = controller.getViewSize();
-          const maxHeight = viewSize.height - canvasRect.height;
-          scrollBar(controller, canvas, 0, maxHeight);
+          scrollBar(
+            controller,
+            canvas,
+            0,
+            event.code === "ArrowUp" ? -viewSize.height : viewSize.height
+          );
           return;
         }
-        if (event.code === "ArrowRight") {
-          const canvasRect = canvas.getBoundingClientRect();
+        if (event.code === "ArrowRight" || event.code === "ArrowLeft") {
           const viewSize = controller.getViewSize();
-          const maxWidth = viewSize.width - canvasRect.width;
-          scrollBar(controller, canvas, maxWidth, 0);
+          scrollBar(
+            controller,
+            canvas,
+            event.code === "ArrowLeft" ? -viewSize.width : viewSize.width,
+            0
+          );
           return;
         }
       }
