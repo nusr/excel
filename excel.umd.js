@@ -463,56 +463,6 @@ var __export__ = (() => {
     );
   }
 
-  // src/lodash/isEmpty.ts
-  function isEmpty(value) {
-    const temp = value || {};
-    return [Object, Array].includes(temp.constructor) && !Object.entries(temp).length;
-  }
-
-  // src/lodash/randomInt.ts
-  function randomInt(min, max) {
-    const t1 = Math.min(min, max);
-    const t2 = Math.max(min, max);
-    return Math.floor(t1 + Math.random() * (t2 - t1 + 1));
-  }
-
-  // src/lodash/get.ts
-  function get(obj, path, defaultValue) {
-    const result = obj == null ? void 0 : path.replace(/\[/g, ".").replace(/\]/g, "").split(".").reduce((res, key) => {
-      return res == null ? res : res[key];
-    }, obj);
-    return result === void 0 ? defaultValue : result;
-  }
-
-  // src/lodash/setWith.ts
-  function setWith(obj, path, value) {
-    if (obj == null || typeof obj !== "object") {
-      return obj;
-    }
-    path.replace(/\[/g, ".").replace(/\]/g, "").split(".").reduce((res, key, index, arr) => {
-      if (index === arr.length - 1) {
-        res[key] = value;
-      } else {
-        if (res[key] == null) {
-          res[key] = {};
-        }
-      }
-      return res[key];
-    }, obj);
-    return obj;
-  }
-
-  // src/lodash/debounce.ts
-  function debounce(fn) {
-    let timer;
-    return (...rest) => {
-      cancelAnimationFrame(timer);
-      timer = requestAnimationFrame(() => {
-        fn(...rest);
-      });
-    };
-  }
-
   // src/util/debug.ts
   var _Debug = class {
     namespace;
@@ -533,7 +483,7 @@ var __export__ = (() => {
       console.log(...result);
     };
     getRandomColor = () => {
-      const index = randomInt(0, DEBUG_COLOR_LIST.length - 1);
+      const index = Math.floor(Math.random() * DEBUG_COLOR_LIST.length);
       assert(index >= 0 && index < DEBUG_COLOR_LIST.length, String(index));
       return DEBUG_COLOR_LIST[index];
     };
@@ -597,6 +547,147 @@ var __export__ = (() => {
     };
   }
   var { isSupportFontFamily } = SupportFontFamilyFactory();
+
+  // src/util/copy.ts
+  function select(element) {
+    const isReadOnly = element.hasAttribute("readonly");
+    if (!isReadOnly) {
+      element.setAttribute("readonly", "");
+    }
+    element.select();
+    element.setSelectionRange(0, element.value.length);
+    if (!isReadOnly) {
+      element.removeAttribute("readonly");
+    }
+    return element.value;
+  }
+  function createFakeElement(value) {
+    const isRTL = document.documentElement.getAttribute("dir") === "rtl";
+    const fakeElement = document.createElement("textarea");
+    fakeElement.style.fontSize = "12pt";
+    fakeElement.style.border = "0";
+    fakeElement.style.padding = "0";
+    fakeElement.style.margin = "0";
+    fakeElement.style.position = "absolute";
+    fakeElement.style[isRTL ? "right" : "left"] = "-9999px";
+    let yPosition = window.pageYOffset || document.documentElement.scrollTop;
+    fakeElement.style.top = `${yPosition}px`;
+    fakeElement.setAttribute("readonly", "");
+    fakeElement.value = value;
+    return fakeElement;
+  }
+  function writeDataToClipboard(textData) {
+    const result = {};
+    const keyList = Object.keys(textData);
+    for (const key of keyList) {
+      result[key] = new Blob([textData[key]], { type: key });
+    }
+    const data = [new ClipboardItem(result)];
+    return navigator.clipboard.write(data);
+  }
+  var fakeCopyAction = (value, container, type) => {
+    const fakeElement = createFakeElement(value);
+    container.appendChild(fakeElement);
+    const selectedText = select(fakeElement);
+    document.execCommand(type);
+    fakeElement.remove();
+    return selectedText;
+  };
+  async function copy(textData) {
+    try {
+      await writeDataToClipboard(textData);
+      return textData["text/plain"];
+    } catch (error) {
+      console.error(error);
+      return fakeCopyAction(textData["text/plain"], document.body, "copy");
+    }
+  }
+  async function cut(textData) {
+    try {
+      await writeDataToClipboard(textData);
+      return textData["text/plain"];
+    } catch (error) {
+      console.error(error);
+      return fakeCopyAction(textData["text/plain"], document.body, "cut");
+    }
+  }
+  function paste() {
+    return navigator.clipboard.readText();
+  }
+
+  // src/util/lodash.ts
+  function debounce(fn) {
+    let timer;
+    return (...rest) => {
+      cancelAnimationFrame(timer);
+      timer = requestAnimationFrame(() => {
+        fn(...rest);
+      });
+    };
+  }
+  function get(obj, path, defaultValue) {
+    const result = obj == null ? void 0 : path.replace(/\[/g, ".").replace(/\]/g, "").split(".").reduce((res, key) => {
+      return res == null ? res : res[key];
+    }, obj);
+    return result === void 0 ? defaultValue : result;
+  }
+  function isEmpty(value) {
+    const temp = value || {};
+    return [Object, Array].includes(temp.constructor) && !Object.entries(temp).length;
+  }
+  function setWith(obj, path, value) {
+    if (obj == null || typeof obj !== "object") {
+      return obj;
+    }
+    path.replace(/\[/g, ".").replace(/\]/g, "").split(".").reduce((res, key, index, arr) => {
+      if (index === arr.length - 1) {
+        res[key] = value;
+      } else {
+        if (res[key] == null) {
+          res[key] = {};
+        }
+      }
+      return res[key];
+    }, obj);
+    return obj;
+  }
+
+  // src/util/theme/size.ts
+  var size = {
+    smallFont: "10px",
+    font: "12px",
+    largeFont: "14px",
+    padding: "12px",
+    fontFamily: `${DEFAULT_FONT_FAMILY},${MUST_FONT_FAMILY}`,
+    lineHeight: "1.5",
+    mediumPadding: "8px",
+    borderRadius: "4px",
+    tinyPadding: "4px"
+  };
+  var size_default = size;
+
+  // src/util/theme/color.ts
+  var color = {
+    primaryColor: "#217346",
+    buttonActiveColor: "rgb(198,198,198)",
+    selectionColor: "rgba(198,198,198,0.3)",
+    backgroundColor: "#e6e6e6",
+    white: "#ffffff",
+    black: "#000000",
+    gridStrokeColor: "#d4d4d4",
+    triangleFillColor: "#b4b4b4",
+    contentColor: DEFAULT_FONT_COLOR,
+    borderColor: "#cccccc",
+    activeBorderColor: "#808080",
+    disabledColor: "#ccc"
+  };
+  var color_default = color;
+
+  // src/util/theme/index.ts
+  var theme = {
+    ...size_default,
+    ...color_default
+  };
 
   // src/react/dom.ts
   function createElement(tagName, options) {
@@ -1865,44 +1956,6 @@ var __export__ = (() => {
   };
   ToolbarContainer.displayName = "ToolbarContainer";
 
-  // src/theme/size.ts
-  var size = {
-    smallFont: "10px",
-    font: "12px",
-    largeFont: "14px",
-    padding: "12px",
-    fontFamily: `${DEFAULT_FONT_FAMILY},${MUST_FONT_FAMILY}`,
-    lineHeight: "1.5",
-    mediumPadding: "8px",
-    borderRadius: "4px",
-    tinyPadding: "4px"
-  };
-  var size_default = size;
-
-  // src/theme/color.ts
-  var color = {
-    primaryColor: "#217346",
-    buttonActiveColor: "rgb(198,198,198)",
-    selectionColor: "rgba(198,198,198,0.3)",
-    backgroundColor: "#e6e6e6",
-    white: "#ffffff",
-    black: "#000000",
-    gridStrokeColor: "#d4d4d4",
-    triangleFillColor: "#b4b4b4",
-    contentColor: DEFAULT_FONT_COLOR,
-    borderColor: "#cccccc",
-    activeBorderColor: "#808080",
-    disabledColor: "#ccc"
-  };
-  var color_default = color;
-
-  // src/theme/index.ts
-  var theme = {
-    ...size_default,
-    ...color_default
-  };
-  var theme_default = theme;
-
   // src/containers/SheetBar/index.ts
   var SheetBarContainer = (state, controller) => {
     return h(
@@ -1943,7 +1996,7 @@ var __export__ = (() => {
             },
             type: "circle",
             style: {
-              backgroundColor: theme_default.buttonActiveColor
+              backgroundColor: theme.buttonActiveColor
             }
           },
           Icon({
@@ -2009,6 +2062,33 @@ var __export__ = (() => {
           }
         },
         "delete a row"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.copy();
+            hideContextMenu();
+          }
+        },
+        "copy"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.paste();
+            hideContextMenu();
+          }
+        },
+        "paste"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.cut();
+            hideContextMenu();
+          }
+        },
+        "cut"
       )
     );
   };
@@ -2037,6 +2117,7 @@ var __export__ = (() => {
   var ROW_TITLE_HEIGHT = 20;
   var COL_TITLE_WIDTH = 34;
   var PLAIN_TEXT = "text/plain";
+  var HTML_TEXT = "text/html";
   var defaultScrollValue = {
     top: 0,
     left: 0,
@@ -2052,6 +2133,15 @@ var __export__ = (() => {
     changeSet = /* @__PURE__ */ new Set();
     hooks = {
       modelChange() {
+      },
+      async cut() {
+        return "";
+      },
+      async copy() {
+        return "";
+      },
+      async paste() {
+        return "";
       }
     };
     history;
@@ -2300,7 +2390,7 @@ var __export__ = (() => {
       this.emitChange();
     }
     parseText(text) {
-      const list = text.split("\n").map((item) => item).map((item) => item.split("	"));
+      const list = text.trim().split("\n").map((item) => item).map((item) => item.split("	"));
       const rowCount = list.length;
       let colCount = 0;
       for (let item of list) {
@@ -2308,7 +2398,6 @@ var __export__ = (() => {
           colCount = item.length;
         }
       }
-      console.log(list);
       const activeCell = this.getActiveCell();
       this.model.setCellValues(list, this.ranges);
       this.changeSet.add("contentChange");
@@ -2316,12 +2405,52 @@ var __export__ = (() => {
     }
     paste(event) {
       if (!event) {
+        this.hooks.paste().then((data) => this.parseText(data));
         return;
       }
       const text = event.clipboardData?.getData(PLAIN_TEXT) || "";
       this.parseText(text);
     }
     copy() {
+      const [range] = this.ranges;
+      const { row, col, rowCount, colCount } = range;
+      const result = [];
+      for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+        const temp = [];
+        for (let c = col, endCol = col + colCount; c < endCol; c++) {
+          const t = this.model.queryCell(r, c);
+          temp.push(t.value);
+        }
+        result.push(temp);
+      }
+      const text = result.map((item) => item.join("	")).join("\n");
+      this.hooks.copy({
+        [PLAIN_TEXT]: text,
+        [HTML_TEXT]: ""
+      });
+    }
+    cut() {
+      const [range] = this.ranges;
+      const { row, col, rowCount, colCount } = range;
+      const result = [];
+      const newValue = [];
+      for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+        const temp = [];
+        newValue.push(new Array(colCount).fill(""));
+        for (let c = col, endCol = col + colCount; c < endCol; c++) {
+          const t = this.model.queryCell(r, c);
+          temp.push(t.value);
+        }
+        result.push(temp);
+      }
+      this.model.setCellValues(newValue, this.ranges);
+      const text = result.map((item) => item.join("	")).join("\n");
+      this.hooks.copy({
+        [PLAIN_TEXT]: text,
+        [HTML_TEXT]: ""
+      });
+      this.changeSet.add("contentChange");
+      this.emitChange();
     }
   };
 
@@ -2930,7 +3059,7 @@ var __export__ = (() => {
     }
   };
 
-  // src/formula/text.ts
+  // src/parser/formula/text.ts
   var T = (value) => {
     return typeof value === "string" ? value : "";
   };
@@ -3058,7 +3187,7 @@ var __export__ = (() => {
   };
   var text_default = textFormulas;
 
-  // src/formula/math.ts
+  // src/parser/formula/math.ts
   var ABS = (data) => {
     return Math.abs(data);
   };
@@ -3249,7 +3378,7 @@ var __export__ = (() => {
   };
   var math_default = formulas;
 
-  // src/formula/index.ts
+  // src/parser/formula/index.ts
   var formulas2 = {
     ...text_default,
     ...math_default
@@ -4132,6 +4261,14 @@ var __export__ = (() => {
         );
       }
       if (event.ctrlKey || event.metaKey) {
+        if (event.code === "KeyC") {
+          controller.copy();
+          return;
+        }
+        if (event.code === "KeyX") {
+          controller.cut();
+          return;
+        }
         if (event.code === "ArrowDown" || event.code === "ArrowUp") {
           const viewSize = controller.getViewSize();
           scrollBar(
@@ -4152,6 +4289,7 @@ var __export__ = (() => {
           );
           return;
         }
+        return;
       }
       if (inputDom === event.target) {
         return;
@@ -4169,7 +4307,6 @@ var __export__ = (() => {
       })
     );
     document.body.addEventListener("paste", function(event) {
-      console.log(event);
       event.stopPropagation();
       event.preventDefault();
       controller.paste(event);
@@ -4502,14 +4639,14 @@ var __export__ = (() => {
       const endCell = controller.computeCellPosition(endCellRow, endCellCol);
       const width = endCell.left + endCell.width - activeCell.left;
       const height = endCell.top + endCell.height - activeCell.top;
-      this.ctx.fillStyle = theme_default.selectionColor;
+      this.ctx.fillStyle = theme.selectionColor;
       fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
       fillRect(this.ctx, 0, activeCell.top, headerSize.width, height);
       const check = range.rowCount > 1 || range.colCount > 1;
       if (check) {
         fillRect(this.ctx, activeCell.left, activeCell.top, width, height);
       }
-      this.ctx.strokeStyle = theme_default.primaryColor;
+      this.ctx.strokeStyle = theme.primaryColor;
       this.ctx.lineWidth = dpr();
       assert(width >= 0 && height >= 0);
       const list = [
@@ -4528,10 +4665,10 @@ var __export__ = (() => {
     }
     renderSelectAll() {
       const { controller } = this;
-      this.ctx.fillStyle = theme_default.selectionColor;
+      this.ctx.fillStyle = theme.selectionColor;
       fillRect(this.ctx, 0, 0, this.canvasSize.width, this.canvasSize.height);
       const headerSize = controller.getHeaderSize();
-      this.ctx.strokeStyle = theme_default.primaryColor;
+      this.ctx.strokeStyle = theme.primaryColor;
       this.ctx.lineWidth = dpr();
       this.renderActiveCell();
       strokeRect(
@@ -4547,7 +4684,7 @@ var __export__ = (() => {
       const headerSize = controller.getHeaderSize();
       const ranges = controller.getRanges();
       const [range] = ranges;
-      this.ctx.fillStyle = theme_default.selectionColor;
+      this.ctx.fillStyle = theme.selectionColor;
       const activeCell = controller.computeCellPosition(range.row, range.col);
       fillRect(this.ctx, activeCell.left, 0, activeCell.width, headerSize.height);
       fillRect(
@@ -4564,7 +4701,7 @@ var __export__ = (() => {
         activeCell.width,
         this.canvasSize.height - activeCell.height
       );
-      this.ctx.strokeStyle = theme_default.primaryColor;
+      this.ctx.strokeStyle = theme.primaryColor;
       this.ctx.lineWidth = dpr();
       const list = [
         [headerSize.width, headerSize.height],
@@ -4584,7 +4721,7 @@ var __export__ = (() => {
       const headerSize = controller.getHeaderSize();
       const ranges = controller.getRanges();
       const [range] = ranges;
-      this.ctx.fillStyle = theme_default.selectionColor;
+      this.ctx.fillStyle = theme.selectionColor;
       const activeCell = controller.computeCellPosition(range.row, range.col);
       fillRect(
         this.ctx,
@@ -4601,7 +4738,7 @@ var __export__ = (() => {
         this.canvasSize.width - activeCell.width,
         activeCell.height
       );
-      this.ctx.strokeStyle = theme_default.primaryColor;
+      this.ctx.strokeStyle = theme.primaryColor;
       this.ctx.lineWidth = dpr();
       const list = [
         [activeCell.left, headerSize.height],
@@ -4623,9 +4760,9 @@ var __export__ = (() => {
     textAlign: "center",
     textBaseline: "middle",
     font: DEFAULT_FONT_CONFIG,
-    fillStyle: theme_default.black,
+    fillStyle: theme.black,
     lineWidth: thinLineWidth(),
-    strokeStyle: theme_default.gridStrokeColor
+    strokeStyle: theme.gridStrokeColor
   };
 
   // src/canvas/Content.ts
@@ -4724,9 +4861,9 @@ var __export__ = (() => {
       }
       const headerSize = this.controller.getHeaderSize();
       this.ctx.save();
-      this.ctx.fillStyle = theme_default.backgroundColor;
+      this.ctx.fillStyle = theme.backgroundColor;
       fillRect(this.ctx, 0, 0, headerSize.width, headerSize.height);
-      this.ctx.fillStyle = theme_default.triangleFillColor;
+      this.ctx.fillStyle = theme.triangleFillColor;
       const offset = 2;
       drawTriangle(
         this.ctx,
@@ -4740,12 +4877,14 @@ var __export__ = (() => {
       const { controller } = this;
       const headerSize = controller.getHeaderSize();
       const { row: rowIndex, col: colIndex } = controller.getScroll();
-      const { rowCount, colCount } = this.controller.getSheetInfo(this.controller.getCurrentSheetId());
+      const { rowCount, colCount } = this.controller.getSheetInfo(
+        this.controller.getCurrentSheetId()
+      );
       const lineWidth = thinLineWidth();
       this.ctx.save();
-      this.ctx.fillStyle = theme_default.white;
+      this.ctx.fillStyle = theme.white;
       this.ctx.lineWidth = lineWidth;
-      this.ctx.strokeStyle = theme_default.gridStrokeColor;
+      this.ctx.strokeStyle = theme.gridStrokeColor;
       this.ctx.translate(npx(headerSize.width), npx(headerSize.height));
       const pointList = [];
       let y = 0;
@@ -4778,20 +4917,22 @@ var __export__ = (() => {
       this.ctx.restore();
     }
     fillRowText(row, rowWidth, y) {
-      this.ctx.fillStyle = theme_default.black;
+      this.ctx.fillStyle = theme.black;
       fillText(this.ctx, String(row), rowWidth / 2, y);
     }
     fillColText(colText, x, colHeight) {
-      this.ctx.fillStyle = theme_default.black;
+      this.ctx.fillStyle = theme.black;
       fillText(this.ctx, colText, x, colHeight / 2 + dpr());
     }
     renderRowsHeader(height) {
       const { controller } = this;
       const { row: rowIndex } = controller.getScroll();
       const headerSize = controller.getHeaderSize();
-      const { rowCount } = controller.getSheetInfo(controller.getCurrentSheetId());
+      const { rowCount } = controller.getSheetInfo(
+        controller.getCurrentSheetId()
+      );
       this.ctx.save();
-      this.ctx.fillStyle = theme_default.backgroundColor;
+      this.ctx.fillStyle = theme.backgroundColor;
       fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
       Object.assign(this.ctx, HEADER_STYLE);
       const pointList = [];
@@ -4819,10 +4960,12 @@ var __export__ = (() => {
       const { controller } = this;
       const { col: colIndex } = controller.getScroll();
       const headerSize = controller.getHeaderSize();
-      const { colCount } = controller.getSheetInfo(controller.getCurrentSheetId());
+      const { colCount } = controller.getSheetInfo(
+        controller.getCurrentSheetId()
+      );
       const pointList = [];
       this.ctx.save();
-      this.ctx.fillStyle = theme_default.backgroundColor;
+      this.ctx.fillStyle = theme.backgroundColor;
       fillRect(this.ctx, headerSize.width, 0, width, headerSize.height);
       Object.assign(this.ctx, HEADER_STYLE);
       let x = headerSize.width;
@@ -4853,9 +4996,9 @@ var __export__ = (() => {
 
   // src/init.ts
   function initTheme(dom) {
-    const keyList = Object.keys(theme_default);
+    const keyList = Object.keys(theme);
     for (const key of keyList) {
-      dom.style.setProperty(`--${key}`, String(theme_default[key] || ""));
+      dom.style.setProperty(`--${key}`, String(theme[key] || ""));
     }
   }
   function initFontFamilyList() {
@@ -4887,7 +5030,11 @@ var __export__ = (() => {
     const canvas = document.querySelector(
       `#${MAIN_CANVAS_ID}`
     );
-    const mainCanvas = new MainCanvas(canvas, new Content(controller, createCanvas()), new Selection(controller, createCanvas()));
+    const mainCanvas = new MainCanvas(
+      canvas,
+      new Content(controller, createCanvas()),
+      new Selection(controller, createCanvas())
+    );
     const resize = () => {
       const size2 = canvas.parentElement.getBoundingClientRect();
       mainCanvas.resize(size2.width, size2.height);
@@ -4899,6 +5046,9 @@ var __export__ = (() => {
     registerEvents(stateValue, controller, canvas, resize);
     const canvasPosition = canvas.parentElement.getBoundingClientRect();
     controller.setHooks({
+      copy,
+      cut,
+      paste,
       modelChange: (changeSet) => {
         const newStateValue = getStoreValue(controller, canvasPosition.top);
         Object.assign(stateValue, newStateValue);
