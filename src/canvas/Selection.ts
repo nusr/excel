@@ -1,5 +1,5 @@
 import { dpr, npx, resizeCanvas, assert, isCol, isRow, isSheet } from '@/util';
-import theme from '@/theme';
+import { theme } from '@/util';
 import {
   fillRect,
   renderCell,

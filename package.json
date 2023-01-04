@@ -20,7 +20,7 @@
     "url": "https://github.com/nusr/excel.git"
   },
   "keywords": [],
-  "author": "Steve Xu <xuqiou@outlook.com>",
+  "author": "Steve Xu",
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {

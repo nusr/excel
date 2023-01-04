@@ -1,4 +1,3 @@
-import { isEmpty, get, setWith } from '@/lodash';
 import {
   StyleType,
   QueryCellResult,
@@ -19,6 +18,9 @@ import {
   intToColumnName,
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
+  isEmpty,
+  get,
+  setWith,
 } from '@/util';
 import { parseFormula } from '@/parser';
 

@@ -1,5 +1,5 @@
 import { parseNumberArray, MAX_PARAMS_COUNT } from "@/util";
-import type { ResultType, MathFormulaType } from "../types";
+import type { ResultType, MathFormulaType } from "../../types";
 export const ABS = (data: number): number => {
   return Math.abs(data);
 };

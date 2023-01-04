@@ -1,4 +1,4 @@
-import { setWith } from "../setWith";
+import { setWith } from "..";
 
 describe("setWith.test.ts", () => {
   describe("setWith", () => {

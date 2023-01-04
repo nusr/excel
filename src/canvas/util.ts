@@ -9,8 +9,8 @@ import {
   ERROR_SET,
   ERROR_FORMULA_COLOR,
   isTestEnv,
+  isEmpty,
 } from '@/util';
-import { isEmpty } from '@/lodash';
 import { CellInfo, ErrorTypes, EWrap, Point } from '@/types';
 
 export const getStyle = (
@@ -245,5 +245,3 @@ export function drawTriangle(
   ctx.lineTo(npx(point3[0]), npx(point3[1]));
   ctx.fill();
 }
-
-

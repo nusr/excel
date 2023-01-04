@@ -1,4 +1,3 @@
-import { randomInt } from '@/lodash';
 import { assert } from './assert';
 import { DEBUG_COLOR_LIST } from './constant';
 type NameSpaceType = 'react' | 'controller' | 'canvas' | 'model';
@@ -31,7 +30,7 @@ class Debug {
     console.log(...result);
   };
   getRandomColor = (): string => {
-    const index = randomInt(0, DEBUG_COLOR_LIST.length - 1);
+    const index = Math.floor(Math.random() * DEBUG_COLOR_LIST.length);
     assert(index >= 0 && index < DEBUG_COLOR_LIST.length, String(index));
     return DEBUG_COLOR_LIST[index];
   };

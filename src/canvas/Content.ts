@@ -1,13 +1,13 @@
-import { isEmpty } from "@/lodash";
 import {
+  isEmpty,
   thinLineWidth,
   npx,
   dpr,
   intToColumnName,
   isTestEnv,
   resizeCanvas,
-} from "@/util";
-import theme from "@/theme";
+} from '@/util';
+import { theme } from '@/util';
 import {
   fillRect,
   fillText,
@@ -15,15 +15,15 @@ import {
   renderCell,
   drawTriangle,
   getStyle,
-} from "./util";
-import { HEADER_STYLE } from "./constant";
+} from './util';
+import { HEADER_STYLE } from './constant';
 import type {
   Point,
   ContentView,
   IController,
   EventType,
   IWindowSize,
-} from "@/types";
+} from '@/types';
 
 export class Content implements ContentView {
   private canvas: HTMLCanvasElement;
@@ -36,7 +36,7 @@ export class Content implements ContentView {
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
-    const ctx = this.canvas.getContext("2d")!;
+    const ctx = this.canvas.getContext('2d')!;
     this.ctx = ctx;
     const size = dpr();
     this.ctx.scale(size, size);
@@ -57,13 +57,13 @@ export class Content implements ContentView {
       0,
       0,
       npx(this.canvasSize.width),
-      npx(this.canvasSize.height)
+      npx(this.canvasSize.height),
     );
   }
 
   render({ changeSet }: EventType): void {
     const { width, height } = this.canvasSize;
-    if (!changeSet.has("contentChange")) {
+    if (!changeSet.has('contentChange')) {
       return;
     }
     const headerSize = this.controller.getHeaderSize();
@@ -105,7 +105,7 @@ export class Content implements ContentView {
           ...cellInfo,
           ...result,
         },
-        getStyle("lineHeight", this.canvas)
+        getStyle('lineHeight', this.canvas),
       );
       const t = Math.max(wrapHeight, fontSizeHeight);
       if (t > result.height) {
@@ -132,7 +132,7 @@ export class Content implements ContentView {
       this.ctx,
       [headerSize.width / 2 - offset, headerSize.height - offset],
       [headerSize.width - offset, headerSize.height - offset],
-      [headerSize.width - offset, offset]
+      [headerSize.width - offset, offset],
     );
 
     this.ctx.restore();
@@ -142,7 +142,9 @@ export class Content implements ContentView {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
     const { row: rowIndex, col: colIndex } = controller.getScroll();
-    const { rowCount, colCount } = this.controller.getSheetInfo(this.controller.getCurrentSheetId());
+    const { rowCount, colCount } = this.controller.getSheetInfo(
+      this.controller.getCurrentSheetId(),
+    );
     const lineWidth = thinLineWidth();
     this.ctx.save();
     this.ctx.fillStyle = theme.white;
@@ -192,7 +194,9 @@ export class Content implements ContentView {
     const { controller } = this;
     const { row: rowIndex } = controller.getScroll();
     const headerSize = controller.getHeaderSize();
-    const { rowCount } = controller.getSheetInfo(controller.getCurrentSheetId());
+    const { rowCount } = controller.getSheetInfo(
+      controller.getCurrentSheetId(),
+    );
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
     fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
@@ -224,7 +228,9 @@ export class Content implements ContentView {
 
     const { col: colIndex } = controller.getScroll();
     const headerSize = controller.getHeaderSize();
-    const { colCount } = controller.getSheetInfo(controller.getCurrentSheetId());
+    const { colCount } = controller.getSheetInfo(
+      controller.getCurrentSheetId(),
+    );
     const pointList: Array<Point> = [];
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
@@ -243,7 +249,7 @@ export class Content implements ContentView {
       this.fillColText(
         intToColumnName(i),
         temp + colWidth / 2,
-        headerSize.height
+        headerSize.height,
       );
       x += colWidth;
       if (x > width) {

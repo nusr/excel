@@ -1,8 +1,8 @@
-import { IBaseModel } from './model';
-import { Coordinate, CellInfo, CanvasOverlayPosition } from './components';
-import { IRange } from './range';
-import { IScrollValue } from './scroll';
-import { ChangeEventType, IWindowSize } from './event';
+import { IBaseModel } from "./model";
+import { Coordinate, CellInfo, CanvasOverlayPosition } from "./components";
+import { IRange } from "./range";
+import { IScrollValue } from "./scroll";
+import { ChangeEventType, IWindowSize } from "./event";
 
 export enum EBorderLineType {
   MEDIUM,
@@ -23,7 +23,12 @@ export type CanvasSize = {
 
 export type IHooks = {
   modelChange: (val: Set<ChangeEventType>) => void;
+  copy: (data: Record<ClipboardType, string>) => Promise<string>;
+  cut: (data: Record<ClipboardType, string>) => Promise<string>;
+  paste: () => Promise<string>;
 };
+
+export type ClipboardType = "text/plain" | "text/html";
 
 export interface IController extends IScrollValue, IBaseModel {
   getViewSize(): IWindowSize;
@@ -44,5 +49,6 @@ export interface IController extends IScrollValue, IBaseModel {
   computeCellPosition(row: number, col: number): CanvasOverlayPosition;
   getChangeSet(): Set<ChangeEventType>;
   paste(event?: ClipboardEvent): void;
-  copy(): void
+  copy(): void;
+  cut(): void;
 }

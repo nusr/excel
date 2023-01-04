@@ -59,6 +59,33 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
       },
       'delete a row',
     ),
+    Button(
+      {
+        onClick() {
+          controller.copy();
+          hideContextMenu();
+        },
+      },
+      'copy',
+    ),
+    Button(
+      {
+        onClick() {
+          controller.paste();
+          hideContextMenu();
+        },
+      },
+      'paste',
+    ),
+    Button(
+      {
+        onClick() {
+          controller.cut();
+          hideContextMenu();
+        },
+      },
+      'cut',
+    ),
   );
 };
 ContextMenuContainer.displayName = 'ContextMenuContainer';

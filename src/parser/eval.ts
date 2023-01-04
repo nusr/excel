@@ -1,6 +1,6 @@
 import { Scanner } from './scanner';
 import { Parser } from './parser';
-import formulas from '../formula';
+import formulas from './formula';
 import { Interpreter } from './interpreter';
 import {
   FunctionMap,

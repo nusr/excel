@@ -1,4 +1,4 @@
-import { isEmpty } from "../isEmpty";
+import { isEmpty } from "..";
 
 describe("isNil.test.ts", () => {
   describe("isNil", () => {

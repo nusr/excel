@@ -1,6 +1,10 @@
 import { StoreValue, IController } from '@/types';
-import { FORMULA_EDITOR_ID, DOUBLE_CLICK_TIME, SCROLL_SIZE } from '@/util';
-import { debounce } from '@/lodash';
+import {
+  FORMULA_EDITOR_ID,
+  DOUBLE_CLICK_TIME,
+  SCROLL_SIZE,
+  debounce,
+} from '@/util';
 
 interface IHitInfo {
   width: number;
@@ -169,6 +173,14 @@ export function registerEvents(
       );
     }
     if (event.ctrlKey || event.metaKey) {
+      if (event.code === 'KeyC') {
+        controller.copy();
+        return;
+      }
+      if (event.code === 'KeyX') {
+        controller.cut();
+        return;
+      }
       if (event.code === 'ArrowDown' || event.code === 'ArrowUp') {
         const viewSize = controller.getViewSize();
         scrollBar(
@@ -189,6 +201,7 @@ export function registerEvents(
         );
         return;
       }
+      return;
     }
     if (inputDom === event.target) {
       return;
@@ -207,12 +220,11 @@ export function registerEvents(
       scrollBar(controller, canvas, event.deltaX, event.deltaY);
     }),
   );
-  document.body.addEventListener('paste', function(event: ClipboardEvent) {
-    console.log(event);
+  document.body.addEventListener('paste', function (event: ClipboardEvent) {
     event.stopPropagation();
     event.preventDefault();
     controller.paste(event);
-  })
+  });
 
   canvas.addEventListener('mousedown', (event) => {
     const headerSize = controller.getHeaderSize();

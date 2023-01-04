@@ -9,3 +9,6 @@ export * from './range';
 export * from './reference';
 export * from './debug';
 export * from './isSupportFontFamily';
+export * from './copy';
+export * from './lodash';
+export * from './theme';

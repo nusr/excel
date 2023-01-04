@@ -5,8 +5,8 @@ import {
   makeFont,
   DEFAULT_FONT_SIZE,
   FORMULA_EDITOR_ID,
+  isEmpty,
 } from '@/util';
-import { isEmpty } from '@/lodash';
 
 export function getEditorStyle(
   style: QueryCellResult['style'],

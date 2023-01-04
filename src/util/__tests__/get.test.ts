@@ -1,4 +1,4 @@
-import { get } from "../";
+import { get } from "..";
 
 describe("get.test.ts", () => {
   describe("get", () => {

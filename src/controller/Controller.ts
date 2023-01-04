@@ -1,4 +1,3 @@
-import { isEmpty } from '@/lodash';
 import {
   Coordinate,
   WorkBookJSON,
@@ -14,8 +13,9 @@ import {
   CanvasOverlayPosition,
   ScrollValue,
   IRange,
+  ResultType,
 } from '@/types';
-import { parseReference, controllerLog, Range, assert } from '@/util';
+import { parseReference, controllerLog, Range, assert, isEmpty } from '@/util';
 
 const DEFAULT_ACTIVE_CELL = { row: 0, col: 0 };
 const CELL_HEIGHT = 20;
@@ -23,6 +23,7 @@ const CELL_WIDTH = 68;
 const ROW_TITLE_HEIGHT = 20;
 const COL_TITLE_WIDTH = 34;
 const PLAIN_TEXT = 'text/plain';
+const HTML_TEXT = 'text/html';
 
 const defaultScrollValue: ScrollValue = {
   top: 0,
@@ -40,6 +41,15 @@ export class Controller implements IController {
   private changeSet = new Set<ChangeEventType>();
   private hooks: IHooks = {
     modelChange() {},
+    async cut() {
+      return '';
+    },
+    async copy() {
+      return '';
+    },
+    async paste() {
+      return '';
+    },
   };
   private history: IHistory;
   private readonly rowMap: Map<number, number> = new Map([]);
@@ -296,6 +306,7 @@ export class Controller implements IController {
   }
   private parseText(text: string) {
     const list = text
+      .trim()
       .split('\n')
       .map((item) => item)
       .map((item) => item.split('\t'));
@@ -306,15 +317,15 @@ export class Controller implements IController {
         colCount = item.length;
       }
     }
-    console.log(list);
     const activeCell = this.getActiveCell();
     this.model.setCellValues(list, this.ranges);
     this.changeSet.add('contentChange');
     this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
   }
   // private parseHTML(html: string) {}
-  paste(event?: ClipboardEvent): void {
+  paste(event?: ClipboardEvent) {
     if (!event) {
+      this.hooks.paste().then((data) => this.parseText(data));
       return;
     }
     const text = event.clipboardData?.getData(PLAIN_TEXT) || '';
@@ -325,6 +336,44 @@ export class Controller implements IController {
     this.parseText(text);
   }
   copy(): void {
-
+    const [range] = this.ranges;
+    const { row, col, rowCount, colCount } = range;
+    const result: ResultType[][] = [];
+    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+      const temp: ResultType[] = [];
+      for (let c = col, endCol = col + colCount; c < endCol; c++) {
+        const t = this.model.queryCell(r, c);
+        temp.push(t.value);
+      }
+      result.push(temp);
+    }
+    const text = result.map((item) => item.join('\t')).join('\n');
+    this.hooks.copy({
+      [PLAIN_TEXT]: text,
+      [HTML_TEXT]: '',
+    });
+  }
+  cut() {
+    const [range] = this.ranges;
+    const { row, col, rowCount, colCount } = range;
+    const result: ResultType[][] = [];
+    const newValue: string[][] = [];
+    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+      const temp: ResultType[] = [];
+      newValue.push(new Array(colCount).fill(''));
+      for (let c = col, endCol = col + colCount; c < endCol; c++) {
+        const t = this.model.queryCell(r, c);
+        temp.push(t.value);
+      }
+      result.push(temp);
+    }
+    this.model.setCellValues(newValue, this.ranges);
+    const text = result.map((item) => item.join('\t')).join('\n');
+    this.hooks.copy({
+      [PLAIN_TEXT]: text,
+      [HTML_TEXT]: '',
+    });
+    this.changeSet.add('contentChange');
+    this.emitChange();
   }
 }
