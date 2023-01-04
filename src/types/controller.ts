@@ -51,4 +51,5 @@ export interface IController extends IScrollValue, IBaseModel {
   paste(event?: ClipboardEvent): void;
   copy(): void;
   cut(): void;
+  getIsDrawAntLine(): boolean;
 }

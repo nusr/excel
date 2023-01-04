@@ -1,4 +1,4 @@
-import { StoreValue, IController, ChangeEventType } from './types';
+import { StoreValue, IController, ChangeEventType,  } from './types';
 import { Controller, History } from './controller';
 import { Model, MOCK_MODEL } from './model';
 import { MainCanvas, registerEvents, Selection, Content } from './canvas';
@@ -52,6 +52,7 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
   )!;
   const mainCanvas = new MainCanvas(
     canvas,
+    controller,
     new Content(controller, createCanvas()),
     new Selection(controller, createCanvas()),
   );
