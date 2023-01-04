@@ -2131,6 +2131,8 @@ var __export__ = (() => {
     model;
     ranges = [];
     changeSet = /* @__PURE__ */ new Set();
+    isDrawAntLine = false;
+    cutRanges = [];
     hooks = {
       modelChange() {
       },
@@ -2403,15 +2405,33 @@ var __export__ = (() => {
       this.changeSet.add("contentChange");
       this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
     }
-    paste(event) {
-      if (!event) {
-        this.hooks.paste().then((data) => this.parseText(data));
-        return;
+    async paste(event) {
+      this.isDrawAntLine = false;
+      if (this.cutRanges.length > 0) {
+        const [range] = this.cutRanges;
+        const result = [];
+        for (let i = 0; i < range.rowCount; i++) {
+          result.push(new Array(range.colCount).fill(""));
+        }
+        this.model.setCellValues(result, this.cutRanges);
       }
-      const text = event.clipboardData?.getData(PLAIN_TEXT) || "";
-      this.parseText(text);
+      if (!event) {
+        const data = await this.hooks.paste();
+        this.parseText(data);
+      } else {
+        const text = event.clipboardData?.getData(PLAIN_TEXT) || "";
+        this.parseText(text);
+      }
+      if (this.cutRanges.length) {
+        this.cutRanges = [];
+        this.hooks.copy({
+          [PLAIN_TEXT]: "",
+          [HTML_TEXT]: ""
+        });
+      }
     }
     copy() {
+      this.isDrawAntLine = true;
       const [range] = this.ranges;
       const { row, col, rowCount, colCount } = range;
       const result = [];
@@ -2428,29 +2448,33 @@ var __export__ = (() => {
         [PLAIN_TEXT]: text,
         [HTML_TEXT]: ""
       });
+      this.changeSet.add("selectionChange");
+      this.emitChange();
     }
     cut() {
+      this.isDrawAntLine = true;
       const [range] = this.ranges;
       const { row, col, rowCount, colCount } = range;
       const result = [];
-      const newValue = [];
       for (let r = row, endRow = row + rowCount; r < endRow; r++) {
         const temp = [];
-        newValue.push(new Array(colCount).fill(""));
         for (let c = col, endCol = col + colCount; c < endCol; c++) {
           const t = this.model.queryCell(r, c);
           temp.push(t.value);
         }
         result.push(temp);
       }
-      this.model.setCellValues(newValue, this.ranges);
+      this.cutRanges = this.ranges.slice();
       const text = result.map((item) => item.join("	")).join("\n");
       this.hooks.copy({
         [PLAIN_TEXT]: text,
         [HTML_TEXT]: ""
       });
-      this.changeSet.add("contentChange");
+      this.changeSet.add("selectionChange");
       this.emitChange();
+    }
+    getIsDrawAntLine() {
+      return this.isDrawAntLine;
     }
   };
 
@@ -4078,18 +4102,191 @@ var __export__ = (() => {
     mergeCells: ["D2:E3"]
   };
 
+  // src/canvas/util.ts
+  var getStyle = (key, dom = document.body) => {
+    if (isTestEnv()) {
+      return 20;
+    }
+    return parseInt(window.getComputedStyle(dom)[key]);
+  };
+  var measureTextMap = /* @__PURE__ */ new Map();
+  function measureText(ctx, char) {
+    const mapKey = `${char}__${ctx.font}`;
+    let temp = measureTextMap.get(mapKey);
+    if (!temp) {
+      const metrics = ctx.measureText(char);
+      measureTextMap.set(mapKey, metrics);
+      temp = metrics;
+    }
+    return temp;
+  }
+  function fillRect(ctx, x, y, width, height) {
+    ctx.fillRect(npx(x), npx(y), npx(width), npx(height));
+  }
+  function strokeRect(ctx, x, y, width, height) {
+    ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
+  }
+  function clearRect(ctx, x, y, width, height) {
+    ctx.clearRect(npx(x), npx(y), npx(width), npx(height));
+  }
+  function getFontSizeHeight(ctx, char) {
+    const { actualBoundingBoxDescent, actualBoundingBoxAscent } = measureText(
+      ctx,
+      char
+    );
+    const result = actualBoundingBoxDescent + actualBoundingBoxAscent;
+    return Math.ceil(result);
+  }
+  function fillText(ctx, text, x, y) {
+    ctx.fillText(text, npx(x), npx(y));
+  }
+  function fillWrapText(ctx, text, x, y, cellWidth, lineHeight) {
+    let line = "";
+    const textList = text.split("");
+    let testWidth = 0;
+    const realCellWidth = cellWidth * 2;
+    let wrapHeight = lineHeight;
+    y += lineHeight / 2;
+    for (let i = 0; i < textList.length; i++) {
+      const char = textList[i];
+      const { width } = measureText(ctx, char);
+      if (testWidth + width > realCellWidth) {
+        fillText(ctx, line, x, y);
+        line = char;
+        y += lineHeight;
+        testWidth = width;
+        wrapHeight += lineHeight;
+      } else {
+        testWidth += width;
+        line = line + char;
+      }
+    }
+    if (line) {
+      fillText(ctx, line, x, y);
+    }
+    return wrapHeight;
+  }
+  function fillTexts(ctx, text, x, y, cellWidth) {
+    let line = "";
+    const textList = text.split("");
+    let testWidth = 0;
+    const realCellWidth = cellWidth * 2;
+    let textWidth = 0;
+    for (let i = 0; i < textList.length; i++) {
+      const char = textList[i];
+      const { width } = measureText(ctx, char);
+      if (testWidth + width > realCellWidth) {
+        if (i === 0) {
+          textWidth = width;
+          line = char;
+        }
+        break;
+      } else {
+        testWidth += width;
+        line = line + char;
+      }
+    }
+    fillText(ctx, line, x, y);
+    return textWidth;
+  }
+  function renderCell(ctx, cellInfo, canvasLineHeight) {
+    const { style, value, left, top, width, height } = cellInfo;
+    const isNum2 = isNumber(value);
+    let font = DEFAULT_FONT_CONFIG;
+    let fillStyle = DEFAULT_FONT_COLOR;
+    if (!isEmpty(style)) {
+      const fontSize = npx(style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE);
+      font = makeFont(
+        style?.isItalic ? "italic" : "normal",
+        style?.isBold ? "bold" : "500",
+        fontSize,
+        style?.fontFamily
+      );
+      fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
+      if (style?.fillColor) {
+        ctx.fillStyle = style?.fillColor;
+        fillRect(ctx, left, top, width, height);
+      }
+    }
+    let text = String(value);
+    if (ERROR_SET.has(text)) {
+      fillStyle = ERROR_FORMULA_COLOR;
+    } else if (typeof value === "boolean" || ["TRUE", "FALSE"].includes(text.toUpperCase())) {
+      text = text.toUpperCase();
+    } else if (value === void 0 || value === null) {
+      text = "";
+    }
+    ctx.textAlign = isNum2 ? "right" : "left";
+    ctx.font = font;
+    ctx.fillStyle = fillStyle;
+    ctx.textBaseline = "middle";
+    const x = left + (isNum2 ? width : 0);
+    const result = {};
+    const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
+    const textHeight = Math.max(
+      fontSizeHeight,
+      canvasLineHeight,
+      getStyle("lineHeight")
+    );
+    if (style?.wrapText === 1 /* AUTO_WRAP */) {
+      const y = top;
+      result.wrapHeight = fillWrapText(ctx, text, x, y, width, textHeight);
+    } else {
+      const y = Math.floor(top + height / 2);
+      result.textWidth = fillTexts(ctx, text, x, y, width);
+    }
+    return {
+      ...result,
+      fontSizeHeight: textHeight
+    };
+  }
+  function drawLines(ctx, pointList) {
+    assert(pointList.length > 0);
+    ctx.beginPath();
+    for (let i = 0; i < pointList.length; i += 2) {
+      const first = pointList[i];
+      const second = pointList[i + 1];
+      ctx.moveTo(npx(first[0]), npx(first[1]));
+      ctx.lineTo(npx(second[0]), npx(second[1]));
+    }
+    ctx.stroke();
+  }
+  function drawTriangle(ctx, point1, point2, point3) {
+    ctx.beginPath();
+    ctx.moveTo(npx(point1[0]), npx(point1[1]));
+    ctx.lineTo(npx(point2[0]), npx(point2[1]));
+    ctx.lineTo(npx(point3[0]), npx(point3[1]));
+    ctx.fill();
+  }
+  function drawAntLine(ctx, x, y, width, height) {
+    const oldDash = ctx.getLineDash();
+    ctx.setLineDash([npx(8), npx(6)]);
+    const offset = dpr() / 2;
+    strokeRect(
+      ctx,
+      x + offset,
+      y + offset,
+      width - offset * 2,
+      height - offset * 2
+    );
+    ctx.setLineDash(oldDash);
+  }
+
   // src/canvas/Main.ts
   var MainCanvas = class {
     ctx;
     content;
     selection;
     canvas;
+    controller;
     canvasSize = {
       width: 0,
       height: 0
     };
-    constructor(canvas, content, selection) {
+    antLine = null;
+    constructor(canvas, controller, content, selection) {
       this.canvas = canvas;
+      this.controller = controller;
       this.ctx = canvas.getContext("2d");
       this.content = content;
       this.selection = selection;
@@ -4118,13 +4315,35 @@ var __export__ = (() => {
     }
     render = (params) => {
       if (params.changeSet.size === 0) {
-        return;
+        return {
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0
+        };
       }
       this.content.render(params);
-      this.selection.render(params);
+      const result = this.selection.render(params);
+      if (this.controller.getIsDrawAntLine()) {
+        if (this.antLine === null) {
+          this.antLine = result;
+        }
+      } else {
+        this.antLine = null;
+      }
       this.clear();
       this.ctx.drawImage(this.content.getCanvas(), 0, 0);
       this.ctx.drawImage(this.selection.getCanvas(), 0, 0);
+      if (this.antLine) {
+        drawAntLine(
+          this.ctx,
+          this.antLine.left,
+          this.antLine.top,
+          this.antLine.width,
+          this.antLine.height
+        );
+      }
+      return result;
     };
   };
 
@@ -4396,163 +4615,6 @@ var __export__ = (() => {
     });
   }
 
-  // src/canvas/util.ts
-  var getStyle = (key, dom = document.body) => {
-    if (isTestEnv()) {
-      return 20;
-    }
-    return parseInt(window.getComputedStyle(dom)[key]);
-  };
-  var measureTextMap = /* @__PURE__ */ new Map();
-  function measureText(ctx, char) {
-    const mapKey = `${char}__${ctx.font}`;
-    let temp = measureTextMap.get(mapKey);
-    if (!temp) {
-      const metrics = ctx.measureText(char);
-      measureTextMap.set(mapKey, metrics);
-      temp = metrics;
-    }
-    return temp;
-  }
-  function fillRect(ctx, x, y, width, height) {
-    ctx.fillRect(npx(x), npx(y), npx(width), npx(height));
-  }
-  function strokeRect(ctx, x, y, width, height) {
-    ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
-  }
-  function clearRect(ctx, x, y, width, height) {
-    ctx.clearRect(npx(x), npx(y), npx(width), npx(height));
-  }
-  function getFontSizeHeight(ctx, char) {
-    const { actualBoundingBoxDescent, actualBoundingBoxAscent } = measureText(
-      ctx,
-      char
-    );
-    const result = actualBoundingBoxDescent + actualBoundingBoxAscent;
-    return Math.ceil(result);
-  }
-  function fillText(ctx, text, x, y) {
-    ctx.fillText(text, npx(x), npx(y));
-  }
-  function fillWrapText(ctx, text, x, y, cellWidth, lineHeight) {
-    let line = "";
-    const textList = text.split("");
-    let testWidth = 0;
-    const realCellWidth = cellWidth * 2;
-    let wrapHeight = lineHeight;
-    y += lineHeight / 2;
-    for (let i = 0; i < textList.length; i++) {
-      const char = textList[i];
-      const { width } = measureText(ctx, char);
-      if (testWidth + width > realCellWidth) {
-        fillText(ctx, line, x, y);
-        line = char;
-        y += lineHeight;
-        testWidth = width;
-        wrapHeight += lineHeight;
-      } else {
-        testWidth += width;
-        line = line + char;
-      }
-    }
-    if (line) {
-      fillText(ctx, line, x, y);
-    }
-    return wrapHeight;
-  }
-  function fillTexts(ctx, text, x, y, cellWidth) {
-    let line = "";
-    const textList = text.split("");
-    let testWidth = 0;
-    const realCellWidth = cellWidth * 2;
-    let textWidth = 0;
-    for (let i = 0; i < textList.length; i++) {
-      const char = textList[i];
-      const { width } = measureText(ctx, char);
-      if (testWidth + width > realCellWidth) {
-        if (i === 0) {
-          textWidth = width;
-          line = char;
-        }
-        break;
-      } else {
-        testWidth += width;
-        line = line + char;
-      }
-    }
-    fillText(ctx, line, x, y);
-    return textWidth;
-  }
-  function renderCell(ctx, cellInfo, canvasLineHeight) {
-    const { style, value, left, top, width, height } = cellInfo;
-    const isNum2 = isNumber(value);
-    let font = DEFAULT_FONT_CONFIG;
-    let fillStyle = DEFAULT_FONT_COLOR;
-    if (!isEmpty(style)) {
-      const fontSize = npx(style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE);
-      font = makeFont(
-        style?.isItalic ? "italic" : "normal",
-        style?.isBold ? "bold" : "500",
-        fontSize,
-        style?.fontFamily
-      );
-      fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
-      if (style?.fillColor) {
-        ctx.fillStyle = style?.fillColor;
-        fillRect(ctx, left, top, width, height);
-      }
-    }
-    let text = String(value);
-    if (ERROR_SET.has(text)) {
-      fillStyle = ERROR_FORMULA_COLOR;
-    } else if (typeof value === "boolean" || ["TRUE", "FALSE"].includes(text.toUpperCase())) {
-      text = text.toUpperCase();
-    } else if (value === void 0 || value === null) {
-      text = "";
-    }
-    ctx.textAlign = isNum2 ? "right" : "left";
-    ctx.font = font;
-    ctx.fillStyle = fillStyle;
-    ctx.textBaseline = "middle";
-    const x = left + (isNum2 ? width : 0);
-    const result = {};
-    const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
-    const textHeight = Math.max(
-      fontSizeHeight,
-      canvasLineHeight,
-      getStyle("lineHeight")
-    );
-    if (style?.wrapText === 1 /* AUTO_WRAP */) {
-      const y = top;
-      result.wrapHeight = fillWrapText(ctx, text, x, y, width, textHeight);
-    } else {
-      const y = Math.floor(top + height / 2);
-      result.textWidth = fillTexts(ctx, text, x, y, width);
-    }
-    return {
-      ...result,
-      fontSizeHeight: textHeight
-    };
-  }
-  function drawLines(ctx, pointList) {
-    assert(pointList.length > 0);
-    ctx.beginPath();
-    for (let i = 0; i < pointList.length; i += 2) {
-      const first = pointList[i];
-      const second = pointList[i + 1];
-      ctx.moveTo(npx(first[0]), npx(first[1]));
-      ctx.lineTo(npx(second[0]), npx(second[1]));
-    }
-    ctx.stroke();
-  }
-  function drawTriangle(ctx, point1, point2, point3) {
-    ctx.beginPath();
-    ctx.moveTo(npx(point1[0]), npx(point1[1]));
-    ctx.lineTo(npx(point2[0]), npx(point2[1]));
-    ctx.lineTo(npx(point3[0]), npx(point3[1]));
-    ctx.fill();
-  }
-
   // src/canvas/Selection.ts
   var Selection = class {
     canvas;
@@ -4594,18 +4656,24 @@ var __export__ = (() => {
       const ranges = controller.getRanges();
       const [range] = ranges;
       if (isSheet(range)) {
-        this.renderSelectAll();
-        return;
+        return this.renderSelectAll();
       }
       if (isCol(range)) {
-        this.renderSelectCol();
-        return;
+        return this.renderSelectCol();
       }
       if (isRow(range)) {
-        this.renderSelectRow();
-        return;
+        return this.renderSelectRow();
       }
-      this.renderSelectRange();
+      return this.renderSelectRange();
+    }
+    renderHighlight(x, y, width, height) {
+      strokeRect(this.ctx, x, y, width, height);
+      return {
+        left: x,
+        top: y,
+        width,
+        height
+      };
     }
     renderActiveCell() {
       const { controller } = this;
@@ -4661,7 +4729,7 @@ var __export__ = (() => {
       if (check) {
         this.renderActiveCell();
       }
-      strokeRect(this.ctx, activeCell.left, activeCell.top, width, height);
+      return this.renderHighlight(activeCell.left, activeCell.top, width, height);
     }
     renderSelectAll() {
       const { controller } = this;
@@ -4671,8 +4739,7 @@ var __export__ = (() => {
       this.ctx.strokeStyle = theme.primaryColor;
       this.ctx.lineWidth = dpr();
       this.renderActiveCell();
-      strokeRect(
-        this.ctx,
+      return this.renderHighlight(
         headerSize.width,
         headerSize.height,
         this.canvasSize.width - headerSize.width,
@@ -4708,8 +4775,7 @@ var __export__ = (() => {
         [headerSize.width, this.canvasSize.height - headerSize.height]
       ];
       drawLines(this.ctx, list);
-      strokeRect(
-        this.ctx,
+      return this.renderHighlight(
         activeCell.left,
         activeCell.top,
         activeCell.width,
@@ -4745,8 +4811,7 @@ var __export__ = (() => {
         [this.canvasSize.width - headerSize.width, headerSize.height]
       ];
       drawLines(this.ctx, list);
-      strokeRect(
-        this.ctx,
+      return this.renderHighlight(
         activeCell.left,
         activeCell.top,
         this.canvasSize.width,
@@ -4803,7 +4868,12 @@ var __export__ = (() => {
     render({ changeSet }) {
       const { width, height } = this.canvasSize;
       if (!changeSet.has("contentChange")) {
-        return;
+        return {
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0
+        };
       }
       const headerSize = this.controller.getHeaderSize();
       this.clear();
@@ -4814,6 +4884,12 @@ var __export__ = (() => {
       this.renderColsHeader(contentWidth);
       this.renderTriangle();
       this.renderContent(width, height);
+      return {
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0
+      };
     }
     renderContent(width, height) {
       const { controller } = this;
@@ -5032,6 +5108,7 @@ var __export__ = (() => {
     );
     const mainCanvas = new MainCanvas(
       canvas,
+      controller,
       new Content(controller, createCanvas()),
       new Selection(controller, createCanvas())
     );
