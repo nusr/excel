@@ -8,6 +8,7 @@ export const FORMULA_EDITOR_ID = 'formula-editor';
 export const DOUBLE_CLICK_TIME = 300;
 export const TEST_ID_KEY = 'data-test-id';
 export const SCROLL_SIZE = 30;
+export const BOTTOM_BUFF = 200;
 export const DEBUG_COLOR_LIST = [
   '#0000CC',
   '#0000FF',

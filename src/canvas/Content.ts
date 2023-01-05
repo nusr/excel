@@ -44,11 +44,8 @@ export class Content implements ContentView {
   getCanvas() {
     return this.canvas;
   }
-  resize(width: number, height: number) {
-    this.canvasSize = {
-      width,
-      height,
-    };
+  resize() {
+    const { width, height } = this.controller.getDomRect();
     resizeCanvas(this.canvas, width, height);
   }
 
@@ -62,7 +59,6 @@ export class Content implements ContentView {
   }
 
   render({ changeSet }: EventType) {
-    const { width, height } = this.canvasSize;
     if (!changeSet.has("contentChange")) {
       return {
         top: 0,
@@ -71,6 +67,7 @@ export class Content implements ContentView {
         height: 0,
       };
     }
+    const { width, height } = this.controller.getDomRect();
     const headerSize = this.controller.getHeaderSize();
     this.clear();
     const contentWidth = width - headerSize.width;
@@ -79,7 +76,7 @@ export class Content implements ContentView {
     this.renderRowsHeader(contentHeight);
     this.renderColsHeader(contentWidth);
     this.renderTriangle();
-    this.renderContent(width, height);
+    this.renderContent();
     return {
       top: 0,
       left: 0,
@@ -87,8 +84,9 @@ export class Content implements ContentView {
       height: 0,
     };
   }
-  private renderContent(width: number, height: number): void {
+  private renderContent(): void {
     const { controller } = this;
+    const { width, height } = this.controller.getDomRect();
     const data = controller.getCellsContent(controller.getCurrentSheetId());
     if (isEmpty(data)) {
       return;

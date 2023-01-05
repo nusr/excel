@@ -14,6 +14,7 @@ import {
   ScrollValue,
   IRange,
   ResultType,
+  DomRect,
 } from "@/types";
 import { parseReference, controllerLog, Range, assert, isEmpty } from "@/util";
 
@@ -50,9 +51,18 @@ export class Controller implements IController {
       return "";
     },
     async paste() {
-      return "";
+      return {
+        "text/html": "",
+        "text/plain": "",
+      };
     },
   };
+  private domRect: DomRect = {
+    top: 0,
+    left: 0,
+    width: 0,
+    height: 0,
+  }
   private history: IHistory;
   private readonly rowMap: Map<number, number> = new Map([]);
   private readonly colMap: Map<number, number> = new Map([]);
@@ -307,11 +317,25 @@ export class Controller implements IController {
     this.emitChange();
   }
   private parseText(text: string) {
-    const list = text
-      .trim()
-      .split("\n")
-      .map((item) => item)
-      .map((item) => item.split("\t"));
+    let list: string[][];
+    if (text.indexOf("\r\n") > -1) {
+      list = text
+        .split("\r\n")
+        .map((item) => item)
+        .map((item) => item.split("\t"));
+    } else {
+      list = text
+        .split("\n")
+        .map((item) => item)
+        .map((item) => item.split("\t"));
+    }
+    if (list[0].length !== list[list.length - 1].length) {
+      // delete last empty cell
+      const last = list[list.length - 1];
+      if (last.length === 1 && !last[0]) {
+        list.pop();
+      }
+    }
     const rowCount = list.length;
     let colCount = 0;
     for (let item of list) {
@@ -337,7 +361,7 @@ export class Controller implements IController {
     }
     if (!event) {
       const data = await this.hooks.paste();
-      this.parseText(data);
+      this.parseText(data[PLAIN_TEXT]);
     } else {
       const text = event.clipboardData?.getData(PLAIN_TEXT) || "";
       // TODO: parse html
@@ -352,8 +376,7 @@ export class Controller implements IController {
       });
     }
   }
-  copy(): void {
-    this.isDrawAntLine = true;
+  private getCopyData() {
     const [range] = this.ranges;
     const { row, col, rowCount, colCount } = range;
     const result: ResultType[][] = [];
@@ -361,41 +384,55 @@ export class Controller implements IController {
       const temp: ResultType[] = [];
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
         const t = this.model.queryCell(r, c);
-        temp.push(t.value);
+        temp.push(t.value || "");
       }
       result.push(temp);
     }
-    const text = result.map((item) => item.join("\t")).join("\n");
-    this.hooks.copy({
-      [PLAIN_TEXT]: text,
-      [HTML_TEXT]: "",
-    });
+    const text = result.map((item) => item.join("\t")).join("\r\n") + "\r\n";
+    return text;
+  }
+  copy(event?: ClipboardEvent): void {
+    this.isDrawAntLine = true;
+    const text = this.getCopyData();
+    if (event) {
+      event.clipboardData?.setData(PLAIN_TEXT, text);
+      event.clipboardData?.setData(HTML_TEXT, "");
+    } else {
+      this.hooks.copy({
+        [PLAIN_TEXT]: text,
+        [HTML_TEXT]: "",
+      });
+    }
     this.changeSet.add("selectionChange");
     this.emitChange();
   }
-  cut() {
+  cut(event?: ClipboardEvent) {
     this.isDrawAntLine = true;
-    const [range] = this.ranges;
-    const { row, col, rowCount, colCount } = range;
-    const result: ResultType[][] = [];
-    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
-      const temp: ResultType[] = [];
-      for (let c = col, endCol = col + colCount; c < endCol; c++) {
-        const t = this.model.queryCell(r, c);
-        temp.push(t.value);
-      }
-      result.push(temp);
-    }
+    const text = this.getCopyData();
     this.cutRanges = this.ranges.slice();
-    const text = result.map((item) => item.join("\t")).join("\n");
-    this.hooks.copy({
-      [PLAIN_TEXT]: text,
-      [HTML_TEXT]: "",
-    });
+    if (event) {
+      event.clipboardData?.setData(PLAIN_TEXT, text);
+      event.clipboardData?.setData(HTML_TEXT, "");
+    } else {
+      this.hooks.copy({
+        [PLAIN_TEXT]: text,
+        [HTML_TEXT]: "",
+      });
+    }
     this.changeSet.add("selectionChange");
     this.emitChange();
   }
   getIsDrawAntLine() {
     return this.isDrawAntLine;
+  }
+  setDomRect(data: DomRect): void {
+    this.domRect = {
+      ...data,
+    }
+  }
+  getDomRect(): DomRect {
+    return {
+      ...this.domRect,
+    }
   }
 }

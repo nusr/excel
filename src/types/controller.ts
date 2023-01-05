@@ -12,20 +12,25 @@ export enum EBorderLineType {
   DOUBLE,
 }
 
-export type CanvasSize = {
+export type DomRect = {
   top: number;
   left: number;
   width: number;
   height: number;
+};
+
+export type CanvasSize = {
   contentWidth: number;
   contentHeight: number;
-};
+} & DomRect;
+
+export type ClipboardData = Record<ClipboardType, string>;
 
 export type IHooks = {
   modelChange: (val: Set<ChangeEventType>) => void;
-  copy: (data: Record<ClipboardType, string>) => Promise<string>;
-  cut: (data: Record<ClipboardType, string>) => Promise<string>;
-  paste: () => Promise<string>;
+  copy: (data: ClipboardData) => Promise<string>;
+  cut: (data: ClipboardData) => Promise<string>;
+  paste: () => Promise<ClipboardData>;
 };
 
 export type ClipboardType = "text/plain" | "text/html";
@@ -49,7 +54,9 @@ export interface IController extends IScrollValue, IBaseModel {
   computeCellPosition(row: number, col: number): CanvasOverlayPosition;
   getChangeSet(): Set<ChangeEventType>;
   paste(event?: ClipboardEvent): void;
-  copy(): void;
-  cut(): void;
+  copy(event?: ClipboardEvent): void;
+  cut(event?: ClipboardEvent): void;
   getIsDrawAntLine(): boolean;
+  setDomRect(data: DomRect): void;
+  getDomRect(): DomRect;
 }

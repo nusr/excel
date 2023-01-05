@@ -1,7 +1,6 @@
 import { dpr, resizeCanvas, npx } from "@/util";
 import {
   EventType,
-  IWindowSize,
   ContentView,
   CanvasOverlayPosition,
   IController,
@@ -14,10 +13,6 @@ export class MainCanvas implements ContentView {
   private selection: ContentView;
   private canvas: HTMLCanvasElement;
   private controller: IController;
-  private canvasSize: IWindowSize = {
-    width: 0,
-    height: 0,
-  };
   private antLine: CanvasOverlayPosition | null = null;
   constructor(
     canvas: HTMLCanvasElement,
@@ -36,21 +31,19 @@ export class MainCanvas implements ContentView {
   getCanvas() {
     return this.canvas;
   }
-  resize(width: number, height: number) {
-    this.canvasSize = {
-      width,
-      height,
-    };
+  resize() {
+    const { width, height } = this.controller.getDomRect();
     resizeCanvas(this.canvas, width, height);
-    this.content.resize(width, height);
-    this.selection.resize(width, height);
+    this.content.resize();
+    this.selection.resize();
   }
   private clear() {
+    const { width, height } = this.controller.getDomRect();
     this.ctx.clearRect(
       0,
       0,
-      npx(this.canvasSize.width),
-      npx(this.canvasSize.height)
+      npx(width),
+      npx(height)
     );
   }
   render = (params: EventType) => {

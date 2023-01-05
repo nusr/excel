@@ -1,4 +1,4 @@
-export { MainCanvas } from './Main';
-export { registerEvents } from './event';
-export { Selection } from './Selection';
-export { Content } from './Content';
+export { MainCanvas } from "./Main";
+export { registerEvents, computeRowAndCol } from "./event";
+export { Selection } from "./Selection";
+export { Content } from "./Content";

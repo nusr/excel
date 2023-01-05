@@ -11,7 +11,6 @@ import {
 import type {
   ContentView,
   IController,
-  IWindowSize,
   Point,
   CanvasOverlayPosition,
 } from "@/types";
@@ -20,10 +19,6 @@ export class Selection implements ContentView {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private controller: IController;
-  private canvasSize: IWindowSize = {
-    width: 0,
-    height: 0,
-  };
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
@@ -35,20 +30,13 @@ export class Selection implements ContentView {
   getCanvas() {
     return this.canvas;
   }
-  resize(width: number, height: number) {
-    this.canvasSize = {
-      width,
-      height,
-    };
+  resize() {
+    const { width, height } = this.controller.getDomRect();
     resizeCanvas(this.canvas, width, height);
   }
   private clear() {
-    this.ctx.clearRect(
-      0,
-      0,
-      npx(this.canvasSize.width),
-      npx(this.canvasSize.height)
-    );
+    const { width, height } = this.controller.getDomRect();
+    this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
 
   render(): CanvasOverlayPosition {
@@ -139,8 +127,9 @@ export class Selection implements ContentView {
   }
   private renderSelectAll() {
     const { controller } = this;
+    const { width, height } = this.controller.getDomRect();
     this.ctx.fillStyle = theme.selectionColor;
-    fillRect(this.ctx, 0, 0, this.canvasSize.width, this.canvasSize.height);
+    fillRect(this.ctx, 0, 0, width, height);
 
     const headerSize = controller.getHeaderSize();
     this.ctx.strokeStyle = theme.primaryColor;
@@ -149,51 +138,47 @@ export class Selection implements ContentView {
     return this.renderHighlight(
       headerSize.width,
       headerSize.height,
-      this.canvasSize.width - headerSize.width,
-      this.canvasSize.height - headerSize.height
+      width - headerSize.width,
+      height - headerSize.height
     );
   }
   private renderSelectCol() {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
     const ranges = controller.getRanges();
+    const { height } = controller.getDomRect();
     const [range] = ranges;
     this.ctx.fillStyle = theme.selectionColor;
     const activeCell = controller.computeCellPosition(range.row, range.col);
     fillRect(this.ctx, activeCell.left, 0, activeCell.width, headerSize.height);
-    fillRect(
-      this.ctx,
-      0,
-      activeCell.top,
-      headerSize.width,
-      this.canvasSize.height
-    );
+    fillRect(this.ctx, 0, activeCell.top, headerSize.width, height);
     fillRect(
       this.ctx,
       activeCell.left,
       activeCell.top + activeCell.height,
       activeCell.width,
-      this.canvasSize.height - activeCell.height
+      height - activeCell.height
     );
 
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
     const list: Point[] = [
       [headerSize.width, headerSize.height],
-      [headerSize.width, this.canvasSize.height - headerSize.height],
+      [headerSize.width, height - headerSize.height],
     ];
     drawLines(this.ctx, list);
     return this.renderHighlight(
       activeCell.left,
       activeCell.top,
       activeCell.width,
-      this.canvasSize.height
+      height
     );
   }
   private renderSelectRow() {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
     const ranges = controller.getRanges();
+    const { width } = controller.getDomRect();
     const [range] = ranges;
     this.ctx.fillStyle = theme.selectionColor;
     const activeCell = controller.computeCellPosition(range.row, range.col);
@@ -201,7 +186,7 @@ export class Selection implements ContentView {
       this.ctx,
       activeCell.left,
       0,
-      this.canvasSize.width,
+      width,
       headerSize.height
     );
     fillRect(this.ctx, 0, activeCell.top, headerSize.width, activeCell.height);
@@ -210,7 +195,7 @@ export class Selection implements ContentView {
       this.ctx,
       activeCell.left + activeCell.width,
       activeCell.top,
-      this.canvasSize.width - activeCell.width,
+      width - activeCell.width,
       activeCell.height
     );
 
@@ -218,13 +203,13 @@ export class Selection implements ContentView {
     this.ctx.lineWidth = dpr();
     const list: Point[] = [
       [activeCell.left, headerSize.height],
-      [this.canvasSize.width - headerSize.width, headerSize.height],
+      [width - headerSize.width, headerSize.height],
     ];
     drawLines(this.ctx, list);
     return this.renderHighlight(
       activeCell.left,
       activeCell.top,
-      this.canvasSize.width,
+      width,
       activeCell.height
     );
   }

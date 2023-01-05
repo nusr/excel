@@ -4,6 +4,7 @@ import {
   DOUBLE_CLICK_TIME,
   SCROLL_SIZE,
   debounce,
+  BOTTOM_BUFF,
 } from '@/util';
 
 interface IHitInfo {
@@ -20,8 +21,8 @@ interface IHitInfo {
 function getHitInfo(
   event: MouseEvent,
   controller: IController,
-  canvasSize: DOMRect,
 ): IHitInfo | null {
+  const canvasSize = controller.getDomRect();
   const scroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
   const headerSize = controller.getHeaderSize();
@@ -47,39 +48,17 @@ function getHitInfo(
   return { ...cellSize, row, col, pageY, pageX, x, y };
 }
 
-const BOTTOM_BUFF = 200;
-
-function scrollBar(
+export function computeRowAndCol(
   controller: IController,
-  canvas: HTMLCanvasElement,
-  scrollX: number,
-  scrollY: number,
+  left: number,
+  top: number,
 ) {
-  const headerSize = controller.getHeaderSize();
-  const canvasRect = canvas.getBoundingClientRect();
-  const viewSize = controller.getViewSize();
   const oldScroll = controller.getScroll();
+  // const canvasRect = controller.getDomRect();
+  // const viewSize = controller.getViewSize();
+  // const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
+  // const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
 
-  const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
-  const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-
-  const maxScrollHeight =
-    canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
-  const maxScrollWidth =
-    canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
-  let top = oldScroll.top + scrollY;
-  if (top < 0) {
-    top = 0;
-  } else if (top > maxHeight) {
-    top = maxHeight;
-  }
-
-  let left = oldScroll.left + scrollX;
-  if (left < 0) {
-    left = 0;
-  } else if (left > maxWidth) {
-    left = maxWidth;
-  }
   const realDeltaY = top - oldScroll.top;
   const realDeltaX = left - oldScroll.left;
   let { row, col } = oldScroll;
@@ -130,16 +109,54 @@ function scrollBar(
       }
     }
   }
-
-  const scrollTop = (top * maxScrollHeight) / maxHeight;
-  const scrollLeft = (left * maxScrollWidth) / maxWidth;
-  controller.setScroll({
-    top,
-    left,
+  if (top === 0) {
+    row = 0;
+  }
+  if (left === 0) {
+    col = 0;
+  }
+  return {
     row,
     col,
-    scrollLeft: Math.floor(scrollLeft),
-    scrollTop: Math.floor(scrollTop),
+    left,
+    top,
+  };
+}
+
+function scrollBar(controller: IController, scrollX: number, scrollY: number) {
+  const headerSize = controller.getHeaderSize();
+  const canvasRect = controller.getDomRect();
+  const viewSize = controller.getViewSize();
+  const oldScroll = controller.getScroll();
+
+  const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
+  const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
+
+  const maxScrollHeight =
+    canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
+  const maxScrollWidth =
+    canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
+  let top = oldScroll.top + scrollY;
+  if (top < 0) {
+    top = 0;
+  } else if (top > maxHeight) {
+    top = maxHeight;
+  }
+
+  let left = oldScroll.left + scrollX;
+  if (left < 0) {
+    left = 0;
+  } else if (left > maxWidth) {
+    left = maxWidth;
+  }
+  const result = computeRowAndCol(controller, left, top);
+
+  const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
+  const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
+  controller.setScroll({
+    ...result,
+    scrollLeft,
+    scrollTop,
   });
 }
 
@@ -173,19 +190,10 @@ export function registerEvents(
       );
     }
     if (event.ctrlKey || event.metaKey) {
-      if (event.code === 'KeyC') {
-        controller.copy();
-        return;
-      }
-      if (event.code === 'KeyX') {
-        controller.cut();
-        return;
-      }
       if (event.code === 'ArrowDown' || event.code === 'ArrowUp') {
         const viewSize = controller.getViewSize();
         scrollBar(
           controller,
-          canvas,
           0,
           event.code === 'ArrowUp' ? -viewSize.height : viewSize.height,
         );
@@ -195,7 +203,6 @@ export function registerEvents(
         const viewSize = controller.getViewSize();
         scrollBar(
           controller,
-          canvas,
           event.code === 'ArrowLeft' ? -viewSize.width : viewSize.width,
           0,
         );
@@ -217,23 +224,30 @@ export function registerEvents(
       if (event.target !== canvas) {
         return;
       }
-      scrollBar(controller, canvas, event.deltaX, event.deltaY);
+      scrollBar(controller, event.deltaX, event.deltaY);
     }),
   );
-  document.body.addEventListener('paste', function (event: ClipboardEvent) {
-    event.stopPropagation();
+  document.body.addEventListener('paste', function (event) {
     event.preventDefault();
     controller.paste(event);
+  });
+  document.body.addEventListener('copy', function (event) {
+    event.preventDefault();
+    controller.copy(event);
+  });
+  document.body.addEventListener('cut', function (event) {
+    event.preventDefault();
+    controller.cut(event);
   });
 
   canvas.addEventListener('mousedown', (event) => {
     const headerSize = controller.getHeaderSize();
     stateValue.contextMenuPosition = undefined;
-    const canvasRect = canvas.getBoundingClientRect();
+    const canvasRect = controller.getDomRect();
     const { timeStamp, clientX, clientY } = event;
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;
-    const position = getHitInfo(event, controller, canvasRect);
+    const position = getHitInfo(event, controller);
     if (!position) {
       return;
     }
@@ -278,13 +292,13 @@ export function registerEvents(
 
   canvas.addEventListener('mousemove', (event) => {
     const headerSize = controller.getHeaderSize();
-    const rect = canvas.getBoundingClientRect();
+    const rect = controller.getDomRect();
     const { clientX, clientY } = event;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     if (event.buttons === 1) {
       if (x > headerSize.width && y > headerSize.height) {
-        const position = getHitInfo(event, controller, rect);
+        const position = getHitInfo(event, controller);
         if (!position) {
           return;
         }

@@ -1,7 +1,7 @@
-import { StoreValue, IController, ChangeEventType,  } from './types';
-import { Controller, History } from './controller';
-import { Model, MOCK_MODEL } from './model';
-import { MainCanvas, registerEvents, Selection, Content } from './canvas';
+import { StoreValue, IController, ChangeEventType } from "./types";
+import { Controller, History } from "./controller";
+import { Model, MOCK_MODEL } from "./model";
+import { MainCanvas, registerEvents, Selection, Content } from "./canvas";
 import {
   FONT_FAMILY_LIST,
   isSupportFontFamily,
@@ -11,12 +11,12 @@ import {
   cut,
   paste,
   theme,
-} from './util';
+} from "./util";
 
 export function initTheme(dom: HTMLElement) {
   const keyList = Object.keys(theme) as Array<keyof typeof theme>;
   for (const key of keyList) {
-    dom.style.setProperty(`--${key}`, String(theme[key] || ''));
+    dom.style.setProperty(`--${key}`, String(theme[key] || ""));
   }
 }
 export function initFontFamilyList() {
@@ -27,10 +27,11 @@ export function initFontFamilyList() {
   return list;
 }
 
-function getStoreValue(controller: IController, canvasTop: number) {
+function getStoreValue(controller: IController) {
+  const { top } = controller.getDomRect()
   const cell = controller.getCell(controller.getActiveCell());
   const cellPosition = controller.computeCellPosition(cell.row, cell.col);
-  cellPosition.top = canvasTop + cellPosition.top;
+  cellPosition.top = top + cellPosition.top;
   const scroll = controller.getScroll();
   const newStateValue: Partial<StoreValue> = {
     isCellEditing: false,
@@ -48,30 +49,35 @@ function getStoreValue(controller: IController, canvasTop: number) {
 
 export function initCanvas(stateValue: StoreValue, controller: IController) {
   const canvas = document.querySelector<HTMLCanvasElement>(
-    `#${MAIN_CANVAS_ID}`,
+    `#${MAIN_CANVAS_ID}`
   )!;
   const mainCanvas = new MainCanvas(
     canvas,
     controller,
     new Content(controller, createCanvas()),
-    new Selection(controller, createCanvas()),
+    new Selection(controller, createCanvas())
   );
   const resize = () => {
     const size = canvas.parentElement!.getBoundingClientRect();
-    mainCanvas.resize(size.width, size.height);
+    controller.setDomRect({
+      top: size.top,
+      left: size.left,
+      width: size.width,
+      height: size.height,
+    });
+    mainCanvas.resize();
     mainCanvas.render({
-      changeSet: new Set<ChangeEventType>(['contentChange']),
+      changeSet: new Set<ChangeEventType>(["contentChange"]),
     });
   };
   resize();
   registerEvents(stateValue, controller, canvas, resize);
-  const canvasPosition = canvas.parentElement!.getBoundingClientRect();
   controller.setHooks({
     copy,
     cut,
     paste,
     modelChange: (changeSet) => {
-      const newStateValue = getStoreValue(controller, canvasPosition.top);
+      const newStateValue = getStoreValue(controller);
       Object.assign(stateValue, newStateValue);
       mainCanvas.render({ changeSet: changeSet });
       mainCanvas.render({

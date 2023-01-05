@@ -1,8 +1,8 @@
-import { h, SmartComponent, CSSProperties } from '@/react';
-import { Button } from '@/components';
+import { h, SmartComponent, CSSProperties } from "@/react";
+import { Button } from "@/components";
 
 const defaultStyle: CSSProperties = {
-  display: 'none',
+  display: "none",
 };
 
 export const ContextMenuContainer: SmartComponent = (state, controller) => {
@@ -18,9 +18,9 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
     state.contextMenuPosition = undefined;
   };
   return h(
-    'div',
+    "div",
     {
-      className: 'context-menu',
+      className: "context-menu",
       style,
     },
     Button(
@@ -30,7 +30,7 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
           hideContextMenu();
         },
       },
-      'add a column',
+      "add a column"
     ),
     Button(
       {
@@ -39,7 +39,7 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
           hideContextMenu();
         },
       },
-      'delete a column',
+      "delete a column"
     ),
     Button(
       {
@@ -48,7 +48,7 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
           hideContextMenu();
         },
       },
-      'add a row',
+      "add a row"
     ),
     Button(
       {
@@ -57,7 +57,7 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
           hideContextMenu();
         },
       },
-      'delete a row',
+      "delete a row"
     ),
     Button(
       {
@@ -66,16 +66,7 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
           hideContextMenu();
         },
       },
-      'copy',
-    ),
-    Button(
-      {
-        onClick() {
-          controller.paste();
-          hideContextMenu();
-        },
-      },
-      'paste',
+      "copy"
     ),
     Button(
       {
@@ -84,8 +75,17 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
           hideContextMenu();
         },
       },
-      'cut',
+      "cut"
     ),
+    Button(
+      {
+        onClick() {
+          controller.paste();
+          hideContextMenu();
+        },
+      },
+      "paste"
+    )
   );
 };
-ContextMenuContainer.displayName = 'ContextMenuContainer';
+ContextMenuContainer.displayName = "ContextMenuContainer";
