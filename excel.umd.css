@@ -255,7 +255,7 @@ span {
   top: 0;
   background-color: var(--white);
   box-sizing: content-box;
-  padding: 0 3px;
+  padding: 0 5px;
   border: 1px solid #ccc;
   border-top-color: var(--white);
 }
@@ -263,7 +263,7 @@ span {
   position: relative;
   cursor: pointer;
   border-radius: var(--borderRadius);
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 .horizontal-scroll-bar {
   position: absolute;
@@ -272,7 +272,7 @@ span {
   left: 0;
   bottom: 0;
   box-sizing: content-box;
-  padding: 3px 0;
+  padding: 5px 0;
   border: 1px solid #ccc;
   border-left-color: var(--white);
   background-color: var(--white);
@@ -281,8 +281,12 @@ span {
   position: relative;
   cursor: pointer;
   border-radius: var(--borderRadius);
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
   height: 100%;
+}
+.horizontal-scroll-bar-content:hover,
+.vertical-scroll-bar-content:hover {
+  background-color: rgba(0, 0, 0, 0.2);
 }
 .sheet-bar-add {
   margin-left: var(--mediumPadding);

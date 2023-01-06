@@ -59,6 +59,9 @@ var __export__ = (() => {
     document.body.appendChild(canvas);
     return canvas;
   }
+  function isMac() {
+    return navigator.userAgent.indexOf("Mac OS X") > -1;
+  }
 
   // src/util/style.ts
   var DEFAULT_FONT_SIZE = 11;
@@ -128,8 +131,8 @@ var __export__ = (() => {
   var DEFAULT_COL_COUNT = 30;
   var MAIN_CANVAS_ID = "main-canvas-id";
   var FORMULA_EDITOR_ID = "formula-editor";
-  var DOUBLE_CLICK_TIME = 300;
   var SCROLL_SIZE = 30;
+  var BOTTOM_BUFF = 200;
   var DEBUG_COLOR_LIST = [
     "#0000CC",
     "#0000FF",
@@ -240,7 +243,12 @@ var __export__ = (() => {
     fontFamilyList: [],
     contextMenuPosition: void 0,
     scrollLeft: 0,
-    scrollTop: 0
+    scrollTop: 0,
+    headerSize: {
+      width: 0,
+      height: 0
+    },
+    scrollStatus: 0 /* NONE */
   };
 
   // src/util/util.ts
@@ -585,6 +593,25 @@ var __export__ = (() => {
     const data = [new ClipboardItem(result)];
     return navigator.clipboard.write(data);
   }
+  async function readDataFromClipboard() {
+    const result = {
+      "text/html": "",
+      "text/plain": ""
+    };
+    const list = await navigator.clipboard.read();
+    for (const item of list) {
+      if (item.types.includes("text/plain")) {
+        const buf = await item.getType("text/plain");
+        result["text/plain"] = await buf.text();
+      }
+      if (item.types.includes("text/html")) {
+        const buf = await item.getType("text/html");
+        result["text/html"] = await buf.text();
+      }
+    }
+    console.log(result);
+    return result;
+  }
   var fakeCopyAction = (value, container, type) => {
     const fakeElement = createFakeElement(value);
     container.appendChild(fakeElement);
@@ -611,8 +638,17 @@ var __export__ = (() => {
       return fakeCopyAction(textData["text/plain"], document.body, "cut");
     }
   }
-  function paste() {
-    return navigator.clipboard.readText();
+  async function paste() {
+    try {
+      return readDataFromClipboard();
+    } catch (error) {
+      console.log(error);
+      const result = await navigator.clipboard.readText();
+      return {
+        "text/html": "",
+        "text/plain": result
+      };
+    }
   }
 
   // src/util/lodash.ts
@@ -1402,9 +1438,1149 @@ var __export__ = (() => {
     return temp;
   }
 
-  // src/containers/canvas/index.ts
-  var CanvasContainer = (state, controller) => {
+  // src/canvas/util.ts
+  var getStyle = (key, dom = document.body) => {
+    if (isTestEnv()) {
+      return 20;
+    }
+    return parseInt(window.getComputedStyle(dom)[key]);
+  };
+  var measureTextMap = /* @__PURE__ */ new Map();
+  function measureText(ctx, char) {
+    const mapKey = `${char}__${ctx.font}`;
+    let temp = measureTextMap.get(mapKey);
+    if (!temp) {
+      const metrics = ctx.measureText(char);
+      measureTextMap.set(mapKey, metrics);
+      temp = metrics;
+    }
+    return temp;
+  }
+  function fillRect(ctx, x, y, width, height) {
+    ctx.fillRect(npx(x), npx(y), npx(width), npx(height));
+  }
+  function strokeRect(ctx, x, y, width, height) {
+    ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
+  }
+  function clearRect(ctx, x, y, width, height) {
+    ctx.clearRect(npx(x), npx(y), npx(width), npx(height));
+  }
+  function getFontSizeHeight(ctx, char) {
+    const { actualBoundingBoxDescent, actualBoundingBoxAscent } = measureText(
+      ctx,
+      char
+    );
+    const result = actualBoundingBoxDescent + actualBoundingBoxAscent;
+    return Math.ceil(result);
+  }
+  function fillText(ctx, text, x, y) {
+    ctx.fillText(text, npx(x), npx(y));
+  }
+  function fillWrapText(ctx, text, x, y, cellWidth, lineHeight) {
+    let line = "";
+    const textList = text.split("");
+    let testWidth = 0;
+    const realCellWidth = cellWidth * 2;
+    let wrapHeight = lineHeight;
+    y += lineHeight / 2;
+    for (let i = 0; i < textList.length; i++) {
+      const char = textList[i];
+      const { width } = measureText(ctx, char);
+      if (testWidth + width > realCellWidth) {
+        fillText(ctx, line, x, y);
+        line = char;
+        y += lineHeight;
+        testWidth = width;
+        wrapHeight += lineHeight;
+      } else {
+        testWidth += width;
+        line = line + char;
+      }
+    }
+    if (line) {
+      fillText(ctx, line, x, y);
+    }
+    return wrapHeight;
+  }
+  function fillTexts(ctx, text, x, y, cellWidth) {
+    let line = "";
+    const textList = text.split("");
+    let testWidth = 0;
+    const realCellWidth = cellWidth * 2;
+    let textWidth = 0;
+    for (let i = 0; i < textList.length; i++) {
+      const char = textList[i];
+      const { width } = measureText(ctx, char);
+      if (testWidth + width > realCellWidth) {
+        if (i === 0) {
+          textWidth = width;
+          line = char;
+        }
+        break;
+      } else {
+        testWidth += width;
+        line = line + char;
+      }
+    }
+    fillText(ctx, line, x, y);
+    return textWidth;
+  }
+  function renderCell(ctx, cellInfo, canvasLineHeight) {
+    const { style, value, left, top, width, height } = cellInfo;
+    const isNum2 = isNumber(value);
+    let font = DEFAULT_FONT_CONFIG;
+    let fillStyle = DEFAULT_FONT_COLOR;
+    if (!isEmpty(style)) {
+      const fontSize = npx(style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE);
+      font = makeFont(
+        style?.isItalic ? "italic" : "normal",
+        style?.isBold ? "bold" : "500",
+        fontSize,
+        style?.fontFamily
+      );
+      fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
+      if (style?.fillColor) {
+        ctx.fillStyle = style?.fillColor;
+        fillRect(ctx, left, top, width, height);
+      }
+    }
+    let text = String(value);
+    if (ERROR_SET.has(text)) {
+      fillStyle = ERROR_FORMULA_COLOR;
+    } else if (typeof value === "boolean" || ["TRUE", "FALSE"].includes(text.toUpperCase())) {
+      text = text.toUpperCase();
+    } else if (value === void 0 || value === null) {
+      text = "";
+    }
+    ctx.textAlign = isNum2 ? "right" : "left";
+    ctx.font = font;
+    ctx.fillStyle = fillStyle;
+    ctx.textBaseline = "middle";
+    const x = left + (isNum2 ? width : 0);
+    const result = {};
+    const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
+    const textHeight = Math.max(
+      fontSizeHeight,
+      canvasLineHeight,
+      getStyle("lineHeight")
+    );
+    if (style?.wrapText === 1 /* AUTO_WRAP */) {
+      const y = top;
+      result.wrapHeight = fillWrapText(ctx, text, x, y, width, textHeight);
+    } else {
+      const y = Math.floor(top + height / 2);
+      result.textWidth = fillTexts(ctx, text, x, y, width);
+    }
+    return {
+      ...result,
+      fontSizeHeight: textHeight
+    };
+  }
+  function drawLines(ctx, pointList) {
+    assert(pointList.length > 0);
+    ctx.beginPath();
+    for (let i = 0; i < pointList.length; i += 2) {
+      const first = pointList[i];
+      const second = pointList[i + 1];
+      ctx.moveTo(npx(first[0]), npx(first[1]));
+      ctx.lineTo(npx(second[0]), npx(second[1]));
+    }
+    ctx.stroke();
+  }
+  function drawTriangle(ctx, point1, point2, point3) {
+    ctx.beginPath();
+    ctx.moveTo(npx(point1[0]), npx(point1[1]));
+    ctx.lineTo(npx(point2[0]), npx(point2[1]));
+    ctx.lineTo(npx(point3[0]), npx(point3[1]));
+    ctx.fill();
+  }
+  function drawAntLine(ctx, x, y, width, height) {
+    const oldDash = ctx.getLineDash();
+    ctx.setLineDash([npx(8), npx(6)]);
+    const offset = dpr() / 2;
+    strokeRect(
+      ctx,
+      x + offset,
+      y + offset,
+      width - offset * 2,
+      height - offset * 2
+    );
+    ctx.setLineDash(oldDash);
+  }
+
+  // src/canvas/Main.ts
+  var MainCanvas = class {
+    ctx;
+    content;
+    selection;
+    canvas;
+    controller;
+    antLine = null;
+    constructor(canvas, controller, content, selection) {
+      this.canvas = canvas;
+      this.controller = controller;
+      this.ctx = canvas.getContext("2d");
+      this.content = content;
+      this.selection = selection;
+      const size2 = dpr();
+      this.ctx.scale(size2, size2);
+    }
+    getCanvas() {
+      return this.canvas;
+    }
+    resize() {
+      const { width, height } = this.controller.getDomRect();
+      resizeCanvas(this.canvas, width, height);
+      this.content.resize();
+      this.selection.resize();
+    }
+    clear() {
+      const { width, height } = this.controller.getDomRect();
+      this.ctx.clearRect(
+        0,
+        0,
+        npx(width),
+        npx(height)
+      );
+    }
+    render = (params) => {
+      if (params.changeSet.size === 0) {
+        return {
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0
+        };
+      }
+      this.content.render(params);
+      const result = this.selection.render(params);
+      if (this.controller.getIsDrawAntLine()) {
+        if (this.antLine === null) {
+          this.antLine = result;
+        }
+      } else {
+        this.antLine = null;
+      }
+      this.clear();
+      this.ctx.drawImage(this.content.getCanvas(), 0, 0);
+      this.ctx.drawImage(this.selection.getCanvas(), 0, 0);
+      if (this.antLine) {
+        drawAntLine(
+          this.ctx,
+          this.antLine.left,
+          this.antLine.top,
+          this.antLine.width,
+          this.antLine.height
+        );
+      }
+      return result;
+    };
+  };
+
+  // src/canvas/shortcut.ts
+  function computeScrollRowAndCol(controller, left, top) {
+    const oldScroll = controller.getScroll();
+    let { row, col } = oldScroll;
+    if (oldScroll.top !== top) {
+      row = 0;
+      let t = top;
+      while (t > 0) {
+        const a = controller.getRowHeight(row);
+        if (a > t) {
+          break;
+        }
+        t -= a;
+        row++;
+      }
+    }
+    if (oldScroll.left !== left) {
+      col = 0;
+      let t = left;
+      while (t > 0) {
+        const a = controller.getColWidth(col);
+        if (a > t) {
+          break;
+        }
+        t -= a;
+        col++;
+      }
+    }
+    return {
+      row,
+      col
+    };
+  }
+  function computeScrollPosition(controller, left, top) {
     const headerSize = controller.getHeaderSize();
+    const canvasRect = controller.getDomRect();
+    const viewSize = controller.getViewSize();
+    const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
+    const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
+    const maxScrollHeight = canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
+    const maxScrollWidth = canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
+    const scrollTop = Math.floor(top * maxScrollHeight / maxHeight);
+    const scrollLeft = Math.floor(left * maxScrollWidth / maxWidth);
+    return {
+      maxHeight,
+      maxWidth,
+      maxScrollHeight,
+      maxScrollWidth,
+      scrollTop,
+      scrollLeft
+    };
+  }
+  function scrollBar(controller, scrollX, scrollY) {
+    const oldScroll = controller.getScroll();
+    const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } = computeScrollPosition(controller, oldScroll.left, oldScroll.top);
+    let top = oldScroll.top + Math.ceil(scrollY);
+    if (top < 0) {
+      top = 0;
+    } else if (top > maxHeight) {
+      top = maxHeight;
+    }
+    let left = oldScroll.left + Math.ceil(scrollX);
+    if (left < 0) {
+      left = 0;
+    } else if (left > maxWidth) {
+      left = maxWidth;
+    }
+    const { row, col } = computeScrollRowAndCol(controller, left, top);
+    const scrollTop = Math.floor(top * maxScrollHeight / maxHeight);
+    const scrollLeft = Math.floor(left * maxScrollWidth / maxWidth);
+    controller.setScroll({
+      row,
+      col,
+      top,
+      left,
+      scrollTop,
+      scrollLeft
+    });
+  }
+  function recalculateScroll(controller) {
+    const activeCell = controller.getActiveCell();
+    const position = controller.computeCellPosition(
+      activeCell.row,
+      activeCell.col
+    );
+    const domRect = controller.getDomRect();
+    const oldScroll = controller.getScroll();
+    const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+    const headerSize = controller.getHeaderSize();
+    const buff = 5;
+    const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } = computeScrollPosition(controller, oldScroll.left, oldScroll.top);
+    if (position.left + position.width + buff > domRect.width) {
+      if (oldScroll.col <= sheetInfo.colCount - 2) {
+        const col = oldScroll.col + 1;
+        const left = oldScroll.left + controller.getColWidth(oldScroll.col);
+        const scrollLeft = Math.floor(left * maxScrollWidth / maxWidth);
+        controller.setScroll({
+          ...oldScroll,
+          col,
+          left,
+          scrollLeft
+        });
+      }
+    }
+    if (position.left - headerSize.width < domRect.left + buff) {
+      if (oldScroll.col >= 1) {
+        const col = oldScroll.col - 1;
+        const left = oldScroll.left - controller.getColWidth(oldScroll.col);
+        const scrollLeft = Math.floor(left * maxScrollWidth / maxWidth);
+        controller.setScroll({
+          ...oldScroll,
+          col,
+          left,
+          scrollLeft
+        });
+      }
+    }
+    if (position.top + position.height + buff > domRect.height) {
+      if (oldScroll.row <= sheetInfo.rowCount - 2) {
+        const row = oldScroll.row + 1;
+        const top = oldScroll.top + controller.getRowHeight(oldScroll.row);
+        const scrollTop = Math.floor(top * maxScrollHeight / maxHeight);
+        controller.setScroll({
+          ...oldScroll,
+          row,
+          top,
+          scrollTop
+        });
+      }
+    }
+    if (position.top - headerSize.height < domRect.top + buff) {
+      if (oldScroll.row >= 1) {
+        const row = oldScroll.row - 1;
+        const top = oldScroll.top - controller.getRowHeight(oldScroll.row);
+        const scrollTop = Math.floor(top * maxScrollHeight / maxHeight);
+        controller.setScroll({
+          ...oldScroll,
+          row,
+          top,
+          scrollTop
+        });
+      }
+    }
+  }
+  var keyboardEventList = [
+    {
+      key: "Enter",
+      modifierKey: [],
+      handler: (controller) => {
+        const activeCell = controller.getActiveCell();
+        controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
+      }
+    },
+    {
+      key: "Tab",
+      modifierKey: [],
+      handler: (controller) => {
+        const activeCell = controller.getActiveCell();
+        controller.setActiveCell(activeCell.row, activeCell.col + 1, 1, 1);
+      }
+    },
+    {
+      key: "ArrowDown",
+      modifierKey: [isMac() ? "meta" : "ctrl"],
+      handler: (controller) => {
+        const viewSize = controller.getViewSize();
+        scrollBar(controller, 0, viewSize.height);
+      }
+    },
+    {
+      key: "ArrowUp",
+      modifierKey: [isMac() ? "meta" : "ctrl"],
+      handler: (controller) => {
+        const viewSize = controller.getViewSize();
+        scrollBar(controller, 0, -viewSize.height);
+      }
+    },
+    {
+      key: "ArrowRight",
+      modifierKey: [isMac() ? "meta" : "ctrl"],
+      handler: (controller) => {
+        const viewSize = controller.getViewSize();
+        scrollBar(controller, viewSize.width, 0);
+      }
+    },
+    {
+      key: "ArrowLeft",
+      modifierKey: [isMac() ? "meta" : "ctrl"],
+      handler: (controller) => {
+        const viewSize = controller.getViewSize();
+        scrollBar(controller, -viewSize.width, 0);
+      }
+    },
+    {
+      key: "ArrowDown",
+      modifierKey: [],
+      handler: (controller) => {
+        const activeCell = controller.getActiveCell();
+        controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
+        recalculateScroll(controller);
+      }
+    },
+    {
+      key: "ArrowUp",
+      modifierKey: [],
+      handler: (controller) => {
+        const activeCell = controller.getActiveCell();
+        controller.setActiveCell(activeCell.row - 1, activeCell.col, 1, 1);
+        recalculateScroll(controller);
+      }
+    },
+    {
+      key: "ArrowRight",
+      modifierKey: [],
+      handler: (controller) => {
+        const activeCell = controller.getActiveCell();
+        controller.setActiveCell(activeCell.row, activeCell.col + 1, 1, 1);
+        recalculateScroll(controller);
+      }
+    },
+    {
+      key: "ArrowLeft",
+      modifierKey: [],
+      handler: (controller) => {
+        const activeCell = controller.getActiveCell();
+        controller.setActiveCell(activeCell.row, activeCell.col - 1, 1, 1);
+        recalculateScroll(controller);
+      }
+    }
+  ];
+
+  // src/canvas/event.ts
+  function getHitInfo(event, controller) {
+    const canvasSize = controller.getDomRect();
+    const scroll = controller.getScroll();
+    const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+    const headerSize = controller.getHeaderSize();
+    const { pageX, pageY } = event;
+    const x = pageX - canvasSize.left;
+    const y = pageY - canvasSize.top;
+    let resultX = headerSize.width;
+    let resultY = headerSize.height;
+    let row = scroll.row;
+    let col = scroll.col;
+    while (resultX + controller.getColWidth(col) <= x) {
+      resultX += controller.getColWidth(col);
+      col++;
+    }
+    while (resultY + controller.getRowHeight(row) <= y) {
+      resultY += controller.getRowHeight(row);
+      row++;
+    }
+    if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
+      return null;
+    }
+    const cellSize = controller.getCellSize(row, col);
+    return { ...cellSize, row, col, pageY, pageX, x, y };
+  }
+  function registerEvents(stateValue, controller, canvas, resizeWindow) {
+    let isClick = false;
+    const inputDom = document.querySelector(
+      `#${FORMULA_EDITOR_ID}`
+    );
+    window.addEventListener("resize", function() {
+      resizeWindow();
+    });
+    window.addEventListener("keydown", function(event) {
+      const list = keyboardEventList.filter((v) => v.key === event.key);
+      list.sort((a, b) => b.modifierKey.length - a.modifierKey.length);
+      let temp = null;
+      for (const item of list) {
+        if (item.modifierKey.length > 0) {
+          if (item.modifierKey.some((v) => event[`${v}Key`])) {
+            temp = item;
+            break;
+          }
+        } else {
+          temp = item;
+          break;
+        }
+      }
+      if (temp) {
+        temp.handler(controller);
+        return;
+      }
+      if (event.metaKey || event.ctrlKey) {
+        return;
+      }
+      if (inputDom === event.target) {
+        return;
+      }
+      console.log(event.key);
+      stateValue.isCellEditing = true;
+      inputDom.focus();
+    });
+    window.addEventListener(
+      "wheel",
+      debounce(function(event) {
+        if (event.target !== canvas) {
+          return;
+        }
+        scrollBar(controller, event.deltaX, event.deltaY);
+      })
+    );
+    document.body.addEventListener("paste", function(event) {
+      event.preventDefault();
+      controller.paste(event);
+    });
+    document.body.addEventListener("copy", function(event) {
+      event.preventDefault();
+      controller.copy(event);
+    });
+    document.body.addEventListener("cut", function(event) {
+      event.preventDefault();
+      controller.cut(event);
+    });
+    canvas.addEventListener("click", function(event) {
+      isClick = true;
+      stateValue.contextMenuPosition = void 0;
+      const headerSize = controller.getHeaderSize();
+      const canvasRect = controller.getDomRect();
+      const { clientX, clientY } = event;
+      const x = clientX - canvasRect.left;
+      const y = clientY - canvasRect.top;
+      const position = getHitInfo(event, controller);
+      if (!position) {
+        return;
+      }
+      if (headerSize.width > x && headerSize.height > y) {
+        controller.setActiveCell(0, 0, 0, 0);
+        return;
+      }
+      if (headerSize.width > x && headerSize.height <= y) {
+        const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+        controller.setActiveCell(
+          position.row,
+          position.col,
+          0,
+          sheetInfo.colCount
+        );
+        return;
+      }
+      if (headerSize.width <= x && headerSize.height > y) {
+        const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+        controller.setActiveCell(
+          position.row,
+          position.col,
+          sheetInfo.rowCount,
+          0
+        );
+        return;
+      }
+      const activeCell = controller.getActiveCell();
+      const check = activeCell.row >= 0 && activeCell.row === position.row && activeCell.col === position.col;
+      if (!check) {
+        controller.setActiveCell(position.row, position.col, 1, 1);
+      }
+      isClick = false;
+    });
+    canvas.addEventListener("dblclick", function() {
+      isClick = true;
+      stateValue.isCellEditing = true;
+      isClick = false;
+    });
+    canvas.addEventListener("mousemove", function(event) {
+      if (!isClick) {
+        return;
+      }
+      const headerSize = controller.getHeaderSize();
+      const rect = controller.getDomRect();
+      const { clientX, clientY } = event;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      if (event.buttons === 1) {
+        if (x > headerSize.width && y > headerSize.height) {
+          const position = getHitInfo(event, controller);
+          if (!position) {
+            return;
+          }
+          const activeCell = controller.getActiveCell();
+          if (activeCell.row === position.row && activeCell.col === position.col) {
+            return;
+          }
+          const colCount = Math.abs(position.col - activeCell.col) + 1;
+          const rowCount = Math.abs(position.row - activeCell.row) + 1;
+          controller.setActiveCell(
+            Math.min(position.row, activeCell.row),
+            Math.min(position.col, activeCell.col),
+            rowCount,
+            colCount
+          );
+        }
+      }
+    });
+    canvas.addEventListener("contextmenu", function(event) {
+      event.preventDefault();
+      stateValue.contextMenuPosition = {
+        top: event.clientY,
+        left: event.clientX,
+        width: 100,
+        height: 100
+      };
+      return false;
+    });
+  }
+
+  // src/canvas/Selection.ts
+  var Selection = class {
+    canvas;
+    ctx;
+    controller;
+    constructor(controller, canvas) {
+      this.controller = controller;
+      this.canvas = canvas;
+      const ctx = this.canvas.getContext("2d");
+      this.ctx = ctx;
+      const size2 = dpr();
+      this.ctx.scale(size2, size2);
+    }
+    getCanvas() {
+      return this.canvas;
+    }
+    resize() {
+      const { width, height } = this.controller.getDomRect();
+      resizeCanvas(this.canvas, width, height);
+    }
+    clear() {
+      const { width, height } = this.controller.getDomRect();
+      this.ctx.clearRect(0, 0, npx(width), npx(height));
+    }
+    render() {
+      this.clear();
+      const { controller } = this;
+      const ranges = controller.getRanges();
+      const [range] = ranges;
+      if (isSheet(range)) {
+        return this.renderSelectAll();
+      }
+      if (isCol(range)) {
+        return this.renderSelectCol();
+      }
+      if (isRow(range)) {
+        return this.renderSelectRow();
+      }
+      return this.renderSelectRange();
+    }
+    renderHighlight(x, y, width, height) {
+      strokeRect(this.ctx, x, y, width, height);
+      return {
+        left: x,
+        top: y,
+        width,
+        height
+      };
+    }
+    renderActiveCell() {
+      const { controller } = this;
+      const cellData = controller.getCell(controller.getActiveCell());
+      const activeCell = controller.computeCellPosition(
+        cellData.row,
+        cellData.col
+      );
+      clearRect(
+        this.ctx,
+        activeCell.left,
+        activeCell.top,
+        activeCell.width,
+        activeCell.height
+      );
+      renderCell(
+        this.ctx,
+        { ...cellData, ...activeCell },
+        getStyle("lineHeight", this.canvas)
+      );
+    }
+    renderSelectRange() {
+      const { controller } = this;
+      const headerSize = controller.getHeaderSize();
+      const ranges = controller.getRanges();
+      const [range] = ranges;
+      const activeCell = controller.computeCellPosition(range.row, range.col);
+      const endCellRow = range.row + range.rowCount - 1;
+      const endCellCol = range.col + range.colCount - 1;
+      assert(endCellRow >= 0 && endCellCol >= 0);
+      const endCell = controller.computeCellPosition(endCellRow, endCellCol);
+      const width = endCell.left + endCell.width - activeCell.left;
+      const height = endCell.top + endCell.height - activeCell.top;
+      this.ctx.fillStyle = theme.selectionColor;
+      fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
+      fillRect(this.ctx, 0, activeCell.top, headerSize.width, height);
+      const check = range.rowCount > 1 || range.colCount > 1;
+      if (check) {
+        fillRect(this.ctx, activeCell.left, activeCell.top, width, height);
+      }
+      this.ctx.strokeStyle = theme.primaryColor;
+      this.ctx.lineWidth = dpr();
+      assert(width >= 0 && height >= 0);
+      const list = [
+        [activeCell.left, headerSize.height],
+        [activeCell.left + width, headerSize.height]
+      ];
+      list.push(
+        [headerSize.width, activeCell.top],
+        [headerSize.width, activeCell.top + height]
+      );
+      drawLines(this.ctx, list);
+      if (check) {
+        this.renderActiveCell();
+      }
+      return this.renderHighlight(activeCell.left, activeCell.top, width, height);
+    }
+    renderSelectAll() {
+      const { controller } = this;
+      const { width, height } = this.controller.getDomRect();
+      this.ctx.fillStyle = theme.selectionColor;
+      fillRect(this.ctx, 0, 0, width, height);
+      const headerSize = controller.getHeaderSize();
+      this.ctx.strokeStyle = theme.primaryColor;
+      this.ctx.lineWidth = dpr();
+      this.renderActiveCell();
+      return this.renderHighlight(
+        headerSize.width,
+        headerSize.height,
+        width - headerSize.width,
+        height - headerSize.height
+      );
+    }
+    renderSelectCol() {
+      const { controller } = this;
+      const headerSize = controller.getHeaderSize();
+      const ranges = controller.getRanges();
+      const { height } = controller.getDomRect();
+      const [range] = ranges;
+      this.ctx.fillStyle = theme.selectionColor;
+      const activeCell = controller.computeCellPosition(range.row, range.col);
+      fillRect(this.ctx, activeCell.left, 0, activeCell.width, headerSize.height);
+      fillRect(this.ctx, 0, activeCell.top, headerSize.width, height);
+      fillRect(
+        this.ctx,
+        activeCell.left,
+        activeCell.top + activeCell.height,
+        activeCell.width,
+        height - activeCell.height
+      );
+      this.ctx.strokeStyle = theme.primaryColor;
+      this.ctx.lineWidth = dpr();
+      const list = [
+        [headerSize.width, headerSize.height],
+        [headerSize.width, height - headerSize.height]
+      ];
+      drawLines(this.ctx, list);
+      return this.renderHighlight(
+        activeCell.left,
+        activeCell.top,
+        activeCell.width,
+        height
+      );
+    }
+    renderSelectRow() {
+      const { controller } = this;
+      const headerSize = controller.getHeaderSize();
+      const ranges = controller.getRanges();
+      const { width } = controller.getDomRect();
+      const [range] = ranges;
+      this.ctx.fillStyle = theme.selectionColor;
+      const activeCell = controller.computeCellPosition(range.row, range.col);
+      fillRect(
+        this.ctx,
+        activeCell.left,
+        0,
+        width,
+        headerSize.height
+      );
+      fillRect(this.ctx, 0, activeCell.top, headerSize.width, activeCell.height);
+      fillRect(
+        this.ctx,
+        activeCell.left + activeCell.width,
+        activeCell.top,
+        width - activeCell.width,
+        activeCell.height
+      );
+      this.ctx.strokeStyle = theme.primaryColor;
+      this.ctx.lineWidth = dpr();
+      const list = [
+        [activeCell.left, headerSize.height],
+        [width - headerSize.width, headerSize.height]
+      ];
+      drawLines(this.ctx, list);
+      return this.renderHighlight(
+        activeCell.left,
+        activeCell.top,
+        width,
+        activeCell.height
+      );
+    }
+  };
+
+  // src/canvas/constant.ts
+  var HEADER_STYLE = {
+    textAlign: "center",
+    textBaseline: "middle",
+    font: DEFAULT_FONT_CONFIG,
+    fillStyle: theme.black,
+    lineWidth: thinLineWidth(),
+    strokeStyle: theme.gridStrokeColor
+  };
+
+  // src/canvas/Content.ts
+  var Content = class {
+    canvas;
+    ctx;
+    controller;
+    constructor(controller, canvas) {
+      this.controller = controller;
+      this.canvas = canvas;
+      const ctx = this.canvas.getContext("2d");
+      this.ctx = ctx;
+      const size2 = dpr();
+      this.ctx.scale(size2, size2);
+    }
+    getCanvas() {
+      return this.canvas;
+    }
+    resize() {
+      const { width, height } = this.controller.getDomRect();
+      resizeCanvas(this.canvas, width, height);
+    }
+    clear() {
+      const { width, height } = this.controller.getDomRect();
+      this.ctx.clearRect(
+        0,
+        0,
+        npx(width),
+        npx(height)
+      );
+    }
+    render({ changeSet }) {
+      if (!changeSet.has("contentChange")) {
+        return {
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0
+        };
+      }
+      const { width, height } = this.controller.getDomRect();
+      const headerSize = this.controller.getHeaderSize();
+      this.clear();
+      const contentWidth = width - headerSize.width;
+      const contentHeight = height - headerSize.height;
+      this.renderGrid(contentWidth, contentHeight);
+      this.renderRowsHeader(contentHeight);
+      this.renderColsHeader(contentWidth);
+      this.renderTriangle();
+      this.renderContent();
+      return {
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0
+      };
+    }
+    renderContent() {
+      const { controller } = this;
+      const { width, height } = this.controller.getDomRect();
+      const data = controller.getCellsContent(controller.getCurrentSheetId());
+      if (isEmpty(data)) {
+        return;
+      }
+      this.ctx.save();
+      const { row: rowIndex, col: colIndex } = controller.getScroll();
+      for (const item of data) {
+        const { row, col } = item;
+        if (row < rowIndex || col < colIndex) {
+          continue;
+        }
+        const result = controller.computeCellPosition(row, col);
+        if (result.top > height || result.left > width) {
+          continue;
+        }
+        const cellInfo = this.controller.getCell(item);
+        const {
+          wrapHeight = 0,
+          fontSizeHeight = 0,
+          textWidth = 0
+        } = renderCell(
+          this.ctx,
+          {
+            ...cellInfo,
+            ...result
+          },
+          getStyle("lineHeight", this.canvas)
+        );
+        const t = Math.max(wrapHeight, fontSizeHeight);
+        if (t > result.height) {
+          controller.setRowHeight(row, t);
+        }
+        if (textWidth > result.width) {
+          controller.setColWidth(col, textWidth);
+        }
+      }
+      this.ctx.restore();
+    }
+    renderTriangle() {
+      if (isTestEnv()) {
+        return;
+      }
+      const headerSize = this.controller.getHeaderSize();
+      this.ctx.save();
+      this.ctx.fillStyle = theme.backgroundColor;
+      fillRect(this.ctx, 0, 0, headerSize.width, headerSize.height);
+      this.ctx.fillStyle = theme.triangleFillColor;
+      const offset = 2;
+      drawTriangle(
+        this.ctx,
+        [headerSize.width / 2 - offset, headerSize.height - offset],
+        [headerSize.width - offset, headerSize.height - offset],
+        [headerSize.width - offset, offset]
+      );
+      this.ctx.restore();
+    }
+    renderGrid(width, height) {
+      const { controller } = this;
+      const headerSize = controller.getHeaderSize();
+      const { row: rowIndex, col: colIndex } = controller.getScroll();
+      const { rowCount, colCount } = this.controller.getSheetInfo(
+        this.controller.getCurrentSheetId()
+      );
+      const lineWidth = thinLineWidth();
+      this.ctx.save();
+      this.ctx.fillStyle = theme.white;
+      this.ctx.lineWidth = lineWidth;
+      this.ctx.strokeStyle = theme.gridStrokeColor;
+      this.ctx.translate(npx(headerSize.width), npx(headerSize.height));
+      const pointList = [];
+      let y = 0;
+      let x = 0;
+      let maxX = 0;
+      for (let i = colIndex; i < colCount; i++) {
+        maxX += controller.getColWidth(i);
+        if (maxX > width) {
+          break;
+        }
+      }
+      const realWidth = Math.min(maxX, width);
+      for (let i = rowIndex; i < rowCount; i++) {
+        pointList.push([0, y], [realWidth, y]);
+        y += controller.getRowHeight(i);
+        if (y > height) {
+          break;
+        }
+      }
+      for (let i = colIndex; i < colCount; i++) {
+        pointList.push([x, 0], [x, y]);
+        x += controller.getColWidth(i);
+        if (x > realWidth) {
+          break;
+        }
+      }
+      pointList.push([0, y], [x, y]);
+      pointList.push([x, 0], [x, y]);
+      drawLines(this.ctx, pointList);
+      this.ctx.restore();
+    }
+    fillRowText(row, rowWidth, y) {
+      this.ctx.fillStyle = theme.black;
+      fillText(this.ctx, String(row), rowWidth / 2, y);
+    }
+    fillColText(colText, x, colHeight) {
+      this.ctx.fillStyle = theme.black;
+      fillText(this.ctx, colText, x, colHeight / 2 + dpr());
+    }
+    renderRowsHeader(height) {
+      const { controller } = this;
+      const { row: rowIndex } = controller.getScroll();
+      const headerSize = controller.getHeaderSize();
+      const { rowCount } = controller.getSheetInfo(
+        controller.getCurrentSheetId()
+      );
+      this.ctx.save();
+      this.ctx.fillStyle = theme.backgroundColor;
+      fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
+      Object.assign(this.ctx, HEADER_STYLE);
+      const pointList = [];
+      let y = headerSize.height;
+      let i = rowIndex;
+      for (; i < rowCount; i++) {
+        const rowHeight = controller.getRowHeight(i);
+        let temp = y;
+        if (i === rowIndex) {
+          temp += thinLineWidth() / 2;
+        }
+        pointList.push([0, temp], [headerSize.width, temp]);
+        this.fillRowText(i + 1, headerSize.width, temp + rowHeight / 2);
+        y += rowHeight;
+        if (y > height) {
+          break;
+        }
+      }
+      pointList.push([0, y], [headerSize.width, y]);
+      pointList.push([0, 0], [0, y]);
+      drawLines(this.ctx, pointList);
+      this.ctx.restore();
+    }
+    renderColsHeader(width) {
+      const { controller } = this;
+      const { col: colIndex } = controller.getScroll();
+      const headerSize = controller.getHeaderSize();
+      const { colCount } = controller.getSheetInfo(
+        controller.getCurrentSheetId()
+      );
+      const pointList = [];
+      this.ctx.save();
+      this.ctx.fillStyle = theme.backgroundColor;
+      fillRect(this.ctx, headerSize.width, 0, width, headerSize.height);
+      Object.assign(this.ctx, HEADER_STYLE);
+      let x = headerSize.width;
+      let i = colIndex;
+      for (; i < colCount; i++) {
+        const colWidth = controller.getColWidth(i);
+        let temp = x;
+        if (i === colIndex) {
+          temp += thinLineWidth() / 2;
+        }
+        pointList.push([temp, 0], [temp, headerSize.height]);
+        this.fillColText(
+          intToColumnName(i),
+          temp + colWidth / 2,
+          headerSize.height
+        );
+        x += colWidth;
+        if (x > width) {
+          break;
+        }
+      }
+      pointList.push([x, 0], [x, headerSize.height]);
+      pointList.push([0, 0], [x, 0]);
+      drawLines(this.ctx, pointList);
+      this.ctx.restore();
+    }
+  };
+
+  // src/containers/canvas/index.ts
+  function scrollBar2(controller, scrollX, scrollY) {
+    const oldScroll = controller.getScroll();
+    const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } = computeScrollPosition(controller, oldScroll.left, oldScroll.top);
+    let scrollTop = oldScroll.scrollTop + Math.ceil(scrollY);
+    let scrollLeft = oldScroll.scrollLeft + Math.ceil(scrollX);
+    if (scrollTop < 0) {
+      scrollTop = 0;
+    } else if (scrollTop > maxScrollHeight) {
+      scrollTop = maxScrollHeight;
+    }
+    if (scrollLeft < 0) {
+      scrollLeft = 0;
+    } else if (scrollLeft > maxScrollWidth) {
+      scrollLeft = maxScrollWidth;
+    }
+    const top = Math.floor(maxHeight * scrollTop / maxScrollHeight);
+    const left = Math.floor(maxWidth * scrollLeft / maxScrollWidth);
+    const { row, col } = computeScrollRowAndCol(controller, left, top);
+    controller.setScroll({
+      top,
+      left,
+      row,
+      col,
+      scrollLeft,
+      scrollTop
+    });
+  }
+  var prevPageY = 0;
+  var prevPageX = 0;
+  var scrollStatus = 0 /* NONE */;
+  var CanvasContainer = (state, controller) => {
+    const { headerSize } = state;
+    function handleDrag(event) {
+      event.stopPropagation();
+      console.log(event);
+      if (scrollStatus === 1 /* VERTICAL */) {
+        if (prevPageY) {
+          scrollBar2(controller, 0, event.pageY - prevPageY);
+        }
+        prevPageY = event.pageY;
+      } else if (scrollStatus === 2 /* HORIZONTAL */) {
+        if (prevPageX) {
+          scrollBar2(controller, event.pageX - prevPageX, 0);
+        }
+        prevPageX = event.pageX;
+      }
+    }
+    function handleDragEnd() {
+      scrollStatus = 0 /* NONE */;
+      prevPageY = 0;
+      prevPageX = 0;
+      tearDown();
+    }
+    function tearDown() {
+      document.removeEventListener("mousemove", handleDrag);
+      document.removeEventListener("mouseup", handleDragEnd);
+    }
+    function register() {
+      document.addEventListener("mousemove", handleDrag);
+      document.addEventListener("mouseup", handleDragEnd);
+    }
     return h(
       "div",
       {
@@ -1420,6 +2596,16 @@ var __export__ = (() => {
           className: "vertical-scroll-bar",
           style: {
             top: headerSize.height
+          },
+          onmouseleave() {
+            handleDragEnd();
+          },
+          onmousedown() {
+            if (scrollStatus) {
+              return;
+            }
+            scrollStatus = 1 /* VERTICAL */;
+            register();
           }
         },
         h("div", {
@@ -1436,6 +2622,16 @@ var __export__ = (() => {
           className: "horizontal-scroll-bar",
           style: {
             left: headerSize.width
+          },
+          onmouseleave() {
+            handleDragEnd();
+          },
+          onmousedown() {
+            if (scrollStatus) {
+              return;
+            }
+            scrollStatus = 2 /* HORIZONTAL */;
+            register();
           }
         },
         h("div", {
@@ -2075,20 +3271,20 @@ var __export__ = (() => {
       Button(
         {
           onClick() {
-            controller.paste();
-            hideContextMenu();
-          }
-        },
-        "paste"
-      ),
-      Button(
-        {
-          onClick() {
             controller.cut();
             hideContextMenu();
           }
         },
         "cut"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.paste();
+            hideContextMenu();
+          }
+        },
+        "paste"
       )
     );
   };
@@ -2143,8 +3339,17 @@ var __export__ = (() => {
         return "";
       },
       async paste() {
-        return "";
+        return {
+          "text/html": "",
+          "text/plain": ""
+        };
       }
+    };
+    domRect = {
+      top: 0,
+      left: 0,
+      width: 0,
+      height: 0
     };
     history;
     rowMap = /* @__PURE__ */ new Map([]);
@@ -2152,6 +3357,10 @@ var __export__ = (() => {
     viewSize = {
       width: 0,
       height: 0
+    };
+    headerSize = {
+      width: COL_TITLE_WIDTH,
+      height: ROW_TITLE_HEIGHT
     };
     constructor(model, history) {
       this.model = model;
@@ -2203,11 +3412,15 @@ var __export__ = (() => {
       return { row, col };
     }
     setActiveCell(row, col, rowCount, colCount) {
-      this.changeSet.add("selectionChange");
+      const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
+      if (row < 0 || col < 0 || row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
+        return;
+      }
       this.model.setActiveCell(row, col, rowCount, colCount);
       this.ranges = [
         new Range(row, col, rowCount, colCount, this.getCurrentSheetId())
       ];
+      this.changeSet.add("selectionChange");
       this.emitChange();
     }
     setCurrentSheetId(id) {
@@ -2331,8 +3544,7 @@ var __export__ = (() => {
     }
     getHeaderSize() {
       return {
-        width: COL_TITLE_WIDTH,
-        height: ROW_TITLE_HEIGHT
+        ...this.headerSize
       };
     }
     computeCellPosition(row, col) {
@@ -2388,11 +3600,33 @@ var __export__ = (() => {
       this.scrollValue[sheetId] = {
         ...data
       };
+      if (data.row > 9999) {
+        this.headerSize = {
+          width: Math.floor(COL_TITLE_WIDTH * 2),
+          height: ROW_TITLE_HEIGHT
+        };
+      } else {
+        this.headerSize = {
+          width: COL_TITLE_WIDTH,
+          height: ROW_TITLE_HEIGHT
+        };
+      }
       this.changeSet.add("contentChange");
       this.emitChange();
     }
     parseText(text) {
-      const list = text.trim().split("\n").map((item) => item).map((item) => item.split("	"));
+      let list;
+      if (text.indexOf("\r\n") > -1) {
+        list = text.split("\r\n").map((item) => item).map((item) => item.split("	"));
+      } else {
+        list = text.split("\n").map((item) => item).map((item) => item.split("	"));
+      }
+      if (list[0].length !== list[list.length - 1].length) {
+        const last = list[list.length - 1];
+        if (last.length === 1 && !last[0]) {
+          list.pop();
+        }
+      }
       const rowCount = list.length;
       let colCount = 0;
       for (let item of list) {
@@ -2417,7 +3651,7 @@ var __export__ = (() => {
       }
       if (!event) {
         const data = await this.hooks.paste();
-        this.parseText(data);
+        this.parseText(data[PLAIN_TEXT]);
       } else {
         const text = event.clipboardData?.getData(PLAIN_TEXT) || "";
         this.parseText(text);
@@ -2430,8 +3664,7 @@ var __export__ = (() => {
         });
       }
     }
-    copy() {
-      this.isDrawAntLine = true;
+    getCopyData() {
       const [range] = this.ranges;
       const { row, col, rowCount, colCount } = range;
       const result = [];
@@ -2439,42 +3672,56 @@ var __export__ = (() => {
         const temp = [];
         for (let c = col, endCol = col + colCount; c < endCol; c++) {
           const t = this.model.queryCell(r, c);
-          temp.push(t.value);
+          temp.push(t.value || "");
         }
         result.push(temp);
       }
-      const text = result.map((item) => item.join("	")).join("\n");
-      this.hooks.copy({
-        [PLAIN_TEXT]: text,
-        [HTML_TEXT]: ""
-      });
+      const text = result.map((item) => item.join("	")).join("\r\n") + "\r\n";
+      return text;
+    }
+    copy(event) {
+      this.isDrawAntLine = true;
+      const text = this.getCopyData();
+      if (event) {
+        event.clipboardData?.setData(PLAIN_TEXT, text);
+        event.clipboardData?.setData(HTML_TEXT, "");
+      } else {
+        this.hooks.copy({
+          [PLAIN_TEXT]: text,
+          [HTML_TEXT]: ""
+        });
+      }
       this.changeSet.add("selectionChange");
       this.emitChange();
     }
-    cut() {
+    cut(event) {
       this.isDrawAntLine = true;
-      const [range] = this.ranges;
-      const { row, col, rowCount, colCount } = range;
-      const result = [];
-      for (let r = row, endRow = row + rowCount; r < endRow; r++) {
-        const temp = [];
-        for (let c = col, endCol = col + colCount; c < endCol; c++) {
-          const t = this.model.queryCell(r, c);
-          temp.push(t.value);
-        }
-        result.push(temp);
-      }
+      const text = this.getCopyData();
       this.cutRanges = this.ranges.slice();
-      const text = result.map((item) => item.join("	")).join("\n");
-      this.hooks.copy({
-        [PLAIN_TEXT]: text,
-        [HTML_TEXT]: ""
-      });
+      if (event) {
+        event.clipboardData?.setData(PLAIN_TEXT, text);
+        event.clipboardData?.setData(HTML_TEXT, "");
+      } else {
+        this.hooks.copy({
+          [PLAIN_TEXT]: text,
+          [HTML_TEXT]: ""
+        });
+      }
       this.changeSet.add("selectionChange");
       this.emitChange();
     }
     getIsDrawAntLine() {
       return this.isDrawAntLine;
+    }
+    setDomRect(data) {
+      this.domRect = {
+        ...data
+      };
+    }
+    getDomRect() {
+      return {
+        ...this.domRect
+      };
     }
   };
 
@@ -4102,974 +5349,6 @@ var __export__ = (() => {
     mergeCells: ["D2:E3"]
   };
 
-  // src/canvas/util.ts
-  var getStyle = (key, dom = document.body) => {
-    if (isTestEnv()) {
-      return 20;
-    }
-    return parseInt(window.getComputedStyle(dom)[key]);
-  };
-  var measureTextMap = /* @__PURE__ */ new Map();
-  function measureText(ctx, char) {
-    const mapKey = `${char}__${ctx.font}`;
-    let temp = measureTextMap.get(mapKey);
-    if (!temp) {
-      const metrics = ctx.measureText(char);
-      measureTextMap.set(mapKey, metrics);
-      temp = metrics;
-    }
-    return temp;
-  }
-  function fillRect(ctx, x, y, width, height) {
-    ctx.fillRect(npx(x), npx(y), npx(width), npx(height));
-  }
-  function strokeRect(ctx, x, y, width, height) {
-    ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
-  }
-  function clearRect(ctx, x, y, width, height) {
-    ctx.clearRect(npx(x), npx(y), npx(width), npx(height));
-  }
-  function getFontSizeHeight(ctx, char) {
-    const { actualBoundingBoxDescent, actualBoundingBoxAscent } = measureText(
-      ctx,
-      char
-    );
-    const result = actualBoundingBoxDescent + actualBoundingBoxAscent;
-    return Math.ceil(result);
-  }
-  function fillText(ctx, text, x, y) {
-    ctx.fillText(text, npx(x), npx(y));
-  }
-  function fillWrapText(ctx, text, x, y, cellWidth, lineHeight) {
-    let line = "";
-    const textList = text.split("");
-    let testWidth = 0;
-    const realCellWidth = cellWidth * 2;
-    let wrapHeight = lineHeight;
-    y += lineHeight / 2;
-    for (let i = 0; i < textList.length; i++) {
-      const char = textList[i];
-      const { width } = measureText(ctx, char);
-      if (testWidth + width > realCellWidth) {
-        fillText(ctx, line, x, y);
-        line = char;
-        y += lineHeight;
-        testWidth = width;
-        wrapHeight += lineHeight;
-      } else {
-        testWidth += width;
-        line = line + char;
-      }
-    }
-    if (line) {
-      fillText(ctx, line, x, y);
-    }
-    return wrapHeight;
-  }
-  function fillTexts(ctx, text, x, y, cellWidth) {
-    let line = "";
-    const textList = text.split("");
-    let testWidth = 0;
-    const realCellWidth = cellWidth * 2;
-    let textWidth = 0;
-    for (let i = 0; i < textList.length; i++) {
-      const char = textList[i];
-      const { width } = measureText(ctx, char);
-      if (testWidth + width > realCellWidth) {
-        if (i === 0) {
-          textWidth = width;
-          line = char;
-        }
-        break;
-      } else {
-        testWidth += width;
-        line = line + char;
-      }
-    }
-    fillText(ctx, line, x, y);
-    return textWidth;
-  }
-  function renderCell(ctx, cellInfo, canvasLineHeight) {
-    const { style, value, left, top, width, height } = cellInfo;
-    const isNum2 = isNumber(value);
-    let font = DEFAULT_FONT_CONFIG;
-    let fillStyle = DEFAULT_FONT_COLOR;
-    if (!isEmpty(style)) {
-      const fontSize = npx(style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE);
-      font = makeFont(
-        style?.isItalic ? "italic" : "normal",
-        style?.isBold ? "bold" : "500",
-        fontSize,
-        style?.fontFamily
-      );
-      fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
-      if (style?.fillColor) {
-        ctx.fillStyle = style?.fillColor;
-        fillRect(ctx, left, top, width, height);
-      }
-    }
-    let text = String(value);
-    if (ERROR_SET.has(text)) {
-      fillStyle = ERROR_FORMULA_COLOR;
-    } else if (typeof value === "boolean" || ["TRUE", "FALSE"].includes(text.toUpperCase())) {
-      text = text.toUpperCase();
-    } else if (value === void 0 || value === null) {
-      text = "";
-    }
-    ctx.textAlign = isNum2 ? "right" : "left";
-    ctx.font = font;
-    ctx.fillStyle = fillStyle;
-    ctx.textBaseline = "middle";
-    const x = left + (isNum2 ? width : 0);
-    const result = {};
-    const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
-    const textHeight = Math.max(
-      fontSizeHeight,
-      canvasLineHeight,
-      getStyle("lineHeight")
-    );
-    if (style?.wrapText === 1 /* AUTO_WRAP */) {
-      const y = top;
-      result.wrapHeight = fillWrapText(ctx, text, x, y, width, textHeight);
-    } else {
-      const y = Math.floor(top + height / 2);
-      result.textWidth = fillTexts(ctx, text, x, y, width);
-    }
-    return {
-      ...result,
-      fontSizeHeight: textHeight
-    };
-  }
-  function drawLines(ctx, pointList) {
-    assert(pointList.length > 0);
-    ctx.beginPath();
-    for (let i = 0; i < pointList.length; i += 2) {
-      const first = pointList[i];
-      const second = pointList[i + 1];
-      ctx.moveTo(npx(first[0]), npx(first[1]));
-      ctx.lineTo(npx(second[0]), npx(second[1]));
-    }
-    ctx.stroke();
-  }
-  function drawTriangle(ctx, point1, point2, point3) {
-    ctx.beginPath();
-    ctx.moveTo(npx(point1[0]), npx(point1[1]));
-    ctx.lineTo(npx(point2[0]), npx(point2[1]));
-    ctx.lineTo(npx(point3[0]), npx(point3[1]));
-    ctx.fill();
-  }
-  function drawAntLine(ctx, x, y, width, height) {
-    const oldDash = ctx.getLineDash();
-    ctx.setLineDash([npx(8), npx(6)]);
-    const offset = dpr() / 2;
-    strokeRect(
-      ctx,
-      x + offset,
-      y + offset,
-      width - offset * 2,
-      height - offset * 2
-    );
-    ctx.setLineDash(oldDash);
-  }
-
-  // src/canvas/Main.ts
-  var MainCanvas = class {
-    ctx;
-    content;
-    selection;
-    canvas;
-    controller;
-    canvasSize = {
-      width: 0,
-      height: 0
-    };
-    antLine = null;
-    constructor(canvas, controller, content, selection) {
-      this.canvas = canvas;
-      this.controller = controller;
-      this.ctx = canvas.getContext("2d");
-      this.content = content;
-      this.selection = selection;
-      const size2 = dpr();
-      this.ctx.scale(size2, size2);
-    }
-    getCanvas() {
-      return this.canvas;
-    }
-    resize(width, height) {
-      this.canvasSize = {
-        width,
-        height
-      };
-      resizeCanvas(this.canvas, width, height);
-      this.content.resize(width, height);
-      this.selection.resize(width, height);
-    }
-    clear() {
-      this.ctx.clearRect(
-        0,
-        0,
-        npx(this.canvasSize.width),
-        npx(this.canvasSize.height)
-      );
-    }
-    render = (params) => {
-      if (params.changeSet.size === 0) {
-        return {
-          top: 0,
-          left: 0,
-          width: 0,
-          height: 0
-        };
-      }
-      this.content.render(params);
-      const result = this.selection.render(params);
-      if (this.controller.getIsDrawAntLine()) {
-        if (this.antLine === null) {
-          this.antLine = result;
-        }
-      } else {
-        this.antLine = null;
-      }
-      this.clear();
-      this.ctx.drawImage(this.content.getCanvas(), 0, 0);
-      this.ctx.drawImage(this.selection.getCanvas(), 0, 0);
-      if (this.antLine) {
-        drawAntLine(
-          this.ctx,
-          this.antLine.left,
-          this.antLine.top,
-          this.antLine.width,
-          this.antLine.height
-        );
-      }
-      return result;
-    };
-  };
-
-  // src/canvas/event.ts
-  function getHitInfo(event, controller, canvasSize) {
-    const scroll = controller.getScroll();
-    const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-    const headerSize = controller.getHeaderSize();
-    const { pageX, pageY } = event;
-    const x = pageX - canvasSize.left;
-    const y = pageY - canvasSize.top;
-    let resultX = headerSize.width;
-    let resultY = headerSize.height;
-    let row = scroll.row;
-    let col = scroll.col;
-    while (resultX + controller.getColWidth(col) <= x) {
-      resultX += controller.getColWidth(col);
-      col++;
-    }
-    while (resultY + controller.getRowHeight(row) <= y) {
-      resultY += controller.getRowHeight(row);
-      row++;
-    }
-    if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
-      return null;
-    }
-    const cellSize = controller.getCellSize(row, col);
-    return { ...cellSize, row, col, pageY, pageX, x, y };
-  }
-  var BOTTOM_BUFF = 200;
-  function scrollBar(controller, canvas, scrollX, scrollY) {
-    const headerSize = controller.getHeaderSize();
-    const canvasRect = canvas.getBoundingClientRect();
-    const viewSize = controller.getViewSize();
-    const oldScroll = controller.getScroll();
-    const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
-    const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-    const maxScrollHeight = canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
-    const maxScrollWidth = canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
-    let top = oldScroll.top + scrollY;
-    if (top < 0) {
-      top = 0;
-    } else if (top > maxHeight) {
-      top = maxHeight;
-    }
-    let left = oldScroll.left + scrollX;
-    if (left < 0) {
-      left = 0;
-    } else if (left > maxWidth) {
-      left = maxWidth;
-    }
-    const realDeltaY = top - oldScroll.top;
-    const realDeltaX = left - oldScroll.left;
-    let { row, col } = oldScroll;
-    if (Math.abs(realDeltaY) > 0) {
-      if (realDeltaY > 0) {
-        let t = realDeltaY;
-        while (t > 0) {
-          const a = controller.getRowHeight(row + 1);
-          if (a > t) {
-            break;
-          }
-          t -= a;
-          row++;
-        }
-      } else {
-        let t = -realDeltaY;
-        while (t > 0) {
-          const a = controller.getRowHeight(row - 1);
-          if (a > t) {
-            break;
-          }
-          t -= a;
-          row--;
-        }
-      }
-    }
-    if (Math.abs(realDeltaX) > 0) {
-      if (realDeltaX > 0) {
-        let t = realDeltaX;
-        while (t > 0) {
-          const a = controller.getColWidth(col + 1);
-          if (a > t) {
-            break;
-          }
-          t -= a;
-          col++;
-        }
-      } else {
-        let t = -realDeltaX;
-        while (t > 0) {
-          const a = controller.getColWidth(col - 1);
-          if (a > t) {
-            break;
-          }
-          t -= a;
-          col--;
-        }
-      }
-    }
-    const scrollTop = top * maxScrollHeight / maxHeight;
-    const scrollLeft = left * maxScrollWidth / maxWidth;
-    controller.setScroll({
-      top,
-      left,
-      row,
-      col,
-      scrollLeft: Math.floor(scrollLeft),
-      scrollTop: Math.floor(scrollTop)
-    });
-  }
-  function registerEvents(stateValue, controller, canvas, resizeWindow) {
-    let lastTimeStamp = 0;
-    const inputDom = document.querySelector(
-      `#${FORMULA_EDITOR_ID}`
-    );
-    window.addEventListener("resize", () => {
-      resizeWindow();
-    });
-    window.addEventListener("keydown", function(event) {
-      if (event.code === "Enter") {
-        controller.setActiveCell(
-          stateValue.activeCell.row + 1,
-          stateValue.activeCell.col,
-          1,
-          1
-        );
-      } else if (event.code === "Tab") {
-        controller.setActiveCell(
-          stateValue.activeCell.row,
-          stateValue.activeCell.col + 1,
-          1,
-          1
-        );
-      }
-      if (event.ctrlKey || event.metaKey) {
-        if (event.code === "KeyC") {
-          controller.copy();
-          return;
-        }
-        if (event.code === "KeyX") {
-          controller.cut();
-          return;
-        }
-        if (event.code === "ArrowDown" || event.code === "ArrowUp") {
-          const viewSize = controller.getViewSize();
-          scrollBar(
-            controller,
-            canvas,
-            0,
-            event.code === "ArrowUp" ? -viewSize.height : viewSize.height
-          );
-          return;
-        }
-        if (event.code === "ArrowRight" || event.code === "ArrowLeft") {
-          const viewSize = controller.getViewSize();
-          scrollBar(
-            controller,
-            canvas,
-            event.code === "ArrowLeft" ? -viewSize.width : viewSize.width,
-            0
-          );
-          return;
-        }
-        return;
-      }
-      if (inputDom === event.target) {
-        return;
-      }
-      stateValue.isCellEditing = true;
-      inputDom.focus();
-    });
-    window.addEventListener(
-      "wheel",
-      debounce((event) => {
-        if (event.target !== canvas) {
-          return;
-        }
-        scrollBar(controller, canvas, event.deltaX, event.deltaY);
-      })
-    );
-    document.body.addEventListener("paste", function(event) {
-      event.stopPropagation();
-      event.preventDefault();
-      controller.paste(event);
-    });
-    canvas.addEventListener("mousedown", (event) => {
-      const headerSize = controller.getHeaderSize();
-      stateValue.contextMenuPosition = void 0;
-      const canvasRect = canvas.getBoundingClientRect();
-      const { timeStamp, clientX, clientY } = event;
-      const x = clientX - canvasRect.left;
-      const y = clientY - canvasRect.top;
-      const position = getHitInfo(event, controller, canvasRect);
-      if (!position) {
-        return;
-      }
-      if (headerSize.width > x && headerSize.height > y) {
-        controller.setActiveCell(0, 0, 0, 0);
-        return;
-      }
-      if (headerSize.width > x && headerSize.height <= y) {
-        const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-        controller.setActiveCell(
-          position.row,
-          position.col,
-          0,
-          sheetInfo.colCount
-        );
-        return;
-      }
-      if (headerSize.width <= x && headerSize.height > y) {
-        const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-        controller.setActiveCell(
-          position.row,
-          position.col,
-          sheetInfo.rowCount,
-          0
-        );
-        return;
-      }
-      const activeCell = controller.getActiveCell();
-      const check = activeCell.row >= 0 && activeCell.row === position.row && activeCell.col === position.col;
-      if (!check) {
-        controller.setActiveCell(position.row, position.col, 1, 1);
-      }
-      const delay = timeStamp - lastTimeStamp;
-      if (delay < DOUBLE_CLICK_TIME) {
-        stateValue.isCellEditing = true;
-      }
-      lastTimeStamp = timeStamp;
-    });
-    canvas.addEventListener("mousemove", (event) => {
-      const headerSize = controller.getHeaderSize();
-      const rect = canvas.getBoundingClientRect();
-      const { clientX, clientY } = event;
-      const x = clientX - rect.left;
-      const y = clientY - rect.top;
-      if (event.buttons === 1) {
-        if (x > headerSize.width && y > headerSize.height) {
-          const position = getHitInfo(event, controller, rect);
-          if (!position) {
-            return;
-          }
-          const activeCell = controller.getActiveCell();
-          if (activeCell.row === position.row && activeCell.col === position.col) {
-            return;
-          }
-          const colCount = Math.abs(position.col - activeCell.col) + 1;
-          const rowCount = Math.abs(position.row - activeCell.row) + 1;
-          controller.setActiveCell(
-            Math.min(position.row, activeCell.row),
-            Math.min(position.col, activeCell.col),
-            rowCount,
-            colCount
-          );
-        }
-      }
-    });
-    canvas.addEventListener("contextmenu", (event) => {
-      event.preventDefault();
-      stateValue.contextMenuPosition = {
-        top: event.clientY,
-        left: event.clientX,
-        width: 100,
-        height: 100
-      };
-      return false;
-    });
-  }
-
-  // src/canvas/Selection.ts
-  var Selection = class {
-    canvas;
-    ctx;
-    controller;
-    canvasSize = {
-      width: 0,
-      height: 0
-    };
-    constructor(controller, canvas) {
-      this.controller = controller;
-      this.canvas = canvas;
-      const ctx = this.canvas.getContext("2d");
-      this.ctx = ctx;
-      const size2 = dpr();
-      this.ctx.scale(size2, size2);
-    }
-    getCanvas() {
-      return this.canvas;
-    }
-    resize(width, height) {
-      this.canvasSize = {
-        width,
-        height
-      };
-      resizeCanvas(this.canvas, width, height);
-    }
-    clear() {
-      this.ctx.clearRect(
-        0,
-        0,
-        npx(this.canvasSize.width),
-        npx(this.canvasSize.height)
-      );
-    }
-    render() {
-      this.clear();
-      const { controller } = this;
-      const ranges = controller.getRanges();
-      const [range] = ranges;
-      if (isSheet(range)) {
-        return this.renderSelectAll();
-      }
-      if (isCol(range)) {
-        return this.renderSelectCol();
-      }
-      if (isRow(range)) {
-        return this.renderSelectRow();
-      }
-      return this.renderSelectRange();
-    }
-    renderHighlight(x, y, width, height) {
-      strokeRect(this.ctx, x, y, width, height);
-      return {
-        left: x,
-        top: y,
-        width,
-        height
-      };
-    }
-    renderActiveCell() {
-      const { controller } = this;
-      const cellData = controller.getCell(controller.getActiveCell());
-      const activeCell = controller.computeCellPosition(
-        cellData.row,
-        cellData.col
-      );
-      clearRect(
-        this.ctx,
-        activeCell.left,
-        activeCell.top,
-        activeCell.width,
-        activeCell.height
-      );
-      renderCell(
-        this.ctx,
-        { ...cellData, ...activeCell },
-        getStyle("lineHeight", this.canvas)
-      );
-    }
-    renderSelectRange() {
-      const { controller } = this;
-      const headerSize = controller.getHeaderSize();
-      const ranges = controller.getRanges();
-      const [range] = ranges;
-      const activeCell = controller.computeCellPosition(range.row, range.col);
-      const endCellRow = range.row + range.rowCount - 1;
-      const endCellCol = range.col + range.colCount - 1;
-      assert(endCellRow >= 0 && endCellCol >= 0);
-      const endCell = controller.computeCellPosition(endCellRow, endCellCol);
-      const width = endCell.left + endCell.width - activeCell.left;
-      const height = endCell.top + endCell.height - activeCell.top;
-      this.ctx.fillStyle = theme.selectionColor;
-      fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
-      fillRect(this.ctx, 0, activeCell.top, headerSize.width, height);
-      const check = range.rowCount > 1 || range.colCount > 1;
-      if (check) {
-        fillRect(this.ctx, activeCell.left, activeCell.top, width, height);
-      }
-      this.ctx.strokeStyle = theme.primaryColor;
-      this.ctx.lineWidth = dpr();
-      assert(width >= 0 && height >= 0);
-      const list = [
-        [activeCell.left, headerSize.height],
-        [activeCell.left + width, headerSize.height]
-      ];
-      list.push(
-        [headerSize.width, activeCell.top],
-        [headerSize.width, activeCell.top + height]
-      );
-      drawLines(this.ctx, list);
-      if (check) {
-        this.renderActiveCell();
-      }
-      return this.renderHighlight(activeCell.left, activeCell.top, width, height);
-    }
-    renderSelectAll() {
-      const { controller } = this;
-      this.ctx.fillStyle = theme.selectionColor;
-      fillRect(this.ctx, 0, 0, this.canvasSize.width, this.canvasSize.height);
-      const headerSize = controller.getHeaderSize();
-      this.ctx.strokeStyle = theme.primaryColor;
-      this.ctx.lineWidth = dpr();
-      this.renderActiveCell();
-      return this.renderHighlight(
-        headerSize.width,
-        headerSize.height,
-        this.canvasSize.width - headerSize.width,
-        this.canvasSize.height - headerSize.height
-      );
-    }
-    renderSelectCol() {
-      const { controller } = this;
-      const headerSize = controller.getHeaderSize();
-      const ranges = controller.getRanges();
-      const [range] = ranges;
-      this.ctx.fillStyle = theme.selectionColor;
-      const activeCell = controller.computeCellPosition(range.row, range.col);
-      fillRect(this.ctx, activeCell.left, 0, activeCell.width, headerSize.height);
-      fillRect(
-        this.ctx,
-        0,
-        activeCell.top,
-        headerSize.width,
-        this.canvasSize.height
-      );
-      fillRect(
-        this.ctx,
-        activeCell.left,
-        activeCell.top + activeCell.height,
-        activeCell.width,
-        this.canvasSize.height - activeCell.height
-      );
-      this.ctx.strokeStyle = theme.primaryColor;
-      this.ctx.lineWidth = dpr();
-      const list = [
-        [headerSize.width, headerSize.height],
-        [headerSize.width, this.canvasSize.height - headerSize.height]
-      ];
-      drawLines(this.ctx, list);
-      return this.renderHighlight(
-        activeCell.left,
-        activeCell.top,
-        activeCell.width,
-        this.canvasSize.height
-      );
-    }
-    renderSelectRow() {
-      const { controller } = this;
-      const headerSize = controller.getHeaderSize();
-      const ranges = controller.getRanges();
-      const [range] = ranges;
-      this.ctx.fillStyle = theme.selectionColor;
-      const activeCell = controller.computeCellPosition(range.row, range.col);
-      fillRect(
-        this.ctx,
-        activeCell.left,
-        0,
-        this.canvasSize.width,
-        headerSize.height
-      );
-      fillRect(this.ctx, 0, activeCell.top, headerSize.width, activeCell.height);
-      fillRect(
-        this.ctx,
-        activeCell.left + activeCell.width,
-        activeCell.top,
-        this.canvasSize.width - activeCell.width,
-        activeCell.height
-      );
-      this.ctx.strokeStyle = theme.primaryColor;
-      this.ctx.lineWidth = dpr();
-      const list = [
-        [activeCell.left, headerSize.height],
-        [this.canvasSize.width - headerSize.width, headerSize.height]
-      ];
-      drawLines(this.ctx, list);
-      return this.renderHighlight(
-        activeCell.left,
-        activeCell.top,
-        this.canvasSize.width,
-        activeCell.height
-      );
-    }
-  };
-
-  // src/canvas/constant.ts
-  var HEADER_STYLE = {
-    textAlign: "center",
-    textBaseline: "middle",
-    font: DEFAULT_FONT_CONFIG,
-    fillStyle: theme.black,
-    lineWidth: thinLineWidth(),
-    strokeStyle: theme.gridStrokeColor
-  };
-
-  // src/canvas/Content.ts
-  var Content = class {
-    canvas;
-    ctx;
-    controller;
-    canvasSize = {
-      width: 0,
-      height: 0
-    };
-    constructor(controller, canvas) {
-      this.controller = controller;
-      this.canvas = canvas;
-      const ctx = this.canvas.getContext("2d");
-      this.ctx = ctx;
-      const size2 = dpr();
-      this.ctx.scale(size2, size2);
-    }
-    getCanvas() {
-      return this.canvas;
-    }
-    resize(width, height) {
-      this.canvasSize = {
-        width,
-        height
-      };
-      resizeCanvas(this.canvas, width, height);
-    }
-    clear() {
-      this.ctx.clearRect(
-        0,
-        0,
-        npx(this.canvasSize.width),
-        npx(this.canvasSize.height)
-      );
-    }
-    render({ changeSet }) {
-      const { width, height } = this.canvasSize;
-      if (!changeSet.has("contentChange")) {
-        return {
-          top: 0,
-          left: 0,
-          width: 0,
-          height: 0
-        };
-      }
-      const headerSize = this.controller.getHeaderSize();
-      this.clear();
-      const contentWidth = width - headerSize.width;
-      const contentHeight = height - headerSize.height;
-      this.renderGrid(contentWidth, contentHeight);
-      this.renderRowsHeader(contentHeight);
-      this.renderColsHeader(contentWidth);
-      this.renderTriangle();
-      this.renderContent(width, height);
-      return {
-        top: 0,
-        left: 0,
-        width: 0,
-        height: 0
-      };
-    }
-    renderContent(width, height) {
-      const { controller } = this;
-      const data = controller.getCellsContent(controller.getCurrentSheetId());
-      if (isEmpty(data)) {
-        return;
-      }
-      this.ctx.save();
-      const { row: rowIndex, col: colIndex } = controller.getScroll();
-      for (const item of data) {
-        const { row, col } = item;
-        if (row < rowIndex || col < colIndex) {
-          continue;
-        }
-        const result = controller.computeCellPosition(row, col);
-        if (result.top > height || result.left > width) {
-          continue;
-        }
-        const cellInfo = this.controller.getCell(item);
-        const {
-          wrapHeight = 0,
-          fontSizeHeight = 0,
-          textWidth = 0
-        } = renderCell(
-          this.ctx,
-          {
-            ...cellInfo,
-            ...result
-          },
-          getStyle("lineHeight", this.canvas)
-        );
-        const t = Math.max(wrapHeight, fontSizeHeight);
-        if (t > result.height) {
-          controller.setRowHeight(row, t);
-        }
-        if (textWidth > result.width) {
-          controller.setColWidth(col, textWidth);
-        }
-      }
-      this.ctx.restore();
-    }
-    renderTriangle() {
-      if (isTestEnv()) {
-        return;
-      }
-      const headerSize = this.controller.getHeaderSize();
-      this.ctx.save();
-      this.ctx.fillStyle = theme.backgroundColor;
-      fillRect(this.ctx, 0, 0, headerSize.width, headerSize.height);
-      this.ctx.fillStyle = theme.triangleFillColor;
-      const offset = 2;
-      drawTriangle(
-        this.ctx,
-        [headerSize.width / 2 - offset, headerSize.height - offset],
-        [headerSize.width - offset, headerSize.height - offset],
-        [headerSize.width - offset, offset]
-      );
-      this.ctx.restore();
-    }
-    renderGrid(width, height) {
-      const { controller } = this;
-      const headerSize = controller.getHeaderSize();
-      const { row: rowIndex, col: colIndex } = controller.getScroll();
-      const { rowCount, colCount } = this.controller.getSheetInfo(
-        this.controller.getCurrentSheetId()
-      );
-      const lineWidth = thinLineWidth();
-      this.ctx.save();
-      this.ctx.fillStyle = theme.white;
-      this.ctx.lineWidth = lineWidth;
-      this.ctx.strokeStyle = theme.gridStrokeColor;
-      this.ctx.translate(npx(headerSize.width), npx(headerSize.height));
-      const pointList = [];
-      let y = 0;
-      let x = 0;
-      let maxX = 0;
-      for (let i = colIndex; i < colCount; i++) {
-        maxX += controller.getColWidth(i);
-        if (maxX > width) {
-          break;
-        }
-      }
-      const realWidth = Math.min(maxX, width);
-      for (let i = rowIndex; i < rowCount; i++) {
-        pointList.push([0, y], [realWidth, y]);
-        y += controller.getRowHeight(i);
-        if (y > height) {
-          break;
-        }
-      }
-      for (let i = colIndex; i < colCount; i++) {
-        pointList.push([x, 0], [x, y]);
-        x += controller.getColWidth(i);
-        if (x > realWidth) {
-          break;
-        }
-      }
-      pointList.push([0, y], [x, y]);
-      pointList.push([x, 0], [x, y]);
-      drawLines(this.ctx, pointList);
-      this.ctx.restore();
-    }
-    fillRowText(row, rowWidth, y) {
-      this.ctx.fillStyle = theme.black;
-      fillText(this.ctx, String(row), rowWidth / 2, y);
-    }
-    fillColText(colText, x, colHeight) {
-      this.ctx.fillStyle = theme.black;
-      fillText(this.ctx, colText, x, colHeight / 2 + dpr());
-    }
-    renderRowsHeader(height) {
-      const { controller } = this;
-      const { row: rowIndex } = controller.getScroll();
-      const headerSize = controller.getHeaderSize();
-      const { rowCount } = controller.getSheetInfo(
-        controller.getCurrentSheetId()
-      );
-      this.ctx.save();
-      this.ctx.fillStyle = theme.backgroundColor;
-      fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
-      Object.assign(this.ctx, HEADER_STYLE);
-      const pointList = [];
-      let y = headerSize.height;
-      let i = rowIndex;
-      for (; i < rowCount; i++) {
-        const rowHeight = controller.getRowHeight(i);
-        let temp = y;
-        if (i === rowIndex) {
-          temp += thinLineWidth() / 2;
-        }
-        pointList.push([0, temp], [headerSize.width, temp]);
-        this.fillRowText(i + 1, headerSize.width, temp + rowHeight / 2);
-        y += rowHeight;
-        if (y > height) {
-          break;
-        }
-      }
-      pointList.push([0, y], [headerSize.width, y]);
-      pointList.push([0, 0], [0, y]);
-      drawLines(this.ctx, pointList);
-      this.ctx.restore();
-    }
-    renderColsHeader(width) {
-      const { controller } = this;
-      const { col: colIndex } = controller.getScroll();
-      const headerSize = controller.getHeaderSize();
-      const { colCount } = controller.getSheetInfo(
-        controller.getCurrentSheetId()
-      );
-      const pointList = [];
-      this.ctx.save();
-      this.ctx.fillStyle = theme.backgroundColor;
-      fillRect(this.ctx, headerSize.width, 0, width, headerSize.height);
-      Object.assign(this.ctx, HEADER_STYLE);
-      let x = headerSize.width;
-      let i = colIndex;
-      for (; i < colCount; i++) {
-        const colWidth = controller.getColWidth(i);
-        let temp = x;
-        if (i === colIndex) {
-          temp += thinLineWidth() / 2;
-        }
-        pointList.push([temp, 0], [temp, headerSize.height]);
-        this.fillColText(
-          intToColumnName(i),
-          temp + colWidth / 2,
-          headerSize.height
-        );
-        x += colWidth;
-        if (x > width) {
-          break;
-        }
-      }
-      pointList.push([x, 0], [x, headerSize.height]);
-      pointList.push([0, 0], [x, 0]);
-      drawLines(this.ctx, pointList);
-      this.ctx.restore();
-    }
-  };
-
   // src/init.ts
   function initTheme(dom) {
     const keyList = Object.keys(theme);
@@ -5084,22 +5363,23 @@ var __export__ = (() => {
     });
     return list;
   }
-  function getStoreValue(controller, canvasTop) {
+  function getStoreValue(controller) {
+    const { top } = controller.getDomRect();
+    const { scrollLeft, scrollTop } = controller.getScroll();
     const cell = controller.getCell(controller.getActiveCell());
     const cellPosition = controller.computeCellPosition(cell.row, cell.col);
-    cellPosition.top = canvasTop + cellPosition.top;
-    const scroll = controller.getScroll();
+    cellPosition.top = top + cellPosition.top;
     const newStateValue = {
-      isCellEditing: false,
       canRedo: controller.canRedo(),
       canUndo: controller.canUndo(),
       sheetList: controller.getSheetList(),
       currentSheetId: controller.getCurrentSheetId(),
       cellPosition,
-      scrollLeft: scroll.scrollLeft,
-      scrollTop: scroll.scrollTop
+      scrollLeft,
+      scrollTop,
+      headerSize: controller.getHeaderSize(),
+      activeCell: cell
     };
-    newStateValue.activeCell = cell;
     return newStateValue;
   }
   function initCanvas(stateValue, controller) {
@@ -5114,20 +5394,25 @@ var __export__ = (() => {
     );
     const resize = () => {
       const size2 = canvas.parentElement.getBoundingClientRect();
-      mainCanvas.resize(size2.width, size2.height);
+      controller.setDomRect({
+        top: size2.top,
+        left: size2.left,
+        width: size2.width,
+        height: size2.height
+      });
+      mainCanvas.resize();
       mainCanvas.render({
         changeSet: /* @__PURE__ */ new Set(["contentChange"])
       });
     };
     resize();
     registerEvents(stateValue, controller, canvas, resize);
-    const canvasPosition = canvas.parentElement.getBoundingClientRect();
     controller.setHooks({
       copy,
       cut,
       paste,
       modelChange: (changeSet) => {
-        const newStateValue = getStoreValue(controller, canvasPosition.top);
+        const newStateValue = getStoreValue(controller);
         Object.assign(stateValue, newStateValue);
         mainCanvas.render({ changeSet });
         mainCanvas.render({
