@@ -6,7 +6,6 @@ import {
   registerEvents,
   Selection,
   Content,
-  computeScrollPosition,
 } from './canvas';
 import {
   FONT_FAMILY_LIST,
