@@ -1,8 +1,8 @@
-import { IBaseModel } from "./model";
-import { Coordinate, CellInfo, CanvasOverlayPosition } from "./components";
-import { IRange } from "./range";
-import { IScrollValue } from "./scroll";
-import { ChangeEventType, IWindowSize } from "./event";
+import { IBaseModel } from './model';
+import { Coordinate, CellInfo, CanvasOverlayPosition } from './components';
+import { IRange } from './range';
+import { IScrollValue } from './scroll';
+import { ChangeEventType, IWindowSize } from './event';
 
 export enum EBorderLineType {
   MEDIUM,
@@ -12,17 +12,10 @@ export enum EBorderLineType {
   DOUBLE,
 }
 
-export type DomRect = {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-};
-
 export type CanvasSize = {
   contentWidth: number;
   contentHeight: number;
-} & DomRect;
+} & CanvasOverlayPosition;
 
 export type ClipboardData = Record<ClipboardType, string>;
 
@@ -33,7 +26,7 @@ export type IHooks = {
   paste: () => Promise<ClipboardData>;
 };
 
-export type ClipboardType = "text/plain" | "text/html";
+export type ClipboardType = 'text/plain' | 'text/html';
 
 export interface IController extends IScrollValue, IBaseModel {
   getViewSize(): IWindowSize;
@@ -57,6 +50,6 @@ export interface IController extends IScrollValue, IBaseModel {
   copy(event?: ClipboardEvent): void;
   cut(event?: ClipboardEvent): void;
   getIsDrawAntLine(): boolean;
-  setDomRect(data: DomRect): void;
-  getDomRect(): DomRect;
+  setDomRect(data: CanvasOverlayPosition): void;
+  getDomRect(): CanvasOverlayPosition;
 }

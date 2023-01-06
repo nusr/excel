@@ -22,17 +22,12 @@ import type {
   ContentView,
   IController,
   EventType,
-  IWindowSize,
 } from "@/types";
 
 export class Content implements ContentView {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private controller: IController;
-  private canvasSize: IWindowSize = {
-    width: 0,
-    height: 0,
-  };
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
@@ -50,11 +45,12 @@ export class Content implements ContentView {
   }
 
   private clear() {
+    const { width, height } = this.controller.getDomRect();
     this.ctx.clearRect(
       0,
       0,
-      npx(this.canvasSize.width),
-      npx(this.canvasSize.height)
+      npx(width),
+      npx(height)
     );
   }
 

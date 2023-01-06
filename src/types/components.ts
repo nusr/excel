@@ -1,4 +1,5 @@
 import { QueryCellResult, WorkBookJSON } from './model';
+import { IWindowSize } from './event';
 export type OptionItem = {
   value: string | number;
   label: string;
@@ -19,13 +20,13 @@ export interface Coordinate {
 export type CellInfo = QueryCellResult & Coordinate;
 
 export type ScrollValue = {
-  left: number; // 
+  left: number;
   top: number;
   row: number;
   col: number;
   scrollLeft: number;
   scrollTop: number;
-}
+};
 
 export interface StoreValue {
   sheetList: WorkBookJSON['workbook'];
@@ -39,6 +40,14 @@ export interface StoreValue {
   contextMenuPosition?: CanvasOverlayPosition;
   scrollTop: number;
   scrollLeft: number;
+  headerSize: IWindowSize;
+  scrollStatus: ScrollStatus,
 }
 
 export type Point = [x: number, y: number];
+
+export enum ScrollStatus {
+  NONE = 0,
+  VERTICAL,
+  HORIZONTAL,
+}

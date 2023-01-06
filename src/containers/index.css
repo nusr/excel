@@ -34,7 +34,7 @@
   align-items: center;
 }
 
-.toolbar-wrapper>* {
+.toolbar-wrapper > * {
   margin-right: 8px;
 }
 
@@ -145,7 +145,7 @@
   top: 0;
   background-color: var(--white);
   box-sizing: content-box;
-  padding: 0 4px;
+  padding: 0 5px;
   border: 1px solid #ccc;
   border-top-color: var(--white);
 }
@@ -164,7 +164,7 @@
   left: 0;
   bottom: 0;
   box-sizing: content-box;
-  padding: 4px 0;
+  padding: 5px 0;
   border: 1px solid #ccc;
   border-left-color: var(--white);
   background-color: var(--white);
@@ -182,7 +182,6 @@
 .vertical-scroll-bar-content:hover {
   background-color: rgba(0, 0, 0, 0.2);
 }
-
 .sheet-bar-add {
   margin-left: var(--mediumPadding);
-}
+}

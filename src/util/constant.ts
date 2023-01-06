@@ -1,11 +1,10 @@
-import type { ErrorTypes, StoreValue } from '@/types';
+import { ErrorTypes, StoreValue, ScrollStatus } from '@/types';
 export const SHEET_NAME_PREFIX = 'Sheet';
 export const STYLE_ID_PREFIX = 'style';
 export const DEFAULT_ROW_COUNT = 200;
 export const DEFAULT_COL_COUNT = 30;
 export const MAIN_CANVAS_ID = 'main-canvas-id';
 export const FORMULA_EDITOR_ID = 'formula-editor';
-export const DOUBLE_CLICK_TIME = 300;
 export const TEST_ID_KEY = 'data-test-id';
 export const SCROLL_SIZE = 30;
 export const BOTTOM_BUFF = 200;
@@ -122,4 +121,9 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
   contextMenuPosition: undefined,
   scrollLeft: 0,
   scrollTop: 0,
+  headerSize: {
+    width: 0,
+    height: 0,
+  },
+  scrollStatus: ScrollStatus.NONE,
 };

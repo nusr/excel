@@ -13,10 +13,10 @@ export function thinLineWidth(): number {
 export function resizeCanvas(
   canvas: HTMLCanvasElement,
   width: number,
-  height: number,
+  height: number
 ): void {
-  canvas.style.width = width + 'px';
-  canvas.style.height = height + 'px';
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
   const realWidth = npx(width);
   const realHeight = npx(height);
   canvas.width = realWidth;
@@ -24,8 +24,12 @@ export function resizeCanvas(
 }
 
 export function createCanvas() {
-  const canvas = document.createElement('canvas');
-  canvas.style.display = 'none';
+  const canvas = document.createElement("canvas");
+  canvas.style.display = "none";
   document.body.appendChild(canvas);
   return canvas;
+}
+
+export function isMac() {
+  return navigator.userAgent.indexOf("Mac OS X") > -1;
 }

@@ -14,17 +14,16 @@ import {
   ScrollValue,
   IRange,
   ResultType,
-  DomRect,
-} from "@/types";
-import { parseReference, controllerLog, Range, assert, isEmpty } from "@/util";
+} from '@/types';
+import { parseReference, controllerLog, Range, assert, isEmpty } from '@/util';
 
 const DEFAULT_ACTIVE_CELL = { row: 0, col: 0 };
 const CELL_HEIGHT = 20;
 const CELL_WIDTH = 68;
 const ROW_TITLE_HEIGHT = 20;
 const COL_TITLE_WIDTH = 34;
-const PLAIN_TEXT = "text/plain";
-const HTML_TEXT = "text/html";
+const PLAIN_TEXT = 'text/plain';
+const HTML_TEXT = 'text/html';
 
 const defaultScrollValue: ScrollValue = {
   top: 0,
@@ -45,30 +44,34 @@ export class Controller implements IController {
   private hooks: IHooks = {
     modelChange() {},
     async cut() {
-      return "";
+      return '';
     },
     async copy() {
-      return "";
+      return '';
     },
     async paste() {
       return {
-        "text/html": "",
-        "text/plain": "",
+        'text/html': '',
+        'text/plain': '',
       };
     },
   };
-  private domRect: DomRect = {
+  private domRect: CanvasOverlayPosition = {
     top: 0,
     left: 0,
     width: 0,
     height: 0,
-  }
+  };
   private history: IHistory;
   private readonly rowMap: Map<number, number> = new Map([]);
   private readonly colMap: Map<number, number> = new Map([]);
   private viewSize = {
     width: 0,
     height: 0,
+  };
+  private headerSize = {
+    width: COL_TITLE_WIDTH,
+    height: ROW_TITLE_HEIGHT,
   };
   constructor(model: IModel, history: IHistory) {
     this.model = model;
@@ -78,7 +81,7 @@ export class Controller implements IController {
         DEFAULT_ACTIVE_CELL.col,
         1,
         1,
-        this.getCurrentSheetId()
+        this.getCurrentSheetId(),
       ),
     ];
     this.history = history;
@@ -86,7 +89,7 @@ export class Controller implements IController {
   getCurrentSheetId(): string {
     return this.model.getCurrentSheetId();
   }
-  getSheetList(): WorkBookJSON["workbook"] {
+  getSheetList(): WorkBookJSON['workbook'] {
     return this.model.getSheetList();
   }
   getCellsContent(sheetId: string): Coordinate[] {
@@ -102,7 +105,7 @@ export class Controller implements IController {
     this.hooks = hooks;
   }
   private emitChange(recordHistory = true): void {
-    controllerLog("emitChange", this.changeSet);
+    controllerLog('emitChange', this.changeSet);
     if (recordHistory) {
       this.history.onChange(this.toJSON());
     }
@@ -123,13 +126,22 @@ export class Controller implements IController {
     row: number,
     col: number,
     rowCount: number,
-    colCount: number
+    colCount: number,
   ): void {
-    this.changeSet.add("selectionChange");
+    const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
+    if (
+      row < 0 ||
+      col < 0 ||
+      row >= sheetInfo.rowCount ||
+      col >= sheetInfo.colCount
+    ) {
+      return;
+    }
     this.model.setActiveCell(row, col, rowCount, colCount);
     this.ranges = [
       new Range(row, col, rowCount, colCount, this.getCurrentSheetId()),
     ];
+    this.changeSet.add('selectionChange');
     this.emitChange();
   }
   setCurrentSheetId(id: string): void {
@@ -139,7 +151,7 @@ export class Controller implements IController {
     this.model.setCurrentSheetId(id);
     const pos = this.getActiveCell();
     this.setActiveCell(pos.row, pos.col, 1, 1);
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
     this.computeViewSize();
     this.emitChange();
   }
@@ -157,11 +169,11 @@ export class Controller implements IController {
     });
   }
   fromJSON(json: WorkBookJSON): void {
-    controllerLog("loadJSON", json);
+    controllerLog('loadJSON', json);
     this.model.fromJSON(json);
     this.model.setActiveCell(0, 0, 1, 1);
     this.computeViewSize();
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
     this.emitChange(false);
   }
   toJSON(): WorkBookJSON {
@@ -169,9 +181,9 @@ export class Controller implements IController {
   }
 
   setCellValues(value: string[][], ranges: IRange[]): void {
-    controllerLog("setCellValue", value);
+    controllerLog('setCellValue', value);
     this.model.setCellValues(value, ranges);
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
     this.emitChange();
   }
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
@@ -179,7 +191,7 @@ export class Controller implements IController {
       return;
     }
     this.model.setCellStyle(style, ranges);
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
     this.emitChange();
   }
   getCell = (data: Coordinate): CellInfo => {
@@ -218,7 +230,7 @@ export class Controller implements IController {
   setColWidth(col: number, width: number): void {
     this.colMap.set(col, width);
     this.computeViewSize();
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
   }
   getRowHeight(row: number): number {
     return this.rowMap.get(row) || CELL_HEIGHT;
@@ -226,7 +238,7 @@ export class Controller implements IController {
   setRowHeight(row: number, height: number) {
     this.rowMap.set(row, height);
     this.computeViewSize();
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
   }
   private computeViewSize() {
     const headerSize = this.getHeaderSize();
@@ -254,8 +266,7 @@ export class Controller implements IController {
   }
   getHeaderSize() {
     return {
-      width: COL_TITLE_WIDTH,
-      height: ROW_TITLE_HEIGHT,
+      ...this.headerSize,
     };
   }
   computeCellPosition(row: number, col: number): CanvasOverlayPosition {
@@ -279,22 +290,22 @@ export class Controller implements IController {
 
   addRow(rowIndex: number, count: number): void {
     this.model.addRow(rowIndex, count);
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
     this.emitChange();
   }
   addCol(colIndex: number, count: number): void {
     this.model.addCol(colIndex, count);
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
     this.emitChange();
   }
   deleteCol(colIndex: number, count: number): void {
     this.model.deleteCol(colIndex, count);
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
     this.emitChange();
   }
   deleteRow(rowIndex: number, count: number): void {
     this.model.deleteRow(rowIndex, count);
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
     this.emitChange();
   }
   getChangeSet(): Set<ChangeEventType> {
@@ -313,21 +324,32 @@ export class Controller implements IController {
     this.scrollValue[sheetId] = {
       ...data,
     };
-    this.changeSet.add("contentChange");
+    if (data.row > 9999) {
+      this.headerSize = {
+        width: Math.floor(COL_TITLE_WIDTH * 2),
+        height: ROW_TITLE_HEIGHT,
+      };
+    } else {
+      this.headerSize = {
+        width: COL_TITLE_WIDTH,
+        height: ROW_TITLE_HEIGHT,
+      };
+    }
+    this.changeSet.add('contentChange');
     this.emitChange();
   }
   private parseText(text: string) {
     let list: string[][];
-    if (text.indexOf("\r\n") > -1) {
+    if (text.indexOf('\r\n') > -1) {
       list = text
-        .split("\r\n")
+        .split('\r\n')
         .map((item) => item)
-        .map((item) => item.split("\t"));
+        .map((item) => item.split('\t'));
     } else {
       list = text
-        .split("\n")
+        .split('\n')
         .map((item) => item)
-        .map((item) => item.split("\t"));
+        .map((item) => item.split('\t'));
     }
     if (list[0].length !== list[list.length - 1].length) {
       // delete last empty cell
@@ -345,7 +367,7 @@ export class Controller implements IController {
     }
     const activeCell = this.getActiveCell();
     this.model.setCellValues(list, this.ranges);
-    this.changeSet.add("contentChange");
+    this.changeSet.add('contentChange');
     this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
   }
   async paste(event?: ClipboardEvent) {
@@ -354,7 +376,7 @@ export class Controller implements IController {
       const [range] = this.cutRanges;
       const result: string[][] = [];
       for (let i = 0; i < range.rowCount; i++) {
-        result.push(new Array(range.colCount).fill(""));
+        result.push(new Array(range.colCount).fill(''));
       }
       // clear cut data
       this.model.setCellValues(result, this.cutRanges);
@@ -363,7 +385,7 @@ export class Controller implements IController {
       const data = await this.hooks.paste();
       this.parseText(data[PLAIN_TEXT]);
     } else {
-      const text = event.clipboardData?.getData(PLAIN_TEXT) || "";
+      const text = event.clipboardData?.getData(PLAIN_TEXT) || '';
       // TODO: parse html
       this.parseText(text);
     }
@@ -371,8 +393,8 @@ export class Controller implements IController {
       this.cutRanges = [];
       // clear clipboard
       this.hooks.copy({
-        [PLAIN_TEXT]: "",
-        [HTML_TEXT]: "",
+        [PLAIN_TEXT]: '',
+        [HTML_TEXT]: '',
       });
     }
   }
@@ -384,11 +406,11 @@ export class Controller implements IController {
       const temp: ResultType[] = [];
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
         const t = this.model.queryCell(r, c);
-        temp.push(t.value || "");
+        temp.push(t.value || '');
       }
       result.push(temp);
     }
-    const text = result.map((item) => item.join("\t")).join("\r\n") + "\r\n";
+    const text = result.map((item) => item.join('\t')).join('\r\n') + '\r\n';
     return text;
   }
   copy(event?: ClipboardEvent): void {
@@ -396,14 +418,14 @@ export class Controller implements IController {
     const text = this.getCopyData();
     if (event) {
       event.clipboardData?.setData(PLAIN_TEXT, text);
-      event.clipboardData?.setData(HTML_TEXT, "");
+      event.clipboardData?.setData(HTML_TEXT, '');
     } else {
       this.hooks.copy({
         [PLAIN_TEXT]: text,
-        [HTML_TEXT]: "",
+        [HTML_TEXT]: '',
       });
     }
-    this.changeSet.add("selectionChange");
+    this.changeSet.add('selectionChange');
     this.emitChange();
   }
   cut(event?: ClipboardEvent) {
@@ -412,27 +434,27 @@ export class Controller implements IController {
     this.cutRanges = this.ranges.slice();
     if (event) {
       event.clipboardData?.setData(PLAIN_TEXT, text);
-      event.clipboardData?.setData(HTML_TEXT, "");
+      event.clipboardData?.setData(HTML_TEXT, '');
     } else {
       this.hooks.copy({
         [PLAIN_TEXT]: text,
-        [HTML_TEXT]: "",
+        [HTML_TEXT]: '',
       });
     }
-    this.changeSet.add("selectionChange");
+    this.changeSet.add('selectionChange');
     this.emitChange();
   }
   getIsDrawAntLine() {
     return this.isDrawAntLine;
   }
-  setDomRect(data: DomRect): void {
+  setDomRect(data: CanvasOverlayPosition): void {
     this.domRect = {
       ...data,
-    }
+    };
   }
-  getDomRect(): DomRect {
+  getDomRect(): CanvasOverlayPosition {
     return {
       ...this.domRect,
-    }
+    };
   }
 }

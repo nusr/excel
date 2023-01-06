@@ -1,4 +1,5 @@
 export { MainCanvas } from "./Main";
-export { registerEvents, computeRowAndCol } from "./event";
+export { registerEvents } from "./event";
+export { computeScrollRowAndCol, computeScrollPosition } from './shortcut';
 export { Selection } from "./Selection";
 export { Content } from "./Content";

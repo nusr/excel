@@ -1,22 +1,15 @@
 import { h, SmartComponent } from '@/react';
-import { IController } from '@/types';
-import { MAIN_CANVAS_ID, SCROLL_SIZE, BOTTOM_BUFF } from '@/util';
-import { computeRowAndCol } from '@/canvas';
+import { IController, ScrollStatus } from '@/types';
+import { MAIN_CANVAS_ID, SCROLL_SIZE } from '@/util';
+import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
 
 function scrollBar(controller: IController, scrollX: number, scrollY: number) {
-  const headerSize = controller.getHeaderSize();
-  const domRect = controller.getDomRect();
-  const viewSize = controller.getViewSize();
   const oldScroll = controller.getScroll();
+  const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } =
+    computeScrollPosition(controller, oldScroll.left, oldScroll.top);
 
-  const maxHeight = viewSize.height - domRect.height + BOTTOM_BUFF;
-  const maxWidth = viewSize.width - domRect.width + BOTTOM_BUFF;
-
-  const maxScrollHeight =
-    domRect.height - headerSize.height - SCROLL_SIZE * 1.5;
-  const maxScrollWidth = domRect.width - headerSize.width - SCROLL_SIZE * 1.5;
-  let scrollTop = oldScroll.scrollTop + scrollY;
-  let scrollLeft = oldScroll.scrollLeft + scrollX;
+  let scrollTop = oldScroll.scrollTop + Math.ceil(scrollY);
+  let scrollLeft = oldScroll.scrollLeft + Math.ceil(scrollX);
   if (scrollTop < 0) {
     scrollTop = 0;
   } else if (scrollTop > maxScrollHeight) {
@@ -29,32 +22,31 @@ function scrollBar(controller: IController, scrollX: number, scrollY: number) {
   }
   const top = Math.floor((maxHeight * scrollTop) / maxScrollHeight);
   const left = Math.floor((maxWidth * scrollLeft) / maxScrollWidth);
-  const result = computeRowAndCol(controller, left, top);
+  const { row, col } = computeScrollRowAndCol(controller, left, top);
   controller.setScroll({
-    ...result,
+    top,
+    left,
+    row,
+    col,
     scrollLeft,
     scrollTop,
   });
 }
-
-enum DragStatus {
-  NONE = 0,
-  VERTICAL,
-  HORIZONTAL,
-}
-
-let dragStatus = DragStatus.NONE;
 let prevPageY = 0;
 let prevPageX = 0;
+let scrollStatus = ScrollStatus.NONE;
 export const CanvasContainer: SmartComponent = (state, controller) => {
-  const headerSize = controller.getHeaderSize();
+  const { headerSize } = state;
+
   function handleDrag(event: MouseEvent) {
-    if (dragStatus === DragStatus.VERTICAL) {
+    event.stopPropagation();
+    console.log(event);
+    if (scrollStatus === ScrollStatus.VERTICAL) {
       if (prevPageY) {
         scrollBar(controller, 0, event.pageY - prevPageY);
       }
       prevPageY = event.pageY;
-    } else if (dragStatus === DragStatus.HORIZONTAL) {
+    } else if (scrollStatus === ScrollStatus.HORIZONTAL) {
       if (prevPageX) {
         scrollBar(controller, event.pageX - prevPageX, 0);
       }
@@ -62,7 +54,7 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
     }
   }
   function handleDragEnd() {
-    dragStatus = DragStatus.NONE;
+    scrollStatus = ScrollStatus.NONE;
     prevPageY = 0;
     prevPageX = 0;
     tearDown();
@@ -94,19 +86,19 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
         onmouseleave() {
           handleDragEnd();
         },
+        onmousedown() {
+          if (scrollStatus) {
+            return;
+          }
+          scrollStatus = ScrollStatus.VERTICAL;
+          register();
+        },
       },
       h('div', {
         className: 'vertical-scroll-bar-content',
         style: {
           height: SCROLL_SIZE,
           transform: `translateY(${state.scrollTop}px)`,
-        },
-        onmousedown() {
-          if (dragStatus) {
-            return;
-          }
-          dragStatus = DragStatus.VERTICAL;
-          register();
         },
       }),
     ),
@@ -120,19 +112,19 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
         onmouseleave() {
           handleDragEnd();
         },
+        onmousedown() {
+          if (scrollStatus) {
+            return;
+          }
+          scrollStatus = ScrollStatus.HORIZONTAL;
+          register();
+        },
       },
       h('div', {
         className: 'horizontal-scroll-bar-content',
         style: {
           width: SCROLL_SIZE,
           transform: `translateX(${state.scrollLeft}px)`,
-        },
-        onmousedown() {
-          if (dragStatus) {
-            return;
-          }
-          dragStatus = DragStatus.HORIZONTAL;
-          register();
         },
       }),
     ),

@@ -1,11 +1,6 @@
-import { StoreValue, IController } from '@/types';
-import {
-  FORMULA_EDITOR_ID,
-  DOUBLE_CLICK_TIME,
-  SCROLL_SIZE,
-  debounce,
-  BOTTOM_BUFF,
-} from '@/util';
+import { StoreValue, IController, KeyboardEventItem } from '@/types';
+import { FORMULA_EDITOR_ID, debounce } from '@/util';
+import { keyboardEventList, scrollBar } from './shortcut';
 
 interface IHitInfo {
   width: number;
@@ -48,171 +43,45 @@ function getHitInfo(
   return { ...cellSize, row, col, pageY, pageX, x, y };
 }
 
-export function computeRowAndCol(
-  controller: IController,
-  left: number,
-  top: number,
-) {
-  const oldScroll = controller.getScroll();
-  // const canvasRect = controller.getDomRect();
-  // const viewSize = controller.getViewSize();
-  // const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
-  // const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-
-  const realDeltaY = top - oldScroll.top;
-  const realDeltaX = left - oldScroll.left;
-  let { row, col } = oldScroll;
-
-  if (Math.abs(realDeltaY) > 0) {
-    if (realDeltaY > 0) {
-      let t = realDeltaY;
-      while (t > 0) {
-        const a = controller.getRowHeight(row + 1);
-        if (a > t) {
-          break;
-        }
-        t -= a;
-        row++;
-      }
-    } else {
-      let t = -realDeltaY;
-      while (t > 0) {
-        const a = controller.getRowHeight(row - 1);
-        if (a > t) {
-          break;
-        }
-        t -= a;
-        row--;
-      }
-    }
-  }
-  if (Math.abs(realDeltaX) > 0) {
-    if (realDeltaX > 0) {
-      let t = realDeltaX;
-      while (t > 0) {
-        const a = controller.getColWidth(col + 1);
-        if (a > t) {
-          break;
-        }
-        t -= a;
-        col++;
-      }
-    } else {
-      let t = -realDeltaX;
-      while (t > 0) {
-        const a = controller.getColWidth(col - 1);
-        if (a > t) {
-          break;
-        }
-        t -= a;
-        col--;
-      }
-    }
-  }
-  if (top === 0) {
-    row = 0;
-  }
-  if (left === 0) {
-    col = 0;
-  }
-  return {
-    row,
-    col,
-    left,
-    top,
-  };
-}
-
-function scrollBar(controller: IController, scrollX: number, scrollY: number) {
-  const headerSize = controller.getHeaderSize();
-  const canvasRect = controller.getDomRect();
-  const viewSize = controller.getViewSize();
-  const oldScroll = controller.getScroll();
-
-  const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
-  const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-
-  const maxScrollHeight =
-    canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
-  const maxScrollWidth =
-    canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
-  let top = oldScroll.top + scrollY;
-  if (top < 0) {
-    top = 0;
-  } else if (top > maxHeight) {
-    top = maxHeight;
-  }
-
-  let left = oldScroll.left + scrollX;
-  if (left < 0) {
-    left = 0;
-  } else if (left > maxWidth) {
-    left = maxWidth;
-  }
-  const result = computeRowAndCol(controller, left, top);
-
-  const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
-  const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
-  controller.setScroll({
-    ...result,
-    scrollLeft,
-    scrollTop,
-  });
-}
-
 export function registerEvents(
   stateValue: StoreValue,
   controller: IController,
   canvas: HTMLCanvasElement,
   resizeWindow: () => void,
 ): void {
-  let lastTimeStamp = 0;
+  let isClick = false;
   const inputDom = document.querySelector<HTMLInputElement>(
     `#${FORMULA_EDITOR_ID}`,
   )!;
-  window.addEventListener('resize', () => {
+  window.addEventListener('resize', function () {
     resizeWindow();
   });
   window.addEventListener('keydown', function (event) {
-    if (event.code === 'Enter') {
-      controller.setActiveCell(
-        stateValue.activeCell.row + 1,
-        stateValue.activeCell.col,
-        1,
-        1,
-      );
-    } else if (event.code === 'Tab') {
-      controller.setActiveCell(
-        stateValue.activeCell.row,
-        stateValue.activeCell.col + 1,
-        1,
-        1,
-      );
+    const list = keyboardEventList.filter((v) => v.key === event.key);
+    list.sort((a, b) => b.modifierKey.length - a.modifierKey.length);
+    let temp: KeyboardEventItem | null = null;
+    for (const item of list) {
+      if (item.modifierKey.length > 0) {
+        if (item.modifierKey.some((v) => event[`${v}Key`])) {
+          temp = item;
+          break;
+        }
+      } else {
+        temp = item;
+        break;
+      }
     }
-    if (event.ctrlKey || event.metaKey) {
-      if (event.code === 'ArrowDown' || event.code === 'ArrowUp') {
-        const viewSize = controller.getViewSize();
-        scrollBar(
-          controller,
-          0,
-          event.code === 'ArrowUp' ? -viewSize.height : viewSize.height,
-        );
-        return;
-      }
-      if (event.code === 'ArrowRight' || event.code === 'ArrowLeft') {
-        const viewSize = controller.getViewSize();
-        scrollBar(
-          controller,
-          event.code === 'ArrowLeft' ? -viewSize.width : viewSize.width,
-          0,
-        );
-        return;
-      }
+    if (temp) {
+      temp.handler(controller);
+      return;
+    }
+    if (event.metaKey || event.ctrlKey) {
       return;
     }
     if (inputDom === event.target) {
       return;
     }
+    console.log(event.key);
 
     stateValue.isCellEditing = true;
     inputDom.focus();
@@ -220,7 +89,7 @@ export function registerEvents(
 
   window.addEventListener(
     'wheel',
-    debounce((event: WheelEvent) => {
+    debounce(function (event: WheelEvent) {
       if (event.target !== canvas) {
         return;
       }
@@ -240,11 +109,12 @@ export function registerEvents(
     controller.cut(event);
   });
 
-  canvas.addEventListener('mousedown', (event) => {
-    const headerSize = controller.getHeaderSize();
+  canvas.addEventListener('click', function (event) {
+    isClick = true;
     stateValue.contextMenuPosition = undefined;
+    const headerSize = controller.getHeaderSize();
     const canvasRect = controller.getDomRect();
-    const { timeStamp, clientX, clientY } = event;
+    const { clientX, clientY } = event;
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;
     const position = getHitInfo(event, controller);
@@ -283,14 +153,19 @@ export function registerEvents(
     if (!check) {
       controller.setActiveCell(position.row, position.col, 1, 1);
     }
-    const delay = timeStamp - lastTimeStamp;
-    if (delay < DOUBLE_CLICK_TIME) {
-      stateValue.isCellEditing = true;
-    }
-    lastTimeStamp = timeStamp;
+
+    isClick = false;
+  });
+  canvas.addEventListener('dblclick', function () {
+    isClick = true;
+    stateValue.isCellEditing = true;
+    isClick = false;
   });
 
-  canvas.addEventListener('mousemove', (event) => {
+  canvas.addEventListener('mousemove', function (event) {
+    if (!isClick) {
+      return;
+    }
     const headerSize = controller.getHeaderSize();
     const rect = controller.getDomRect();
     const { clientX, clientY } = event;
@@ -320,7 +195,7 @@ export function registerEvents(
       }
     }
   });
-  canvas.addEventListener('contextmenu', (event) => {
+  canvas.addEventListener('contextmenu', function (event) {
     event.preventDefault();
     stateValue.contextMenuPosition = {
       top: event.clientY,
