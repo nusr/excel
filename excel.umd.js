@@ -652,6 +652,107 @@ var __export__ = (() => {
       };
     }
   }
+  function generateHTML(style, content) {
+    return `<html
+  xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns="http://www.w3.org/TR/REC-html40"
+>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="ProgId" content="Excel.Sheet" />
+    <meta name="Generator" content="Microsoft Excel 15" />
+    <style>
+       {
+        mso-displayed-decimal-separator: '.';
+        mso-displayed-thousand-separator: ',';
+      }
+      @page {
+        margin: 0.75in 0.7in 0.75in 0.7in;
+        mso-header-margin: 0.3in;
+        mso-footer-margin: 0.3in;
+      }
+      .font5 {
+        color: windowtext;
+        font-size: 9pt;
+        font-weight: 400;
+        font-style: normal;
+        text-decoration: none;
+        font-family: \u7B49\u7EBF;
+        mso-generic-font-family: auto;
+        mso-font-charset: 134;
+      }
+      tr {
+        mso-height-source: auto;
+        mso-ruby-visibility: none;
+      }
+      col {
+        mso-width-source: auto;
+        mso-ruby-visibility: none;
+      }
+      br {
+        mso-data-placement: same-cell;
+      }
+      td {
+        padding-top: 1px;
+        padding-right: 1px;
+        padding-left: 1px;
+        mso-ignore: padding;
+        color: black;
+        font-size: 11pt;
+        font-weight: 400;
+        font-style: normal;
+        text-decoration: none;
+        font-family: \u7B49\u7EBF;
+        mso-generic-font-family: auto;
+        mso-font-charset: 134;
+        mso-number-format: General;
+        text-align: general;
+        vertical-align: middle;
+        border: none;
+        mso-background-source: auto;
+        mso-pattern: auto;
+        mso-protection: locked visible;
+        white-space: nowrap;
+        mso-rotate: 0;
+      }
+      ${style}
+      ruby {
+        ruby-align: left;
+      }
+      rt {
+        color: windowtext;
+        font-size: 9pt;
+        font-weight: 400;
+        font-style: normal;
+        text-decoration: none;
+        font-family: \u7B49\u7EBF;
+        mso-generic-font-family: auto;
+        mso-font-charset: 134;
+        mso-char-type: none;
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body link="#0563C1" vlink="#954F72">
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      width="103"
+      style="border-collapse: collapse; width: 77pt"
+    >
+      <col
+        width="103"
+        style="mso-width-source: userset; mso-width-alt: 3515; width: 77pt"
+      />
+      ${content}
+    </table>
+  </body>
+</html>`;
+  }
 
   // src/util/lodash.ts
   function debounce(fn) {
@@ -1611,13 +1712,58 @@ var __export__ = (() => {
   }
 
   // src/canvas/Main.ts
+  function computeRangePosition(controller) {
+    const ranges = controller.getCopyRanges();
+    if (ranges.length === 0) {
+      return null;
+    }
+    const [range] = ranges;
+    let result;
+    const { width, height } = controller.getDomRect();
+    const headerSize = controller.getHeaderSize();
+    const activeCell = controller.computeCellPosition(range.row, range.col);
+    if (isSheet(range)) {
+      result = {
+        left: headerSize.width,
+        top: headerSize.height,
+        width: width - headerSize.width,
+        height: height - headerSize.height
+      };
+    } else if (isCol(range)) {
+      result = {
+        left: activeCell.left,
+        top: activeCell.top,
+        width: activeCell.width,
+        height
+      };
+    } else if (isRow(range)) {
+      result = {
+        left: activeCell.left,
+        top: activeCell.top,
+        width,
+        height: activeCell.height
+      };
+    } else {
+      const endCellRow = range.row + range.rowCount - 1;
+      const endCellCol = range.col + range.colCount - 1;
+      const endCell = controller.computeCellPosition(endCellRow, endCellCol);
+      const width2 = endCell.left + endCell.width - activeCell.left;
+      const height2 = endCell.top + endCell.height - activeCell.top;
+      result = {
+        left: activeCell.left,
+        top: activeCell.top,
+        width: width2,
+        height: height2
+      };
+    }
+    return result;
+  }
   var MainCanvas = class {
     ctx;
     content;
     selection;
     canvas;
     controller;
-    antLine = null;
     constructor(canvas, controller, content, selection) {
       this.canvas = canvas;
       this.controller = controller;
@@ -1638,44 +1784,30 @@ var __export__ = (() => {
     }
     clear() {
       const { width, height } = this.controller.getDomRect();
-      this.ctx.clearRect(
-        0,
-        0,
-        npx(width),
-        npx(height)
-      );
+      this.ctx.clearRect(0, 0, npx(width), npx(height));
     }
     render = (params) => {
       if (params.changeSet.size === 0) {
-        return {
-          top: 0,
-          left: 0,
-          width: 0,
-          height: 0
-        };
+        return;
       }
       this.content.render(params);
-      const result = this.selection.render(params);
-      if (this.controller.getIsDrawAntLine()) {
-        if (this.antLine === null) {
-          this.antLine = result;
-        }
-      } else {
-        this.antLine = null;
-      }
+      this.selection.render(params);
       this.clear();
       this.ctx.drawImage(this.content.getCanvas(), 0, 0);
       this.ctx.drawImage(this.selection.getCanvas(), 0, 0);
-      if (this.antLine) {
+      const position = computeRangePosition(this.controller);
+      if (position) {
+        this.ctx.strokeStyle = theme.primaryColor;
+        this.ctx.lineWidth = dpr();
         drawAntLine(
           this.ctx,
-          this.antLine.left,
-          this.antLine.top,
-          this.antLine.width,
-          this.antLine.height
+          position.left,
+          position.top,
+          position.width,
+          position.height
         );
       }
-      return result;
+      return;
     };
   };
 
@@ -2105,30 +2237,27 @@ var __export__ = (() => {
       const { width, height } = this.controller.getDomRect();
       this.ctx.clearRect(0, 0, npx(width), npx(height));
     }
-    render() {
+    render({ changeSet }) {
+      if (changeSet.size === 0) {
+        return;
+      }
       this.clear();
       const { controller } = this;
       const ranges = controller.getRanges();
       const [range] = ranges;
       if (isSheet(range)) {
-        return this.renderSelectAll();
+        this.renderSelectAll();
+        return;
       }
       if (isCol(range)) {
-        return this.renderSelectCol();
+        this.renderSelectCol();
+        return;
       }
       if (isRow(range)) {
-        return this.renderSelectRow();
+        this.renderSelectRow();
+        return;
       }
-      return this.renderSelectRange();
-    }
-    renderHighlight(x, y, width, height) {
-      strokeRect(this.ctx, x, y, width, height);
-      return {
-        left: x,
-        top: y,
-        width,
-        height
-      };
+      this.renderSelectRange();
     }
     renderActiveCell() {
       const { controller } = this;
@@ -2158,7 +2287,6 @@ var __export__ = (() => {
       const activeCell = controller.computeCellPosition(range.row, range.col);
       const endCellRow = range.row + range.rowCount - 1;
       const endCellCol = range.col + range.colCount - 1;
-      assert(endCellRow >= 0 && endCellCol >= 0);
       const endCell = controller.computeCellPosition(endCellRow, endCellCol);
       const width = endCell.left + endCell.width - activeCell.left;
       const height = endCell.top + endCell.height - activeCell.top;
@@ -2171,7 +2299,6 @@ var __export__ = (() => {
       }
       this.ctx.strokeStyle = theme.primaryColor;
       this.ctx.lineWidth = dpr();
-      assert(width >= 0 && height >= 0);
       const list = [
         [activeCell.left, headerSize.height],
         [activeCell.left + width, headerSize.height]
@@ -2184,7 +2311,7 @@ var __export__ = (() => {
       if (check) {
         this.renderActiveCell();
       }
-      return this.renderHighlight(activeCell.left, activeCell.top, width, height);
+      strokeRect(this.ctx, activeCell.left, activeCell.top, width, height);
     }
     renderSelectAll() {
       const { controller } = this;
@@ -2195,7 +2322,8 @@ var __export__ = (() => {
       this.ctx.strokeStyle = theme.primaryColor;
       this.ctx.lineWidth = dpr();
       this.renderActiveCell();
-      return this.renderHighlight(
+      strokeRect(
+        this.ctx,
         headerSize.width,
         headerSize.height,
         width - headerSize.width,
@@ -2226,7 +2354,8 @@ var __export__ = (() => {
         [headerSize.width, height - headerSize.height]
       ];
       drawLines(this.ctx, list);
-      return this.renderHighlight(
+      strokeRect(
+        this.ctx,
         activeCell.left,
         activeCell.top,
         activeCell.width,
@@ -2241,13 +2370,7 @@ var __export__ = (() => {
       const [range] = ranges;
       this.ctx.fillStyle = theme.selectionColor;
       const activeCell = controller.computeCellPosition(range.row, range.col);
-      fillRect(
-        this.ctx,
-        activeCell.left,
-        0,
-        width,
-        headerSize.height
-      );
+      fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
       fillRect(this.ctx, 0, activeCell.top, headerSize.width, activeCell.height);
       fillRect(
         this.ctx,
@@ -2263,7 +2386,8 @@ var __export__ = (() => {
         [width - headerSize.width, headerSize.height]
       ];
       drawLines(this.ctx, list);
-      return this.renderHighlight(
+      strokeRect(
+        this.ctx,
         activeCell.left,
         activeCell.top,
         width,
@@ -2304,21 +2428,11 @@ var __export__ = (() => {
     }
     clear() {
       const { width, height } = this.controller.getDomRect();
-      this.ctx.clearRect(
-        0,
-        0,
-        npx(width),
-        npx(height)
-      );
+      this.ctx.clearRect(0, 0, npx(width), npx(height));
     }
     render({ changeSet }) {
-      if (!changeSet.has("contentChange")) {
-        return {
-          top: 0,
-          left: 0,
-          width: 0,
-          height: 0
-        };
+      if (changeSet.size === 0 || !changeSet.has("contentChange")) {
+        return;
       }
       const { width, height } = this.controller.getDomRect();
       const headerSize = this.controller.getHeaderSize();
@@ -2330,12 +2444,6 @@ var __export__ = (() => {
       this.renderColsHeader(contentWidth);
       this.renderTriangle();
       this.renderContent();
-      return {
-        top: 0,
-        left: 0,
-        width: 0,
-        height: 0
-      };
     }
     renderContent() {
       const { controller } = this;
@@ -2675,7 +2783,6 @@ var __export__ = (() => {
       state.isCellEditing = false;
     };
     return h("input", {
-      title: "editor",
       className: "base-editor",
       id: FORMULA_EDITOR_ID,
       value: initValue,
@@ -3100,7 +3207,7 @@ var __export__ = (() => {
       Button(
         {
           onClick: () => {
-            setCellStyle({ isWrapText: true });
+            setCellStyle({ isWrapText: !isWrapText });
           },
           active: isWrapText,
           testId: "toolbar-wrap-text"
@@ -3318,56 +3425,83 @@ var __export__ = (() => {
     scrollLeft: 0,
     scrollTop: 0
   };
+  function convertCanvasStyleToString(style) {
+    let result = "";
+    if (style.fontColor) {
+      result += `color:${style.fontColor};`;
+    }
+    if (style.fillColor) {
+      result += `background-color:${style.fillColor};`;
+    }
+    if (style.fontSize) {
+      result += `font-size:${style.fontSize}pt;`;
+    }
+    if (style.fontFamily) {
+      result += `font-family:${style.fontFamily};`;
+    }
+    if (style.isItalic) {
+      result += `font-style:italic;`;
+    }
+    if (style.isBold) {
+      result += `font-weight:700;`;
+    }
+    if (style.isWrapText) {
+      result += `white-space:normal;`;
+    }
+    return result;
+  }
+  function convertCSSStyleToCanvasStyle(style) {
+    const {
+      color: color2,
+      backgroundColor,
+      fontSize,
+      fontFamily,
+      fontStyle,
+      fontWeight,
+      whiteSpace
+    } = style;
+    const result = {};
+    if (color2) {
+      result.fontColor = color2;
+    }
+    if (backgroundColor) {
+      result.fillColor = backgroundColor;
+    }
+    if (fontSize) {
+      const size2 = parseInt(fontSize, 10);
+      if (!isNaN(size2)) {
+        result.fontSize = size2;
+      }
+    }
+    if (fontFamily) {
+      result.fontFamily = fontFamily;
+    }
+    if (fontStyle === "italic") {
+      result.isItalic = true;
+    }
+    if (fontWeight && ["700", "800", "900", "bold", "bolder"].includes(fontWeight)) {
+      result.isBold = true;
+    }
+    if (whiteSpace && [
+      "normal",
+      "pre-wrap",
+      "pre-line",
+      "break-spaces",
+      "revert",
+      "unset"
+    ].includes(whiteSpace)) {
+      result.isWrapText = true;
+    }
+    return result;
+  }
   var parseStyle = (styleList, selector) => {
     for (const item of styleList) {
-      if (item.sheet?.cssRules) {
-        for (const rule of item.sheet?.cssRules) {
-          if (rule instanceof CSSStyleRule) {
-            if (rule.selectorText === selector) {
-              const {
-                color: color2,
-                backgroundColor,
-                fontSize,
-                fontFamily,
-                fontStyle,
-                fontWeight,
-                whiteSpace
-              } = rule.style;
-              const result = {};
-              if (color2) {
-                result.fontColor = color2;
-              }
-              if (backgroundColor) {
-                result.fillColor = backgroundColor;
-              }
-              if (fontSize) {
-                const size2 = parseInt(fontSize, 10);
-                if (!isNaN(size2)) {
-                  result.fontSize = size2;
-                }
-              }
-              if (fontFamily) {
-                result.fontFamily = fontFamily;
-              }
-              if (fontStyle === "italic") {
-                result.isItalic = true;
-              }
-              if (["700", "800", "900", "bold", "bolder"].includes(fontWeight)) {
-                result.isBold = true;
-              }
-              if ([
-                "normal",
-                "pre-wrap",
-                "pre-line",
-                "break-spaces",
-                "revert",
-                "unset"
-              ].includes(whiteSpace)) {
-                result.isWrapText = true;
-              }
-              return result;
-            }
-          }
+      if (!item.sheet?.cssRules) {
+        continue;
+      }
+      for (const rule of item.sheet?.cssRules) {
+        if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
+          return convertCSSStyleToCanvasStyle(rule.style);
         }
       }
     }
@@ -3378,7 +3512,7 @@ var __export__ = (() => {
     model;
     ranges = [];
     changeSet = /* @__PURE__ */ new Set();
-    isDrawAntLine = false;
+    copyRanges = [];
     cutRanges = [];
     hooks = {
       modelChange() {
@@ -3701,6 +3835,7 @@ var __export__ = (() => {
     parseHTML(htmlString) {
       const parser = new DOMParser();
       const text = htmlString.replace("<style>\r\n<!--table", "<style>").replace("-->\r\n</style>", "</style>");
+      console.log(text);
       const doc = parser.parseFromString(text, "text/html");
       const trList = doc.querySelectorAll("tr");
       const styleList = doc.querySelectorAll("style");
@@ -3737,7 +3872,7 @@ var __export__ = (() => {
       this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
     }
     async paste(event) {
-      this.isDrawAntLine = false;
+      this.copyRanges = [];
       if (this.cutRanges.length > 0) {
         const [range] = this.cutRanges;
         const result = [];
@@ -3773,50 +3908,61 @@ var __export__ = (() => {
       const [range] = this.ranges;
       const { row, col, rowCount, colCount } = range;
       const result = [];
+      const html = [];
+      let index = 1;
+      const classList = [];
       for (let r = row, endRow = row + rowCount; r < endRow; r++) {
         const temp = [];
+        const t = [];
         for (let c = col, endCol = col + colCount; c < endCol; c++) {
-          const t = this.model.queryCell(r, c);
-          temp.push(t.value || "");
+          const a = this.model.queryCell(r, c);
+          const str = String(a.value || "");
+          temp.push(str);
+          if (a.style) {
+            let text2 = convertCanvasStyleToString(a.style);
+            if (!str) {
+              text2 += "mso-pattern:black none;";
+            }
+            const className = `xl${index++}`;
+            classList.push(`.${className}{${text2}}`);
+            t.push(`<td class="${className}"> ${str} </td>`);
+          } else {
+            t.push(`<td> ${str} </td>`);
+          }
         }
         result.push(temp);
+        html.push(t);
       }
+      const htmlData = generateHTML(
+        classList.join("\n"),
+        html.map((item) => `<tr>${item.join("\n")}</tr>`).join("\n")
+      );
       const text = result.map((item) => item.join("	")).join("\r\n") + "\r\n";
-      return text;
+      return {
+        [PLAIN_FORMAT]: text,
+        [HTML_FORMAT]: htmlData
+      };
     }
     copy(event) {
-      this.isDrawAntLine = true;
-      const text = this.getCopyData();
+      this.copyRanges = this.ranges.slice();
+      const data = this.getCopyData();
       if (event) {
-        event.clipboardData?.setData(PLAIN_FORMAT, text);
-        event.clipboardData?.setData(HTML_FORMAT, "");
+        const keyList = Object.keys(data);
+        for (const key of keyList) {
+          event.clipboardData?.setData(key, data[key]);
+        }
       } else {
-        this.hooks.copy({
-          [PLAIN_FORMAT]: text,
-          [HTML_FORMAT]: ""
-        });
+        this.hooks.copy(data);
       }
       this.changeSet.add("selectionChange");
       this.emitChange();
     }
     cut(event) {
-      this.isDrawAntLine = true;
-      const text = this.getCopyData();
       this.cutRanges = this.ranges.slice();
-      if (event) {
-        event.clipboardData?.setData(PLAIN_FORMAT, text);
-        event.clipboardData?.setData(HTML_FORMAT, "");
-      } else {
-        this.hooks.copy({
-          [PLAIN_FORMAT]: text,
-          [HTML_FORMAT]: ""
-        });
-      }
-      this.changeSet.add("selectionChange");
-      this.emitChange();
+      this.copy(event);
     }
-    getIsDrawAntLine() {
-      return this.isDrawAntLine;
+    getCopyRanges() {
+      return this.copyRanges.slice();
     }
     setDomRect(data) {
       this.domRect = {
@@ -5451,8 +5597,12 @@ var __export__ = (() => {
       style1: {
         fillColor: "red"
       },
-      "3": {},
-      4: {}
+      "3": {
+        fontSize: 36
+      },
+      4: {
+        isWrapText: true
+      }
     },
     mergeCells: ["D2:E3"]
   };
