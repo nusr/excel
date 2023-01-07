@@ -557,6 +557,8 @@ var __export__ = (() => {
   var { isSupportFontFamily } = SupportFontFamilyFactory();
 
   // src/util/copy.ts
+  var PLAIN_FORMAT = "text/plain";
+  var HTML_FORMAT = "text/html";
   function select(element) {
     const isReadOnly = element.hasAttribute("readonly");
     if (!isReadOnly) {
@@ -595,18 +597,18 @@ var __export__ = (() => {
   }
   async function readDataFromClipboard() {
     const result = {
-      "text/html": "",
-      "text/plain": ""
+      [HTML_FORMAT]: "",
+      [PLAIN_FORMAT]: ""
     };
     const list = await navigator.clipboard.read();
     for (const item of list) {
-      if (item.types.includes("text/plain")) {
-        const buf = await item.getType("text/plain");
-        result["text/plain"] = await buf.text();
+      if (item.types.includes(PLAIN_FORMAT)) {
+        const buf = await item.getType(PLAIN_FORMAT);
+        result[PLAIN_FORMAT] = await buf.text();
       }
-      if (item.types.includes("text/html")) {
-        const buf = await item.getType("text/html");
-        result["text/html"] = await buf.text();
+      if (item.types.includes(HTML_FORMAT)) {
+        const buf = await item.getType(HTML_FORMAT);
+        result[HTML_FORMAT] = await buf.text();
       }
     }
     console.log(result);
@@ -623,19 +625,19 @@ var __export__ = (() => {
   async function copy(textData) {
     try {
       await writeDataToClipboard(textData);
-      return textData["text/plain"];
+      return textData[PLAIN_FORMAT];
     } catch (error) {
       console.error(error);
-      return fakeCopyAction(textData["text/plain"], document.body, "copy");
+      return fakeCopyAction(textData[PLAIN_FORMAT], document.body, "copy");
     }
   }
   async function cut(textData) {
     try {
       await writeDataToClipboard(textData);
-      return textData["text/plain"];
+      return textData[PLAIN_FORMAT];
     } catch (error) {
       console.error(error);
-      return fakeCopyAction(textData["text/plain"], document.body, "cut");
+      return fakeCopyAction(textData[PLAIN_FORMAT], document.body, "cut");
     }
   }
   async function paste() {
@@ -645,8 +647,8 @@ var __export__ = (() => {
       console.log(error);
       const result = await navigator.clipboard.readText();
       return {
-        "text/html": "",
-        "text/plain": result
+        [HTML_FORMAT]: "",
+        [PLAIN_FORMAT]: result
       };
     }
   }
@@ -1564,7 +1566,7 @@ var __export__ = (() => {
       canvasLineHeight,
       getStyle("lineHeight")
     );
-    if (style?.wrapText === 1 /* AUTO_WRAP */) {
+    if (style?.isWrapText) {
       const y = top;
       result.wrapHeight = fillWrapText(ctx, text, x, y, width, textHeight);
     } else {
@@ -1909,6 +1911,7 @@ var __export__ = (() => {
   ];
 
   // src/canvas/event.ts
+  var DOUBLE_CLICK_TIME = 300;
   function getHitInfo(event, controller) {
     const canvasSize = controller.getDomRect();
     const scroll = controller.getScroll();
@@ -1936,7 +1939,7 @@ var __export__ = (() => {
     return { ...cellSize, row, col, pageY, pageX, x, y };
   }
   function registerEvents(stateValue, controller, canvas, resizeWindow) {
-    let isClick = false;
+    let lastTimeStamp = 0;
     const inputDom = document.querySelector(
       `#${FORMULA_EDITOR_ID}`
     );
@@ -1993,12 +1996,11 @@ var __export__ = (() => {
       event.preventDefault();
       controller.cut(event);
     });
-    canvas.addEventListener("click", function(event) {
-      isClick = true;
+    canvas.addEventListener("mousedown", function(event) {
       stateValue.contextMenuPosition = void 0;
       const headerSize = controller.getHeaderSize();
       const canvasRect = controller.getDomRect();
-      const { clientX, clientY } = event;
+      const { timeStamp, clientX, clientY } = event;
       const x = clientX - canvasRect.left;
       const y = clientY - canvasRect.top;
       const position = getHitInfo(event, controller);
@@ -2034,17 +2036,13 @@ var __export__ = (() => {
       if (!check) {
         controller.setActiveCell(position.row, position.col, 1, 1);
       }
-      isClick = false;
-    });
-    canvas.addEventListener("dblclick", function() {
-      isClick = true;
-      stateValue.isCellEditing = true;
-      isClick = false;
+      const delay = timeStamp - lastTimeStamp;
+      if (delay < DOUBLE_CLICK_TIME) {
+        stateValue.isCellEditing = true;
+      }
+      lastTimeStamp = timeStamp;
     });
     canvas.addEventListener("mousemove", function(event) {
-      if (!isClick) {
-        return;
-      }
       const headerSize = controller.getHeaderSize();
       const rect = controller.getDomRect();
       const { clientX, clientY } = event;
@@ -2672,7 +2670,7 @@ var __export__ = (() => {
       inputDom = element;
     };
     const setValue = (value) => {
-      controller.setCellValues([[value]], controller.getRanges());
+      controller.setCellValues([[value]], [], controller.getRanges());
       inputDom.value = "";
       state.isCellEditing = false;
     };
@@ -3048,7 +3046,7 @@ var __export__ = (() => {
       fontColor = DEFAULT_FONT_COLOR,
       fillColor = "",
       fontFamily = DEFAULT_FONT_FAMILY,
-      wrapText
+      isWrapText
     } = style;
     return h(
       "div",
@@ -3102,9 +3100,9 @@ var __export__ = (() => {
       Button(
         {
           onClick: () => {
-            setCellStyle({ wrapText: 1 /* AUTO_WRAP */ });
+            setCellStyle({ isWrapText: true });
           },
-          active: wrapText === 1 /* AUTO_WRAP */,
+          active: isWrapText,
           testId: "toolbar-wrap-text"
         },
         "Wrap Text"
@@ -3308,12 +3306,10 @@ var __export__ = (() => {
 
   // src/controller/Controller.ts
   var DEFAULT_ACTIVE_CELL = { row: 0, col: 0 };
-  var CELL_HEIGHT = 20;
+  var CELL_HEIGHT = 19;
   var CELL_WIDTH = 68;
-  var ROW_TITLE_HEIGHT = 20;
+  var ROW_TITLE_HEIGHT = 19;
   var COL_TITLE_WIDTH = 34;
-  var PLAIN_TEXT = "text/plain";
-  var HTML_TEXT = "text/html";
   var defaultScrollValue = {
     top: 0,
     left: 0,
@@ -3321,6 +3317,61 @@ var __export__ = (() => {
     col: 0,
     scrollLeft: 0,
     scrollTop: 0
+  };
+  var parseStyle = (styleList, selector) => {
+    for (const item of styleList) {
+      if (item.sheet?.cssRules) {
+        for (const rule of item.sheet?.cssRules) {
+          if (rule instanceof CSSStyleRule) {
+            if (rule.selectorText === selector) {
+              const {
+                color: color2,
+                backgroundColor,
+                fontSize,
+                fontFamily,
+                fontStyle,
+                fontWeight,
+                whiteSpace
+              } = rule.style;
+              const result = {};
+              if (color2) {
+                result.fontColor = color2;
+              }
+              if (backgroundColor) {
+                result.fillColor = backgroundColor;
+              }
+              if (fontSize) {
+                const size2 = parseInt(fontSize, 10);
+                if (!isNaN(size2)) {
+                  result.fontSize = size2;
+                }
+              }
+              if (fontFamily) {
+                result.fontFamily = fontFamily;
+              }
+              if (fontStyle === "italic") {
+                result.isItalic = true;
+              }
+              if (["700", "800", "900", "bold", "bolder"].includes(fontWeight)) {
+                result.isBold = true;
+              }
+              if ([
+                "normal",
+                "pre-wrap",
+                "pre-line",
+                "break-spaces",
+                "revert",
+                "unset"
+              ].includes(whiteSpace)) {
+                result.isWrapText = true;
+              }
+              return result;
+            }
+          }
+        }
+      }
+    }
+    return {};
   };
   var Controller = class {
     scrollValue = {};
@@ -3340,8 +3391,8 @@ var __export__ = (() => {
       },
       async paste() {
         return {
-          "text/html": "",
-          "text/plain": ""
+          [HTML_FORMAT]: "",
+          [PLAIN_FORMAT]: ""
         };
       }
     };
@@ -3458,9 +3509,9 @@ var __export__ = (() => {
     toJSON() {
       return this.model.toJSON();
     }
-    setCellValues(value, ranges) {
+    setCellValues(value, style, ranges) {
       controllerLog("setCellValue", value);
-      this.model.setCellValues(value, ranges);
+      this.model.setCellValues(value, style, ranges);
       this.changeSet.add("contentChange");
       this.emitChange();
     }
@@ -3634,8 +3685,49 @@ var __export__ = (() => {
           colCount = item.length;
         }
       }
+      if (list.length === 0) {
+        return;
+      }
       const activeCell = this.getActiveCell();
-      this.model.setCellValues(list, this.ranges);
+      this.model.setCellValues(list, [], this.ranges);
+      this.changeSet.add("contentChange");
+      this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
+    }
+    parseHTML(htmlString) {
+      const parser = new DOMParser();
+      const text = htmlString.replace("<style>\r\n<!--table", "<style>").replace("-->\r\n</style>", "</style>");
+      const doc = parser.parseFromString(text, "text/html");
+      const trList = doc.querySelectorAll("tr");
+      const styleList = doc.querySelectorAll("style");
+      const result = [];
+      const resultStyle = [];
+      const rowCount = trList.length;
+      let colCount = 0;
+      for (const item of trList) {
+        const tdList = item.querySelectorAll("td");
+        const temp = [];
+        const list = [];
+        for (const td of tdList) {
+          let itemStyle = {};
+          if (td.className) {
+            itemStyle = parseStyle(styleList, "." + td.className);
+          } else {
+            itemStyle = parseStyle(styleList, td.tagName.toLowerCase());
+          }
+          list.push(itemStyle);
+          temp.push(td.textContent || "");
+        }
+        result.push(temp);
+        resultStyle.push(list);
+        if (temp.length > colCount) {
+          colCount = temp.length;
+        }
+      }
+      if (result.length === 0) {
+        return;
+      }
+      const activeCell = this.getActiveCell();
+      this.model.setCellValues(result, resultStyle, this.ranges);
       this.changeSet.add("contentChange");
       this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
     }
@@ -3647,20 +3739,28 @@ var __export__ = (() => {
         for (let i = 0; i < range.rowCount; i++) {
           result.push(new Array(range.colCount).fill(""));
         }
-        this.model.setCellValues(result, this.cutRanges);
+        this.model.setCellValues(result, [], this.cutRanges);
       }
+      let html = "";
+      let text = "";
       if (!event) {
         const data = await this.hooks.paste();
-        this.parseText(data[PLAIN_TEXT]);
+        html = data[HTML_FORMAT];
+        text = data[PLAIN_FORMAT];
       } else {
-        const text = event.clipboardData?.getData(PLAIN_TEXT) || "";
+        html = event.clipboardData?.getData(HTML_FORMAT) || "";
+        text = event.clipboardData?.getData(PLAIN_FORMAT) || "";
+      }
+      if (html) {
+        this.parseHTML(html);
+      } else {
         this.parseText(text);
       }
       if (this.cutRanges.length) {
         this.cutRanges = [];
         this.hooks.copy({
-          [PLAIN_TEXT]: "",
-          [HTML_TEXT]: ""
+          [PLAIN_FORMAT]: "",
+          [HTML_FORMAT]: ""
         });
       }
     }
@@ -3683,12 +3783,12 @@ var __export__ = (() => {
       this.isDrawAntLine = true;
       const text = this.getCopyData();
       if (event) {
-        event.clipboardData?.setData(PLAIN_TEXT, text);
-        event.clipboardData?.setData(HTML_TEXT, "");
+        event.clipboardData?.setData(PLAIN_FORMAT, text);
+        event.clipboardData?.setData(HTML_FORMAT, "");
       } else {
         this.hooks.copy({
-          [PLAIN_TEXT]: text,
-          [HTML_TEXT]: ""
+          [PLAIN_FORMAT]: text,
+          [HTML_FORMAT]: ""
         });
       }
       this.changeSet.add("selectionChange");
@@ -3699,12 +3799,12 @@ var __export__ = (() => {
       const text = this.getCopyData();
       this.cutRanges = this.ranges.slice();
       if (event) {
-        event.clipboardData?.setData(PLAIN_TEXT, text);
-        event.clipboardData?.setData(HTML_TEXT, "");
+        event.clipboardData?.setData(PLAIN_FORMAT, text);
+        event.clipboardData?.setData(HTML_FORMAT, "");
       } else {
         this.hooks.copy({
-          [PLAIN_TEXT]: text,
-          [HTML_TEXT]: ""
+          [PLAIN_FORMAT]: text,
+          [HTML_FORMAT]: ""
         });
       }
       this.changeSet.add("selectionChange");
@@ -5077,7 +5177,7 @@ var __export__ = (() => {
       const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
       setWith(this, `${configPath}.formula`, formula);
     }
-    setCellValues(value, ranges) {
+    setCellValues(value, style, ranges) {
       const [range] = ranges;
       const { row, col } = range;
       for (let r = 0; r < value.length; r++) {
@@ -5087,6 +5187,9 @@ var __export__ = (() => {
             row: row + r,
             col: col + c
           };
+          if (style[r] && style[r][c]) {
+            this.setStyle(style[r][c], temp);
+          }
           if (t.startsWith("=")) {
             this.setCellFormula(t, temp);
           } else {
@@ -5097,32 +5200,32 @@ var __export__ = (() => {
       }
       this.computeAllCell();
     }
+    setStyle(style, range) {
+      const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
+      const oldStyleId = get(this, stylePath, "");
+      if (oldStyleId) {
+        const oldStyle = this.styles[oldStyleId];
+        if (isEmpty(oldStyle)) {
+          this.styles[oldStyleId] = { ...style };
+        } else {
+          this.styles[oldStyleId] = {
+            ...oldStyle,
+            ...style
+          };
+        }
+      } else {
+        const styleNum = getListMaxNum(Object.keys(this.styles), STYLE_ID_PREFIX);
+        const styleId = `${STYLE_ID_PREFIX}${styleNum + 1}`;
+        this.styles[styleId] = { ...style };
+        setWith(this, stylePath, styleId);
+      }
+    }
     setCellStyle(style, ranges) {
       const [range] = ranges;
       const { row, col, rowCount, colCount } = range;
       for (let r = row, endRow = row + rowCount; r < endRow; r++) {
         for (let c = col, endCol = col + colCount; c < endCol; c++) {
-          const stylePath = `worksheets[${this.currentSheetId}][${r}][${c}].style`;
-          const oldStyleId = get(this, stylePath, "");
-          if (oldStyleId) {
-            const oldStyle = this.styles[oldStyleId];
-            if (isEmpty(oldStyle)) {
-              this.styles[oldStyleId] = { ...style };
-            } else {
-              this.styles[oldStyleId] = {
-                ...oldStyle,
-                ...style
-              };
-            }
-          } else {
-            const styleNum = getListMaxNum(
-              Object.keys(this.styles),
-              STYLE_ID_PREFIX
-            );
-            const styleId = `${STYLE_ID_PREFIX}${styleNum + 1}`;
-            this.styles[styleId] = { ...style };
-            setWith(this, stylePath, styleId);
-          }
+          this.setStyle(style, { row: r, col: c });
         }
       }
     }
