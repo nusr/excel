@@ -189,12 +189,12 @@ export class Controller implements IController {
     const { row, col } = result;
     return { row, col };
   }
-  setActiveCell(
+  private setRanges(
     row: number,
     col: number,
     rowCount: number,
     colCount: number,
-  ): void {
+  ) {
     const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
     if (
       row < 0 ||
@@ -202,12 +202,23 @@ export class Controller implements IController {
       row >= sheetInfo.rowCount ||
       col >= sheetInfo.colCount
     ) {
-      return;
+      return false;
     }
     this.model.setActiveCell(row, col, rowCount, colCount);
     this.ranges = [
       new Range(row, col, rowCount, colCount, this.getCurrentSheetId()),
     ];
+    return true;
+  }
+  setActiveCell(
+    row: number,
+    col: number,
+    rowCount: number,
+    colCount: number,
+  ): void {
+    if (!this.setRanges(row, col, rowCount, colCount)){
+      return;
+    }
     this.changeSet.add('selectionChange');
     this.emitChange();
   }
@@ -217,15 +228,14 @@ export class Controller implements IController {
     }
     this.model.setCurrentSheetId(id);
     const pos = this.getActiveCell();
-    this.setActiveCell(pos.row, pos.col, 1, 1);
-    this.changeSet.add('contentChange');
+    this.setRanges(pos.row, pos.col, 1, 1);
     this.computeViewSize();
-    this.emitChange();
+    this.setScroll(this.getScroll());
   }
   addSheet(): void {
     this.model.addSheet();
     this.computeViewSize();
-    this.model.setActiveCell(0, 0, 1, 1);
+    this.setRanges(0, 0, 1, 1);
     this.setScroll({
       top: 0,
       left: 0,
@@ -238,7 +248,7 @@ export class Controller implements IController {
   fromJSON(json: WorkBookJSON): void {
     controllerLog('loadJSON', json);
     this.model.fromJSON(json);
-    this.model.setActiveCell(0, 0, 1, 1);
+    this.setRanges(0, 0, 1, 1);
     this.computeViewSize();
     this.changeSet.add('contentChange');
     this.emitChange(false);
