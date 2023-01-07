@@ -1,4 +1,4 @@
-import { IRange } from "@/types";
+import { IRange } from '@/types';
 export function isSheet(range: IRange): boolean {
   return isRow(range) && isCol(range);
 }
@@ -8,18 +8,32 @@ export function isRow(range: IRange): boolean {
 export function isCol(range: IRange): boolean {
   return range.row === range.colCount && range.colCount === 0;
 }
+
+export function isSameRange(oldRange?: IRange, newRange?: IRange): boolean {
+  if (!oldRange || !newRange) {
+    return false;
+  }
+  return (
+    oldRange.col === newRange.col &&
+    oldRange.row === newRange.row &&
+    oldRange.colCount === newRange.colCount &&
+    oldRange.rowCount === newRange.rowCount &&
+    oldRange.sheetId === newRange.sheetId
+  );
+}
+
 export class Range implements IRange {
   row = 0;
   col = 0;
   colCount = 0;
   rowCount = 0;
-  sheetId = "";
+  sheetId = '';
   constructor(
     row: number,
     col: number,
     rowCount: number,
     colCount: number,
-    sheetId: string
+    sheetId: string,
   ) {
     this.row = row;
     this.col = col;
@@ -39,7 +53,7 @@ export class Range implements IRange {
       range.col,
       range.rowCount,
       range.colCount,
-      range.sheetId
+      range.sheetId,
     );
   }
 }

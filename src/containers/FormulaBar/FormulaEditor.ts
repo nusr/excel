@@ -43,7 +43,6 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
     state.isCellEditing = false;
   };
   return h('input', {
-    title: 'editor',
     className: 'base-editor',
     id: FORMULA_EDITOR_ID,
     value: initValue,

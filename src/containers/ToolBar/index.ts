@@ -87,7 +87,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     Button(
       {
         onClick: () => {
-          setCellStyle({ isWrapText: true });
+          setCellStyle({ isWrapText: !isWrapText });
         },
         active: isWrapText,
         testId: 'toolbar-wrap-text',

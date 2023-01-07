@@ -1,5 +1,4 @@
 import type { EventType } from "./event";
-import { CanvasOverlayPosition } from "./components";
 import { IController } from "./controller";
 
 export type ModifierKeyType = "alt" | "shift" | "ctrl" | "meta";
@@ -12,5 +11,5 @@ export type KeyboardEventItem = {
 export interface ContentView {
   getCanvas(): HTMLCanvasElement;
   resize(): void;
-  render(value: EventType): CanvasOverlayPosition;
+  render(value: EventType): void;
 }

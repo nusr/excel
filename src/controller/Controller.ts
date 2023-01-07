@@ -14,6 +14,8 @@ import {
   ScrollValue,
   IRange,
   ResultType,
+  ClipboardData,
+  ClipboardType,
 } from '@/types';
 import {
   parseReference,
@@ -23,6 +25,7 @@ import {
   isEmpty,
   PLAIN_FORMAT,
   HTML_FORMAT,
+  generateHTML,
 } from '@/util';
 
 const DEFAULT_ACTIVE_CELL = { row: 0, col: 0 };
@@ -40,61 +43,97 @@ const defaultScrollValue: ScrollValue = {
   scrollTop: 0,
 };
 
+function convertCanvasStyleToString(style: Partial<StyleType>): string {
+  let result = '';
+  if (style.fontColor) {
+    result += `color:${style.fontColor};`;
+  }
+  if (style.fillColor) {
+    result += `background-color:${style.fillColor};`;
+  }
+  if (style.fontSize) {
+    result += `font-size:${style.fontSize}pt;`;
+  }
+  if (style.fontFamily) {
+    result += `font-family:${style.fontFamily};`;
+  }
+  if (style.isItalic) {
+    result += `font-style:italic;`;
+  }
+  if (style.isBold) {
+    result += `font-weight:700;`;
+  }
+  if (style.isWrapText) {
+    result += `white-space:normal;`;
+  }
+
+  return result;
+}
+
+function convertCSSStyleToCanvasStyle(
+  style: Partial<CSSStyleDeclaration>,
+): Partial<StyleType> {
+  const {
+    color,
+    backgroundColor,
+    fontSize,
+    fontFamily,
+    fontStyle,
+    fontWeight,
+    whiteSpace,
+  } = style;
+  const result: Partial<StyleType> = {};
+  if (color) {
+    result.fontColor = color;
+  }
+  if (backgroundColor) {
+    result.fillColor = backgroundColor;
+  }
+  if (fontSize) {
+    const size = parseInt(fontSize, 10);
+    if (!isNaN(size)) {
+      result.fontSize = size;
+    }
+  }
+  if (fontFamily) {
+    result.fontFamily = fontFamily;
+  }
+  if (fontStyle === 'italic') {
+    result.isItalic = true;
+  }
+  if (
+    fontWeight &&
+    ['700', '800', '900', 'bold', 'bolder'].includes(fontWeight)
+  ) {
+    result.isBold = true;
+  }
+  if (
+    whiteSpace &&
+    [
+      'normal',
+      'pre-wrap',
+      'pre-line',
+      'break-spaces',
+      'revert',
+      'unset',
+    ].includes(whiteSpace)
+  ) {
+    result.isWrapText = true;
+  }
+  return result;
+}
+
 const parseStyle = (
   styleList: NodeListOf<HTMLStyleElement>,
   selector: string,
 ): Partial<StyleType> => {
   for (const item of styleList) {
-    if (item.sheet?.cssRules) {
-      for (const rule of item.sheet?.cssRules) {
-        if (rule instanceof CSSStyleRule) {
-          if (rule.selectorText === selector) {
-            const {
-              color,
-              backgroundColor,
-              fontSize,
-              fontFamily,
-              fontStyle,
-              fontWeight,
-              whiteSpace,
-            } = rule.style;
-            const result: Partial<StyleType> = {};
-            if (color) {
-              result.fontColor = color;
-            }
-            if (backgroundColor) {
-              result.fillColor = backgroundColor;
-            }
-            if (fontSize) {
-              const size = parseInt(fontSize, 10);
-              if (!isNaN(size)) {
-                result.fontSize = size;
-              }
-            }
-            if (fontFamily) {
-              result.fontFamily = fontFamily;
-            }
-            if (fontStyle === 'italic') {
-              result.isItalic = true;
-            }
-            if (['700', '800', '900', 'bold', 'bolder'].includes(fontWeight)) {
-              result.isBold = true;
-            }
-            if (
-              [
-                'normal',
-                'pre-wrap',
-                'pre-line',
-                'break-spaces',
-                'revert',
-                'unset',
-              ].includes(whiteSpace)
-            ) {
-              result.isWrapText = true;
-            }
-            return result;
-          }
-        }
+    if (!item.sheet?.cssRules) {
+      continue;
+    }
+    for (const rule of item.sheet?.cssRules) {
+      if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
+        return convertCSSStyleToCanvasStyle(rule.style);
       }
     }
   }
@@ -106,7 +145,7 @@ export class Controller implements IController {
   private model: IModel;
   private ranges: Array<Range> = [];
   private changeSet = new Set<ChangeEventType>();
-  private isDrawAntLine = false;
+  private copyRanges: Array<Range> = [];
   private cutRanges: Array<Range> = [];
   private hooks: IHooks = {
     modelChange() {},
@@ -216,7 +255,7 @@ export class Controller implements IController {
     rowCount: number,
     colCount: number,
   ): void {
-    if (!this.setRanges(row, col, rowCount, colCount)){
+    if (!this.setRanges(row, col, rowCount, colCount)) {
       return;
     }
     this.changeSet.add('selectionChange');
@@ -459,6 +498,7 @@ export class Controller implements IController {
     const text = htmlString
       .replace('<style>\r\n<!--table', '<style>')
       .replace('-->\r\n</style>', '</style>');
+    console.log(text);
     const doc = parser.parseFromString(text, 'text/html');
     const trList = doc.querySelectorAll('tr');
     const styleList = doc.querySelectorAll('style');
@@ -496,7 +536,7 @@ export class Controller implements IController {
     this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
   }
   async paste(event?: ClipboardEvent) {
-    this.isDrawAntLine = false;
+    this.copyRanges = [];
     if (this.cutRanges.length > 0) {
       const [range] = this.cutRanges;
       const result: string[][] = [];
@@ -529,56 +569,66 @@ export class Controller implements IController {
       });
     }
   }
-  private getCopyData() {
+  private getCopyData(): ClipboardData {
     const [range] = this.ranges;
     const { row, col, rowCount, colCount } = range;
     const result: ResultType[][] = [];
+    const html: string[][] = [];
+    let index = 1;
+    const classList: string[] = [];
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {
       const temp: ResultType[] = [];
+      const t: string[] = [];
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
-        const t = this.model.queryCell(r, c);
-        temp.push(t.value || '');
+        const a = this.model.queryCell(r, c);
+        const str = String(a.value || '');
+        temp.push(str);
+        if (a.style) {
+          let text = convertCanvasStyleToString(a.style);
+          if (!str) {
+            // copy background-color
+            text += 'mso-pattern:black none;';
+          }
+          const className = `xl${index++}`;
+          classList.push(`.${className}{${text}}`);
+          t.push(`<td class="${className}"> ${str} </td>`);
+        } else {
+          t.push(`<td> ${str} </td>`);
+        }
       }
       result.push(temp);
+      html.push(t);
     }
+    const htmlData = generateHTML(
+      classList.join('\n'),
+      html.map((item) => `<tr>${item.join('\n')}</tr>`).join('\n'),
+    );
     const text = result.map((item) => item.join('\t')).join('\r\n') + '\r\n';
-    return text;
+    return {
+      [PLAIN_FORMAT]: text,
+      [HTML_FORMAT]: htmlData,
+    };
   }
   copy(event?: ClipboardEvent): void {
-    this.isDrawAntLine = true;
-    const text = this.getCopyData();
+    this.copyRanges = this.ranges.slice();
+    const data = this.getCopyData();
     if (event) {
-      event.clipboardData?.setData(PLAIN_FORMAT, text);
-      event.clipboardData?.setData(HTML_FORMAT, '');
+      const keyList = Object.keys(data) as ClipboardType[];
+      for (const key of keyList) {
+        event.clipboardData?.setData(key, data[key]);
+      }
     } else {
-      // TODO: generate html string
-      this.hooks.copy({
-        [PLAIN_FORMAT]: text,
-        [HTML_FORMAT]: '',
-      });
+      this.hooks.copy(data);
     }
     this.changeSet.add('selectionChange');
     this.emitChange();
   }
   cut(event?: ClipboardEvent) {
-    this.isDrawAntLine = true;
-    const text = this.getCopyData();
     this.cutRanges = this.ranges.slice();
-    if (event) {
-      event.clipboardData?.setData(PLAIN_FORMAT, text);
-      event.clipboardData?.setData(HTML_FORMAT, '');
-    } else {
-      // TODO: generate html string
-      this.hooks.copy({
-        [PLAIN_FORMAT]: text,
-        [HTML_FORMAT]: '',
-      });
-    }
-    this.changeSet.add('selectionChange');
-    this.emitChange();
+    this.copy(event);
   }
-  getIsDrawAntLine() {
-    return this.isDrawAntLine;
+  getCopyRanges() {
+    return this.copyRanges.slice();
   }
   setDomRect(data: CanvasOverlayPosition): void {
     this.domRect = {

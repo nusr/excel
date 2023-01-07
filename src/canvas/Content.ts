@@ -6,8 +6,8 @@ import {
   intToColumnName,
   isTestEnv,
   resizeCanvas,
-} from "@/util";
-import { theme } from "@/util";
+} from '@/util';
+import { theme } from '@/util';
 import {
   fillRect,
   fillText,
@@ -15,14 +15,9 @@ import {
   renderCell,
   drawTriangle,
   getStyle,
-} from "./util";
-import { HEADER_STYLE } from "./constant";
-import type {
-  Point,
-  ContentView,
-  IController,
-  EventType,
-} from "@/types";
+} from './util';
+import { HEADER_STYLE } from './constant';
+import type { Point, ContentView, IController, EventType } from '@/types';
 
 export class Content implements ContentView {
   private canvas: HTMLCanvasElement;
@@ -31,7 +26,7 @@ export class Content implements ContentView {
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
-    const ctx = this.canvas.getContext("2d")!;
+    const ctx = this.canvas.getContext('2d')!;
     this.ctx = ctx;
     const size = dpr();
     this.ctx.scale(size, size);
@@ -46,22 +41,12 @@ export class Content implements ContentView {
 
   private clear() {
     const { width, height } = this.controller.getDomRect();
-    this.ctx.clearRect(
-      0,
-      0,
-      npx(width),
-      npx(height)
-    );
+    this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
 
   render({ changeSet }: EventType) {
-    if (!changeSet.has("contentChange")) {
-      return {
-        top: 0,
-        left: 0,
-        width: 0,
-        height: 0,
-      };
+    if (changeSet.size === 0 || !changeSet.has('contentChange')) {
+      return;
     }
     const { width, height } = this.controller.getDomRect();
     const headerSize = this.controller.getHeaderSize();
@@ -73,12 +58,6 @@ export class Content implements ContentView {
     this.renderColsHeader(contentWidth);
     this.renderTriangle();
     this.renderContent();
-    return {
-      top: 0,
-      left: 0,
-      width: 0,
-      height: 0,
-    };
   }
   private renderContent(): void {
     const { controller } = this;
@@ -110,7 +89,7 @@ export class Content implements ContentView {
           ...cellInfo,
           ...result,
         },
-        getStyle("lineHeight", this.canvas)
+        getStyle('lineHeight', this.canvas),
       );
       const t = Math.max(wrapHeight, fontSizeHeight);
       if (t > result.height) {
@@ -137,7 +116,7 @@ export class Content implements ContentView {
       this.ctx,
       [headerSize.width / 2 - offset, headerSize.height - offset],
       [headerSize.width - offset, headerSize.height - offset],
-      [headerSize.width - offset, offset]
+      [headerSize.width - offset, offset],
     );
 
     this.ctx.restore();
@@ -148,7 +127,7 @@ export class Content implements ContentView {
     const headerSize = controller.getHeaderSize();
     const { row: rowIndex, col: colIndex } = controller.getScroll();
     const { rowCount, colCount } = this.controller.getSheetInfo(
-      this.controller.getCurrentSheetId()
+      this.controller.getCurrentSheetId(),
     );
     const lineWidth = thinLineWidth();
     this.ctx.save();
@@ -200,7 +179,7 @@ export class Content implements ContentView {
     const { row: rowIndex } = controller.getScroll();
     const headerSize = controller.getHeaderSize();
     const { rowCount } = controller.getSheetInfo(
-      controller.getCurrentSheetId()
+      controller.getCurrentSheetId(),
     );
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
@@ -234,7 +213,7 @@ export class Content implements ContentView {
     const { col: colIndex } = controller.getScroll();
     const headerSize = controller.getHeaderSize();
     const { colCount } = controller.getSheetInfo(
-      controller.getCurrentSheetId()
+      controller.getCurrentSheetId(),
     );
     const pointList: Array<Point> = [];
     this.ctx.save();
@@ -254,7 +233,7 @@ export class Content implements ContentView {
       this.fillColText(
         intToColumnName(i),
         temp + colWidth / 2,
-        headerSize.height
+        headerSize.height,
       );
       x += colWidth;
       if (x > width) {

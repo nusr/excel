@@ -83,10 +83,10 @@ export const MOCK_MODEL: WorkBookJSON = {
       fillColor: 'red',
     },
     '3': {
-      // fontSize: 36,
+      fontSize: 36,
     },
     4: {
-      // wrapText: EWrap.AUTO_WRAP,
+      isWrapText: true,
     },
   },
   mergeCells: ['D2:E3'],

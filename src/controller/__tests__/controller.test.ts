@@ -90,12 +90,6 @@ describe('controller.test.ts', () => {
   });
 
   describe('copy', () => {
-    test('empty', () => {
-      const controller = new Controller(new Model(), new History());
-      controller.addSheet();
-      controller.copy();
-      expect(controller.getIsDrawAntLine()).toEqual(true);
-    });
     test('set', () => {
       const controller = new Controller(new Model(), new History());
       controller.addSheet();

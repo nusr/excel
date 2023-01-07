@@ -125,3 +125,106 @@ export async function paste(): Promise<ClipboardData> {
     };
   }
 }
+
+
+export function generateHTML(style: string, content: string) {
+  return `<html
+  xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns="http://www.w3.org/TR/REC-html40"
+>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="ProgId" content="Excel.Sheet" />
+    <meta name="Generator" content="Microsoft Excel 15" />
+    <style>
+       {
+        mso-displayed-decimal-separator: '\.';
+        mso-displayed-thousand-separator: '\,';
+      }
+      @page {
+        margin: 0.75in 0.7in 0.75in 0.7in;
+        mso-header-margin: 0.3in;
+        mso-footer-margin: 0.3in;
+      }
+      .font5 {
+        color: windowtext;
+        font-size: 9pt;
+        font-weight: 400;
+        font-style: normal;
+        text-decoration: none;
+        font-family: 等线;
+        mso-generic-font-family: auto;
+        mso-font-charset: 134;
+      }
+      tr {
+        mso-height-source: auto;
+        mso-ruby-visibility: none;
+      }
+      col {
+        mso-width-source: auto;
+        mso-ruby-visibility: none;
+      }
+      br {
+        mso-data-placement: same-cell;
+      }
+      td {
+        padding-top: 1px;
+        padding-right: 1px;
+        padding-left: 1px;
+        mso-ignore: padding;
+        color: black;
+        font-size: 11pt;
+        font-weight: 400;
+        font-style: normal;
+        text-decoration: none;
+        font-family: 等线;
+        mso-generic-font-family: auto;
+        mso-font-charset: 134;
+        mso-number-format: General;
+        text-align: general;
+        vertical-align: middle;
+        border: none;
+        mso-background-source: auto;
+        mso-pattern: auto;
+        mso-protection: locked visible;
+        white-space: nowrap;
+        mso-rotate: 0;
+      }
+      ${style}
+      ruby {
+        ruby-align: left;
+      }
+      rt {
+        color: windowtext;
+        font-size: 9pt;
+        font-weight: 400;
+        font-style: normal;
+        text-decoration: none;
+        font-family: 等线;
+        mso-generic-font-family: auto;
+        mso-font-charset: 134;
+        mso-char-type: none;
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body link="#0563C1" vlink="#954F72">
+    <table
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      width="103"
+      style="border-collapse: collapse; width: 77pt"
+    >
+      <col
+        width="103"
+        style="mso-width-source: userset; mso-width-alt: 3515; width: 77pt"
+      />
+      ${content}
+    </table>
+  </body>
+</html>`
+}

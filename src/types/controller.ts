@@ -49,7 +49,7 @@ export interface IController extends IScrollValue, IBaseModel {
   paste(event?: ClipboardEvent): void;
   copy(event?: ClipboardEvent): void;
   cut(event?: ClipboardEvent): void;
-  getIsDrawAntLine(): boolean;
+  getCopyRanges(): IRange[];
   setDomRect(data: CanvasOverlayPosition): void;
   getDomRect(): CanvasOverlayPosition;
 }

@@ -1,5 +1,4 @@
-import { dpr, npx, resizeCanvas, assert, isCol, isRow, isSheet } from "@/util";
-import { theme } from "@/util";
+import { dpr, npx, resizeCanvas, isCol, isRow, isSheet, theme } from '@/util';
 import {
   fillRect,
   renderCell,
@@ -7,13 +6,8 @@ import {
   strokeRect,
   drawLines,
   clearRect,
-} from "./util";
-import type {
-  ContentView,
-  IController,
-  Point,
-  CanvasOverlayPosition,
-} from "@/types";
+} from './util';
+import type { ContentView, IController, Point, EventType } from '@/types';
 
 export class Selection implements ContentView {
   private canvas: HTMLCanvasElement;
@@ -22,7 +16,7 @@ export class Selection implements ContentView {
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
-    const ctx = this.canvas.getContext("2d")!;
+    const ctx = this.canvas.getContext('2d')!;
     this.ctx = ctx;
     const size = dpr();
     this.ctx.scale(size, size);
@@ -39,49 +33,46 @@ export class Selection implements ContentView {
     this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
 
-  render(): CanvasOverlayPosition {
+  render({ changeSet }: EventType) {
+    if (changeSet.size === 0) {
+      return;
+    }
     this.clear();
     const { controller } = this;
     const ranges = controller.getRanges();
     const [range] = ranges;
     if (isSheet(range)) {
-      return this.renderSelectAll();
+      this.renderSelectAll();
+      return;
     }
     if (isCol(range)) {
-      return this.renderSelectCol();
+      this.renderSelectCol();
+      return;
     }
     if (isRow(range)) {
-      return this.renderSelectRow();
+      this.renderSelectRow();
+      return;
     }
-    return this.renderSelectRange();
-  }
-  private renderHighlight(x: number, y: number, width: number, height: number) {
-    strokeRect(this.ctx, x, y, width, height);
-    return {
-      left: x,
-      top: y,
-      width,
-      height,
-    };
+    this.renderSelectRange();
   }
   private renderActiveCell() {
     const { controller } = this;
     const cellData = controller.getCell(controller.getActiveCell());
     const activeCell = controller.computeCellPosition(
       cellData.row,
-      cellData.col
+      cellData.col,
     );
     clearRect(
       this.ctx,
       activeCell.left,
       activeCell.top,
       activeCell.width,
-      activeCell.height
+      activeCell.height,
     );
     renderCell(
       this.ctx,
       { ...cellData, ...activeCell },
-      getStyle("lineHeight", this.canvas)
+      getStyle('lineHeight', this.canvas),
     );
   }
   private renderSelectRange() {
@@ -92,7 +83,7 @@ export class Selection implements ContentView {
     const activeCell = controller.computeCellPosition(range.row, range.col);
     const endCellRow = range.row + range.rowCount - 1;
     const endCellCol = range.col + range.colCount - 1;
-    assert(endCellRow >= 0 && endCellCol >= 0);
+
     const endCell = controller.computeCellPosition(endCellRow, endCellCol);
     const width = endCell.left + endCell.width - activeCell.left;
     const height = endCell.top + endCell.height - activeCell.top;
@@ -109,21 +100,20 @@ export class Selection implements ContentView {
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
 
-    assert(width >= 0 && height >= 0);
     const list: Point[] = [
       [activeCell.left, headerSize.height],
       [activeCell.left + width, headerSize.height],
     ];
     list.push(
       [headerSize.width, activeCell.top],
-      [headerSize.width, activeCell.top + height]
+      [headerSize.width, activeCell.top + height],
     );
     drawLines(this.ctx, list);
     if (check) {
       this.renderActiveCell();
     }
 
-    return this.renderHighlight(activeCell.left, activeCell.top, width, height);
+    strokeRect(this.ctx, activeCell.left, activeCell.top, width, height);
   }
   private renderSelectAll() {
     const { controller } = this;
@@ -135,11 +125,12 @@ export class Selection implements ContentView {
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
     this.renderActiveCell();
-    return this.renderHighlight(
+    strokeRect(
+      this.ctx,
       headerSize.width,
       headerSize.height,
       width - headerSize.width,
-      height - headerSize.height
+      height - headerSize.height,
     );
   }
   private renderSelectCol() {
@@ -157,7 +148,7 @@ export class Selection implements ContentView {
       activeCell.left,
       activeCell.top + activeCell.height,
       activeCell.width,
-      height - activeCell.height
+      height - activeCell.height,
     );
 
     this.ctx.strokeStyle = theme.primaryColor;
@@ -167,11 +158,12 @@ export class Selection implements ContentView {
       [headerSize.width, height - headerSize.height],
     ];
     drawLines(this.ctx, list);
-    return this.renderHighlight(
+    strokeRect(
+      this.ctx,
       activeCell.left,
       activeCell.top,
       activeCell.width,
-      height
+      height,
     );
   }
   private renderSelectRow() {
@@ -182,13 +174,7 @@ export class Selection implements ContentView {
     const [range] = ranges;
     this.ctx.fillStyle = theme.selectionColor;
     const activeCell = controller.computeCellPosition(range.row, range.col);
-    fillRect(
-      this.ctx,
-      activeCell.left,
-      0,
-      width,
-      headerSize.height
-    );
+    fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
     fillRect(this.ctx, 0, activeCell.top, headerSize.width, activeCell.height);
 
     fillRect(
@@ -196,7 +182,7 @@ export class Selection implements ContentView {
       activeCell.left + activeCell.width,
       activeCell.top,
       width - activeCell.width,
-      activeCell.height
+      activeCell.height,
     );
 
     this.ctx.strokeStyle = theme.primaryColor;
@@ -206,11 +192,12 @@ export class Selection implements ContentView {
       [width - headerSize.width, headerSize.height],
     ];
     drawLines(this.ctx, list);
-    return this.renderHighlight(
+    strokeRect(
+      this.ctx,
       activeCell.left,
       activeCell.top,
       width,
-      activeCell.height
+      activeCell.height,
     );
   }
 }
