@@ -129,7 +129,11 @@ export class Model implements IModel {
     const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
     setWith(this, `${configPath}.formula`, formula);
   }
-  setCellValues(value: string[][], ranges: Range[]): void {
+  setCellValues(
+    value: string[][],
+    style: Partial<StyleType>[][],
+    ranges: Range[],
+  ): void {
     const [range] = ranges;
     const { row, col } = range;
     for (let r = 0; r < value.length; r++) {
@@ -139,6 +143,9 @@ export class Model implements IModel {
           row: row + r,
           col: col + c,
         };
+        if (style[r] && style[r][c]) {
+          this.setStyle(style[r][c], temp);
+        }
         if (t.startsWith('=')) {
           this.setCellFormula(t, temp);
         } else {
@@ -149,32 +156,32 @@ export class Model implements IModel {
     }
     this.computeAllCell();
   }
+  private setStyle(style: Partial<StyleType>, range: Coordinate) {
+    const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
+    const oldStyleId = get<string>(this, stylePath, '');
+    if (oldStyleId) {
+      const oldStyle = this.styles[oldStyleId];
+      if (isEmpty(oldStyle)) {
+        this.styles[oldStyleId] = { ...style };
+      } else {
+        this.styles[oldStyleId] = {
+          ...oldStyle,
+          ...style,
+        };
+      }
+    } else {
+      const styleNum = getListMaxNum(Object.keys(this.styles), STYLE_ID_PREFIX);
+      const styleId = `${STYLE_ID_PREFIX}${styleNum + 1}`;
+      this.styles[styleId] = { ...style };
+      setWith(this, stylePath, styleId);
+    }
+  }
   setCellStyle(style: Partial<StyleType>, ranges: Range[]): void {
     const [range] = ranges;
     const { row, col, rowCount, colCount } = range;
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
-        const stylePath = `worksheets[${this.currentSheetId}][${r}][${c}].style`;
-        const oldStyleId = get<string>(this, stylePath, '');
-        if (oldStyleId) {
-          const oldStyle = this.styles[oldStyleId];
-          if (isEmpty(oldStyle)) {
-            this.styles[oldStyleId] = { ...style };
-          } else {
-            this.styles[oldStyleId] = {
-              ...oldStyle,
-              ...style,
-            };
-          }
-        } else {
-          const styleNum = getListMaxNum(
-            Object.keys(this.styles),
-            STYLE_ID_PREFIX,
-          );
-          const styleId = `${STYLE_ID_PREFIX}${styleNum + 1}`;
-          this.styles[styleId] = { ...style };
-          setWith(this, stylePath, styleId);
-        }
+        this.setStyle(style, { row: r, col: c });
       }
     }
   }

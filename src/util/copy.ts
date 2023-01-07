@@ -1,21 +1,24 @@
-import type { ClipboardType, ClipboardData } from "@/types";
+import type { ClipboardType, ClipboardData } from '@/types';
+
+export const PLAIN_FORMAT = 'text/plain';
+export const HTML_FORMAT = 'text/html';
 
 function select(element: HTMLTextAreaElement) {
-  const isReadOnly = element.hasAttribute("readonly");
+  const isReadOnly = element.hasAttribute('readonly');
   if (!isReadOnly) {
-    element.setAttribute("readonly", "");
+    element.setAttribute('readonly', '');
   }
   element.select();
   element.setSelectionRange(0, element.value.length);
 
   if (!isReadOnly) {
-    element.removeAttribute("readonly");
+    element.removeAttribute('readonly');
   }
   return element.value;
 }
 
-export function isSupported(action = ["copy", "cut"]) {
-  const actions = typeof action === "string" ? [action] : action;
+export function isSupported(action = ['copy', 'cut']) {
+  const actions = typeof action === 'string' ? [action] : action;
   let support = !!document.queryCommandSupported;
 
   actions.forEach((action) => {
@@ -26,22 +29,22 @@ export function isSupported(action = ["copy", "cut"]) {
 }
 
 function createFakeElement(value: string) {
-  const isRTL = document.documentElement.getAttribute("dir") === "rtl";
-  const fakeElement = document.createElement("textarea");
+  const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
+  const fakeElement = document.createElement('textarea');
   // Prevent zooming on iOS
-  fakeElement.style.fontSize = "12pt";
+  fakeElement.style.fontSize = '12pt';
   // Reset box model
-  fakeElement.style.border = "0";
-  fakeElement.style.padding = "0";
-  fakeElement.style.margin = "0";
+  fakeElement.style.border = '0';
+  fakeElement.style.padding = '0';
+  fakeElement.style.margin = '0';
   // Move element out of screen horizontally
-  fakeElement.style.position = "absolute";
-  fakeElement.style[isRTL ? "right" : "left"] = "-9999px";
+  fakeElement.style.position = 'absolute';
+  fakeElement.style[isRTL ? 'right' : 'left'] = '-9999px';
   // Move element to the same position vertically
   let yPosition = window.pageYOffset || document.documentElement.scrollTop;
   fakeElement.style.top = `${yPosition}px`;
 
-  fakeElement.setAttribute("readonly", "");
+  fakeElement.setAttribute('readonly', '');
   fakeElement.value = value;
 
   return fakeElement;
@@ -59,18 +62,18 @@ function writeDataToClipboard(textData: ClipboardData) {
 
 async function readDataFromClipboard(): Promise<ClipboardData> {
   const result: ClipboardData = {
-    "text/html": "",
-    "text/plain": "",
+    [HTML_FORMAT]: '',
+    [PLAIN_FORMAT]: '',
   };
   const list = await navigator.clipboard.read();
   for (const item of list) {
-    if (item.types.includes("text/plain")) {
-      const buf = await item.getType("text/plain");
-      result["text/plain"] = await buf.text();
+    if (item.types.includes(PLAIN_FORMAT)) {
+      const buf = await item.getType(PLAIN_FORMAT);
+      result[PLAIN_FORMAT] = await buf.text();
     }
-    if (item.types.includes("text/html")) {
-      const buf = await item.getType("text/html");
-      result["text/html"] = await buf.text();
+    if (item.types.includes(HTML_FORMAT)) {
+      const buf = await item.getType(HTML_FORMAT);
+      result[HTML_FORMAT] = await buf.text();
     }
   }
   console.log(result);
@@ -80,7 +83,7 @@ async function readDataFromClipboard(): Promise<ClipboardData> {
 const fakeCopyAction = (
   value: string,
   container: HTMLElement,
-  type: "copy" | "cut"
+  type: 'copy' | 'cut',
 ) => {
   const fakeElement = createFakeElement(value);
   container.appendChild(fakeElement);
@@ -94,20 +97,20 @@ const fakeCopyAction = (
 export async function copy(textData: ClipboardData): Promise<string> {
   try {
     await writeDataToClipboard(textData);
-    return textData["text/plain"];
+    return textData[PLAIN_FORMAT];
   } catch (error) {
     console.error(error);
-    return fakeCopyAction(textData["text/plain"], document.body, "copy");
+    return fakeCopyAction(textData[PLAIN_FORMAT], document.body, 'copy');
   }
 }
 
 export async function cut(textData: ClipboardData): Promise<string> {
   try {
     await writeDataToClipboard(textData);
-    return textData["text/plain"];
+    return textData[PLAIN_FORMAT];
   } catch (error) {
     console.error(error);
-    return fakeCopyAction(textData["text/plain"], document.body, "cut");
+    return fakeCopyAction(textData[PLAIN_FORMAT], document.body, 'cut');
   }
 }
 export async function paste(): Promise<ClipboardData> {
@@ -117,8 +120,8 @@ export async function paste(): Promise<ClipboardData> {
     console.log(error);
     const result = await navigator.clipboard.readText();
     return {
-      "text/html": "",
-      "text/plain": result,
+      [HTML_FORMAT]: '',
+      [PLAIN_FORMAT]: result,
     };
   }
 }

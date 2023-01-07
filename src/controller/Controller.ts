@@ -15,15 +15,21 @@ import {
   IRange,
   ResultType,
 } from '@/types';
-import { parseReference, controllerLog, Range, assert, isEmpty } from '@/util';
+import {
+  parseReference,
+  controllerLog,
+  Range,
+  assert,
+  isEmpty,
+  PLAIN_FORMAT,
+  HTML_FORMAT,
+} from '@/util';
 
 const DEFAULT_ACTIVE_CELL = { row: 0, col: 0 };
-const CELL_HEIGHT = 20;
+const CELL_HEIGHT = 19;
 const CELL_WIDTH = 68;
-const ROW_TITLE_HEIGHT = 20;
+const ROW_TITLE_HEIGHT = 19;
 const COL_TITLE_WIDTH = 34;
-const PLAIN_TEXT = 'text/plain';
-const HTML_TEXT = 'text/html';
 
 const defaultScrollValue: ScrollValue = {
   top: 0,
@@ -32,6 +38,67 @@ const defaultScrollValue: ScrollValue = {
   col: 0,
   scrollLeft: 0,
   scrollTop: 0,
+};
+
+const parseStyle = (
+  styleList: NodeListOf<HTMLStyleElement>,
+  selector: string,
+): Partial<StyleType> => {
+  for (const item of styleList) {
+    if (item.sheet?.cssRules) {
+      for (const rule of item.sheet?.cssRules) {
+        if (rule instanceof CSSStyleRule) {
+          if (rule.selectorText === selector) {
+            const {
+              color,
+              backgroundColor,
+              fontSize,
+              fontFamily,
+              fontStyle,
+              fontWeight,
+              whiteSpace,
+            } = rule.style;
+            const result: Partial<StyleType> = {};
+            if (color) {
+              result.fontColor = color;
+            }
+            if (backgroundColor) {
+              result.fillColor = backgroundColor;
+            }
+            if (fontSize) {
+              const size = parseInt(fontSize, 10);
+              if (!isNaN(size)) {
+                result.fontSize = size;
+              }
+            }
+            if (fontFamily) {
+              result.fontFamily = fontFamily;
+            }
+            if (fontStyle === 'italic') {
+              result.isItalic = true;
+            }
+            if (['700', '800', '900', 'bold', 'bolder'].includes(fontWeight)) {
+              result.isBold = true;
+            }
+            if (
+              [
+                'normal',
+                'pre-wrap',
+                'pre-line',
+                'break-spaces',
+                'revert',
+                'unset',
+              ].includes(whiteSpace)
+            ) {
+              result.isWrapText = true;
+            }
+            return result;
+          }
+        }
+      }
+    }
+  }
+  return {};
 };
 
 export class Controller implements IController {
@@ -51,8 +118,8 @@ export class Controller implements IController {
     },
     async paste() {
       return {
-        'text/html': '',
-        'text/plain': '',
+        [HTML_FORMAT]: '',
+        [PLAIN_FORMAT]: '',
       };
     },
   };
@@ -180,9 +247,13 @@ export class Controller implements IController {
     return this.model.toJSON();
   }
 
-  setCellValues(value: string[][], ranges: IRange[]): void {
+  setCellValues(
+    value: string[][],
+    style: Partial<StyleType>[][],
+    ranges: IRange[],
+  ): void {
     controllerLog('setCellValue', value);
-    this.model.setCellValues(value, ranges);
+    this.model.setCellValues(value, style, ranges);
     this.changeSet.add('contentChange');
     this.emitChange();
   }
@@ -365,8 +436,52 @@ export class Controller implements IController {
         colCount = item.length;
       }
     }
+    if (list.length === 0) {
+      return;
+    }
     const activeCell = this.getActiveCell();
-    this.model.setCellValues(list, this.ranges);
+    this.model.setCellValues(list, [], this.ranges);
+    this.changeSet.add('contentChange');
+    this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
+  }
+  private parseHTML(htmlString: string) {
+    const parser = new DOMParser();
+    const text = htmlString
+      .replace('<style>\r\n<!--table', '<style>')
+      .replace('-->\r\n</style>', '</style>');
+    const doc = parser.parseFromString(text, 'text/html');
+    const trList = doc.querySelectorAll('tr');
+    const styleList = doc.querySelectorAll('style');
+    const result: string[][] = [];
+    const resultStyle: Partial<StyleType>[][] = [];
+    const rowCount = trList.length;
+    let colCount = 0;
+
+    for (const item of trList) {
+      const tdList = item.querySelectorAll('td');
+      const temp: string[] = [];
+      const list: Partial<StyleType>[] = [];
+      for (const td of tdList) {
+        let itemStyle: Partial<StyleType> = {};
+        if (td.className) {
+          itemStyle = parseStyle(styleList, '.' + td.className);
+        } else {
+          itemStyle = parseStyle(styleList, td.tagName.toLowerCase());
+        }
+        list.push(itemStyle);
+        temp.push(td.textContent || '');
+      }
+      result.push(temp);
+      resultStyle.push(list);
+      if (temp.length > colCount) {
+        colCount = temp.length;
+      }
+    }
+    if (result.length === 0) {
+      return;
+    }
+    const activeCell = this.getActiveCell();
+    this.model.setCellValues(result, resultStyle, this.ranges);
     this.changeSet.add('contentChange');
     this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
   }
@@ -379,22 +494,28 @@ export class Controller implements IController {
         result.push(new Array(range.colCount).fill(''));
       }
       // clear cut data
-      this.model.setCellValues(result, this.cutRanges);
+      this.model.setCellValues(result, [], this.cutRanges);
     }
+    let html: string = '';
+    let text: string = '';
     if (!event) {
       const data = await this.hooks.paste();
-      this.parseText(data[PLAIN_TEXT]);
+      html = data[HTML_FORMAT];
+      text = data[PLAIN_FORMAT];
     } else {
-      const text = event.clipboardData?.getData(PLAIN_TEXT) || '';
-      // TODO: parse html
+      html = event.clipboardData?.getData(HTML_FORMAT) || '';
+      text = event.clipboardData?.getData(PLAIN_FORMAT) || '';
+    }
+    if (html) {
+      this.parseHTML(html);
+    } else {
       this.parseText(text);
     }
     if (this.cutRanges.length) {
       this.cutRanges = [];
-      // clear clipboard
       this.hooks.copy({
-        [PLAIN_TEXT]: '',
-        [HTML_TEXT]: '',
+        [PLAIN_FORMAT]: '',
+        [HTML_FORMAT]: '',
       });
     }
   }
@@ -417,12 +538,12 @@ export class Controller implements IController {
     this.isDrawAntLine = true;
     const text = this.getCopyData();
     if (event) {
-      event.clipboardData?.setData(PLAIN_TEXT, text);
-      event.clipboardData?.setData(HTML_TEXT, '');
+      event.clipboardData?.setData(PLAIN_FORMAT, text);
+      event.clipboardData?.setData(HTML_FORMAT, '');
     } else {
       this.hooks.copy({
-        [PLAIN_TEXT]: text,
-        [HTML_TEXT]: '',
+        [PLAIN_FORMAT]: text,
+        [HTML_FORMAT]: '',
       });
     }
     this.changeSet.add('selectionChange');
@@ -433,12 +554,12 @@ export class Controller implements IController {
     const text = this.getCopyData();
     this.cutRanges = this.ranges.slice();
     if (event) {
-      event.clipboardData?.setData(PLAIN_TEXT, text);
-      event.clipboardData?.setData(HTML_TEXT, '');
+      event.clipboardData?.setData(PLAIN_FORMAT, text);
+      event.clipboardData?.setData(HTML_FORMAT, '');
     } else {
       this.hooks.copy({
-        [PLAIN_TEXT]: text,
-        [HTML_TEXT]: '',
+        [PLAIN_FORMAT]: text,
+        [HTML_FORMAT]: '',
       });
     }
     this.changeSet.add('selectionChange');

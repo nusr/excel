@@ -2,6 +2,8 @@ import { StoreValue, IController, KeyboardEventItem } from '@/types';
 import { FORMULA_EDITOR_ID, debounce } from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 
+const DOUBLE_CLICK_TIME = 300;
+
 interface IHitInfo {
   width: number;
   height: number;
@@ -49,7 +51,7 @@ export function registerEvents(
   canvas: HTMLCanvasElement,
   resizeWindow: () => void,
 ): void {
-  let isClick = false;
+  let lastTimeStamp = 0;
   const inputDom = document.querySelector<HTMLInputElement>(
     `#${FORMULA_EDITOR_ID}`,
   )!;
@@ -109,12 +111,11 @@ export function registerEvents(
     controller.cut(event);
   });
 
-  canvas.addEventListener('click', function (event) {
-    isClick = true;
+  canvas.addEventListener('mousedown', function (event) {
     stateValue.contextMenuPosition = undefined;
     const headerSize = controller.getHeaderSize();
     const canvasRect = controller.getDomRect();
-    const { clientX, clientY } = event;
+    const { timeStamp, clientX, clientY } = event;
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;
     const position = getHitInfo(event, controller);
@@ -153,19 +154,13 @@ export function registerEvents(
     if (!check) {
       controller.setActiveCell(position.row, position.col, 1, 1);
     }
-
-    isClick = false;
-  });
-  canvas.addEventListener('dblclick', function () {
-    isClick = true;
-    stateValue.isCellEditing = true;
-    isClick = false;
-  });
-
-  canvas.addEventListener('mousemove', function (event) {
-    if (!isClick) {
-      return;
+    const delay = timeStamp - lastTimeStamp;
+    if (delay < DOUBLE_CLICK_TIME) {
+      stateValue.isCellEditing = true;
     }
+    lastTimeStamp = timeStamp;
+  });
+  canvas.addEventListener('mousemove', function (event) {
     const headerSize = controller.getHeaderSize();
     const rect = controller.getDomRect();
     const { clientX, clientY } = event;

@@ -11,10 +11,6 @@ export enum EHorizontalAlign {
   CENTER,
   RIGHT,
 }
-export enum EWrap {
-  OVERFLOW,
-  AUTO_WRAP,
-}
 export type StyleType = {
   fontColor: string;
   fillColor: string;
@@ -22,7 +18,7 @@ export type StyleType = {
   fontFamily: string;
   verticalAlign: EVerticalAlign;
   horizontalAlign: EHorizontalAlign;
-  wrapText: EWrap;
+  isWrapText: boolean;
   format: string;
   isUnderline: boolean;
   isItalic: boolean;
@@ -65,7 +61,11 @@ export interface IModel extends IBaseModel {
 }
 
 export interface IBaseModel {
-  setCellValues(value: string[][], ranges: IRange[]): void;
+  setCellValues(
+    value: string[][],
+    style: Partial<StyleType>[][],
+    ranges: IRange[],
+  ): void;
   setActiveCell(
     row: number,
     col: number,

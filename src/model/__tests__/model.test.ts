@@ -14,6 +14,7 @@ describe('model.test.ts', () => {
     expect(model.queryCell(0, 0)).toEqual({ style: undefined });
     model.setCellValues(
       [['test']],
+      [],
       [new Range(0, 0, 1, 1, model.getCurrentSheetId())],
     );
     expect(model.queryCell(0, 0)).toEqual({

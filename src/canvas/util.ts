@@ -12,7 +12,7 @@ import {
   dpr,
   isEmpty,
 } from "@/util";
-import { CellInfo, ErrorTypes, EWrap, Point } from "@/types";
+import { CellInfo, ErrorTypes, Point } from "@/types";
 
 export const getStyle = (
   key: "lineHeight" | "letterSpacing",
@@ -206,7 +206,7 @@ export function renderCell(
     canvasLineHeight,
     getStyle("lineHeight")
   );
-  if (style?.wrapText === EWrap.AUTO_WRAP) {
+  if (style?.isWrapText) {
     const y = top;
     result.wrapHeight = fillWrapText(ctx, text, x, y, width, textHeight);
   } else {

@@ -13,7 +13,7 @@ import {
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
 } from '@/util';
-import { StyleType, EWrap } from '@/types';
+import { StyleType } from '@/types';
 
 export const ToolbarContainer: SmartComponent = (state, controller) => {
   const getItemStyle = (value: string | number) => {
@@ -33,7 +33,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     fontColor = DEFAULT_FONT_COLOR,
     fillColor = '',
     fontFamily = DEFAULT_FONT_FAMILY,
-    wrapText,
+    isWrapText,
   } = style;
   return h(
     'div',
@@ -87,9 +87,9 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     Button(
       {
         onClick: () => {
-          setCellStyle({ wrapText: EWrap.AUTO_WRAP });
+          setCellStyle({ isWrapText: true });
         },
-        active: wrapText === EWrap.AUTO_WRAP,
+        active: isWrapText,
         testId: 'toolbar-wrap-text',
       },
       'Wrap Text',
