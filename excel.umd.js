@@ -3462,15 +3462,21 @@ var __export__ = (() => {
       const { row, col } = result;
       return { row, col };
     }
-    setActiveCell(row, col, rowCount, colCount) {
+    setRanges(row, col, rowCount, colCount) {
       const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
       if (row < 0 || col < 0 || row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
-        return;
+        return false;
       }
       this.model.setActiveCell(row, col, rowCount, colCount);
       this.ranges = [
         new Range(row, col, rowCount, colCount, this.getCurrentSheetId())
       ];
+      return true;
+    }
+    setActiveCell(row, col, rowCount, colCount) {
+      if (!this.setRanges(row, col, rowCount, colCount)) {
+        return;
+      }
       this.changeSet.add("selectionChange");
       this.emitChange();
     }
@@ -3480,15 +3486,14 @@ var __export__ = (() => {
       }
       this.model.setCurrentSheetId(id);
       const pos = this.getActiveCell();
-      this.setActiveCell(pos.row, pos.col, 1, 1);
-      this.changeSet.add("contentChange");
+      this.setRanges(pos.row, pos.col, 1, 1);
       this.computeViewSize();
-      this.emitChange();
+      this.setScroll(this.getScroll());
     }
     addSheet() {
       this.model.addSheet();
       this.computeViewSize();
-      this.model.setActiveCell(0, 0, 1, 1);
+      this.setRanges(0, 0, 1, 1);
       this.setScroll({
         top: 0,
         left: 0,
@@ -3501,7 +3506,7 @@ var __export__ = (() => {
     fromJSON(json) {
       controllerLog("loadJSON", json);
       this.model.fromJSON(json);
-      this.model.setActiveCell(0, 0, 1, 1);
+      this.setRanges(0, 0, 1, 1);
       this.computeViewSize();
       this.changeSet.add("contentChange");
       this.emitChange(false);
