@@ -541,6 +541,7 @@ export class Controller implements IController {
       event.clipboardData?.setData(PLAIN_FORMAT, text);
       event.clipboardData?.setData(HTML_FORMAT, '');
     } else {
+      // TODO: generate html string
       this.hooks.copy({
         [PLAIN_FORMAT]: text,
         [HTML_FORMAT]: '',
@@ -557,6 +558,7 @@ export class Controller implements IController {
       event.clipboardData?.setData(PLAIN_FORMAT, text);
       event.clipboardData?.setData(HTML_FORMAT, '');
     } else {
+      // TODO: generate html string
       this.hooks.copy({
         [PLAIN_FORMAT]: text,
         [HTML_FORMAT]: '',
