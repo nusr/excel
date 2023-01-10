@@ -1,5 +1,5 @@
 import { h, SmartComponent, CSSProperties } from '@/react';
-import { QueryCellResult, CanvasOverlayPosition } from '@/types';
+import { ModelCellType, CanvasOverlayPosition } from '@/types';
 import {
   DEFAULT_FONT_COLOR,
   makeFont,
@@ -9,7 +9,7 @@ import {
 } from '@/util';
 
 export function getEditorStyle(
-  style: QueryCellResult['style'],
+  style: ModelCellType['style'],
   cellPosition: CanvasOverlayPosition,
 ): CSSProperties | undefined {
   if (isEmpty(style)) {

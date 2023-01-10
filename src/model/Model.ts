@@ -1,10 +1,9 @@
 import {
   StyleType,
-  QueryCellResult,
+  ModelCellType,
   WorkBookJSON,
   WorksheetType,
   Coordinate,
-  ModelCellType,
   IModel,
   ResultType,
 } from '@/types';
@@ -13,8 +12,6 @@ import {
   assert,
   modelLog,
   Range,
-  getListMaxNum,
-  STYLE_ID_PREFIX,
   intToColumnName,
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
@@ -39,7 +36,6 @@ export class Model implements IModel {
   private currentSheetId = '';
   private workbook: WorkBookJSON['workbook'] = [];
   private worksheets: WorkBookJSON['worksheets'] = {};
-  private styles: WorkBookJSON['styles'] = {};
   private mergeCells: WorkBookJSON['mergeCells'] = [];
   getSheetList(): WorkBookJSON['workbook'] {
     return this.workbook;
@@ -96,24 +92,17 @@ export class Model implements IModel {
   }
   fromJSON(json: WorkBookJSON): void {
     modelLog('fromJSON', json);
-    const {
-      worksheets = {},
-      workbook = [],
-      styles = {},
-      mergeCells = [],
-    } = json;
+    const { worksheets = {}, workbook = [], mergeCells = [] } = json;
     this.worksheets = worksheets;
     this.workbook = workbook;
-    this.styles = styles;
     this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
     this.mergeCells = mergeCells;
     this.computeAllCell();
   }
   toJSON(): WorkBookJSON {
-    const { worksheets, styles, workbook, mergeCells } = this;
+    const { worksheets, workbook, mergeCells } = this;
     return {
       workbook,
-      styles,
       worksheets,
       mergeCells,
     };
@@ -158,23 +147,7 @@ export class Model implements IModel {
   }
   private setStyle(style: Partial<StyleType>, range: Coordinate) {
     const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
-    const oldStyleId = get<string>(this, stylePath, '');
-    if (oldStyleId) {
-      const oldStyle = this.styles[oldStyleId];
-      if (isEmpty(oldStyle)) {
-        this.styles[oldStyleId] = { ...style };
-      } else {
-        this.styles[oldStyleId] = {
-          ...oldStyle,
-          ...style,
-        };
-      }
-    } else {
-      const styleNum = getListMaxNum(Object.keys(this.styles), STYLE_ID_PREFIX);
-      const styleId = `${STYLE_ID_PREFIX}${styleNum + 1}`;
-      this.styles[styleId] = { ...style };
-      setWith(this, stylePath, styleId);
-    }
+    setWith(this, stylePath, style);
   }
   setCellStyle(style: Partial<StyleType>, ranges: Range[]): void {
     const [range] = ranges;
@@ -189,19 +162,14 @@ export class Model implements IModel {
     row: number,
     col: number,
     sheetId: string = '',
-  ): QueryCellResult => {
+  ): ModelCellType => {
     const realSheetId = sheetId || this.currentSheetId;
     const cellData = get<ModelCellType>(
       this,
       `worksheets[${realSheetId}][${row}][${col}]`,
       {},
     );
-    const { style } = cellData;
-    let temp = undefined;
-    if (style && this.styles[style]) {
-      temp = this.styles[style];
-    }
-    return { ...cellData, style: temp };
+    return cellData;
   };
   private computeAllCell() {
     const sheetData = this.worksheets[this.currentSheetId];

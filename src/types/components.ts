@@ -1,4 +1,4 @@
-import { QueryCellResult, WorkBookJSON } from './model';
+import { ModelCellType, WorkBookJSON } from './model';
 import { IWindowSize } from './event';
 export type OptionItem = {
   value: string | number;
@@ -17,7 +17,7 @@ export interface Coordinate {
   col: number;
 }
 
-export type CellInfo = QueryCellResult & Coordinate;
+export type CellInfo = ModelCellType & Coordinate;
 
 export type ScrollValue = {
   left: number;

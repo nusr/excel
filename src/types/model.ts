@@ -38,10 +38,6 @@ export type ModelCellType = {
   formula?: string;
   width?: number;
   height?: number;
-  style?: string;
-};
-
-export type QueryCellResult = Omit<ModelCellType, 'style'> & {
   style?: Partial<StyleType>;
 };
 
@@ -49,15 +45,18 @@ export type ModelCellValue = ModelCellType & { col: number; row: number };
 
 export type ModelColType = Record<string, ModelCellType>;
 export type ModelRowType = Record<string, ModelColType>;
+export type MergeCellItem = {
+  start: Coordinate;
+  end: Coordinate;
+};
 export type WorkBookJSON = {
   workbook: WorksheetType[];
   worksheets: Record<string, ModelRowType>;
-  styles: Record<string, Partial<StyleType>>;
-  mergeCells?: string[];
+  mergeCells: MergeCellItem[];
 };
 
 export interface IModel extends IBaseModel {
-  queryCell(row: number, col: number, sheetId?: string): QueryCellResult;
+  queryCell(row: number, col: number, sheetId?: string): ModelCellType;
 }
 
 export interface IBaseModel {

@@ -20,11 +20,13 @@ export const MOCK_MODEL: WorkBookJSON = {
   ],
   worksheets: {
     Sheet1: {
-      '0': {
-        '0': {
+      0: {
+        0: {
           value: '',
           formula: '=SUM(1, SUM(1,2))',
-          style: '1',
+          style: {
+            fontColor: '#ff0000',
+          },
         },
         '1': {
           value: '',
@@ -33,61 +35,56 @@ export const MOCK_MODEL: WorkBookJSON = {
         '2': {
           value: '',
           formula: '=SUM(A1)',
-          style: '2',
         },
         '3': {
           value: '超大字',
-          style: '3',
+          style: {
+            fontSize: 36,
+          },
         },
         4: {
           value: '这是一段非常长的文案，需要换行展示',
-          style: '4',
+          style: {
+            isWrapText: true,
+          },
         },
       },
-      '3': {
+      3: {
         0: {
-          style: 'style1',
+          style: {
+            fillColor: 'red',
+          },
         },
         1: {
-          style: 'style1',
-        },
-        2: {
-          style: 'style1',
-        },
-        3: {
-          style: 'style1',
+          style: {
+            fillColor: 'red',
+          },
         },
       },
-      '4': {
+      4: {
         0: {
-          style: 'style1',
+          style: {
+            fillColor: 'red',
+          },
         },
         1: {
-          style: 'style1',
-        },
-        2: {
-          style: 'style1',
-        },
-        3: {
-          style: 'style1',
+          style: {
+            fillColor: 'red',
+          },
         },
       },
     },
   },
-  styles: {
-    '1': {
-      fontColor: '#ff0000',
+  mergeCells: [
+    {
+      start: {
+        row: 7,
+        col: 0,
+      },
+      end: {
+        row: 8,
+        col: 1,
+      },
     },
-    '2': {},
-    style1: {
-      fillColor: 'red',
-    },
-    '3': {
-      fontSize: 36,
-    },
-    4: {
-      isWrapText: true,
-    },
-  },
-  mergeCells: ['D2:E3'],
+  ],
 };
