@@ -126,7 +126,6 @@ var __export__ = (() => {
 
   // src/util/constant.ts
   var SHEET_NAME_PREFIX = "Sheet";
-  var STYLE_ID_PREFIX = "style";
   var DEFAULT_ROW_COUNT = 200;
   var DEFAULT_COL_COUNT = 30;
   var MAIN_CANVAS_ID = "main-canvas-id";
@@ -3142,7 +3141,10 @@ var __export__ = (() => {
       };
     };
     const setCellStyle = (value) => {
-      controller.setCellStyle(value, controller.getRanges());
+      const cellData = controller.getCell(controller.getActiveCell());
+      const styleData = cellData.style || {};
+      Object.assign(styleData, value);
+      controller.setCellStyle(styleData, controller.getRanges());
     };
     const { activeCell, canRedo, canUndo, fontFamilyList } = state;
     const { style = {} } = activeCell;
@@ -5239,7 +5241,6 @@ var __export__ = (() => {
     currentSheetId = "";
     workbook = [];
     worksheets = {};
-    styles = {};
     mergeCells = [];
     getSheetList() {
       return this.workbook;
@@ -5296,24 +5297,17 @@ var __export__ = (() => {
     }
     fromJSON(json) {
       modelLog("fromJSON", json);
-      const {
-        worksheets = {},
-        workbook = [],
-        styles = {},
-        mergeCells = []
-      } = json;
+      const { worksheets = {}, workbook = [], mergeCells = [] } = json;
       this.worksheets = worksheets;
       this.workbook = workbook;
-      this.styles = styles;
       this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
       this.mergeCells = mergeCells;
       this.computeAllCell();
     }
     toJSON() {
-      const { worksheets, styles, workbook, mergeCells } = this;
+      const { worksheets, workbook, mergeCells } = this;
       return {
         workbook,
-        styles,
         worksheets,
         mergeCells
       };
@@ -5353,23 +5347,7 @@ var __export__ = (() => {
     }
     setStyle(style, range) {
       const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
-      const oldStyleId = get(this, stylePath, "");
-      if (oldStyleId) {
-        const oldStyle = this.styles[oldStyleId];
-        if (isEmpty(oldStyle)) {
-          this.styles[oldStyleId] = { ...style };
-        } else {
-          this.styles[oldStyleId] = {
-            ...oldStyle,
-            ...style
-          };
-        }
-      } else {
-        const styleNum = getListMaxNum(Object.keys(this.styles), STYLE_ID_PREFIX);
-        const styleId = `${STYLE_ID_PREFIX}${styleNum + 1}`;
-        this.styles[styleId] = { ...style };
-        setWith(this, stylePath, styleId);
-      }
+      setWith(this, stylePath, style);
     }
     setCellStyle(style, ranges) {
       const [range] = ranges;
@@ -5387,12 +5365,7 @@ var __export__ = (() => {
         `worksheets[${realSheetId}][${row}][${col}]`,
         {}
       );
-      const { style } = cellData;
-      let temp = void 0;
-      if (style && this.styles[style]) {
-        temp = this.styles[style];
-      }
-      return { ...cellData, style: temp };
+      return cellData;
     };
     computeAllCell() {
       const sheetData = this.worksheets[this.currentSheetId];
@@ -5535,11 +5508,13 @@ var __export__ = (() => {
     ],
     worksheets: {
       Sheet1: {
-        "0": {
-          "0": {
+        0: {
+          0: {
             value: "",
             formula: "=SUM(1, SUM(1,2))",
-            style: "1"
+            style: {
+              fontColor: "#ff0000"
+            }
           },
           "1": {
             value: "",
@@ -5547,64 +5522,59 @@ var __export__ = (() => {
           },
           "2": {
             value: "",
-            formula: "=SUM(A1)",
-            style: "2"
+            formula: "=SUM(A1)"
           },
           "3": {
             value: "\u8D85\u5927\u5B57",
-            style: "3"
+            style: {
+              fontSize: 36
+            }
           },
           4: {
             value: "\u8FD9\u662F\u4E00\u6BB5\u975E\u5E38\u957F\u7684\u6587\u6848\uFF0C\u9700\u8981\u6362\u884C\u5C55\u793A",
-            style: "4"
+            style: {
+              isWrapText: true
+            }
           }
         },
-        "3": {
+        3: {
           0: {
-            style: "style1"
+            style: {
+              fillColor: "red"
+            }
           },
           1: {
-            style: "style1"
-          },
-          2: {
-            style: "style1"
-          },
-          3: {
-            style: "style1"
+            style: {
+              fillColor: "red"
+            }
           }
         },
-        "4": {
+        4: {
           0: {
-            style: "style1"
+            style: {
+              fillColor: "red"
+            }
           },
           1: {
-            style: "style1"
-          },
-          2: {
-            style: "style1"
-          },
-          3: {
-            style: "style1"
+            style: {
+              fillColor: "red"
+            }
           }
         }
       }
     },
-    styles: {
-      "1": {
-        fontColor: "#ff0000"
-      },
-      "2": {},
-      style1: {
-        fillColor: "red"
-      },
-      "3": {
-        fontSize: 36
-      },
-      4: {
-        isWrapText: true
+    mergeCells: [
+      {
+        start: {
+          row: 7,
+          col: 0
+        },
+        end: {
+          row: 8,
+          col: 1
+        }
       }
-    },
-    mergeCells: ["D2:E3"]
+    ]
   };
 
   // src/init.ts
