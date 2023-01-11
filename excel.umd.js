@@ -1578,7 +1578,7 @@ var __export__ = (() => {
   function fillText(ctx, text, x, y) {
     ctx.fillText(text, npx(x), npx(y));
   }
-  function fillWrapText(ctx, text, x, y, cellWidth, lineHeight) {
+  function fillWrapText(ctx, text, x, y, cellWidth, lineHeight, underline) {
     let line = "";
     const textList = text.split("");
     let testWidth = 0;
@@ -1590,6 +1590,16 @@ var __export__ = (() => {
       const { width } = measureText(ctx, char);
       if (testWidth + width > realCellWidth) {
         fillText(ctx, line, x, y);
+        if (underline) {
+          drawUnderline(
+            ctx,
+            [
+              [x, y + lineHeight / 2],
+              [x + cellWidth, y + lineHeight / 2]
+            ],
+            underline
+          );
+        }
         line = char;
         y += lineHeight;
         testWidth = width;
@@ -1601,22 +1611,31 @@ var __export__ = (() => {
     }
     if (line) {
       fillText(ctx, line, x, y);
+      if (underline) {
+        drawUnderline(
+          ctx,
+          [
+            [x, y + lineHeight / 2],
+            [x + testWidth / 2, y + lineHeight / 2]
+          ],
+          underline
+        );
+      }
     }
     return wrapHeight;
   }
   function fillTexts(ctx, text, x, y, cellWidth) {
     let line = "";
-    const textList = text.split("");
+    const textList = [...text];
     let testWidth = 0;
     const realCellWidth = cellWidth * 2;
-    let textWidth = 0;
     for (let i = 0; i < textList.length; i++) {
       const char = textList[i];
       const { width } = measureText(ctx, char);
       if (testWidth + width > realCellWidth) {
         if (i === 0) {
-          textWidth = width;
           line = char;
+          testWidth += width;
         }
         break;
       } else {
@@ -1625,7 +1644,7 @@ var __export__ = (() => {
       }
     }
     fillText(ctx, line, x, y);
-    return textWidth;
+    return testWidth;
   }
   function renderCell(ctx, cellInfo, canvasLineHeight) {
     const { style, value, left, top, width, height } = cellInfo;
@@ -1666,12 +1685,41 @@ var __export__ = (() => {
       canvasLineHeight,
       getStyle("lineHeight")
     );
+    if (style?.underline) {
+      ctx.strokeStyle = fillStyle;
+    }
     if (style?.isWrapText) {
       const y = top;
-      result.wrapHeight = fillWrapText(ctx, text, x, y, width, textHeight);
+      result.wrapHeight = fillWrapText(
+        ctx,
+        text,
+        x,
+        y,
+        width,
+        textHeight,
+        style?.underline
+      );
     } else {
       const y = Math.floor(top + height / 2);
-      result.textWidth = fillTexts(ctx, text, x, y, width);
+      let textWidth = fillTexts(ctx, text, x, y, width);
+      if (style?.underline) {
+        const t = y + textHeight / 2;
+        let list = [];
+        textWidth = Math.min(textWidth, width);
+        if (!isNum2) {
+          list = [
+            [x, t],
+            [x + textWidth, t]
+          ];
+        } else {
+          const a = left + width;
+          list = [
+            [a - textWidth, t],
+            [a, t]
+          ];
+        }
+        drawUnderline(ctx, list, style?.underline);
+      }
     }
     return {
       ...result,
@@ -1708,6 +1756,18 @@ var __export__ = (() => {
       height - offset * 2
     );
     ctx.setLineDash(oldDash);
+  }
+  function drawUnderline(ctx, pointList, underline) {
+    const [start, end] = pointList;
+    const offset = dpr();
+    const list = [
+      [start[0], start[1] - offset],
+      [end[0], end[1] - offset]
+    ];
+    if (underline === 2 /* DOUBLE */) {
+      list.push([start[0], start[1] - offset * 2], [end[0], end[1] - offset * 2]);
+    }
+    drawLines(ctx, list);
   }
 
   // src/canvas/Main.ts
@@ -3134,6 +3194,20 @@ var __export__ = (() => {
   ColorPicker.displayName = "ColorPicker";
 
   // src/containers/ToolBar/index.ts
+  var underlineList = [
+    {
+      value: 0 /* NONE */,
+      label: "none"
+    },
+    {
+      value: 1 /* SINGLE */,
+      label: "single underline"
+    },
+    {
+      value: 2 /* DOUBLE */,
+      label: "double underline"
+    }
+  ];
   var ToolbarContainer = (state, controller) => {
     const getItemStyle = (value) => {
       return {
@@ -3149,13 +3223,14 @@ var __export__ = (() => {
     const { activeCell, canRedo, canUndo, fontFamilyList } = state;
     const { style = {} } = activeCell;
     const {
-      isBold,
-      isItalic,
+      isBold = false,
+      isItalic = false,
       fontSize = DEFAULT_FONT_SIZE,
       fontColor = DEFAULT_FONT_COLOR,
       fillColor = "",
       fontFamily = DEFAULT_FONT_FAMILY,
-      isWrapText
+      isWrapText = false,
+      underline = 0 /* NONE */
     } = style;
     return h(
       "div",
@@ -3206,6 +3281,16 @@ var __export__ = (() => {
         },
         Icon({ name: "italic" })
       ),
+      Select({
+        data: underlineList,
+        value: underline,
+        style: {
+          width: "130px"
+        },
+        onChange: (value) => {
+          setCellStyle({ underline: Number(value) });
+        }
+      }),
       Button(
         {
           onClick: () => {
@@ -3450,6 +3535,14 @@ var __export__ = (() => {
     if (style.isWrapText) {
       result += `white-space:normal;`;
     }
+    if (style.underline) {
+      result += "text-decoration:underline;";
+      if (style.underline === 2 /* DOUBLE */) {
+        result += "text-decoration-style: double;";
+      } else {
+        result += "text-decoration-style: single;";
+      }
+    }
     return result;
   }
   function convertCSSStyleToCanvasStyle(style) {
@@ -3460,7 +3553,8 @@ var __export__ = (() => {
       fontFamily,
       fontStyle,
       fontWeight,
-      whiteSpace
+      whiteSpace,
+      textDecoration
     } = style;
     const result = {};
     if (color2) {
@@ -3481,7 +3575,7 @@ var __export__ = (() => {
     if (fontStyle === "italic") {
       result.isItalic = true;
     }
-    if (fontWeight && ["700", "800", "900", "bold", "bolder"].includes(fontWeight)) {
+    if (fontWeight && ["700", "800", "900", "bold"].includes(fontWeight)) {
       result.isBold = true;
     }
     if (whiteSpace && [
@@ -3493,6 +3587,9 @@ var __export__ = (() => {
       "unset"
     ].includes(whiteSpace)) {
       result.isWrapText = true;
+    }
+    if (textDecoration === "underline") {
+      result.underline = 1 /* SINGLE */;
     }
     return result;
   }
@@ -5516,15 +5613,15 @@ var __export__ = (() => {
               fontColor: "#ff0000"
             }
           },
-          "1": {
+          1: {
             value: "",
             formula: "=SUM(1,4)"
           },
-          "2": {
+          2: {
             value: "",
             formula: "=SUM(A1)"
           },
-          "3": {
+          3: {
             value: "\u8D85\u5927\u5B57",
             style: {
               fontSize: 36
@@ -5533,7 +5630,8 @@ var __export__ = (() => {
           4: {
             value: "\u8FD9\u662F\u4E00\u6BB5\u975E\u5E38\u957F\u7684\u6587\u6848\uFF0C\u9700\u8981\u6362\u884C\u5C55\u793A",
             style: {
-              isWrapText: true
+              isWrapText: true,
+              underline: 1 /* SINGLE */
             }
           }
         },
