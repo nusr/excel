@@ -11,6 +11,11 @@ export enum EHorizontalAlign {
   CENTER,
   RIGHT,
 }
+export enum EUnderLine {
+  NONE = 0,
+  SINGLE,
+  DOUBLE,
+}
 export type StyleType = {
   fontColor: string;
   fillColor: string;
@@ -19,11 +24,9 @@ export type StyleType = {
   verticalAlign: EVerticalAlign;
   horizontalAlign: EHorizontalAlign;
   isWrapText: boolean;
-  format: string;
-  isUnderline: boolean;
+  underline: EUnderLine;
   isItalic: boolean;
   isBold: boolean;
-  isCrossOut: boolean;
 };
 export type WorksheetType = {
   sheetId: string;
@@ -36,9 +39,8 @@ export type WorksheetType = {
 export type ModelCellType = {
   value?: ResultType;
   formula?: string;
-  width?: number;
-  height?: number;
   style?: Partial<StyleType>;
+  format?: string;
 };
 
 export type ModelCellValue = ModelCellType & { col: number; row: number };

@@ -16,6 +16,7 @@ import {
   ResultType,
   ClipboardData,
   ClipboardType,
+  EUnderLine,
 } from '@/types';
 import {
   parseReference,
@@ -66,6 +67,14 @@ function convertCanvasStyleToString(style: Partial<StyleType>): string {
   if (style.isWrapText) {
     result += `white-space:normal;`;
   }
+  if (style.underline) {
+    result += 'text-decoration:underline;';
+    if (style.underline === EUnderLine.DOUBLE) {
+      result += 'text-decoration-style: double;';
+    } else {
+      result += 'text-decoration-style: single;';
+    }
+  }
 
   return result;
 }
@@ -81,6 +90,7 @@ function convertCSSStyleToCanvasStyle(
     fontStyle,
     fontWeight,
     whiteSpace,
+    textDecoration,
   } = style;
   const result: Partial<StyleType> = {};
   if (color) {
@@ -101,10 +111,7 @@ function convertCSSStyleToCanvasStyle(
   if (fontStyle === 'italic') {
     result.isItalic = true;
   }
-  if (
-    fontWeight &&
-    ['700', '800', '900', 'bold', 'bolder'].includes(fontWeight)
-  ) {
+  if (fontWeight && ['700', '800', '900', 'bold'].includes(fontWeight)) {
     result.isBold = true;
   }
   if (
@@ -119,6 +126,10 @@ function convertCSSStyleToCanvasStyle(
     ].includes(whiteSpace)
   ) {
     result.isWrapText = true;
+  }
+  if (textDecoration === 'underline') {
+    result.underline = EUnderLine.SINGLE;
+    // TODO: parse double underline
   }
   return result;
 }

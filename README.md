@@ -25,6 +25,7 @@ npm run start
 - Font size
 - Font bold
 - Font italic
+- Font underline
 - Text color
 - Fill color
 - Text wrapping

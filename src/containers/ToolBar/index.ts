@@ -13,7 +13,22 @@ import {
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
 } from '@/util';
-import { StyleType } from '@/types';
+import { StyleType, EUnderLine, OptionItem } from '@/types';
+
+const underlineList: OptionItem[] = [
+  {
+    value: EUnderLine.NONE,
+    label: 'none',
+  },
+  {
+    value: EUnderLine.SINGLE,
+    label: 'single underline',
+  },
+  {
+    value: EUnderLine.DOUBLE,
+    label: 'double underline',
+  },
+];
 
 export const ToolbarContainer: SmartComponent = (state, controller) => {
   const getItemStyle = (value: string | number) => {
@@ -22,21 +37,22 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     };
   };
   const setCellStyle = (value: Partial<StyleType>) => {
-    const cellData = controller.getCell(controller.getActiveCell())
-    const styleData = cellData.style || {}
-    Object.assign(styleData, value)
+    const cellData = controller.getCell(controller.getActiveCell());
+    const styleData = cellData.style || {};
+    Object.assign(styleData, value);
     controller.setCellStyle(styleData, controller.getRanges());
   };
   const { activeCell, canRedo, canUndo, fontFamilyList } = state;
   const { style = {} } = activeCell;
   const {
-    isBold,
-    isItalic,
+    isBold = false,
+    isItalic = false,
     fontSize = DEFAULT_FONT_SIZE,
     fontColor = DEFAULT_FONT_COLOR,
     fillColor = '',
     fontFamily = DEFAULT_FONT_FAMILY,
-    isWrapText,
+    isWrapText = false,
+    underline = EUnderLine.NONE,
   } = style;
   return h(
     'div',
@@ -87,6 +103,16 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
       },
       Icon({ name: 'italic' }),
     ),
+    Select({
+      data: underlineList,
+      value: underline,
+      style: {
+        width: '130px',
+      },
+      onChange: (value) => {
+        setCellStyle({ underline: Number(value) });
+      },
+    }),
     Button(
       {
         onClick: () => {
