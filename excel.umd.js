@@ -396,7 +396,10 @@ var __export__ = (() => {
   // src/util/reference.ts
   var isCharacter = (char) => char >= "a" && char <= "z" || char >= "A" && char <= "Z";
   var isNum = (char) => char >= "0" && char <= "9";
-  function parseCell(ref) {
+  function convertSheetNameToSheetId(value) {
+    return value;
+  }
+  function parseCell(ref, convertSheetName = convertSheetNameToSheetId) {
     if (typeof ref !== "string" || !ref) {
       return null;
     }
@@ -446,16 +449,22 @@ var __export__ = (() => {
     if (row === -1 || col === -1) {
       return null;
     }
-    const range = new Range(row, col, rowCount, colCount, sheetName);
+    const range = new Range(
+      row,
+      col,
+      rowCount,
+      colCount,
+      convertSheetName(sheetName)
+    );
     return range;
   }
-  function parseReference(text) {
+  function parseReference(text, convertSheetName = convertSheetNameToSheetId) {
     const [cell1, cell2] = text.split(":");
-    const startCell = parseCell(cell1);
+    const startCell = parseCell(cell1, convertSheetName);
     if (!startCell) {
       return null;
     }
-    const endCell = parseCell(cell2);
+    const endCell = parseCell(cell2, convertSheetName);
     if (!endCell) {
       return startCell;
     }
@@ -1680,7 +1689,7 @@ var __export__ = (() => {
     const x = left + (isNum2 ? width : 0);
     const result = {};
     const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
-    const textHeight = Math.max(
+    const textHeight = Math.min(
       fontSizeHeight,
       canvasLineHeight,
       getStyle("lineHeight")
@@ -3257,6 +3266,34 @@ var __export__ = (() => {
         },
         Icon({ name: "redo" })
       ),
+      Select({
+        data: fontFamilyList,
+        value: fontFamily,
+        style: {
+          width: "140px"
+        },
+        getItemStyle,
+        onChange: (value) => {
+          setCellStyle({ fontFamily: String(value) });
+        }
+      }),
+      Select({
+        data: FONT_SIZE_LIST,
+        value: fontSize,
+        onChange: (value) => {
+          setCellStyle({ fontSize: Number(value) });
+        }
+      }),
+      Button(
+        {
+          onClick: () => {
+            setCellStyle({ isWrapText: !isWrapText });
+          },
+          active: isWrapText,
+          testId: "toolbar-wrap-text"
+        },
+        "Wrap Text"
+      ),
       Button(
         {
           active: isBold,
@@ -3291,44 +3328,6 @@ var __export__ = (() => {
           setCellStyle({ underline: Number(value) });
         }
       }),
-      Button(
-        {
-          onClick: () => {
-            setCellStyle({ isWrapText: !isWrapText });
-          },
-          active: isWrapText,
-          testId: "toolbar-wrap-text"
-        },
-        "Wrap Text"
-      ),
-      Select({
-        data: fontFamilyList,
-        value: fontFamily,
-        style: {
-          width: "140px"
-        },
-        getItemStyle,
-        onChange: (value) => {
-          setCellStyle({ fontFamily: String(value) });
-        }
-      }),
-      Select({
-        data: FONT_SIZE_LIST,
-        value: fontSize,
-        onChange: (value) => {
-          setCellStyle({ fontSize: Number(value) });
-        }
-      }),
-      ColorPicker(
-        {
-          color: fontColor,
-          onChange: (value) => {
-            setCellStyle({ fontColor: value });
-          },
-          key: "font-color"
-        },
-        Icon({ name: "fontColor" })
-      ),
       ColorPicker(
         {
           key: "fill-color",
@@ -3338,6 +3337,16 @@ var __export__ = (() => {
           }
         },
         FillColorIcon({})
+      ),
+      ColorPicker(
+        {
+          color: fontColor,
+          onChange: (value) => {
+            setCellStyle({ fontColor: value });
+          },
+          key: "font-color"
+        },
+        Icon({ name: "fontColor" })
       ),
       Github({})
     );
@@ -3499,7 +3508,6 @@ var __export__ = (() => {
   App.displayName = "App";
 
   // src/controller/Controller.ts
-  var DEFAULT_ACTIVE_CELL = { row: 0, col: 0 };
   var CELL_HEIGHT = 19;
   var CELL_WIDTH = 68;
   var ROW_TITLE_HEIGHT = 19;
@@ -3648,15 +3656,7 @@ var __export__ = (() => {
     };
     constructor(model, history) {
       this.model = model;
-      this.ranges = [
-        new Range(
-          DEFAULT_ACTIVE_CELL.row,
-          DEFAULT_ACTIVE_CELL.col,
-          1,
-          1,
-          this.getCurrentSheetId()
-        )
-      ];
+      this.ranges = [new Range(0, 0, 1, 1, this.getCurrentSheetId())];
       this.history = history;
     }
     getCurrentSheetId() {
@@ -3687,13 +3687,9 @@ var __export__ = (() => {
     }
     getActiveCell() {
       const { activeCell } = this.getSheetInfo(this.model.getCurrentSheetId());
-      if (!activeCell) {
-        return { ...DEFAULT_ACTIVE_CELL };
-      }
-      const result = parseReference(activeCell);
-      assert(!!result);
-      const { row, col } = result;
-      return { row, col };
+      return {
+        ...activeCell
+      };
     }
     setRanges(row, col, rowCount, colCount) {
       const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
@@ -3934,7 +3930,6 @@ var __export__ = (() => {
     parseHTML(htmlString) {
       const parser = new DOMParser();
       const text = htmlString.replace("<style>\r\n<!--table", "<style>").replace("-->\r\n</style>", "</style>");
-      console.log(text);
       const doc = parser.parseFromString(text, "text/html");
       const trList = doc.querySelectorAll("tr");
       const styleList = doc.querySelectorAll("style");
@@ -5113,7 +5108,7 @@ var __export__ = (() => {
       throw new CustomError("#NAME?");
     }
     visitCellExpression(data) {
-      const t = parseCell(data.value.value);
+      const t = parseCell(data.value.value, this.cellDataMap.convertSheetNameToSheetId);
       if (t === null) {
         throw new CustomError("#REF!");
       }
@@ -5184,7 +5179,8 @@ var __export__ = (() => {
           const right = this.convertToCellExpression(expr.right);
           if (left !== null && right !== null) {
             const result = parseReference(
-              `${left.value.value}:${right.value.value}`
+              `${left.value.value}:${right.value.value}`,
+              this.cellDataMap.convertSheetNameToSheetId
             );
             if (result === null) {
               throw new CustomError("#REF!");
@@ -5312,6 +5308,9 @@ var __export__ = (() => {
       const key = this.getKey(row, col, sheetId);
       return this.map.get(key);
     }
+    convertSheetNameToSheetId(value) {
+      return value;
+    }
   };
   var VariableMapImpl = class {
     map = /* @__PURE__ */ new Map();
@@ -5348,8 +5347,13 @@ var __export__ = (() => {
       );
       if (index >= 0) {
         const tempList = Array.from(this.workbook);
-        const activeCell = `${intToColumnName(col)}${row + 1}`;
-        tempList.splice(index, 1, { ...this.workbook[index], activeCell });
+        tempList.splice(index, 1, {
+          ...this.workbook[index],
+          activeCell: {
+            row,
+            col
+          }
+        });
         this.workbook = tempList;
       }
     }
@@ -5357,7 +5361,15 @@ var __export__ = (() => {
       const item = getDefaultSheetInfo(this.workbook);
       this.workbook = [
         ...this.workbook,
-        { ...item, colCount: DEFAULT_COL_COUNT, rowCount: DEFAULT_ROW_COUNT }
+        {
+          ...item,
+          colCount: DEFAULT_COL_COUNT,
+          rowCount: DEFAULT_ROW_COUNT,
+          activeCell: {
+            row: 0,
+            col: 0
+          }
+        }
       ];
       this.currentSheetId = item.sheetId;
     }
@@ -5368,6 +5380,7 @@ var __export__ = (() => {
     }
     setCurrentSheetId(id) {
       this.currentSheetId = id;
+      this.computeAllCell();
     }
     getCurrentSheetId() {
       return this.currentSheetId;
@@ -5487,6 +5500,10 @@ var __export__ = (() => {
           return temp.value;
         },
         set: () => {
+        },
+        convertSheetNameToSheetId: (sheetName) => {
+          const item = this.workbook.find((v) => v.name === sheetName);
+          return item?.sheetId || "";
         }
       });
       return result.error ? result.error : result.result;
@@ -5589,9 +5606,12 @@ var __export__ = (() => {
   var MOCK_MODEL = {
     workbook: [
       {
-        sheetId: "Sheet1",
+        sheetId: "1",
         name: "Sheet1",
-        activeCell: "B2",
+        activeCell: {
+          row: 1,
+          col: 1
+        },
         colCount: 16384,
         rowCount: 1048576
       },
@@ -5600,11 +5620,14 @@ var __export__ = (() => {
         name: "test",
         colCount: DEFAULT_COL_COUNT,
         rowCount: DEFAULT_ROW_COUNT,
-        activeCell: "F5"
+        activeCell: {
+          row: 4,
+          col: 4
+        }
       }
     ],
     worksheets: {
-      Sheet1: {
+      1: {
         0: {
           0: {
             value: "",
@@ -5659,18 +5682,22 @@ var __export__ = (() => {
             }
           }
         }
+      },
+      2: {
+        0: {
+          0: {
+            formula: "=Sheet1!A1"
+          }
+        }
       }
     },
     mergeCells: [
       {
-        start: {
-          row: 7,
-          col: 0
-        },
-        end: {
-          row: 8,
-          col: 1
-        }
+        row: 7,
+        col: 0,
+        rowCount: 2,
+        colCount: 2,
+        sheetId: "1"
       }
     ]
   };
