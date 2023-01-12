@@ -136,7 +136,7 @@ export class Interpreter implements Visitor {
     throw new CustomError('#NAME?');
   }
   visitCellExpression(data: CellExpression) {
-    const t = parseCell(data.value.value);
+    const t = parseCell(data.value.value, this.cellDataMap.convertSheetNameToSheetId);
     if (t === null) {
       throw new CustomError('#REF!');
     }
@@ -211,6 +211,7 @@ export class Interpreter implements Visitor {
         if (left !== null && right !== null) {
           const result = parseReference(
             `${left.value.value}:${right.value.value}`,
+            this.cellDataMap.convertSheetNameToSheetId,
           );
           if (result === null) {
             throw new CustomError('#REF!');

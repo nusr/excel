@@ -47,6 +47,7 @@ export interface FunctionMap {
 export interface CellDataMap {
   set(row: number, col: number, sheetId: string, value: any): void;
   get(row: number, col: number, sheetId: string): any;
+  convertSheetNameToSheetId(sheetName: string): string;
 }
 
 export interface VariableMap {
@@ -61,3 +62,6 @@ export type InterpreterResult = {
 };
 
 export type ReferenceType = 'absolute' | 'mixed' | 'relative';
+
+
+export type ConvertSheetName = (value: string) => string;

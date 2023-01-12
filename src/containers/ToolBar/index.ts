@@ -79,6 +79,34 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
       },
       Icon({ name: 'redo' }),
     ),
+    Select({
+      data: fontFamilyList,
+      value: fontFamily,
+      style: {
+        width: '140px',
+      },
+      getItemStyle: getItemStyle,
+      onChange: (value) => {
+        setCellStyle({ fontFamily: String(value) });
+      },
+    }),
+    Select({
+      data: FONT_SIZE_LIST,
+      value: fontSize,
+      onChange: (value) => {
+        setCellStyle({ fontSize: Number(value) });
+      },
+    }),
+    Button(
+      {
+        onClick: () => {
+          setCellStyle({ isWrapText: !isWrapText });
+        },
+        active: isWrapText,
+        testId: 'toolbar-wrap-text',
+      },
+      'Wrap Text',
+    ),
     Button(
       {
         active: isBold,
@@ -113,44 +141,6 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
         setCellStyle({ underline: Number(value) });
       },
     }),
-    Button(
-      {
-        onClick: () => {
-          setCellStyle({ isWrapText: !isWrapText });
-        },
-        active: isWrapText,
-        testId: 'toolbar-wrap-text',
-      },
-      'Wrap Text',
-    ),
-    Select({
-      data: fontFamilyList,
-      value: fontFamily,
-      style: {
-        width: '140px',
-      },
-      getItemStyle: getItemStyle,
-      onChange: (value) => {
-        setCellStyle({ fontFamily: String(value) });
-      },
-    }),
-    Select({
-      data: FONT_SIZE_LIST,
-      value: fontSize,
-      onChange: (value) => {
-        setCellStyle({ fontSize: Number(value) });
-      },
-    }),
-    ColorPicker(
-      {
-        color: fontColor,
-        onChange: (value) => {
-          setCellStyle({ fontColor: value });
-        },
-        key: 'font-color',
-      },
-      Icon({ name: 'fontColor' }),
-    ),
     ColorPicker(
       {
         key: 'fill-color',
@@ -161,6 +151,17 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
       },
       FillColorIcon({}),
     ),
+    ColorPicker(
+      {
+        color: fontColor,
+        onChange: (value) => {
+          setCellStyle({ fontColor: value });
+        },
+        key: 'font-color',
+      },
+      Icon({ name: 'fontColor' }),
+    ),
+
     Github({}),
   );
 };

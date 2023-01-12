@@ -31,7 +31,7 @@ export type StyleType = {
 export type WorksheetType = {
   sheetId: string;
   name: string;
-  activeCell?: string;
+  activeCell: Coordinate;
   rowCount: number;
   colCount: number;
 };
@@ -54,7 +54,7 @@ export type MergeCellItem = {
 export type WorkBookJSON = {
   workbook: WorksheetType[];
   worksheets: Record<string, ModelRowType>;
-  mergeCells: MergeCellItem[];
+  mergeCells: IRange[];
 };
 
 export interface IModel extends IBaseModel {

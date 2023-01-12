@@ -12,7 +12,6 @@ import {
   assert,
   modelLog,
   Range,
-  intToColumnName,
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
   isEmpty,
@@ -46,8 +45,13 @@ export class Model implements IModel {
     );
     if (index >= 0) {
       const tempList = Array.from(this.workbook);
-      const activeCell = `${intToColumnName(col)}${row + 1}`;
-      tempList.splice(index, 1, { ...this.workbook[index], activeCell });
+      tempList.splice(index, 1, {
+        ...this.workbook[index],
+        activeCell: {
+          row,
+          col,
+        },
+      });
       this.workbook = tempList;
     }
   }
@@ -55,7 +59,15 @@ export class Model implements IModel {
     const item = getDefaultSheetInfo(this.workbook);
     this.workbook = [
       ...this.workbook,
-      { ...item, colCount: DEFAULT_COL_COUNT, rowCount: DEFAULT_ROW_COUNT },
+      {
+        ...item,
+        colCount: DEFAULT_COL_COUNT,
+        rowCount: DEFAULT_ROW_COUNT,
+        activeCell: {
+          row: 0,
+          col: 0,
+        },
+      },
     ];
     this.currentSheetId = item.sheetId;
   }
@@ -66,6 +78,7 @@ export class Model implements IModel {
   }
   setCurrentSheetId(id: string): void {
     this.currentSheetId = id;
+    this.computeAllCell()
   }
   getCurrentSheetId(): string {
     return this.currentSheetId;
@@ -194,6 +207,10 @@ export class Model implements IModel {
         return temp.value;
       },
       set: () => {},
+      convertSheetNameToSheetId: (sheetName: string): string =>  {
+        const item = this.workbook.find(v => v.name === sheetName);
+        return item?.sheetId || '';
+      }
     });
     return result.error ? result.error : result.result;
   }

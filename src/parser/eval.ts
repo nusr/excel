@@ -119,6 +119,9 @@ export class CellDataMapImpl implements CellDataMap {
     const key = this.getKey(row, col, sheetId);
     return this.map.get(key);
   }
+  convertSheetNameToSheetId(value: string): string {
+    return value;
+  }
 }
 
 export class VariableMapImpl implements VariableMap {

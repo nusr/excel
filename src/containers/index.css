@@ -25,19 +25,16 @@
 
 .toolbar-wrapper {
   width: 100%;
-  padding: 0 20px;
+  padding: 10px 20px;
   box-sizing: border-box;
-  height: 40px;
   background-color: #f3f3f3;
   border-bottom: 1px solid var(--gridStrokeColor);
   display: flex;
   align-items: center;
 }
-
 .toolbar-wrapper > * {
   margin-right: 8px;
 }
-
 .formula-bar-wrapper {
   width: 100%;
   box-sizing: border-box;

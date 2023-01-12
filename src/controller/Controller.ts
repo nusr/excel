@@ -19,17 +19,14 @@ import {
   EUnderLine,
 } from '@/types';
 import {
-  parseReference,
   controllerLog,
   Range,
-  assert,
   isEmpty,
   PLAIN_FORMAT,
   HTML_FORMAT,
   generateHTML,
 } from '@/util';
 
-const DEFAULT_ACTIVE_CELL = { row: 0, col: 0 };
 const CELL_HEIGHT = 19;
 const CELL_WIDTH = 68;
 const ROW_TITLE_HEIGHT = 19;
@@ -192,15 +189,7 @@ export class Controller implements IController {
   };
   constructor(model: IModel, history: IHistory) {
     this.model = model;
-    this.ranges = [
-      new Range(
-        DEFAULT_ACTIVE_CELL.row,
-        DEFAULT_ACTIVE_CELL.col,
-        1,
-        1,
-        this.getCurrentSheetId(),
-      ),
-    ];
+    this.ranges = [new Range(0, 0, 1, 1, this.getCurrentSheetId())];
     this.history = history;
   }
   getCurrentSheetId(): string {
@@ -231,13 +220,9 @@ export class Controller implements IController {
   }
   getActiveCell(): Coordinate {
     const { activeCell } = this.getSheetInfo(this.model.getCurrentSheetId());
-    if (!activeCell) {
-      return { ...DEFAULT_ACTIVE_CELL };
-    }
-    const result = parseReference(activeCell);
-    assert(!!result);
-    const { row, col } = result;
-    return { row, col };
+    return {
+      ...activeCell,
+    };
   }
   private setRanges(
     row: number,
@@ -509,7 +494,6 @@ export class Controller implements IController {
     const text = htmlString
       .replace('<style>\r\n<!--table', '<style>')
       .replace('-->\r\n</style>', '</style>');
-    console.log(text);
     const doc = parser.parseFromString(text, 'text/html');
     const trList = doc.querySelectorAll('tr');
     const styleList = doc.querySelectorAll('style');

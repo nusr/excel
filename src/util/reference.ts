@@ -6,15 +6,22 @@ const isCharacter = (char: string) =>
   (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z');
 const isNum = (char: string) => char >= '0' && char <= '9';
 
-export function parseCell(ref: string): Range | null {
+function convertSheetNameToSheetId(value: string) {
+  return value;
+}
+
+export function parseCell(
+  ref: string,
+  convertSheetName = convertSheetNameToSheetId,
+): Range | null {
   if (typeof ref !== 'string' || !ref) {
     return null;
   }
   const realRef = ref.trim();
   let [sheetName, other = ''] = realRef.split('!');
   if (!realRef.includes('!')) {
-    sheetName = ''
-    other = realRef
+    sheetName = '';
+    other = realRef;
   }
   let i = 0;
   let rowText = '';
@@ -55,19 +62,28 @@ export function parseCell(ref: string): Range | null {
     col = columnNameToInt(colText);
   }
   if (row === -1 || col === -1) {
-    return null
+    return null;
   }
-  const range = new Range(row, col, rowCount, colCount, sheetName);
+  const range = new Range(
+    row,
+    col,
+    rowCount,
+    colCount,
+    convertSheetName(sheetName),
+  );
   return range;
 }
 
-export function parseReference(text: string): Range | null {
+export function parseReference(
+  text: string,
+  convertSheetName = convertSheetNameToSheetId,
+): Range | null {
   const [cell1, cell2] = text.split(':');
-  const startCell = parseCell(cell1);
+  const startCell = parseCell(cell1, convertSheetName);
   if (!startCell) {
     return null;
   }
-  const endCell = parseCell(cell2);
+  const endCell = parseCell(cell2, convertSheetName);
   if (!endCell) {
     return startCell;
   }

@@ -221,7 +221,7 @@ export function renderCell(
   const x = left + (isNum ? width : 0);
   const result: IRenderCellResult = {};
   const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
-  const textHeight = Math.max(
+  const textHeight = Math.min(
     fontSizeHeight,
     canvasLineHeight,
     getStyle('lineHeight'),
