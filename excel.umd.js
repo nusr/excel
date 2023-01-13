@@ -251,9 +251,6 @@ var __export__ = (() => {
   };
 
   // src/util/util.ts
-  var isString = (value) => {
-    return typeof value === "string";
-  };
   function isNumber(value) {
     if (typeof value === "number" && !window.isNaN(value)) {
       return true;
@@ -458,25 +455,15 @@ var __export__ = (() => {
     );
     return range;
   }
-  function parseReference(text, convertSheetName = convertSheetNameToSheetId) {
-    const [cell1, cell2] = text.split(":");
-    const startCell = parseCell(cell1, convertSheetName);
-    if (!startCell) {
+  function mergeRange(start, end) {
+    if (start.sheetId !== end.sheetId) {
       return null;
     }
-    const endCell = parseCell(cell2, convertSheetName);
-    if (!endCell) {
-      return startCell;
-    }
-    const rowCount = endCell.row - startCell.row + 1;
-    const colCount = endCell.col - startCell.col + 1;
-    return new Range(
-      startCell.row,
-      startCell.col,
-      rowCount,
-      colCount,
-      endCell.sheetId
-    );
+    const rowCount = Math.abs(start.row - end.row) + 1;
+    const colCount = Math.abs(start.col - end.col) + 1;
+    const row = start.row < end.row ? start.row : end.row;
+    const col = start.col < end.col ? start.col : end.col;
+    return new Range(row, col, rowCount, colCount, start.sheetId);
   }
 
   // src/util/debug.ts
@@ -619,7 +606,6 @@ var __export__ = (() => {
         result[HTML_FORMAT] = await buf.text();
       }
     }
-    console.log(result);
     return result;
   }
   var fakeCopyAction = (value, container, type) => {
@@ -652,7 +638,7 @@ var __export__ = (() => {
     try {
       return readDataFromClipboard();
     } catch (error) {
-      console.log(error);
+      console.error(error);
       const result = await navigator.clipboard.readText();
       return {
         [HTML_FORMAT]: "",
@@ -2171,7 +2157,6 @@ var __export__ = (() => {
       if (inputDom === event.target) {
         return;
       }
-      console.log(event.key);
       stateValue.isCellEditing = true;
       inputDom.focus();
     });
@@ -2728,7 +2713,6 @@ var __export__ = (() => {
     const { headerSize } = state;
     function handleDrag(event) {
       event.stopPropagation();
-      console.log(event);
       if (scrollStatus === 1 /* VERTICAL */) {
         if (prevPageY) {
           scrollBar2(controller, 0, event.pageY - prevPageY);
@@ -4134,7 +4118,7 @@ var __export__ = (() => {
     }
   };
 
-  // src/parser/error.ts
+  // src/parser/formula/error.ts
   var CustomError = class extends Error {
     value;
     constructor(value) {
@@ -4142,6 +4126,185 @@ var __export__ = (() => {
       this.value = value;
     }
   };
+  var paramsError = new CustomError("#VALUE!");
+  var resultError = new CustomError("#NUM!");
+  function assert2(condition, message = "#VALUE!") {
+    if (!condition) {
+      throw new CustomError(message);
+    }
+  }
+  function mustOne(list) {
+    assert2(list.length === 1);
+    const [value] = list;
+    return value;
+  }
+  function mustOneString(list) {
+    const value = mustOne(list);
+    assert2(typeof value === "string");
+    return value;
+  }
+  function mustOneNumber(list) {
+    const value = mustOne(list);
+    assert2(typeof value === "number" && !isNaN(value));
+    return value;
+  }
+  function mustEmpty(list) {
+    assert2(list.length === 0);
+  }
+
+  // src/parser/formula/text.ts
+  var T = (...list) => {
+    const value = mustOne(list);
+    return typeof value === "string" ? value : "";
+  };
+  var LOWER = (...list) => {
+    const value = mustOneString(list);
+    return value.toLowerCase();
+  };
+  var CHAR = (...list) => {
+    const value = mustOneNumber(list);
+    return String.fromCharCode(value);
+  };
+  var CODE = (...list) => {
+    const value = mustOneString(list);
+    return value.charCodeAt(0);
+  };
+  var LEN = (...list) => {
+    const value = mustOneString(list);
+    return value.length;
+  };
+  var SPLIT = (...list) => {
+    assert2(list.length === 2);
+    const [value, sep] = list;
+    assert2(typeof value === "string");
+    assert2(typeof sep === "string");
+    return value.split(sep);
+  };
+  var UPPER = (...list) => {
+    const value = mustOneString(list);
+    return value.toUpperCase();
+  };
+  var TRIM = (...list) => {
+    const value = mustOneString(list);
+    return value.replace(/ +/g, " ").trim();
+  };
+  var CONCAT = (...list) => {
+    assert2(list.length <= MAX_PARAMS_COUNT);
+    return list.join("");
+  };
+  var textFormulas = {
+    CONCAT,
+    CONCATENATE: CONCAT,
+    SPLIT,
+    CHAR,
+    CODE,
+    UNICHAR: CHAR,
+    UNICODE: CODE,
+    LEN,
+    LOWER,
+    UPPER,
+    TRIM,
+    T
+  };
+  var text_default = textFormulas;
+
+  // src/parser/formula/math.ts
+  var ABS = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.abs(data);
+  };
+  var ACOS = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.acos(data);
+  };
+  var ACOSH = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.log(data + Math.sqrt(data * data - 1));
+  };
+  var ACOT = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.atan(1 / data);
+  };
+  var ACOTH = (...list) => {
+    const data = mustOneNumber(list);
+    return 0.5 * Math.log((data + 1) / (data - 1));
+  };
+  var ASIN = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.asin(data);
+  };
+  var ASINH = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.log(data + Math.sqrt(data * data + 1));
+  };
+  var ATAN = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.atan(data);
+  };
+  var ATANH = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.log((1 + data) / (data + 1)) / 2;
+  };
+  var COS = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.cos(data);
+  };
+  var COT = (...list) => {
+    const data = mustOneNumber(list);
+    return 1 / Math.tan(data);
+  };
+  var EXP = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.exp(data);
+  };
+  var INT = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.floor(data);
+  };
+  var PI = (...list) => {
+    mustEmpty(list);
+    return Math.PI;
+  };
+  var E = (...list) => {
+    mustEmpty(list);
+    return Math.E;
+  };
+  var SIN = (...list) => {
+    const data = mustOneNumber(list);
+    return Math.sin(data);
+  };
+  var SUM = (...rest) => {
+    const list = parseNumberArray(rest);
+    assert2(list.length <= MAX_PARAMS_COUNT);
+    return list.reduce((sum, cur) => sum + cur, 0);
+  };
+  var formulas = {
+    ABS,
+    ACOS,
+    ACOSH,
+    ACOT,
+    ACOTH,
+    ASIN,
+    ASINH,
+    ATAN,
+    ATANH,
+    COT,
+    COS,
+    EXP,
+    INT,
+    PI,
+    E,
+    SIN,
+    SUM
+  };
+  var math_default = formulas;
+
+  // src/parser/formula/index.ts
+  var formulas2 = {
+    ...text_default,
+    ...math_default
+  };
+  var formula_default = formulas2;
 
   // src/parser/scanner.ts
   var emptyData = "";
@@ -4162,7 +4325,7 @@ var __export__ = (() => {
         this.start = this.current;
         this.scanToken();
       }
-      this.tokens.push(new Token(26 /* EOF */, ""));
+      this.tokens.push(new Token(27 /* EOF */, ""));
       if (this.tokens.length > 0 && this.tokens[0].type === 0 /* EQUAL */) {
         this.tokens.shift();
       }
@@ -4291,6 +4454,9 @@ var __export__ = (() => {
         case '"':
           this.string(c);
           break;
+        case "!":
+          this.addToken(26 /* EXCLAMATION */);
+          break;
         case ";":
           this.addToken(25 /* SEMICOLON */);
           break;
@@ -4318,7 +4484,7 @@ var __export__ = (() => {
       }
     }
     anyChar(c) {
-      const text = '(),:=<>+-*/^&%"{}';
+      const text = '(),:=<>+-*/^&%"{}!';
       return !text.includes(c) && !this.isWhiteSpace(c);
     }
     isWhiteSpace(c) {
@@ -4608,11 +4774,10 @@ var __export__ = (() => {
         const name = this.previous();
         const { value, type } = name;
         const realValue = value.toUpperCase();
-        const newToken = new Token(type, realValue);
         if (errorSet.has(realValue)) {
           return new ErrorExpression(new Token(type, realValue));
         }
-        if (realValue && realValue[realValue.length - 1] === "!") {
+        if (this.match(26 /* EXCLAMATION */)) {
           const expr = this.expression();
           if (expr instanceof CellExpression) {
             return new CellExpression(expr.value, expr.type, name);
@@ -4622,6 +4787,7 @@ var __export__ = (() => {
         if (/^[a-z]+$/i.test(value)) {
           return new DefineNameExpression(name);
         }
+        const newToken = new Token(type, realValue);
         if (/^\$[A-Z]+\$\d+$/.test(realValue) || /^\$[A-Z]+$/.test(realValue) || /^\$\d+$/.test(realValue)) {
           return new CellExpression(newToken, "absolute", null);
         }
@@ -4665,341 +4831,15 @@ var __export__ = (() => {
       this.current++;
     }
     isAtEnd() {
-      return this.peek().type === 26 /* EOF */;
+      return this.peek().type === 27 /* EOF */;
     }
     peek() {
       if (this.current < this.tokens.length) {
         return this.tokens[this.current];
       }
-      return new Token(26 /* EOF */, "");
+      return new Token(27 /* EOF */, "");
     }
   };
-
-  // src/parser/formula/text.ts
-  var T = (value) => {
-    return typeof value === "string" ? value : "";
-  };
-  var LOWER = (value) => value.toLowerCase();
-  var CHAR = (value) => String.fromCharCode(value);
-  var CODE = (value) => value.charCodeAt(0);
-  var LEN = (value) => value.length;
-  var SPLIT = (value, sep) => value.split(sep);
-  var UNICHAR = CHAR;
-  var UNICODE = CODE;
-  var UPPER = (value) => value.toUpperCase();
-  var TRIM = (value) => value.replace(/ +/g, " ").trim();
-  var CONCAT = (...value) => {
-    return value.join("");
-  };
-  var textFormulas = {
-    CONCAT: {
-      func: CONCAT,
-      options: {
-        paramsType: "any",
-        minParamsCount: 1,
-        maxParamsCount: 100,
-        resultType: "string"
-      }
-    },
-    CONCATENATE: {
-      func: CONCAT,
-      options: {
-        paramsType: "any",
-        minParamsCount: 1,
-        maxParamsCount: 100,
-        resultType: "string"
-      }
-    },
-    SPLIT: {
-      func: SPLIT,
-      options: {
-        paramsType: "string",
-        minParamsCount: 2,
-        maxParamsCount: 2,
-        resultType: "array string"
-      }
-    },
-    CHAR: {
-      func: CHAR,
-      options: {
-        paramsType: "string",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "string"
-      }
-    },
-    CODE: {
-      func: CODE,
-      options: {
-        paramsType: "string",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    UNICHAR: {
-      func: UNICHAR,
-      options: {
-        paramsType: "string",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "string"
-      }
-    },
-    UNICODE: {
-      func: UNICODE,
-      options: {
-        paramsType: "string",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    LEN: {
-      func: LEN,
-      options: {
-        paramsType: "string",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    LOWER: {
-      func: LOWER,
-      options: {
-        paramsType: "string",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "string"
-      }
-    },
-    UPPER: {
-      func: UPPER,
-      options: {
-        paramsType: "string",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "string"
-      }
-    },
-    TRIM: {
-      func: TRIM,
-      options: {
-        paramsType: "string",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "string"
-      }
-    },
-    T: {
-      func: T,
-      options: {
-        paramsType: "any",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "string"
-      }
-    }
-  };
-  var text_default = textFormulas;
-
-  // src/parser/formula/math.ts
-  var ABS = (data) => {
-    return Math.abs(data);
-  };
-  var ACOS = (data) => {
-    return Math.acos(data);
-  };
-  var ACOSH = (data) => {
-    return Math.log(data + Math.sqrt(data * data - 1));
-  };
-  var ACOT = (data) => {
-    return Math.atan(1 / data);
-  };
-  var ACOTH = (data) => {
-    return 0.5 * Math.log((data + 1) / (data - 1));
-  };
-  var ASIN = (data) => {
-    return Math.asin(data);
-  };
-  var ASINH = (data) => {
-    return Math.log(data + Math.sqrt(data * data + 1));
-  };
-  var ATAN = (data) => Math.atan(data);
-  var ATANH = (data) => Math.log((1 + data) / (data + 1)) / 2;
-  var COS = (data) => Math.cos(data);
-  var COT = (data) => 1 / Math.tan(data);
-  var EXP = (data) => Math.exp(data);
-  var INT = (data) => Math.floor(data);
-  var PI = () => Math.PI;
-  var SIN = (data) => Math.sin(data);
-  var SUM = (...rest) => {
-    const list = parseNumberArray(rest);
-    return list.reduce((sum, cur) => sum + cur, 0);
-  };
-  var formulas = {
-    ABS: {
-      func: ABS,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    ACOS: {
-      func: ACOS,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    ACOSH: {
-      func: ACOSH,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    ACOT: {
-      func: ACOT,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    ACOTH: {
-      func: ACOTH,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    ASIN: {
-      func: ASIN,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    ASINH: {
-      func: ASINH,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    ATAN: {
-      func: ATAN,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    ATANH: {
-      func: ATANH,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    COT: {
-      func: COT,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    COS: {
-      func: COS,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    EXP: {
-      func: EXP,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    INT: {
-      func: INT,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    PI: {
-      func: PI,
-      options: {
-        paramsType: "any",
-        minParamsCount: 0,
-        maxParamsCount: 0,
-        resultType: "number"
-      }
-    },
-    E: {
-      func: INT,
-      options: {
-        paramsType: "any",
-        minParamsCount: 0,
-        maxParamsCount: 0,
-        resultType: "number"
-      }
-    },
-    SIN: {
-      func: SIN,
-      options: {
-        paramsType: "number",
-        minParamsCount: 1,
-        maxParamsCount: 1,
-        resultType: "number"
-      }
-    },
-    SUM: {
-      func: SUM,
-      options: {
-        paramsType: "any",
-        minParamsCount: 1,
-        maxParamsCount: MAX_PARAMS_COUNT,
-        resultType: "number"
-      }
-    }
-  };
-  var math_default = formulas;
-
-  // src/parser/formula/index.ts
-  var formulas2 = {
-    ...text_default,
-    ...math_default
-  };
-  var formula_default = formulas2;
 
   // src/parser/interpreter.ts
   var Interpreter = class {
@@ -5007,7 +4847,7 @@ var __export__ = (() => {
     functionMap;
     cellDataMap;
     variableMap;
-    constructor(expressions, functionMap, cellDataMap, variableMap) {
+    constructor(expressions, cellDataMap, variableMap, functionMap) {
       this.expressions = expressions;
       this.functionMap = functionMap;
       this.cellDataMap = cellDataMap;
@@ -5087,7 +4927,8 @@ var __export__ = (() => {
       }
     }
     visitCallExpression(expr) {
-      const callee = this.functionMap.get(expr.name.value);
+      const funcName = expr.name.value.toUpperCase();
+      const callee = this.functionMap[funcName];
       if (callee && typeof callee === "function") {
         const params = [];
         for (const item of expr.params) {
@@ -5108,9 +4949,18 @@ var __export__ = (() => {
       throw new CustomError("#NAME?");
     }
     visitCellExpression(data) {
-      const t = parseCell(data.value.value, this.cellDataMap.convertSheetNameToSheetId);
+      let sheetId = "";
+      if (data.sheetName) {
+        sheetId = this.cellDataMap.convertSheetNameToSheetId(
+          data.sheetName.value
+        );
+      }
+      const t = parseCell(data.value.value);
       if (t === null) {
         throw new CustomError("#REF!");
+      }
+      if (sheetId) {
+        t.sheetId = sheetId;
       }
       return t;
     }
@@ -5178,12 +5028,11 @@ var __export__ = (() => {
           const left = this.convertToCellExpression(expr.left);
           const right = this.convertToCellExpression(expr.right);
           if (left !== null && right !== null) {
-            const result = parseReference(
-              `${left.value.value}:${right.value.value}`,
-              this.cellDataMap.convertSheetNameToSheetId
-            );
+            const a = this.visitCellExpression(left);
+            const b = this.visitCellExpression(right);
+            const result = mergeRange(a, b);
             if (result === null) {
-              throw new CustomError("#REF!");
+              throw new CustomError("#VALUE!");
             }
             return result;
           } else {
@@ -5214,59 +5063,15 @@ var __export__ = (() => {
   };
 
   // src/parser/eval.ts
-  function parseFormula(source, cellData = new CellDataMapImpl(), variableMap = new VariableMapImpl()) {
-    const func = new FunctionMapImpl();
-    const list = Object.keys(formula_default);
-    for (const key of list) {
-      func.set(key, (...args) => {
-        const item = formula_default[key];
-        if (item === null) {
-          throw new CustomError("#NAME?");
-        }
-        const { func: func2, options } = item;
-        const { paramsType, minParamsCount, maxParamsCount, resultType } = options;
-        if (paramsType === "number") {
-          if (!args.every(isNumber)) {
-            throw new CustomError("#VALUE!");
-          }
-        } else if (paramsType === "string") {
-          if (!args.every(isString)) {
-            throw new CustomError("#VALUE!");
-          }
-        }
-        if (args.length > maxParamsCount || args.length < minParamsCount) {
-          throw new CustomError("#VALUE!");
-        }
-        const result = func2(...args);
-        if (Array.isArray(result)) {
-          if (resultType !== "array string") {
-            throw new CustomError("#NUM!");
-          }
-          return result;
-        }
-        if (resultType === "number") {
-          if (!isNumber(result)) {
-            throw new CustomError("#NUM!");
-          }
-        } else if (resultType === "string") {
-          if (!isString(result)) {
-            throw new CustomError("#NUM!");
-          }
-        }
-        return result;
-      });
-    }
-    return interpret(source, func, cellData, variableMap);
-  }
-  function interpret(source, func, cellData, variableMap) {
+  function parseFormula(source, cellData = new CellDataMapImpl(), variableMap = new VariableMapImpl(), functionMap = formula_default) {
     try {
       const list = new Scanner(source).scan();
       const expressions = new Parser(list).parse();
       const result = new Interpreter(
         expressions,
-        func,
         cellData,
-        variableMap
+        variableMap,
+        functionMap
       ).interpret();
       return {
         result,
@@ -5285,20 +5090,15 @@ var __export__ = (() => {
       error: "#ERROR!"
     };
   }
-  var FunctionMapImpl = class {
-    map = /* @__PURE__ */ new Map();
-    set(name, value) {
-      this.map.set(name.toLowerCase(), value);
-    }
-    get(name) {
-      return this.map.get(name.toLowerCase());
-    }
-  };
   var CellDataMapImpl = class {
     map = /* @__PURE__ */ new Map();
+    sheetNameMap = {};
     getKey(row, col, sheetId = "") {
       const key = `${row}_${col}_${sheetId}`;
       return key;
+    }
+    setSheetNameMap(sheetNameMap) {
+      this.sheetNameMap = sheetNameMap;
     }
     set(row, col, sheetId, value) {
       const key = this.getKey(row, col, sheetId);
@@ -5308,8 +5108,11 @@ var __export__ = (() => {
       const key = this.getKey(row, col, sheetId);
       return this.map.get(key);
     }
-    convertSheetNameToSheetId(value) {
-      return value;
+    convertSheetNameToSheetId(sheetName) {
+      if (!sheetName) {
+        return "";
+      }
+      return this.sheetNameMap[sheetName] || "";
     }
   };
   var VariableMapImpl = class {
