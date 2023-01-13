@@ -1,10 +1,10 @@
-import { Range, parseReference, parseCell } from '@/util';
+import { Range, mergeRange, parseCell } from '@/util';
 import {
   TokenType,
-  FunctionMap,
   CellDataMap,
   ErrorTypes,
   VariableMap,
+  FormulaData,
 } from '@/types';
 import type {
   Visitor,
@@ -22,19 +22,19 @@ import {
   DefineNameExpression,
   GroupExpression,
 } from './expression';
-import { CustomError } from './error';
+import { CustomError } from './formula';
 import { Token } from './token';
 
 export class Interpreter implements Visitor {
   private readonly expressions: Expression[];
-  private readonly functionMap: FunctionMap;
+  private readonly functionMap: FormulaData;
   private readonly cellDataMap: CellDataMap;
   private readonly variableMap: VariableMap;
   constructor(
     expressions: Expression[],
-    functionMap: FunctionMap,
     cellDataMap: CellDataMap,
     variableMap: VariableMap,
+    functionMap: FormulaData,
   ) {
     this.expressions = expressions;
     this.functionMap = functionMap;
@@ -115,7 +115,8 @@ export class Interpreter implements Visitor {
     }
   }
   visitCallExpression(expr: CallExpression) {
-    const callee: any = this.functionMap.get(expr.name.value);
+    const funcName = expr.name.value.toUpperCase();
+    const callee: any = this.functionMap[funcName];
     if (callee && typeof callee === 'function') {
       const params: any[] = [];
       for (const item of expr.params) {
@@ -136,9 +137,18 @@ export class Interpreter implements Visitor {
     throw new CustomError('#NAME?');
   }
   visitCellExpression(data: CellExpression) {
-    const t = parseCell(data.value.value, this.cellDataMap.convertSheetNameToSheetId);
+    let sheetId = '';
+    if (data.sheetName) {
+      sheetId = this.cellDataMap.convertSheetNameToSheetId(
+        data.sheetName.value,
+      );
+    }
+    const t = parseCell(data.value.value);
     if (t === null) {
       throw new CustomError('#REF!');
+    }
+    if (sheetId) {
+      t.sheetId = sheetId;
     }
     return t;
   }
@@ -209,12 +219,11 @@ export class Interpreter implements Visitor {
         const left = this.convertToCellExpression(expr.left);
         const right = this.convertToCellExpression(expr.right);
         if (left !== null && right !== null) {
-          const result = parseReference(
-            `${left.value.value}:${right.value.value}`,
-            this.cellDataMap.convertSheetNameToSheetId,
-          );
+          const a = this.visitCellExpression(left);
+          const b = this.visitCellExpression(right);
+          const result = mergeRange(a, b);
           if (result === null) {
-            throw new CustomError('#REF!');
+            throw new CustomError('#VALUE!');
           }
           return result;
         } else {

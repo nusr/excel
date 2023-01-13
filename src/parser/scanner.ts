@@ -1,6 +1,6 @@
 import { TokenType } from '@/types';
 import { Token } from './token';
-import { CustomError } from './error';
+import { CustomError } from './formula';
 
 const emptyData = '';
 const identifierMap = new Map<string, TokenType>([
@@ -151,6 +151,9 @@ export class Scanner {
       case '"':
         this.string(c);
         break;
+      case '!':
+        this.addToken(TokenType.EXCLAMATION);
+        break;
       case ';':
         this.addToken(TokenType.SEMICOLON);
         break;
@@ -182,7 +185,7 @@ export class Scanner {
     }
   }
   private anyChar(c: string) {
-    const text = '(),:=<>+-*/^&%"{}';
+    const text = '(),:=<>+-*/^&%"{}!';
     return !text.includes(c) && !this.isWhiteSpace(c);
   }
   private isWhiteSpace(c: string) {

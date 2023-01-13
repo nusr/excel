@@ -1,15 +1,4 @@
-interface IFormulaOptions {
-  paramsType: 'number' | 'string' | 'any';
-  minParamsCount: number;
-  maxParamsCount: number;
-  resultType: 'number' | 'string' | 'array string';
-}
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type FormulaFunction = (...data: any[]) => number | string | boolean | string[];
-export type FormulaContent = {
-  func: FormulaFunction;
-  options: IFormulaOptions;
-} | null;
+ type FormulaFunction = (...data: any[]) => number | string | boolean | string[];
 
 export type TextFormulaKeys =
   | 'CONCATENATE'
@@ -46,6 +35,7 @@ export type MathFormulaKeys =
 
 export type FormulaKeys = TextFormulaKeys | MathFormulaKeys;
 
-export type TextFormulaType = Record<TextFormulaKeys, FormulaContent>;
-export type MathFormulaType = Record<MathFormulaKeys, FormulaContent>;
-export type FormulaType = Record<FormulaKeys, FormulaContent>;
+export type TextFormulaType = Record<TextFormulaKeys, FormulaFunction>;
+export type MathFormulaType = Record<MathFormulaKeys, FormulaFunction>;
+export type FormulaType = Record<FormulaKeys, FormulaFunction>;
+export type FormulaData = Record<string, FormulaFunction>;

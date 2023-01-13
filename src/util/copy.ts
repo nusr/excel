@@ -76,7 +76,6 @@ async function readDataFromClipboard(): Promise<ClipboardData> {
       result[HTML_FORMAT] = await buf.text();
     }
   }
-  console.log(result);
   return result;
 }
 
@@ -117,7 +116,7 @@ export async function paste(): Promise<ClipboardData> {
   try {
     return readDataFromClipboard();
   } catch (error) {
-    console.log(error);
+    console.error(error);
     const result = await navigator.clipboard.readText();
     return {
       [HTML_FORMAT]: '',

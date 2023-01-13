@@ -1,9 +1,9 @@
 import { SHEET_NAME_PREFIX } from './constant';
-import type { WorksheetType, ResultType } from '@/types';
-export const isString = (value: ResultType): boolean => {
+import type { WorksheetType } from '@/types';
+export const isString = (value: any): boolean => {
   return typeof value === 'string';
 };
-export function isNumber(value: ResultType): boolean {
+export function isNumber(value: any): boolean {
   if (typeof value === 'number' && !window.isNaN(value)) {
     return true;
   }
@@ -14,14 +14,14 @@ export function isNumber(value: ResultType): boolean {
   return !window.isNaN(temp) && temp === Number(value);
 }
 
-export function parseNumber(value: ResultType): number {
+export function parseNumber(value: any): number {
   if (isNumber(value)) {
     return Number(value);
   }
   return 0;
 }
 
-export function parseNumberArray(list: ResultType[]): number[] {
+export function parseNumberArray(list: any[]): number[] {
   const result: number[] = [];
   for (let i = 0; i < list.length; i++) {
     const temp = parseNumber(list[i]);

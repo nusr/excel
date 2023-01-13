@@ -35,13 +35,8 @@ export enum TokenType {
   lEFT_BRACE, // {
   RIGHT_BRACE, // }
   SEMICOLON, // ;
+  EXCLAMATION, // !
   EOF,
-}
-
-export interface FunctionMap {
-  set(name: string, value: (...list: any[]) => any): void;
-  set(name: string, value: () => any): void;
-  get(name: string): any;
 }
 
 export interface CellDataMap {

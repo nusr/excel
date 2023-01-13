@@ -83,7 +83,6 @@ export function registerEvents(
     if (inputDom === event.target) {
       return;
     }
-    console.log(event.key);
 
     stateValue.isCellEditing = true;
     inputDom.focus();

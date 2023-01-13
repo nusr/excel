@@ -1,132 +1,62 @@
 import type { TextFormulaType } from '@/types';
+import { MAX_PARAMS_COUNT } from '@/util';
+import { assert, mustOneString, mustOneNumber, mustOne } from './error';
 
-export const T = (value: unknown): string => {
+export const T = (...list: any[]): string => {
+  const value = mustOne(list);
   return typeof value === 'string' ? value : '';
 };
 
-export const LOWER = (value: string): string => value.toLowerCase();
-export const CHAR = (value: number): string => String.fromCharCode(value);
-export const CODE = (value: string): number => value.charCodeAt(0);
-export const LEN = (value: string): number => value.length;
+export const LOWER = (...list: any[]): string => {
+  const value = mustOneString(list);
+  return value.toLowerCase();
+};
+export const CHAR = (...list: any[]): string => {
+  const value = mustOneNumber(list);
+  return String.fromCharCode(value);
+};
+export const CODE = (...list: any[]): number => {
+  const value = mustOneString(list);
+  return value.charCodeAt(0);
+};
+export const LEN = (...list: any[]): number => {
+  const value = mustOneString(list);
+  return value.length;
+};
 
-export const SPLIT = (value: string, sep: string): string[] => value.split(sep);
-export const UNICHAR = CHAR;
-export const UNICODE = CODE;
-export const UPPER = (value: string): string => value.toUpperCase();
-export const TRIM = (value: string): string => value.replace(/ +/g, ' ').trim();
-export const CONCAT = (...value: any[]): string => {
-  return value.join('');
+export const SPLIT = (...list: any[]): string[] => {
+  assert(list.length === 2);
+  const [value, sep] = list;
+  assert(typeof value === 'string');
+  assert(typeof sep === 'string');
+  return value.split(sep);
+};
+export const UPPER = (...list: any[]): string => {
+  const value = mustOneString(list);
+  return value.toUpperCase();
+};
+export const TRIM = (...list: any[]): string => {
+  const value = mustOneString(list);
+  return value.replace(/ +/g, ' ').trim();
+};
+export const CONCAT = (...list: any[]): string => {
+  assert(list.length <= MAX_PARAMS_COUNT);
+  return list.join('');
 };
 
 const textFormulas: TextFormulaType = {
-  CONCAT: {
-    func: CONCAT,
-    options: {
-      paramsType: 'any',
-      minParamsCount: 1,
-      maxParamsCount: 100,
-      resultType: 'string',
-    },
-  },
-  CONCATENATE: {
-    func: CONCAT,
-    options: {
-      paramsType: 'any',
-      minParamsCount: 1,
-      maxParamsCount: 100,
-      resultType: 'string',
-    },
-  },
-  SPLIT: {
-    func: SPLIT,
-    options: {
-      paramsType: 'string',
-      minParamsCount: 2,
-      maxParamsCount: 2,
-      resultType: 'array string',
-    }
-  },
-  CHAR: {
-    func: CHAR,
-    options: {
-      paramsType: 'string',
-      minParamsCount: 1,
-      maxParamsCount: 1,
-      resultType: 'string',
-    },
-  },
-  CODE: {
-    func: CODE,
-    options: {
-      paramsType: 'string',
-      minParamsCount: 1,
-      maxParamsCount: 1,
-      resultType: 'number',
-    },
-  },
-  UNICHAR: {
-    func: UNICHAR,
-    options: {
-      paramsType: 'string',
-      minParamsCount: 1,
-      maxParamsCount: 1,
-      resultType: 'string',
-    },
-  },
-  UNICODE: {
-    func: UNICODE,
-    options: {
-      paramsType: 'string',
-      minParamsCount: 1,
-      maxParamsCount: 1,
-      resultType: 'number',
-    },
-  },
-  LEN: {
-    func: LEN,
-    options: {
-      paramsType: 'string',
-      minParamsCount: 1,
-      maxParamsCount: 1,
-      resultType: 'number',
-    },
-  },
-  LOWER: {
-    func: LOWER,
-    options: {
-      paramsType: 'string',
-      minParamsCount: 1,
-      maxParamsCount: 1,
-      resultType: 'string',
-    },
-  },
-  UPPER: {
-    func: UPPER,
-    options: {
-      paramsType: 'string',
-      minParamsCount: 1,
-      maxParamsCount: 1,
-      resultType: 'string',
-    },
-  },
-  TRIM: {
-    func: TRIM,
-    options: {
-      paramsType: 'string',
-      minParamsCount: 1,
-      maxParamsCount: 1,
-      resultType: 'string',
-    },
-  },
-  T: {
-    func: T,
-    options: {
-      paramsType: 'any',
-      minParamsCount: 1,
-      maxParamsCount: 1,
-      resultType: 'string',
-    },
-  },
+  CONCAT,
+  CONCATENATE: CONCAT,
+  SPLIT,
+  CHAR,
+  CODE,
+  UNICHAR: CHAR,
+  UNICODE: CODE,
+  LEN,
+  LOWER,
+  UPPER,
+  TRIM,
+  T,
 };
 
 export default textFormulas;

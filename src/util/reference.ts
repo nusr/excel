@@ -97,3 +97,15 @@ export function parseReference(
     endCell.sheetId,
   );
 }
+
+export function mergeRange(start: Range, end: Range): Range | null {
+  if (start.sheetId !== end.sheetId) {
+    return null;
+  }
+  const rowCount = Math.abs(start.row - end.row) + 1;
+  const colCount = Math.abs(start.col - end.col) + 1;
+  const row = start.row < end.row ? start.row : end.row;
+  const col = start.col < end.col ? start.col : end.col;
+
+  return new Range(row, col, rowCount, colCount, start.sheetId);
+}

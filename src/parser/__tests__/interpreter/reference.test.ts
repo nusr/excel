@@ -86,4 +86,15 @@ describe('parseFormula reference', () => {
       result: 15,
     });
   });
+  it('sheet cell', () => {
+    const cellDataMap = new CellDataMapImpl();
+    cellDataMap.set(0, 0, '1', 1);
+    cellDataMap.setSheetNameMap({
+      'Sheet1': '1',
+    });
+    expect(parseFormula('=Sheet1!A1', cellDataMap)).toEqual({
+      error: null,
+      result: 1,
+    });
+  });
 });

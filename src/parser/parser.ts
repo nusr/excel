@@ -15,7 +15,7 @@ import {
   ErrorExpression,
   CellRangeExpression,
 } from './expression';
-import { CustomError } from './error';
+import { CustomError } from './formula';
 
 const errorSet = new Set<ErrorTypes>([
   '#ERROR!',
@@ -166,11 +166,10 @@ export class Parser {
       const name = this.previous();
       const { value, type } = name;
       const realValue = value.toUpperCase();
-      const newToken = new Token(type, realValue);
       if (errorSet.has(realValue as ErrorTypes)) {
         return new ErrorExpression(new Token(type, realValue));
       }
-      if (realValue && realValue[realValue.length - 1] === '!') {
+      if (this.match(TokenType.EXCLAMATION)) {
         const expr = this.expression();
         if (expr instanceof CellExpression) {
           return new CellExpression(expr.value, expr.type, name);
@@ -180,6 +179,7 @@ export class Parser {
       if (/^[a-z]+$/i.test(value)) {
         return new DefineNameExpression(name);
       }
+      const newToken = new Token(type, realValue);
       if (
         /^\$[A-Z]+\$\d+$/.test(realValue) ||
         /^\$[A-Z]+$/.test(realValue) ||
@@ -199,9 +199,6 @@ export class Parser {
       this.expect(TokenType.RIGHT_BRACKET);
       return new GroupExpression(value);
     }
-    // if (this.match(TokenType.EMPTY_CHAR)) {
-      // return this.expression();
-    // }
     throw new CustomError('#ERROR!');
   }
   private match(...types: TokenType[]): boolean {

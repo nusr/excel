@@ -40,7 +40,6 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
 
   function handleDrag(event: MouseEvent) {
     event.stopPropagation();
-    console.log(event);
     if (scrollStatus === ScrollStatus.VERTICAL) {
       if (prevPageY) {
         scrollBar(controller, 0, event.pageY - prevPageY);
