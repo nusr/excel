@@ -128,8 +128,6 @@ var __export__ = (() => {
   var SHEET_NAME_PREFIX = "Sheet";
   var DEFAULT_ROW_COUNT = 200;
   var DEFAULT_COL_COUNT = 30;
-  var MAIN_CANVAS_ID = "main-canvas-id";
-  var FORMULA_EDITOR_ID = "formula-editor";
   var SCROLL_SIZE = 30;
   var BOTTOM_BUFF = 200;
   var DEBUG_COLOR_LIST = [
@@ -1760,7 +1758,8 @@ var __export__ = (() => {
       [end[0], end[1] - offset]
     ];
     if (underline === 2 /* DOUBLE */) {
-      list.push([start[0], start[1] - offset * 2], [end[0], end[1] - offset * 2]);
+      const t = offset * 2;
+      list.push([start[0], start[1] - t], [end[0], end[1] - t]);
     }
     drawLines(ctx, list);
   }
@@ -1772,6 +1771,9 @@ var __export__ = (() => {
       return null;
     }
     const [range] = ranges;
+    if (range.sheetId !== controller.getCurrentSheetId()) {
+      return null;
+    }
     let result;
     const { width, height } = controller.getDomRect();
     const headerSize = controller.getHeaderSize();
@@ -1818,7 +1820,8 @@ var __export__ = (() => {
     selection;
     canvas;
     controller;
-    constructor(canvas, controller, content, selection) {
+    constructor(controller, content, selection) {
+      const canvas = controller.getMainDom().canvas;
       this.canvas = canvas;
       this.controller = controller;
       this.ctx = canvas.getContext("2d");
@@ -2124,11 +2127,13 @@ var __export__ = (() => {
     const cellSize = controller.getCellSize(row, col);
     return { ...cellSize, row, col, pageY, pageX, x, y };
   }
-  function registerEvents(stateValue, controller, canvas, resizeWindow) {
+  function isInputEvent(event) {
+    const name = (event?.target?.tagName || "").toLowerCase();
+    return name === "input" || name === "textarea";
+  }
+  function registerEvents(stateValue, controller, resizeWindow) {
+    const canvas = controller.getMainDom().canvas;
     let lastTimeStamp = 0;
-    const inputDom = document.querySelector(
-      `#${FORMULA_EDITOR_ID}`
-    );
     window.addEventListener("resize", function() {
       resizeWindow();
     });
@@ -2154,11 +2159,11 @@ var __export__ = (() => {
       if (event.metaKey || event.ctrlKey) {
         return;
       }
-      if (inputDom === event.target) {
+      if (isInputEvent(event)) {
         return;
       }
       stateValue.isCellEditing = true;
-      inputDom.focus();
+      controller.getMainDom().input.focus();
     });
     window.addEventListener(
       "wheel",
@@ -2170,14 +2175,23 @@ var __export__ = (() => {
       })
     );
     document.body.addEventListener("paste", function(event) {
+      if (isInputEvent(event)) {
+        return;
+      }
       event.preventDefault();
       controller.paste(event);
     });
     document.body.addEventListener("copy", function(event) {
+      if (isInputEvent(event)) {
+        return;
+      }
       event.preventDefault();
       controller.copy(event);
     });
     document.body.addEventListener("cut", function(event) {
+      if (isInputEvent(event)) {
+        return;
+      }
       event.preventDefault();
       controller.cut(event);
     });
@@ -2219,11 +2233,20 @@ var __export__ = (() => {
       const activeCell = controller.getActiveCell();
       const check = activeCell.row >= 0 && activeCell.row === position.row && activeCell.col === position.col;
       if (!check) {
+        const inputDom = controller.getMainDom().input;
+        const isInputFocus = document.activeElement === inputDom;
+        if (isInputFocus) {
+          const value = inputDom.value;
+          controller.setCellValues([[value]], [], controller.getRanges());
+          stateValue.isCellEditing = false;
+          inputDom.value = "";
+        }
         controller.setActiveCell(position.row, position.col, 1, 1);
-      }
-      const delay = timeStamp - lastTimeStamp;
-      if (delay < DOUBLE_CLICK_TIME) {
-        stateValue.isCellEditing = true;
+      } else {
+        const delay = timeStamp - lastTimeStamp;
+        if (delay < DOUBLE_CLICK_TIME) {
+          stateValue.isCellEditing = true;
+        }
       }
       lastTimeStamp = timeStamp;
     });
@@ -2746,7 +2769,12 @@ var __export__ = (() => {
       },
       h("canvas", {
         className: "full canvas-content",
-        id: MAIN_CANVAS_ID
+        hook: {
+          ref(dom) {
+            const canvas = dom;
+            controller.setMainDom({ canvas });
+          }
+        }
       }),
       h(
         "div",
@@ -2828,6 +2856,7 @@ var __export__ = (() => {
     let inputDom;
     const ref = (element) => {
       inputDom = element;
+      controller.setMainDom({ input: inputDom });
     };
     const setValue = (value) => {
       controller.setCellValues([[value]], [], controller.getRanges());
@@ -2836,7 +2865,6 @@ var __export__ = (() => {
     };
     return h("input", {
       className: "base-editor",
-      id: FORMULA_EDITOR_ID,
       value: initValue,
       style: isCellEditing ? getEditorStyle(activeCell.style, cellPosition) : void 0,
       hook: {
@@ -2847,9 +2875,6 @@ var __export__ = (() => {
           return;
         }
         state.isCellEditing = true;
-      },
-      onblur: (event) => {
-        setValue(event.currentTarget.value);
       },
       onkeydown: (event) => {
         inputDom.nextSibling.textContent = event.currentTarget.value;
@@ -3537,7 +3562,7 @@ var __export__ = (() => {
     }
     return result;
   }
-  function convertCSSStyleToCanvasStyle(style) {
+  function convertCSSStyleToCanvasStyle(style, selectorCSSText) {
     const {
       color: color2,
       backgroundColor,
@@ -3582,6 +3607,9 @@ var __export__ = (() => {
     }
     if (textDecoration === "underline") {
       result.underline = 1 /* SINGLE */;
+      if (selectorCSSText.includes("text-underline-style:double")) {
+        result.underline = 2 /* DOUBLE */;
+      }
     }
     return result;
   }
@@ -3590,9 +3618,19 @@ var __export__ = (() => {
       if (!item.sheet?.cssRules) {
         continue;
       }
+      const cssText = item.textContent || "";
       for (const rule of item.sheet?.cssRules) {
         if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
-          return convertCSSStyleToCanvasStyle(rule.style);
+          const startIndex = cssText.indexOf(selector);
+          let endIndex = startIndex;
+          while (cssText[endIndex] !== "}" && endIndex < cssText.length) {
+            endIndex++;
+          }
+          let plainText = "";
+          if (startIndex >= 0) {
+            plainText = cssText.slice(startIndex + selector.length, endIndex).replace(/\s/g, "");
+          }
+          return convertCSSStyleToCanvasStyle(rule.style, plainText);
         }
       }
     }
@@ -3621,15 +3659,10 @@ var __export__ = (() => {
         };
       }
     };
-    domRect = {
-      top: 0,
-      left: 0,
-      width: 0,
-      height: 0
-    };
     history;
     rowMap = /* @__PURE__ */ new Map([]);
     colMap = /* @__PURE__ */ new Map([]);
+    // sheet size
     viewSize = {
       width: 0,
       height: 0
@@ -3638,6 +3671,7 @@ var __export__ = (() => {
       width: COL_TITLE_WIDTH,
       height: ROW_TITLE_HEIGHT
     };
+    mainDom = {};
     constructor(model, history) {
       this.model = model;
       this.ranges = [new Range(0, 0, 1, 1, this.getCurrentSheetId())];
@@ -3701,12 +3735,16 @@ var __export__ = (() => {
       const pos = this.getActiveCell();
       this.setRanges(pos.row, pos.col, 1, 1);
       this.computeViewSize();
+      this.rowMap.clear();
+      this.colMap.clear();
       this.setScroll(this.getScroll());
     }
     addSheet() {
       this.model.addSheet();
-      this.computeViewSize();
       this.setRanges(0, 0, 1, 1);
+      this.computeViewSize();
+      this.rowMap.clear();
+      this.colMap.clear();
       this.setScroll({
         top: 0,
         left: 0,
@@ -4042,15 +4080,29 @@ var __export__ = (() => {
     getCopyRanges() {
       return this.copyRanges.slice();
     }
-    setDomRect(data) {
-      this.domRect = {
-        ...data
+    getDomRect() {
+      const canvas = this.getMainDom().canvas;
+      if (!canvas) {
+        return {
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0
+        };
+      }
+      const size2 = canvas.parentElement.getBoundingClientRect();
+      return {
+        top: size2.top,
+        left: size2.left,
+        width: size2.width,
+        height: size2.height
       };
     }
-    getDomRect() {
-      return {
-        ...this.domRect
-      };
+    setMainDom(dom) {
+      this.mainDom = Object.assign(this.mainDom, dom);
+    }
+    getMainDom() {
+      return this.mainDom;
     }
   };
 
@@ -5539,30 +5591,19 @@ var __export__ = (() => {
     return newStateValue;
   }
   function initCanvas(stateValue, controller) {
-    const canvas = document.querySelector(
-      `#${MAIN_CANVAS_ID}`
-    );
     const mainCanvas = new MainCanvas(
-      canvas,
       controller,
       new Content(controller, createCanvas()),
       new Selection(controller, createCanvas())
     );
     const resize = () => {
-      const size2 = canvas.parentElement.getBoundingClientRect();
-      controller.setDomRect({
-        top: size2.top,
-        left: size2.left,
-        width: size2.width,
-        height: size2.height
-      });
       mainCanvas.resize();
       mainCanvas.render({
         changeSet: /* @__PURE__ */ new Set(["contentChange"])
       });
     };
     resize();
-    registerEvents(stateValue, controller, canvas, resize);
+    registerEvents(stateValue, controller, resize);
     controller.setHooks({
       copy,
       cut,
