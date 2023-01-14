@@ -2,8 +2,6 @@ import { ErrorTypes, StoreValue, ScrollStatus } from '@/types';
 export const SHEET_NAME_PREFIX = 'Sheet';
 export const DEFAULT_ROW_COUNT = 200;
 export const DEFAULT_COL_COUNT = 30;
-export const MAIN_CANVAS_ID = 'main-canvas-id';
-export const FORMULA_EDITOR_ID = 'formula-editor';
 export const TEST_ID_KEY = 'data-test-id';
 export const SCROLL_SIZE = 30;
 export const BOTTOM_BUFF = 200;

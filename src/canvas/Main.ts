@@ -15,6 +15,9 @@ function computeRangePosition(
     return null;
   }
   const [range] = ranges;
+  if (range.sheetId !== controller.getCurrentSheetId()) {
+    return null;
+  }
   let result: CanvasOverlayPosition;
   const { width, height } = controller.getDomRect();
   const headerSize = controller.getHeaderSize();
@@ -63,11 +66,11 @@ export class MainCanvas implements ContentView {
   private canvas: HTMLCanvasElement;
   private controller: IController;
   constructor(
-    canvas: HTMLCanvasElement,
     controller: IController,
     content: ContentView,
     selection: ContentView,
   ) {
+    const canvas = controller.getMainDom().canvas!;
     this.canvas = canvas;
     this.controller = controller;
     this.ctx = canvas.getContext('2d')!;

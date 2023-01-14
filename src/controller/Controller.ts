@@ -17,6 +17,7 @@ import {
   ClipboardData,
   ClipboardType,
   EUnderLine,
+  MainDom,
 } from '@/types';
 import {
   controllerLog,
@@ -78,6 +79,7 @@ function convertCanvasStyleToString(style: Partial<StyleType>): string {
 
 function convertCSSStyleToCanvasStyle(
   style: Partial<CSSStyleDeclaration>,
+  selectorCSSText: string,
 ): Partial<StyleType> {
   const {
     color,
@@ -126,7 +128,9 @@ function convertCSSStyleToCanvasStyle(
   }
   if (textDecoration === 'underline') {
     result.underline = EUnderLine.SINGLE;
-    // TODO: parse double underline
+    if (selectorCSSText.includes('text-underline-style:double')) {
+      result.underline = EUnderLine.DOUBLE;
+    }
   }
   return result;
 }
@@ -139,9 +143,21 @@ const parseStyle = (
     if (!item.sheet?.cssRules) {
       continue;
     }
+    const cssText = item.textContent || '';
     for (const rule of item.sheet?.cssRules) {
       if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
-        return convertCSSStyleToCanvasStyle(rule.style);
+        const startIndex = cssText.indexOf(selector);
+        let endIndex = startIndex;
+        while (cssText[endIndex] !== '}' && endIndex < cssText.length) {
+          endIndex++;
+        }
+        let plainText = '';
+        if (startIndex >= 0) {
+          plainText = cssText
+            .slice(startIndex + selector.length, endIndex)
+            .replace(/\s/g, '');
+        }
+        return convertCSSStyleToCanvasStyle(rule.style, plainText);
       }
     }
   }
@@ -170,15 +186,10 @@ export class Controller implements IController {
       };
     },
   };
-  private domRect: CanvasOverlayPosition = {
-    top: 0,
-    left: 0,
-    width: 0,
-    height: 0,
-  };
   private history: IHistory;
-  private readonly rowMap: Map<number, number> = new Map([]);
-  private readonly colMap: Map<number, number> = new Map([]);
+  private readonly rowMap: Map<number, number> = new Map<number, number>([]);
+  private readonly colMap: Map<number, number> = new Map<number, number>([]);
+  // sheet size
   private viewSize = {
     width: 0,
     height: 0,
@@ -187,6 +198,7 @@ export class Controller implements IController {
     width: COL_TITLE_WIDTH,
     height: ROW_TITLE_HEIGHT,
   };
+  private mainDom: MainDom = {};
   constructor(model: IModel, history: IHistory) {
     this.model = model;
     this.ranges = [new Range(0, 0, 1, 1, this.getCurrentSheetId())];
@@ -265,12 +277,16 @@ export class Controller implements IController {
     const pos = this.getActiveCell();
     this.setRanges(pos.row, pos.col, 1, 1);
     this.computeViewSize();
+    this.rowMap.clear();
+    this.colMap.clear();
     this.setScroll(this.getScroll());
   }
   addSheet(): void {
     this.model.addSheet();
-    this.computeViewSize();
     this.setRanges(0, 0, 1, 1);
+    this.computeViewSize();
+    this.rowMap.clear();
+    this.colMap.clear();
     this.setScroll({
       top: 0,
       left: 0,
@@ -625,14 +641,28 @@ export class Controller implements IController {
   getCopyRanges() {
     return this.copyRanges.slice();
   }
-  setDomRect(data: CanvasOverlayPosition): void {
-    this.domRect = {
-      ...data,
+  getDomRect(): CanvasOverlayPosition {
+    const canvas = this.getMainDom().canvas;
+    if (!canvas) {
+      return {
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0,
+      };
+    }
+    const size = canvas.parentElement!.getBoundingClientRect();
+    return {
+      top: size.top,
+      left: size.left,
+      width: size.width,
+      height: size.height,
     };
   }
-  getDomRect(): CanvasOverlayPosition {
-    return {
-      ...this.domRect,
-    };
+  setMainDom(dom: MainDom): void {
+    this.mainDom = Object.assign(this.mainDom, dom);
+  }
+  getMainDom(): MainDom {
+    return this.mainDom;
   }
 }

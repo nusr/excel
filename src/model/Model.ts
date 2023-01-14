@@ -78,7 +78,7 @@ export class Model implements IModel {
   }
   setCurrentSheetId(id: string): void {
     this.currentSheetId = id;
-    this.computeAllCell()
+    this.computeAllCell();
   }
   getCurrentSheetId(): string {
     return this.currentSheetId;
@@ -207,10 +207,10 @@ export class Model implements IModel {
         return temp.value;
       },
       set: () => {},
-      convertSheetNameToSheetId: (sheetName: string): string =>  {
-        const item = this.workbook.find(v => v.name === sheetName);
+      convertSheetNameToSheetId: (sheetName: string): string => {
+        const item = this.workbook.find((v) => v.name === sheetName);
         return item?.sheetId || '';
-      }
+      },
     });
     return result.error ? result.error : result.result;
   }

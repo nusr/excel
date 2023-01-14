@@ -4,7 +4,6 @@ import {
   DEFAULT_FONT_COLOR,
   makeFont,
   DEFAULT_FONT_SIZE,
-  FORMULA_EDITOR_ID,
   isEmpty,
 } from '@/util';
 
@@ -35,6 +34,7 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
   let inputDom: HTMLInputElement;
   const ref = (element: Element) => {
     inputDom = element as HTMLInputElement;
+    controller.setMainDom({ input: inputDom });
   };
 
   const setValue = (value: string) => {
@@ -44,7 +44,6 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
   };
   return h('input', {
     className: 'base-editor',
-    id: FORMULA_EDITOR_ID,
     value: initValue,
     style: isCellEditing
       ? getEditorStyle(activeCell.style, cellPosition)
@@ -57,9 +56,6 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
         return;
       }
       state.isCellEditing = true;
-    },
-    onblur: (event: any) => {
-      setValue(event.currentTarget.value);
     },
     onkeydown: (event: any) => {
       inputDom.nextSibling!.textContent = event.currentTarget.value;

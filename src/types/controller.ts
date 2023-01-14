@@ -28,6 +28,11 @@ export type IHooks = {
 
 export type ClipboardType = 'text/plain' | 'text/html';
 
+export type MainDom = {
+  input?: HTMLInputElement;
+  canvas?: HTMLCanvasElement;
+}
+
 export interface IController extends IScrollValue, IBaseModel {
   getViewSize(): IWindowSize;
   getHeaderSize(): IWindowSize;
@@ -50,6 +55,7 @@ export interface IController extends IScrollValue, IBaseModel {
   copy(event?: ClipboardEvent): void;
   cut(event?: ClipboardEvent): void;
   getCopyRanges(): IRange[];
-  setDomRect(data: CanvasOverlayPosition): void;
   getDomRect(): CanvasOverlayPosition;
+  setMainDom(dom: MainDom): void;
+  getMainDom(): MainDom;
 }

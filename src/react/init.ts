@@ -67,13 +67,6 @@ const hooks: Array<keyof Module> = [
   'post',
 ];
 
-// TODO Should `domApi` be put into this in the next major version bump?
-export type Options = {
-  experimental?: {
-    fragments?: boolean;
-  };
-};
-
 export function init(modules: Array<Partial<Module>>, domApi?: DOMOperation) {
   const cbs: ModuleHooks = {
     create: [],

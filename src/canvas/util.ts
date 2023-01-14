@@ -328,7 +328,8 @@ export function drawUnderline(
     [end[0], end[1] - offset],
   ];
   if (underline === EUnderLine.DOUBLE) {
-    list.push([start[0], start[1] - offset * 2], [end[0], end[1] - offset * 2]);
+    const t = offset * 2;
+    list.push([start[0], start[1] - t], [end[0], end[1] - t]);
   }
   drawLines(ctx, list);
 }

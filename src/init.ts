@@ -1,16 +1,10 @@
 import { StoreValue, IController, ChangeEventType } from './types';
 import { Controller, History } from './controller';
 import { Model, MOCK_MODEL } from './model';
-import {
-  MainCanvas,
-  registerEvents,
-  Selection,
-  Content,
-} from './canvas';
+import { MainCanvas, registerEvents, Selection, Content } from './canvas';
 import {
   FONT_FAMILY_LIST,
   isSupportFontFamily,
-  MAIN_CANVAS_ID,
   createCanvas,
   copy,
   cut,
@@ -53,30 +47,19 @@ function getStoreValue(controller: IController) {
 }
 
 export function initCanvas(stateValue: StoreValue, controller: IController) {
-  const canvas = document.querySelector<HTMLCanvasElement>(
-    `#${MAIN_CANVAS_ID}`,
-  )!;
   const mainCanvas = new MainCanvas(
-    canvas,
     controller,
     new Content(controller, createCanvas()),
     new Selection(controller, createCanvas()),
   );
   const resize = () => {
-    const size = canvas.parentElement!.getBoundingClientRect();
-    controller.setDomRect({
-      top: size.top,
-      left: size.left,
-      width: size.width,
-      height: size.height,
-    });
     mainCanvas.resize();
     mainCanvas.render({
       changeSet: new Set<ChangeEventType>(['contentChange']),
     });
   };
   resize();
-  registerEvents(stateValue, controller, canvas, resize);
+  registerEvents(stateValue, controller, resize);
   controller.setHooks({
     copy,
     cut,

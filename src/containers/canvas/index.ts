@@ -1,6 +1,6 @@
 import { h, SmartComponent } from '@/react';
 import { IController, ScrollStatus } from '@/types';
-import { MAIN_CANVAS_ID, SCROLL_SIZE } from '@/util';
+import { SCROLL_SIZE } from '@/util';
 import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
 
 function scrollBar(controller: IController, scrollX: number, scrollY: number) {
@@ -73,7 +73,12 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
     },
     h('canvas', {
       className: 'full canvas-content',
-      id: MAIN_CANVAS_ID,
+      hook: {
+        ref(dom) {
+          const canvas = dom as HTMLCanvasElement;
+          controller.setMainDom({ canvas });
+        },
+      },
     }),
     h(
       'div',

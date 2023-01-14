@@ -19,7 +19,6 @@ interface VNodePropsData extends EventListener {
   href?: string;
   fill?: string;
   ns?: string; // for SVGs
-  is?: string; // for custom elements v1
   viewBox?: string;
   name?: string;
   'aria-hidden'?: boolean;

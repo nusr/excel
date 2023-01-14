@@ -1,5 +1,5 @@
 import { StoreValue, IController, KeyboardEventItem } from '@/types';
-import { FORMULA_EDITOR_ID, debounce } from '@/util';
+import { debounce } from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 
 const DOUBLE_CLICK_TIME = 300;
@@ -45,16 +45,18 @@ function getHitInfo(
   return { ...cellSize, row, col, pageY, pageX, x, y };
 }
 
+function isInputEvent(event: any): boolean {
+  const name = (event?.target?.tagName || '').toLowerCase();
+  return name === 'input' || name === 'textarea';
+}
+
 export function registerEvents(
   stateValue: StoreValue,
   controller: IController,
-  canvas: HTMLCanvasElement,
   resizeWindow: () => void,
 ): void {
+  const canvas = controller.getMainDom().canvas!;
   let lastTimeStamp = 0;
-  const inputDom = document.querySelector<HTMLInputElement>(
-    `#${FORMULA_EDITOR_ID}`,
-  )!;
   window.addEventListener('resize', function () {
     resizeWindow();
   });
@@ -80,12 +82,12 @@ export function registerEvents(
     if (event.metaKey || event.ctrlKey) {
       return;
     }
-    if (inputDom === event.target) {
+    if (isInputEvent(event)) {
       return;
     }
 
     stateValue.isCellEditing = true;
-    inputDom.focus();
+    controller.getMainDom().input!.focus();
   });
 
   window.addEventListener(
@@ -98,14 +100,23 @@ export function registerEvents(
     }),
   );
   document.body.addEventListener('paste', function (event) {
+    if (isInputEvent(event)) {
+      return;
+    }
     event.preventDefault();
     controller.paste(event);
   });
   document.body.addEventListener('copy', function (event) {
+    if (isInputEvent(event)) {
+      return;
+    }
     event.preventDefault();
     controller.copy(event);
   });
   document.body.addEventListener('cut', function (event) {
+    if (isInputEvent(event)) {
+      return;
+    }
     event.preventDefault();
     controller.cut(event);
   });
@@ -151,12 +162,22 @@ export function registerEvents(
       activeCell.row === position.row &&
       activeCell.col === position.col;
     if (!check) {
+      const inputDom = controller.getMainDom().input!;
+      const isInputFocus = document.activeElement === inputDom;
+      if (isInputFocus) {
+        const value = inputDom.value;
+        controller.setCellValues([[value]], [], controller.getRanges());
+        stateValue.isCellEditing = false;
+        inputDom.value = '';
+      }
       controller.setActiveCell(position.row, position.col, 1, 1);
+    } else {
+      const delay = timeStamp - lastTimeStamp;
+      if (delay < DOUBLE_CLICK_TIME) {
+        stateValue.isCellEditing = true;
+      }
     }
-    const delay = timeStamp - lastTimeStamp;
-    if (delay < DOUBLE_CLICK_TIME) {
-      stateValue.isCellEditing = true;
-    }
+
     lastTimeStamp = timeStamp;
   });
   canvas.addEventListener('mousemove', function (event) {
