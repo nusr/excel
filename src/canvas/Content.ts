@@ -45,7 +45,7 @@ export class Content implements ContentView {
   }
 
   render({ changeSet }: EventType) {
-    if (changeSet.size === 0 || !changeSet.has('contentChange')) {
+    if (changeSet.size === 0 || !changeSet.has('content')) {
       return;
     }
     const { width, height } = this.controller.getDomRect();

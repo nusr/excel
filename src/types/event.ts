@@ -1,4 +1,4 @@
-export type ChangeEventType = "contentChange" | "selectionChange";
+export type ChangeEventType = "content" | "selection";
 
 export type IWindowSize = {
   width: number;

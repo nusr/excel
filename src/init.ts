@@ -1,7 +1,7 @@
 import { StoreValue, IController, ChangeEventType } from './types';
 import { Controller, History } from './controller';
 import { Model, MOCK_MODEL } from './model';
-import { MainCanvas, registerEvents, Selection, Content } from './canvas';
+import { MainCanvas, registerEvents, Content } from './canvas';
 import {
   FONT_FAMILY_LIST,
   isSupportFontFamily,
@@ -50,12 +50,11 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
   const mainCanvas = new MainCanvas(
     controller,
     new Content(controller, createCanvas()),
-    new Selection(controller, createCanvas()),
   );
   const resize = () => {
     mainCanvas.resize();
     mainCanvas.render({
-      changeSet: new Set<ChangeEventType>(['contentChange']),
+      changeSet: new Set<ChangeEventType>(['content']),
     });
   };
   resize();

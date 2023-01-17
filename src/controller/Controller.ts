@@ -266,7 +266,7 @@ export class Controller implements IController {
     if (!this.setRanges(row, col, rowCount, colCount)) {
       return;
     }
-    this.changeSet.add('selectionChange');
+    this.changeSet.add('selection');
     this.emitChange();
   }
   setCurrentSheetId(id: string): void {
@@ -301,7 +301,7 @@ export class Controller implements IController {
     this.model.fromJSON(json);
     this.setRanges(0, 0, 1, 1);
     this.computeViewSize();
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
     this.emitChange(false);
   }
   toJSON(): WorkBookJSON {
@@ -315,7 +315,7 @@ export class Controller implements IController {
   ): void {
     controllerLog('setCellValue', value);
     this.model.setCellValues(value, style, ranges);
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
     this.emitChange();
   }
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
@@ -323,7 +323,7 @@ export class Controller implements IController {
       return;
     }
     this.model.setCellStyle(style, ranges);
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
     this.emitChange();
   }
   getCell = (data: Coordinate): CellInfo => {
@@ -362,7 +362,7 @@ export class Controller implements IController {
   setColWidth(col: number, width: number): void {
     this.colMap.set(col, width);
     this.computeViewSize();
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
   }
   getRowHeight(row: number): number {
     return this.rowMap.get(row) || CELL_HEIGHT;
@@ -370,7 +370,7 @@ export class Controller implements IController {
   setRowHeight(row: number, height: number) {
     this.rowMap.set(row, height);
     this.computeViewSize();
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
   }
   private computeViewSize() {
     const headerSize = this.getHeaderSize();
@@ -422,22 +422,22 @@ export class Controller implements IController {
 
   addRow(rowIndex: number, count: number): void {
     this.model.addRow(rowIndex, count);
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
     this.emitChange();
   }
   addCol(colIndex: number, count: number): void {
     this.model.addCol(colIndex, count);
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
     this.emitChange();
   }
   deleteCol(colIndex: number, count: number): void {
     this.model.deleteCol(colIndex, count);
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
     this.emitChange();
   }
   deleteRow(rowIndex: number, count: number): void {
     this.model.deleteRow(rowIndex, count);
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
     this.emitChange();
   }
   getChangeSet(): Set<ChangeEventType> {
@@ -467,7 +467,7 @@ export class Controller implements IController {
         height: ROW_TITLE_HEIGHT,
       };
     }
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
     this.emitChange();
   }
   private parseText(text: string) {
@@ -502,7 +502,7 @@ export class Controller implements IController {
     }
     const activeCell = this.getActiveCell();
     this.model.setCellValues(list, [], this.ranges);
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
     this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
   }
   private parseHTML(htmlString: string) {
@@ -543,7 +543,7 @@ export class Controller implements IController {
     }
     const activeCell = this.getActiveCell();
     this.model.setCellValues(result, resultStyle, this.ranges);
-    this.changeSet.add('contentChange');
+    this.changeSet.add('content');
     this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
   }
   async paste(event?: ClipboardEvent) {
@@ -631,7 +631,7 @@ export class Controller implements IController {
     } else {
       this.hooks.copy(data);
     }
-    this.changeSet.add('selectionChange');
+    this.changeSet.add('selection');
     this.emitChange();
   }
   cut(event?: ClipboardEvent) {
