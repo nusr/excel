@@ -59,7 +59,7 @@ function computeRangePosition(
   return result;
 }
 
-export class MainCanvas implements ContentView {
+export class MainCanvas {
   private ctx: CanvasRenderingContext2D;
   private content: ContentView;
   private selection: ContentView;
@@ -78,9 +78,6 @@ export class MainCanvas implements ContentView {
     this.selection = selection;
     const size = dpr();
     this.ctx.scale(size, size);
-  }
-  getCanvas() {
-    return this.canvas;
   }
   resize() {
     const { width, height } = this.controller.getDomRect();

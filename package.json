@@ -5,11 +5,11 @@
   "main": "lib/excel.umd.js",
   "module": "lib/excel.esm.js",
   "scripts": {
-    "start": "node ./scripts/open.js dist/index.html && npm run build -- NODE_ENV=development",
+    "start": "npm run build -- NODE_ENV=development",
     "build": "node ./scripts/esbuild.js",
     "test": "jest --config ./scripts/unit-test-jest.config.js",
     "coverage": "npm run test -- --coverage",
-    "ci": "npm run build && npm run test && npm run type-check && npm run e2e",
+    "ci": "npm run test && npm run type-check && npm run build && npm run e2e",
     "type-check": "npx tsc",
     "postinstall": "node ./post-install.js",
     "prebuild": "node ./post-install.js",
@@ -25,7 +25,7 @@
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
     "@types/jest": "29.2.5",
-    "esbuild": "0.16.16",
+    "esbuild": "0.17.0",
     "jest": "29.3.1",
     "jest-environment-jsdom": "29.3.1",
     "puppeteer": "18.2.1",

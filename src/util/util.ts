@@ -64,3 +64,7 @@ export function getDefaultSheetInfo(
 export function isTestEnv(): boolean {
   return process.env.NODE_ENV === 'test';
 }
+
+export function isDevEnv(): boolean {
+  return process.env.NODE_ENV === 'development';
+}

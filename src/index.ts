@@ -1,15 +1,15 @@
-import { render } from './react';
-import { App } from './App';
-import { DEFAULT_STORE_VALUE } from './util';
+import { render } from "./react";
+import { App } from "./App";
+import { DEFAULT_STORE_VALUE } from "./util";
 import {
   initCanvas,
   initController,
   initTheme,
   initFontFamilyList,
-} from './init';
-import './global.css';
-import './components/index.css';
-import './containers/index.css';
+} from "./init";
+import "./global.css";
+import "./components/index.css";
+import "./containers/index.css";
 
 function init(containerDom: HTMLDivElement) {
   initTheme(document.documentElement);
@@ -30,4 +30,4 @@ function init(containerDom: HTMLDivElement) {
   initCanvas(stateValue, controller);
 }
 
-init(document.querySelector<HTMLDivElement>('#root')!);
+init(document.querySelector<HTMLDivElement>("#root")!);
