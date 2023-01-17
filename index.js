@@ -1830,9 +1830,6 @@ var __export__ = (() => {
       const size2 = dpr();
       this.ctx.scale(size2, size2);
     }
-    getCanvas() {
-      return this.canvas;
-    }
     resize() {
       const { width, height } = this.controller.getDomRect();
       resizeCanvas(this.canvas, width, height);
@@ -5650,4 +5647,4 @@ var __export__ = (() => {
             exports[key] = __export__[key]
         }
     }));
-//# sourceMappingURL=excel.umd.js.map
+//# sourceMappingURL=index.js.map

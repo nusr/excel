@@ -4,10 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebExcel</title>
-    <link rel="stylesheet" href="./excel.umd.css" />
+    <link rel="stylesheet" href="./index.css" />
   </head>
   <body>
     <div id="root"></div>
-    <script src="./excel.umd.js"></script>
+    <script src="./index.js"></script>
+    <script>
+      const isDev = "production" === 'development'
+      if (isDev) {
+        new EventSource("/esbuild").addEventListener("change", () =>
+          location.reload()
+        );
+      }
+    </script>
   </body>
 </html>
