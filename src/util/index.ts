@@ -12,3 +12,4 @@ export * from './isSupportFontFamily';
 export * from './copy';
 export * from './lodash';
 export * from './theme';
+export * from './font';

@@ -1,4 +1,4 @@
-import { StoreValue, IController, ChangeEventType } from './types';
+import { StoreValue, IController, ChangeEventType, OptionItem } from './types';
 import { Controller, History } from './controller';
 import { Model, MOCK_MODEL } from './model';
 import { MainCanvas, registerEvents, Content } from './canvas';
@@ -18,20 +18,33 @@ export function initTheme(dom: HTMLElement) {
     dom.style.setProperty(`--${key}`, String(theme[key] || ''));
   }
 }
-export function initFontFamilyList() {
-  const list = FONT_FAMILY_LIST.map((v) => {
+export function initFontFamilyList(fontList = FONT_FAMILY_LIST) {
+  const list = fontList.map((v) => {
     const disabled = !isSupportFontFamily(v);
     return { label: v, value: v, disabled };
   });
   return list;
 }
 
-function getStoreValue(controller: IController) {
+function getStoreValue(controller: IController, fontFamilyList: OptionItem[]) {
   const { top } = controller.getDomRect();
   const { scrollLeft, scrollTop } = controller.getScroll();
   const cell = controller.getCell(controller.getActiveCell());
   const cellPosition = controller.computeCellPosition(cell.row, cell.col);
   cellPosition.top = top + cellPosition.top;
+  if (!cell.style) {
+    cell.style = {};
+  }
+  if (!cell.style.fontFamily) {
+    let defaultFontFamily = '';
+    for (const item of fontFamilyList) {
+      if (!item.disabled) {
+        defaultFontFamily = String(item.value);
+        break;
+      }
+    }
+    cell.style.fontFamily = defaultFontFamily;
+  }
   const newStateValue: Partial<StoreValue> = {
     canRedo: controller.canRedo(),
     canUndo: controller.canUndo(),
@@ -64,7 +77,10 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
     cut,
     paste,
     modelChange: (changeSet) => {
-      const newStateValue = getStoreValue(controller);
+      const newStateValue = getStoreValue(
+        controller,
+        stateValue.fontFamilyList,
+      );
       Object.assign(stateValue, newStateValue);
       mainCanvas.render({ changeSet: changeSet });
       mainCanvas.render({

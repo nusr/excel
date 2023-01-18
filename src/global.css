@@ -5,9 +5,11 @@ html {
 }
 html {
   font-size: var(--font);
-  font-family: var(--fontFamily);
   color: var(--contentColor);
   line-height: var(--lineHeight);
+}
+body {
+  font-family: 'Microsoft Yahei UI', 'PingFang SC', 'Arial', sans-serif;
 }
 #root {
   height: 100vh;

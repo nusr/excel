@@ -16,12 +16,10 @@
   height: 20px;
   line-height: 20px;
   text-align: center;
-  font-weight: bold;
   box-sizing: border-box;
   cursor: pointer;
   border-radius: var(--borderRadius);
   border: 1px solid transparent;
-  /* display: flex; */
 }
 
 .button-wrapper.circle {

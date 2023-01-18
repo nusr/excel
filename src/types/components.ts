@@ -41,7 +41,7 @@ export interface StoreValue {
   scrollTop: number;
   scrollLeft: number;
   headerSize: IWindowSize;
-  scrollStatus: ScrollStatus,
+  scrollStatus: ScrollStatus;
 }
 
 export type Point = [x: number, y: number];

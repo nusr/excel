@@ -12,6 +12,8 @@ import './components/index.css';
 import './containers/index.css';
 
 export function initExcel(containerDom: HTMLDivElement) {
+  const fontFamilyList = initFontFamilyList();
+
   initTheme(document.documentElement);
   const controller = initController();
   const stateValue = new Proxy(DEFAULT_STORE_VALUE, {
@@ -25,7 +27,7 @@ export function initExcel(containerDom: HTMLDivElement) {
   const setState = () => {
     render(containerDom, App(stateValue, controller));
   };
+  stateValue.fontFamilyList = fontFamilyList;
   setState();
-  stateValue.fontFamilyList = initFontFamilyList();
   initCanvas(stateValue, controller);
 }

@@ -7,12 +7,7 @@ import {
   Select,
   FillColorIcon,
 } from '@/components';
-import {
-  DEFAULT_FONT_FAMILY,
-  FONT_SIZE_LIST,
-  DEFAULT_FONT_SIZE,
-  DEFAULT_FONT_COLOR,
-} from '@/util';
+import { FONT_SIZE_LIST, DEFAULT_FONT_SIZE, DEFAULT_FONT_COLOR } from '@/util';
 import { StyleType, EUnderLine, OptionItem } from '@/types';
 
 const underlineList: OptionItem[] = [
@@ -34,6 +29,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
   const getItemStyle = (value: string | number) => {
     return {
       'font-family': String(value),
+      'font-size': '16px',
     };
   };
   const setCellStyle = (value: Partial<StyleType>) => {
@@ -50,9 +46,9 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     fontSize = DEFAULT_FONT_SIZE,
     fontColor = DEFAULT_FONT_COLOR,
     fillColor = '',
-    fontFamily = DEFAULT_FONT_FAMILY,
     isWrapText = false,
     underline = EUnderLine.NONE,
+    fontFamily = '',
   } = style;
   return h(
     'div',

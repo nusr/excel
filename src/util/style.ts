@@ -7,14 +7,13 @@
  * font-family
  * e.g italic bold 14px/16px sans-serif;
  */
-import { npx } from "./dpr";
+import { npx } from './dpr';
 
 export const DEFAULT_FONT_SIZE = 11;
-export const DEFAULT_FONT_COLOR = "#333333";
-export const ERROR_FORMULA_COLOR = "#ff0000";
-export const DEFAULT_FILL_COLOR = "transparent";
-export const MUST_FONT_FAMILY = "sans-serif";
-export const DEFAULT_FONT_FAMILY = "宋体";
+export const DEFAULT_FONT_COLOR = '#333333';
+export const ERROR_FORMULA_COLOR = '#ff0000';
+export const DEFAULT_FILL_COLOR = 'transparent';
+export const MUST_FONT_FAMILY = 'sans-serif';
 
 export const FONT_SIZE_LIST = [
   6,
@@ -36,34 +35,21 @@ export const FONT_SIZE_LIST = [
   72,
 ];
 
-export const FONT_FAMILY_LIST = [
-  DEFAULT_FONT_FAMILY,
-  "Times New Roman",
-  "Arial",
-  "Tahoma",
-  "Verdana",
-  "微软雅黑",
-  "黑体",
-  "楷体",
-  "仿宋",
-  "新宋体",
-  "华文新魏",
-  "华文行楷",
-  "华文隶书",
-  "苹方",
-];
-
 export function makeFont(
-  fontStyle: "none" | "normal" | "italic" | "oblique" = "normal",
-  fontWeight = "normal",
+  fontStyle: 'none' | 'normal' | 'italic' | 'oblique' = 'normal',
+  fontWeight = 'normal',
   fontSize = 12,
-  fontFamily: string = DEFAULT_FONT_FAMILY
+  fontFamily: string = '',
 ): string {
-  return `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily},${MUST_FONT_FAMILY}`;
+  const temp = `${fontStyle} ${fontWeight} ${fontSize}px `;
+  if (!fontFamily) {
+    return temp + MUST_FONT_FAMILY;
+  }
+  return `${temp}${fontFamily},${MUST_FONT_FAMILY}`;
 }
 
 export const DEFAULT_FONT_CONFIG = makeFont(
   undefined,
-  "500",
-  npx(DEFAULT_FONT_SIZE)
+  '500',
+  npx(DEFAULT_FONT_SIZE),
 );
