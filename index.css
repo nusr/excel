@@ -6,9 +6,15 @@ html {
 }
 html {
   font-size: var(--font);
-  font-family: var(--fontFamily);
   color: var(--contentColor);
   line-height: var(--lineHeight);
+}
+body {
+  font-family:
+    "Microsoft Yahei UI",
+    "PingFang SC",
+    "Arial",
+    sans-serif;
 }
 #root {
   height: 100vh;
@@ -39,7 +45,6 @@ span {
   height: 20px;
   line-height: 20px;
   text-align: center;
-  font-weight: bold;
   box-sizing: border-box;
   cursor: pointer;
   border-radius: var(--borderRadius);

@@ -90,7 +90,6 @@ var __export__ = (() => {
   var DEFAULT_FONT_COLOR = "#333333";
   var ERROR_FORMULA_COLOR = "#ff0000";
   var MUST_FONT_FAMILY = "sans-serif";
-  var DEFAULT_FONT_FAMILY = "\u5B8B\u4F53";
   var FONT_SIZE_LIST = [
     6,
     8,
@@ -110,24 +109,12 @@ var __export__ = (() => {
     48,
     72
   ];
-  var FONT_FAMILY_LIST = [
-    DEFAULT_FONT_FAMILY,
-    "Times New Roman",
-    "Arial",
-    "Tahoma",
-    "Verdana",
-    "\u5FAE\u8F6F\u96C5\u9ED1",
-    "\u9ED1\u4F53",
-    "\u6977\u4F53",
-    "\u4EFF\u5B8B",
-    "\u65B0\u5B8B\u4F53",
-    "\u534E\u6587\u65B0\u9B4F",
-    "\u534E\u6587\u884C\u6977",
-    "\u534E\u6587\u96B6\u4E66",
-    "\u82F9\u65B9"
-  ];
-  function makeFont(fontStyle = "normal", fontWeight = "normal", fontSize = 12, fontFamily = DEFAULT_FONT_FAMILY) {
-    return `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily},${MUST_FONT_FAMILY}`;
+  function makeFont(fontStyle = "normal", fontWeight = "normal", fontSize = 12, fontFamily = "") {
+    const temp = `${fontStyle} ${fontWeight} ${fontSize}px `;
+    if (!fontFamily) {
+      return temp + MUST_FONT_FAMILY;
+    }
+    return `${temp}${fontFamily},${MUST_FONT_FAMILY}`;
   }
   var DEFAULT_FONT_CONFIG = makeFont(
     void 0,
@@ -531,45 +518,33 @@ var __export__ = (() => {
   var modelLog = new Debug("model").init();
 
   // src/util/isSupportFontFamily.ts
-  function SupportFontFamilyFactory(defaultFont = MUST_FONT_FAMILY) {
-    if (isTestEnv()) {
-      return {
-        isSupportFontFamily: () => true
-      };
-    }
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    assert(ctx !== null);
-    const getImageData = function(font) {
-      const width = 50;
-      canvas.width = width;
-      canvas.height = width;
-      ctx.textAlign = "center";
-      ctx.fillStyle = "black";
-      ctx.textBaseline = "middle";
-      ctx.clearRect(0, 0, width, width);
-      ctx.font = `${width}px ${font},${defaultFont}`;
-      ctx.fillText("\u5B8Ba", width / 2, width / 2);
-      const imageData = ctx.getImageData(0, 0, width, width, {
-        colorSpace: "srgb"
-      }).data;
-      return imageData.join("");
+  function SupportFontFamilyFactory(body = document.body) {
+    const monoFont = "monospace";
+    const serifFont = "serif";
+    const container = document.createElement("span");
+    container.innerHTML = "\u6D4B\u8BD5a11";
+    container.style.cssText = [
+      "position:absolute",
+      "width:auto",
+      "font-size:128px",
+      "left:-99999px"
+    ].join(" !important;");
+    const getWidth = function(fontFamily) {
+      container.style.fontFamily = fontFamily;
+      body.appendChild(container);
+      const width = container.clientWidth;
+      body.removeChild(container);
+      return width;
     };
-    const defaultImageData = getImageData(defaultFont);
-    const isSupportFontFamily2 = (fontFamily) => {
-      if (typeof fontFamily != "string") {
-        return false;
-      }
-      if (fontFamily.toLowerCase() == defaultFont.toLowerCase()) {
-        return true;
-      }
-      return defaultImageData !== getImageData(fontFamily);
+    const monoWidth = getWidth(monoFont);
+    const serifWidth = getWidth(serifFont);
+    const sansWidth = getWidth(MUST_FONT_FAMILY);
+    const isSupportFontFamily2 = function(fontFamily) {
+      return monoWidth !== getWidth(`${fontFamily},${monoFont}`) || sansWidth !== getWidth(`${fontFamily},${MUST_FONT_FAMILY}`) || serifWidth !== getWidth(`${fontFamily},${serifFont}`);
     };
-    return {
-      isSupportFontFamily: isSupportFontFamily2
-    };
+    return isSupportFontFamily2;
   }
-  var { isSupportFontFamily } = SupportFontFamilyFactory();
+  var isSupportFontFamily = SupportFontFamilyFactory();
 
   // src/util/copy.ts
   var PLAIN_FORMAT = "text/plain";
@@ -811,7 +786,6 @@ var __export__ = (() => {
     font: "12px",
     largeFont: "14px",
     padding: "12px",
-    fontFamily: `${DEFAULT_FONT_FAMILY},${MUST_FONT_FAMILY}`,
     lineHeight: "1.5",
     mediumPadding: "8px",
     borderRadius: "4px",
@@ -841,6 +815,178 @@ var __export__ = (() => {
     ...size_default,
     ...color_default
   };
+
+  // src/util/font.ts
+  var FONT_FAMILY_LIST = [
+    "\u7B49\u7EBF",
+    "\u7B49\u7EBF Light",
+    "\u65B9\u6B63\u8212\u4F53",
+    "\u65B9\u6B63\u59DA\u4F53",
+    "\u4EFF\u5B8B",
+    "\u9ED1\u4F53",
+    "\u534E\u6587\u5F69\u4E91",
+    "\u534E\u6587\u4EFF\u5B8B",
+    "\u534E\u6587\u7425\u73C0",
+    "\u534E\u6587\u6977\u4F53",
+    "\u534E\u6587\u96B6\u4E66",
+    "\u534E\u6587\u5B8B\u4F53",
+    "\u534E\u6587\u7EC6\u9ED1",
+    "\u534E\u6587\u65B0\u9B4F",
+    "\u534E\u6587\u884C\u6977",
+    "\u534E\u6587\u4E2D\u5B8B",
+    "\u6977\u4F53",
+    "\u96B6\u4E66",
+    "\u5B8B\u4F53",
+    "\u5FAE\u8F6F\u96C5\u9ED1",
+    "\u5FAE\u8F6F\u96C5\u9ED1 Light",
+    "\u65B0\u5B8B\u4F53",
+    "\u5E7C\u5706",
+    "Agency FB",
+    "Algerian",
+    "Arial",
+    "Arial Narrow",
+    "Bahnschrift",
+    "Bahnschrift Condensed",
+    "Bahnschrift Light",
+    "Bahnschrift SemiBold",
+    "Bahnschrift SemiCondensed",
+    "Baskerville Old Face",
+    "Bauhaus 93",
+    "Bell MT",
+    "Berlin Sans FB",
+    "Book Antiqua",
+    "Bookman Old Style",
+    "Bookshelf Symbol 7",
+    "Calibri",
+    "Calibri Light",
+    "Californian FB",
+    "Calisto MT",
+    "Cambria",
+    "Cambria Math",
+    "Candara",
+    "Candara Light",
+    "Cascadia Code",
+    "Cascadia Code",
+    "Cascadia Code ExtraLight",
+    "Cascadia Code ExtraLight",
+    "Cascadia Code Light",
+    "Cascadia Code Light",
+    "Cascadia Code PL",
+    "Cascadia Code PL ExtraLight",
+    "Cascadia Code PL Light",
+    "Cascadia Code PL SemiBold",
+    "Cascadia Code SemiBold",
+    "Cascadia Code SemiBold",
+    "Cascadia Mono",
+    "Cascadia Mono",
+    "Cascadia Mono ExtraLight",
+    "Cascadia Mono ExtraLight",
+    "Cascadia Mono Light",
+    "Cascadia Mono Light",
+    "Cascadia Mono PL",
+    "Cascadia Mono PL ExtraLight",
+    "Cascadia Mono PL Light",
+    "Cascadia Mono PL SemiBold",
+    "Cascadia Mono SemiBold",
+    "Cascadia Mono SemiBold",
+    "Castellar",
+    "Centaur",
+    "Century",
+    "Century Gothic",
+    "Century Schoolbook",
+    "Colonna MT",
+    "Comic Sans MS",
+    "Consolas",
+    "Constantia",
+    "Cooper Black",
+    "Copperplate Gothic Light",
+    "Corbel",
+    "Corbel Light",
+    "Courier New",
+    "Dubai Light",
+    "Dubai Medium",
+    "Dubai Regular",
+    "Ebrima",
+    "Elephant",
+    "Engravers MT",
+    "Felix Titling",
+    "Footlight MT Light",
+    "Franklin Gothic Book",
+    "Franklin Gothic Heavy",
+    "Franklin Gothic Medium",
+    "Leelawadee UI",
+    "Lucida Bright",
+    "Lucida Bright Demibold",
+    "Lucida Console",
+    "Lucida Fax",
+    "Lucida Sans",
+    "Lucida Sans Typewriter",
+    "Lucida Sans Unicode",
+    "Maiandra GD",
+    "Malgun Gothic",
+    "Microsoft JhengHei",
+    "Microsoft JhengHei Light",
+    "Microsoft JhengHei UI",
+    "Microsoft JhengHei UI Light",
+    "Microsoft New Tai Lue",
+    "Microsoft PhagsPa",
+    "Microsoft Sans Serif",
+    "Microsoft Tai Le",
+    "Microsoft Yahei UI",
+    "Microsoft YaHei UI Light",
+    "Microsoft Yi Baiti",
+    "Modern No. 20",
+    "Mongolian Baiti",
+    "MS Gothic",
+    "MS PGothic",
+    "MS Reference Sans Serif",
+    "MS UI Gothic",
+    "Rockwell",
+    "Rockwell Condensed",
+    "Segoe Print",
+    "Segoe Script",
+    "Segoe UI",
+    "Segoe UI Black",
+    "Segoe UI Emoji",
+    "Segoe UI Historic",
+    "Segoe UI Light",
+    "Segoe UI Semibold",
+    "Segoe UI Symbol",
+    "Segoe UI Variable Display",
+    "Segoe UI Variable Display Light",
+    "Segoe UI Variable Display Semibold",
+    "Segoe UI Variable Small",
+    "Segoe UI Variable Small Light",
+    "Segoe UI Variable Small Semibold",
+    "Segoe UI Variable Text",
+    "Segoe UI Variable Text Light",
+    "Segoe UI Variable Text Semibold",
+    "SimSun-ExtB",
+    "Sitka Banner",
+    "Sitka Banner Semibold",
+    "Sitka Display",
+    "Sitka Display Semibold",
+    "Sitka Heading",
+    "Sitka Heading Semibold",
+    "Sitka Small",
+    "Sitka Small Semibold",
+    "Sitka Subheading",
+    "Sitka Subheading Semibold",
+    "Sitka Text",
+    "Sitka Text Semibold",
+    "Times New Roman",
+    "Trebuchet MS",
+    "Verdana",
+    "Wide Latin",
+    "Wingdings 2",
+    "Wingdings 3",
+    "Yu Gothic Light",
+    "Yu Gothic Medium",
+    "Yu Gothic Regular",
+    "Yu Gothic UI Light",
+    "Yu Gothic UI Regular",
+    "Yu Gothic UI Semibold"
+  ];
 
   // src/react/dom.ts
   function createElement(tagName, options) {
@@ -3194,7 +3340,8 @@ var __export__ = (() => {
   var ToolbarContainer = (state, controller) => {
     const getItemStyle = (value) => {
       return {
-        "font-family": String(value)
+        "font-family": String(value),
+        "font-size": "16px"
       };
     };
     const setCellStyle = (value) => {
@@ -3211,9 +3358,9 @@ var __export__ = (() => {
       fontSize = DEFAULT_FONT_SIZE,
       fontColor = DEFAULT_FONT_COLOR,
       fillColor = "",
-      fontFamily = DEFAULT_FONT_FAMILY,
       isWrapText = false,
-      underline = 0 /* NONE */
+      underline = 0 /* NONE */,
+      fontFamily = ""
     } = style;
     return h(
       "div",
@@ -5529,19 +5676,32 @@ var __export__ = (() => {
       dom.style.setProperty(`--${key}`, String(theme[key] || ""));
     }
   }
-  function initFontFamilyList() {
-    const list = FONT_FAMILY_LIST.map((v) => {
+  function initFontFamilyList(fontList = FONT_FAMILY_LIST) {
+    const list = fontList.map((v) => {
       const disabled = !isSupportFontFamily(v);
       return { label: v, value: v, disabled };
     });
     return list;
   }
-  function getStoreValue(controller) {
+  function getStoreValue(controller, fontFamilyList) {
     const { top } = controller.getDomRect();
     const { scrollLeft, scrollTop } = controller.getScroll();
     const cell = controller.getCell(controller.getActiveCell());
     const cellPosition = controller.computeCellPosition(cell.row, cell.col);
     cellPosition.top = top + cellPosition.top;
+    if (!cell.style) {
+      cell.style = {};
+    }
+    if (!cell.style.fontFamily) {
+      let defaultFontFamily = "";
+      for (const item of fontFamilyList) {
+        if (!item.disabled) {
+          defaultFontFamily = String(item.value);
+          break;
+        }
+      }
+      cell.style.fontFamily = defaultFontFamily;
+    }
     const newStateValue = {
       canRedo: controller.canRedo(),
       canUndo: controller.canUndo(),
@@ -5573,7 +5733,10 @@ var __export__ = (() => {
       cut,
       paste,
       modelChange: (changeSet) => {
-        const newStateValue = getStoreValue(controller);
+        const newStateValue = getStoreValue(
+          controller,
+          stateValue.fontFamilyList
+        );
         Object.assign(stateValue, newStateValue);
         mainCanvas.render({ changeSet });
         mainCanvas.render({
@@ -5591,6 +5754,7 @@ var __export__ = (() => {
 
   // src/index.ts
   function initExcel(containerDom) {
+    const fontFamilyList = initFontFamilyList();
     initTheme(document.documentElement);
     const controller = initController();
     const stateValue = new Proxy(DEFAULT_STORE_VALUE, {
@@ -5603,8 +5767,8 @@ var __export__ = (() => {
     const setState = () => {
       render(containerDom, App(stateValue, controller));
     };
+    stateValue.fontFamilyList = fontFamilyList;
     setState();
-    stateValue.fontFamilyList = initFontFamilyList();
     initCanvas(stateValue, controller);
   }
   return __toCommonJS(src_exports);
