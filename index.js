@@ -2390,6 +2390,40 @@ var __export__ = (() => {
         controller.setActiveCell(activeCell.row, activeCell.col - 1, 1, 1);
         recalculateScroll(controller);
       }
+    },
+    {
+      key: "b",
+      modifierKey: [isMac() ? "meta" : "ctrl"],
+      handler: (controller) => {
+        const cellData = controller.getCell(controller.getActiveCell());
+        const style = cellData.style || {};
+        style.isBold = !style.isBold;
+        controller.setCellStyle(style, controller.getRanges());
+      }
+    },
+    {
+      key: "i",
+      modifierKey: [isMac() ? "meta" : "ctrl"],
+      handler: (controller) => {
+        const cellData = controller.getCell(controller.getActiveCell());
+        const style = cellData.style || {};
+        style.isItalic = !style.isItalic;
+        controller.setCellStyle(style, controller.getRanges());
+      }
+    },
+    {
+      key: "u",
+      modifierKey: [isMac() ? "meta" : "ctrl"],
+      handler: (controller) => {
+        const cellData = controller.getCell(controller.getActiveCell());
+        const style = cellData.style || {};
+        if (style.underline === void 0 || style.underline === 0 /* NONE */) {
+          style.underline = 1 /* SINGLE */;
+        } else {
+          style.underline = 0 /* NONE */;
+        }
+        controller.setCellStyle(style, controller.getRanges());
+      }
     }
   ];
 
@@ -2447,10 +2481,12 @@ var __export__ = (() => {
         }
       }
       if (temp) {
+        event.preventDefault();
         temp.handler(controller);
         return;
       }
       if (event.metaKey || event.ctrlKey) {
+        console.log("event.key", event.key);
         return;
       }
       if (isInputEvent(event)) {
@@ -3036,7 +3072,8 @@ var __export__ = (() => {
       active = false,
       type = "normal",
       style = {},
-      testId = void 0
+      testId = void 0,
+      title = ""
     } = props;
     return h(
       "div",
@@ -3048,6 +3085,7 @@ var __export__ = (() => {
           circle: type === "circle"
         }),
         style,
+        title,
         "data-testId": testId
       },
       ...children
@@ -3179,7 +3217,8 @@ var __export__ = (() => {
       value: activeValue,
       style = {},
       onChange,
-      getItemStyle = () => ({})
+      getItemStyle = () => ({}),
+      title = ""
     } = props;
     const handleChange = (event) => {
       const { value } = event.target;
@@ -3192,7 +3231,8 @@ var __export__ = (() => {
         value: activeValue,
         style,
         name: "select",
-        className: "select-list"
+        className: "select-list",
+        title
       },
       ...data.map((item) => {
         const value = typeof item === "object" ? item.value : item;
@@ -3423,7 +3463,8 @@ var __export__ = (() => {
               isBold: !isBold
             });
           },
-          testId: "toolbar-bold"
+          testId: "toolbar-bold",
+          title: "Bold"
         },
         Icon({ name: "bold" })
       ),
@@ -3435,7 +3476,8 @@ var __export__ = (() => {
               isItalic: !isItalic
             });
           },
-          testId: "toolbar-italic"
+          testId: "toolbar-italic",
+          title: "Italic"
         },
         Icon({ name: "italic" })
       ),
@@ -3445,6 +3487,7 @@ var __export__ = (() => {
         style: {
           width: "130px"
         },
+        title: "Underline",
         onChange: (value) => {
           setCellStyle({ underline: Number(value) });
         }
