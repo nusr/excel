@@ -15,6 +15,7 @@ export default {
     'src/**/*.{ts,tsx}',
     '!src/canvas/*.{ts,tsx}',
     '!src/types/*.{ts,tsx}',
+    '!src/**/*.d.ts',
   ],
 
   coverageReporters: [

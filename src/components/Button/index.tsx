@@ -8,6 +8,7 @@ export interface ButtonProps {
   disabled?: boolean;
   onClick?: (event: MouseEvent) => void;
   className?: string;
+  title?: string;
   testId?: string;
 }
 
@@ -24,6 +25,7 @@ export const Button: FunctionComponent<ButtonProps> = (props, ...children) => {
     type = 'normal',
     style = {},
     testId = undefined,
+    title = '',
   } = props;
   return h(
     'div',
@@ -35,6 +37,7 @@ export const Button: FunctionComponent<ButtonProps> = (props, ...children) => {
         circle: type === 'circle',
       }),
       style,
+      title,
       'data-testId': testId,
     },
     ...children,

@@ -1,4 +1,4 @@
-import type { KeyboardEventItem, IController } from '@/types';
+import { KeyboardEventItem, IController, EUnderLine } from '@/types';
 import { BOTTOM_BUFF, SCROLL_SIZE, isMac } from '@/util';
 
 export function computeScrollRowAndCol(
@@ -252,6 +252,43 @@ export const keyboardEventList: KeyboardEventItem[] = [
       const activeCell = controller.getActiveCell();
       controller.setActiveCell(activeCell.row, activeCell.col - 1, 1, 1);
       recalculateScroll(controller);
+    },
+  },
+  {
+    key: 'b',
+    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    handler: (controller) => {
+      const cellData = controller.getCell(controller.getActiveCell());
+      const style = cellData.style || {};
+      style.isBold = !style.isBold;
+      controller.setCellStyle(style, controller.getRanges());
+    },
+  },
+  {
+    key: 'i',
+    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    handler: (controller) => {
+      const cellData = controller.getCell(controller.getActiveCell());
+      const style = cellData.style || {};
+      style.isItalic = !style.isItalic;
+      controller.setCellStyle(style, controller.getRanges());
+    },
+  },
+  {
+    key: 'u',
+    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    handler: (controller) => {
+      const cellData = controller.getCell(controller.getActiveCell());
+      const style = cellData.style || {};
+      if (
+        style.underline === undefined ||
+        style.underline === EUnderLine.NONE
+      ) {
+        style.underline = EUnderLine.SINGLE;
+      } else {
+        style.underline = EUnderLine.NONE;
+      }
+      controller.setCellStyle(style, controller.getRanges());
     },
   },
 ];

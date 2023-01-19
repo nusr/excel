@@ -8,6 +8,7 @@ export type SelectProps = {
   data: Array<string | number | OptionItem>;
   getItemStyle?: (value: string | number) => CSSProperties;
   onChange: (value: string | number) => void;
+  title?: string;
 };
 
 export const Select: FunctionComponent<SelectProps> = (props) => {
@@ -17,6 +18,7 @@ export const Select: FunctionComponent<SelectProps> = (props) => {
     style = {},
     onChange,
     getItemStyle = () => ({}),
+    title = '',
   } = props;
   const handleChange = (event: any) => {
     const { value } = event.target;
@@ -30,6 +32,7 @@ export const Select: FunctionComponent<SelectProps> = (props) => {
       style,
       name: 'select',
       className: 'select-list',
+      title,
     },
     ...data.map((item) => {
       const value = typeof item === 'object' ? item.value : item;

@@ -76,10 +76,12 @@ export function registerEvents(
       }
     }
     if (temp) {
+      event.preventDefault();
       temp.handler(controller);
       return;
     }
     if (event.metaKey || event.ctrlKey) {
+      console.log('event.key', event.key);
       return;
     }
     if (isInputEvent(event)) {

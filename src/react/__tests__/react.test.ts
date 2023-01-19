@@ -44,8 +44,10 @@ describe('react.test.ts', () => {
       );
     });
     test('component with properties', () => {
-      const Text: FunctionComponent<{ cls: string; text: string }> = ({ cls, text }) =>
-        h('p', { className: cls }, text);
+      const Text: FunctionComponent<{ cls: string; text: string }> = ({
+        cls,
+        text,
+      }) => h('p', { className: cls }, text);
       Text.displayName = 'Text';
       render(document.body, Text({ cls: 'foo', text: 'bar' }));
       expect(document.querySelector('.foo')!.textContent).toEqual('bar');
@@ -63,6 +65,27 @@ describe('react.test.ts', () => {
       render(document.body, D({}));
       expect(document.querySelector('.c > .c > .a')!.textContent).toEqual('A');
       expect(document.querySelector('.c > .c > .b')!.textContent).toEqual('B');
+    });
+  });
+  describe('ref hook', () => {
+    test('normal', () => {
+      let dom: Element | null = null;
+      render(
+        document.body,
+        h(
+          'div',
+          {
+            className: 'simple',
+            hook: {
+              ref(e) {
+                dom = e;
+              },
+            },
+          },
+          'text',
+        ),
+      );
+      expect(document.querySelector('.simple')!).toEqual(dom);
     });
   });
 });

@@ -112,6 +112,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
           });
         },
         testId: 'toolbar-bold',
+        title: 'Bold',
       },
       Icon({ name: 'bold' }),
     ),
@@ -124,6 +125,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
           });
         },
         testId: 'toolbar-italic',
+        title: 'Italic',
       },
       Icon({ name: 'italic' }),
     ),
@@ -133,6 +135,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
       style: {
         width: '130px',
       },
+      title: 'Underline',
       onChange: (value) => {
         setCellStyle({ underline: Number(value) });
       },
