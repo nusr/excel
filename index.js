@@ -3408,6 +3408,7 @@ var __export__ = (() => {
   Select.displayName = "Select";
 
   // src/components/ColorPicker/index.tsx
+  var NO_FILL = "No Fill";
   var COLOR_LIST = [
     "#4D4D4D",
     "#999999",
@@ -3444,7 +3445,8 @@ var __export__ = (() => {
     "#0C797D",
     "#0062B1",
     "#653294",
-    "#AB149E"
+    "#AB149E",
+    NO_FILL
   ];
   var baseClassName = "color-picker-wrapper";
   var ColorPicker = (props, ...children) => {
@@ -3496,17 +3498,23 @@ var __export__ = (() => {
             className: "color-picker-list"
           },
           ...COLOR_LIST.map(
-            (item) => h("div", {
-              key: item,
-              className: "color-picker-item",
-              style: {
-                backgroundColor: item
+            (item) => h(
+              "div",
+              {
+                key: item,
+                className: classnames("color-picker-item", {
+                  "no-fill": item === NO_FILL
+                }),
+                style: {
+                  backgroundColor: item
+                },
+                onclick: () => {
+                  toggleVisible(false);
+                  onChange(item === NO_FILL ? "" : item);
+                }
               },
-              onclick: () => {
-                toggleVisible(false);
-                onChange(item);
-              }
-            })
+              item === NO_FILL ? NO_FILL : ""
+            )
           )
         )
       )
