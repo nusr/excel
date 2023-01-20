@@ -16,7 +16,6 @@ import {
   ResultType,
   ClipboardData,
   ClipboardType,
-  EUnderLine,
   MainDom,
 } from '@/types';
 import {
@@ -26,10 +25,10 @@ import {
   PLAIN_FORMAT,
   HTML_FORMAT,
   generateHTML,
+  convertCanvasStyleToString,
+  parseStyle,
 } from '@/util';
 
-const CELL_HEIGHT = 19;
-const CELL_WIDTH = 68;
 const ROW_TITLE_HEIGHT = 19;
 const COL_TITLE_WIDTH = 34;
 
@@ -40,128 +39,6 @@ const defaultScrollValue: ScrollValue = {
   col: 0,
   scrollLeft: 0,
   scrollTop: 0,
-};
-
-function convertCanvasStyleToString(style: Partial<StyleType>): string {
-  let result = '';
-  if (style.fontColor) {
-    result += `color:${style.fontColor};`;
-  }
-  if (style.fillColor) {
-    result += `background-color:${style.fillColor};`;
-  }
-  if (style.fontSize) {
-    result += `font-size:${style.fontSize}pt;`;
-  }
-  if (style.fontFamily) {
-    result += `font-family:${style.fontFamily};`;
-  }
-  if (style.isItalic) {
-    result += `font-style:italic;`;
-  }
-  if (style.isBold) {
-    result += `font-weight:700;`;
-  }
-  if (style.isWrapText) {
-    result += `white-space:normal;`;
-  }
-  if (style.underline) {
-    result += 'text-decoration:underline;';
-    if (style.underline === EUnderLine.DOUBLE) {
-      result += 'text-decoration-style: double;';
-    } else {
-      result += 'text-decoration-style: single;';
-    }
-  }
-
-  return result;
-}
-
-function convertCSSStyleToCanvasStyle(
-  style: Partial<CSSStyleDeclaration>,
-  selectorCSSText: string,
-): Partial<StyleType> {
-  const {
-    color,
-    backgroundColor,
-    fontSize,
-    fontFamily,
-    fontStyle,
-    fontWeight,
-    whiteSpace,
-    textDecoration,
-  } = style;
-  const result: Partial<StyleType> = {};
-  if (color) {
-    result.fontColor = color;
-  }
-  if (backgroundColor) {
-    result.fillColor = backgroundColor;
-  }
-  if (fontSize) {
-    const size = parseInt(fontSize, 10);
-    if (!isNaN(size)) {
-      result.fontSize = size;
-    }
-  }
-  if (fontFamily) {
-    result.fontFamily = fontFamily;
-  }
-  if (fontStyle === 'italic') {
-    result.isItalic = true;
-  }
-  if (fontWeight && ['700', '800', '900', 'bold'].includes(fontWeight)) {
-    result.isBold = true;
-  }
-  if (
-    whiteSpace &&
-    [
-      'normal',
-      'pre-wrap',
-      'pre-line',
-      'break-spaces',
-      'revert',
-      'unset',
-    ].includes(whiteSpace)
-  ) {
-    result.isWrapText = true;
-  }
-  if (textDecoration === 'underline') {
-    result.underline = EUnderLine.SINGLE;
-    if (selectorCSSText.includes('text-underline-style:double')) {
-      result.underline = EUnderLine.DOUBLE;
-    }
-  }
-  return result;
-}
-
-const parseStyle = (
-  styleList: NodeListOf<HTMLStyleElement>,
-  selector: string,
-): Partial<StyleType> => {
-  for (const item of styleList) {
-    if (!item.sheet?.cssRules) {
-      continue;
-    }
-    const cssText = item.textContent || '';
-    for (const rule of item.sheet?.cssRules) {
-      if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
-        const startIndex = cssText.indexOf(selector);
-        let endIndex = startIndex;
-        while (cssText[endIndex] !== '}' && endIndex < cssText.length) {
-          endIndex++;
-        }
-        let plainText = '';
-        if (startIndex >= 0) {
-          plainText = cssText
-            .slice(startIndex + selector.length, endIndex)
-            .replace(/\s/g, '');
-        }
-        return convertCSSStyleToCanvasStyle(rule.style, plainText);
-      }
-    }
-  }
-  return {};
 };
 
 export class Controller implements IController {
@@ -187,8 +64,6 @@ export class Controller implements IController {
     },
   };
   private history: IHistory;
-  private readonly rowMap: Map<number, number> = new Map<number, number>([]);
-  private readonly colMap: Map<number, number> = new Map<number, number>([]);
   // sheet size
   private viewSize = {
     width: 0,
@@ -236,12 +111,8 @@ export class Controller implements IController {
       ...activeCell,
     };
   }
-  private setRanges(
-    row: number,
-    col: number,
-    rowCount: number,
-    colCount: number,
-  ) {
+  private setRanges(range: IRange) {
+    const { row, col, colCount, rowCount } = range;
     const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
     if (
       row < 0 ||
@@ -251,19 +122,14 @@ export class Controller implements IController {
     ) {
       return false;
     }
-    this.model.setActiveCell(row, col, rowCount, colCount);
+    this.model.setActiveCell(range);
     this.ranges = [
       new Range(row, col, rowCount, colCount, this.getCurrentSheetId()),
     ];
     return true;
   }
-  setActiveCell(
-    row: number,
-    col: number,
-    rowCount: number,
-    colCount: number,
-  ): void {
-    if (!this.setRanges(row, col, rowCount, colCount)) {
+  setActiveCell(range: IRange): void {
+    if (!this.setRanges(range)) {
       return;
     }
     this.changeSet.add('selection');
@@ -275,18 +141,26 @@ export class Controller implements IController {
     }
     this.model.setCurrentSheetId(id);
     const pos = this.getActiveCell();
-    this.setRanges(pos.row, pos.col, 1, 1);
+    this.setRanges({
+      row: pos.row,
+      col: pos.col,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
     this.computeViewSize();
-    this.rowMap.clear();
-    this.colMap.clear();
     this.setScroll(this.getScroll());
   }
   addSheet(): void {
     this.model.addSheet();
-    this.setRanges(0, 0, 1, 1);
+    this.setRanges({
+      row: 0,
+      col: 0,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
     this.computeViewSize();
-    this.rowMap.clear();
-    this.colMap.clear();
     this.setScroll({
       top: 0,
       left: 0,
@@ -299,7 +173,14 @@ export class Controller implements IController {
   fromJSON(json: WorkBookJSON): void {
     controllerLog('loadJSON', json);
     this.model.fromJSON(json);
-    this.setRanges(0, 0, 1, 1);
+    const activeCell = this.getActiveCell();
+    this.setRanges({
+      row: activeCell.row,
+      col: activeCell.col,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
     this.computeViewSize();
     this.changeSet.add('content');
     this.emitChange(false);
@@ -357,18 +238,18 @@ export class Controller implements IController {
     }
   }
   getColWidth(col: number): number {
-    return this.colMap.get(col) || CELL_WIDTH;
+    return this.model.getColWidth(col);
   }
   setColWidth(col: number, width: number): void {
-    this.colMap.set(col, width);
+    this.model.setColWidth(col, width);
     this.computeViewSize();
     this.changeSet.add('content');
   }
   getRowHeight(row: number): number {
-    return this.rowMap.get(row) || CELL_HEIGHT;
+    return this.model.getRowHeight(row);
   }
   setRowHeight(row: number, height: number) {
-    this.rowMap.set(row, height);
+    this.model.setRowHeight(row, height);
     this.computeViewSize();
     this.changeSet.add('content');
   }
@@ -503,7 +384,13 @@ export class Controller implements IController {
     const activeCell = this.getActiveCell();
     this.model.setCellValues(list, [], this.ranges);
     this.changeSet.add('content');
-    this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
+    this.setActiveCell({
+      row: activeCell.row,
+      col: activeCell.col,
+      rowCount,
+      colCount,
+      sheetId: '',
+    });
   }
   private parseHTML(htmlString: string) {
     const parser = new DOMParser();
@@ -544,7 +431,13 @@ export class Controller implements IController {
     const activeCell = this.getActiveCell();
     this.model.setCellValues(result, resultStyle, this.ranges);
     this.changeSet.add('content');
-    this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
+    this.setActiveCell({
+      row: activeCell.row,
+      col: activeCell.col,
+      rowCount,
+      colCount,
+      sheetId: '',
+    });
   }
   async paste(event?: ClipboardEvent) {
     this.copyRanges = [];

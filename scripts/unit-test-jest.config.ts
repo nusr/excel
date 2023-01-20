@@ -15,7 +15,9 @@ export default {
     'src/**/*.{ts,tsx}',
     '!src/canvas/*.{ts,tsx}',
     '!src/types/*.{ts,tsx}',
-    '!src/**/*.d.ts',
+    '!src/react/hooks.ts',
+    '!src/react/vNode.ts',
+    '!src/react/modules/module.ts',
   ],
 
   coverageReporters: [

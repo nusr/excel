@@ -7,8 +7,8 @@ export const MOCK_MODEL: WorkBookJSON = {
       sheetId: '1',
       name: 'Sheet1',
       activeCell: {
-        row: 1,
-        col: 1,
+        row: 2,
+        col: 2,
       },
       colCount: 16384,
       rowCount: 1048576,
@@ -51,7 +51,7 @@ export const MOCK_MODEL: WorkBookJSON = {
         4: {
           value: '这是一段非常长的文案，需要换行展示',
           style: {
-            isWrapText: true,
+            // isWrapText: true,
             underline: EUnderLine.SINGLE,
           },
         },
@@ -98,4 +98,10 @@ export const MOCK_MODEL: WorkBookJSON = {
       sheetId: '1',
     },
   ],
+  customHeight: {
+    // 1: {
+    //   0: 100,
+    // },
+  },
+  customWidth: {},
 };

@@ -135,27 +135,35 @@ export function registerEvents(
       return;
     }
     if (headerSize.width > x && headerSize.height > y) {
-      controller.setActiveCell(0, 0, 0, 0);
+      controller.setActiveCell({
+        row: 0,
+        col: 0,
+        colCount: 0,
+        rowCount: 0,
+        sheetId: '',
+      });
       return;
     }
     if (headerSize.width > x && headerSize.height <= y) {
       const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-      controller.setActiveCell(
-        position.row,
-        position.col,
-        0,
-        sheetInfo.colCount,
-      );
+      controller.setActiveCell({
+        row: position.row,
+        col: position.col,
+        rowCount: 0,
+        colCount: sheetInfo.colCount,
+        sheetId: '',
+      });
       return;
     }
     if (headerSize.width <= x && headerSize.height > y) {
       const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-      controller.setActiveCell(
-        position.row,
-        position.col,
-        sheetInfo.rowCount,
-        0,
-      );
+      controller.setActiveCell({
+        row: position.row,
+        col: position.col,
+        rowCount: sheetInfo.rowCount,
+        colCount: 0,
+        sheetId: '',
+      });
       return;
     }
     const activeCell = controller.getActiveCell();
@@ -172,7 +180,13 @@ export function registerEvents(
         stateValue.isCellEditing = false;
         inputDom.value = '';
       }
-      controller.setActiveCell(position.row, position.col, 1, 1);
+      controller.setActiveCell({
+        row: position.row,
+        col: position.col,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
     } else {
       const delay = timeStamp - lastTimeStamp;
       if (delay < DOUBLE_CLICK_TIME) {
@@ -203,12 +217,13 @@ export function registerEvents(
         }
         const colCount = Math.abs(position.col - activeCell.col) + 1;
         const rowCount = Math.abs(position.row - activeCell.row) + 1;
-        controller.setActiveCell(
-          Math.min(position.row, activeCell.row),
-          Math.min(position.col, activeCell.col),
+        controller.setActiveCell({
+          row: Math.min(position.row, activeCell.row),
+          col: Math.min(position.col, activeCell.col),
           rowCount,
           colCount,
-        );
+          sheetId: '',
+        });
       }
     }
   });

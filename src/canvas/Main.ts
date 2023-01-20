@@ -1,4 +1,4 @@
-import { dpr, resizeCanvas, npx, isCol, isRow, isSheet, theme } from '@/util';
+import { dpr, npx, isCol, isRow, isSheet, theme } from '@/util';
 import {
   EventType,
   ContentView,
@@ -14,6 +14,7 @@ import {
   drawLines,
   clearRect,
   drawAntLine,
+  resizeCanvas,
 } from './util';
 
 export class MainCanvas {

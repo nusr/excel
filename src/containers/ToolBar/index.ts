@@ -93,16 +93,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
         setCellStyle({ fontSize: Number(value) });
       },
     }),
-    Button(
-      {
-        onClick: () => {
-          setCellStyle({ isWrapText: !isWrapText });
-        },
-        active: isWrapText,
-        testId: 'toolbar-wrap-text',
-      },
-      'Wrap Text',
-    ),
+
     Button(
       {
         active: isBold,
@@ -160,7 +151,16 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
       },
       Icon({ name: 'fontColor' }),
     ),
-
+    Button(
+      {
+        onClick: () => {
+          setCellStyle({ isWrapText: !isWrapText });
+        },
+        active: isWrapText,
+        testId: 'toolbar-wrap-text',
+      },
+      'Wrap Text',
+    ),
     Github({}),
   );
 };

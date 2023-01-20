@@ -5,7 +5,6 @@ import {
   dpr,
   intToColumnName,
   isTestEnv,
-  resizeCanvas,
 } from '@/util';
 import { theme } from '@/util';
 import {
@@ -15,6 +14,7 @@ import {
   renderCell,
   drawTriangle,
   getStyle,
+  resizeCanvas,
 } from './util';
 import { HEADER_STYLE } from './constant';
 import type { Point, ContentView, IController, EventType } from '@/types';

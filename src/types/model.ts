@@ -47,6 +47,7 @@ export type ModelCellValue = ModelCellType & { col: number; row: number };
 
 export type ModelColType = Record<string, ModelCellType>;
 export type ModelRowType = Record<string, ModelColType>;
+export type CustomHeightOrWidthItem = Record<string, number>;
 export type MergeCellItem = {
   start: Coordinate;
   end: Coordinate;
@@ -55,6 +56,8 @@ export type WorkBookJSON = {
   workbook: WorksheetType[];
   worksheets: Record<string, ModelRowType>;
   mergeCells: IRange[];
+  customHeight: Record<string, CustomHeightOrWidthItem>;
+  customWidth: Record<string, CustomHeightOrWidthItem>;
 };
 
 export interface IModel extends IBaseModel {
@@ -62,17 +65,16 @@ export interface IModel extends IBaseModel {
 }
 
 export interface IBaseModel {
+  getColWidth(col: number): number;
+  setColWidth(col: number, width: number): void;
+  getRowHeight(row: number): number;
+  setRowHeight(row: number, height: number): void;
   setCellValues(
-    value: string[][],
+    value: ResultType[][],
     style: Partial<StyleType>[][],
     ranges: IRange[],
   ): void;
-  setActiveCell(
-    row: number,
-    col: number,
-    rowCount: number,
-    colCount: number,
-  ): void;
+  setActiveCell(range: IRange): void;
   setCurrentSheetId(id: string): void;
   getCurrentSheetId(): string;
   addSheet(): void;

@@ -8,6 +8,7 @@
  * e.g italic bold 14px/16px sans-serif;
  */
 import { npx } from './dpr';
+import { EUnderLine, StyleType } from '@/types';
 
 export const DEFAULT_FONT_SIZE = 11;
 export const DEFAULT_FONT_COLOR = '#333333';
@@ -53,3 +54,125 @@ export const DEFAULT_FONT_CONFIG = makeFont(
   '500',
   npx(DEFAULT_FONT_SIZE),
 );
+
+export function convertCanvasStyleToString(style: Partial<StyleType>): string {
+  let result = '';
+  if (style.fontColor) {
+    result += `color:${style.fontColor};`;
+  }
+  if (style.fillColor) {
+    result += `background-color:${style.fillColor};`;
+  }
+  if (style.fontSize) {
+    result += `font-size:${style.fontSize}pt;`;
+  }
+  if (style.fontFamily) {
+    result += `font-family:${style.fontFamily};`;
+  }
+  if (style.isItalic) {
+    result += `font-style:italic;`;
+  }
+  if (style.isBold) {
+    result += `font-weight:700;`;
+  }
+  if (style.isWrapText) {
+    result += `white-space:normal;`;
+  }
+  if (style.underline) {
+    result += 'text-decoration:underline;';
+    if (style.underline === EUnderLine.DOUBLE) {
+      result += 'text-decoration-style: double;';
+    } else {
+      result += 'text-decoration-style: single;';
+    }
+  }
+
+  return result;
+}
+
+function convertCSSStyleToCanvasStyle(
+  style: Partial<CSSStyleDeclaration>,
+  selectorCSSText: string,
+): Partial<StyleType> {
+  const {
+    color,
+    backgroundColor,
+    fontSize,
+    fontFamily,
+    fontStyle,
+    fontWeight,
+    whiteSpace,
+    textDecoration,
+  } = style;
+  const result: Partial<StyleType> = {};
+  if (color) {
+    result.fontColor = color;
+  }
+  if (backgroundColor) {
+    result.fillColor = backgroundColor;
+  }
+  if (fontSize) {
+    const size = parseInt(fontSize, 10);
+    if (!isNaN(size)) {
+      result.fontSize = size;
+    }
+  }
+  if (fontFamily) {
+    result.fontFamily = fontFamily;
+  }
+  if (fontStyle === 'italic') {
+    result.isItalic = true;
+  }
+  if (fontWeight && ['700', '800', '900', 'bold'].includes(fontWeight)) {
+    result.isBold = true;
+  }
+  if (
+    whiteSpace &&
+    [
+      'normal',
+      'pre-wrap',
+      'pre-line',
+      'break-spaces',
+      'revert',
+      'unset',
+    ].includes(whiteSpace)
+  ) {
+    result.isWrapText = true;
+  }
+  if (textDecoration === 'underline') {
+    result.underline = EUnderLine.SINGLE;
+    if (selectorCSSText.includes('text-underline-style:double')) {
+      result.underline = EUnderLine.DOUBLE;
+    }
+  }
+  return result;
+}
+
+export function parseStyle(
+  styleList: NodeListOf<HTMLStyleElement>,
+  selector: string,
+): Partial<StyleType> {
+  for (const item of styleList) {
+    if (!item.sheet?.cssRules) {
+      continue;
+    }
+    const cssText = item.textContent || '';
+    for (const rule of item.sheet?.cssRules) {
+      if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
+        const startIndex = cssText.indexOf(selector);
+        let endIndex = startIndex;
+        while (cssText[endIndex] !== '}' && endIndex < cssText.length) {
+          endIndex++;
+        }
+        let plainText = '';
+        if (startIndex >= 0) {
+          plainText = cssText
+            .slice(startIndex + selector.length, endIndex)
+            .replace(/\s/g, '');
+        }
+        return convertCSSStyleToCanvasStyle(rule.style, plainText);
+      }
+    }
+  }
+  return {};
+}

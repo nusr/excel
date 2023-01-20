@@ -6,6 +6,7 @@ import {
   Coordinate,
   IModel,
   ResultType,
+  IRange,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -20,6 +21,8 @@ import {
 } from '@/util';
 import { parseFormula } from '@/parser';
 
+const CELL_HEIGHT = 19;
+const CELL_WIDTH = 68;
 const XLSX_MAX_COL_COUNT = 16384; // XFD
 const XLSX_MAX_ROW_COUNT = 1048576;
 
@@ -36,10 +39,12 @@ export class Model implements IModel {
   private workbook: WorkBookJSON['workbook'] = [];
   private worksheets: WorkBookJSON['worksheets'] = {};
   private mergeCells: WorkBookJSON['mergeCells'] = [];
+  private customHeight: WorkBookJSON['customHeight'] = {};
+  private customWidth: WorkBookJSON['customWidth'] = {};
   getSheetList(): WorkBookJSON['workbook'] {
     return this.workbook;
   }
-  setActiveCell(row: number, col: number): void {
+  setActiveCell(range: IRange): void {
     const index = this.workbook.findIndex(
       (v) => v.sheetId === this.currentSheetId,
     );
@@ -48,8 +53,8 @@ export class Model implements IModel {
       tempList.splice(index, 1, {
         ...this.workbook[index],
         activeCell: {
-          row,
-          col,
+          row: range.row,
+          col: range.col,
         },
       });
       this.workbook = tempList;
@@ -105,19 +110,30 @@ export class Model implements IModel {
   }
   fromJSON(json: WorkBookJSON): void {
     modelLog('fromJSON', json);
-    const { worksheets = {}, workbook = [], mergeCells = [] } = json;
+    const {
+      worksheets = {},
+      workbook = [],
+      mergeCells = [],
+      customHeight = {},
+      customWidth = {},
+    } = json;
     this.worksheets = worksheets;
     this.workbook = workbook;
     this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
     this.mergeCells = mergeCells;
+    this.customWidth = customWidth;
+    this.customHeight = customHeight;
     this.computeAllCell();
   }
   toJSON(): WorkBookJSON {
-    const { worksheets, workbook, mergeCells } = this;
+    const { worksheets, workbook, mergeCells, customHeight, customWidth } =
+      this;
     return {
       workbook,
       worksheets,
       mergeCells,
+      customHeight,
+      customWidth,
     };
   }
 
@@ -308,5 +324,35 @@ export class Model implements IModel {
     }
     const sheetInfo = this.getSheetInfo();
     sheetInfo.rowCount -= count;
+  }
+  getColWidth(col: number): number {
+    const temp = this.customWidth[this.currentSheetId];
+    if (!temp) {
+      return CELL_WIDTH;
+    }
+    if (typeof temp[col] === 'number') {
+      return temp[col];
+    }
+    return CELL_WIDTH;
+  }
+  setColWidth(col: number, width: number): void {
+    this.customWidth[this.currentSheetId] =
+      this.customWidth[this.currentSheetId] || {};
+    this.customWidth[this.currentSheetId][col] = width;
+  }
+  getRowHeight(row: number): number {
+    const temp = this.customHeight[this.currentSheetId];
+    if (!temp) {
+      return CELL_HEIGHT;
+    }
+    if (typeof temp[row] === 'number') {
+      return temp[row];
+    }
+    return CELL_HEIGHT;
+  }
+  setRowHeight(row: number, height: number): void {
+    this.customHeight[this.currentSheetId] =
+      this.customHeight[this.currentSheetId] || {};
+    this.customHeight[this.currentSheetId][row] = height;
   }
 }

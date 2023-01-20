@@ -221,7 +221,7 @@ export function renderCell(
   const x = left + (isNum ? width : 0);
   const result: IRenderCellResult = {};
   const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
-  const textHeight = Math.min(
+  const textHeight = Math.max(
     fontSizeHeight,
     canvasLineHeight,
     getStyle('lineHeight'),
@@ -332,4 +332,17 @@ export function drawUnderline(
     list.push([start[0], start[1] - t], [end[0], end[1] - t]);
   }
   drawLines(ctx, list);
+}
+
+export function resizeCanvas(
+  canvas: HTMLCanvasElement,
+  width: number,
+  height: number
+): void {
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+  const realWidth = npx(width);
+  const realHeight = npx(height);
+  canvas.width = realWidth;
+  canvas.height = realHeight;
 }

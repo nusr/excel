@@ -21,7 +21,13 @@ describe('controller.test.ts', () => {
     test('set', () => {
       const controller = new Controller(new Model(), new History());
       controller.addSheet();
-      controller.setActiveCell(2, 2, 1, 1);
+      controller.setActiveCell({
+        row: 2,
+        col: 2,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
       expect(controller.getRanges()).toEqual([
         {
           row: 2,

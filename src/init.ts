@@ -5,7 +5,6 @@ import { MainCanvas, registerEvents, Content } from './canvas';
 import {
   FONT_FAMILY_LIST,
   isSupportFontFamily,
-  createCanvas,
   copy,
   cut,
   paste,
@@ -57,6 +56,13 @@ function getStoreValue(controller: IController, fontFamilyList: OptionItem[]) {
     activeCell: cell,
   };
   return newStateValue;
+}
+
+function createCanvas() {
+  const canvas = document.createElement('canvas');
+  canvas.style.display = 'none';
+  document.body.appendChild(canvas);
+  return canvas;
 }
 
 export function initCanvas(stateValue: StoreValue, controller: IController) {

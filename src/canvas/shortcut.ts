@@ -175,7 +175,13 @@ export const keyboardEventList: KeyboardEventItem[] = [
     modifierKey: [],
     handler: (controller) => {
       const activeCell = controller.getActiveCell();
-      controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
+      controller.setActiveCell({
+        row: activeCell.row + 1,
+        col: activeCell.col,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
     },
   },
   {
@@ -183,7 +189,13 @@ export const keyboardEventList: KeyboardEventItem[] = [
     modifierKey: [],
     handler: (controller) => {
       const activeCell = controller.getActiveCell();
-      controller.setActiveCell(activeCell.row, activeCell.col + 1, 1, 1);
+      controller.setActiveCell({
+        row: activeCell.row,
+        col: activeCell.col + 1,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
     },
   },
   {
@@ -223,7 +235,13 @@ export const keyboardEventList: KeyboardEventItem[] = [
     modifierKey: [],
     handler: (controller) => {
       const activeCell = controller.getActiveCell();
-      controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
+      controller.setActiveCell({
+        row: activeCell.row + 1,
+        col: activeCell.col,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
       recalculateScroll(controller);
     },
   },
@@ -232,7 +250,13 @@ export const keyboardEventList: KeyboardEventItem[] = [
     modifierKey: [],
     handler: (controller) => {
       const activeCell = controller.getActiveCell();
-      controller.setActiveCell(activeCell.row - 1, activeCell.col, 1, 1);
+      controller.setActiveCell({
+        row: activeCell.row - 1,
+        col: activeCell.col,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
       recalculateScroll(controller);
     },
   },
@@ -241,7 +265,13 @@ export const keyboardEventList: KeyboardEventItem[] = [
     modifierKey: [],
     handler: (controller) => {
       const activeCell = controller.getActiveCell();
-      controller.setActiveCell(activeCell.row, activeCell.col + 1, 1, 1);
+      controller.setActiveCell({
+        row: activeCell.row,
+        col: activeCell.col + 1,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
       recalculateScroll(controller);
     },
   },
@@ -250,7 +280,13 @@ export const keyboardEventList: KeyboardEventItem[] = [
     modifierKey: [],
     handler: (controller) => {
       const activeCell = controller.getActiveCell();
-      controller.setActiveCell(activeCell.row, activeCell.col - 1, 1, 1);
+      controller.setActiveCell({
+        row: activeCell.row,
+        col: activeCell.col - 1,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
       recalculateScroll(controller);
     },
   },
