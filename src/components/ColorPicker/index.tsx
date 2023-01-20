@@ -1,11 +1,13 @@
 import { h, FunctionComponent, CSSProperties } from '@/react';
+import { classnames } from '@/util';
 export type ColorPickerProps = {
   color: string;
   style?: CSSProperties;
   key: string;
   onChange: (value: string) => void;
 };
-export const COLOR_LIST = [
+const NO_FILL = 'No Fill';
+const COLOR_LIST = [
   '#4D4D4D',
   '#999999',
   '#FFFFFF',
@@ -42,6 +44,7 @@ export const COLOR_LIST = [
   '#0062B1',
   '#653294',
   '#AB149E',
+  NO_FILL,
 ];
 
 const baseClassName = 'color-picker-wrapper';
@@ -99,17 +102,23 @@ export const ColorPicker: FunctionComponent<ColorPickerProps> = (
           className: 'color-picker-list',
         },
         ...COLOR_LIST.map((item) =>
-          h('div', {
-            key: item,
-            className: 'color-picker-item',
-            style: {
-              backgroundColor: item,
+          h(
+            'div',
+            {
+              key: item,
+              className: classnames('color-picker-item', {
+                'no-fill': item === NO_FILL,
+              }),
+              style: {
+                backgroundColor: item,
+              },
+              onclick: () => {
+                toggleVisible(false);
+                onChange(item === NO_FILL ? '' : item);
+              },
             },
-            onclick: () => {
-              toggleVisible(false);
-              onChange(item);
-            },
-          }),
+            item === NO_FILL ? NO_FILL : '',
+          ),
         ),
       ),
     ),

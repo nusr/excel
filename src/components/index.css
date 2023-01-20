@@ -89,7 +89,11 @@
   margin-bottom: 4px;
   margin-right: 4px;
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 1px solid #ddd;
+}
+.no-fill.color-picker-item {
+  width: auto;
+  padding: 0 2px;
 }
 .color-picker-item:hover {
   border-color: #ccc;
