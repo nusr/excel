@@ -67,20 +67,6 @@ var __export__ = (() => {
   function thinLineWidth() {
     return 1;
   }
-  function resizeCanvas(canvas, width, height) {
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-    const realWidth = npx(width);
-    const realHeight = npx(height);
-    canvas.width = realWidth;
-    canvas.height = realHeight;
-  }
-  function createCanvas() {
-    const canvas = document.createElement("canvas");
-    canvas.style.display = "none";
-    document.body.appendChild(canvas);
-    return canvas;
-  }
   function isMac() {
     return navigator.userAgent.indexOf("Mac OS X") > -1;
   }
@@ -121,6 +107,113 @@ var __export__ = (() => {
     "500",
     npx(DEFAULT_FONT_SIZE)
   );
+  function convertCanvasStyleToString(style) {
+    let result = "";
+    if (style.fontColor) {
+      result += `color:${style.fontColor};`;
+    }
+    if (style.fillColor) {
+      result += `background-color:${style.fillColor};`;
+    }
+    if (style.fontSize) {
+      result += `font-size:${style.fontSize}pt;`;
+    }
+    if (style.fontFamily) {
+      result += `font-family:${style.fontFamily};`;
+    }
+    if (style.isItalic) {
+      result += `font-style:italic;`;
+    }
+    if (style.isBold) {
+      result += `font-weight:700;`;
+    }
+    if (style.isWrapText) {
+      result += `white-space:normal;`;
+    }
+    if (style.underline) {
+      result += "text-decoration:underline;";
+      if (style.underline === 2 /* DOUBLE */) {
+        result += "text-decoration-style: double;";
+      } else {
+        result += "text-decoration-style: single;";
+      }
+    }
+    return result;
+  }
+  function convertCSSStyleToCanvasStyle(style, selectorCSSText) {
+    const {
+      color: color2,
+      backgroundColor,
+      fontSize,
+      fontFamily,
+      fontStyle,
+      fontWeight,
+      whiteSpace,
+      textDecoration
+    } = style;
+    const result = {};
+    if (color2) {
+      result.fontColor = color2;
+    }
+    if (backgroundColor) {
+      result.fillColor = backgroundColor;
+    }
+    if (fontSize) {
+      const size2 = parseInt(fontSize, 10);
+      if (!isNaN(size2)) {
+        result.fontSize = size2;
+      }
+    }
+    if (fontFamily) {
+      result.fontFamily = fontFamily;
+    }
+    if (fontStyle === "italic") {
+      result.isItalic = true;
+    }
+    if (fontWeight && ["700", "800", "900", "bold"].includes(fontWeight)) {
+      result.isBold = true;
+    }
+    if (whiteSpace && [
+      "normal",
+      "pre-wrap",
+      "pre-line",
+      "break-spaces",
+      "revert",
+      "unset"
+    ].includes(whiteSpace)) {
+      result.isWrapText = true;
+    }
+    if (textDecoration === "underline") {
+      result.underline = 1 /* SINGLE */;
+      if (selectorCSSText.includes("text-underline-style:double")) {
+        result.underline = 2 /* DOUBLE */;
+      }
+    }
+    return result;
+  }
+  function parseStyle(styleList, selector) {
+    for (const item of styleList) {
+      if (!item.sheet?.cssRules) {
+        continue;
+      }
+      const cssText = item.textContent || "";
+      for (const rule of item.sheet?.cssRules) {
+        if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
+          const startIndex = cssText.indexOf(selector);
+          let endIndex = startIndex;
+          while (cssText[endIndex] !== "}" && endIndex < cssText.length) {
+            endIndex++;
+          }
+          let plainText = "";
+          if (startIndex >= 0) {
+            plainText = cssText.slice(startIndex + selector.length, endIndex).replace(/\s/g, "");
+          }
+          return convertCSSStyleToCanvasStyle(rule.style, plainText);
+        }
+      }
+    }
+    return {};
+  }
 
   // src/util/assert.ts
   function assert(condition, message = "assert error", env = "production") {
@@ -1841,7 +1934,7 @@ var __export__ = (() => {
     const x = left + (isNum2 ? width : 0);
     const result = {};
     const fontSizeHeight = getFontSizeHeight(ctx, text[0]);
-    const textHeight = Math.min(
+    const textHeight = Math.max(
       fontSizeHeight,
       canvasLineHeight,
       getStyle("lineHeight")
@@ -1930,6 +2023,14 @@ var __export__ = (() => {
       list.push([start[0], start[1] - t], [end[0], end[1] - t]);
     }
     drawLines(ctx, list);
+  }
+  function resizeCanvas(canvas, width, height) {
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    const realWidth = npx(width);
+    const realHeight = npx(height);
+    canvas.width = realWidth;
+    canvas.height = realHeight;
   }
 
   // src/canvas/Main.ts
@@ -2312,7 +2413,13 @@ var __export__ = (() => {
       modifierKey: [],
       handler: (controller) => {
         const activeCell = controller.getActiveCell();
-        controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
+        controller.setActiveCell({
+          row: activeCell.row + 1,
+          col: activeCell.col,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: ""
+        });
       }
     },
     {
@@ -2320,7 +2427,13 @@ var __export__ = (() => {
       modifierKey: [],
       handler: (controller) => {
         const activeCell = controller.getActiveCell();
-        controller.setActiveCell(activeCell.row, activeCell.col + 1, 1, 1);
+        controller.setActiveCell({
+          row: activeCell.row,
+          col: activeCell.col + 1,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: ""
+        });
       }
     },
     {
@@ -2360,7 +2473,13 @@ var __export__ = (() => {
       modifierKey: [],
       handler: (controller) => {
         const activeCell = controller.getActiveCell();
-        controller.setActiveCell(activeCell.row + 1, activeCell.col, 1, 1);
+        controller.setActiveCell({
+          row: activeCell.row + 1,
+          col: activeCell.col,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: ""
+        });
         recalculateScroll(controller);
       }
     },
@@ -2369,7 +2488,13 @@ var __export__ = (() => {
       modifierKey: [],
       handler: (controller) => {
         const activeCell = controller.getActiveCell();
-        controller.setActiveCell(activeCell.row - 1, activeCell.col, 1, 1);
+        controller.setActiveCell({
+          row: activeCell.row - 1,
+          col: activeCell.col,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: ""
+        });
         recalculateScroll(controller);
       }
     },
@@ -2378,7 +2503,13 @@ var __export__ = (() => {
       modifierKey: [],
       handler: (controller) => {
         const activeCell = controller.getActiveCell();
-        controller.setActiveCell(activeCell.row, activeCell.col + 1, 1, 1);
+        controller.setActiveCell({
+          row: activeCell.row,
+          col: activeCell.col + 1,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: ""
+        });
         recalculateScroll(controller);
       }
     },
@@ -2387,7 +2518,13 @@ var __export__ = (() => {
       modifierKey: [],
       handler: (controller) => {
         const activeCell = controller.getActiveCell();
-        controller.setActiveCell(activeCell.row, activeCell.col - 1, 1, 1);
+        controller.setActiveCell({
+          row: activeCell.row,
+          col: activeCell.col - 1,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: ""
+        });
         recalculateScroll(controller);
       }
     },
@@ -2537,27 +2674,35 @@ var __export__ = (() => {
         return;
       }
       if (headerSize.width > x && headerSize.height > y) {
-        controller.setActiveCell(0, 0, 0, 0);
+        controller.setActiveCell({
+          row: 0,
+          col: 0,
+          colCount: 0,
+          rowCount: 0,
+          sheetId: ""
+        });
         return;
       }
       if (headerSize.width > x && headerSize.height <= y) {
         const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-        controller.setActiveCell(
-          position.row,
-          position.col,
-          0,
-          sheetInfo.colCount
-        );
+        controller.setActiveCell({
+          row: position.row,
+          col: position.col,
+          rowCount: 0,
+          colCount: sheetInfo.colCount,
+          sheetId: ""
+        });
         return;
       }
       if (headerSize.width <= x && headerSize.height > y) {
         const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-        controller.setActiveCell(
-          position.row,
-          position.col,
-          sheetInfo.rowCount,
-          0
-        );
+        controller.setActiveCell({
+          row: position.row,
+          col: position.col,
+          rowCount: sheetInfo.rowCount,
+          colCount: 0,
+          sheetId: ""
+        });
         return;
       }
       const activeCell = controller.getActiveCell();
@@ -2571,7 +2716,13 @@ var __export__ = (() => {
           stateValue.isCellEditing = false;
           inputDom.value = "";
         }
-        controller.setActiveCell(position.row, position.col, 1, 1);
+        controller.setActiveCell({
+          row: position.row,
+          col: position.col,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: ""
+        });
       } else {
         const delay = timeStamp - lastTimeStamp;
         if (delay < DOUBLE_CLICK_TIME) {
@@ -2598,12 +2749,13 @@ var __export__ = (() => {
           }
           const colCount = Math.abs(position.col - activeCell.col) + 1;
           const rowCount = Math.abs(position.row - activeCell.row) + 1;
-          controller.setActiveCell(
-            Math.min(position.row, activeCell.row),
-            Math.min(position.col, activeCell.col),
+          controller.setActiveCell({
+            row: Math.min(position.row, activeCell.row),
+            col: Math.min(position.col, activeCell.col),
             rowCount,
-            colCount
-          );
+            colCount,
+            sheetId: ""
+          });
         }
       }
     });
@@ -3447,16 +3599,6 @@ var __export__ = (() => {
       }),
       Button(
         {
-          onClick: () => {
-            setCellStyle({ isWrapText: !isWrapText });
-          },
-          active: isWrapText,
-          testId: "toolbar-wrap-text"
-        },
-        "Wrap Text"
-      ),
-      Button(
-        {
           active: isBold,
           onClick: () => {
             setCellStyle({
@@ -3511,6 +3653,16 @@ var __export__ = (() => {
           key: "font-color"
         },
         Icon({ name: "fontColor" })
+      ),
+      Button(
+        {
+          onClick: () => {
+            setCellStyle({ isWrapText: !isWrapText });
+          },
+          active: isWrapText,
+          testId: "toolbar-wrap-text"
+        },
+        "Wrap Text"
       ),
       Github({})
     );
@@ -3672,8 +3824,6 @@ var __export__ = (() => {
   App.displayName = "App";
 
   // src/controller/Controller.ts
-  var CELL_HEIGHT = 19;
-  var CELL_WIDTH = 68;
   var ROW_TITLE_HEIGHT = 19;
   var COL_TITLE_WIDTH = 34;
   var defaultScrollValue = {
@@ -3683,113 +3833,6 @@ var __export__ = (() => {
     col: 0,
     scrollLeft: 0,
     scrollTop: 0
-  };
-  function convertCanvasStyleToString(style) {
-    let result = "";
-    if (style.fontColor) {
-      result += `color:${style.fontColor};`;
-    }
-    if (style.fillColor) {
-      result += `background-color:${style.fillColor};`;
-    }
-    if (style.fontSize) {
-      result += `font-size:${style.fontSize}pt;`;
-    }
-    if (style.fontFamily) {
-      result += `font-family:${style.fontFamily};`;
-    }
-    if (style.isItalic) {
-      result += `font-style:italic;`;
-    }
-    if (style.isBold) {
-      result += `font-weight:700;`;
-    }
-    if (style.isWrapText) {
-      result += `white-space:normal;`;
-    }
-    if (style.underline) {
-      result += "text-decoration:underline;";
-      if (style.underline === 2 /* DOUBLE */) {
-        result += "text-decoration-style: double;";
-      } else {
-        result += "text-decoration-style: single;";
-      }
-    }
-    return result;
-  }
-  function convertCSSStyleToCanvasStyle(style, selectorCSSText) {
-    const {
-      color: color2,
-      backgroundColor,
-      fontSize,
-      fontFamily,
-      fontStyle,
-      fontWeight,
-      whiteSpace,
-      textDecoration
-    } = style;
-    const result = {};
-    if (color2) {
-      result.fontColor = color2;
-    }
-    if (backgroundColor) {
-      result.fillColor = backgroundColor;
-    }
-    if (fontSize) {
-      const size2 = parseInt(fontSize, 10);
-      if (!isNaN(size2)) {
-        result.fontSize = size2;
-      }
-    }
-    if (fontFamily) {
-      result.fontFamily = fontFamily;
-    }
-    if (fontStyle === "italic") {
-      result.isItalic = true;
-    }
-    if (fontWeight && ["700", "800", "900", "bold"].includes(fontWeight)) {
-      result.isBold = true;
-    }
-    if (whiteSpace && [
-      "normal",
-      "pre-wrap",
-      "pre-line",
-      "break-spaces",
-      "revert",
-      "unset"
-    ].includes(whiteSpace)) {
-      result.isWrapText = true;
-    }
-    if (textDecoration === "underline") {
-      result.underline = 1 /* SINGLE */;
-      if (selectorCSSText.includes("text-underline-style:double")) {
-        result.underline = 2 /* DOUBLE */;
-      }
-    }
-    return result;
-  }
-  var parseStyle = (styleList, selector) => {
-    for (const item of styleList) {
-      if (!item.sheet?.cssRules) {
-        continue;
-      }
-      const cssText = item.textContent || "";
-      for (const rule of item.sheet?.cssRules) {
-        if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
-          const startIndex = cssText.indexOf(selector);
-          let endIndex = startIndex;
-          while (cssText[endIndex] !== "}" && endIndex < cssText.length) {
-            endIndex++;
-          }
-          let plainText = "";
-          if (startIndex >= 0) {
-            plainText = cssText.slice(startIndex + selector.length, endIndex).replace(/\s/g, "");
-          }
-          return convertCSSStyleToCanvasStyle(rule.style, plainText);
-        }
-      }
-    }
-    return {};
   };
   var Controller = class {
     scrollValue = {};
@@ -3815,8 +3858,6 @@ var __export__ = (() => {
       }
     };
     history;
-    rowMap = /* @__PURE__ */ new Map([]);
-    colMap = /* @__PURE__ */ new Map([]);
     // sheet size
     viewSize = {
       width: 0,
@@ -3864,19 +3905,20 @@ var __export__ = (() => {
         ...activeCell
       };
     }
-    setRanges(row, col, rowCount, colCount) {
+    setRanges(range) {
+      const { row, col, colCount, rowCount } = range;
       const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
       if (row < 0 || col < 0 || row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
         return false;
       }
-      this.model.setActiveCell(row, col, rowCount, colCount);
+      this.model.setActiveCell(range);
       this.ranges = [
         new Range(row, col, rowCount, colCount, this.getCurrentSheetId())
       ];
       return true;
     }
-    setActiveCell(row, col, rowCount, colCount) {
-      if (!this.setRanges(row, col, rowCount, colCount)) {
+    setActiveCell(range) {
+      if (!this.setRanges(range)) {
         return;
       }
       this.changeSet.add("selection");
@@ -3888,18 +3930,26 @@ var __export__ = (() => {
       }
       this.model.setCurrentSheetId(id);
       const pos = this.getActiveCell();
-      this.setRanges(pos.row, pos.col, 1, 1);
+      this.setRanges({
+        row: pos.row,
+        col: pos.col,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: ""
+      });
       this.computeViewSize();
-      this.rowMap.clear();
-      this.colMap.clear();
       this.setScroll(this.getScroll());
     }
     addSheet() {
       this.model.addSheet();
-      this.setRanges(0, 0, 1, 1);
+      this.setRanges({
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: ""
+      });
       this.computeViewSize();
-      this.rowMap.clear();
-      this.colMap.clear();
       this.setScroll({
         top: 0,
         left: 0,
@@ -3912,7 +3962,14 @@ var __export__ = (() => {
     fromJSON(json) {
       controllerLog("loadJSON", json);
       this.model.fromJSON(json);
-      this.setRanges(0, 0, 1, 1);
+      const activeCell = this.getActiveCell();
+      this.setRanges({
+        row: activeCell.row,
+        col: activeCell.col,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: ""
+      });
       this.computeViewSize();
       this.changeSet.add("content");
       this.emitChange(false);
@@ -3965,18 +4022,18 @@ var __export__ = (() => {
       }
     }
     getColWidth(col) {
-      return this.colMap.get(col) || CELL_WIDTH;
+      return this.model.getColWidth(col);
     }
     setColWidth(col, width) {
-      this.colMap.set(col, width);
+      this.model.setColWidth(col, width);
       this.computeViewSize();
       this.changeSet.add("content");
     }
     getRowHeight(row) {
-      return this.rowMap.get(row) || CELL_HEIGHT;
+      return this.model.getRowHeight(row);
     }
     setRowHeight(row, height) {
-      this.rowMap.set(row, height);
+      this.model.setRowHeight(row, height);
       this.computeViewSize();
       this.changeSet.add("content");
     }
@@ -4102,7 +4159,13 @@ var __export__ = (() => {
       const activeCell = this.getActiveCell();
       this.model.setCellValues(list, [], this.ranges);
       this.changeSet.add("content");
-      this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
+      this.setActiveCell({
+        row: activeCell.row,
+        col: activeCell.col,
+        rowCount,
+        colCount,
+        sheetId: ""
+      });
     }
     parseHTML(htmlString) {
       const parser = new DOMParser();
@@ -4140,7 +4203,13 @@ var __export__ = (() => {
       const activeCell = this.getActiveCell();
       this.model.setCellValues(result, resultStyle, this.ranges);
       this.changeSet.add("content");
-      this.setActiveCell(activeCell.row, activeCell.col, rowCount, colCount);
+      this.setActiveCell({
+        row: activeCell.row,
+        col: activeCell.col,
+        rowCount,
+        colCount,
+        sheetId: ""
+      });
     }
     async paste(event) {
       this.copyRanges = [];
@@ -5336,6 +5405,8 @@ var __export__ = (() => {
   };
 
   // src/model/Model.ts
+  var CELL_HEIGHT = 19;
+  var CELL_WIDTH = 68;
   var XLSX_MAX_COL_COUNT = 16384;
   var XLSX_MAX_ROW_COUNT = 1048576;
   function convertToNumber(list) {
@@ -5348,10 +5419,12 @@ var __export__ = (() => {
     workbook = [];
     worksheets = {};
     mergeCells = [];
+    customHeight = {};
+    customWidth = {};
     getSheetList() {
       return this.workbook;
     }
-    setActiveCell(row, col) {
+    setActiveCell(range) {
       const index = this.workbook.findIndex(
         (v) => v.sheetId === this.currentSheetId
       );
@@ -5360,8 +5433,8 @@ var __export__ = (() => {
         tempList.splice(index, 1, {
           ...this.workbook[index],
           activeCell: {
-            row,
-            col
+            row: range.row,
+            col: range.col
           }
         });
         this.workbook = tempList;
@@ -5417,19 +5490,29 @@ var __export__ = (() => {
     }
     fromJSON(json) {
       modelLog("fromJSON", json);
-      const { worksheets = {}, workbook = [], mergeCells = [] } = json;
+      const {
+        worksheets = {},
+        workbook = [],
+        mergeCells = [],
+        customHeight = {},
+        customWidth = {}
+      } = json;
       this.worksheets = worksheets;
       this.workbook = workbook;
       this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
       this.mergeCells = mergeCells;
+      this.customWidth = customWidth;
+      this.customHeight = customHeight;
       this.computeAllCell();
     }
     toJSON() {
-      const { worksheets, workbook, mergeCells } = this;
+      const { worksheets, workbook, mergeCells, customHeight, customWidth } = this;
       return {
         workbook,
         worksheets,
-        mergeCells
+        mergeCells,
+        customHeight,
+        customWidth
       };
     }
     setCellValue(value, range) {
@@ -5610,6 +5693,34 @@ var __export__ = (() => {
       const sheetInfo = this.getSheetInfo();
       sheetInfo.rowCount -= count;
     }
+    getColWidth(col) {
+      const temp = this.customWidth[this.currentSheetId];
+      if (!temp) {
+        return CELL_WIDTH;
+      }
+      if (typeof temp[col] === "number") {
+        return temp[col];
+      }
+      return CELL_WIDTH;
+    }
+    setColWidth(col, width) {
+      this.customWidth[this.currentSheetId] = this.customWidth[this.currentSheetId] || {};
+      this.customWidth[this.currentSheetId][col] = width;
+    }
+    getRowHeight(row) {
+      const temp = this.customHeight[this.currentSheetId];
+      if (!temp) {
+        return CELL_HEIGHT;
+      }
+      if (typeof temp[row] === "number") {
+        return temp[row];
+      }
+      return CELL_HEIGHT;
+    }
+    setRowHeight(row, height) {
+      this.customHeight[this.currentSheetId] = this.customHeight[this.currentSheetId] || {};
+      this.customHeight[this.currentSheetId][row] = height;
+    }
   };
 
   // src/model/mockModel.ts
@@ -5619,8 +5730,8 @@ var __export__ = (() => {
         sheetId: "1",
         name: "Sheet1",
         activeCell: {
-          row: 1,
-          col: 1
+          row: 2,
+          col: 2
         },
         colCount: 16384,
         rowCount: 1048576
@@ -5663,7 +5774,7 @@ var __export__ = (() => {
           4: {
             value: "\u8FD9\u662F\u4E00\u6BB5\u975E\u5E38\u957F\u7684\u6587\u6848\uFF0C\u9700\u8981\u6362\u884C\u5C55\u793A",
             style: {
-              isWrapText: true,
+              // isWrapText: true,
               underline: 1 /* SINGLE */
             }
           }
@@ -5709,7 +5820,13 @@ var __export__ = (() => {
         colCount: 2,
         sheetId: "1"
       }
-    ]
+    ],
+    customHeight: {
+      // 1: {
+      //   0: 100,
+      // },
+    },
+    customWidth: {}
   };
 
   // src/init.ts
@@ -5757,6 +5874,12 @@ var __export__ = (() => {
       activeCell: cell
     };
     return newStateValue;
+  }
+  function createCanvas() {
+    const canvas = document.createElement("canvas");
+    canvas.style.display = "none";
+    document.body.appendChild(canvas);
+    return canvas;
   }
   function initCanvas(stateValue, controller) {
     const mainCanvas = new MainCanvas(
