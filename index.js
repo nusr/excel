@@ -4525,6 +4525,13 @@ var __export__ = (() => {
     const data = mustOneNumber(list);
     return Math.atan(data);
   };
+  var ATAN2 = (...list) => {
+    assert2(list.length === 2);
+    const [x, y] = list;
+    assert2(typeof x === "number");
+    assert2(typeof y === "number");
+    return Math.atan2(x, y);
+  };
   var ATANH = (...list) => {
     const data = mustOneNumber(list);
     return Math.log((1 + data) / (data + 1)) / 2;
@@ -4571,6 +4578,7 @@ var __export__ = (() => {
     ASIN,
     ASINH,
     ATAN,
+    ATAN2,
     ATANH,
     COT,
     COS,
@@ -5496,7 +5504,7 @@ var __export__ = (() => {
       }
       return result;
     }
-    fromJSON(json) {
+    fromJSON = (json) => {
       modelLog("fromJSON", json);
       const {
         worksheets = {},
@@ -5512,8 +5520,8 @@ var __export__ = (() => {
       this.customWidth = customWidth;
       this.customHeight = customHeight;
       this.computeAllCell();
-    }
-    toJSON() {
+    };
+    toJSON = () => {
       const { worksheets, workbook, mergeCells, customHeight, customWidth } = this;
       return {
         workbook,
@@ -5522,7 +5530,7 @@ var __export__ = (() => {
         customHeight,
         customWidth
       };
-    }
+    };
     setCellValue(value, range) {
       const { row, col } = range;
       const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
@@ -5741,8 +5749,8 @@ var __export__ = (() => {
           row: 2,
           col: 2
         },
-        colCount: 16384,
-        rowCount: 1048576
+        colCount: DEFAULT_COL_COUNT,
+        rowCount: DEFAULT_ROW_COUNT
       },
       {
         sheetId: "2",
@@ -5782,7 +5790,7 @@ var __export__ = (() => {
           4: {
             value: "\u8FD9\u662F\u4E00\u6BB5\u975E\u5E38\u957F\u7684\u6587\u6848\uFF0C\u9700\u8981\u6362\u884C\u5C55\u793A",
             style: {
-              // isWrapText: true,
+              isWrapText: true,
               underline: 1 /* SINGLE */
             }
           }
@@ -5830,11 +5838,15 @@ var __export__ = (() => {
       }
     ],
     customHeight: {
-      // 1: {
-      //   0: 100,
-      // },
+      1: {
+        1: 100
+      }
     },
-    customWidth: {}
+    customWidth: {
+      1: {
+        1: 100
+      }
+    }
   };
 
   // src/init.ts
