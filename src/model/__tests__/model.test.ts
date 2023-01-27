@@ -1,15 +1,15 @@
-import { Model } from '..';
+import { Model, History } from '..';
 import { Range } from '@/util';
 
 describe('model.test.ts', () => {
   test('normal', () => {
-    const model = new Model();
+    const model = new Model(new History());
     expect(model.getSheetList()).toHaveLength(0);
     model.addSheet();
     expect(model.getSheetList()).toHaveLength(1);
   });
   test('setCellValue', () => {
-    const model = new Model();
+    const model = new Model(new History());
     model.addSheet();
     expect(model.queryCell(0, 0)).toEqual({ style: undefined });
     model.setCellValues(
@@ -24,7 +24,7 @@ describe('model.test.ts', () => {
     });
   });
   test('toJSON', () => {
-    const model = new Model();
+    const model = new Model(new History());
     expect(model.toJSON()).toEqual({
       workbook: [],
       worksheets: {},
@@ -34,7 +34,7 @@ describe('model.test.ts', () => {
     });
   });
   test('fromJSON', () => {
-    const model = new Model();
+    const model = new Model(new History());
     model.fromJSON({
       workbook: [
         {

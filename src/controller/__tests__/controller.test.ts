@@ -1,17 +1,17 @@
-import { Controller, History } from '..';
-import { Model } from '@/model';
+import { Controller } from '..';
+import { Model, History } from '@/model';
 
 describe('controller.test.ts', () => {
   describe('undo redo', () => {
     test('normal', () => {
-      const controller = new Controller(new Model(), new History());
+      const controller = new Controller(new Model(new History()));
       expect(controller.canRedo()).toEqual(false);
       expect(controller.canUndo()).toEqual(false);
     });
   });
   describe('activeCell', () => {
     test('get', () => {
-      const controller = new Controller(new Model(), new History());
+      const controller = new Controller(new Model(new History()));
       controller.addSheet();
       expect(controller.getActiveCell()).toEqual({
         row: 0,
@@ -19,7 +19,7 @@ describe('controller.test.ts', () => {
       });
     });
     test('set', () => {
-      const controller = new Controller(new Model(), new History());
+      const controller = new Controller(new Model(new History()));
       controller.addSheet();
       controller.setActiveCell({
         row: 2,
@@ -42,7 +42,7 @@ describe('controller.test.ts', () => {
 
   describe('addSheet', () => {
     test('normal', () => {
-      const controller = new Controller(new Model(), new History());
+      const controller = new Controller(new Model(new History()));
       controller.addSheet();
       expect(controller.getScroll()).toEqual({
         top: 0,
@@ -57,7 +57,7 @@ describe('controller.test.ts', () => {
 
   describe('scroll', () => {
     test('get', () => {
-      const controller = new Controller(new Model(), new History());
+      const controller = new Controller(new Model(new History()));
       controller.addSheet();
       expect(controller.getScroll()).toEqual({
         top: 0,
@@ -69,7 +69,7 @@ describe('controller.test.ts', () => {
       });
     });
     test('set', () => {
-      const controller = new Controller(new Model(), new History());
+      const controller = new Controller(new Model(new History()));
       controller.addSheet();
       const headerSize = controller.getHeaderSize();
       controller.setScroll({
@@ -97,7 +97,7 @@ describe('controller.test.ts', () => {
 
   describe('copy', () => {
     test('set', () => {
-      const controller = new Controller(new Model(), new History());
+      const controller = new Controller(new Model(new History()));
       controller.addSheet();
       let text: string = '';
       const textFormat = 'text/plain';
@@ -117,7 +117,7 @@ describe('controller.test.ts', () => {
 
   describe('computeCellPosition', () => {
     test('normal', () => {
-      const controller = new Controller(new Model(), new History());
+      const controller = new Controller(new Model(new History()));
       controller.addSheet();
       const headerSize = controller.getHeaderSize();
       const size = controller.computeCellPosition(0, 0);
@@ -133,12 +133,12 @@ describe('controller.test.ts', () => {
 
   describe('RowHeight', () => {
     test('get', () => {
-      const controller = new Controller(new Model(), new History());
+      const controller = new Controller(new Model(new History()));
       controller.addSheet();
       expect(controller.getRowHeight(0)).toEqual(controller.getRowHeight(1));
     });
     test('set', () => {
-      const controller = new Controller(new Model(), new History());
+      const controller = new Controller(new Model(new History()));
       controller.addSheet();
       controller.setRowHeight(0, 100);
       expect(controller.getRowHeight(0)).toEqual(100);

@@ -38,7 +38,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     Object.assign(styleData, value);
     controller.setCellStyle(styleData, controller.getRanges());
   };
-  const { activeCell, canRedo, canUndo, fontFamilyList } = state;
+  const { activeCell, fontFamilyList } = state;
   const { style = {} } = activeCell;
   const {
     isBold = false,
@@ -57,7 +57,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     },
     Button(
       {
-        disabled: !canUndo,
+        disabled: !controller.canUndo(),
         onClick() {
           controller.undo();
         },
@@ -67,7 +67,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     ),
     Button(
       {
-        disabled: !canRedo,
+        disabled: !controller.canRedo(),
         onClick() {
           controller.redo();
         },

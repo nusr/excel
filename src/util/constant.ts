@@ -112,8 +112,6 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
     width: 0,
     height: 0,
   },
-  canRedo: false,
-  canUndo: false,
   fontFamilyList: [],
   contextMenuPosition: undefined,
   scrollLeft: 0,

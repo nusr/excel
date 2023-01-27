@@ -40,10 +40,6 @@ export interface IController extends IScrollValue, IBaseModel {
   setHooks(hooks: IHooks): void;
   getActiveCell(): Coordinate;
   getCell(data: Coordinate): CellInfo;
-  canRedo(): boolean;
-  canUndo(): boolean;
-  undo(): void;
-  redo(): void;
   getCellSize(row: number, col: number): IWindowSize;
   computeCellPosition(row: number, col: number): CanvasOverlayPosition;
   getChangeSet(): Set<ChangeEventType>;

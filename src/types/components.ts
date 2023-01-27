@@ -34,8 +34,6 @@ export interface StoreValue {
   isCellEditing: boolean;
   activeCell: CellInfo;
   cellPosition: CanvasOverlayPosition;
-  canRedo: boolean;
-  canUndo: boolean;
   fontFamilyList: OptionItem[];
   contextMenuPosition?: CanvasOverlayPosition;
   scrollTop: number;

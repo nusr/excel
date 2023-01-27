@@ -8,7 +8,6 @@ import {
   IHooks,
   IModel,
   WorksheetType,
-  IHistory,
   IWindowSize,
   CanvasOverlayPosition,
   ScrollValue,
@@ -63,7 +62,6 @@ export class Controller implements IController {
       };
     },
   };
-  private history: IHistory;
   // sheet size
   private viewSize = {
     width: 0,
@@ -74,10 +72,9 @@ export class Controller implements IController {
     height: ROW_TITLE_HEIGHT,
   };
   private mainDom: MainDom = {};
-  constructor(model: IModel, history: IHistory) {
+  constructor(model: IModel) {
     this.model = model;
     this.ranges = [new Range(0, 0, 1, 1, this.getCurrentSheetId())];
-    this.history = history;
   }
   getCurrentSheetId(): string {
     return this.model.getCurrentSheetId();
@@ -97,11 +94,8 @@ export class Controller implements IController {
   setHooks(hooks: IHooks): void {
     this.hooks = hooks;
   }
-  private emitChange(recordHistory = true): void {
+  private emitChange(): void {
     controllerLog('emitChange', this.changeSet);
-    if (recordHistory) {
-      this.history.onChange(this.toJSON());
-    }
     this.hooks.modelChange(this.changeSet);
     this.changeSet = new Set<ChangeEventType>();
   }
@@ -183,7 +177,7 @@ export class Controller implements IController {
     });
     this.computeViewSize();
     this.changeSet.add('content');
-    this.emitChange(false);
+    this.emitChange();
   }
   toJSON(): WorkBookJSON {
     return this.model.toJSON();
@@ -220,22 +214,20 @@ export class Controller implements IController {
     };
   };
   canRedo(): boolean {
-    return this.history.canRedo();
+    return this.model.canRedo();
   }
   canUndo(): boolean {
-    return this.history.canUndo();
+    return this.model.canUndo();
   }
   undo(): void {
-    const result = this.history.undo(this.toJSON());
-    if (result) {
-      this.fromJSON(result);
-    }
+    this.model.undo();
+    this.changeSet.add('content');
+    this.emitChange();
   }
   redo(): void {
-    const result = this.history.redo(this.toJSON());
-    if (result) {
-      this.fromJSON(result);
-    }
+    this.model.redo();
+    this.changeSet.add('content');
+    this.emitChange();
   }
   getColWidth(col: number): number {
     return this.model.getColWidth(col);

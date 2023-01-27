@@ -88,6 +88,10 @@ export interface IBaseModel {
   addCol(colIndex: number, count: number): void;
   deleteCol(colIndex: number, count: number): void;
   deleteRow(rowIndex: number, count: number): void;
+  canRedo(): boolean;
+  canUndo(): boolean;
+  undo(): void;
+  redo(): void;
 }
 
 export interface IHistory {
@@ -96,4 +100,24 @@ export interface IHistory {
   undo(sheetData: WorkBookJSON): WorkBookJSON | undefined;
   redo(sheetData: WorkBookJSON): WorkBookJSON | undefined;
   onChange(sheetData: WorkBookJSON): void;
+}
+
+export type UndoRedoItem = {
+  op: UndoRedoType;
+  path: string;
+  value: any;
+};
+
+export type UndoRedoType = 'set' | 'add-array' | 'delete-array';
+
+export interface IUndoRedo {
+  clear(): void;
+  canRedo(): boolean;
+  canUndo(): boolean;
+  undo(): UndoRedoItem[];
+  redo(): UndoRedoItem[];
+  pushRedo(op: UndoRedoType, key: string, value: any): void;
+  pushUndo(op: UndoRedoType, key: string, value: any): void;
+  record(): void;
+  clearItem(): void;
 }

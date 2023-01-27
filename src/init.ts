@@ -1,6 +1,6 @@
 import { StoreValue, IController, ChangeEventType, OptionItem } from './types';
-import { Controller, History } from './controller';
-import { Model, MOCK_MODEL } from './model';
+import { Controller } from './controller';
+import { Model, MOCK_MODEL, History } from './model';
 import { MainCanvas, registerEvents, Content } from './canvas';
 import {
   FONT_FAMILY_LIST,
@@ -45,8 +45,6 @@ function getStoreValue(controller: IController, fontFamilyList: OptionItem[]) {
     cell.style.fontFamily = defaultFontFamily;
   }
   const newStateValue: Partial<StoreValue> = {
-    canRedo: controller.canRedo(),
-    canUndo: controller.canUndo(),
     sheetList: controller.getSheetList(),
     currentSheetId: controller.getCurrentSheetId(),
     cellPosition: cellPosition,
@@ -97,7 +95,8 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
   controller.fromJSON(MOCK_MODEL);
 }
 export function initController(): IController {
-  const controller = new Controller(new Model(), new History());
+  const controller = new Controller(new Model(new History()));
   controller.addSheet();
+  (window as any).controller = controller;
   return controller;
 }

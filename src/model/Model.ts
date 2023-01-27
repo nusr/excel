@@ -7,6 +7,8 @@ import {
   IModel,
   ResultType,
   IRange,
+  IUndoRedo,
+  UndoRedoItem,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -41,6 +43,10 @@ export class Model implements IModel {
   private mergeCells: WorkBookJSON['mergeCells'] = [];
   private customHeight: WorkBookJSON['customHeight'] = {};
   private customWidth: WorkBookJSON['customWidth'] = {};
+  private history: IUndoRedo;
+  constructor(history: IUndoRedo) {
+    this.history = history;
+  }
   getSheetList(): WorkBookJSON['workbook'] {
     return this.workbook;
   }
@@ -48,32 +54,40 @@ export class Model implements IModel {
     const index = this.workbook.findIndex(
       (v) => v.sheetId === this.currentSheetId,
     );
-    if (index >= 0) {
-      const tempList = Array.from(this.workbook);
-      tempList.splice(index, 1, {
-        ...this.workbook[index],
-        activeCell: {
-          row: range.row,
-          col: range.col,
-        },
-      });
-      this.workbook = tempList;
+    if (index < 0) {
+      return;
     }
+    const oldValue = this.workbook[index].activeCell;
+    if (oldValue.col === range.col && oldValue.row === range.row) {
+      return;
+    }
+    const key = `workbook.${index}.activeCell`;
+    this.history.clearItem();
+    this.history.pushUndo('set', key, {
+      row: range.row,
+      col: range.col,
+    });
+    this.history.pushRedo('set', key, {
+      ...oldValue,
+    });
+    setWith(this, key, {
+      row: range.row,
+      col: range.col,
+    });
+    this.history.record();
   }
   addSheet(): void {
     const item = getDefaultSheetInfo(this.workbook);
-    this.workbook = [
-      ...this.workbook,
-      {
-        ...item,
-        colCount: DEFAULT_COL_COUNT,
-        rowCount: DEFAULT_ROW_COUNT,
-        activeCell: {
-          row: 0,
-          col: 0,
-        },
+    const sheet: WorksheetType = {
+      ...item,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      activeCell: {
+        row: 0,
+        col: 0,
       },
-    ];
+    };
+    this.workbook = [...this.workbook, sheet];
     this.currentSheetId = item.sheetId;
   }
   getSheetInfo(id: string = this.currentSheetId): WorksheetType {
@@ -124,6 +138,7 @@ export class Model implements IModel {
     this.customWidth = customWidth;
     this.customHeight = customHeight;
     this.computeAllCell();
+    this.history.clear();
   };
   toJSON = (): WorkBookJSON => {
     const { worksheets, workbook, mergeCells, customHeight, customWidth } =
@@ -355,4 +370,42 @@ export class Model implements IModel {
       this.customHeight[this.currentSheetId] || {};
     this.customHeight[this.currentSheetId][row] = height;
   }
+  canRedo(): boolean {
+    return this.history.canRedo();
+  }
+  canUndo(): boolean {
+    return this.history.canUndo();
+  }
+  undo(): void {
+    if (!this.canUndo()) {
+      return;
+    }
+    this.executeOperate(this.history.undo());
+  }
+  redo(): void {
+    if (!this.canRedo()) {
+      return;
+    }
+    this.executeOperate(this.history.redo());
+  }
+
+  private executeOperate = (list: UndoRedoItem[]) => {
+    for (const item of list) {
+      const { op, path, value } = item;
+      switch (op) {
+        case 'set': {
+          console.log(path, value);
+          setWith(this, path, value);
+          break;
+        }
+        // case 'add-array':
+        //   break;
+        // case 'delete-array':
+        //   break;
+        default:
+          console.error(`not support type: ${op}`);
+          break;
+      }
+    }
+  };
 }
