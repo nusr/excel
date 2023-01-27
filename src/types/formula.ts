@@ -1,4 +1,4 @@
- type FormulaFunction = (...data: any[]) => number | string | boolean | string[];
+type FormulaFunction = (...data: any[]) => number | string | boolean | string[];
 
 export type TextFormulaKeys =
   | 'CONCATENATE'
@@ -22,6 +22,7 @@ export type MathFormulaKeys =
   | 'ASIN'
   | 'ASINH'
   | 'ATAN'
+  | 'ATAN2'
   | 'ATANH'
   | 'COS'
   | 'COT'

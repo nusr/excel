@@ -170,7 +170,6 @@ async function main() {
 
 async function liveReload() {
   deleteDir('dist');
-  buildHtml();
   const options = buildUMD('');
   const ctx = await context({
     ...options,
@@ -184,6 +183,7 @@ async function liveReload() {
     servedir: distDir,
   });
   const url = `http://localhost:${port}`;
+  buildHtml();
   openBrowser(url);
   console.log(`running in: ${url}`);
 }

@@ -10,8 +10,8 @@ export const MOCK_MODEL: WorkBookJSON = {
         row: 2,
         col: 2,
       },
-      colCount: 16384,
-      rowCount: 1048576,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
     },
     {
       sheetId: '2',
@@ -51,7 +51,7 @@ export const MOCK_MODEL: WorkBookJSON = {
         4: {
           value: '这是一段非常长的文案，需要换行展示',
           style: {
-            // isWrapText: true,
+            isWrapText: true,
             underline: EUnderLine.SINGLE,
           },
         },
@@ -99,9 +99,13 @@ export const MOCK_MODEL: WorkBookJSON = {
     },
   ],
   customHeight: {
-    // 1: {
-    //   0: 100,
-    // },
+    1: {
+      1: 100,
+    },
   },
-  customWidth: {},
+  customWidth: {
+    1: {
+      1: 100,
+    },
+  },
 };

@@ -23,4 +23,69 @@ describe('model.test.ts', () => {
       formula: '',
     });
   });
+  test('toJSON', () => {
+    const model = new Model();
+    expect(model.toJSON()).toEqual({
+      workbook: [],
+      worksheets: {},
+      mergeCells: [],
+      customHeight: {},
+      customWidth: {},
+    });
+  });
+  test('fromJSON', () => {
+    const model = new Model();
+    model.fromJSON({
+      workbook: [
+        {
+          sheetId: '1',
+          activeCell: {
+            row: 0,
+            col: 1,
+          },
+          rowCount: 200,
+          colCount: 200,
+          name: 'test',
+        },
+      ],
+      worksheets: {},
+      mergeCells: [
+        {
+          row: 1,
+          col: 1,
+          colCount: 3,
+          rowCount: 3,
+          sheetId: '1',
+        },
+      ],
+      customHeight: {},
+      customWidth: {},
+    }),
+      expect(model.toJSON()).toEqual({
+        workbook: [
+          {
+            sheetId: '1',
+            activeCell: {
+              row: 0,
+              col: 1,
+            },
+            rowCount: 200,
+            colCount: 200,
+            name: 'test',
+          },
+        ],
+        worksheets: {},
+        mergeCells: [
+          {
+            row: 1,
+            col: 1,
+            colCount: 3,
+            rowCount: 3,
+            sheetId: '1',
+          },
+        ],
+        customHeight: {},
+        customWidth: {},
+      });
+  });
 });

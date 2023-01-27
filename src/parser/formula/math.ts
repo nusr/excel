@@ -38,6 +38,13 @@ export const ATAN = (...list: any[]): number => {
   const data = mustOneNumber(list);
   return Math.atan(data);
 };
+export const ATAN2 = (...list: any[]): number => {
+  assert(list.length === 2);
+  const [x, y] = list;
+  assert(typeof x === 'number');
+  assert(typeof y === 'number');
+  return Math.atan2(x, y);
+};
 export const ATANH = (...list: any[]): number => {
   const data = mustOneNumber(list);
   return Math.log((1 + data) / (data + 1)) / 2;
@@ -129,6 +136,7 @@ const formulas: MathFormulaType = {
   ASIN,
   ASINH,
   ATAN,
+  ATAN2,
   ATANH,
   COT,
   COS,

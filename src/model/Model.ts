@@ -108,7 +108,7 @@ export class Model implements IModel {
     }
     return result;
   }
-  fromJSON(json: WorkBookJSON): void {
+  fromJSON = (json: WorkBookJSON) => {
     modelLog('fromJSON', json);
     const {
       worksheets = {},
@@ -124,8 +124,8 @@ export class Model implements IModel {
     this.customWidth = customWidth;
     this.customHeight = customHeight;
     this.computeAllCell();
-  }
-  toJSON(): WorkBookJSON {
+  };
+  toJSON = (): WorkBookJSON => {
     const { worksheets, workbook, mergeCells, customHeight, customWidth } =
       this;
     return {
@@ -135,7 +135,7 @@ export class Model implements IModel {
       customHeight,
       customWidth,
     };
-  }
+  };
 
   private setCellValue(value: ResultType, range: Coordinate): void {
     const { row, col } = range;
