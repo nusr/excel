@@ -337,8 +337,6 @@ var __export__ = (() => {
       width: 0,
       height: 0
     },
-    canRedo: false,
-    canUndo: false,
     fontFamilyList: [],
     contextMenuPosition: void 0,
     scrollLeft: 0,
@@ -3550,7 +3548,7 @@ var __export__ = (() => {
       Object.assign(styleData, value);
       controller.setCellStyle(styleData, controller.getRanges());
     };
-    const { activeCell, canRedo, canUndo, fontFamilyList } = state;
+    const { activeCell, fontFamilyList } = state;
     const { style = {} } = activeCell;
     const {
       isBold = false,
@@ -3569,7 +3567,7 @@ var __export__ = (() => {
       },
       Button(
         {
-          disabled: !canUndo,
+          disabled: !controller.canUndo(),
           onClick() {
             controller.undo();
           },
@@ -3579,7 +3577,7 @@ var __export__ = (() => {
       ),
       Button(
         {
-          disabled: !canRedo,
+          disabled: !controller.canRedo(),
           onClick() {
             controller.redo();
           },
@@ -3865,7 +3863,6 @@ var __export__ = (() => {
         };
       }
     };
-    history;
     // sheet size
     viewSize = {
       width: 0,
@@ -3876,10 +3873,9 @@ var __export__ = (() => {
       height: ROW_TITLE_HEIGHT
     };
     mainDom = {};
-    constructor(model, history) {
+    constructor(model) {
       this.model = model;
       this.ranges = [new Range(0, 0, 1, 1, this.getCurrentSheetId())];
-      this.history = history;
     }
     getCurrentSheetId() {
       return this.model.getCurrentSheetId();
@@ -3899,11 +3895,8 @@ var __export__ = (() => {
     setHooks(hooks2) {
       this.hooks = hooks2;
     }
-    emitChange(recordHistory = true) {
+    emitChange() {
       controllerLog("emitChange", this.changeSet);
-      if (recordHistory) {
-        this.history.onChange(this.toJSON());
-      }
       this.hooks.modelChange(this.changeSet);
       this.changeSet = /* @__PURE__ */ new Set();
     }
@@ -3980,7 +3973,7 @@ var __export__ = (() => {
       });
       this.computeViewSize();
       this.changeSet.add("content");
-      this.emitChange(false);
+      this.emitChange();
     }
     toJSON() {
       return this.model.toJSON();
@@ -4012,22 +4005,20 @@ var __export__ = (() => {
       };
     };
     canRedo() {
-      return this.history.canRedo();
+      return this.model.canRedo();
     }
     canUndo() {
-      return this.history.canUndo();
+      return this.model.canUndo();
     }
     undo() {
-      const result = this.history.undo(this.toJSON());
-      if (result) {
-        this.fromJSON(result);
-      }
+      this.model.undo();
+      this.changeSet.add("content");
+      this.emitChange();
     }
     redo() {
-      const result = this.history.redo(this.toJSON());
-      if (result) {
-        this.fromJSON(result);
-      }
+      this.model.redo();
+      this.changeSet.add("content");
+      this.emitChange();
     }
     getColWidth(col) {
       return this.model.getColWidth(col);
@@ -4335,57 +4326,6 @@ var __export__ = (() => {
     }
     getMainDom() {
       return this.mainDom;
-    }
-  };
-
-  // src/controller/History.ts
-  var History = class {
-    undoList = [];
-    redoList = [];
-    constructor() {
-      this.reset();
-    }
-    reset() {
-      this.undoList = [];
-      this.redoList = [];
-    }
-    onChange(sheetData) {
-      this.addUndoData(sheetData);
-      this.redoList = [];
-    }
-    addUndoData(sheetData) {
-      this.undoList.push(JSON.stringify(sheetData));
-    }
-    addRedoData(sheetData) {
-      this.redoList.push(JSON.stringify(sheetData));
-    }
-    getUndoData() {
-      const temp = this.undoList.pop();
-      return temp ? JSON.parse(temp) : temp;
-    }
-    getRedoData() {
-      const temp = this.redoList.pop();
-      return temp ? JSON.parse(temp) : temp;
-    }
-    canRedo() {
-      return this.redoList.length > 0;
-    }
-    canUndo() {
-      return this.undoList.length > 0;
-    }
-    redo(sheetData) {
-      if (this.canRedo()) {
-        this.addUndoData(sheetData);
-        return this.getRedoData();
-      }
-      return void 0;
-    }
-    undo(sheetData) {
-      if (this.canUndo()) {
-        this.addRedoData(sheetData);
-        return this.getUndoData();
-      }
-      return void 0;
     }
   };
 
@@ -5437,6 +5377,10 @@ var __export__ = (() => {
     mergeCells = [];
     customHeight = {};
     customWidth = {};
+    history;
+    constructor(history) {
+      this.history = history;
+    }
     getSheetList() {
       return this.workbook;
     }
@@ -5444,32 +5388,40 @@ var __export__ = (() => {
       const index = this.workbook.findIndex(
         (v) => v.sheetId === this.currentSheetId
       );
-      if (index >= 0) {
-        const tempList = Array.from(this.workbook);
-        tempList.splice(index, 1, {
-          ...this.workbook[index],
-          activeCell: {
-            row: range.row,
-            col: range.col
-          }
-        });
-        this.workbook = tempList;
+      if (index < 0) {
+        return;
       }
+      const oldValue = this.workbook[index].activeCell;
+      if (oldValue.col === range.col && oldValue.row === range.row) {
+        return;
+      }
+      const key = `workbook.${index}.activeCell`;
+      this.history.clearItem();
+      this.history.pushUndo("set", key, {
+        row: range.row,
+        col: range.col
+      });
+      this.history.pushRedo("set", key, {
+        ...oldValue
+      });
+      setWith(this, key, {
+        row: range.row,
+        col: range.col
+      });
+      this.history.record();
     }
     addSheet() {
       const item = getDefaultSheetInfo(this.workbook);
-      this.workbook = [
-        ...this.workbook,
-        {
-          ...item,
-          colCount: DEFAULT_COL_COUNT,
-          rowCount: DEFAULT_ROW_COUNT,
-          activeCell: {
-            row: 0,
-            col: 0
-          }
+      const sheet = {
+        ...item,
+        colCount: DEFAULT_COL_COUNT,
+        rowCount: DEFAULT_ROW_COUNT,
+        activeCell: {
+          row: 0,
+          col: 0
         }
-      ];
+      };
+      this.workbook = [...this.workbook, sheet];
       this.currentSheetId = item.sheetId;
     }
     getSheetInfo(id = this.currentSheetId) {
@@ -5520,6 +5472,7 @@ var __export__ = (() => {
       this.customWidth = customWidth;
       this.customHeight = customHeight;
       this.computeAllCell();
+      this.history.clear();
     };
     toJSON = () => {
       const { worksheets, workbook, mergeCells, customHeight, customWidth } = this;
@@ -5737,6 +5690,39 @@ var __export__ = (() => {
       this.customHeight[this.currentSheetId] = this.customHeight[this.currentSheetId] || {};
       this.customHeight[this.currentSheetId][row] = height;
     }
+    canRedo() {
+      return this.history.canRedo();
+    }
+    canUndo() {
+      return this.history.canUndo();
+    }
+    undo() {
+      if (!this.canUndo()) {
+        return;
+      }
+      this.executeOperate(this.history.undo());
+    }
+    redo() {
+      if (!this.canRedo()) {
+        return;
+      }
+      this.executeOperate(this.history.redo());
+    }
+    executeOperate = (list) => {
+      for (const item of list) {
+        const { op, path, value } = item;
+        switch (op) {
+          case "set": {
+            console.log(path, value);
+            setWith(this, path, value);
+            break;
+          }
+          default:
+            console.error(`not support type: ${op}`);
+            break;
+        }
+      }
+    };
   };
 
   // src/model/mockModel.ts
@@ -5849,6 +5835,63 @@ var __export__ = (() => {
     }
   };
 
+  // src/model/History.ts
+  var History = class {
+    undoList = [];
+    redoList = [];
+    undoItem = [];
+    redoItem = [];
+    constructor() {
+      this.clear();
+    }
+    clearItem() {
+      this.undoItem = [];
+      this.redoItem = [];
+    }
+    record() {
+      if (this.undoItem.length > 0) {
+        this.undoList.push(this.undoItem);
+      }
+      if (this.redoItem.length > 0) {
+        this.redoList.push(this.redoItem);
+      }
+      this.clearItem();
+      console.log("undoList", this.undoList);
+      console.log("redoList", this.redoList);
+    }
+    pushRedo(op, key, value) {
+      this.redoItem.push({
+        op,
+        path: key,
+        value
+      });
+    }
+    pushUndo(op, key, value) {
+      this.undoItem.push({
+        op,
+        path: key,
+        value
+      });
+    }
+    clear() {
+      this.undoList = [];
+      this.redoList = [];
+      this.clearItem();
+    }
+    canRedo() {
+      return this.redoList.length > 0;
+    }
+    canUndo() {
+      return this.undoList.length > 0;
+    }
+    redo() {
+      return this.redoList.pop();
+    }
+    undo() {
+      return this.undoList.pop();
+    }
+  };
+
   // src/init.ts
   function initTheme(dom) {
     const keyList = Object.keys(theme);
@@ -5883,8 +5926,6 @@ var __export__ = (() => {
       cell.style.fontFamily = defaultFontFamily;
     }
     const newStateValue = {
-      canRedo: controller.canRedo(),
-      canUndo: controller.canUndo(),
       sheetList: controller.getSheetList(),
       currentSheetId: controller.getCurrentSheetId(),
       cellPosition,
@@ -5933,8 +5974,9 @@ var __export__ = (() => {
     controller.fromJSON(MOCK_MODEL);
   }
   function initController() {
-    const controller = new Controller(new Model(), new History());
+    const controller = new Controller(new Model(new History()));
     controller.addSheet();
+    window.controller = controller;
     return controller;
   }
 
