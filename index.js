@@ -327,9 +327,9 @@ var __export__ = (() => {
     isCellEditing: false,
     activeCell: {
       value: "",
+      style: {},
       row: 0,
-      col: 0,
-      style: {}
+      col: 0
     },
     cellPosition: {
       left: -999,
@@ -345,7 +345,9 @@ var __export__ = (() => {
       width: 0,
       height: 0
     },
-    scrollStatus: 0 /* NONE */
+    scrollStatus: 0 /* NONE */,
+    canRedo: false,
+    canUndo: false
   };
 
   // src/util/util.ts
@@ -460,6 +462,12 @@ var __export__ = (() => {
   }
   function isCol(range) {
     return range.row === range.colCount && range.colCount === 0;
+  }
+  function isSameRange(oldRange, newRange) {
+    if (!oldRange || !newRange) {
+      return false;
+    }
+    return oldRange.col === newRange.col && oldRange.row === newRange.row && oldRange.colCount === newRange.colCount && oldRange.rowCount === newRange.rowCount && oldRange.sheetId === newRange.sheetId;
   }
   var Range = class {
     row = 0;
@@ -2087,8 +2095,7 @@ var __export__ = (() => {
     }
     renderSelection() {
       const { controller } = this;
-      const ranges = controller.getRanges();
-      const [range] = ranges;
+      const range = controller.getActiveCell();
       if (isSheet(range)) {
         return this.renderSelectAll();
       }
@@ -2123,8 +2130,7 @@ var __export__ = (() => {
     renderSelectRange() {
       const { controller } = this;
       const headerSize = controller.getHeaderSize();
-      const ranges = controller.getRanges();
-      const [range] = ranges;
+      const range = controller.getActiveCell();
       const activeCell = controller.computeCellPosition(range.row, range.col);
       const endCellRow = range.row + range.rowCount - 1;
       const endCellCol = range.col + range.colCount - 1;
@@ -2186,9 +2192,8 @@ var __export__ = (() => {
     renderSelectCol() {
       const { controller } = this;
       const headerSize = controller.getHeaderSize();
-      const ranges = controller.getRanges();
+      const range = controller.getActiveCell();
       const { height } = controller.getDomRect();
-      const [range] = ranges;
       this.ctx.fillStyle = theme.selectionColor;
       const activeCell = controller.computeCellPosition(range.row, range.col);
       fillRect(this.ctx, activeCell.left, 0, activeCell.width, headerSize.height);
@@ -2224,9 +2229,8 @@ var __export__ = (() => {
     renderSelectRow() {
       const { controller } = this;
       const headerSize = controller.getHeaderSize();
-      const ranges = controller.getRanges();
+      const range = controller.getActiveCell();
       const { width } = controller.getDomRect();
-      const [range] = ranges;
       this.ctx.fillStyle = theme.selectionColor;
       const activeCell = controller.computeCellPosition(range.row, range.col);
       fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
@@ -2533,7 +2537,7 @@ var __export__ = (() => {
         const cellData = controller.getCell(controller.getActiveCell());
         const style = cellData.style || {};
         style.isBold = !style.isBold;
-        controller.setCellStyle(style, controller.getRanges());
+        controller.setCellStyle(style, [controller.getActiveCell()]);
       }
     },
     {
@@ -2543,7 +2547,7 @@ var __export__ = (() => {
         const cellData = controller.getCell(controller.getActiveCell());
         const style = cellData.style || {};
         style.isItalic = !style.isItalic;
-        controller.setCellStyle(style, controller.getRanges());
+        controller.setCellStyle(style, [controller.getActiveCell()]);
       }
     },
     {
@@ -2557,7 +2561,7 @@ var __export__ = (() => {
         } else {
           style.underline = 0 /* NONE */;
         }
-        controller.setCellStyle(style, controller.getRanges());
+        controller.setCellStyle(style, [controller.getActiveCell()]);
       }
     }
   ];
@@ -2710,7 +2714,7 @@ var __export__ = (() => {
         const isInputFocus = document.activeElement === inputDom;
         if (isInputFocus) {
           const value = inputDom.value;
-          controller.setCellValues([[value]], [], controller.getRanges());
+          controller.setCellValues([[value]], [], [controller.getActiveCell()]);
           stateValue.isCellEditing = false;
           inputDom.value = "";
         }
@@ -2821,7 +2825,8 @@ var __export__ = (() => {
     renderContent() {
       const { controller } = this;
       const { width, height } = this.controller.getDomRect();
-      const data = controller.getCellsContent(controller.getCurrentSheetId());
+      const currentSheetId = controller.getCurrentSheetId();
+      const data = controller.getCellsContent(currentSheetId);
       if (isEmpty(data)) {
         return;
       }
@@ -2836,7 +2841,9 @@ var __export__ = (() => {
         if (result.top > height || result.left > width) {
           continue;
         }
-        const cellInfo = this.controller.getCell(item);
+        const cellInfo = this.controller.getCell(
+          new Range(row, col, 1, 1, currentSheetId)
+        );
         const {
           wrapHeight = 0,
           fontSizeHeight = 0,
@@ -3156,7 +3163,7 @@ var __export__ = (() => {
       controller.setMainDom({ input: inputDom });
     };
     const setValue = (value) => {
-      controller.setCellValues([[value]], [], controller.getRanges());
+      controller.setCellValues([[value]], [], [controller.getActiveCell()]);
       inputDom.value = "";
       state.isCellEditing = false;
     };
@@ -3546,9 +3553,9 @@ var __export__ = (() => {
       const cellData = controller.getCell(controller.getActiveCell());
       const styleData = cellData.style || {};
       Object.assign(styleData, value);
-      controller.setCellStyle(styleData, controller.getRanges());
+      controller.setCellStyle(styleData, [controller.getActiveCell()]);
     };
-    const { activeCell, fontFamilyList } = state;
+    const { activeCell, fontFamilyList, canRedo, canUndo } = state;
     const { style = {} } = activeCell;
     const {
       isBold = false,
@@ -3567,7 +3574,7 @@ var __export__ = (() => {
       },
       Button(
         {
-          disabled: !controller.canUndo(),
+          disabled: !canUndo,
           onClick() {
             controller.undo();
           },
@@ -3577,7 +3584,7 @@ var __export__ = (() => {
       ),
       Button(
         {
-          disabled: !controller.canRedo(),
+          disabled: !canRedo,
           onClick() {
             controller.redo();
           },
@@ -3843,7 +3850,6 @@ var __export__ = (() => {
   var Controller = class {
     scrollValue = {};
     model;
-    ranges = [];
     changeSet = /* @__PURE__ */ new Set();
     copyRanges = [];
     cutRanges = [];
@@ -3875,7 +3881,6 @@ var __export__ = (() => {
     mainDom = {};
     constructor(model) {
       this.model = model;
-      this.ranges = [new Range(0, 0, 1, 1, this.getCurrentSheetId())];
     }
     getCurrentSheetId() {
       return this.model.getCurrentSheetId();
@@ -3889,9 +3894,6 @@ var __export__ = (() => {
     getSheetInfo(sheetId) {
       return this.model.getSheetInfo(sheetId);
     }
-    getRanges() {
-      return this.ranges;
-    }
     setHooks(hooks2) {
       this.hooks = hooks2;
     }
@@ -3899,27 +3901,29 @@ var __export__ = (() => {
       controllerLog("emitChange", this.changeSet);
       this.hooks.modelChange(this.changeSet);
       this.changeSet = /* @__PURE__ */ new Set();
+      this.model.record();
     }
     getActiveCell() {
-      const { activeCell } = this.getSheetInfo(this.model.getCurrentSheetId());
+      const currentSheetId = this.model.getCurrentSheetId();
+      const { activeCell } = this.getSheetInfo(currentSheetId);
       return {
-        ...activeCell
+        ...activeCell,
+        sheetId: activeCell.sheetId || currentSheetId
       };
     }
-    setRanges(range) {
-      const { row, col, colCount, rowCount } = range;
-      const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
+    setSheetCell(range) {
+      const { row, col, sheetId } = range;
+      const id = sheetId || this.model.getCurrentSheetId();
+      const sheetInfo = this.model.getSheetInfo(id);
       if (row < 0 || col < 0 || row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
         return false;
       }
+      range.sheetId = id;
       this.model.setActiveCell(range);
-      this.ranges = [
-        new Range(row, col, rowCount, colCount, this.getCurrentSheetId())
-      ];
       return true;
     }
     setActiveCell(range) {
-      if (!this.setRanges(range)) {
+      if (!this.setSheetCell(range)) {
         return;
       }
       this.changeSet.add("selection");
@@ -3931,19 +3935,13 @@ var __export__ = (() => {
       }
       this.model.setCurrentSheetId(id);
       const pos = this.getActiveCell();
-      this.setRanges({
-        row: pos.row,
-        col: pos.col,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: ""
-      });
+      this.setSheetCell(pos);
       this.computeViewSize();
       this.setScroll(this.getScroll());
     }
     addSheet() {
       this.model.addSheet();
-      this.setRanges({
+      this.setSheetCell({
         row: 0,
         col: 0,
         rowCount: 1,
@@ -3964,13 +3962,7 @@ var __export__ = (() => {
       controllerLog("loadJSON", json);
       this.model.fromJSON(json);
       const activeCell = this.getActiveCell();
-      this.setRanges({
-        row: activeCell.row,
-        col: activeCell.col,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: ""
-      });
+      this.setSheetCell(activeCell);
       this.computeViewSize();
       this.changeSet.add("content");
       this.emitChange();
@@ -3992,17 +3984,9 @@ var __export__ = (() => {
       this.changeSet.add("content");
       this.emitChange();
     }
-    getCell = (data) => {
-      const { row, col } = data;
-      const { model } = this;
-      const { value, formula, style } = model.queryCell(row, col);
-      return {
-        value,
-        row,
-        col,
-        formula,
-        style
-      };
+    getCell = (range) => {
+      const result = this.model.getCell(range);
+      return result;
     };
     canRedo() {
       return this.model.canRedo();
@@ -4156,15 +4140,14 @@ var __export__ = (() => {
         return;
       }
       const activeCell = this.getActiveCell();
-      this.model.setCellValues(list, [], this.ranges);
-      this.changeSet.add("content");
-      this.setActiveCell({
-        row: activeCell.row,
-        col: activeCell.col,
+      const range = {
+        ...activeCell,
         rowCount,
-        colCount,
-        sheetId: ""
-      });
+        colCount
+      };
+      this.model.setCellValues(list, [], [range]);
+      this.changeSet.add("content");
+      this.setActiveCell(range);
     }
     parseHTML(htmlString) {
       const parser = new DOMParser();
@@ -4200,15 +4183,14 @@ var __export__ = (() => {
         return;
       }
       const activeCell = this.getActiveCell();
-      this.model.setCellValues(result, resultStyle, this.ranges);
-      this.changeSet.add("content");
-      this.setActiveCell({
-        row: activeCell.row,
-        col: activeCell.col,
+      const range = {
+        ...activeCell,
         rowCount,
-        colCount,
-        sheetId: ""
-      });
+        colCount
+      };
+      this.model.setCellValues(result, resultStyle, [range]);
+      this.changeSet.add("content");
+      this.setActiveCell(range);
     }
     async paste(event) {
       this.copyRanges = [];
@@ -4244,17 +4226,17 @@ var __export__ = (() => {
       }
     }
     getCopyData() {
-      const [range] = this.ranges;
-      const { row, col, rowCount, colCount } = range;
+      const { row, col, rowCount, colCount } = this.getActiveCell();
       const result = [];
       const html = [];
       let index = 1;
       const classList = [];
+      const currentSheetId = this.model.getCurrentSheetId();
       for (let r = row, endRow = row + rowCount; r < endRow; r++) {
         const temp = [];
         const t = [];
         for (let c = col, endCol = col + colCount; c < endCol; c++) {
-          const a = this.model.queryCell(r, c);
+          const a = this.model.getCell(new Range(r, c, 1, 1, currentSheetId));
           const str = String(a.value || "");
           temp.push(str);
           if (a.style) {
@@ -4283,7 +4265,7 @@ var __export__ = (() => {
       };
     }
     copy(event) {
-      this.copyRanges = this.ranges.slice();
+      this.copyRanges = [this.getActiveCell()];
       const data = this.getCopyData();
       if (event) {
         const keyList = Object.keys(data);
@@ -4297,7 +4279,7 @@ var __export__ = (() => {
       this.emitChange();
     }
     cut(event) {
-      this.cutRanges = this.ranges.slice();
+      this.cutRanges = [this.getActiveCell()];
       this.copy(event);
     }
     getCopyRanges() {
@@ -5385,30 +5367,20 @@ var __export__ = (() => {
       return this.workbook;
     }
     setActiveCell(range) {
-      const index = this.workbook.findIndex(
-        (v) => v.sheetId === this.currentSheetId
-      );
+      const index = this.workbook.findIndex((v) => v.sheetId === range.sheetId);
       if (index < 0) {
         return;
       }
       const oldValue = this.workbook[index].activeCell;
-      if (oldValue.col === range.col && oldValue.row === range.row) {
+      if (isSameRange(oldValue, range)) {
         return;
       }
       const key = `workbook.${index}.activeCell`;
-      this.history.clearItem();
-      this.history.pushUndo("set", key, {
-        row: range.row,
-        col: range.col
-      });
+      this.history.pushUndo("set", key, { ...range });
       this.history.pushRedo("set", key, {
         ...oldValue
       });
-      setWith(this, key, {
-        row: range.row,
-        col: range.col
-      });
-      this.history.record();
+      setWith(this, key, { ...range });
     }
     addSheet() {
       const item = getDefaultSheetInfo(this.workbook);
@@ -5418,7 +5390,10 @@ var __export__ = (() => {
         rowCount: DEFAULT_ROW_COUNT,
         activeCell: {
           row: 0,
-          col: 0
+          col: 0,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: item.sheetId
         }
       };
       this.workbook = [...this.workbook, sheet];
@@ -5486,13 +5461,17 @@ var __export__ = (() => {
     };
     setCellValue(value, range) {
       const { row, col } = range;
-      const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
-      setWith(this, `${configPath}.value`, value);
+      const key = `worksheets[${this.currentSheetId}][${row}][${col}].value`;
+      this.history.pushRedo("set", key, get(this, key, void 0));
+      this.history.pushUndo("set", key, value);
+      setWith(this, key, value);
     }
     setCellFormula(formula, range) {
       const { row, col } = range;
-      const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
-      setWith(this, `${configPath}.formula`, formula);
+      const key = `worksheets[${this.currentSheetId}][${row}][${col}].formula`;
+      this.history.pushRedo("set", key, get(this, key, void 0));
+      this.history.pushUndo("set", key, formula);
+      setWith(this, key, formula);
     }
     setCellValues(value, style, ranges) {
       const [range] = ranges;
@@ -5519,6 +5498,8 @@ var __export__ = (() => {
     }
     setStyle(style, range) {
       const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
+      this.history.pushRedo("set", stylePath, get(this, stylePath, {}));
+      this.history.pushUndo("set", stylePath, style);
       setWith(this, stylePath, style);
     }
     setCellStyle(style, ranges) {
@@ -5530,14 +5511,19 @@ var __export__ = (() => {
         }
       }
     }
-    queryCell = (row, col, sheetId = "") => {
+    getCell = (range) => {
+      const { row, col, sheetId } = range;
       const realSheetId = sheetId || this.currentSheetId;
       const cellData = get(
         this,
         `worksheets[${realSheetId}][${row}][${col}]`,
         {}
       );
-      return cellData;
+      return {
+        ...cellData,
+        row,
+        col
+      };
     };
     computeAllCell() {
       const sheetData = this.worksheets[this.currentSheetId];
@@ -5558,7 +5544,7 @@ var __export__ = (() => {
     parseFormula(formula) {
       const result = parseFormula(formula, {
         get: (row, col, sheetId) => {
-          const temp = this.queryCell(row, col, sheetId);
+          const temp = this.getCell(new Range(row, col, 1, 1, sheetId));
           return temp.value;
         },
         set: () => {
@@ -5708,12 +5694,14 @@ var __export__ = (() => {
       }
       this.executeOperate(this.history.redo());
     }
-    executeOperate = (list) => {
+    record() {
+      this.history.onChange();
+    }
+    executeOperate(list) {
       for (const item of list) {
         const { op, path, value } = item;
         switch (op) {
           case "set": {
-            console.log(path, value);
             setWith(this, path, value);
             break;
           }
@@ -5722,7 +5710,7 @@ var __export__ = (() => {
             break;
         }
       }
-    };
+    }
   };
 
   // src/model/mockModel.ts
@@ -5733,7 +5721,10 @@ var __export__ = (() => {
         name: "Sheet1",
         activeCell: {
           row: 2,
-          col: 2
+          col: 2,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: ""
         },
         colCount: DEFAULT_COL_COUNT,
         rowCount: DEFAULT_ROW_COUNT
@@ -5745,7 +5736,10 @@ var __export__ = (() => {
         rowCount: DEFAULT_ROW_COUNT,
         activeCell: {
           row: 4,
-          col: 4
+          col: 4,
+          rowCount: 2,
+          colCount: 2,
+          sheetId: ""
         }
       }
     ],
@@ -5848,16 +5842,14 @@ var __export__ = (() => {
       this.undoItem = [];
       this.redoItem = [];
     }
-    record() {
+    onChange() {
       if (this.undoItem.length > 0) {
-        this.undoList.push(this.undoItem);
+        this.undoList.push(this.undoItem.slice());
       }
       if (this.redoItem.length > 0) {
-        this.redoList.push(this.redoItem);
+        this.redoList.push(this.redoItem.slice());
       }
       this.clearItem();
-      console.log("undoList", this.undoList);
-      console.log("redoList", this.redoList);
     }
     pushRedo(op, key, value) {
       this.redoItem.push({
@@ -5909,8 +5901,9 @@ var __export__ = (() => {
   function getStoreValue(controller, fontFamilyList) {
     const { top } = controller.getDomRect();
     const { scrollLeft, scrollTop } = controller.getScroll();
-    const cell = controller.getCell(controller.getActiveCell());
-    const cellPosition = controller.computeCellPosition(cell.row, cell.col);
+    const activeCell = controller.getActiveCell();
+    const cell = controller.getCell(activeCell);
+    const cellPosition = controller.computeCellPosition(activeCell.row, activeCell.col);
     cellPosition.top = top + cellPosition.top;
     if (!cell.style) {
       cell.style = {};
@@ -5932,7 +5925,9 @@ var __export__ = (() => {
       scrollLeft,
       scrollTop,
       headerSize: controller.getHeaderSize(),
-      activeCell: cell
+      activeCell: cell,
+      canRedo: controller.canRedo(),
+      canUndo: controller.canUndo()
     };
     return newStateValue;
   }
