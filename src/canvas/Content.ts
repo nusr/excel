@@ -5,8 +5,9 @@ import {
   dpr,
   intToColumnName,
   isTestEnv,
+  Range,
+  theme,
 } from '@/util';
-import { theme } from '@/util';
 import {
   fillRect,
   fillText,
@@ -17,7 +18,7 @@ import {
   resizeCanvas,
 } from './util';
 import { HEADER_STYLE } from './constant';
-import type { Point, ContentView, IController, EventType } from '@/types';
+import { Point, ContentView, IController, EventType } from '@/types';
 
 export class Content implements ContentView {
   private canvas: HTMLCanvasElement;
@@ -62,7 +63,8 @@ export class Content implements ContentView {
   private renderContent(): void {
     const { controller } = this;
     const { width, height } = this.controller.getDomRect();
-    const data = controller.getCellsContent(controller.getCurrentSheetId());
+    const currentSheetId = controller.getCurrentSheetId();
+    const data = controller.getCellsContent(currentSheetId);
     if (isEmpty(data)) {
       return;
     }
@@ -78,7 +80,9 @@ export class Content implements ContentView {
         continue;
       }
 
-      const cellInfo = this.controller.getCell(item);
+      const cellInfo = this.controller.getCell(
+        new Range(row, col, 1, 1, currentSheetId),
+      );
       const {
         wrapHeight = 0,
         fontSizeHeight = 0,

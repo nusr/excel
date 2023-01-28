@@ -102,9 +102,9 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
   isCellEditing: false,
   activeCell: {
     value: '',
+    style: {},
     row: 0,
     col: 0,
-    style: {},
   },
   cellPosition: {
     left: -999,
@@ -121,4 +121,6 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
     height: 0,
   },
   scrollStatus: ScrollStatus.NONE,
+  canRedo: false,
+  canUndo: false,
 };

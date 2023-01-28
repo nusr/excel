@@ -17,8 +17,6 @@ export interface Coordinate {
   col: number;
 }
 
-export type CellInfo = ModelCellType & Coordinate;
-
 export type ScrollValue = {
   left: number;
   top: number;
@@ -32,7 +30,7 @@ export interface StoreValue {
   sheetList: WorkBookJSON['workbook'];
   currentSheetId: string;
   isCellEditing: boolean;
-  activeCell: CellInfo;
+  activeCell: ModelCellType & Coordinate;
   cellPosition: CanvasOverlayPosition;
   fontFamilyList: OptionItem[];
   contextMenuPosition?: CanvasOverlayPosition;
@@ -40,6 +38,8 @@ export interface StoreValue {
   scrollLeft: number;
   headerSize: IWindowSize;
   scrollStatus: ScrollStatus;
+  canRedo: boolean;
+  canUndo: boolean;
 }
 
 export type Point = [x: number, y: number];

@@ -32,6 +32,9 @@ describe('util.test.ts', () => {
             activeCell: {
               row: 0,
               col: 0,
+              rowCount: 1,
+              colCount: 1,
+              sheetId: ''
             },
           },
         ]),

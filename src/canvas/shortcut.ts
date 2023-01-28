@@ -297,7 +297,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
       const cellData = controller.getCell(controller.getActiveCell());
       const style = cellData.style || {};
       style.isBold = !style.isBold;
-      controller.setCellStyle(style, controller.getRanges());
+      controller.setCellStyle(style, [controller.getActiveCell()]);
     },
   },
   {
@@ -307,7 +307,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
       const cellData = controller.getCell(controller.getActiveCell());
       const style = cellData.style || {};
       style.isItalic = !style.isItalic;
-      controller.setCellStyle(style, controller.getRanges());
+      controller.setCellStyle(style, [controller.getActiveCell()]);
     },
   },
   {
@@ -324,7 +324,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
       } else {
         style.underline = EUnderLine.NONE;
       }
-      controller.setCellStyle(style, controller.getRanges());
+      controller.setCellStyle(style, [controller.getActiveCell()]);
     },
   },
 ];

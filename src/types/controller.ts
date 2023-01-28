@@ -1,5 +1,5 @@
 import { IBaseModel } from './model';
-import { Coordinate, CellInfo, CanvasOverlayPosition } from './components';
+import { CanvasOverlayPosition } from './components';
 import { IRange } from './range';
 import { IScrollValue } from './scroll';
 import { ChangeEventType, IWindowSize } from './event';
@@ -31,15 +31,13 @@ export type ClipboardType = 'text/plain' | 'text/html';
 export type MainDom = {
   input?: HTMLInputElement;
   canvas?: HTMLCanvasElement;
-}
+};
 
 export interface IController extends IScrollValue, IBaseModel {
   getViewSize(): IWindowSize;
   getHeaderSize(): IWindowSize;
-  getRanges(): IRange[];
   setHooks(hooks: IHooks): void;
-  getActiveCell(): Coordinate;
-  getCell(data: Coordinate): CellInfo;
+  getActiveCell(): IRange;
   getCellSize(row: number, col: number): IWindowSize;
   computeCellPosition(row: number, col: number): CanvasOverlayPosition;
   getChangeSet(): Set<ChangeEventType>;

@@ -31,7 +31,7 @@ export type StyleType = {
 export type WorksheetType = {
   sheetId: string;
   name: string;
-  activeCell: Coordinate;
+  activeCell: IRange;
   rowCount: number;
   colCount: number;
 };
@@ -61,10 +61,11 @@ export type WorkBookJSON = {
 };
 
 export interface IModel extends IBaseModel {
-  queryCell(row: number, col: number, sheetId?: string): ModelCellType;
+  record(): void;
 }
 
 export interface IBaseModel {
+  getCell(range: IRange): ModelCellType & Coordinate;
   getColWidth(col: number): number;
   setColWidth(col: number, width: number): void;
   getRowHeight(row: number): number;
@@ -94,14 +95,6 @@ export interface IBaseModel {
   redo(): void;
 }
 
-export interface IHistory {
-  canRedo(): boolean;
-  canUndo(): boolean;
-  undo(sheetData: WorkBookJSON): WorkBookJSON | undefined;
-  redo(sheetData: WorkBookJSON): WorkBookJSON | undefined;
-  onChange(sheetData: WorkBookJSON): void;
-}
-
 export type UndoRedoItem = {
   op: UndoRedoType;
   path: string;
@@ -110,14 +103,13 @@ export type UndoRedoItem = {
 
 export type UndoRedoType = 'set' | 'add-array' | 'delete-array';
 
-export interface IUndoRedo {
+export interface IHistory {
   clear(): void;
   canRedo(): boolean;
   canUndo(): boolean;
   undo(): UndoRedoItem[];
   redo(): UndoRedoItem[];
-  pushRedo(op: UndoRedoType, key: string, value: any): void;
-  pushUndo(op: UndoRedoType, key: string, value: any): void;
-  record(): void;
-  clearItem(): void;
+  pushRedo(op: UndoRedoType, path: string, value: any): void;
+  pushUndo(op: UndoRedoType, path: string, value: any): void;
+  onChange(): void;
 }

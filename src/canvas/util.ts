@@ -12,7 +12,7 @@ import {
   dpr,
   isEmpty,
 } from '@/util';
-import { CellInfo, ErrorTypes, Point, EUnderLine } from '@/types';
+import { ModelCellType, ErrorTypes, Point, EUnderLine } from '@/types';
 
 export const getStyle = (
   key: 'lineHeight' | 'letterSpacing',
@@ -176,7 +176,7 @@ interface IRenderCellResult {
 
 export function renderCell(
   ctx: CanvasRenderingContext2D,
-  cellInfo: CellInfo & {
+  cellInfo: ModelCellType & {
     left: number;
     top: number;
     width: number;

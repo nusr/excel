@@ -74,8 +74,7 @@ export class MainCanvas {
 
   private renderSelection(): CanvasOverlayPosition {
     const { controller } = this;
-    const ranges = controller.getRanges();
-    const [range] = ranges;
+    const range = controller.getActiveCell();
     if (isSheet(range)) {
       return this.renderSelectAll();
     }
@@ -111,8 +110,7 @@ export class MainCanvas {
   private renderSelectRange() {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
-    const ranges = controller.getRanges();
-    const [range] = ranges;
+    const range = controller.getActiveCell();
     const activeCell = controller.computeCellPosition(range.row, range.col);
     const endCellRow = range.row + range.rowCount - 1;
     const endCellCol = range.col + range.colCount - 1;
@@ -181,9 +179,8 @@ export class MainCanvas {
   private renderSelectCol() {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
-    const ranges = controller.getRanges();
+    const range = controller.getActiveCell();
     const { height } = controller.getDomRect();
-    const [range] = ranges;
     this.ctx.fillStyle = theme.selectionColor;
     const activeCell = controller.computeCellPosition(range.row, range.col);
     fillRect(this.ctx, activeCell.left, 0, activeCell.width, headerSize.height);
@@ -220,9 +217,8 @@ export class MainCanvas {
   private renderSelectRow() {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
-    const ranges = controller.getRanges();
+    const range = controller.getActiveCell();
     const { width } = controller.getDomRect();
-    const [range] = ranges;
     this.ctx.fillStyle = theme.selectionColor;
     const activeCell = controller.computeCellPosition(range.row, range.col);
     fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);

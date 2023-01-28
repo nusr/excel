@@ -28,8 +28,9 @@ export function initFontFamilyList(fontList = FONT_FAMILY_LIST) {
 function getStoreValue(controller: IController, fontFamilyList: OptionItem[]) {
   const { top } = controller.getDomRect();
   const { scrollLeft, scrollTop } = controller.getScroll();
-  const cell = controller.getCell(controller.getActiveCell());
-  const cellPosition = controller.computeCellPosition(cell.row, cell.col);
+  const activeCell = controller.getActiveCell();
+  const cell = controller.getCell(activeCell);
+  const cellPosition = controller.computeCellPosition(activeCell.row, activeCell.col);
   cellPosition.top = top + cellPosition.top;
   if (!cell.style) {
     cell.style = {};
@@ -52,6 +53,8 @@ function getStoreValue(controller: IController, fontFamilyList: OptionItem[]) {
     scrollTop,
     headerSize: controller.getHeaderSize(),
     activeCell: cell,
+    canRedo: controller.canRedo(),
+    canUndo: controller.canUndo(),
   };
   return newStateValue;
 }

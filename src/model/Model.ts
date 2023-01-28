@@ -7,7 +7,7 @@ import {
   IModel,
   ResultType,
   IRange,
-  IUndoRedo,
+  IHistory,
   UndoRedoItem,
 } from '@/types';
 import {
@@ -20,6 +20,7 @@ import {
   isEmpty,
   get,
   setWith,
+  isSameRange,
 } from '@/util';
 import { parseFormula } from '@/parser';
 
@@ -43,38 +44,28 @@ export class Model implements IModel {
   private mergeCells: WorkBookJSON['mergeCells'] = [];
   private customHeight: WorkBookJSON['customHeight'] = {};
   private customWidth: WorkBookJSON['customWidth'] = {};
-  private history: IUndoRedo;
-  constructor(history: IUndoRedo) {
+  private history: IHistory;
+  constructor(history: IHistory) {
     this.history = history;
   }
   getSheetList(): WorkBookJSON['workbook'] {
     return this.workbook;
   }
   setActiveCell(range: IRange): void {
-    const index = this.workbook.findIndex(
-      (v) => v.sheetId === this.currentSheetId,
-    );
+    const index = this.workbook.findIndex((v) => v.sheetId === range.sheetId);
     if (index < 0) {
       return;
     }
     const oldValue = this.workbook[index].activeCell;
-    if (oldValue.col === range.col && oldValue.row === range.row) {
+    if (isSameRange(oldValue, range)) {
       return;
     }
     const key = `workbook.${index}.activeCell`;
-    this.history.clearItem();
-    this.history.pushUndo('set', key, {
-      row: range.row,
-      col: range.col,
-    });
+    this.history.pushUndo('set', key, { ...range });
     this.history.pushRedo('set', key, {
       ...oldValue,
     });
-    setWith(this, key, {
-      row: range.row,
-      col: range.col,
-    });
-    this.history.record();
+    setWith(this, key, { ...range });
   }
   addSheet(): void {
     const item = getDefaultSheetInfo(this.workbook);
@@ -85,6 +76,9 @@ export class Model implements IModel {
       activeCell: {
         row: 0,
         col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: item.sheetId,
       },
     };
     this.workbook = [...this.workbook, sheet];
@@ -154,13 +148,20 @@ export class Model implements IModel {
 
   private setCellValue(value: ResultType, range: Coordinate): void {
     const { row, col } = range;
-    const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
-    setWith(this, `${configPath}.value`, value);
+    const key = `worksheets[${this.currentSheetId}][${row}][${col}].value`;
+    this.history.pushRedo('set', key, get(this, key, undefined));
+    this.history.pushUndo('set', key, value);
+
+    setWith(this, key, value);
   }
   private setCellFormula(formula: string, range: Coordinate): void {
     const { row, col } = range;
-    const configPath = `worksheets[${this.currentSheetId}][${row}][${col}]`;
-    setWith(this, `${configPath}.formula`, formula);
+    const key = `worksheets[${this.currentSheetId}][${row}][${col}].formula`;
+
+    this.history.pushRedo('set', key, get(this, key, undefined));
+    this.history.pushUndo('set', key, formula);
+
+    setWith(this, key, formula);
   }
   setCellValues(
     value: string[][],
@@ -191,6 +192,8 @@ export class Model implements IModel {
   }
   private setStyle(style: Partial<StyleType>, range: Coordinate) {
     const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
+    this.history.pushRedo('set', stylePath, get(this, stylePath, {}));
+    this.history.pushUndo('set', stylePath, style);
     setWith(this, stylePath, style);
   }
   setCellStyle(style: Partial<StyleType>, ranges: Range[]): void {
@@ -202,18 +205,19 @@ export class Model implements IModel {
       }
     }
   }
-  queryCell = (
-    row: number,
-    col: number,
-    sheetId: string = '',
-  ): ModelCellType => {
+  getCell = (range: IRange) => {
+    const { row, col, sheetId } = range;
     const realSheetId = sheetId || this.currentSheetId;
     const cellData = get<ModelCellType>(
       this,
       `worksheets[${realSheetId}][${row}][${col}]`,
       {},
     );
-    return cellData;
+    return {
+      ...cellData,
+      row,
+      col,
+    };
   };
   private computeAllCell() {
     const sheetData = this.worksheets[this.currentSheetId];
@@ -234,7 +238,7 @@ export class Model implements IModel {
   private parseFormula(formula: string) {
     const result = parseFormula(formula, {
       get: (row: number, col: number, sheetId: string) => {
-        const temp = this.queryCell(row, col, sheetId);
+        const temp = this.getCell(new Range(row, col, 1, 1, sheetId));
         return temp.value;
       },
       set: () => {},
@@ -376,25 +380,27 @@ export class Model implements IModel {
   canUndo(): boolean {
     return this.history.canUndo();
   }
-  undo(): void {
+  undo() {
     if (!this.canUndo()) {
       return;
     }
     this.executeOperate(this.history.undo());
   }
-  redo(): void {
+  redo() {
     if (!this.canRedo()) {
       return;
     }
     this.executeOperate(this.history.redo());
   }
+  record(): void {
+    this.history.onChange();
+  }
 
-  private executeOperate = (list: UndoRedoItem[]) => {
+  private executeOperate(list: UndoRedoItem[]) {
     for (const item of list) {
       const { op, path, value } = item;
       switch (op) {
         case 'set': {
-          console.log(path, value);
           setWith(this, path, value);
           break;
         }
@@ -407,5 +413,5 @@ export class Model implements IModel {
           break;
       }
     }
-  };
+  }
 }

@@ -16,6 +16,9 @@ describe('controller.test.ts', () => {
       expect(controller.getActiveCell()).toEqual({
         row: 0,
         col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '1',
       });
     });
     test('set', () => {
@@ -28,15 +31,13 @@ describe('controller.test.ts', () => {
         colCount: 1,
         sheetId: '',
       });
-      expect(controller.getRanges()).toEqual([
-        {
-          row: 2,
-          col: 2,
-          rowCount: 1,
-          colCount: 1,
-          sheetId: controller.getCurrentSheetId(),
-        },
-      ]);
+      expect(controller.getActiveCell()).toEqual({
+        row: 2,
+        col: 2,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
     });
   });
 

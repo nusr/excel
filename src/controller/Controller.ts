@@ -1,7 +1,6 @@
 import {
   Coordinate,
   WorkBookJSON,
-  CellInfo,
   StyleType,
   ChangeEventType,
   IController,
@@ -43,10 +42,9 @@ const defaultScrollValue: ScrollValue = {
 export class Controller implements IController {
   private scrollValue: Record<string, ScrollValue> = {};
   private model: IModel;
-  private ranges: Array<Range> = [];
   private changeSet = new Set<ChangeEventType>();
-  private copyRanges: Array<Range> = [];
-  private cutRanges: Array<Range> = [];
+  private copyRanges: Array<IRange> = [];
+  private cutRanges: Array<IRange> = [];
   private hooks: IHooks = {
     modelChange() {},
     async cut() {
@@ -74,7 +72,6 @@ export class Controller implements IController {
   private mainDom: MainDom = {};
   constructor(model: IModel) {
     this.model = model;
-    this.ranges = [new Range(0, 0, 1, 1, this.getCurrentSheetId())];
   }
   getCurrentSheetId(): string {
     return this.model.getCurrentSheetId();
@@ -88,9 +85,6 @@ export class Controller implements IController {
   getSheetInfo(sheetId: string): WorksheetType {
     return this.model.getSheetInfo(sheetId);
   }
-  getRanges(): Range[] {
-    return this.ranges;
-  }
   setHooks(hooks: IHooks): void {
     this.hooks = hooks;
   }
@@ -98,16 +92,20 @@ export class Controller implements IController {
     controllerLog('emitChange', this.changeSet);
     this.hooks.modelChange(this.changeSet);
     this.changeSet = new Set<ChangeEventType>();
+    this.model.record();
   }
-  getActiveCell(): Coordinate {
-    const { activeCell } = this.getSheetInfo(this.model.getCurrentSheetId());
+  getActiveCell(): IRange {
+    const currentSheetId = this.model.getCurrentSheetId();
+    const { activeCell } = this.getSheetInfo(currentSheetId);
     return {
       ...activeCell,
+      sheetId: activeCell.sheetId || currentSheetId,
     };
   }
-  private setRanges(range: IRange) {
-    const { row, col, colCount, rowCount } = range;
-    const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
+  private setSheetCell(range: IRange) {
+    const { row, col, sheetId } = range;
+    const id = sheetId || this.model.getCurrentSheetId();
+    const sheetInfo = this.model.getSheetInfo(id);
     if (
       row < 0 ||
       col < 0 ||
@@ -116,14 +114,12 @@ export class Controller implements IController {
     ) {
       return false;
     }
+    range.sheetId = id;
     this.model.setActiveCell(range);
-    this.ranges = [
-      new Range(row, col, rowCount, colCount, this.getCurrentSheetId()),
-    ];
     return true;
   }
   setActiveCell(range: IRange): void {
-    if (!this.setRanges(range)) {
+    if (!this.setSheetCell(range)) {
       return;
     }
     this.changeSet.add('selection');
@@ -135,19 +131,13 @@ export class Controller implements IController {
     }
     this.model.setCurrentSheetId(id);
     const pos = this.getActiveCell();
-    this.setRanges({
-      row: pos.row,
-      col: pos.col,
-      rowCount: 1,
-      colCount: 1,
-      sheetId: '',
-    });
+    this.setSheetCell(pos);
     this.computeViewSize();
     this.setScroll(this.getScroll());
   }
   addSheet(): void {
     this.model.addSheet();
-    this.setRanges({
+    this.setSheetCell({
       row: 0,
       col: 0,
       rowCount: 1,
@@ -168,13 +158,7 @@ export class Controller implements IController {
     controllerLog('loadJSON', json);
     this.model.fromJSON(json);
     const activeCell = this.getActiveCell();
-    this.setRanges({
-      row: activeCell.row,
-      col: activeCell.col,
-      rowCount: 1,
-      colCount: 1,
-      sheetId: '',
-    });
+    this.setSheetCell(activeCell);
     this.computeViewSize();
     this.changeSet.add('content');
     this.emitChange();
@@ -201,17 +185,9 @@ export class Controller implements IController {
     this.changeSet.add('content');
     this.emitChange();
   }
-  getCell = (data: Coordinate): CellInfo => {
-    const { row, col } = data;
-    const { model } = this;
-    const { value, formula, style } = model.queryCell(row, col);
-    return {
-      value,
-      row,
-      col,
-      formula,
-      style,
-    };
+  getCell = (range: IRange) => {
+    const result = this.model.getCell(range);
+    return result;
   };
   canRedo(): boolean {
     return this.model.canRedo();
@@ -219,12 +195,12 @@ export class Controller implements IController {
   canUndo(): boolean {
     return this.model.canUndo();
   }
-  undo(): void {
+  undo() {
     this.model.undo();
     this.changeSet.add('content');
     this.emitChange();
   }
-  redo(): void {
+  redo() {
     this.model.redo();
     this.changeSet.add('content');
     this.emitChange();
@@ -374,15 +350,14 @@ export class Controller implements IController {
       return;
     }
     const activeCell = this.getActiveCell();
-    this.model.setCellValues(list, [], this.ranges);
-    this.changeSet.add('content');
-    this.setActiveCell({
-      row: activeCell.row,
-      col: activeCell.col,
+    const range: IRange = {
+      ...activeCell,
       rowCount,
       colCount,
-      sheetId: '',
-    });
+    };
+    this.model.setCellValues(list, [], [range]);
+    this.changeSet.add('content');
+    this.setActiveCell(range);
   }
   private parseHTML(htmlString: string) {
     const parser = new DOMParser();
@@ -421,15 +396,14 @@ export class Controller implements IController {
       return;
     }
     const activeCell = this.getActiveCell();
-    this.model.setCellValues(result, resultStyle, this.ranges);
-    this.changeSet.add('content');
-    this.setActiveCell({
-      row: activeCell.row,
-      col: activeCell.col,
+    const range: IRange = {
+      ...activeCell,
       rowCount,
       colCount,
-      sheetId: '',
-    });
+    };
+    this.model.setCellValues(result, resultStyle, [range]);
+    this.changeSet.add('content');
+    this.setActiveCell(range);
   }
   async paste(event?: ClipboardEvent) {
     this.copyRanges = [];
@@ -466,17 +440,17 @@ export class Controller implements IController {
     }
   }
   private getCopyData(): ClipboardData {
-    const [range] = this.ranges;
-    const { row, col, rowCount, colCount } = range;
+    const { row, col, rowCount, colCount } = this.getActiveCell();
     const result: ResultType[][] = [];
     const html: string[][] = [];
     let index = 1;
     const classList: string[] = [];
+    const currentSheetId = this.model.getCurrentSheetId();
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {
       const temp: ResultType[] = [];
       const t: string[] = [];
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
-        const a = this.model.queryCell(r, c);
+        const a = this.model.getCell(new Range(r, c, 1, 1, currentSheetId));
         const str = String(a.value || '');
         temp.push(str);
         if (a.style) {
@@ -506,7 +480,7 @@ export class Controller implements IController {
     };
   }
   copy(event?: ClipboardEvent): void {
-    this.copyRanges = this.ranges.slice();
+    this.copyRanges = [this.getActiveCell()];
     const data = this.getCopyData();
     if (event) {
       const keyList = Object.keys(data) as ClipboardType[];
@@ -520,7 +494,7 @@ export class Controller implements IController {
     this.emitChange();
   }
   cut(event?: ClipboardEvent) {
-    this.cutRanges = this.ranges.slice();
+    this.cutRanges = [this.getActiveCell()];
     this.copy(event);
   }
   getCopyRanges() {

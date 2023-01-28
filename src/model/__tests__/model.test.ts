@@ -11,16 +11,22 @@ describe('model.test.ts', () => {
   test('setCellValue', () => {
     const model = new Model(new History());
     model.addSheet();
-    expect(model.queryCell(0, 0)).toEqual({ style: undefined });
+    expect(model.getCell(new Range(0, 0, 1, 1, ''))).toEqual({
+      style: undefined,
+      row: 0,
+      col: 0,
+    });
     model.setCellValues(
       [['test']],
       [],
       [new Range(0, 0, 1, 1, model.getCurrentSheetId())],
     );
-    expect(model.queryCell(0, 0)).toEqual({
+    expect(model.getCell(new Range(0, 0, 1, 1, ''))).toEqual({
       style: undefined,
       value: 'test',
       formula: '',
+      row: 0,
+      col: 0,
     });
   });
   test('toJSON', () => {
@@ -42,6 +48,9 @@ describe('model.test.ts', () => {
           activeCell: {
             row: 0,
             col: 1,
+            rowCount: 1,
+            colCount: 1,
+            sheetId: '',
           },
           rowCount: 200,
           colCount: 200,
@@ -68,6 +77,9 @@ describe('model.test.ts', () => {
             activeCell: {
               row: 0,
               col: 1,
+              rowCount: 1,
+              colCount: 1,
+              sheetId: '',
             },
             rowCount: 200,
             colCount: 200,

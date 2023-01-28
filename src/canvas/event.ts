@@ -176,7 +176,7 @@ export function registerEvents(
       const isInputFocus = document.activeElement === inputDom;
       if (isInputFocus) {
         const value = inputDom.value;
-        controller.setCellValues([[value]], [], controller.getRanges());
+        controller.setCellValues([[value]], [], [controller.getActiveCell()]);
         stateValue.isCellEditing = false;
         inputDom.value = '';
       }

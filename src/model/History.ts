@@ -1,5 +1,5 @@
-import { IUndoRedo, UndoRedoItem, UndoRedoType } from '@/types';
-export class History implements IUndoRedo {
+import { IHistory, UndoRedoItem, UndoRedoType } from '@/types';
+export class History implements IHistory {
   private undoList: UndoRedoItem[][] = [];
   private redoList: UndoRedoItem[][] = [];
   private undoItem: UndoRedoItem[] = [];
@@ -7,20 +7,18 @@ export class History implements IUndoRedo {
   constructor() {
     this.clear();
   }
-  clearItem(): void {
+  private clearItem(): void {
     this.undoItem = [];
     this.redoItem = [];
   }
-  record(): void {
+  onChange(): void {
     if (this.undoItem.length > 0) {
-      this.undoList.push(this.undoItem);
+      this.undoList.push(this.undoItem.slice());
     }
     if (this.redoItem.length > 0) {
-      this.redoList.push(this.redoItem);
+      this.redoList.push(this.redoItem.slice());
     }
     this.clearItem();
-    console.log('undoList', this.undoList);
-    console.log('redoList', this.redoList);
   }
   pushRedo(op: UndoRedoType, key: string, value: any): void {
     this.redoItem.push({

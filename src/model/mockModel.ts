@@ -9,6 +9,9 @@ export const MOCK_MODEL: WorkBookJSON = {
       activeCell: {
         row: 2,
         col: 2,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
       },
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
@@ -21,6 +24,9 @@ export const MOCK_MODEL: WorkBookJSON = {
       activeCell: {
         row: 4,
         col: 4,
+        rowCount: 2,
+        colCount: 2,
+        sheetId: '',
       },
     },
   ],
