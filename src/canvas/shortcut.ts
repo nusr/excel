@@ -169,11 +169,26 @@ function recalculateScroll(controller: IController) {
   }
 }
 
+function checkActiveElement(controller: IController) {
+  const inputDom = controller.getMainDom().input!;
+  const isInputFocus = document.activeElement === inputDom;
+  if (isInputFocus) {
+    controller.setCellValues(
+      [[inputDom.value]],
+      [],
+      [controller.getActiveCell()],
+    );
+    inputDom.value = '';
+    inputDom.blur();
+  }
+}
+
 export const keyboardEventList: KeyboardEventItem[] = [
   {
     key: 'Enter',
     modifierKey: [],
     handler: (controller) => {
+      checkActiveElement(controller);
       const activeCell = controller.getActiveCell();
       controller.setActiveCell({
         row: activeCell.row + 1,
@@ -188,6 +203,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'Tab',
     modifierKey: [],
     handler: (controller) => {
+      checkActiveElement(controller);
       const activeCell = controller.getActiveCell();
       controller.setActiveCell({
         row: activeCell.row,
@@ -202,6 +218,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowDown',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
+      checkActiveElement(controller);
       const viewSize = controller.getViewSize();
       scrollBar(controller, 0, viewSize.height);
     },
@@ -210,6 +227,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowUp',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
+      checkActiveElement(controller);
       const viewSize = controller.getViewSize();
       scrollBar(controller, 0, -viewSize.height);
     },
@@ -218,6 +236,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowRight',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
+      checkActiveElement(controller);
       const viewSize = controller.getViewSize();
       scrollBar(controller, viewSize.width, 0);
     },
@@ -226,6 +245,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowLeft',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
+      checkActiveElement(controller);
       const viewSize = controller.getViewSize();
       scrollBar(controller, -viewSize.width, 0);
     },
@@ -234,6 +254,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowDown',
     modifierKey: [],
     handler: (controller) => {
+      checkActiveElement(controller);
       const activeCell = controller.getActiveCell();
       controller.setActiveCell({
         row: activeCell.row + 1,
@@ -249,6 +270,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowUp',
     modifierKey: [],
     handler: (controller) => {
+      checkActiveElement(controller);
       const activeCell = controller.getActiveCell();
       controller.setActiveCell({
         row: activeCell.row - 1,
@@ -264,6 +286,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowRight',
     modifierKey: [],
     handler: (controller) => {
+      checkActiveElement(controller);
       const activeCell = controller.getActiveCell();
       controller.setActiveCell({
         row: activeCell.row,
@@ -279,6 +302,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowLeft',
     modifierKey: [],
     handler: (controller) => {
+      checkActiveElement(controller);
       const activeCell = controller.getActiveCell();
       controller.setActiveCell({
         row: activeCell.row,

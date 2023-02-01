@@ -81,7 +81,7 @@ export function registerEvents(
       return;
     }
     if (event.metaKey || event.ctrlKey) {
-      console.log('event.key', event.key);
+      console.log(event.key);
       return;
     }
     if (isInputEvent(event)) {
