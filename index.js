@@ -2409,11 +2409,25 @@ var __export__ = (() => {
       }
     }
   }
+  function checkActiveElement(controller) {
+    const inputDom = controller.getMainDom().input;
+    const isInputFocus = document.activeElement === inputDom;
+    if (isInputFocus) {
+      controller.setCellValues(
+        [[inputDom.value]],
+        [],
+        [controller.getActiveCell()]
+      );
+      inputDom.value = "";
+      inputDom.blur();
+    }
+  }
   var keyboardEventList = [
     {
       key: "Enter",
       modifierKey: [],
       handler: (controller) => {
+        checkActiveElement(controller);
         const activeCell = controller.getActiveCell();
         controller.setActiveCell({
           row: activeCell.row + 1,
@@ -2428,6 +2442,7 @@ var __export__ = (() => {
       key: "Tab",
       modifierKey: [],
       handler: (controller) => {
+        checkActiveElement(controller);
         const activeCell = controller.getActiveCell();
         controller.setActiveCell({
           row: activeCell.row,
@@ -2442,6 +2457,7 @@ var __export__ = (() => {
       key: "ArrowDown",
       modifierKey: [isMac() ? "meta" : "ctrl"],
       handler: (controller) => {
+        checkActiveElement(controller);
         const viewSize = controller.getViewSize();
         scrollBar(controller, 0, viewSize.height);
       }
@@ -2450,6 +2466,7 @@ var __export__ = (() => {
       key: "ArrowUp",
       modifierKey: [isMac() ? "meta" : "ctrl"],
       handler: (controller) => {
+        checkActiveElement(controller);
         const viewSize = controller.getViewSize();
         scrollBar(controller, 0, -viewSize.height);
       }
@@ -2458,6 +2475,7 @@ var __export__ = (() => {
       key: "ArrowRight",
       modifierKey: [isMac() ? "meta" : "ctrl"],
       handler: (controller) => {
+        checkActiveElement(controller);
         const viewSize = controller.getViewSize();
         scrollBar(controller, viewSize.width, 0);
       }
@@ -2466,6 +2484,7 @@ var __export__ = (() => {
       key: "ArrowLeft",
       modifierKey: [isMac() ? "meta" : "ctrl"],
       handler: (controller) => {
+        checkActiveElement(controller);
         const viewSize = controller.getViewSize();
         scrollBar(controller, -viewSize.width, 0);
       }
@@ -2474,6 +2493,7 @@ var __export__ = (() => {
       key: "ArrowDown",
       modifierKey: [],
       handler: (controller) => {
+        checkActiveElement(controller);
         const activeCell = controller.getActiveCell();
         controller.setActiveCell({
           row: activeCell.row + 1,
@@ -2489,6 +2509,7 @@ var __export__ = (() => {
       key: "ArrowUp",
       modifierKey: [],
       handler: (controller) => {
+        checkActiveElement(controller);
         const activeCell = controller.getActiveCell();
         controller.setActiveCell({
           row: activeCell.row - 1,
@@ -2504,6 +2525,7 @@ var __export__ = (() => {
       key: "ArrowRight",
       modifierKey: [],
       handler: (controller) => {
+        checkActiveElement(controller);
         const activeCell = controller.getActiveCell();
         controller.setActiveCell({
           row: activeCell.row,
@@ -2519,6 +2541,7 @@ var __export__ = (() => {
       key: "ArrowLeft",
       modifierKey: [],
       handler: (controller) => {
+        checkActiveElement(controller);
         const activeCell = controller.getActiveCell();
         controller.setActiveCell({
           row: activeCell.row,
@@ -2625,7 +2648,7 @@ var __export__ = (() => {
         return;
       }
       if (event.metaKey || event.ctrlKey) {
-        console.log("event.key", event.key);
+        console.log(event.key);
         return;
       }
       if (isInputEvent(event)) {
@@ -3162,11 +3185,6 @@ var __export__ = (() => {
       inputDom = element;
       controller.setMainDom({ input: inputDom });
     };
-    const setValue = (value) => {
-      controller.setCellValues([[value]], [], [controller.getActiveCell()]);
-      inputDom.value = "";
-      state.isCellEditing = false;
-    };
     return h("input", {
       className: "base-editor",
       value: initValue,
@@ -3181,9 +3199,8 @@ var __export__ = (() => {
         state.isCellEditing = true;
       },
       onkeydown: (event) => {
-        inputDom.nextSibling.textContent = event.currentTarget.value;
-        if (event.key === "Enter" || event.key === "Tab") {
-          setValue(event.currentTarget.value);
+        if (isCellEditing) {
+          inputDom.nextSibling.textContent = event.currentTarget.value;
         }
       }
     });
