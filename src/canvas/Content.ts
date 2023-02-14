@@ -14,7 +14,6 @@ import {
   drawLines,
   renderCell,
   drawTriangle,
-  getStyle,
   resizeCanvas,
 } from './util';
 import { HEADER_STYLE } from './constant';
@@ -83,24 +82,13 @@ export class Content implements ContentView {
       const cellInfo = this.controller.getCell(
         new Range(row, col, 1, 1, currentSheetId),
       );
-      const {
-        wrapHeight = 0,
-        fontSizeHeight = 0,
-        textWidth = 0,
-      } = renderCell(
-        this.ctx,
-        {
-          ...cellInfo,
-          ...result,
-        },
-        getStyle('lineHeight', this.canvas),
-      );
+      const { wrapHeight = 0, fontSizeHeight = 0 } = renderCell(this.ctx, {
+        ...cellInfo,
+        ...result,
+      });
       const t = Math.max(wrapHeight, fontSizeHeight);
       if (t > result.height) {
         controller.setRowHeight(row, t);
-      }
-      if (textWidth > result.width) {
-        controller.setColWidth(col, textWidth);
       }
     }
     this.ctx.restore();

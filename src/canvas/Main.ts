@@ -9,7 +9,6 @@ import {
 import {
   fillRect,
   renderCell,
-  getStyle,
   strokeRect,
   drawLines,
   clearRect,
@@ -104,7 +103,6 @@ export class MainCanvas {
     renderCell(
       this.ctx,
       { ...cellData, ...activeCell },
-      getStyle('lineHeight', this.canvas),
     );
   }
   private renderSelectRange() {
