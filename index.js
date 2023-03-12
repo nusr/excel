@@ -1087,6 +1087,34 @@ var __export__ = (() => {
     "Yu Gothic UI Semibold"
   ];
 
+  // src/util/event.ts
+  function getHitInfo(event, controller) {
+    const canvasSize = controller.getDomRect();
+    const scroll = controller.getScroll();
+    const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+    const headerSize = controller.getHeaderSize();
+    const { pageX, pageY } = event;
+    const x = pageX - canvasSize.left;
+    const y = pageY - canvasSize.top;
+    let resultX = headerSize.width;
+    let resultY = headerSize.height;
+    let row = scroll.row;
+    let col = scroll.col;
+    while (resultX + controller.getColWidth(col) <= x) {
+      resultX += controller.getColWidth(col);
+      col++;
+    }
+    while (resultY + controller.getRowHeight(row) <= y) {
+      resultY += controller.getRowHeight(row);
+      row++;
+    }
+    if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
+      return null;
+    }
+    const cellSize = controller.getCellSize(row, col);
+    return { ...cellSize, row, col, pageY, pageX, x, y };
+  }
+
   // src/react/dom.ts
   function createElement(tagName, options) {
     reactLog("createElement");
@@ -2573,44 +2601,12 @@ var __export__ = (() => {
   ];
 
   // src/canvas/event.ts
-  var DOUBLE_CLICK_TIME = 300;
-  function getHitInfo(event, controller) {
-    const canvasSize = controller.getDomRect();
-    const scroll = controller.getScroll();
-    const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-    const headerSize = controller.getHeaderSize();
-    const { pageX, pageY } = event;
-    const x = pageX - canvasSize.left;
-    const y = pageY - canvasSize.top;
-    let resultX = headerSize.width;
-    let resultY = headerSize.height;
-    let row = scroll.row;
-    let col = scroll.col;
-    while (resultX + controller.getColWidth(col) <= x) {
-      resultX += controller.getColWidth(col);
-      col++;
-    }
-    while (resultY + controller.getRowHeight(row) <= y) {
-      resultY += controller.getRowHeight(row);
-      row++;
-    }
-    if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
-      return null;
-    }
-    const cellSize = controller.getCellSize(row, col);
-    return { ...cellSize, row, col, pageY, pageX, x, y };
-  }
   function isInputEvent(event) {
     const name = (event?.target?.tagName || "").toLowerCase();
     return name === "input" || name === "textarea";
   }
-  function registerEvents(stateValue, controller, resizeWindow) {
-    const canvas = controller.getMainDom().canvas;
-    let lastTimeStamp = 0;
-    window.addEventListener("resize", function() {
-      resizeWindow();
-    });
-    window.addEventListener("keydown", function(event) {
+  function registerGlobalEvent(stateValue, controller, resizeWindow) {
+    function handleKeydown(event) {
       const list = keyboardEventList.filter((v) => v.key === event.key);
       list.sort((a, b) => b.modifierKey.length - a.modifierKey.length);
       let temp = null;
@@ -2639,144 +2635,48 @@ var __export__ = (() => {
       }
       stateValue.isCellEditing = true;
       controller.getMainDom().input.focus();
+    }
+    const handleWheel = debounce(function(event) {
+      if (event.target !== controller.getMainDom().canvas) {
+        return;
+      }
+      scrollBar(controller, event.deltaX, event.deltaY);
     });
-    window.addEventListener(
-      "wheel",
-      debounce(function(event) {
-        if (event.target !== canvas) {
-          return;
-        }
-        scrollBar(controller, event.deltaX, event.deltaY);
-      })
-    );
-    document.body.addEventListener("paste", function(event) {
+    function handlePaste(event) {
       if (isInputEvent(event)) {
         return;
       }
       event.preventDefault();
       controller.paste(event);
-    });
-    document.body.addEventListener("copy", function(event) {
+    }
+    function handleCopy(event) {
       if (isInputEvent(event)) {
         return;
       }
       event.preventDefault();
       controller.copy(event);
-    });
-    document.body.addEventListener("cut", function(event) {
+    }
+    function handleCut(event) {
       if (isInputEvent(event)) {
         return;
       }
       event.preventDefault();
       controller.cut(event);
-    });
-    canvas.addEventListener("mousedown", function(event) {
-      stateValue.contextMenuPosition = void 0;
-      const headerSize = controller.getHeaderSize();
-      const canvasRect = controller.getDomRect();
-      const { timeStamp, clientX, clientY } = event;
-      const x = clientX - canvasRect.left;
-      const y = clientY - canvasRect.top;
-      const position = getHitInfo(event, controller);
-      if (!position) {
-        return;
-      }
-      if (headerSize.width > x && headerSize.height > y) {
-        controller.setActiveCell({
-          row: 0,
-          col: 0,
-          colCount: 0,
-          rowCount: 0,
-          sheetId: ""
-        });
-        return;
-      }
-      if (headerSize.width > x && headerSize.height <= y) {
-        const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-        controller.setActiveCell({
-          row: position.row,
-          col: position.col,
-          rowCount: 0,
-          colCount: sheetInfo.colCount,
-          sheetId: ""
-        });
-        return;
-      }
-      if (headerSize.width <= x && headerSize.height > y) {
-        const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-        controller.setActiveCell({
-          row: position.row,
-          col: position.col,
-          rowCount: sheetInfo.rowCount,
-          colCount: 0,
-          sheetId: ""
-        });
-        return;
-      }
-      const activeCell = controller.getActiveCell();
-      const check = activeCell.row >= 0 && activeCell.row === position.row && activeCell.col === position.col;
-      if (!check) {
-        const inputDom = controller.getMainDom().input;
-        const isInputFocus = document.activeElement === inputDom;
-        if (isInputFocus) {
-          const value = inputDom.value;
-          controller.setCellValues([[value]], [], [controller.getActiveCell()]);
-          stateValue.isCellEditing = false;
-          inputDom.value = "";
-        }
-        controller.setActiveCell({
-          row: position.row,
-          col: position.col,
-          rowCount: 1,
-          colCount: 1,
-          sheetId: ""
-        });
-      } else {
-        const delay = timeStamp - lastTimeStamp;
-        if (delay < DOUBLE_CLICK_TIME) {
-          stateValue.isCellEditing = true;
-        }
-      }
-      lastTimeStamp = timeStamp;
-    });
-    canvas.addEventListener("mousemove", function(event) {
-      const headerSize = controller.getHeaderSize();
-      const rect = controller.getDomRect();
-      const { clientX, clientY } = event;
-      const x = clientX - rect.left;
-      const y = clientY - rect.top;
-      if (event.buttons === 1) {
-        if (x > headerSize.width && y > headerSize.height) {
-          const position = getHitInfo(event, controller);
-          if (!position) {
-            return;
-          }
-          const activeCell = controller.getActiveCell();
-          if (activeCell.row === position.row && activeCell.col === position.col) {
-            return;
-          }
-          const colCount = Math.abs(position.col - activeCell.col) + 1;
-          const rowCount = Math.abs(position.row - activeCell.row) + 1;
-          controller.setActiveCell({
-            row: Math.min(position.row, activeCell.row),
-            col: Math.min(position.col, activeCell.col),
-            rowCount,
-            colCount,
-            sheetId: ""
-          });
-        }
-      }
-    });
-    canvas.addEventListener("contextmenu", function(event) {
-      event.preventDefault();
-      stateValue.contextMenuPosition = {
-        top: event.clientY,
-        left: event.clientX,
-        width: 100,
-        height: 100
-      };
-      return false;
-    });
+    }
+    window.addEventListener("resize", resizeWindow);
+    window.addEventListener("keydown", handleKeydown);
+    window.addEventListener("wheel", handleWheel);
+    document.body.addEventListener("paste", handlePaste);
+    document.body.addEventListener("copy", handleCopy);
+    document.body.addEventListener("cut", handleCut);
+    return () => {
+      window.removeEventListener("resize", resizeWindow);
+      window.removeEventListener("keydown", handleKeydown);
+      window.removeEventListener("wheel", handleWheel);
+      document.body.removeEventListener("paste", handlePaste);
+      document.body.removeEventListener("copy", handleCopy);
+      document.body.removeEventListener("cut", handleCut);
+    };
   }
 
   // src/canvas/constant.ts
@@ -2829,37 +2729,63 @@ var __export__ = (() => {
       this.renderContent();
     }
     renderContent() {
-      const { controller } = this;
-      const { width, height } = this.controller.getDomRect();
+      const { controller, ctx } = this;
+      const { width, height } = controller.getDomRect();
+      const headerSize = controller.getHeaderSize();
       const currentSheetId = controller.getCurrentSheetId();
-      const data = controller.getCellsContent(currentSheetId);
-      if (isEmpty(data)) {
-        return;
-      }
-      this.ctx.save();
-      const { row: rowIndex, col: colIndex } = controller.getScroll();
-      for (const item of data) {
-        const { row, col } = item;
-        if (row < rowIndex || col < colIndex) {
-          continue;
-        }
-        const result = controller.computeCellPosition(row, col);
-        if (result.top > height || result.left > width) {
-          continue;
-        }
-        const cellInfo = this.controller.getCell(
-          new Range(row, col, 1, 1, currentSheetId)
-        );
-        const { wrapHeight = 0, fontSizeHeight = 0 } = renderCell(this.ctx, {
-          ...cellInfo,
-          ...result
-        });
-        const t = Math.max(wrapHeight, fontSizeHeight);
-        if (t > result.height) {
-          controller.setRowHeight(row, t);
+      const { row, col } = controller.getScroll();
+      let x = headerSize.width;
+      let c = col;
+      let y = headerSize.height;
+      let r = row;
+      while (1) {
+        const t = controller.getColWidth(c);
+        if (x + t < width) {
+          x += t;
+          c++;
+        } else {
+          break;
         }
       }
-      this.ctx.restore();
+      while (1) {
+        const t = controller.getRowHeight(r);
+        if (y + t < height) {
+          y += t;
+          r++;
+        } else {
+          break;
+        }
+      }
+      const endRow = r;
+      const endCol = c;
+      ctx.save();
+      y = headerSize.height;
+      for (let r2 = row; r2 < endRow; r2++) {
+        x = headerSize.width;
+        for (let c2 = col; c2 < endCol; c2++) {
+          const cellInfo = controller.getCell(
+            new Range(r2, c2, 1, 1, currentSheetId)
+          );
+          if (isEmpty(cellInfo.value) && isEmpty(cellInfo.style)) {
+            x += controller.getColWidth(c2);
+            continue;
+          }
+          const cellSize = controller.getCellSize(r2, c2);
+          const { wrapHeight = 0, fontSizeHeight = 0 } = renderCell(ctx, {
+            ...cellInfo,
+            ...cellSize,
+            top: y,
+            left: x
+          });
+          const t = Math.max(wrapHeight, fontSizeHeight);
+          if (t > cellSize.height) {
+            controller.setRowHeight(r2, t);
+          }
+          x += controller.getColWidth(c2);
+        }
+        y += controller.getRowHeight(r2);
+      }
+      ctx.restore();
     }
     renderTriangle() {
       if (isTestEnv()) {
@@ -3001,6 +2927,7 @@ var __export__ = (() => {
   };
 
   // src/containers/canvas/index.ts
+  var DOUBLE_CLICK_TIME = 300;
   function scrollBar2(controller, scrollX, scrollY) {
     const oldScroll = controller.getScroll();
     const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } = computeScrollPosition(controller, oldScroll.left, oldScroll.top);
@@ -3031,6 +2958,7 @@ var __export__ = (() => {
   var prevPageY = 0;
   var prevPageX = 0;
   var scrollStatus = 0 /* NONE */;
+  var lastTimeStamp = 0;
   var CanvasContainer = (state, controller) => {
     const { headerSize } = state;
     function handleDrag(event) {
@@ -3073,6 +3001,121 @@ var __export__ = (() => {
             const canvas = dom;
             controller.setMainDom({ canvas });
           }
+        },
+        oncontextmenu(event) {
+          event.preventDefault();
+          state.contextMenuPosition = {
+            top: event.clientY,
+            left: event.clientX,
+            width: 100,
+            height: 100
+          };
+          return false;
+        },
+        onmousemove(event) {
+          const headerSize2 = controller.getHeaderSize();
+          const rect = controller.getDomRect();
+          const { clientX, clientY } = event;
+          const x = clientX - rect.left;
+          const y = clientY - rect.top;
+          if (event.buttons === 1) {
+            if (x > headerSize2.width && y > headerSize2.height) {
+              const position = getHitInfo(event, controller);
+              if (!position) {
+                return;
+              }
+              const activeCell = controller.getActiveCell();
+              if (activeCell.row === position.row && activeCell.col === position.col) {
+                return;
+              }
+              const colCount = Math.abs(position.col - activeCell.col) + 1;
+              const rowCount = Math.abs(position.row - activeCell.row) + 1;
+              controller.setActiveCell({
+                row: Math.min(position.row, activeCell.row),
+                col: Math.min(position.col, activeCell.col),
+                rowCount,
+                colCount,
+                sheetId: ""
+              });
+            }
+          }
+        },
+        onmousedown(event) {
+          state.contextMenuPosition = void 0;
+          const headerSize2 = controller.getHeaderSize();
+          const canvasRect = controller.getDomRect();
+          const { timeStamp, clientX, clientY } = event;
+          const x = clientX - canvasRect.left;
+          const y = clientY - canvasRect.top;
+          const position = getHitInfo(event, controller);
+          if (!position) {
+            return;
+          }
+          if (headerSize2.width > x && headerSize2.height > y) {
+            controller.setActiveCell({
+              row: 0,
+              col: 0,
+              colCount: 0,
+              rowCount: 0,
+              sheetId: ""
+            });
+            return;
+          }
+          if (headerSize2.width > x && headerSize2.height <= y) {
+            const sheetInfo = controller.getSheetInfo(
+              controller.getCurrentSheetId()
+            );
+            controller.setActiveCell({
+              row: position.row,
+              col: position.col,
+              rowCount: 0,
+              colCount: sheetInfo.colCount,
+              sheetId: ""
+            });
+            return;
+          }
+          if (headerSize2.width <= x && headerSize2.height > y) {
+            const sheetInfo = controller.getSheetInfo(
+              controller.getCurrentSheetId()
+            );
+            controller.setActiveCell({
+              row: position.row,
+              col: position.col,
+              rowCount: sheetInfo.rowCount,
+              colCount: 0,
+              sheetId: ""
+            });
+            return;
+          }
+          const activeCell = controller.getActiveCell();
+          const check = activeCell.row >= 0 && activeCell.row === position.row && activeCell.col === position.col;
+          if (!check) {
+            const inputDom = controller.getMainDom().input;
+            const isInputFocus = document.activeElement === inputDom;
+            if (isInputFocus) {
+              const value = inputDom.value;
+              controller.setCellValues(
+                [[value]],
+                [],
+                [controller.getActiveCell()]
+              );
+              state.isCellEditing = false;
+              inputDom.value = "";
+            }
+            controller.setActiveCell({
+              row: position.row,
+              col: position.col,
+              rowCount: 1,
+              colCount: 1,
+              sheetId: ""
+            });
+          } else {
+            const delay = timeStamp - lastTimeStamp;
+            if (delay < DOUBLE_CLICK_TIME) {
+              state.isCellEditing = true;
+            }
+          }
+          lastTimeStamp = timeStamp;
         }
       }),
       h(
@@ -3131,82 +3174,7 @@ var __export__ = (() => {
   };
   CanvasContainer.displayName = "CanvasContainer";
 
-  // src/containers/FormulaBar/FormulaEditor.ts
-  function getEditorStyle(style, cellPosition) {
-    if (isEmpty(style)) {
-      return cellPosition;
-    }
-    const font = makeFont(
-      style?.isItalic ? "italic" : "normal",
-      style?.isBold ? "bold" : "500",
-      style?.fontSize || DEFAULT_FONT_SIZE,
-      style?.fontFamily
-    );
-    return {
-      ...cellPosition,
-      backgroundColor: style?.fillColor || "inherit",
-      color: style?.fontColor || DEFAULT_FONT_COLOR,
-      font
-    };
-  }
-  var FormulaEditor = (state, controller) => {
-    const { activeCell, isCellEditing, cellPosition } = state;
-    const initValue = activeCell.formula || String(activeCell.value || "");
-    let inputDom;
-    const ref = (element) => {
-      inputDom = element;
-      controller.setMainDom({ input: inputDom });
-    };
-    return h("input", {
-      className: "base-editor",
-      value: initValue,
-      style: isCellEditing ? getEditorStyle(activeCell.style, cellPosition) : void 0,
-      hook: {
-        ref
-      },
-      onfocus: () => {
-        if (!isCellEditing) {
-          return;
-        }
-        state.isCellEditing = true;
-      },
-      onkeydown: (event) => {
-        if (isCellEditing) {
-          inputDom.nextSibling.textContent = event.currentTarget.value;
-        }
-      }
-    });
-  };
-  FormulaEditor.displayName = "FormulaEditor";
-
-  // src/containers/FormulaBar/index.tsx
-  var FormulaBarContainer = (state, controller) => {
-    const { activeCell } = state;
-    return h(
-      "div",
-      {
-        className: "formula-bar-wrapper"
-      },
-      h(
-        "div",
-        { className: "formula-bar-name" },
-        `${intToColumnName(activeCell.col)}${activeCell.row + 1}`
-      ),
-      h(
-        "div",
-        { className: "formula-bar-editor-wrapper" },
-        FormulaEditor(state, controller),
-        h("div", {
-          className: classnames("formula-bar-value", {
-            show: state.isCellEditing
-          })
-        }, activeCell.formula || String(activeCell.value || ""))
-      )
-    );
-  };
-  FormulaBarContainer.displayName = "FormulaBarContainer";
-
-  // src/components/Button/index.tsx
+  // src/containers/components/Button/index.tsx
   var defaultClick = () => {
     console.log("add click event");
   };
@@ -3239,7 +3207,7 @@ var __export__ = (() => {
   };
   Button.displayName = "Button";
 
-  // src/components/Github/index.ts
+  // src/containers/components/Github/index.ts
   var pathStyle = {
     "transform-origin": "130px 106px"
   };
@@ -3278,7 +3246,7 @@ var __export__ = (() => {
   };
   Github.displayName = "Github";
 
-  // src/components/BaseIcon/icon.ts
+  // src/containers/components/BaseIcon/icon.ts
   var icon = {
     alignCenter: [
       "M142.2 227.6h739.6v56.9H142.2zM142.2 568.9h739.6v56.9H142.2zM256 398.2h512v56.9H256zM256 739.6h512v56.9H256z"
@@ -3316,7 +3284,7 @@ var __export__ = (() => {
   };
   var icon_default = icon;
 
-  // src/components/BaseIcon/BaseIcon.ts
+  // src/containers/components/BaseIcon/BaseIcon.ts
   var BaseIcon = ({
     className = "",
     paths = []
@@ -3333,7 +3301,7 @@ var __export__ = (() => {
   };
   BaseIcon.displayName = "BaseIcon";
 
-  // src/components/BaseIcon/FillColorIcon.ts
+  // src/containers/components/BaseIcon/FillColorIcon.ts
   var FillColorIcon = () => {
     return BaseIcon({
       paths: [
@@ -3349,14 +3317,14 @@ var __export__ = (() => {
   };
   FillColorIcon.displayName = "FillColorIcon";
 
-  // src/components/BaseIcon/index.ts
+  // src/containers/components/BaseIcon/index.ts
   var Icon = ({ name, className = "" }) => {
     const paths = icon_default[name].map((item) => ({ d: item }));
     return BaseIcon({ className, paths });
   };
   Icon.displayName = "Icon";
 
-  // src/components/Select/index.ts
+  // src/containers/components/Select/index.ts
   var Select = (props) => {
     const {
       data,
@@ -3401,7 +3369,7 @@ var __export__ = (() => {
   };
   Select.displayName = "Select";
 
-  // src/components/ColorPicker/index.tsx
+  // src/containers/components/ColorPicker/index.tsx
   var NO_FILL = "No Fill";
   var COLOR_LIST = [
     "#4D4D4D",
@@ -3515,6 +3483,167 @@ var __export__ = (() => {
     );
   };
   ColorPicker.displayName = "ColorPicker";
+
+  // src/containers/ContextMenu/index.ts
+  var defaultStyle = {
+    display: "none"
+  };
+  var ContextMenuContainer = (state, controller) => {
+    const { contextMenuPosition } = state;
+    const style = contextMenuPosition === void 0 ? defaultStyle : {
+      top: contextMenuPosition.top,
+      left: contextMenuPosition.left
+    };
+    const hideContextMenu = () => {
+      state.contextMenuPosition = void 0;
+    };
+    return h(
+      "div",
+      {
+        className: "context-menu",
+        style
+      },
+      Button(
+        {
+          onClick() {
+            controller.addCol(controller.getActiveCell().col, 1);
+            hideContextMenu();
+          }
+        },
+        "add a column"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.deleteCol(controller.getActiveCell().col, 1);
+            hideContextMenu();
+          }
+        },
+        "delete a column"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.addRow(controller.getActiveCell().row, 1);
+            hideContextMenu();
+          }
+        },
+        "add a row"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.deleteRow(controller.getActiveCell().row, 1);
+            hideContextMenu();
+          }
+        },
+        "delete a row"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.copy();
+            hideContextMenu();
+          }
+        },
+        "copy"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.cut();
+            hideContextMenu();
+          }
+        },
+        "cut"
+      ),
+      Button(
+        {
+          onClick() {
+            controller.paste();
+            hideContextMenu();
+          }
+        },
+        "paste"
+      )
+    );
+  };
+  ContextMenuContainer.displayName = "ContextMenuContainer";
+
+  // src/containers/FormulaBar/FormulaEditor.ts
+  function getEditorStyle(style, cellPosition) {
+    if (isEmpty(style)) {
+      return cellPosition;
+    }
+    const font = makeFont(
+      style?.isItalic ? "italic" : "normal",
+      style?.isBold ? "bold" : "500",
+      style?.fontSize || DEFAULT_FONT_SIZE,
+      style?.fontFamily
+    );
+    return {
+      ...cellPosition,
+      backgroundColor: style?.fillColor || "inherit",
+      color: style?.fontColor || DEFAULT_FONT_COLOR,
+      font
+    };
+  }
+  var FormulaEditor = (state, controller) => {
+    const { activeCell, isCellEditing, cellPosition } = state;
+    const initValue = activeCell.formula || String(activeCell.value || "");
+    let inputDom;
+    const ref = (element) => {
+      inputDom = element;
+      controller.setMainDom({ input: inputDom });
+    };
+    return h("input", {
+      className: "base-editor",
+      value: initValue,
+      style: isCellEditing ? getEditorStyle(activeCell.style, cellPosition) : void 0,
+      hook: {
+        ref
+      },
+      onfocus: () => {
+        if (!isCellEditing) {
+          return;
+        }
+        state.isCellEditing = true;
+      },
+      onkeydown: (event) => {
+        if (isCellEditing) {
+          inputDom.nextSibling.textContent = event.currentTarget.value;
+        }
+      }
+    });
+  };
+  FormulaEditor.displayName = "FormulaEditor";
+
+  // src/containers/FormulaBar/index.tsx
+  var FormulaBarContainer = (state, controller) => {
+    const { activeCell } = state;
+    return h(
+      "div",
+      {
+        className: "formula-bar-wrapper"
+      },
+      h(
+        "div",
+        { className: "formula-bar-name" },
+        `${intToColumnName(activeCell.col)}${activeCell.row + 1}`
+      ),
+      h(
+        "div",
+        { className: "formula-bar-editor-wrapper" },
+        FormulaEditor(state, controller),
+        h("div", {
+          className: classnames("formula-bar-value", {
+            show: state.isCellEditing
+          })
+        }, activeCell.formula || String(activeCell.value || ""))
+      )
+    );
+  };
+  FormulaBarContainer.displayName = "FormulaBarContainer";
 
   // src/containers/ToolBar/index.ts
   var underlineList = [
@@ -3723,93 +3852,7 @@ var __export__ = (() => {
   };
   SheetBarContainer.displayName = "SheetBarContainer";
 
-  // src/containers/ContextMenu/index.ts
-  var defaultStyle = {
-    display: "none"
-  };
-  var ContextMenuContainer = (state, controller) => {
-    const { contextMenuPosition } = state;
-    const style = contextMenuPosition === void 0 ? defaultStyle : {
-      top: contextMenuPosition.top,
-      left: contextMenuPosition.left
-    };
-    const hideContextMenu = () => {
-      state.contextMenuPosition = void 0;
-    };
-    return h(
-      "div",
-      {
-        className: "context-menu",
-        style
-      },
-      Button(
-        {
-          onClick() {
-            controller.addCol(controller.getActiveCell().col, 1);
-            hideContextMenu();
-          }
-        },
-        "add a column"
-      ),
-      Button(
-        {
-          onClick() {
-            controller.deleteCol(controller.getActiveCell().col, 1);
-            hideContextMenu();
-          }
-        },
-        "delete a column"
-      ),
-      Button(
-        {
-          onClick() {
-            controller.addRow(controller.getActiveCell().row, 1);
-            hideContextMenu();
-          }
-        },
-        "add a row"
-      ),
-      Button(
-        {
-          onClick() {
-            controller.deleteRow(controller.getActiveCell().row, 1);
-            hideContextMenu();
-          }
-        },
-        "delete a row"
-      ),
-      Button(
-        {
-          onClick() {
-            controller.copy();
-            hideContextMenu();
-          }
-        },
-        "copy"
-      ),
-      Button(
-        {
-          onClick() {
-            controller.cut();
-            hideContextMenu();
-          }
-        },
-        "cut"
-      ),
-      Button(
-        {
-          onClick() {
-            controller.paste();
-            hideContextMenu();
-          }
-        },
-        "paste"
-      )
-    );
-  };
-  ContextMenuContainer.displayName = "ContextMenuContainer";
-
-  // src/App.ts
+  // src/containers/index.ts
   var App = (state, controller) => {
     return h(
       "div",
@@ -3877,9 +3920,6 @@ var __export__ = (() => {
     getSheetList() {
       return this.model.getSheetList();
     }
-    getCellsContent(sheetId) {
-      return this.model.getCellsContent(sheetId);
-    }
     getSheetInfo(sheetId) {
       return this.model.getSheetInfo(sheetId);
     }
@@ -3901,20 +3941,12 @@ var __export__ = (() => {
       };
     }
     setSheetCell(range) {
-      const { row, col, sheetId } = range;
-      const id = sheetId || this.model.getCurrentSheetId();
-      const sheetInfo = this.model.getSheetInfo(id);
-      if (row < 0 || col < 0 || row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
-        return false;
-      }
+      const id = range.sheetId || this.model.getCurrentSheetId();
       range.sheetId = id;
       this.model.setActiveCell(range);
-      return true;
     }
     setActiveCell(range) {
-      if (!this.setSheetCell(range)) {
-        return;
-      }
+      this.setSheetCell(range);
       this.changeSet.add("selection");
       this.emitChange();
     }
@@ -4300,7 +4332,7 @@ var __export__ = (() => {
     }
   };
 
-  // src/parser/token.ts
+  // src/formula/token.ts
   var Token = class {
     type;
     value;
@@ -4313,7 +4345,7 @@ var __export__ = (() => {
     }
   };
 
-  // src/parser/formula/error.ts
+  // src/formula/formula/error.ts
   var CustomError = class extends Error {
     value;
     constructor(value) {
@@ -4347,7 +4379,7 @@ var __export__ = (() => {
     assert2(list.length === 0);
   }
 
-  // src/parser/formula/text.ts
+  // src/formula/formula/text.ts
   var T = (...list) => {
     const value = mustOne(list);
     return typeof value === "string" ? value : "";
@@ -4403,7 +4435,7 @@ var __export__ = (() => {
   };
   var text_default = textFormulas;
 
-  // src/parser/formula/math.ts
+  // src/formula/formula/math.ts
   var ABS = (...list) => {
     const data = mustOneNumber(list);
     return Math.abs(data);
@@ -4502,14 +4534,14 @@ var __export__ = (() => {
   };
   var math_default = formulas;
 
-  // src/parser/formula/index.ts
+  // src/formula/formula/index.ts
   var formulas2 = {
     ...text_default,
     ...math_default
   };
   var formula_default = formulas2;
 
-  // src/parser/scanner.ts
+  // src/formula/scanner.ts
   var emptyData = "";
   var identifierMap = /* @__PURE__ */ new Map([
     ["TRUE", 19 /* TRUE */],
@@ -4695,7 +4727,7 @@ var __export__ = (() => {
     }
   };
 
-  // src/parser/expression.ts
+  // src/formula/expression.ts
   var BinaryExpression = class {
     left;
     right;
@@ -4835,7 +4867,7 @@ var __export__ = (() => {
     }
   };
 
-  // src/parser/parser.ts
+  // src/formula/parser.ts
   var errorSet = /* @__PURE__ */ new Set([
     "#ERROR!",
     "#DIV/0!",
@@ -5044,7 +5076,7 @@ var __export__ = (() => {
     }
   };
 
-  // src/parser/interpreter.ts
+  // src/formula/interpreter.ts
   var Interpreter = class {
     expressions;
     functionMap;
@@ -5265,7 +5297,7 @@ var __export__ = (() => {
     }
   };
 
-  // src/parser/eval.ts
+  // src/formula/eval.ts
   function parseFormula(source, cellData = new CellDataMapImpl(), variableMap = new VariableMapImpl(), functionMap = formula_default) {
     try {
       const list = new Scanner(source).scan();
@@ -5360,12 +5392,16 @@ var __export__ = (() => {
       if (index < 0) {
         return;
       }
-      const oldValue = this.workbook[index].activeCell;
+      const { row, col } = range;
+      const sheet = this.workbook[index];
+      if (row < 0 || col < 0 || row >= sheet.rowCount || col >= sheet.colCount) {
+        return;
+      }
+      const oldValue = sheet.activeCell;
       if (isSameRange(oldValue, range)) {
         return;
       }
       const key = `workbook.${index}.activeCell`;
-      this.history.pushUndo("set", key, { ...range });
       this.history.pushRedo("set", key, {
         ...oldValue
       });
@@ -5400,26 +5436,6 @@ var __export__ = (() => {
     getCurrentSheetId() {
       return this.currentSheetId;
     }
-    getCellsContent(sheetId) {
-      const sheetData = this.worksheets[sheetId];
-      if (isEmpty(sheetData)) {
-        return [];
-      }
-      const result = [];
-      const rowKeys = Object.keys(sheetData);
-      for (const rowKey of rowKeys) {
-        const colKeys = Object.keys(sheetData[rowKey]);
-        for (const colKey of colKeys) {
-          const row = Number(rowKey);
-          const col = Number(colKey);
-          result.push({
-            row,
-            col
-          });
-        }
-      }
-      return result;
-    }
     fromJSON = (json) => {
       modelLog("fromJSON", json);
       const {
@@ -5452,14 +5468,12 @@ var __export__ = (() => {
       const { row, col } = range;
       const key = `worksheets[${this.currentSheetId}][${row}][${col}].value`;
       this.history.pushRedo("set", key, get(this, key, void 0));
-      this.history.pushUndo("set", key, value);
       setWith(this, key, value);
     }
     setCellFormula(formula, range) {
       const { row, col } = range;
       const key = `worksheets[${this.currentSheetId}][${row}][${col}].formula`;
       this.history.pushRedo("set", key, get(this, key, void 0));
-      this.history.pushUndo("set", key, formula);
       setWith(this, key, formula);
     }
     setCellValues(value, style, ranges) {
@@ -5488,7 +5502,6 @@ var __export__ = (() => {
     setStyle(style, range) {
       const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
       this.history.pushRedo("set", stylePath, get(this, stylePath, {}));
-      this.history.pushUndo("set", stylePath, style);
       setWith(this, stylePath, style);
     }
     setCellStyle(style, ranges) {
@@ -5691,6 +5704,8 @@ var __export__ = (() => {
         const { op, path, value } = item;
         switch (op) {
           case "set": {
+            this.history.pushUndo(op, path, get(this, path, void 0));
+            this.record();
             setWith(this, path, value);
             break;
           }
@@ -5892,7 +5907,10 @@ var __export__ = (() => {
     const { scrollLeft, scrollTop } = controller.getScroll();
     const activeCell = controller.getActiveCell();
     const cell = controller.getCell(activeCell);
-    const cellPosition = controller.computeCellPosition(activeCell.row, activeCell.col);
+    const cellPosition = controller.computeCellPosition(
+      activeCell.row,
+      activeCell.col
+    );
     cellPosition.top = top + cellPosition.top;
     if (!cell.style) {
       cell.style = {};
@@ -5938,7 +5956,7 @@ var __export__ = (() => {
       });
     };
     resize();
-    registerEvents(stateValue, controller, resize);
+    const removeEvent = registerGlobalEvent(stateValue, controller, resize);
     controller.setHooks({
       copy,
       cut,
@@ -5956,6 +5974,7 @@ var __export__ = (() => {
       }
     });
     controller.fromJSON(MOCK_MODEL);
+    return removeEvent;
   }
   function initController() {
     const controller = new Controller(new Model(new History()));
@@ -5981,7 +6000,7 @@ var __export__ = (() => {
     };
     stateValue.fontFamilyList = fontFamilyList;
     setState();
-    initCanvas(stateValue, controller);
+    return initCanvas(stateValue, controller);
   }
   return __toCommonJS(src_exports);
 })();
