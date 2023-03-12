@@ -394,7 +394,7 @@ function handleFormula(data: any = {}) {
   const allFormulas = Object.keys(data);
   allFormulas.sort((a, b) => a.localeCompare(b));
   const set = new Set(Object.keys(data).filter((key) => Boolean(data[key])));
-  const result = [];
+  const result: string[] = [];
   for (const item of allFormulas) {
     result.push(`[${set.has(item) ? 'x' : ' '}] ${item}`);
   }
