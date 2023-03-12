@@ -1,7 +1,7 @@
 import { StoreValue, IController, ChangeEventType, OptionItem } from './types';
 import { Controller } from './controller';
 import { Model, MOCK_MODEL, History } from './model';
-import { MainCanvas, registerEvents, Content } from './canvas';
+import { MainCanvas, registerGlobalEvent, Content } from './canvas';
 import {
   FONT_FAMILY_LIST,
   isSupportFontFamily,
@@ -30,7 +30,10 @@ function getStoreValue(controller: IController, fontFamilyList: OptionItem[]) {
   const { scrollLeft, scrollTop } = controller.getScroll();
   const activeCell = controller.getActiveCell();
   const cell = controller.getCell(activeCell);
-  const cellPosition = controller.computeCellPosition(activeCell.row, activeCell.col);
+  const cellPosition = controller.computeCellPosition(
+    activeCell.row,
+    activeCell.col,
+  );
   cellPosition.top = top + cellPosition.top;
   if (!cell.style) {
     cell.style = {};
@@ -78,7 +81,7 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
     });
   };
   resize();
-  registerEvents(stateValue, controller, resize);
+  const removeEvent = registerGlobalEvent(stateValue, controller, resize);
   controller.setHooks({
     copy,
     cut,
@@ -96,6 +99,7 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
     },
   });
   controller.fromJSON(MOCK_MODEL);
+  return removeEvent;
 }
 export function initController(): IController {
   const controller = new Controller(new Model(new History()));

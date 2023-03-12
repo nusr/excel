@@ -29,5 +29,5 @@ export function initExcel(containerDom: HTMLDivElement) {
   };
   stateValue.fontFamilyList = fontFamilyList;
   setState();
-  initCanvas(stateValue, controller);
+  return initCanvas(stateValue, controller);
 }

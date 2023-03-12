@@ -79,9 +79,6 @@ export class Controller implements IController {
   getSheetList(): WorkBookJSON['workbook'] {
     return this.model.getSheetList();
   }
-  getCellsContent(sheetId: string): Coordinate[] {
-    return this.model.getCellsContent(sheetId);
-  }
   getSheetInfo(sheetId: string): WorksheetType {
     return this.model.getSheetInfo(sheetId);
   }
@@ -103,25 +100,12 @@ export class Controller implements IController {
     };
   }
   private setSheetCell(range: IRange) {
-    const { row, col, sheetId } = range;
-    const id = sheetId || this.model.getCurrentSheetId();
-    const sheetInfo = this.model.getSheetInfo(id);
-    if (
-      row < 0 ||
-      col < 0 ||
-      row >= sheetInfo.rowCount ||
-      col >= sheetInfo.colCount
-    ) {
-      return false;
-    }
+    const id = range.sheetId || this.model.getCurrentSheetId();
     range.sheetId = id;
     this.model.setActiveCell(range);
-    return true;
   }
   setActiveCell(range: IRange): void {
-    if (!this.setSheetCell(range)) {
-      return;
-    }
+    this.setSheetCell(range);
     this.changeSet.add('selection');
     this.emitChange();
   }

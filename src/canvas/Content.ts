@@ -60,38 +60,66 @@ export class Content implements ContentView {
     this.renderContent();
   }
   private renderContent(): void {
-    const { controller } = this;
-    const { width, height } = this.controller.getDomRect();
+    const { controller, ctx } = this;
+    const { width, height } = controller.getDomRect();
+    const headerSize = controller.getHeaderSize();
     const currentSheetId = controller.getCurrentSheetId();
-    const data = controller.getCellsContent(currentSheetId);
-    if (isEmpty(data)) {
-      return;
-    }
-    this.ctx.save();
-    const { row: rowIndex, col: colIndex } = controller.getScroll();
-    for (const item of data) {
-      const { row, col } = item;
-      if (row < rowIndex || col < colIndex) {
-        continue;
-      }
-      const result = controller.computeCellPosition(row, col);
-      if (result.top > height || result.left > width) {
-        continue;
-      }
+    const { row, col } = controller.getScroll();
 
-      const cellInfo = this.controller.getCell(
-        new Range(row, col, 1, 1, currentSheetId),
-      );
-      const { wrapHeight = 0, fontSizeHeight = 0 } = renderCell(this.ctx, {
-        ...cellInfo,
-        ...result,
-      });
-      const t = Math.max(wrapHeight, fontSizeHeight);
-      if (t > result.height) {
-        controller.setRowHeight(row, t);
+    let x = headerSize.width;
+    let c = col;
+    let y = headerSize.height;
+    let r = row;
+
+    while (1) {
+      const t = controller.getColWidth(c);
+      if (x + t < width) {
+        x += t;
+        c++;
+      } else {
+        break;
       }
     }
-    this.ctx.restore();
+
+    while (1) {
+      const t = controller.getRowHeight(r);
+      if (y + t < height) {
+        y += t;
+        r++;
+      } else {
+        break;
+      }
+    }
+    const endRow = r;
+    const endCol = c;
+    ctx.save();
+    y = headerSize.height;
+    for (let r = row; r < endRow; r++) {
+      x = headerSize.width;
+      for (let c = col; c < endCol; c++) {
+        const cellInfo = controller.getCell(
+          new Range(r, c, 1, 1, currentSheetId),
+        );
+        if (isEmpty(cellInfo.value) && isEmpty(cellInfo.style)) {
+          x += controller.getColWidth(c);
+          continue;
+        }
+        const cellSize = controller.getCellSize(r, c);
+        const { wrapHeight = 0, fontSizeHeight = 0 } = renderCell(ctx, {
+          ...cellInfo,
+          ...cellSize,
+          top: y,
+          left: x,
+        });
+        const t = Math.max(wrapHeight, fontSizeHeight);
+        if (t > cellSize.height) {
+          controller.setRowHeight(r, t);
+        }
+        x += controller.getColWidth(c);
+      }
+      y += controller.getRowHeight(r);
+    }
+    ctx.restore();
   }
   private renderTriangle(): void {
     if (isTestEnv()) {

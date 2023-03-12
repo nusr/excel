@@ -56,12 +56,16 @@ export class Model implements IModel {
     if (index < 0) {
       return;
     }
-    const oldValue = this.workbook[index].activeCell;
+    const { row, col } = range;
+    const sheet = this.workbook[index];
+    if (row < 0 || col < 0 || row >= sheet.rowCount || col >= sheet.colCount) {
+      return;
+    }
+    const oldValue = sheet.activeCell;
     if (isSameRange(oldValue, range)) {
       return;
     }
     const key = `workbook.${index}.activeCell`;
-    this.history.pushUndo('set', key, { ...range });
     this.history.pushRedo('set', key, {
       ...oldValue,
     });
@@ -95,26 +99,6 @@ export class Model implements IModel {
   }
   getCurrentSheetId(): string {
     return this.currentSheetId;
-  }
-  getCellsContent(sheetId: string): Array<Coordinate> {
-    const sheetData = this.worksheets[sheetId];
-    if (isEmpty(sheetData)) {
-      return [];
-    }
-    const result = [];
-    const rowKeys = Object.keys(sheetData);
-    for (const rowKey of rowKeys) {
-      const colKeys = Object.keys(sheetData[rowKey]);
-      for (const colKey of colKeys) {
-        const row = Number(rowKey);
-        const col = Number(colKey);
-        result.push({
-          row,
-          col,
-        });
-      }
-    }
-    return result;
   }
   fromJSON = (json: WorkBookJSON) => {
     modelLog('fromJSON', json);
@@ -150,7 +134,6 @@ export class Model implements IModel {
     const { row, col } = range;
     const key = `worksheets[${this.currentSheetId}][${row}][${col}].value`;
     this.history.pushRedo('set', key, get(this, key, undefined));
-    this.history.pushUndo('set', key, value);
 
     setWith(this, key, value);
   }
@@ -159,7 +142,6 @@ export class Model implements IModel {
     const key = `worksheets[${this.currentSheetId}][${row}][${col}].formula`;
 
     this.history.pushRedo('set', key, get(this, key, undefined));
-    this.history.pushUndo('set', key, formula);
 
     setWith(this, key, formula);
   }
@@ -193,7 +175,6 @@ export class Model implements IModel {
   private setStyle(style: Partial<StyleType>, range: Coordinate) {
     const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
     this.history.pushRedo('set', stylePath, get(this, stylePath, {}));
-    this.history.pushUndo('set', stylePath, style);
     setWith(this, stylePath, style);
   }
   setCellStyle(style: Partial<StyleType>, ranges: Range[]): void {
@@ -401,6 +382,8 @@ export class Model implements IModel {
       const { op, path, value } = item;
       switch (op) {
         case 'set': {
+          this.history.pushUndo(op, path, get(this, path, undefined));
+          this.record();
           setWith(this, path, value);
           break;
         }

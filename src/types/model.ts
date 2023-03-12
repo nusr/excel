@@ -79,7 +79,6 @@ export interface IBaseModel {
   setCurrentSheetId(id: string): void;
   getCurrentSheetId(): string;
   addSheet(): void;
-  getCellsContent(sheetId: string): Array<Coordinate>;
   toJSON(): WorkBookJSON;
   fromJSON(json: WorkBookJSON): void;
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void;

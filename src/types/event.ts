@@ -8,3 +8,14 @@ export type IWindowSize = {
 export type EventType = {
   changeSet: Set<ChangeEventType>;
 };
+
+export interface IHitInfo {
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+  row: number;
+  col: number;
+  pageX: number;
+  pageY: number;
+}
