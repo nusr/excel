@@ -1,5 +1,5 @@
 import { render } from './react';
-import { App } from './App';
+import { App } from './containers';
 import { DEFAULT_STORE_VALUE } from './util';
 import {
   initCanvas,
@@ -8,7 +8,7 @@ import {
   initFontFamilyList,
 } from './init';
 import './global.css';
-import './components/index.css';
+import './containers/components/index.css';
 import './containers/index.css';
 
 export function initExcel(containerDom: HTMLDivElement) {

@@ -1,5 +1,4 @@
 import {
-  Coordinate,
   WorkBookJSON,
   StyleType,
   ChangeEventType,

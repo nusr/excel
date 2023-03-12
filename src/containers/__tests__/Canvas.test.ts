@@ -1,4 +1,4 @@
-import { CanvasContainer } from '..';
+import { CanvasContainer } from '../canvas';
 import { render } from '@/react';
 import { DEFAULT_STORE_VALUE } from '@/util';
 import { initController } from '../../init';

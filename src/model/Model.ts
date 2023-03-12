@@ -22,7 +22,7 @@ import {
   setWith,
   isSameRange,
 } from '@/util';
-import { parseFormula } from '@/parser';
+import { parseFormula } from '@/formula';
 
 const CELL_HEIGHT = 19;
 const CELL_WIDTH = 68;

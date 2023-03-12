@@ -1,4 +1,4 @@
-import { FormulaBarContainer } from '..';
+import { FormulaBarContainer } from '../FormulaBar';
 import { render } from '@/react';
 import { DEFAULT_STORE_VALUE } from '@/util';
 import { initController } from '../../init';

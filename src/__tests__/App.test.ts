@@ -1,4 +1,4 @@
-import { App } from '../App';
+import { App } from '../containers';
 import { render } from '../react';
 import { DEFAULT_STORE_VALUE } from '@/util';
 import { initController } from '../init';

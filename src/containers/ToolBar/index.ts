@@ -6,7 +6,7 @@ import {
   Github,
   Select,
   FillColorIcon,
-} from '@/components';
+} from '../components';
 import { FONT_SIZE_LIST, DEFAULT_FONT_SIZE, DEFAULT_FONT_COLOR } from '@/util';
 import { StyleType, EUnderLine, OptionItem } from '@/types';
 

@@ -1,4 +1,4 @@
-import { ToolbarContainer } from '..';
+import { ToolbarContainer } from '../ToolBar';
 import { render } from '@/react';
 import { DEFAULT_STORE_VALUE } from '@/util';
 import { initController } from '../../init';

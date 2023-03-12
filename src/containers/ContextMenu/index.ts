@@ -1,5 +1,5 @@
 import { h, SmartComponent, CSSProperties } from "@/react";
-import { Button } from "@/components";
+import { Button } from "../components";
 
 const defaultStyle: CSSProperties = {
   display: "none",

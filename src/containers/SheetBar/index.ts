@@ -1,7 +1,7 @@
 import { h, SmartComponent } from '@/react';
 import { classnames } from '@/util';
 import { theme } from '@/util';
-import { Button, Icon } from '@/components';
+import { Button, Icon } from '../components';
 
 export const SheetBarContainer: SmartComponent = (state, controller) => {
   return h(
