@@ -329,25 +329,14 @@ var __export__ = (() => {
       value: "",
       style: {},
       row: 0,
-      col: 0
-    },
-    cellPosition: {
+      col: 0,
       left: -999,
       top: -999,
       width: 0,
       height: 0
     },
     fontFamilyList: [],
-    contextMenuPosition: void 0,
-    scrollLeft: 0,
-    scrollTop: 0,
-    headerSize: {
-      width: 0,
-      height: 0
-    },
-    scrollStatus: 0 /* NONE */,
-    canRedo: false,
-    canUndo: false
+    contextMenuPosition: void 0
   };
 
   // src/util/util.ts
@@ -916,6 +905,8 @@ var __export__ = (() => {
   };
 
   // src/util/font.ts
+  var QUERY_ALL_LOCAL_FONT = "QUERY_ALL_LOCAL_FONT";
+  var LOCAL_FONT_KEY = "LOCAL_FONT_KEY";
   var FONT_FAMILY_LIST = [
     "\u7B49\u7EBF",
     "\u7B49\u7EBF Light",
@@ -940,89 +931,24 @@ var __export__ = (() => {
     "\u5FAE\u8F6F\u96C5\u9ED1 Light",
     "\u65B0\u5B8B\u4F53",
     "\u5E7C\u5706",
-    "Agency FB",
-    "Algerian",
     "Arial",
     "Arial Narrow",
-    "Bahnschrift",
-    "Bahnschrift Condensed",
-    "Bahnschrift Light",
-    "Bahnschrift SemiBold",
-    "Bahnschrift SemiCondensed",
-    "Baskerville Old Face",
-    "Bauhaus 93",
-    "Bell MT",
-    "Berlin Sans FB",
-    "Book Antiqua",
-    "Bookman Old Style",
-    "Bookshelf Symbol 7",
-    "Calibri",
-    "Calibri Light",
-    "Californian FB",
-    "Calisto MT",
-    "Cambria",
-    "Cambria Math",
-    "Candara",
-    "Candara Light",
-    "Cascadia Code",
     "Cascadia Code",
     "Cascadia Code ExtraLight",
-    "Cascadia Code ExtraLight",
-    "Cascadia Code Light",
     "Cascadia Code Light",
     "Cascadia Code PL",
     "Cascadia Code PL ExtraLight",
     "Cascadia Code PL Light",
     "Cascadia Code PL SemiBold",
     "Cascadia Code SemiBold",
-    "Cascadia Code SemiBold",
-    "Cascadia Mono",
     "Cascadia Mono",
     "Cascadia Mono ExtraLight",
-    "Cascadia Mono ExtraLight",
-    "Cascadia Mono Light",
     "Cascadia Mono Light",
     "Cascadia Mono PL",
     "Cascadia Mono PL ExtraLight",
     "Cascadia Mono PL Light",
     "Cascadia Mono PL SemiBold",
     "Cascadia Mono SemiBold",
-    "Cascadia Mono SemiBold",
-    "Castellar",
-    "Centaur",
-    "Century",
-    "Century Gothic",
-    "Century Schoolbook",
-    "Colonna MT",
-    "Comic Sans MS",
-    "Consolas",
-    "Constantia",
-    "Cooper Black",
-    "Copperplate Gothic Light",
-    "Corbel",
-    "Corbel Light",
-    "Courier New",
-    "Dubai Light",
-    "Dubai Medium",
-    "Dubai Regular",
-    "Ebrima",
-    "Elephant",
-    "Engravers MT",
-    "Felix Titling",
-    "Footlight MT Light",
-    "Franklin Gothic Book",
-    "Franklin Gothic Heavy",
-    "Franklin Gothic Medium",
-    "Leelawadee UI",
-    "Lucida Bright",
-    "Lucida Bright Demibold",
-    "Lucida Console",
-    "Lucida Fax",
-    "Lucida Sans",
-    "Lucida Sans Typewriter",
-    "Lucida Sans Unicode",
-    "Maiandra GD",
-    "Malgun Gothic",
     "Microsoft JhengHei",
     "Microsoft JhengHei Light",
     "Microsoft JhengHei UI",
@@ -1034,51 +960,8 @@ var __export__ = (() => {
     "Microsoft Yahei UI",
     "Microsoft YaHei UI Light",
     "Microsoft Yi Baiti",
-    "Modern No. 20",
-    "Mongolian Baiti",
-    "MS Gothic",
-    "MS PGothic",
-    "MS Reference Sans Serif",
-    "MS UI Gothic",
-    "Rockwell",
-    "Rockwell Condensed",
-    "Segoe Print",
-    "Segoe Script",
-    "Segoe UI",
-    "Segoe UI Black",
-    "Segoe UI Emoji",
-    "Segoe UI Historic",
-    "Segoe UI Light",
-    "Segoe UI Semibold",
-    "Segoe UI Symbol",
-    "Segoe UI Variable Display",
-    "Segoe UI Variable Display Light",
-    "Segoe UI Variable Display Semibold",
-    "Segoe UI Variable Small",
-    "Segoe UI Variable Small Light",
-    "Segoe UI Variable Small Semibold",
-    "Segoe UI Variable Text",
-    "Segoe UI Variable Text Light",
-    "Segoe UI Variable Text Semibold",
     "SimSun-ExtB",
-    "Sitka Banner",
-    "Sitka Banner Semibold",
-    "Sitka Display",
-    "Sitka Display Semibold",
-    "Sitka Heading",
-    "Sitka Heading Semibold",
-    "Sitka Small",
-    "Sitka Small Semibold",
-    "Sitka Subheading",
-    "Sitka Subheading Semibold",
-    "Sitka Text",
-    "Sitka Text Semibold",
     "Times New Roman",
-    "Trebuchet MS",
-    "Verdana",
-    "Wide Latin",
-    "Wingdings 2",
-    "Wingdings 3",
     "Yu Gothic Light",
     "Yu Gothic Medium",
     "Yu Gothic Regular",
@@ -2960,7 +2843,8 @@ var __export__ = (() => {
   var scrollStatus = 0 /* NONE */;
   var lastTimeStamp = 0;
   var CanvasContainer = (state, controller) => {
-    const { headerSize } = state;
+    const headerSize = controller.getHeaderSize();
+    const scrollData = controller.getScroll();
     function handleDrag(event) {
       event.stopPropagation();
       if (scrollStatus === 1 /* VERTICAL */) {
@@ -3140,7 +3024,7 @@ var __export__ = (() => {
           className: "vertical-scroll-bar-content",
           style: {
             height: SCROLL_SIZE,
-            transform: `translateY(${state.scrollTop}px)`
+            transform: `translateY(${scrollData.scrollTop}px)`
           }
         })
       ),
@@ -3166,7 +3050,7 @@ var __export__ = (() => {
           className: "horizontal-scroll-bar-content",
           style: {
             width: SCROLL_SIZE,
-            transform: `translateX(${state.scrollLeft}px)`
+            transform: `translateX(${scrollData.scrollLeft}px)`
           }
         })
       )
@@ -3571,7 +3455,14 @@ var __export__ = (() => {
   ContextMenuContainer.displayName = "ContextMenuContainer";
 
   // src/containers/FormulaBar/FormulaEditor.ts
-  function getEditorStyle(style, cellPosition) {
+  function getEditorStyle(data) {
+    const { style } = data;
+    const cellPosition = {
+      top: data.top,
+      left: data.left,
+      width: data.width,
+      height: data.height
+    };
     if (isEmpty(style)) {
       return cellPosition;
     }
@@ -3589,7 +3480,7 @@ var __export__ = (() => {
     };
   }
   var FormulaEditor = (state, controller) => {
-    const { activeCell, isCellEditing, cellPosition } = state;
+    const { activeCell, isCellEditing } = state;
     const initValue = activeCell.formula || String(activeCell.value || "");
     let inputDom;
     const ref = (element) => {
@@ -3599,7 +3490,7 @@ var __export__ = (() => {
     return h("input", {
       className: "base-editor",
       value: initValue,
-      style: isCellEditing ? getEditorStyle(activeCell.style, cellPosition) : void 0,
+      style: isCellEditing ? getEditorStyle(activeCell) : void 0,
       hook: {
         ref
       },
@@ -3670,10 +3561,9 @@ var __export__ = (() => {
     const setCellStyle = (value) => {
       const cellData = controller.getCell(controller.getActiveCell());
       const styleData = cellData.style || {};
-      Object.assign(styleData, value);
-      controller.setCellStyle(styleData, [controller.getActiveCell()]);
+      controller.setCellStyle(Object.assign(styleData, value), [controller.getActiveCell()]);
     };
-    const { activeCell, fontFamilyList, canRedo, canUndo } = state;
+    const { activeCell, fontFamilyList } = state;
     const { style = {} } = activeCell;
     const {
       isBold = false,
@@ -3692,7 +3582,7 @@ var __export__ = (() => {
       },
       Button(
         {
-          disabled: !canUndo,
+          disabled: !controller.canUndo(),
           onClick() {
             controller.undo();
           },
@@ -3702,7 +3592,7 @@ var __export__ = (() => {
       ),
       Button(
         {
-          disabled: !canRedo,
+          disabled: !controller.canRedo(),
           onClick() {
             controller.redo();
           },
@@ -3718,7 +3608,21 @@ var __export__ = (() => {
         },
         getItemStyle,
         onChange: (value) => {
-          setCellStyle({ fontFamily: String(value) });
+          const t = String(value);
+          if (t === QUERY_ALL_LOCAL_FONT) {
+            window.queryLocalFonts().then((list) => {
+              let data = list.map((v) => v.fullName);
+              data = Array.from(new Set(data));
+              localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(data));
+              state.fontFamilyList = data.map((v) => ({
+                label: v,
+                value: v,
+                disabled: false
+              }));
+            });
+          } else {
+            setCellStyle({ fontFamily: String(value) });
+          }
         }
       }),
       Select({
@@ -3816,15 +3720,15 @@ var __export__ = (() => {
           return h(
             "div",
             {
-              key: item.sheetId,
+              key: item.value,
               className: classnames("sheet-bar-item", {
-                active: state.currentSheetId === item.sheetId
+                active: state.currentSheetId === item.value
               }),
               onclick: () => {
-                controller.setCurrentSheetId(item.sheetId);
+                controller.setCurrentSheetId(String(item.value));
               }
             },
-            item.name
+            item.label
           );
         })
       ),
@@ -5896,15 +5800,26 @@ var __export__ = (() => {
     }
   }
   function initFontFamilyList(fontList = FONT_FAMILY_LIST) {
+    const cacheFont = localStorage.getItem(LOCAL_FONT_KEY);
+    if (cacheFont) {
+      const t = JSON.parse(cacheFont);
+      return t.map((v) => ({ value: v, label: v, disabled: false }));
+    }
     const list = fontList.map((v) => {
       const disabled = !isSupportFontFamily(v);
       return { label: v, value: v, disabled };
     });
+    if (window.queryLocalFonts) {
+      list.push({
+        value: QUERY_ALL_LOCAL_FONT,
+        label: "--> query local fonts",
+        disabled: false
+      });
+    }
     return list;
   }
-  function getStoreValue(controller, fontFamilyList) {
+  function getStoreValue(controller, stateValue) {
     const { top } = controller.getDomRect();
-    const { scrollLeft, scrollTop } = controller.getScroll();
     const activeCell = controller.getActiveCell();
     const cell = controller.getCell(activeCell);
     const cellPosition = controller.computeCellPosition(
@@ -5917,7 +5832,7 @@ var __export__ = (() => {
     }
     if (!cell.style.fontFamily) {
       let defaultFontFamily = "";
-      for (const item of fontFamilyList) {
+      for (const item of stateValue.fontFamilyList) {
         if (!item.disabled) {
           defaultFontFamily = String(item.value);
           break;
@@ -5925,16 +5840,14 @@ var __export__ = (() => {
       }
       cell.style.fontFamily = defaultFontFamily;
     }
+    const sheetList = controller.getSheetList().map((v) => ({ value: v.sheetId, label: v.name }));
     const newStateValue = {
-      sheetList: controller.getSheetList(),
-      currentSheetId: controller.getCurrentSheetId(),
-      cellPosition,
-      scrollLeft,
-      scrollTop,
-      headerSize: controller.getHeaderSize(),
-      activeCell: cell,
-      canRedo: controller.canRedo(),
-      canUndo: controller.canUndo()
+      activeCell: {
+        ...cellPosition,
+        ...cell
+      },
+      sheetList,
+      currentSheetId: controller.getCurrentSheetId()
     };
     return newStateValue;
   }
@@ -5962,10 +5875,7 @@ var __export__ = (() => {
       cut,
       paste,
       modelChange: (changeSet) => {
-        const newStateValue = getStoreValue(
-          controller,
-          stateValue.fontFamilyList
-        );
+        const newStateValue = getStoreValue(controller, stateValue);
         Object.assign(stateValue, newStateValue);
         mainCanvas.render({ changeSet });
         mainCanvas.render({
