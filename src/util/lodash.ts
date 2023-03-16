@@ -66,20 +66,19 @@ export function isObjectEqual(a: any, b: any): boolean {
   if (a === b && a === null) {
     return true;
   }
-  if (typeof a !== 'object' || typeof b !== 'object') {
-    return a === b;
-  }
-  const list1 = Object.keys(a);
-  const list2 = Object.keys(b);
-  if (list1.length === list2.length) {
-    for (const key of list1) {
-      if (a[key] !== b[key]) {
-        return false;
+  if (typeof a === 'object' && typeof b === 'object') {
+    const list1 = Object.keys(a);
+    const list2 = Object.keys(b);
+    if (list1.length === list2.length) {
+      for (const key of list1) {
+        if (a[key] !== b[key]) {
+          return false;
+        }
       }
+      return true;
     }
-    return true;
   }
-  return false;
+  return a === b;
 }
 
 export function isArrayEqual(a: any[], b: any[]): boolean {

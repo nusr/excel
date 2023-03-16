@@ -1,5 +1,5 @@
-import { ModelCellType, WorkBookJSON } from './model';
-import { IWindowSize } from './event';
+import { ModelCellType } from './model';
+
 export type OptionItem = {
   value: string | number;
   label: string;

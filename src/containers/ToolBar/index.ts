@@ -41,8 +41,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
   const setCellStyle = (value: Partial<StyleType>) => {
     const cellData = controller.getCell(controller.getActiveCell());
     const styleData = cellData.style || {};
-    Object.assign(styleData, value);
-    controller.setCellStyle(styleData, [controller.getActiveCell()]);
+    controller.setCellStyle(Object.assign(styleData, value), [controller.getActiveCell()]);
   };
   const { activeCell, fontFamilyList } = state;
   const { style = {} } = activeCell;

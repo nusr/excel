@@ -1,4 +1,4 @@
-import { ErrorTypes, StoreValue, ScrollStatus } from '@/types';
+import { ErrorTypes, StoreValue } from '@/types';
 export const SHEET_NAME_PREFIX = 'Sheet';
 export const DEFAULT_ROW_COUNT = 200;
 export const DEFAULT_COL_COUNT = 30;

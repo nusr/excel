@@ -1,4 +1,9 @@
-import { StoreValue, IController, ChangeEventType, OptionItem } from './types';
+import {
+  StoreValue,
+  IController,
+  ChangeEventType,
+  OptionItem,
+} from './types';
 import { Controller } from './controller';
 import { Model, MOCK_MODEL, History } from './model';
 import { MainCanvas, registerGlobalEvent, Content } from './canvas';
@@ -10,8 +15,6 @@ import {
   cut,
   paste,
   theme,
-  isObjectEqual,
-  isArrayEqual,
   LOCAL_FONT_KEY,
 } from './util';
 
@@ -69,21 +72,14 @@ function getStoreValue(
   const sheetList = controller
     .getSheetList()
     .map((v) => ({ value: v.sheetId, label: v.name }));
-  const newStateValue: Partial<StoreValue> = {};
-  const currentSheetId = controller.getCurrentSheetId();
-  const cellData = {
-    ...cell,
-    ...cellPosition,
+  const newStateValue: Partial<StoreValue> = {
+    activeCell: {
+      ...cellPosition,
+      ...cell,
+    },
+    sheetList,
+    currentSheetId: controller.getCurrentSheetId(),
   };
-  if (currentSheetId !== stateValue.currentSheetId) {
-    newStateValue.currentSheetId = currentSheetId;
-  }
-  if (!isArrayEqual(sheetList, stateValue.sheetList)) {
-    newStateValue.sheetList = sheetList;
-  }
-  if (!isObjectEqual(cellData, stateValue.activeCell)) {
-    newStateValue.activeCell = cellData;
-  }
   return newStateValue;
 }
 
@@ -113,9 +109,7 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
     paste,
     modelChange: (changeSet) => {
       const newStateValue = getStoreValue(controller, stateValue);
-      if (Object.keys(newStateValue).length) {
-        Object.assign(stateValue, newStateValue);
-      }
+      Object.assign(stateValue, newStateValue);
       mainCanvas.render({ changeSet: changeSet });
       mainCanvas.render({
         changeSet: controller.getChangeSet(),
