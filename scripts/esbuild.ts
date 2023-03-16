@@ -154,6 +154,7 @@ async function main() {
       {
         ...options,
         outdir: distDir,
+        minify: true,
       },
       buildESM(packageJson.module),
       buildUMD(packageJson.main),
