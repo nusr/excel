@@ -39,8 +39,8 @@ let scrollStatus = ScrollStatus.NONE;
 let lastTimeStamp = 0;
 
 export const CanvasContainer: SmartComponent = (state, controller) => {
-  const { headerSize } = state;
-
+  const headerSize = controller.getHeaderSize();
+  const scrollData = controller.getScroll();
   function handleDrag(event: MouseEvent) {
     event.stopPropagation();
     if (scrollStatus === ScrollStatus.VERTICAL) {
@@ -227,7 +227,7 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
         className: 'vertical-scroll-bar-content',
         style: {
           height: SCROLL_SIZE,
-          transform: `translateY(${state.scrollTop}px)`,
+          transform: `translateY(${scrollData.scrollTop}px)`,
         },
       }),
     ),
@@ -253,7 +253,7 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
         className: 'horizontal-scroll-bar-content',
         style: {
           width: SCROLL_SIZE,
-          transform: `translateX(${state.scrollLeft}px)`,
+          transform: `translateX(${scrollData.scrollLeft}px)`,
         },
       }),
     ),

@@ -26,20 +26,15 @@ export type ScrollValue = {
   scrollTop: number;
 };
 
+export type ActiveCellType = ModelCellType & Coordinate & CanvasOverlayPosition;
+
 export interface StoreValue {
-  sheetList: WorkBookJSON['workbook'];
+  sheetList: OptionItem[];
   currentSheetId: string;
+  activeCell: ActiveCellType;
   isCellEditing: boolean;
-  activeCell: ModelCellType & Coordinate;
-  cellPosition: CanvasOverlayPosition;
   fontFamilyList: OptionItem[];
   contextMenuPosition?: CanvasOverlayPosition;
-  scrollTop: number;
-  scrollLeft: number;
-  headerSize: IWindowSize;
-  scrollStatus: ScrollStatus;
-  canRedo: boolean;
-  canUndo: boolean;
 }
 
 export type Point = [x: number, y: number];

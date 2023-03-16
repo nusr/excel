@@ -105,8 +105,6 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
     style: {},
     row: 0,
     col: 0,
-  },
-  cellPosition: {
     left: -999,
     top: -999,
     width: 0,
@@ -114,13 +112,4 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
   },
   fontFamilyList: [],
   contextMenuPosition: undefined,
-  scrollLeft: 0,
-  scrollTop: 0,
-  headerSize: {
-    width: 0,
-    height: 0,
-  },
-  scrollStatus: ScrollStatus.NONE,
-  canRedo: false,
-  canUndo: false,
 };

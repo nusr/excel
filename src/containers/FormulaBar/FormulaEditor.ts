@@ -1,5 +1,5 @@
 import { h, SmartComponent, CSSProperties } from '@/react';
-import { ModelCellType, CanvasOverlayPosition } from '@/types';
+import { CanvasOverlayPosition, ActiveCellType } from '@/types';
 import {
   DEFAULT_FONT_COLOR,
   makeFont,
@@ -7,10 +7,14 @@ import {
   isEmpty,
 } from '@/util';
 
-export function getEditorStyle(
-  style: ModelCellType['style'],
-  cellPosition: CanvasOverlayPosition,
-): CSSProperties | undefined {
+function getEditorStyle(data: ActiveCellType): CSSProperties | undefined {
+  const { style } = data;
+  const cellPosition: CanvasOverlayPosition = {
+    top: data.top,
+    left: data.left,
+    width: data.width,
+    height: data.height,
+  };
   if (isEmpty(style)) {
     return cellPosition;
   }
@@ -29,7 +33,7 @@ export function getEditorStyle(
 }
 
 export const FormulaEditor: SmartComponent = (state, controller) => {
-  const { activeCell, isCellEditing, cellPosition } = state;
+  const { activeCell, isCellEditing } = state;
   const initValue = activeCell.formula || String(activeCell.value || '');
   let inputDom: HTMLInputElement;
   const ref = (element: Element) => {
@@ -39,9 +43,7 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
   return h('input', {
     className: 'base-editor',
     value: initValue,
-    style: isCellEditing
-      ? getEditorStyle(activeCell.style, cellPosition)
-      : undefined,
+    style: isCellEditing ? getEditorStyle(activeCell) : undefined,
     hook: {
       ref,
     },

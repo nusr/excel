@@ -18,15 +18,15 @@ export const SheetBarContainer: SmartComponent = (state, controller) => {
         return h(
           'div',
           {
-            key: item.sheetId,
+            key: item.value,
             className: classnames('sheet-bar-item', {
-              active: state.currentSheetId === item.sheetId,
+              active: state.currentSheetId === item.value,
             }),
             onclick: () => {
-              controller.setCurrentSheetId(item.sheetId);
+              controller.setCurrentSheetId(String(item.value));
             },
           },
-          item.name,
+          item.label,
         );
       }),
     ),

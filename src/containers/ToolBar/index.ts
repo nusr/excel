@@ -7,7 +7,13 @@ import {
   Select,
   FillColorIcon,
 } from '../components';
-import { FONT_SIZE_LIST, DEFAULT_FONT_SIZE, DEFAULT_FONT_COLOR } from '@/util';
+import {
+  FONT_SIZE_LIST,
+  DEFAULT_FONT_SIZE,
+  DEFAULT_FONT_COLOR,
+  QUERY_ALL_LOCAL_FONT,
+  LOCAL_FONT_KEY,
+} from '@/util';
 import { StyleType, EUnderLine, OptionItem } from '@/types';
 
 const underlineList: OptionItem[] = [
@@ -38,7 +44,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     Object.assign(styleData, value);
     controller.setCellStyle(styleData, [controller.getActiveCell()]);
   };
-  const { activeCell, fontFamilyList, canRedo, canUndo } = state;
+  const { activeCell, fontFamilyList } = state;
   const { style = {} } = activeCell;
   const {
     isBold = false,
@@ -57,7 +63,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     },
     Button(
       {
-        disabled: !canUndo,
+        disabled: !controller.canUndo(),
         onClick() {
           controller.undo();
         },
@@ -67,7 +73,7 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
     ),
     Button(
       {
-        disabled: !canRedo,
+        disabled: !controller.canRedo(),
         onClick() {
           controller.redo();
         },
@@ -83,7 +89,21 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
       },
       getItemStyle: getItemStyle,
       onChange: (value) => {
-        setCellStyle({ fontFamily: String(value) });
+        const t = String(value);
+        if (t === QUERY_ALL_LOCAL_FONT) {
+          (window as any).queryLocalFonts().then((list: any[]) => {
+            let data = list.map((v) => v.fullName);
+            data = Array.from(new Set(data));
+            localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(data));
+            state.fontFamilyList = data.map((v) => ({
+              label: v,
+              value: v,
+              disabled: false,
+            }));
+          });
+        } else {
+          setCellStyle({ fontFamily: String(value) });
+        }
       },
     }),
     Select({

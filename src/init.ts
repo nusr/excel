@@ -4,11 +4,15 @@ import { Model, MOCK_MODEL, History } from './model';
 import { MainCanvas, registerGlobalEvent, Content } from './canvas';
 import {
   FONT_FAMILY_LIST,
+  QUERY_ALL_LOCAL_FONT,
   isSupportFontFamily,
   copy,
   cut,
   paste,
   theme,
+  isObjectEqual,
+  isArrayEqual,
+  LOCAL_FONT_KEY,
 } from './util';
 
 export function initTheme(dom: HTMLElement) {
@@ -17,17 +21,31 @@ export function initTheme(dom: HTMLElement) {
     dom.style.setProperty(`--${key}`, String(theme[key] || ''));
   }
 }
-export function initFontFamilyList(fontList = FONT_FAMILY_LIST) {
+export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
+  const cacheFont = localStorage.getItem(LOCAL_FONT_KEY);
+  if (cacheFont) {
+    const t = JSON.parse(cacheFont) as string[];
+    return t.map((v) => ({ value: v, label: v, disabled: false }));
+  }
   const list = fontList.map((v) => {
     const disabled = !isSupportFontFamily(v);
     return { label: v, value: v, disabled };
   });
+  if ((window as any).queryLocalFonts) {
+    list.push({
+      value: QUERY_ALL_LOCAL_FONT,
+      label: '--> query local fonts',
+      disabled: false,
+    });
+  }
   return list;
 }
 
-function getStoreValue(controller: IController, fontFamilyList: OptionItem[]) {
+function getStoreValue(
+  controller: IController,
+  stateValue: StoreValue,
+): Partial<StoreValue> {
   const { top } = controller.getDomRect();
-  const { scrollLeft, scrollTop } = controller.getScroll();
   const activeCell = controller.getActiveCell();
   const cell = controller.getCell(activeCell);
   const cellPosition = controller.computeCellPosition(
@@ -40,7 +58,7 @@ function getStoreValue(controller: IController, fontFamilyList: OptionItem[]) {
   }
   if (!cell.style.fontFamily) {
     let defaultFontFamily = '';
-    for (const item of fontFamilyList) {
+    for (const item of stateValue.fontFamilyList) {
       if (!item.disabled) {
         defaultFontFamily = String(item.value);
         break;
@@ -48,17 +66,24 @@ function getStoreValue(controller: IController, fontFamilyList: OptionItem[]) {
     }
     cell.style.fontFamily = defaultFontFamily;
   }
-  const newStateValue: Partial<StoreValue> = {
-    sheetList: controller.getSheetList(),
-    currentSheetId: controller.getCurrentSheetId(),
-    cellPosition: cellPosition,
-    scrollLeft,
-    scrollTop,
-    headerSize: controller.getHeaderSize(),
-    activeCell: cell,
-    canRedo: controller.canRedo(),
-    canUndo: controller.canUndo(),
+  const sheetList = controller
+    .getSheetList()
+    .map((v) => ({ value: v.sheetId, label: v.name }));
+  const newStateValue: Partial<StoreValue> = {};
+  const currentSheetId = controller.getCurrentSheetId();
+  const cellData = {
+    ...cell,
+    ...cellPosition,
   };
+  if (currentSheetId !== stateValue.currentSheetId) {
+    newStateValue.currentSheetId = currentSheetId;
+  }
+  if (!isArrayEqual(sheetList, stateValue.sheetList)) {
+    newStateValue.sheetList = sheetList;
+  }
+  if (!isObjectEqual(cellData, stateValue.activeCell)) {
+    newStateValue.activeCell = cellData;
+  }
   return newStateValue;
 }
 
@@ -87,11 +112,10 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
     cut,
     paste,
     modelChange: (changeSet) => {
-      const newStateValue = getStoreValue(
-        controller,
-        stateValue.fontFamilyList,
-      );
-      Object.assign(stateValue, newStateValue);
+      const newStateValue = getStoreValue(controller, stateValue);
+      if (Object.keys(newStateValue).length) {
+        Object.assign(stateValue, newStateValue);
+      }
       mainCanvas.render({ changeSet: changeSet });
       mainCanvas.render({
         changeSet: controller.getChangeSet(),
