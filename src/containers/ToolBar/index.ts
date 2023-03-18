@@ -13,6 +13,7 @@ import {
   DEFAULT_FONT_COLOR,
   QUERY_ALL_LOCAL_FONT,
   LOCAL_FONT_KEY,
+  isSupportFontFamily,
 } from '@/util';
 import { StyleType, EUnderLine, OptionItem } from '@/types';
 
@@ -41,7 +42,9 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
   const setCellStyle = (value: Partial<StyleType>) => {
     const cellData = controller.getCell(controller.getActiveCell());
     const styleData = cellData.style || {};
-    controller.setCellStyle(Object.assign(styleData, value), [controller.getActiveCell()]);
+    controller.setCellStyle(Object.assign(styleData, value), [
+      controller.getActiveCell(),
+    ]);
   };
   const { activeCell, fontFamilyList } = state;
   const { style = {} } = activeCell;
@@ -91,10 +94,13 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
         const t = String(value);
         if (t === QUERY_ALL_LOCAL_FONT) {
           (window as any).queryLocalFonts().then((list: any[]) => {
-            let data = list.map((v) => v.fullName);
-            data = Array.from(new Set(data));
-            localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(data));
-            state.fontFamilyList = data.map((v) => ({
+            let fontList = list.map((v) => v.fullName);
+            fontList = Array.from(new Set(fontList)).filter((v) =>
+              isSupportFontFamily(v),
+            );
+            fontList.sort((a, b) => a.localeCompare(b));
+            localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(fontList));
+            state.fontFamilyList = fontList.map((v) => ({
               label: v,
               value: v,
               disabled: false,

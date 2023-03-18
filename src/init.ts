@@ -1,9 +1,4 @@
-import {
-  StoreValue,
-  IController,
-  ChangeEventType,
-  OptionItem,
-} from './types';
+import { StoreValue, IController, ChangeEventType, OptionItem } from './types';
 import { Controller } from './controller';
 import { Model, MOCK_MODEL, History } from './model';
 import { MainCanvas, registerGlobalEvent, Content } from './canvas';
@@ -27,17 +22,18 @@ export function initTheme(dom: HTMLElement) {
 export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
   const cacheFont = localStorage.getItem(LOCAL_FONT_KEY);
   if (cacheFont) {
-    const t = JSON.parse(cacheFont) as string[];
-    return t.map((v) => ({ value: v, label: v, disabled: false }));
+    const fontList = JSON.parse(cacheFont) as string[];
+    return fontList.map((v) => ({ value: v, label: v, disabled: false }));
   }
-  const list = fontList.map((v) => {
-    const disabled = !isSupportFontFamily(v);
-    return { label: v, value: v, disabled };
-  });
+  const list = fontList.map((v) => ({
+    label: v,
+    value: v,
+    disabled: !isSupportFontFamily(v),
+  }));
   if ((window as any).queryLocalFonts) {
     list.push({
       value: QUERY_ALL_LOCAL_FONT,
-      label: '--> query local fonts',
+      label: '--> query all local fonts',
       disabled: false,
     });
   }
