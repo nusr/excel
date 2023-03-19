@@ -1,4 +1,4 @@
-export function debounce(fn: (...params: any[]) => void) {
+export const debounce = (fn: (...params: any[]) => void) => {
   let timer: ReturnType<typeof requestAnimationFrame>;
   return (...rest: any[]) => {
     cancelAnimationFrame(timer);
@@ -6,7 +6,7 @@ export function debounce(fn: (...params: any[]) => void) {
       fn(...rest);
     });
   };
-}
+};
 
 export function get<T>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

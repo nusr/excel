@@ -112,4 +112,6 @@ export const DEFAULT_STORE_VALUE: StoreValue = {
   },
   fontFamilyList: [],
   contextMenuPosition: undefined,
+  sheetBarContextMenuLeft: undefined,
+  isSheetNameEditing: false,
 };

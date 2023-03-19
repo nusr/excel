@@ -38,6 +38,7 @@ export function render(container: Element, vNode: VNode): VNode {
 
 export type { VNode, FunctionComponent } from './vNode';
 export { h } from './h';
+export type { VNodePropsData } from './h';
 export type { CSSProperties } from './modules/style';
 
 export interface SmartComponent {

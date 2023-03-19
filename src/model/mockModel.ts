@@ -6,6 +6,7 @@ export const MOCK_MODEL: WorkBookJSON = {
     {
       sheetId: '1',
       name: 'Sheet1',
+      isHide: false,
       activeCell: {
         row: 2,
         col: 2,
@@ -19,6 +20,7 @@ export const MOCK_MODEL: WorkBookJSON = {
     {
       sheetId: '2',
       name: 'test',
+      isHide: false,
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       activeCell: {

@@ -75,6 +75,7 @@ export class Model implements IModel {
     const item = getDefaultSheetInfo(this.workbook);
     const sheet: WorksheetType = {
       ...item,
+      isHide: false,
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       activeCell: {
@@ -85,8 +86,54 @@ export class Model implements IModel {
         sheetId: item.sheetId,
       },
     };
-    this.workbook = [...this.workbook, sheet];
-    this.currentSheetId = item.sheetId;
+    const index = this.workbook.findIndex(
+      (item) => item.sheetId === this.currentSheetId,
+    );
+    if (index < 0) {
+      this.workbook.push(sheet);
+    } else {
+      this.workbook.splice(index + 1, 0, sheet);
+    }
+    this.currentSheetId = sheet.sheetId;
+  }
+  private getSheetIndex(sheetId?: string) {
+    const id = sheetId || this.currentSheetId;
+    const index = this.workbook.findIndex((item) => item.sheetId === id);
+    assert(index >= 0);
+    let lastIndex = 0;
+    if (index === 0) {
+      lastIndex = index + 1;
+    } else {
+      lastIndex = index - 1;
+    }
+    return {
+      index,
+      lastIndex,
+    };
+  }
+  deleteSheet(sheetId?: string): void {
+    assert(
+      this.workbook.length >= 2,
+      'A workbook must contains at least on visible worksheet',
+    );
+    const { index, lastIndex } = this.getSheetIndex(sheetId);
+    this.currentSheetId = this.workbook[lastIndex].sheetId;
+    this.workbook.splice(index, 1);
+  }
+  hideSheet(sheetId?: string | undefined): void {
+    const { index, lastIndex } = this.getSheetIndex(sheetId);
+    this.workbook[index].isHide = true;
+    this.currentSheetId = this.workbook[lastIndex].sheetId;
+  }
+  unhideSheet(sheetId?: string | undefined): void {
+    const { index, lastIndex } = this.getSheetIndex(sheetId);
+    this.workbook[index].isHide = false;
+    this.currentSheetId = this.workbook[lastIndex].sheetId;
+  }
+  renameSheet(sheetName: string, sheetId?: string | undefined): void {
+    assert(!!sheetName, 'You typed a invalid name for a sheet.');
+    const sheetInfo = this.getSheetInfo(sheetId);
+    sheetInfo.name = sheetName;
   }
   getSheetInfo(id: string = this.currentSheetId): WorksheetType {
     const item = this.workbook.find((item) => item.sheetId === id);

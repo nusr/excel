@@ -124,7 +124,6 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
         }
       },
       onmousedown(event) {
-        state.contextMenuPosition = undefined;
         const headerSize = controller.getHeaderSize();
         const canvasRect = controller.getDomRect();
         const { timeStamp, clientX, clientY } = event;

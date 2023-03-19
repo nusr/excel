@@ -118,7 +118,7 @@ export class Controller implements IController {
     this.computeViewSize();
     this.setScroll(this.getScroll());
   }
-  addSheet(): void {
+  addSheet = (): void => {
     this.model.addSheet();
     this.setSheetCell({
       row: 0,
@@ -136,6 +136,26 @@ export class Controller implements IController {
       scrollLeft: 0,
       scrollTop: 0,
     });
+  };
+  deleteSheet = (sheetId?: string): void => {
+    this.model.deleteSheet(sheetId);
+    this.changeSet.add('content');
+    this.emitChange();
+  };
+  hideSheet(sheetId?: string | undefined): void {
+    this.model.hideSheet(sheetId);
+    this.changeSet.add('content');
+    this.emitChange();
+  }
+  unhideSheet(sheetId?: string | undefined): void {
+    this.model.unhideSheet(sheetId);
+    this.changeSet.add('content');
+    this.emitChange();
+  }
+  renameSheet(sheetName: string, sheetId?: string | undefined): void {
+    this.model.renameSheet(sheetName, sheetId);
+    this.changeSet.add('content');
+    this.emitChange();
   }
   fromJSON(json: WorkBookJSON): void {
     controllerLog('loadJSON', json);

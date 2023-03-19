@@ -67,6 +67,7 @@ function getStoreValue(
   }
   const sheetList = controller
     .getSheetList()
+    .filter((v) => !v.isHide)
     .map((v) => ({ value: v.sheetId, label: v.name }));
   const newStateValue: Partial<StoreValue> = {
     activeCell: {
@@ -86,7 +87,7 @@ function createCanvas() {
   return canvas;
 }
 
-export function initCanvas(stateValue: StoreValue, controller: IController) {
+export const initCanvas = (stateValue: StoreValue, controller: IController) => {
   const mainCanvas = new MainCanvas(
     controller,
     new Content(controller, createCanvas()),
@@ -114,7 +115,7 @@ export function initCanvas(stateValue: StoreValue, controller: IController) {
   });
   controller.fromJSON(MOCK_MODEL);
   return removeEvent;
-}
+};
 export function initController(): IController {
   const controller = new Controller(new Model(new History()));
   controller.addSheet();

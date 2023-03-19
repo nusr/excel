@@ -10,7 +10,7 @@ type EventListener = {
     : never]?: Listener<HTMLElementEventMap[N]>;
 };
 
-interface VNodePropsData extends EventListener {
+export interface VNodePropsData extends EventListener {
   className?: string;
   style?: CSSProperties;
   key?: Key;
@@ -29,8 +29,10 @@ interface VNodePropsData extends EventListener {
   'fill-opacity'?: string;
   hook?: Hooks;
   'data-testId'?: string;
+  'data-type'?: string;
   disabled?: boolean;
   title?: string;
+  type?: string;
 }
 
 function addNs(node: VNode) {
@@ -87,7 +89,7 @@ export function h(
       continue;
     }
     const item: any = data[key];
-    if (key === 'data-testId') {
+    if (key.startsWith('data-')) {
       if (!nodeData.dataset) {
         nodeData.dataset = {};
       }
@@ -96,7 +98,6 @@ export function h(
       if (!nodeData.on) {
         nodeData.on = {};
       }
-
       nodeData.on[key.slice(2)] = item;
     } else {
       if (!nodeData.props) {

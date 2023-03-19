@@ -7,6 +7,19 @@ function isInputEvent(event: any): boolean {
   return name === 'input' || name === 'textarea';
 }
 
+type OutSideItem = {
+  dom: Element;
+  callback: (state: StoreValue) => void;
+}
+
+type OutSideKey = 'canvas-context-menu' | 'sheet-bar-context-menu'
+
+const clickOutSideMap: Partial<Record<OutSideKey, OutSideItem>> = {}
+
+export const setOutSideMap = (key: OutSideKey, item: OutSideItem) => {
+  clickOutSideMap[key] = item;
+}
+
 export function registerGlobalEvent(
   stateValue: StoreValue,
   controller: IController,
@@ -75,9 +88,22 @@ export function registerGlobalEvent(
     controller.cut(event);
   }
 
+  function handleMouseDown(event: MouseEvent) {
+    if (!event.target) {
+      return
+    }
+    const list = Object.values(clickOutSideMap);
+    for (const item of list) {
+      if (!item.dom.contains(event.target as Node)) {
+        item.callback(stateValue);
+      }
+    }
+  }
+
   window.addEventListener('resize', resizeWindow);
   window.addEventListener('keydown', handleKeydown);
   window.addEventListener('wheel', handleWheel);
+  window.addEventListener('mousedown', handleMouseDown)
   document.body.addEventListener('paste', handlePaste);
   document.body.addEventListener('copy', handleCopy);
   document.body.addEventListener('cut', handleCut);
@@ -86,6 +112,7 @@ export function registerGlobalEvent(
     window.removeEventListener('resize', resizeWindow);
     window.removeEventListener('keydown', handleKeydown);
     window.removeEventListener('wheel', handleWheel);
+    window.removeEventListener('mousedown', handleMouseDown)
     document.body.removeEventListener('paste', handlePaste);
     document.body.removeEventListener('copy', handleCopy);
     document.body.removeEventListener('cut', handleCut);

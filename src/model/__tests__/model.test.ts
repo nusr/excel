@@ -45,6 +45,7 @@ describe('model.test.ts', () => {
       workbook: [
         {
           sheetId: '1',
+          isHide: false,
           activeCell: {
             row: 0,
             col: 1,
@@ -81,6 +82,7 @@ describe('model.test.ts', () => {
               colCount: 1,
               sheetId: '',
             },
+            isHide: false,
             rowCount: 200,
             colCount: 200,
             name: 'test',

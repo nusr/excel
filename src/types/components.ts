@@ -34,7 +34,9 @@ export interface StoreValue {
   activeCell: ActiveCellType;
   isCellEditing: boolean;
   fontFamilyList: OptionItem[];
-  contextMenuPosition?: CanvasOverlayPosition;
+  contextMenuPosition: CanvasOverlayPosition | undefined;
+  sheetBarContextMenuLeft: number | undefined;
+  isSheetNameEditing: boolean;
 }
 
 export type Point = [x: number, y: number];

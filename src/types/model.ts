@@ -31,6 +31,7 @@ export type StyleType = {
 export type WorksheetType = {
   sheetId: string;
   name: string;
+  isHide: boolean;
   activeCell: IRange;
   rowCount: number;
   colCount: number;
@@ -79,6 +80,10 @@ export interface IBaseModel {
   setCurrentSheetId(id: string): void;
   getCurrentSheetId(): string;
   addSheet(): void;
+  deleteSheet(sheetId?: string): void;
+  hideSheet(sheetId?: string): void;
+  unhideSheet(sheetId?: string): void;
+  renameSheet(sheetName: string, sheetId?: string): void;
   toJSON(): WorkBookJSON;
   fromJSON(json: WorkBookJSON): void;
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void;

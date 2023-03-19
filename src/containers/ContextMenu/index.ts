@@ -1,9 +1,35 @@
-import { h, SmartComponent, CSSProperties } from "@/react";
-import { Button } from "../components";
+import { h, SmartComponent, CSSProperties } from '@/react';
+import { Button } from '../components';
+import { setOutSideMap } from '@/canvas';
+import { IController } from '@/types';
 
 const defaultStyle: CSSProperties = {
-  display: "none",
+  display: 'none',
 };
+
+function handleClick(dataType: string, controller: IController): void {
+  switch (dataType) {
+    case 'addCol':
+      controller.addCol(controller.getActiveCell().col, 1);
+      break;
+    case 'deleteCol':
+      controller.deleteCol(controller.getActiveCell().col, 1);
+      break;
+    case 'addRow':
+      controller.addRow(controller.getActiveCell().row, 1);
+      break;
+    case 'deleteRow':
+      controller.deleteRow(controller.getActiveCell().row, 1);
+      break;
+    case 'copy':
+    case 'cut':
+    case 'paste':
+      controller[dataType]();
+      break;
+    default:
+      throw new Error(`context menu unknown data type: ${dataType}`);
+  }
+}
 
 export const ContextMenuContainer: SmartComponent = (state, controller) => {
   const { contextMenuPosition } = state;
@@ -18,74 +44,77 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
     state.contextMenuPosition = undefined;
   };
   return h(
-    "div",
+    'div',
     {
-      className: "context-menu",
+      className: 'context-menu',
       style,
+      hook: {
+        ref(dom) {
+          setOutSideMap('canvas-context-menu', {
+            dom,
+            callback(stateValue) {
+              if (stateValue.contextMenuPosition !== undefined) {
+                stateValue.contextMenuPosition = undefined;
+              }
+            },
+          });
+        },
+      },
+      onclick(event) {
+        if (!event.target) {
+          return;
+        }
+        const node = event.target as HTMLElement;
+        const dataType = node.dataset['type'];
+        if (!dataType) {
+          return;
+        }
+        hideContextMenu();
+        handleClick(dataType, controller);
+      },
     },
     Button(
       {
-        onClick() {
-          controller.addCol(controller.getActiveCell().col, 1);
-          hideContextMenu();
-        },
+        dataType: 'addCol',
       },
-      "add a column"
+      'add a column',
     ),
     Button(
       {
-        onClick() {
-          controller.deleteCol(controller.getActiveCell().col, 1);
-          hideContextMenu();
-        },
+        dataType: 'deleteCol',
       },
-      "delete a column"
+      'delete a column',
     ),
     Button(
       {
-        onClick() {
-          controller.addRow(controller.getActiveCell().row, 1);
-          hideContextMenu();
-        },
+        dataType: 'addRow',
       },
-      "add a row"
+      'add a row',
     ),
     Button(
       {
-        onClick() {
-          controller.deleteRow(controller.getActiveCell().row, 1);
-          hideContextMenu();
-        },
+        dataType: 'deleteRow',
       },
-      "delete a row"
+      'delete a row',
     ),
     Button(
       {
-        onClick() {
-          controller.copy();
-          hideContextMenu();
-        },
+        dataType: 'copy',
       },
-      "copy"
+      'copy',
     ),
     Button(
       {
-        onClick() {
-          controller.cut();
-          hideContextMenu();
-        },
+        dataType: 'cut',
       },
-      "cut"
+      'cut',
     ),
     Button(
       {
-        onClick() {
-          controller.paste();
-          hideContextMenu();
-        },
+        dataType: 'paste',
       },
-      "paste"
-    )
+      'paste',
+    ),
   );
 };
-ContextMenuContainer.displayName = "ContextMenuContainer";
+ContextMenuContainer.displayName = 'ContextMenuContainer';

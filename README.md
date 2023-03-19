@@ -32,7 +32,9 @@ npm run start
 - Formulas
 - Insert row, column
 - Delete row, column
-- Multiple sheets
+- Add Sheet
+- Delete Sheet
+- Rename Sheet
 - Copy
 - Cut
 - Paste

@@ -11,7 +11,7 @@ import './global.css';
 import './containers/components/index.css';
 import './containers/index.css';
 
-export function initExcel(containerDom: HTMLDivElement) {
+export const initExcel = (containerDom: HTMLDivElement) => {
   const fontFamilyList = initFontFamilyList();
 
   initTheme(document.documentElement);
@@ -30,4 +30,4 @@ export function initExcel(containerDom: HTMLDivElement) {
   stateValue.fontFamilyList = fontFamilyList;
   setState();
   return initCanvas(stateValue, controller);
-}
+};

@@ -1,10 +1,11 @@
 export function assert(
   condition: boolean,
-  message = "assert error",
-  env = process.env.NODE_ENV
+  message = 'assert error',
+  env = process.env.NODE_ENV,
 ): asserts condition {
   if (!condition) {
-    if (env === "production") {
+    if (env === 'production') {
+      window.alert(message);
       console.error(message);
       return;
     }

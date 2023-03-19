@@ -11,7 +11,7 @@ export function isNumber(value: any): boolean {
     return false;
   }
   const temp = parseFloat(value);
-  return !window.isNaN(temp) && temp === Number(value);
+  return !window.isNaN(temp);
 }
 
 export function parseNumber(value: any): number {
@@ -32,16 +32,13 @@ export function parseNumberArray(list: any[]): number[] {
   return result;
 }
 
-export function getListMaxNum(list: string[] = [], prefix = ''): number {
+export function getListMaxNum(list: string[] = []): number {
   const idList: number[] = list
     .map((item) => {
-      if (isNumber(item) || prefix.length === 0) {
+      if (isNumber(item)) {
         return parseInt(item, 10);
       }
-      return parseInt(
-        item.includes(prefix) ? item.slice(prefix.length) : item,
-        10,
-      );
+      return 0;
     })
     .filter((v) => !isNaN(v));
   return Math.max(Math.max(...idList), 0);
@@ -50,13 +47,9 @@ export function getListMaxNum(list: string[] = [], prefix = ''): number {
 export function getDefaultSheetInfo(
   list: WorksheetType[] = [],
 ): Pick<WorksheetType, 'name' | 'sheetId'> {
-  const sheetNum = getListMaxNum(
-    list.map((item) => item.name),
-    SHEET_NAME_PREFIX,
-  );
   const sheetId = getListMaxNum(list.map((item) => item.sheetId)) + 1;
   return {
-    name: `${SHEET_NAME_PREFIX}${sheetNum + 1}`,
+    name: `${SHEET_NAME_PREFIX}${sheetId}`,
     sheetId: String(sheetId),
   };
 }
@@ -67,4 +60,4 @@ export function isTestEnv(): boolean {
 
 export function isDevEnv(): boolean {
   return process.env.NODE_ENV === 'development';
-}
+}

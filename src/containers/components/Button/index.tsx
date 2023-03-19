@@ -1,4 +1,4 @@
-import { h, FunctionComponent, CSSProperties } from '@/react';
+import { h, FunctionComponent, CSSProperties, VNodePropsData } from '@/react';
 import { classnames } from '@/util';
 
 export interface ButtonProps {
@@ -10,37 +10,35 @@ export interface ButtonProps {
   className?: string;
   title?: string;
   testId?: string;
+  dataType?: string;
 }
-
-const defaultClick: (event: MouseEvent) => void = () => {
-  console.log('add click event');
-};
 
 export const Button: FunctionComponent<ButtonProps> = (props, ...children) => {
   const {
     className = '',
-    onClick = defaultClick,
+    onClick,
     disabled = false,
     active = false,
     type = 'normal',
     style = {},
     testId = undefined,
     title = '',
+    dataType,
   } = props;
-  return h(
-    'div',
-    {
-      onclick: onClick,
-      className: classnames('button-wrapper', className, {
-        disabled,
-        active,
-        circle: type === 'circle',
-      }),
-      style,
-      title,
-      'data-testId': testId,
-    },
-    ...children,
-  );
+  const realProps: VNodePropsData = {
+    className: classnames('button-wrapper', className, {
+      disabled,
+      active,
+      circle: type === 'circle',
+    }),
+    style,
+    title,
+    'data-testId': testId,
+    'data-type': dataType,
+  };
+  if (onClick) {
+    realProps.onclick = onClick;
+  }
+  return h('div', realProps, ...children);
 };
 Button.displayName = 'Button';

@@ -11,7 +11,7 @@ describe('util.test.ts', () => {
       expect(getListMaxNum()).toEqual(0);
     });
     it('should convert array to 3', function () {
-      expect(getListMaxNum(['1', '3', 'test2'], 'test')).toEqual(3);
+      expect(getListMaxNum(['1', '3', 'test2'])).toEqual(3);
     });
   });
   describe('getDefaultSheetInfo', () => {
@@ -29,6 +29,7 @@ describe('util.test.ts', () => {
             sheetId: '3',
             rowCount: 30,
             colCount: 20,
+            isHide: false,
             activeCell: {
               row: 0,
               col: 0,
@@ -39,7 +40,7 @@ describe('util.test.ts', () => {
           },
         ]),
       ).toMatchObject({
-        name: 'Sheet1',
+        name: 'Sheet4',
         sheetId: '4',
       });
     });

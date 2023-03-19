@@ -43,6 +43,7 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
   return h('input', {
     className: 'base-editor',
     value: initValue,
+    type: 'text',
     style: isCellEditing ? getEditorStyle(activeCell) : undefined,
     hook: {
       ref,
