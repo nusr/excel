@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "ES6",
     "moduleResolution": "Node",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "strict": true,
@@ -26,6 +26,5 @@
     "removeComments": true,
     "declaration": true,
     "resolveJsonModule": true
-  },
-  "include": ["src", "scripts"]
+  }
 }

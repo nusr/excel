@@ -28,7 +28,7 @@
     "esbuild": "0.17.12",
     "jest": "29.5.0",
     "jest-environment-jsdom": "29.5.0",
-    "puppeteer": "18.2.1",
+    "puppeteer": "19.7.5",
     "typescript": "5.0.2"
   },
   "engines": {
