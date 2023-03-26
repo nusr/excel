@@ -33,6 +33,8 @@ export interface VNodePropsData extends EventListener {
   disabled?: boolean;
   title?: string;
   type?: string;
+  hidden?: boolean;
+  method?: string;
 }
 
 function addNs(node: VNode) {

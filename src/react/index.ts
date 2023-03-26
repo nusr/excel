@@ -36,7 +36,7 @@ export function render(container: Element, vNode: VNode): VNode {
   return temp;
 }
 
-export type { VNode, FunctionComponent } from './vNode';
+export type { VNode, FunctionComponent, Children } from './vNode';
 export { h } from './h';
 export type { VNodePropsData } from './h';
 export type { CSSProperties } from './modules/style';

@@ -82,6 +82,7 @@
   background-color: var(--backgroundColor);
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .sheet-bar-list {
@@ -110,6 +111,12 @@
   border: 1px solid var(--borderColor);
   border-radius: var(--borderRadius);
   width: 100px;
+}
+
+.sheet-bar-context-menu > button,
+.context-menu > button {
+  width: 100%;
+  background-color: var(--white);
 }
 
 .sheet-bar-input {
@@ -212,4 +219,11 @@
 }
 .sheet-bar-add {
   margin-left: var(--mediumPadding);
+}
+
+.width100 {
+  width: 100%;
+}
+.bgWhite {
+  background-color: var(--white);
 }

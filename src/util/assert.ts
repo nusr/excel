@@ -4,8 +4,10 @@ export function assert(
   env = process.env.NODE_ENV,
 ): asserts condition {
   if (!condition) {
-    if (env === 'production') {
+    if (env !== 'test') {
       window.alert(message);
+    }
+    if (env === 'production') {
       console.error(message);
       return;
     }

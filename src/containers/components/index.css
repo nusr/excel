@@ -20,6 +20,7 @@
   cursor: pointer;
   border-radius: var(--borderRadius);
   border: 1px solid transparent;
+  display: block;
 }
 
 .button-wrapper.circle {
@@ -109,4 +110,25 @@
 .color-picker-trigger.active {
   background-color: var(--buttonActiveColor);
   border-color: var(--activeBorderColor);
+}
+
+.dialog-element {
+  border: 1px solid var(--borderColor);
+  border-radius: var(--borderRadius);
+  padding: var(--mediumPadding);
+}
+
+.dialog-content {
+  padding-top: var(--mediumPadding);
+}
+
+.dialog-button {
+  padding-top: var(--mediumPadding);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.ml16 {
+  margin-left: var(--mediumPadding);
 }

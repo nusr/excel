@@ -18,7 +18,7 @@ export const Select: FunctionComponent<SelectProps> = (props) => {
     style = {},
     onChange,
     getItemStyle = () => ({}),
-    title = '',
+    title,
   } = props;
   const handleChange = (event: any) => {
     const { value } = event.target;

@@ -1,7 +1,7 @@
 import { h, SmartComponent, CSSProperties } from '@/react';
-import { Button } from '../components';
+import { Button, Dialog, Select } from '../components';
 import { setOutSideMap } from '@/canvas';
-import { IController, StoreValue } from '@/types';
+import { IController, OptionItem, StoreValue } from '@/types';
 
 const defaultStyle: CSSProperties = {
   display: 'none',
@@ -15,14 +15,15 @@ function handleClick(
     case 'addSheet':
     case 'deleteSheet':
     case 'hideSheet':
-    case 'unhideSheet':
       controller[dataType]();
+      break;
+    case 'unhideSheet':
       break;
     case 'renameSheet':
       state.isSheetNameEditing = true;
       break;
     default:
-    // throw new Error(`sheet bar context menu unknown data type: ${dataType}`);
+      throw new Error(`sheet bar context menu unknown data type: ${dataType}`);
   }
 }
 
@@ -33,9 +34,17 @@ export const SheetBarContextMenu: SmartComponent = (state, controller) => {
       : {
           left: `${state.sheetBarContextMenuLeft}px`,
         };
+  const hideSheetList = controller.getSheetList().filter((v) => v.isHide);
+  const optionList: OptionItem[] = hideSheetList.map((item) => ({
+    value: item.sheetId,
+    label: item.name,
+    disabled: false,
+  }));
+  let selectValue = String(optionList?.[0]?.value || '');
   const hideContextMenu = () => {
     state.sheetBarContextMenuLeft = undefined;
   };
+
   return h(
     'div',
     {
@@ -60,6 +69,9 @@ export const SheetBarContextMenu: SmartComponent = (state, controller) => {
         const node = event.target as HTMLElement;
         const dataType = node.dataset['type'];
         if (!dataType) {
+          return;
+        }
+        if (dataType === 'unhideSheet') {
           return;
         }
         hideContextMenu();
@@ -90,12 +102,35 @@ export const SheetBarContextMenu: SmartComponent = (state, controller) => {
       },
       'Hide',
     ),
-    // Button(
-    //   {
-    //     dataType: 'unhideSheet',
-    //   },
-    //   'Unhide',
-    // ),
+    Dialog(
+      {
+        dialogContent: Select({
+          data: optionList,
+          onChange(value) {
+            selectValue = String(value);
+          },
+          style: {
+            width: '300px',
+          },
+          value: undefined,
+        }),
+        title: 'Unhide sheet:',
+        onOk() {
+          controller.unhideSheet(selectValue);
+          hideContextMenu();
+          selectValue = '';
+        },
+        onCancel: hideContextMenu,
+      },
+      Button(
+        {
+          dataType: 'unhideSheet',
+          className: 'width100 bgWhite',
+          disabled: optionList.length === 0,
+        },
+        'Unhide',
+      ),
+    ),
   );
 };
 SheetBarContextMenu.displayName = 'SheetBarContextMenu';

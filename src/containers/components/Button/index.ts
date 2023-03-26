@@ -11,6 +11,7 @@ export interface ButtonProps {
   title?: string;
   testId?: string;
   dataType?: string;
+  buttonType?: string;
 }
 
 export const Button: FunctionComponent<ButtonProps> = (props, ...children) => {
@@ -22,8 +23,9 @@ export const Button: FunctionComponent<ButtonProps> = (props, ...children) => {
     type = 'normal',
     style = {},
     testId = undefined,
-    title = '',
+    title,
     dataType,
+    buttonType,
   } = props;
   const realProps: VNodePropsData = {
     className: classnames('button-wrapper', className, {
@@ -35,10 +37,11 @@ export const Button: FunctionComponent<ButtonProps> = (props, ...children) => {
     title,
     'data-testId': testId,
     'data-type': dataType,
+    type: buttonType,
   };
   if (onClick) {
     realProps.onclick = onClick;
   }
-  return h('div', realProps, ...children);
+  return h('button', realProps, ...children);
 };
 Button.displayName = 'Button';

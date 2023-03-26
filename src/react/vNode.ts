@@ -16,8 +16,10 @@ export interface VNode {
   key: Key | undefined;
 }
 
+export type Children = VNode | string | number;
+
 export interface FunctionComponent<T = {}> {
-  (props: T, ...children: Array<VNode | string | number>): VNode;
+  (props: T, ...children: Array<Children>): VNode;
   displayName: string;
 }
 

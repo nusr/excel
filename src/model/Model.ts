@@ -103,8 +103,17 @@ export class Model implements IModel {
     let lastIndex = 0;
     if (index === 0) {
       lastIndex = index + 1;
+      while (
+        lastIndex <= this.workbook.length - 2 &&
+        this.workbook[lastIndex].isHide
+      ) {
+        lastIndex++;
+      }
     } else {
       lastIndex = index - 1;
+      while (lastIndex >= 1 && this.workbook[lastIndex].isHide) {
+        lastIndex--;
+      }
     }
     return {
       index,
@@ -112,8 +121,9 @@ export class Model implements IModel {
     };
   }
   deleteSheet(sheetId?: string): void {
+    const list = this.workbook.filter((v) => !v.isHide);
     assert(
-      this.workbook.length >= 2,
+      list.length >= 2,
       'A workbook must contains at least on visible worksheet',
     );
     const { index, lastIndex } = this.getSheetIndex(sheetId);
@@ -121,14 +131,19 @@ export class Model implements IModel {
     this.workbook.splice(index, 1);
   }
   hideSheet(sheetId?: string | undefined): void {
+    const list = this.workbook.filter((v) => !v.isHide);
+    assert(
+      list.length >= 2,
+      'A workbook must contains at least on visible worksheet',
+    );
     const { index, lastIndex } = this.getSheetIndex(sheetId);
     this.workbook[index].isHide = true;
     this.currentSheetId = this.workbook[lastIndex].sheetId;
   }
   unhideSheet(sheetId?: string | undefined): void {
-    const { index, lastIndex } = this.getSheetIndex(sheetId);
+    const { index } = this.getSheetIndex(sheetId);
     this.workbook[index].isHide = false;
-    this.currentSheetId = this.workbook[lastIndex].sheetId;
+    this.currentSheetId = this.workbook[index].sheetId;
   }
   renameSheet(sheetName: string, sheetId?: string | undefined): void {
     assert(!!sheetName, 'You typed a invalid name for a sheet.');

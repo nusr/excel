@@ -33,7 +33,7 @@ export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
   if ((window as any).queryLocalFonts) {
     list.push({
       value: QUERY_ALL_LOCAL_FONT,
-      label: '--> query all local fonts',
+      label: '--> get all installed fonts',
       disabled: false,
     });
   }
