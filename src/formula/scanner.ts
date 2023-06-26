@@ -66,14 +66,33 @@ export class Scanner {
     const text = this.list.slice(this.start + 1, this.current - 1).join('');
     this.tokens.push(new Token(TokenType.STRING, text));
   }
-  private number() {
+  private allDigit() {
     while (!this.isAtEnd() && this.isDigit(this.peek())) {
       this.next();
     }
-    if (this.match('.')) {
-      while (!this.isAtEnd() && this.isDigit(this.peek())) {
-        this.next();
+  }
+  private number() {
+    this.allDigit()
+    if (this.match('E')) {
+      // 1E-10 1E+10
+      if (this.match('+') || this.match('-')) {
+        this.allDigit()
+        this.addToken(TokenType.NUMBER);
+        return
       }
+      throw new CustomError('#VALUE!');
+    }
+    if (this.match('.')) {
+      this.allDigit()
+    }
+    if (this.match('E')) {
+      // 1E-10 1E+10
+      if (this.match('+') || this.match('-')) {
+        this.allDigit()
+        this.addToken(TokenType.NUMBER);
+        return
+      }
+      throw new CustomError('#VALUE!');
     }
     this.addToken(TokenType.NUMBER);
   }
@@ -165,7 +184,7 @@ export class Scanner {
         break;
       case ' ':
         // while (!this.isAtEnd() && this.peek() === ' ') {
-          // this.next();
+        // this.next();
         // }
         // this.addToken(TokenType.EMPTY_CHAR);
         break;

@@ -5,22 +5,28 @@ describe("parseFormula variable", () => {
     expect(parseFormula("TRUE")).toEqual({
       result: true,
       error: null,
+      expressionStr: 'TRUE'
     });
     expect(parseFormula("FALSE")).toEqual({
       result: false,
       error: null,
+      expressionStr: "FALSE"
     });
   });
-  it("should evaluate custom variables", () => {
+  it('not found', () => {
     expect(parseFormula("foo")).toEqual({
       result: null,
       error: "#NAME?",
+      expressionStr: ''
     });
+  })
+  it("should evaluate custom variables", () => {
     const temp = new VariableMapImpl()
     temp.set("foo", "222");
     expect(parseFormula("foo", undefined, temp)).toEqual({
       result: "222",
       error: null,
+      expressionStr: 'foo'
     });
   });
 });

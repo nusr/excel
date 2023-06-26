@@ -6,9 +6,9 @@ describe('arithmetic expressions', function () {
     ['1', [getToken(TokenType.NUMBER, '1')]],
     ['1.5', [getToken(TokenType.NUMBER, '1.5')]],
     ['11.55', [getToken(TokenType.NUMBER, '11.55')]],
-    // ['1E-1', [['1E-1', 'operand', 'number']]],
-    // ['1.5E-10', [['1.5E-10', 'operand', 'number']]],
-    // ['1.55E+100', [['1.55E+100', 'operand', 'number']]],
+    ['1E-1', [getToken(TokenType.NUMBER, '1E-1')]],
+    ['1.5E-10', [getToken(TokenType.NUMBER, '1.5E-10')]],
+    ['1.55E+100', [getToken(TokenType.NUMBER, '1.55E+100')]],
     [
       '1+2',
       [

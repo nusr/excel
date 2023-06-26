@@ -1,8 +1,7 @@
-import { Range, mergeRange, parseCell } from '@/util';
+import { Range, mergeRange, parseCell, getFunctionName } from '@/util';
 import {
   TokenType,
   CellDataMap,
-  ErrorTypes,
   VariableMap,
   FormulaData,
 } from '@/types';
@@ -18,8 +17,7 @@ import {
   CellExpression,
   CallExpression,
   LiteralExpression,
-  ErrorExpression,
-  DefineNameExpression,
+  TokenExpression,
   GroupExpression,
 } from './expression';
 import { CustomError } from './formula';
@@ -115,8 +113,7 @@ export class Interpreter implements Visitor {
     }
   }
   visitCallExpression(expr: CallExpression) {
-    const funcName = expr.name.value.toUpperCase();
-    const callee: any = this.functionMap[funcName];
+    const callee = this.evaluate(expr.name)
     if (callee && typeof callee === 'function') {
       const params: any[] = [];
       for (const item of expr.params) {
@@ -152,16 +149,18 @@ export class Interpreter implements Visitor {
     }
     return t;
   }
-  visitErrorExpression(data: ErrorExpression) {
-    throw new CustomError(data.value.value as ErrorTypes);
-  }
   visitLiteralExpression(expr: LiteralExpression) {
     const { type, value } = expr.value;
     switch (type) {
       case TokenType.STRING:
         return value;
-      case TokenType.NUMBER:
-        return parseFloat(value);
+      case TokenType.NUMBER: {
+        const t = parseFloat(value);
+        if (isNaN(t)) {
+          throw new CustomError('#VALUE!');
+        }
+        return t;
+      }
       case TokenType.TRUE:
         return true;
       case TokenType.FALSE:
@@ -170,12 +169,16 @@ export class Interpreter implements Visitor {
         throw new CustomError('#ERROR!');
     }
   }
-  visitDefineNameExpression(expr: DefineNameExpression) {
-    if (!this.variableMap.has(expr.value.value)) {
-      throw new CustomError('#NAME?');
+  visitTokenExpression(expr: TokenExpression) {
+    const name = expr.value.value;
+    const funcName = getFunctionName(name)
+    if (this.functionMap[funcName]) {
+      return this.functionMap[funcName]
     }
-    const result = this.variableMap.get(expr.value.value);
-    return result;
+    if (this.variableMap.has(name)) {
+      return this.variableMap.get(name);
+    }
+    throw new CustomError('#NAME?');
   }
   visitUnaryExpression(data: UnaryExpression): any {
     const value = this.evaluate(data.right);
@@ -192,7 +195,7 @@ export class Interpreter implements Visitor {
     if (expr instanceof CellExpression) {
       return expr;
     }
-    if (expr instanceof DefineNameExpression) {
+    if (expr instanceof TokenExpression) {
       return new CellExpression(
         new Token(TokenType.IDENTIFIER, expr.value.value.toUpperCase()),
         'relative',

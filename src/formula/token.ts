@@ -9,4 +9,7 @@ export class Token {
   error() {
     return `type:${this.type},value:${this.value}`;
   }
+  toString(): string {
+    return this.value;
+  }
 }

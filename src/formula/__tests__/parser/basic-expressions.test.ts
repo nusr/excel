@@ -2,6 +2,7 @@ import {
   BinaryExpression,
   UnaryExpression,
   LiteralExpression,
+  PostUnaryExpression,
 } from '../../expression';
 import { Token } from '../../token';
 import { TokenType } from '../../../types';
@@ -16,15 +17,15 @@ describe('basic expressions', function () {
     );
   });
 
-  // it('1E-2', function () {
-  // const tree = buildTree(tokenizer('1E-2'));
-  // expect(tree).toEqual(builder.numberLiteral(0.01));
-  // });
+  it('1E-2', function () {
+    const tree = buildTree('1E-2');
+    expect(tree).toEqual(new LiteralExpression(new Token(TokenType.NUMBER, '1E-2')),);
+  });
 
-  // it('10%', function () {
-  // const tree = buildTree(tokenizer('10%'));
-  // expect(tree).toEqual(builder.numberLiteral(0.1));
-  // });
+  it('10%', function () {
+    const tree = buildTree('10%');
+    expect(tree).toEqual(new PostUnaryExpression(new Token(TokenType.PERCENT, '%'), new LiteralExpression(new Token(TokenType.NUMBER, '10'))))
+  });
 
   it('-1', function () {
     const tree = buildTree('-1');
@@ -102,7 +103,7 @@ describe('basic expressions', function () {
       new BinaryExpression(
         new LiteralExpression(new Token(TokenType.STRING, 'a')),
         new Token(TokenType.CONCATENATE, '&'),
-         new LiteralExpression(new Token(TokenType.STRING, 'b')),
+        new LiteralExpression(new Token(TokenType.STRING, 'b')),
       ),
     );
   });
@@ -114,7 +115,7 @@ describe('basic expressions', function () {
       new BinaryExpression(
         new LiteralExpression(new Token(TokenType.NUMBER, '1')),
         new Token(TokenType.NOT_EQUAL, '<>'),
-         new LiteralExpression(new Token(TokenType.STRING, 'b')),
+        new LiteralExpression(new Token(TokenType.STRING, 'b')),
       ),
     );
   });

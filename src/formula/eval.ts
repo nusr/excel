@@ -8,6 +8,7 @@ import {
   VariableMap,
   FormulaData,
 } from '@/types';
+import { getFunctionName } from '@/util';
 
 export function parseFormula(
   source: string,
@@ -15,30 +16,45 @@ export function parseFormula(
   variableMap: VariableMap = new VariableMapImpl(),
   functionMap: FormulaData = formulas,
 ): InterpreterResult {
+  let expressionStr = '';
   try {
     const list = new Scanner(source).scan();
-    const expressions = new Parser(list).parse();
+    const isFunc = (value: string): boolean => {
+      const name = getFunctionName(value);
+      return Boolean(functionMap[name]);
+    };
+    const expressions = new Parser(list, isFunc).parse();
     const result = new Interpreter(
       expressions,
       cellData,
       variableMap,
       functionMap,
     ).interpret();
+
+    const strList: string[] = [];
+    for (const item of expressions) {
+      strList.push(item.toString());
+    }
+    expressionStr = strList.join('');
+
     return {
       result: result,
       error: null,
+      expressionStr,
     };
   } catch (error) {
     if (error instanceof CustomError) {
       return {
         result: null,
         error: error.value,
+        expressionStr,
       };
     }
   }
   return {
     result: null,
     error: '#ERROR!',
+    expressionStr,
   };
 }
 

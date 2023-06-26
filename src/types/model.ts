@@ -59,6 +59,7 @@ export type WorkBookJSON = {
   mergeCells: IRange[];
   customHeight: Record<string, CustomHeightOrWidthItem>;
   customWidth: Record<string, CustomHeightOrWidthItem>;
+  customVariable: Record<string, ResultType>
 };
 
 export interface IModel extends IBaseModel {

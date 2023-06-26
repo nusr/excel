@@ -5,7 +5,9 @@ declare global {
 }
 
 async function setupPuppeteer() {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: "new"
+  });
   global.page = await browser.newPage();
 }
 

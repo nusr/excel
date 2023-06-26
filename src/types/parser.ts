@@ -54,6 +54,7 @@ export interface VariableMap {
 export type InterpreterResult = {
   result: any;
   error: ErrorTypes | null;
+  expressionStr: string;
 };
 
 export type ReferenceType = 'absolute' | 'mixed' | 'relative';

@@ -1,5 +1,6 @@
 import type { Token } from './token';
 import type { ReferenceType } from '@/types';
+import { TokenType } from '@/types'
 
 export interface Visitor {
   visitBinaryExpression(expr: BinaryExpression): any;
@@ -9,9 +10,8 @@ export interface Visitor {
   visitCellExpression(expr: CellExpression): any;
   visitCellRangeExpression(expr: CellRangeExpression): any;
   visitCallExpression(expr: CallExpression): any;
-  visitErrorExpression(expr: ErrorExpression): any;
   visitGroupExpression(expr: GroupExpression): any;
-  visitDefineNameExpression(expr: DefineNameExpression): any;
+  visitTokenExpression(expr: TokenExpression): any;
 }
 
 export interface Expression {
@@ -31,8 +31,18 @@ export class BinaryExpression implements Expression {
   accept(visitor: Visitor) {
     return visitor.visitBinaryExpression(this);
   }
+  private handleConcatenate(value: Expression): string {
+    const result = value.toString()
+    const check = this.operator.type === TokenType.CONCATENATE && value instanceof LiteralExpression && value.value.type === TokenType.STRING;
+    if (check) {
+      return JSON.stringify(result);
+    }
+    return result;
+  }
   toString(): string {
-    return '';
+    const left = this.handleConcatenate(this.left)
+    const right = this.handleConcatenate(this.right)
+    return `${left}${this.operator.toString()}${right}`
   }
 }
 
@@ -47,7 +57,7 @@ export class UnaryExpression implements Expression {
     return visitor.visitUnaryExpression(this);
   }
   toString(): string {
-    return '';
+    return this.operator.toString() + this.right.toString()
   }
 }
 
@@ -62,7 +72,7 @@ export class PostUnaryExpression implements Expression {
     return visitor.visitPostUnaryExpression(this);
   }
   toString(): string {
-    return '';
+    return this.left.toString() + this.operator.toString()
   }
 }
 
@@ -75,7 +85,7 @@ export class LiteralExpression implements Expression {
     return visitor.visitLiteralExpression(this);
   }
   toString(): string {
-    return '';
+    return this.value.toString()
   }
 }
 
@@ -92,14 +102,18 @@ export class CellExpression implements Expression {
     return visitor.visitCellExpression(this);
   }
   toString(): string {
-    return '';
+    if (this.sheetName) {
+      return this.sheetName.toString() + '!' + this.value.toString()
+    } else {
+      return this.value.toString()
+    }
   }
 }
 
 export class CallExpression implements Expression {
-  readonly name: Token;
+  readonly name: Expression;
   readonly params: Expression[];
-  constructor(name: Token, params: Expression[]) {
+  constructor(name: Expression, params: Expression[]) {
     this.name = name;
     this.params = params;
   }
@@ -107,19 +121,7 @@ export class CallExpression implements Expression {
     return visitor.visitCallExpression(this);
   }
   toString(): string {
-    return '';
-  }
-}
-export class ErrorExpression implements Expression {
-  readonly value: Token;
-  constructor(value: Token) {
-    this.value = value;
-  }
-  accept(visitor: Visitor): any {
-    return visitor.visitErrorExpression(this);
-  }
-  toString(): string {
-    return '';
+    return `${this.name.toString()}(${this.params.map(item => item.toString()).join(',')})`
   }
 }
 export class CellRangeExpression implements Expression {
@@ -135,7 +137,7 @@ export class CellRangeExpression implements Expression {
     return visitor.visitCellRangeExpression(this);
   }
   toString(): string {
-    return '';
+    return this.left.toString() + this.operator.toString() + this.right.toString()
   }
 }
 
@@ -148,19 +150,19 @@ export class GroupExpression implements Expression {
     return visitor.visitGroupExpression(this);
   }
   toString(): string {
-    return '';
+    return `(${this.value.toString()})`
   }
 }
 
-export class DefineNameExpression implements Expression {
+export class TokenExpression implements Expression {
   readonly value: Token;
   constructor(value: Token) {
     this.value = value;
   }
   accept(visitor: Visitor) {
-    return visitor.visitDefineNameExpression(this);
+    return visitor.visitTokenExpression(this);
   }
   toString(): string {
-    return '';
+    return this.value.toString()
   }
 }

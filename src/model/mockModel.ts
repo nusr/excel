@@ -37,18 +37,18 @@ export const MOCK_MODEL: WorkBookJSON = {
       0: {
         0: {
           value: '',
-          formula: '=SUM(1, SUM(1,2))',
+          // formula: '1',
           style: {
             fontColor: '#ff0000',
           },
         },
         1: {
           value: '',
-          formula: '=SUM(1,4)',
+          formula: '=foo',
         },
         2: {
           value: '',
-          formula: '=SUM(A1)',
+          // formula: '3',
         },
         3: {
           value: '超大字',
@@ -92,7 +92,7 @@ export const MOCK_MODEL: WorkBookJSON = {
     2: {
       0: {
         0: {
-          formula: '=Sheet1!A1',
+          // formula: '=Sheet1!A1',
         },
       },
     },
@@ -116,4 +116,7 @@ export const MOCK_MODEL: WorkBookJSON = {
       1: 100,
     },
   },
+  customVariable: {
+    'foo': 1
+  }
 };
