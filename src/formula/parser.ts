@@ -1,4 +1,4 @@
-import { TokenType, ErrorTypes, ReferenceType } from '@/types';
+import { TokenType, ErrorTypes } from '@/types';
 import { Token } from './token';
 import {
   TokenExpression,
@@ -9,13 +9,11 @@ import {
 import {
   BinaryExpression,
   UnaryExpression,
-  CellExpression,
   CallExpression,
   LiteralExpression,
   CellRangeExpression,
 } from './expression';
 import { CustomError } from './formula';
-import { getFunctionName } from '@/util'
 
 const errorSet = new Set<ErrorTypes>([
   '#ERROR!',
@@ -28,14 +26,11 @@ const errorSet = new Set<ErrorTypes>([
   '#NAME?',
 ]);
 
-
 export class Parser {
   private readonly tokens: Token[];
   private current = 0;
-  private isFunctionName: (value: string) => boolean;
-  constructor(tokens: Token[], isFunctionName: (value: string) => boolean) {
+  constructor(tokens: Token[]) {
     this.tokens = tokens;
-    this.isFunctionName = isFunctionName;
   }
   parse() {
     const result: Expression[] = [];
@@ -114,13 +109,13 @@ export class Parser {
     let expr = this.cellRange();
     if (this.match(TokenType.PERCENT)) {
       const operator = this.previous();
-      expr = new PostUnaryExpression(operator, expr)
+      expr = new PostUnaryExpression(operator, expr);
     }
-    return expr
+    return expr;
   }
   private cellRange(): Expression {
     let expr = this.call();
-    while (this.match(TokenType.COLON)) {
+    while (this.match(TokenType.COLON, TokenType.EXCLAMATION)) {
       const operator = this.previous();
       const right = this.call();
       expr = new CellRangeExpression(expr, operator, right);
@@ -145,18 +140,13 @@ export class Parser {
       do {
         // fix SUM(1,)
         if (this.peek().type == TokenType.RIGHT_BRACKET) {
-          break
+          break;
         }
         params.push(this.expression());
       } while (this.match(TokenType.COMMA));
     }
     this.expect(TokenType.RIGHT_BRACKET);
     return new CallExpression(name, params);
-  }
-  private addCellExpression(value: Token, type: ReferenceType, sheetName: Token | null) {
-    value.value = value.value.toUpperCase()
-    const result = new CellExpression(value, type, sheetName);
-    return result;
   }
   private primary(): Expression {
     if (this.match(TokenType.LEFT_BRACKET)) {
@@ -177,39 +167,39 @@ export class Parser {
 
     if (this.match(TokenType.IDENTIFIER)) {
       const name = this.previous();
-      const { value, type } = name;
-      const realValue = value.toUpperCase();
+      const realValue = name.value.toUpperCase();
       if (errorSet.has(realValue as ErrorTypes)) {
         throw new CustomError(realValue as ErrorTypes);
       }
-      if (this.match(TokenType.EXCLAMATION)) {
-        const expr = this.expression();
-        if (expr instanceof CellExpression) {
-          return this.addCellExpression(expr.value, expr.type, name);
-        }
-        throw new CustomError('#REF!');
-      }
-      const newToken = new Token(type, realValue);
-      if (this.isFunctionName(realValue)) {
-        return new TokenExpression(new Token(type, getFunctionName(realValue)))
-      }
-      if (/^[a-z]+$/i.test(value)) {
-        return new TokenExpression(name);
-      }
-      if (
-        /^\$[A-Z]+\$\d+$/.test(realValue) ||
-        /^\$[A-Z]+$/.test(realValue) ||
-        /^\$\d+$/.test(realValue)
-      ) {
-        return this.addCellExpression(newToken, 'absolute', null);
-      }
-      if (/^\$[A-Z]+\d+$/.test(realValue) || /^[A-Z]+\$\d+$/.test(realValue)) {
-        return this.addCellExpression(newToken, 'mixed', null);
-      }
-      if (/^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue)) {
-        return this.addCellExpression(newToken, 'relative', null);
-      }
+      // if (this.match(TokenType.EXCLAMATION)) {
+      //   const expr = this.expression();
+      //   if (expr instanceof TokenExpression) {
+      //     return this.addCellExpression(expr.value, expr.type, name);
+      //   }
+      //   throw new CustomError('#REF!');
+      // }
       return new TokenExpression(name);
+      // const newToken = new Token(type, realValue);
+      // if (this.isFunctionName(realValue)) {
+      //   return new TokenExpression(new Token(type, getFunctionName(realValue)))
+      // }
+      // if (/^[a-z]+$/i.test(value)) {
+      //   return new TokenExpression(name);
+      // }
+      // if (
+      //   /^\$[A-Z]+\$\d+$/.test(realValue) ||
+      //   /^\$[A-Z]+$/.test(realValue) ||
+      //   /^\$\d+$/.test(realValue)
+      // ) {
+      //   return this.addCellExpression(newToken, 'absolute', null);
+      // }
+      // if (/^\$[A-Z]+\d+$/.test(realValue) || /^[A-Z]+\$\d+$/.test(realValue)) {
+      //   return this.addCellExpression(newToken, 'mixed', null);
+      // }
+      // if (/^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue)) {
+      //   return this.addCellExpression(newToken, 'relative', null);
+      // }
+      // return new TokenExpression(name);
     }
 
     throw new CustomError('#ERROR!');

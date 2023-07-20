@@ -1,6 +1,6 @@
 import type { Token } from './token';
 import type { ReferenceType } from '@/types';
-import { TokenType } from '@/types'
+import { TokenType } from '@/types';
 
 export interface Visitor {
   visitBinaryExpression(expr: BinaryExpression): any;
@@ -32,17 +32,20 @@ export class BinaryExpression implements Expression {
     return visitor.visitBinaryExpression(this);
   }
   private handleConcatenate(value: Expression): string {
-    const result = value.toString()
-    const check = this.operator.type === TokenType.CONCATENATE && value instanceof LiteralExpression && value.value.type === TokenType.STRING;
+    const result = value.toString();
+    const check =
+      this.operator.type === TokenType.CONCATENATE &&
+      value instanceof LiteralExpression &&
+      value.value.type === TokenType.STRING;
     if (check) {
       return JSON.stringify(result);
     }
     return result;
   }
   toString(): string {
-    const left = this.handleConcatenate(this.left)
-    const right = this.handleConcatenate(this.right)
-    return `${left}${this.operator.toString()}${right}`
+    const left = this.handleConcatenate(this.left);
+    const right = this.handleConcatenate(this.right);
+    return `${left}${this.operator.toString()}${right}`;
   }
 }
 
@@ -57,7 +60,7 @@ export class UnaryExpression implements Expression {
     return visitor.visitUnaryExpression(this);
   }
   toString(): string {
-    return this.operator.toString() + this.right.toString()
+    return this.operator.toString() + this.right.toString();
   }
 }
 
@@ -72,7 +75,7 @@ export class PostUnaryExpression implements Expression {
     return visitor.visitPostUnaryExpression(this);
   }
   toString(): string {
-    return this.left.toString() + this.operator.toString()
+    return this.left.toString() + this.operator.toString();
   }
 }
 
@@ -85,7 +88,7 @@ export class LiteralExpression implements Expression {
     return visitor.visitLiteralExpression(this);
   }
   toString(): string {
-    return this.value.toString()
+    return this.value.toString();
   }
 }
 
@@ -103,9 +106,9 @@ export class CellExpression implements Expression {
   }
   toString(): string {
     if (this.sheetName) {
-      return this.sheetName.toString() + '!' + this.value.toString()
+      return this.sheetName.toString() + '!' + this.value.toString();
     } else {
-      return this.value.toString()
+      return this.value.toString();
     }
   }
 }
@@ -121,7 +124,9 @@ export class CallExpression implements Expression {
     return visitor.visitCallExpression(this);
   }
   toString(): string {
-    return `${this.name.toString()}(${this.params.map(item => item.toString()).join(',')})`
+    return `${this.name.toString().toUpperCase()}(${this.params
+      .map((item) => item.toString())
+      .join(',')})`;
   }
 }
 export class CellRangeExpression implements Expression {
@@ -137,7 +142,9 @@ export class CellRangeExpression implements Expression {
     return visitor.visitCellRangeExpression(this);
   }
   toString(): string {
-    return this.left.toString() + this.operator.toString() + this.right.toString()
+    return (
+      this.left.toString() + this.operator.toString() + this.right.toString()
+    );
   }
 }
 
@@ -150,7 +157,7 @@ export class GroupExpression implements Expression {
     return visitor.visitGroupExpression(this);
   }
   toString(): string {
-    return `(${this.value.toString()})`
+    return `(${this.value.toString()})`;
   }
 }
 
@@ -163,6 +170,6 @@ export class TokenExpression implements Expression {
     return visitor.visitTokenExpression(this);
   }
   toString(): string {
-    return this.value.toString()
+    return this.value.toString();
   }
 }

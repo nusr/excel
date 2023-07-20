@@ -1,9 +1,10 @@
-import { Range, mergeRange, parseCell, getFunctionName } from '@/util';
+import { Range, mergeRange, parseCell } from '@/util';
 import {
   TokenType,
   CellDataMap,
   VariableMap,
   FormulaData,
+  ReferenceType,
 } from '@/types';
 import type {
   Visitor,
@@ -113,7 +114,7 @@ export class Interpreter implements Visitor {
     }
   }
   visitCallExpression(expr: CallExpression) {
-    const callee = this.evaluate(expr.name)
+    const callee = this.evaluate(expr.name);
     if (callee && typeof callee === 'function') {
       const params: any[] = [];
       for (const item of expr.params) {
@@ -142,7 +143,7 @@ export class Interpreter implements Visitor {
     }
     const t = parseCell(data.value.value);
     if (t === null) {
-      throw new CustomError('#REF!');
+      throw new CustomError('#NAME?');
     }
     if (sheetId) {
       t.sheetId = sheetId;
@@ -169,15 +170,42 @@ export class Interpreter implements Visitor {
         throw new CustomError('#ERROR!');
     }
   }
+  private addCellExpression(
+    value: Token,
+    type: ReferenceType,
+    sheetName: Token | null,
+  ) {
+    value.value = value.value.toUpperCase();
+    const result = new CellExpression(value, type, sheetName);
+    return this.visitCellExpression(result);
+  }
+
   visitTokenExpression(expr: TokenExpression) {
-    const name = expr.value.value;
-    const funcName = getFunctionName(name)
+    const { value, type } = expr.value;
+    const defineName = value.toLowerCase();
+    if (this.variableMap.has(defineName)) {
+      return this.variableMap.get(defineName);
+    }
+    const funcName = value.toUpperCase();
     if (this.functionMap[funcName]) {
-      return this.functionMap[funcName]
+      return this.functionMap[funcName];
     }
-    if (this.variableMap.has(name)) {
-      return this.variableMap.get(name);
+    const realValue = funcName;
+    const newToken = new Token(type, realValue);
+    if (
+      /^\$[A-Z]+\$\d+$/.test(realValue) ||
+      /^\$[A-Z]+$/.test(realValue) ||
+      /^\$\d+$/.test(realValue)
+    ) {
+      return this.addCellExpression(newToken, 'absolute', null);
     }
+    if (/^\$[A-Z]+\d+$/.test(realValue) || /^[A-Z]+\$\d+$/.test(realValue)) {
+      return this.addCellExpression(newToken, 'mixed', null);
+    }
+    if (/^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue)) {
+      return this.addCellExpression(newToken, 'relative', null);
+    }
+
     throw new CustomError('#NAME?');
   }
   visitUnaryExpression(data: UnaryExpression): any {
@@ -226,16 +254,28 @@ export class Interpreter implements Visitor {
           const b = this.visitCellExpression(right);
           const result = mergeRange(a, b);
           if (result === null) {
-            throw new CustomError('#VALUE!');
+            throw new CustomError('#NAME?');
           }
           return result;
         } else {
-          throw new CustomError('#REF!');
+          throw new CustomError('#NAME?');
         }
         break;
       }
+      case TokenType.EXCLAMATION: {
+        const right = this.convertToCellExpression(expr.right);
+        if (right === null) {
+          throw new CustomError('#REF!');
+        }
+        if (expr.left instanceof TokenExpression) {
+          return this.visitCellExpression(
+            new CellExpression(right.value, right.type, expr.left.value),
+          );
+        }
+        throw new CustomError('#NAME?');
+      }
       default:
-        throw new CustomError('#REF!');
+        throw new CustomError('#NAME?');
     }
   }
   visitGroupExpression(expr: GroupExpression): any {

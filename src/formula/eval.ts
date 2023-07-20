@@ -8,7 +8,6 @@ import {
   VariableMap,
   FormulaData,
 } from '@/types';
-import { getFunctionName } from '@/util';
 
 export function parseFormula(
   source: string,
@@ -19,11 +18,7 @@ export function parseFormula(
   let expressionStr = '';
   try {
     const list = new Scanner(source).scan();
-    const isFunc = (value: string): boolean => {
-      const name = getFunctionName(value);
-      return Boolean(functionMap[name]);
-    };
-    const expressions = new Parser(list, isFunc).parse();
+    const expressions = new Parser(list).parse();
     const result = new Interpreter(
       expressions,
       cellData,

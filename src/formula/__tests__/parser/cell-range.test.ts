@@ -1,6 +1,5 @@
 import { buildTree } from './util';
 import {
-  CellExpression,
   CellRangeExpression,
   TokenExpression,
   LiteralExpression,
@@ -13,11 +12,7 @@ describe('cell ranges', function () {
     const tree = buildTree('A1');
 
     expect(tree).toEqual(
-      new CellExpression(
-        new Token(TokenType.IDENTIFIER, 'A1'),
-        'relative',
-        null,
-      ),
+      new TokenExpression(new Token(TokenType.IDENTIFIER, 'A1')),
     );
   });
 
@@ -25,7 +20,7 @@ describe('cell ranges', function () {
     const tree = buildTree('A$1');
 
     expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.IDENTIFIER, 'A$1'), 'mixed', null),
+      new TokenExpression(new Token(TokenType.IDENTIFIER, 'A$1')),
     );
   });
 
@@ -33,7 +28,7 @@ describe('cell ranges', function () {
     const tree = buildTree('$A1');
 
     expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.IDENTIFIER, '$A1'), 'mixed', null),
+      new TokenExpression(new Token(TokenType.IDENTIFIER, '$A1')),
     );
   });
 
@@ -41,18 +36,14 @@ describe('cell ranges', function () {
     const tree = buildTree('$a1');
 
     expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.IDENTIFIER, '$A1'), 'mixed', null),
+      new TokenExpression(new Token(TokenType.IDENTIFIER, '$a1')),
     );
   });
 
   it('$A$1', function () {
     const tree = buildTree('$A$1');
     expect(tree).toEqual(
-      new CellExpression(
-        new Token(TokenType.IDENTIFIER, '$A$1'),
-        'absolute',
-        null,
-      ),
+      new TokenExpression(new Token(TokenType.IDENTIFIER, '$A$1')),
     );
   });
 
@@ -61,17 +52,9 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(
-          new Token(TokenType.IDENTIFIER, 'A1'),
-          'relative',
-          null,
-        ),
+        new TokenExpression(new Token(TokenType.IDENTIFIER, 'A1')),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(
-          new Token(TokenType.IDENTIFIER, 'A4'),
-          'relative',
-          null,
-        ),
+        new TokenExpression(new Token(TokenType.IDENTIFIER, 'A4')),
       ),
     );
   });
@@ -81,17 +64,9 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(
-          new Token(TokenType.IDENTIFIER, '$A1'),
-          'mixed',
-          null,
-        ),
+        new TokenExpression(new Token(TokenType.IDENTIFIER, '$A1')),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(
-          new Token(TokenType.IDENTIFIER, 'A$4'),
-          'mixed',
-          null,
-        ),
+        new TokenExpression(new Token(TokenType.IDENTIFIER, 'A$4')),
       ),
     );
   });
@@ -101,17 +76,9 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(
-          new Token(TokenType.IDENTIFIER, '$A$1'),
-          'absolute',
-          null,
-        ),
+        new TokenExpression(new Token(TokenType.IDENTIFIER, '$A$1')),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(
-          new Token(TokenType.IDENTIFIER, '$A$4'),
-          'absolute',
-          null,
-        ),
+        new TokenExpression(new Token(TokenType.IDENTIFIER, '$A$4')),
       ),
     );
   });
@@ -132,11 +99,7 @@ describe('cell ranges', function () {
 
     expect(tree).toEqual(
       new CellRangeExpression(
-        new CellExpression(
-          new Token(TokenType.IDENTIFIER, '$1'),
-          'absolute',
-          null,
-        ),
+        new TokenExpression(new Token(TokenType.IDENTIFIER, '$1')),
         new Token(TokenType.COLON, ':'),
         new LiteralExpression(new Token(TokenType.NUMBER, '4')),
       ),
@@ -162,11 +125,7 @@ describe('cell ranges', function () {
       new CellRangeExpression(
         new TokenExpression(new Token(TokenType.IDENTIFIER, 'C')),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(
-          new Token(TokenType.IDENTIFIER, '$G'),
-          'absolute',
-          null,
-        ),
+        new TokenExpression(new Token(TokenType.IDENTIFIER, '$G')),
       ),
     );
   });
@@ -178,11 +137,7 @@ describe('cell ranges', function () {
       new CellRangeExpression(
         new TokenExpression(new Token(TokenType.IDENTIFIER, 'C')),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(
-          new Token(TokenType.IDENTIFIER, 'G5'),
-          'relative',
-          null,
-        ),
+        new TokenExpression(new Token(TokenType.IDENTIFIER, 'G5')),
       ),
     );
   });
@@ -194,13 +149,8 @@ describe('cell ranges', function () {
       new CellRangeExpression(
         new LiteralExpression(new Token(TokenType.NUMBER, '5')),
         new Token(TokenType.COLON, ':'),
-        new CellExpression(
-          new Token(TokenType.IDENTIFIER, 'D5'),
-          'relative',
-          null,
-        ),
+        new TokenExpression(new Token(TokenType.IDENTIFIER, 'D5')),
       ),
     );
   });
-
 });

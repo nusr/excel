@@ -61,13 +61,3 @@ export function isTestEnv(): boolean {
 export function isDevEnv(): boolean {
   return process.env.NODE_ENV === 'development';
 }
-
-export function getFunctionName(value: string): string {
-  if (!value) {
-    return ''
-  }
-  if (value[0] === '@') {
-    return value.toUpperCase().slice(1)
-  }
-  return value.toUpperCase();
-}

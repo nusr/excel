@@ -21,7 +21,7 @@ describe('function calls', function () {
     const tree = buildTree('sum()');
 
     expect(tree).toEqual(
-      new CallExpression(new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')), []),
+      new CallExpression(new TokenExpression(new Token(TokenType.IDENTIFIER, 'sum')), []),
     );
   });
 
