@@ -25,15 +25,17 @@ export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
     const fontList = JSON.parse(cacheFont) as string[];
     return fontList.map((v) => ({ value: v, label: v, disabled: false }));
   }
-  const list = fontList.map((v) => ({
-    label: v,
-    value: v,
-    disabled: !isSupportFontFamily(v),
-  }));
+  const list = fontList
+    .map((v) => ({
+      label: v,
+      value: v,
+      disabled: !isSupportFontFamily(v),
+    }))
+    .filter((v) => !v.disabled);
   if ((window as any).queryLocalFonts) {
     list.push({
       value: QUERY_ALL_LOCAL_FONT,
-      label: '--> get all installed fonts',
+      label: '--> get all local installed fonts',
       disabled: false,
     });
   }

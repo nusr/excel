@@ -10,7 +10,7 @@ describe('ToolbarContainer.test.ts', () => {
       ToolbarContainer(DEFAULT_STORE_VALUE, initController()),
     );
     expect(
-      document.body.querySelector('.toolbar-wrapper')!.childNodes.length,
+      document.body.querySelector('[data-test-id="toolbar"]')!.childNodes.length,
     ).toBeGreaterThanOrEqual(3);
   });
 });

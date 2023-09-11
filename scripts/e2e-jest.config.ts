@@ -1,12 +1,11 @@
-import * as path from 'path'
+import * as path from 'path';
 
-const transformPath = path.join(__dirname, 'transform.js');;
 const rootDir = path.join(process.cwd());
 export default {
   rootDir,
   testEnvironment: 'node',
   transform: {
-    '^.+\\.tsx?$': transformPath,
+    '^.+\\.tsx?$': path.join(__dirname, 'transform.js'),
   },
   testMatch: ['<rootDir>/e2e/**/*.test.[jt]s?(x)'],
   collectCoverage: false,

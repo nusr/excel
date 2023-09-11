@@ -1,5 +1,6 @@
 import { h, FunctionComponent, CSSProperties, VNodePropsData } from '@/react';
 import { classnames } from '@/util';
+import styles from './index.module.css';
 
 export interface ButtonProps {
   type?: 'normal' | 'circle';
@@ -28,10 +29,10 @@ export const Button: FunctionComponent<ButtonProps> = (props, ...children) => {
     buttonType,
   } = props;
   const realProps: VNodePropsData = {
-    className: classnames('button-wrapper', className, {
-      disabled,
-      active,
-      circle: type === 'circle',
+    className: classnames(styles.buttonWrapper, className, {
+      [styles['disabled']]: disabled,
+      [styles['active']]: active,
+      [styles['circle']]: type === 'circle',
     }),
     style,
     title,

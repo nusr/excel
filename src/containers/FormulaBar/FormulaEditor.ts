@@ -6,6 +6,7 @@ import {
   DEFAULT_FONT_SIZE,
   isEmpty,
 } from '@/util';
+import styles from './index.module.css';
 
 function getEditorStyle(data: ActiveCellType): CSSProperties | undefined {
   const { style } = data;
@@ -41,7 +42,7 @@ export const FormulaEditor: SmartComponent = (state, controller) => {
     controller.setMainDom({ input: inputDom });
   };
   return h('input', {
-    className: 'base-editor',
+    className: styles['base-editor'],
     value: initValue,
     type: 'text',
     style: isCellEditing ? getEditorStyle(activeCell) : undefined,

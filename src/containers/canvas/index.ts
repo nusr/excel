@@ -2,6 +2,8 @@ import { h, SmartComponent } from '@/react';
 import { IController, ScrollStatus } from '@/types';
 import { SCROLL_SIZE, getHitInfo } from '@/util';
 import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
+import styles from './index.module.css';
+
 const DOUBLE_CLICK_TIME = 300;
 function scrollBar(controller: IController, scrollX: number, scrollY: number) {
   const oldScroll = controller.getScroll();
@@ -72,10 +74,11 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
   return h(
     'div',
     {
-      className: 'relative canvas-container',
+      className: styles['canvas-container'],
+      'data-testId': 'canvas-container',
     },
     h('canvas', {
-      className: 'full canvas-content',
+      className: styles['canvas-content'],
       hook: {
         ref(dom) {
           const canvas = dom as HTMLCanvasElement;
@@ -207,7 +210,7 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
     h(
       'div',
       {
-        className: 'vertical-scroll-bar',
+        className: styles['vertical-scroll-bar'],
         style: {
           top: headerSize.height,
         },
@@ -223,7 +226,7 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
         },
       },
       h('div', {
-        className: 'vertical-scroll-bar-content',
+        className: styles['vertical-scroll-bar-content'],
         style: {
           height: SCROLL_SIZE,
           transform: `translateY(${scrollData.scrollTop}px)`,
@@ -233,7 +236,7 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
     h(
       'div',
       {
-        className: 'horizontal-scroll-bar',
+        className: styles['horizontal-scroll-bar'],
         style: {
           left: headerSize.width,
         },
@@ -249,7 +252,7 @@ export const CanvasContainer: SmartComponent = (state, controller) => {
         },
       },
       h('div', {
-        className: 'horizontal-scroll-bar-content',
+        className: styles['horizontal-scroll-bar-content'],
         style: {
           width: SCROLL_SIZE,
           transform: `translateX(${scrollData.scrollLeft}px)`,

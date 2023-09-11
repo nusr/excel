@@ -1,5 +1,7 @@
 import { h, FunctionComponent } from '@/react';
 
+import styles from './index.module.css';
+
 const pathStyle = {
   'transform-origin': '130px 106px',
 };
@@ -12,12 +14,12 @@ export const Github: FunctionComponent = () => {
       'aria-label': 'View source on Github',
       target: '_blank',
       rel: 'noreferrer',
-      title: 'github link'
+      title: 'github link',
     },
     h(
       'svg',
       {
-        className: 'github-wrapper',
+        className: styles.githubWrapper,
         viewBox: '0 0 250 250',
         'aria-hidden': true,
       },

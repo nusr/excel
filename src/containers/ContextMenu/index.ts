@@ -2,6 +2,7 @@ import { h, SmartComponent, CSSProperties } from '@/react';
 import { Button } from '../components';
 import { setOutSideMap } from '@/canvas';
 import { IController } from '@/types';
+import styles from './index.module.css'
 
 const defaultStyle: CSSProperties = {
   display: 'none',
@@ -46,7 +47,8 @@ export const ContextMenuContainer: SmartComponent = (state, controller) => {
   return h(
     'div',
     {
-      className: 'context-menu',
+      className: styles['context-menu'],
+      "data-testId": 'context-menu',
       style,
       hook: {
         ref(dom) {

@@ -1,0 +1,10 @@
+.githubWrapper {
+  color: rgb(255, 255, 255);
+  position: absolute;
+  top: 0px;
+  border: 0px;
+  right: 0px;
+  fill: var(--primaryColor);
+  height: 40px;
+  width: 40px;
+}

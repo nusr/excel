@@ -1,5 +1,7 @@
 import { h, FunctionComponent, CSSProperties } from '@/react';
 import { classnames } from '@/util';
+import styles from './index.module.css';
+
 export type ColorPickerProps = {
   color: string;
   style?: CSSProperties;
@@ -47,8 +49,6 @@ const COLOR_LIST = [
   NO_FILL,
 ];
 
-const baseClassName = 'color-picker-wrapper';
-
 export const ColorPicker: FunctionComponent<ColorPickerProps> = (
   props,
   ...children
@@ -56,23 +56,23 @@ export const ColorPicker: FunctionComponent<ColorPickerProps> = (
   const { color, style = {}, onChange, key } = props;
   let ref: Element;
   const toggleVisible = (value: boolean) => {
-    let className = baseClassName;
+    let className = styles['color-picker-wrapper'];
     if (value) {
-      className = className + ' ' + 'show';
+      className = styles['color-picker-wrapper'] + ' ' + styles['show'];
     }
     ref.className = className;
   };
   return h(
     'div',
     {
-      className: 'relative color-picker',
+      className: styles['color-picker'],
       key,
       style: style,
     },
     h(
       'div',
       {
-        className: 'color-picker-trigger',
+        className: styles['color-picker-trigger'],
         style: {
           color,
         },
@@ -86,7 +86,7 @@ export const ColorPicker: FunctionComponent<ColorPickerProps> = (
     h(
       'div',
       {
-        className: baseClassName,
+        className: styles['color-picker-wrapper'],
         hook: {
           ref: (dom) => {
             ref = dom;
@@ -99,15 +99,15 @@ export const ColorPicker: FunctionComponent<ColorPickerProps> = (
       h(
         'div',
         {
-          className: 'color-picker-list',
+          className: styles['color-picker-list'],
         },
         ...COLOR_LIST.map((item) =>
           h(
             'div',
             {
               key: item,
-              className: classnames('color-picker-item', {
-                'no-fill': item === NO_FILL,
+              className: classnames(styles['color-picker-item'], {
+                [styles['no-fill']]: item === NO_FILL,
               }),
               style: {
                 backgroundColor: item,

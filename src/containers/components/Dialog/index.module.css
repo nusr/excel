@@ -1,0 +1,20 @@
+.dialog-element {
+  border: 1px solid var(--borderColor);
+  border-radius: var(--borderRadius);
+  padding: var(--mediumPadding);
+}
+
+.dialog-content {
+  padding-top: var(--mediumPadding);
+}
+
+.dialog-button {
+  padding-top: var(--mediumPadding);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.dialog-cancel {
+  margin-left: var(--mediumPadding);
+}

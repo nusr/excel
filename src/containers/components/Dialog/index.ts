@@ -1,6 +1,7 @@
 import { h, FunctionComponent, Children, CSSProperties } from '@/react';
 import { assert } from '@/util';
 import { Button } from '../Button';
+import styles from './index.module.css';
 
 export interface DialogProps {
   dialogContent: Children;
@@ -16,11 +17,11 @@ export const Dialog: FunctionComponent<DialogProps> = (props, ...children) => {
   let ref: HTMLDialogElement;
   return h(
     'div',
-    { className: 'dialog-container' },
+    { className: styles['dialog-container'] },
     h(
       'dialog',
       {
-        className: 'dialog-element',
+        className: styles['dialog-element'],
         style: dialogStyle,
         hook: {
           ref(dom) {
@@ -36,21 +37,21 @@ export const Dialog: FunctionComponent<DialogProps> = (props, ...children) => {
         h(
           'div',
           {
-            className: 'dialog-title',
+            className: styles['dialog-title'],
           },
           title,
         ),
         h(
           'div',
           {
-            className: 'dialog-content',
+            className: styles['dialog-content'],
           },
           dialogContent,
         ),
         h(
           'div',
           {
-            className: 'dialog-button',
+            className: styles['dialog-button'],
           },
           Button(
             {
@@ -67,7 +68,7 @@ export const Dialog: FunctionComponent<DialogProps> = (props, ...children) => {
                 onOk && onOk();
               },
               buttonType: 'submit',
-              className: 'ml16',
+              className: styles['dialog-cancel'],
             },
             'Confirm',
           ),

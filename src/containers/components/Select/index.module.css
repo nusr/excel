@@ -1,0 +1,16 @@
+.selectList {
+  width: 80px;
+  color: #000;
+}
+.selectItem {
+  font-size: var(--font);
+  cursor: pointer;
+}
+.selectItem.disabled {
+  background-color: #fff;
+  cursor: not-allowed;
+  color: var(--disabledColor);
+}
+.selectItem.disabled:hover {
+  background-color: #fff;
+}

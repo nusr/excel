@@ -10,10 +10,10 @@ describe('FormulaBarContainer.test.ts', () => {
       FormulaBarContainer(DEFAULT_STORE_VALUE, initController()),
     );
     expect(
-      document.body.querySelector('.formula-bar-name')!.textContent,
+      document.body.querySelector('[data-test-id="formula-bar-name"]')!.textContent,
     ).toEqual('A1');
     expect(
-      document.body.querySelector('.formula-bar-wrapper')!.childNodes,
+      document.body.querySelector('[data-test-id="formula-bar"]')!.childNodes,
     ).toHaveLength(2);
   });
 });

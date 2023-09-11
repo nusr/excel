@@ -16,6 +16,7 @@ import {
   isSupportFontFamily,
 } from '@/util';
 import { StyleType, EUnderLine, OptionItem } from '@/types';
+import styles from './index.module.css'
 
 const underlineList: OptionItem[] = [
   {
@@ -61,7 +62,8 @@ export const ToolbarContainer: SmartComponent = (state, controller) => {
   return h(
     'div',
     {
-      className: 'toolbar-wrapper',
+      className: styles['toolbar-wrapper'],
+      "data-testId": 'toolbar'
     },
     Button(
       {

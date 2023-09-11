@@ -17,7 +17,7 @@ describe('ContextMenuContainer.test.ts', () => {
     };
     render(document.body, ContextMenuContainer(state, initController()));
     expect(
-      document.body.querySelector('.context-menu')!.childNodes,
+      document.body.querySelector('[data-test-id="context-menu"]')!.childNodes,
     ).toHaveLength(7);
   });
 });

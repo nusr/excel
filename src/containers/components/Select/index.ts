@@ -1,6 +1,7 @@
 import { h, CSSProperties, FunctionComponent } from '@/react';
 import { classnames } from '@/util';
 import { OptionItem } from '@/types';
+import styles from './index.module.css';
 
 export type SelectProps = {
   value?: string | number;
@@ -31,7 +32,7 @@ export const Select: FunctionComponent<SelectProps> = (props) => {
       value: activeValue,
       style,
       name: 'select',
-      className: 'select-list',
+      className: styles.selectList,
       title,
     },
     ...data.map((item) => {
@@ -46,7 +47,9 @@ export const Select: FunctionComponent<SelectProps> = (props) => {
           value,
           style: itemStyle,
           disabled: !!disabled,
-          className: classnames('select-item', { disabled }),
+          className: classnames(styles.selectItem, {
+            [styles['disabled']]: disabled,
+          }),
         },
         label,
       );

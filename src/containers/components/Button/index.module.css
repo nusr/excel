@@ -1,0 +1,25 @@
+.buttonWrapper {
+  padding: 0 4px;
+  min-width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  border-radius: var(--borderRadius);
+  border: 1px solid transparent;
+  display: block;
+}
+
+.buttonWrapper.circle {
+  border-radius: 50%;
+}
+.buttonWrapper.disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+.buttonWrapper:hover,
+.buttonWrapper.active {
+  background-color: var(--buttonActiveColor);
+  border-color: var(--activeBorderColor);
+}

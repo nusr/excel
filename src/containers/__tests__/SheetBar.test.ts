@@ -10,7 +10,7 @@ describe('SheetBarContainer.test.ts', () => {
       SheetBarContainer(DEFAULT_STORE_VALUE, initController()),
     );
     expect(
-      document.body.querySelector('.sheet-bar-list')!.childNodes,
+      document.body.querySelector('[data-test-id="sheet-bar-list"]')!.childNodes,
     ).toHaveLength(0);
   });
 });

@@ -10,10 +10,10 @@ describe('CanvasContainer.test.ts', () => {
       CanvasContainer(DEFAULT_STORE_VALUE, initController()),
     );
     expect(
-      document.body.querySelector('.canvas-container')!.childNodes,
+      document.body.querySelector('[data-test-id="canvas-container"]')!.childNodes,
     ).toHaveLength(3);
     expect(
-      document.body.querySelector('.canvas-container')!.firstChild!.nodeName,
+      document.body.querySelector('[data-test-id="canvas-container"]')!.firstChild!.nodeName,
     ).toEqual('CANVAS');
   });
 });

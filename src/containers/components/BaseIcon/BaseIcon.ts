@@ -1,5 +1,6 @@
 import { h, FunctionComponent } from '@/react';
 import { classnames } from '@/util';
+import styles from './BaseIcon.module.css';
 
 type PathItem = {
   d: string;
@@ -18,7 +19,7 @@ export const BaseIcon: FunctionComponent<BaseIconProps> = ({
   return h(
     'svg',
     {
-      className: classnames('base-icon', className),
+      className: classnames(styles.baseIcon, className),
       viewBox: '0 0 1137 1024',
       'aria-hidden': true,
     },

@@ -8,8 +8,6 @@ import {
   initFontFamilyList,
 } from './init';
 import './global.css';
-import './containers/components/index.css';
-import './containers/index.css';
 
 export const initExcel = (containerDom: HTMLDivElement) => {
   const fontFamilyList = initFontFamilyList();

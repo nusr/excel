@@ -1,15 +1,14 @@
 import * as path from 'path';
 
 const rootDir = process.cwd();
-const transformPath = path.join(__dirname, 'transform.js');
-console.log('rootDir:', rootDir);
 
 export default {
   rootDir,
   testEnvironment: 'jsdom',
   testMatch: ['<rootDir>/src/**/*.test.[jt]s?(x)'],
   transform: {
-    '^.+\\.tsx?$': transformPath,
+    '^.+\\.css$': path.join(__dirname, 'transform-css.js'),
+    '^.+\\.(ts|tsx)$': path.join(__dirname, 'transform.js'),
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',

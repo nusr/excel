@@ -2,6 +2,7 @@ import { h, SmartComponent, CSSProperties } from '@/react';
 import { Button, Dialog, Select } from '../components';
 import { setOutSideMap } from '@/canvas';
 import { IController, OptionItem, StoreValue } from '@/types';
+import styles from './index.module.css'
 
 const defaultStyle: CSSProperties = {
   display: 'none',
@@ -48,7 +49,7 @@ export const SheetBarContextMenu: SmartComponent = (state, controller) => {
   return h(
     'div',
     {
-      className: 'sheet-bar-context-menu',
+      className: styles['sheet-bar-context-menu'],
       style,
       hook: {
         ref(dom) {
@@ -125,7 +126,7 @@ export const SheetBarContextMenu: SmartComponent = (state, controller) => {
       Button(
         {
           dataType: 'unhideSheet',
-          className: 'width100 bgWhite',
+          className: styles['sheet-bar-unhide'],
           disabled: optionList.length === 0,
         },
         'Unhide',

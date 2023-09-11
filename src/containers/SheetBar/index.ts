@@ -3,6 +3,7 @@ import { classnames } from '@/util';
 import { theme } from '@/util';
 import { Button, Icon } from '../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
+import styles from './index.module.css';
 
 export const SheetBarContainer: SmartComponent = (state, controller) => {
   const setSheetName = (sheetName: string) => {
@@ -12,12 +13,13 @@ export const SheetBarContainer: SmartComponent = (state, controller) => {
   return h(
     'div',
     {
-      className: 'sheet-bar-wrapper',
+      className: styles['sheet-bar-wrapper'],
     },
     h(
       'div',
       {
-        className: 'sheet-bar-list',
+        className: styles['sheet-bar-list'],
+        "data-testId": 'sheet-bar-list'
       },
       ...state.sheetList.map((item) => {
         const isActive = state.currentSheetId === item.value;
@@ -26,8 +28,8 @@ export const SheetBarContainer: SmartComponent = (state, controller) => {
           'div',
           {
             key: item.value,
-            className: classnames('sheet-bar-item', {
-              active: isActive,
+            className: classnames(styles['sheet-bar-item'], {
+              [styles['sheet-bar-item-active']]: isActive,
             }),
             onclick: () => {
               controller.setCurrentSheetId(String(item.value));
@@ -40,8 +42,8 @@ export const SheetBarContainer: SmartComponent = (state, controller) => {
           },
           h('input', {
             value: item.label,
-            className: classnames('sheet-bar-input', {
-              show: showInput,
+            className: classnames(styles['sheet-bar-input'], {
+              [styles['show-block']]: showInput,
             }),
             onblur(event) {
               if (!event.currentTarget) {
@@ -62,8 +64,8 @@ export const SheetBarContainer: SmartComponent = (state, controller) => {
           h(
             'span',
             {
-              className: classnames('sheet-bar-item-text', {
-                show: !showInput,
+              className: classnames(styles['sheet-bar-item-text'], {
+                [styles['show-block']]: !showInput,
               }),
             },
             item.label,
@@ -74,7 +76,7 @@ export const SheetBarContainer: SmartComponent = (state, controller) => {
     h(
       'div',
       {
-        className: 'sheet-bar-add',
+        className: styles['sheet-bar-add'],
       },
       Button(
         {

@@ -1,0 +1,54 @@
+.formula-bar-wrapper {
+  width: 100%;
+  box-sizing: border-box;
+  height: 42px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--backgroundColor);
+}
+
+.formula-bar-name {
+  border: 1px solid var(--gridStrokeColor);
+  width: 100px;
+  height: 21px;
+  line-height: 21px;
+  margin-right: 10px;
+  margin-left: 5px;
+  border-radius: 2px;
+  text-align: center;
+  background-color: var(--white);
+  user-select: none;
+}
+
+.formula-bar-editor-wrapper {
+  border: 1px solid var(--gridStrokeColor);
+  flex: 1;
+  height: 21px;
+  border-radius: 2px;
+  background-color: var(--white);
+}
+
+.formula-bar-value {
+  padding: 0 4px;
+  display: none;
+}
+
+.formula-bar-value.show {
+  display: block;
+}
+
+
+.base-editor {
+  width: 100%;
+  padding: 0 4px;
+  margin: 0;
+  border: none;
+  border-radius: unset;
+  outline: none;
+  font: inherit;
+  overflow: hidden;
+  position: fixed;
+  box-sizing: border-box;
+  z-index: 1;
+}

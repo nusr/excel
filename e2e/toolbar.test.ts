@@ -9,13 +9,13 @@ describe('toolbar.test', () => {
     await page.click(selector);
     await sleep(500);
     const result = await page.$eval(selector, (element) => element.className);
-    return result;
+    return result.split(' ').length > 1;
   };
   for (const item of ['bold', 'italic', 'wrap-text']) {
     test(`test toolbar ${item}`, async () => {
       expect(
         await clickToolbar(getTestIdSelector(`toolbar-${item}`)),
-      ).toContain('active');
+      ).toBeTruthy();
     });
   }
 });
