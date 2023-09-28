@@ -28,6 +28,7 @@ export default {
     'json-summary',
     'html-spa',
   ],
+  
   moduleNameMapper: {
     '@/(.*)': '<rootDir>/src/$1',
   },

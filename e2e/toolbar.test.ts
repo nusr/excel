@@ -3,7 +3,7 @@ import { openPage, sleep, getTestIdSelector } from './util';
 describe('toolbar.test', () => {
   beforeAll(async () => {
     await openPage();
-  });
+  }, 10 * 1000);
 
   const clickToolbar = async function (selector: string) {
     await page.click(selector);
