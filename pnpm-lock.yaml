@@ -18,8 +18,8 @@ devDependencies:
     specifier: 29.7.0
     version: 29.7.0
   puppeteer:
-    specifier: 21.3.5
-    version: 21.3.5(typescript@5.2.2)
+    specifier: 21.3.6
+    version: 21.3.6(typescript@5.2.2)
   typescript:
     specifier: 5.2.2
     version: 5.2.2
@@ -2506,7 +2506,7 @@ packages:
       whatwg-encoding: 2.0.0
       whatwg-mimetype: 3.0.0
       whatwg-url: 11.0.0
-      ws: 8.14.1
+      ws: 8.14.2
       xml-name-validator: 4.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -2883,8 +2883,8 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /puppeteer-core@21.3.5:
-    resolution: {integrity: sha512-C/yVgvob/HbUVTedhnURDruFkJYHEqJWlb6YltJGj/T7yzWdG4ouQ0JER8aX5g2RS4DMQ0xMNuhUVYMqC2QfnQ==}
+  /puppeteer-core@21.3.6:
+    resolution: {integrity: sha512-ZH6tjTdRXwW2fx5W3jBbG+yUVQdDfZW1kjfwvWwMzsnKEli5ZwV70Zp97GOebHQHrK8zM3vX5VqI9sd48c9PnQ==}
     engines: {node: '>=16.3.0'}
     dependencies:
       '@puppeteer/browsers': 1.7.1
@@ -2900,14 +2900,14 @@ packages:
       - utf-8-validate
     dev: true
 
-  /puppeteer@21.3.5(typescript@5.2.2):
-    resolution: {integrity: sha512-Lff7dgN7D1AHnPBgceZiZpcXVpKOcnSCtBy+TZlwqYBumGapOky3/rUPScd6I6poh5XpPNzya6gbipBasAs7xA==}
+  /puppeteer@21.3.6(typescript@5.2.2):
+    resolution: {integrity: sha512-ulK9+KLvdaVsG0EKbKyw/DCXCz88rsnrvIJg9tY8AmkGR01AxI4ZJTH9BJl1OE7cLfh2vxjBvY+xfvJod6rfgw==}
     engines: {node: '>=16.3.0'}
     requiresBuild: true
     dependencies:
       '@puppeteer/browsers': 1.7.1
       cosmiconfig: 8.3.6(typescript@5.2.2)
-      puppeteer-core: 21.3.5
+      puppeteer-core: 21.3.6
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -3354,19 +3354,6 @@ packages:
     dependencies:
       imurmurhash: 0.1.4
       signal-exit: 3.0.7
-    dev: true
-
-  /ws@8.14.1:
-    resolution: {integrity: sha512-4OOseMUq8AzRBI/7SLMUwO+FEDnguetSk7KMb1sHwvF2w2Wv5Hoj0nlifx8vtGsftE/jWHojPy8sMMzYLJ2G/A==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
     dev: true
 
   /ws@8.14.2:
