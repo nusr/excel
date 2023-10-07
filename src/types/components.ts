@@ -28,17 +28,6 @@ export type ScrollValue = {
 
 export type ActiveCellType = ModelCellType & Coordinate & CanvasOverlayPosition;
 
-export interface StoreValue {
-  sheetList: OptionItem[];
-  currentSheetId: string;
-  activeCell: ActiveCellType;
-  isCellEditing: boolean;
-  fontFamilyList: OptionItem[];
-  contextMenuPosition: CanvasOverlayPosition | undefined;
-  sheetBarContextMenuLeft: number | undefined;
-  isSheetNameEditing: boolean;
-}
-
 export type Point = [x: number, y: number];
 
 export enum ScrollStatus {

@@ -24,5 +24,5 @@ export async function openPage() {
 }
 
 export function getTestIdSelector(testId: string) {
-  return `[data-test-id="${testId}"]`
+  return `[data-testid="${testId}"]`
 }

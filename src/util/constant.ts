@@ -1,10 +1,11 @@
-import { ErrorTypes, StoreValue } from '@/types';
+import { ErrorTypes } from '@/types';
 export const SHEET_NAME_PREFIX = 'Sheet';
 export const DEFAULT_ROW_COUNT = 200;
 export const DEFAULT_COL_COUNT = 30;
-export const TEST_ID_KEY = 'data-test-id';
+export const TEST_ID_KEY = 'data-testid';
 export const SCROLL_SIZE = 30;
 export const BOTTOM_BUFF = 200;
+export const DEFAULT_POSITION = -999;
 export const DEBUG_COLOR_LIST = [
   '#0000CC',
   '#0000FF',
@@ -96,7 +97,7 @@ export const ERROR_SET = new Set<ErrorTypes>([
   '#NAME?',
 ]);
 
-export const DEFAULT_STORE_VALUE: StoreValue = {
+export const DEFAULT_STORE_VALUE = {
   sheetList: [],
   currentSheetId: '',
   isCellEditing: false,

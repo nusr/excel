@@ -105,7 +105,7 @@ export class Controller implements IController {
   }
   setActiveCell(range: IRange): void {
     this.setSheetCell(range);
-    this.changeSet.add('selection');
+    this.changeSet.add('setActiveCell');
     this.emitChange();
   }
   setCurrentSheetId(id: string): void {
@@ -113,12 +113,15 @@ export class Controller implements IController {
       return;
     }
     this.model.setCurrentSheetId(id);
+    this.changeSet.add('currentSheetId');
     const pos = this.getActiveCell();
     this.setSheetCell(pos);
     this.computeViewSize();
     this.setScroll(this.getScroll());
   }
   addSheet = (): void => {
+    this.changeSet.add('sheetList');
+    this.changeSet.add('currentSheetId');
     this.model.addSheet();
     this.setSheetCell({
       row: 0,
@@ -139,31 +142,33 @@ export class Controller implements IController {
   };
   deleteSheet = (sheetId?: string): void => {
     this.model.deleteSheet(sheetId);
-    this.changeSet.add('content');
+    this.changeSet.add('sheetList');
     this.emitChange();
   };
   hideSheet(sheetId?: string | undefined): void {
     this.model.hideSheet(sheetId);
-    this.changeSet.add('content');
+    this.changeSet.add('sheetList');
     this.emitChange();
   }
   unhideSheet(sheetId?: string | undefined): void {
     this.model.unhideSheet(sheetId);
-    this.changeSet.add('content');
+    this.changeSet.add('sheetList');
     this.emitChange();
   }
   renameSheet(sheetName: string, sheetId?: string | undefined): void {
     this.model.renameSheet(sheetName, sheetId);
-    this.changeSet.add('content');
+    this.changeSet.add('sheetList');
     this.emitChange();
   }
   fromJSON(json: WorkBookJSON): void {
     controllerLog('loadJSON', json);
     this.model.fromJSON(json);
     const activeCell = this.getActiveCell();
+    this.changeSet.add('sheetList');
+    this.changeSet.add('currentSheetId');
+    this.changeSet.add('setActiveCell');
     this.setSheetCell(activeCell);
     this.computeViewSize();
-    this.changeSet.add('content');
     this.emitChange();
   }
   toJSON(): WorkBookJSON {
@@ -175,9 +180,8 @@ export class Controller implements IController {
     style: Partial<StyleType>[][],
     ranges: IRange[],
   ): void {
-    controllerLog('setCellValue', value);
     this.model.setCellValues(value, style, ranges);
-    this.changeSet.add('content');
+    this.changeSet.add('setCellValues');
     this.emitChange();
   }
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
@@ -185,7 +189,7 @@ export class Controller implements IController {
       return;
     }
     this.model.setCellStyle(style, ranges);
-    this.changeSet.add('content');
+    this.changeSet.add('setCellStyle');
     this.emitChange();
   }
   getCell = (range: IRange) => {
@@ -200,12 +204,14 @@ export class Controller implements IController {
   }
   undo() {
     this.model.undo();
-    this.changeSet.add('content');
+    this.changeSet.add('setCellValues');
+    this.changeSet.add('setCellStyle');
     this.emitChange();
   }
   redo() {
     this.model.redo();
-    this.changeSet.add('content');
+    this.changeSet.add('setCellValues');
+    this.changeSet.add('setCellStyle');
     this.emitChange();
   }
   getColWidth(col: number): number {
@@ -359,7 +365,7 @@ export class Controller implements IController {
       colCount,
     };
     this.model.setCellValues(list, [], [range]);
-    this.changeSet.add('content');
+    this.changeSet.add('setCellValues');
     this.setActiveCell(range);
   }
   private parseHTML(htmlString: string) {
@@ -405,7 +411,8 @@ export class Controller implements IController {
       colCount,
     };
     this.model.setCellValues(result, resultStyle, [range]);
-    this.changeSet.add('content');
+    this.changeSet.add('setCellValues');
+    this.changeSet.add('setCellStyle');
     this.setActiveCell(range);
   }
   async paste(event?: ClipboardEvent) {
@@ -493,7 +500,7 @@ export class Controller implements IController {
     } else {
       this.hooks.copy(data);
     }
-    this.changeSet.add('selection');
+    this.changeSet.add('antLine');
     this.emitChange();
   }
   cut(event?: ClipboardEvent) {

@@ -1,7 +1,5 @@
 # Online Excel
 
-Zero dependencies
-
 [![CI](https://github.com/nusr/excel/actions/workflows/main.yml/badge.svg)](https://github.com/nusr/excel/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/nusr/excel/branch/main/graph/badge.svg?token=ZOC8RHD3Z1)](https://codecov.io/gh/nusr/excel)
 ![GitHub](https://img.shields.io/github/license/nusr/excel.svg)

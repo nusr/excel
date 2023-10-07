@@ -1,6 +1,6 @@
 import type { IHitInfo, IController } from '@/types';
 export function getHitInfo(
-  event: MouseEvent,
+  event: React.MouseEvent<HTMLCanvasElement>,
   controller: IController,
 ): IHitInfo | null {
   const canvasSize = controller.getDomRect();

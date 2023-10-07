@@ -21,7 +21,7 @@
   user-select: none;
 }
 
-.sheet-bar-item-active {
+.sheet-bar-item.active {
   background-color: var(--white);
   color: var(--primaryColor);
 }
@@ -47,14 +47,10 @@
   overflow: hidden;
   z-index: 1;
   background-color: var(--white);
-  display: none;
   outline: none;
   font: inherit;
   border: none;
   border-radius: unset;
-}
-.sheet-bar-item-text {
-  display: none;
 }
 
 .show-block {

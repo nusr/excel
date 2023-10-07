@@ -4,7 +4,6 @@ import {
   npx,
   dpr,
   intToColumnName,
-  isTestEnv,
   Range,
   theme,
 } from '@/util';
@@ -122,9 +121,6 @@ export class Content implements ContentView {
     ctx.restore();
   }
   private renderTriangle(): void {
-    if (isTestEnv()) {
-      return;
-    }
     const headerSize = this.controller.getHeaderSize();
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;

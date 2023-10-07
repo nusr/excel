@@ -1,4 +1,11 @@
-export type ChangeEventType = "content" | "selection";
+export type ChangeEventType =
+  | 'content'
+  | 'antLine'
+  | 'sheetList'
+  | 'currentSheetId'
+  | 'setActiveCell'
+  | 'setCellStyle'
+  | 'setCellValues';
 
 export type IWindowSize = {
   width: number;

@@ -1,0 +1,101 @@
+import React, { CSSProperties, useSyncExternalStore } from 'react';
+import { Button } from '../components';
+import { IController } from '@/types';
+import styles from './index.module.css';
+import { contextMenuStore } from '@/containers/store';
+import { DEFAULT_POSITION } from '@/util';
+import { useClickOutside } from '../hooks';
+const defaultStyle: CSSProperties = {
+  display: 'none',
+};
+
+type Props = {
+  controller: IController;
+};
+
+export const ContextMenuContainer: React.FunctionComponent<Props> = ({
+  controller,
+}) => {
+  const contextMenuPosition = useSyncExternalStore(
+    contextMenuStore.subscribe,
+    contextMenuStore.getSnapshot,
+  );
+  const hideContextMenu = () => {
+    contextMenuStore.mergeState({
+      top: DEFAULT_POSITION,
+      left: DEFAULT_POSITION,
+    });
+  };
+  const [ref] = useClickOutside(hideContextMenu);
+  const style =
+    contextMenuPosition.top < 0 && contextMenuPosition.left < 0
+      ? defaultStyle
+      : { top: contextMenuPosition.top, left: contextMenuPosition.left };
+
+  return (
+    <div
+      className={styles['context-menu']}
+      data-testid="context-menu"
+      style={style}
+      ref={ref}
+    >
+      <Button
+        onClick={() => {
+          hideContextMenu();
+          controller.addCol(controller.getActiveCell().col, 1);
+        }}
+      >
+        add a column
+      </Button>
+      <Button
+        onClick={() => {
+          hideContextMenu();
+          controller.deleteCol(controller.getActiveCell().col, 1);
+        }}
+      >
+        delete a column
+      </Button>
+      <Button
+        onClick={() => {
+          hideContextMenu();
+          controller.addRow(controller.getActiveCell().row, 1);
+        }}
+      >
+        add a row
+      </Button>
+      <Button
+        onClick={() => {
+          hideContextMenu();
+          controller.deleteRow(controller.getActiveCell().row, 1);
+        }}
+      >
+        delete a row
+      </Button>
+      <Button
+        onClick={() => {
+          hideContextMenu();
+          controller.copy();
+        }}
+      >
+        copy
+      </Button>
+      <Button
+        onClick={() => {
+          hideContextMenu();
+          controller.cut();
+        }}
+      >
+        cut
+      </Button>
+      <Button
+        onClick={() => {
+          hideContextMenu();
+          controller.paste();
+        }}
+      >
+        paste
+      </Button>
+    </div>
+  );
+};
+ContextMenuContainer.displayName = 'ContextMenuContainer';

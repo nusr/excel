@@ -1,0 +1,97 @@
+import React, {
+  FunctionComponent,
+  useSyncExternalStore,
+  useState,
+} from 'react';
+import { classnames } from '@/util';
+import { theme, DEFAULT_POSITION } from '@/util';
+import { Button, Icon } from '../components';
+import { SheetBarContextMenu } from './SheetBarContextMenu';
+import styles from './index.module.css';
+import { IController } from '@/types';
+import { sheetListStore, coreStore } from '@/containers/store';
+
+type Props = {
+  controller: IController;
+};
+
+export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
+  const sheetList = useSyncExternalStore(
+    sheetListStore.subscribe,
+    sheetListStore.getSnapshot,
+  );
+  const { currentSheetId } = useSyncExternalStore(
+    coreStore.subscribe,
+    coreStore.getSnapshot,
+  );
+  const [menuPosition, setMenuPosition] = useState(DEFAULT_POSITION);
+  const [editing, setEditing] = useState(false);
+
+  const setSheetName = (sheetName: string) => {
+    controller.renameSheet(sheetName);
+    setEditing(false);
+  };
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const pos = (event.clientX || 0) - 30;
+    setMenuPosition(pos);
+    return false;
+  };
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      event.stopPropagation();
+      setSheetName((event.target as HTMLInputElement).value);
+    }
+  };
+  return (
+    <div className={styles['sheet-bar-wrapper']}>
+      <div className={styles['sheet-bar-list']} data-testid="sheet-bar-list">
+        {sheetList.map((item) => {
+          const isActive = currentSheetId === item.value;
+          const showInput = isActive && editing;
+          const cls = classnames(styles['sheet-bar-item'], {
+            [styles['active']]: isActive,
+          });
+          return (
+            <div
+              key={item.value}
+              className={cls}
+              onContextMenu={handleContextMenu}
+              onClick={() => {
+                controller.setCurrentSheetId(String(item.value));
+              }}
+            >
+              {showInput ? (
+                <input
+                  className={styles['sheet-bar-input']}
+                  defaultValue={item.label}
+                  onKeyDown={handleKeyDown}
+                ></input>
+              ) : (
+                <span className={styles['sheet-bar-item-text']}>
+                  {item.label}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div className={styles['sheet-bar-add']}>
+        <Button
+          onClick={() => controller.addSheet()}
+          type="circle"
+          style={{ backgroundColor: theme.buttonActiveColor }}
+        >
+          <Icon name="plus"></Icon>
+        </Button>
+      </div>
+      <SheetBarContextMenu
+        controller={controller}
+        position={menuPosition}
+        hideMenu={() => setMenuPosition(DEFAULT_POSITION)}
+        editSheetName={() => setEditing(true)}
+      />
+    </div>
+  );
+};
+SheetBarContainer.displayName = 'SheetBarContainer';

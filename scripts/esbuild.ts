@@ -15,8 +15,6 @@ const licenseText = fs.readFileSync(
 );
 const distDir = path.join(process.cwd(), 'dist');
 
-console.log('distDir--->:', distDir);
-
 function openBrowser(url: string) {
   let cmd: string = '';
   const args: string[] = [];
@@ -106,7 +104,7 @@ function buildBrowserConfig(options: BuildOptions): BuildOptions {
   const minify = !!options.outfile?.includes('.min.');
   const realOptions: BuildOptions = {
     bundle: true,
-    entryPoints: ['src/index.ts'],
+    entryPoints: ['src/index.tsx'],
     tsconfig: 'tsconfig.json',
     define: {
       'process.env.NODE_ENV': JSON.stringify(nodeEnv),
