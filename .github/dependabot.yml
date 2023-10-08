@@ -8,8 +8,8 @@ updates:
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     open-pull-requests-limit: 5
     ignore:
       - dependency-name: "puppeteer"
-        versions: ["19.x"]
+        versions: ["19.x"]
