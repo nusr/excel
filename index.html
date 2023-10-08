@@ -1,25 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Web Excel</title>
-    <link rel="stylesheet" href="./index.css" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script src="./index.js"></script>
-    <script>
-      window.onload = function () {
-        if (window.excel && typeof window.excel.initExcel === 'function') {
-          window.excel.initExcel(document.getElementById('root'));
-        }
-        if ("production" === 'development') {
-          new EventSource('/esbuild').addEventListener('change', () =>
-            location.reload(),
-          );
-        }
-      };
-    </script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Excel</title>
+  <link rel="stylesheet" href="./index.css" />
+  <!-- <script src="http://www.unpkg.com/react/umd/react.production.min.js"></script> -->
+  <!-- <script src="http://www.unpkg.com/react-dom/umd/react-dom.production.min.js"></script> -->
+</head>
+
+<body>
+  <div id="root"></div>
+  <script src="./index.js"></script>
+  <script>
+    window.onload = function () {
+      if ("production" === 'development') {
+        new EventSource('/esbuild').addEventListener('change', function () {
+          location.reload();
+        });
+      }
+    };
+  </script>
+</body>
+
 </html>
