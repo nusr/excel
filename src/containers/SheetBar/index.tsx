@@ -40,7 +40,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       event.stopPropagation();
-      setSheetName((event.target as HTMLInputElement).value);
+      setSheetName(event.currentTarget.value);
     }
   };
   return (

@@ -13,7 +13,6 @@ export function registerGlobalEvent(
   resizeWindow: () => void,
 ) {
   function handleKeydown(event: KeyboardEvent) {
-    console.log(event);
     const list = keyboardEventList.filter((v) => v.key === event.key);
     list.sort((a, b) => b.modifierKey.length - a.modifierKey.length);
     let temp: KeyboardEventItem | null = null;
@@ -34,7 +33,6 @@ export function registerGlobalEvent(
       return;
     }
     if (event.metaKey || event.ctrlKey) {
-      console.log(event.key);
       return;
     }
     if (isInputEvent(event)) {
@@ -78,22 +76,9 @@ export function registerGlobalEvent(
     controller.cut(event);
   }
 
-  // function handleMouseDown(event: MouseEvent) {
-  //   if (!event.target) {
-  //     return;
-  //   }
-  //   const list = Object.values(clickOutSideMap);
-  //   for (const item of list) {
-  //     if (!item.dom.contains(event.target as Node)) {
-  //       item.callback(stateValue);
-  //     }
-  //   }
-  // }
-
   window.addEventListener('resize', resizeWindow);
   window.addEventListener('keydown', handleKeydown);
   window.addEventListener('wheel', handleWheel);
-  // window.addEventListener('mousedown', handleMouseDown);
   document.body.addEventListener('paste', handlePaste);
   document.body.addEventListener('copy', handleCopy);
   document.body.addEventListener('cut', handleCut);
@@ -102,7 +87,6 @@ export function registerGlobalEvent(
     window.removeEventListener('resize', resizeWindow);
     window.removeEventListener('keydown', handleKeydown);
     window.removeEventListener('wheel', handleWheel);
-    // window.removeEventListener('mousedown', handleMouseDown);
     document.body.removeEventListener('paste', handlePaste);
     document.body.removeEventListener('copy', handleCopy);
     document.body.removeEventListener('cut', handleCut);

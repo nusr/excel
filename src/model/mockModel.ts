@@ -44,7 +44,7 @@ export const MOCK_MODEL: WorkBookJSON = {
         },
         1: {
           value: '',
-          formula: '=foo',
+          formula: '=foo11',
         },
         2: {
           value: '',

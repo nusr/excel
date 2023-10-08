@@ -1,9 +1,4 @@
-import React, {
-  CSSProperties,
-  useSyncExternalStore,
-  useRef,
-  useEffect,
-} from 'react';
+import React, { CSSProperties, useRef, useEffect } from 'react';
 import { CanvasOverlayPosition, ActiveCellType, IController } from '@/types';
 import {
   DEFAULT_FONT_COLOR,
@@ -12,13 +7,16 @@ import {
   isEmpty,
 } from '@/util';
 import styles from './index.module.css';
-import { activeCellStore, coreStore } from '@/containers/store';
 
 type Props = {
   controller: IController;
+  initValue: string;
+  style: CSSProperties | undefined;
 };
 
-function getEditorStyle(data: ActiveCellType): CSSProperties | undefined {
+export function getEditorStyle(
+  data: ActiveCellType,
+): CSSProperties | undefined {
   const { style } = data;
   const cellPosition: CanvasOverlayPosition = {
     top: data.top,
@@ -45,16 +43,9 @@ function getEditorStyle(data: ActiveCellType): CSSProperties | undefined {
 
 export const FormulaEditor: React.FunctionComponent<Props> = ({
   controller,
+  initValue,
+  style,
 }) => {
-  const activeCell = useSyncExternalStore(
-    activeCellStore.subscribe,
-    activeCellStore.getSnapshot,
-  );
-  const { isCellEditing } = useSyncExternalStore(
-    coreStore.subscribe,
-    coreStore.getSnapshot,
-  );
-  const initValue = activeCell.formula || String(activeCell.value || '');
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (!ref.current) {
@@ -62,51 +53,14 @@ export const FormulaEditor: React.FunctionComponent<Props> = ({
     }
     controller.setMainDom({ input: ref.current });
   }, []);
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    const val = event.currentTarget.value;
-    if (event.key === 'Enter' || event.key === 'Tab') {
-      const activeCell = controller.getActiveCell();
-      ref.current!.blur();
-      ref.current!.value = '';
-      controller.setCellValues([[val]], [], [activeCell]);
-      if (event.key === 'Enter') {
-        controller.setActiveCell({
-          row: activeCell.row + 1,
-          col: activeCell.col,
-          rowCount: 1,
-          colCount: 1,
-          sheetId: '',
-        });
-      } else if (event.key === 'Tab') {
-        controller.setActiveCell({
-          row: activeCell.row,
-          col: activeCell.col + 1,
-          rowCount: 1,
-          colCount: 1,
-          sheetId: '',
-        });
-      }
-      return;
-    }
-    if (ref.current) {
-      ref.current.nextSibling!.textContent = val;
-    }
-  };
   return (
     <input
       className={styles['base-editor']}
       ref={ref}
       defaultValue={initValue}
       type="text"
-      style={isCellEditing ? getEditorStyle(activeCell) : undefined}
-      onFocus={() => {
-        if (!isCellEditing) {
-          return;
-        }
-        coreStore.mergeState({ isCellEditing: true });
-      }}
-      onKeyDown={handleKeyDown}
-    ></input>
+      style={style}
+    />
   );
 };
 

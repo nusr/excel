@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Web Excel</title>
   <link rel="stylesheet" href="./index.css" />
+  <!-- <script src="http://www.unpkg.com/react/umd/react.production.min.js"></script> -->
+  <!-- <script src="http://www.unpkg.com/react-dom/umd/react-dom.production.min.js"></script> -->
 </head>
 
 <body>
@@ -13,9 +15,6 @@
   <script src="./index.js"></script>
   <script>
     window.onload = function () {
-      if (window.excel && typeof window.excel.initExcel === 'function') {
-        window.excel.initExcel(document.getElementById('root'));
-      }
       if (process.env.NODE_ENV === 'development') {
         new EventSource('/esbuild').addEventListener('change', function () {
           location.reload();

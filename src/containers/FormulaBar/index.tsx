@@ -1,5 +1,5 @@
 import React, { useSyncExternalStore } from 'react';
-import { FormulaEditor } from './FormulaEditor';
+import { FormulaEditor, getEditorStyle } from './FormulaEditor';
 import { intToColumnName, classnames } from '@/util';
 import styles from './index.module.css';
 import { IController } from '@/types';
@@ -22,6 +22,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
   );
   const name = `${intToColumnName(activeCell.col)}${activeCell.row + 1}`;
   const showText = !isCellEditing || activeCell.top > 0 || activeCell.left > 0;
+  const editorValue = activeCell.formula || String(activeCell.value || '');
   return (
     <div className={styles['formula-bar-wrapper']} data-testid="formula-bar">
       <div
@@ -31,13 +32,19 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
         {name}
       </div>
       <div className={styles['formula-bar-editor-wrapper']}>
-        <FormulaEditor controller={controller} />
+        {isCellEditing ? (
+          <FormulaEditor
+            controller={controller}
+            initValue={editorValue}
+            style={getEditorStyle(activeCell)}
+          />
+        ) : null}
         <div
           className={classnames(styles['formula-bar-value'], {
             [styles['show']]: showText,
           })}
         >
-          {activeCell.formula || String(activeCell.value || '')}
+          {editorValue}
         </div>
       </div>
     </div>

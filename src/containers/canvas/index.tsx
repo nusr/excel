@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { IController, ScrollStatus, ChangeEventType } from '@/types';
-import { SCROLL_SIZE, getHitInfo, copy, cut, paste } from '@/util';
-import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
+import { IController, ChangeEventType } from '@/types';
+import { getHitInfo, copy, cut, paste } from '@/util';
 import styles from './index.module.css';
 import {
   coreStore,
@@ -9,19 +8,14 @@ import {
   activeCellStore,
   sheetListStore,
   fontFamilyStore,
+  CoreStore,
 } from '@/containers/store';
 import { MainCanvas, registerGlobalEvent, Content } from '@/canvas';
 import { MOCK_MODEL } from '@/model';
+import { ScrollBar } from './ScrollBar';
 
 type Props = {
   controller: IController;
-};
-
-type State = {
-  prevPageY: number;
-  prevPageX: number;
-  scrollStatus: ScrollStatus;
-  lastTimeStamp: number;
 };
 
 function createCanvas() {
@@ -32,35 +26,7 @@ function createCanvas() {
 }
 
 const DOUBLE_CLICK_TIME = 300;
-function scrollBar(controller: IController, scrollX: number, scrollY: number) {
-  const oldScroll = controller.getScroll();
-  const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } =
-    computeScrollPosition(controller, oldScroll.left, oldScroll.top);
 
-  let scrollTop = oldScroll.scrollTop + Math.ceil(scrollY);
-  let scrollLeft = oldScroll.scrollLeft + Math.ceil(scrollX);
-  if (scrollTop < 0) {
-    scrollTop = 0;
-  } else if (scrollTop > maxScrollHeight) {
-    scrollTop = maxScrollHeight;
-  }
-  if (scrollLeft < 0) {
-    scrollLeft = 0;
-  } else if (scrollLeft > maxScrollWidth) {
-    scrollLeft = maxScrollWidth;
-  }
-  const top = Math.floor((maxHeight * scrollTop) / maxScrollHeight);
-  const left = Math.floor((maxWidth * scrollLeft) / maxScrollWidth);
-  const { row, col } = computeScrollRowAndCol(controller, left, top);
-  controller.setScroll({
-    top,
-    left,
-    row,
-    col,
-    scrollLeft,
-    scrollTop,
-  });
-}
 function handleModelChange(
   changeSet: Set<ChangeEventType>,
   controller: IController,
@@ -92,7 +58,8 @@ function handleModelChange(
       }
       cell.style.fontFamily = defaultFontFamily;
     }
-    activeCellStore.mergeState({
+    // reset data
+    activeCellStore.setState({
       ...cellPosition,
       ...cell,
     });
@@ -104,22 +71,29 @@ function handleModelChange(
       .map((v) => ({ value: v.sheetId, label: v.name }));
     sheetListStore.setState(sheetList);
   }
+  const state: Partial<CoreStore> = {};
   if (changeSet.has('currentSheetId')) {
-    coreStore.mergeState({
-      currentSheetId: controller.getCurrentSheetId(),
-    });
+    state.currentSheetId = controller.getCurrentSheetId();
+
+  }
+  if (changeSet.has('scroll')) {
+    const scroll = controller.getScroll();
+    state.scrollLeft = scroll.scrollLeft;
+    state.scrollTop = scroll.scrollTop;
+  }
+  if (Object.keys(state).length > 0) {
+    coreStore.mergeState(state);
   }
 }
 function initCanvas(controller: IController) {
-  const content = createCanvas();
   const mainCanvas = new MainCanvas(
     controller,
-    new Content(controller, content),
+    new Content(controller, createCanvas()),
   );
   const resize = () => {
     mainCanvas.resize();
     mainCanvas.render({
-      changeSet: new Set<ChangeEventType>(['content']),
+      changeSet: new Set<ChangeEventType>(['content', 'setActiveCell']),
     });
   };
   resize();
@@ -129,11 +103,12 @@ function initCanvas(controller: IController) {
     cut,
     paste,
     modelChange: (changeSet) => {
-      mainCanvas.render({ changeSet: changeSet });
-      mainCanvas.render({
-        changeSet: controller.getChangeSet(),
-      });
       handleModelChange(changeSet, controller);
+      mainCanvas.render({ changeSet: changeSet });
+      const newChangeSet = controller.getChangeSet();
+      mainCanvas.render({
+        changeSet: newChangeSet,
+      });
     },
   });
   controller.fromJSON(MOCK_MODEL);
@@ -142,50 +117,15 @@ function initCanvas(controller: IController) {
 
 export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
   const { controller } = props;
-  const state = useRef<State>({
-    prevPageX: 0,
-    prevPageY: 0,
-    scrollStatus: ScrollStatus.NONE,
-    lastTimeStamp: 0,
-  });
+  const lastTimeStamp = useRef(0);
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    if (!ref.current || controller.getMainDom().canvas) {
+    if (!ref.current) {
       return;
     }
     controller.setMainDom({ canvas: ref.current! });
     return initCanvas(controller);
   }, []);
-  const headerSize = controller.getHeaderSize();
-  const scrollData = controller.getScroll();
-  function handleDrag(event: MouseEvent) {
-    event.stopPropagation();
-    if (state.current.scrollStatus === ScrollStatus.VERTICAL) {
-      if (state.current.prevPageY) {
-        scrollBar(controller, 0, event.pageY - state.current.prevPageY);
-      }
-      state.current.prevPageY = event.pageY;
-    } else if (state.current.scrollStatus === ScrollStatus.HORIZONTAL) {
-      if (state.current.prevPageX) {
-        scrollBar(controller, event.pageX - state.current.prevPageX, 0);
-      }
-      state.current.prevPageX = event.pageX;
-    }
-  }
-  function handleDragEnd() {
-    state.current.scrollStatus = ScrollStatus.NONE;
-    state.current.prevPageY = 0;
-    state.current.prevPageX = 0;
-    tearDown();
-  }
-  function tearDown() {
-    document.removeEventListener('mousemove', handleDrag);
-    document.removeEventListener('mouseup', handleDragEnd);
-  }
-  function register() {
-    document.addEventListener('mousemove', handleDrag);
-    document.addEventListener('mouseup', handleDragEnd);
-  }
   const handleContextMenu = (event: React.MouseEvent<HTMLCanvasElement>) => {
     event.preventDefault();
     contextMenuStore.mergeState({
@@ -287,13 +227,13 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
         sheetId: '',
       });
     } else {
-      const delay = timeStamp - state.current.lastTimeStamp;
+      const delay = timeStamp - lastTimeStamp.current;
       if (delay < DOUBLE_CLICK_TIME) {
         coreStore.mergeState({ isCellEditing: true });
       }
     }
 
-    state.current.lastTimeStamp = timeStamp;
+    lastTimeStamp.current = timeStamp;
   };
   return (
     <div className={styles['canvas-container']} data-testid="canvas-container">
@@ -303,47 +243,8 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         ref={ref}
-      ></canvas>
-      <div
-        className={styles['vertical-scroll-bar']}
-        style={{ top: headerSize.height }}
-        onMouseLeave={handleDragEnd}
-        onMouseDown={() => {
-          if (state.current.scrollStatus) {
-            return;
-          }
-          state.current.scrollStatus = ScrollStatus.VERTICAL;
-          register();
-        }}
-      >
-        <div
-          className={styles['vertical-scroll-bar-content']}
-          style={{
-            height: SCROLL_SIZE,
-            transform: `translateY(${scrollData.scrollTop}px)`,
-          }}
-        ></div>
-      </div>
-      <div
-        className={styles['horizontal-scroll-bar']}
-        style={{ left: headerSize.width }}
-        onMouseLeave={handleDragEnd}
-        onMouseDown={() => {
-          if (state.current.scrollStatus) {
-            return;
-          }
-          state.current.scrollStatus = ScrollStatus.HORIZONTAL;
-          register();
-        }}
-      >
-        <div
-          className={styles['horizontal-scroll-bar-content']}
-          style={{
-            width: SCROLL_SIZE,
-            transform: `translateX(${scrollData.scrollLeft}px)`,
-          }}
-        ></div>
-      </div>
+      />
+      <ScrollBar controller={controller} />
     </div>
   );
 };

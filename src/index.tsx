@@ -1,6 +1,6 @@
 import { App } from './containers';
 import './global.css';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom/client';
 import React from 'react';
 import { initController } from '@/controller';
 import { theme } from './util';
@@ -15,7 +15,7 @@ function initTheme(dom: HTMLElement) {
 const domNode = document.getElementById('root')!;
 initTheme(document.documentElement);
 const controller = initController();
-const root = createRoot(domNode);
+const root = ReactDOM.createRoot(domNode);
 
 root.render(
   <React.StrictMode>

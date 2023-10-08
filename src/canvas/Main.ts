@@ -1,4 +1,4 @@
-import { dpr, npx, isCol, isRow, isSheet, theme } from '@/util';
+import { dpr, npx, isCol, isRow, isSheet, theme, canvasLog } from '@/util';
 import {
   EventType,
   ContentView,
@@ -60,6 +60,7 @@ export class MainCanvas {
     if (range.sheetId !== controller.getCurrentSheetId()) {
       return;
     }
+    canvasLog('render canvas ant line')
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
     drawAntLine(
@@ -74,6 +75,7 @@ export class MainCanvas {
   private renderSelection(): CanvasOverlayPosition {
     const { controller } = this;
     const range = controller.getActiveCell();
+    canvasLog('render canvas selection')
     if (isSheet(range)) {
       return this.renderSelectAll();
     }
@@ -100,10 +102,7 @@ export class MainCanvas {
       activeCell.width,
       activeCell.height,
     );
-    renderCell(
-      this.ctx,
-      { ...cellData, ...activeCell },
-    );
+    renderCell(this.ctx, { ...cellData, ...activeCell });
   }
   private renderSelectRange() {
     const { controller } = this;

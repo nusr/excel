@@ -22,7 +22,7 @@ import {
   setWith,
   isSameRange,
 } from '@/util';
-import { parseFormula } from '@/formula';
+import { parseFormula, CustomError } from '@/formula';
 
 const CELL_HEIGHT = 19;
 const CELL_WIDTH = 68;
@@ -45,12 +45,12 @@ export class Model implements IModel {
   private customHeight: WorkBookJSON['customHeight'] = {};
   private customWidth: WorkBookJSON['customWidth'] = {};
   private history: IHistory;
-  private customVariableMap: WorkBookJSON['customVariable'] = {}
+  private customVariableMap: WorkBookJSON['customVariable'] = {};
   constructor(history: IHistory) {
     this.history = history;
   }
   getSheetList(): WorkBookJSON['workbook'] {
-    return this.workbook;
+    return this.workbook.slice();
   }
   setActiveCell(range: IRange): void {
     const index = this.workbook.findIndex((v) => v.sheetId === range.sheetId);
@@ -163,6 +163,10 @@ export class Model implements IModel {
   getCurrentSheetId(): string {
     return this.currentSheetId;
   }
+  private getSheetId() {
+    const list = this.workbook.filter((v) => !v.isHide);
+    return list[0].sheetId;
+  }
   fromJSON = (json: WorkBookJSON) => {
     modelLog('fromJSON', json);
     const {
@@ -171,28 +175,34 @@ export class Model implements IModel {
       mergeCells = [],
       customHeight = {},
       customWidth = {},
-      customVariable = {}
+      customVariable = {},
     } = json;
     this.worksheets = worksheets;
     this.workbook = workbook;
-    this.currentSheetId = workbook[0].sheetId || this.currentSheetId;
+    this.currentSheetId = this.getSheetId() || this.currentSheetId;
     this.mergeCells = mergeCells;
     this.customWidth = customWidth;
     this.customHeight = customHeight;
-    this.customVariableMap = customVariable
+    this.customVariableMap = customVariable;
     this.computeAllCell();
     this.history.clear();
   };
   toJSON = (): WorkBookJSON => {
-    const { worksheets, workbook, mergeCells, customHeight, customWidth, customVariableMap } =
-      this;
+    const {
+      worksheets,
+      workbook,
+      mergeCells,
+      customHeight,
+      customWidth,
+      customVariableMap,
+    } = this;
     return {
       workbook,
       worksheets,
       mergeCells,
       customHeight,
       customWidth,
-      customVariable: customVariableMap
+      customVariable: customVariableMap,
     };
   };
 
@@ -284,27 +294,35 @@ export class Model implements IModel {
   }
   private parseFormula(formula: string) {
     const self = this;
-    const result = parseFormula(formula, {
-      get: (row: number, col: number, sheetId: string) => {
-        const temp = self.getCell(new Range(row, col, 1, 1, sheetId));
-        return temp.value;
+    const result = parseFormula(
+      formula,
+      {
+        get: (row: number, col: number, sheetId: string) => {
+          const sheetInfo = this.getSheetInfo(sheetId || this.currentSheetId);
+          if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
+            throw new CustomError('#REF!');
+          }
+          const temp = self.getCell(new Range(row, col, 1, 1, sheetId));
+          return temp.value;
+        },
+        set: () => {},
+        convertSheetNameToSheetId: (sheetName: string): string => {
+          const item = self.workbook.find((v) => v.name === sheetName);
+          return item?.sheetId || '';
+        },
       },
-      set: () => { },
-      convertSheetNameToSheetId: (sheetName: string): string => {
-        const item = self.workbook.find((v) => v.name === sheetName);
-        return item?.sheetId || '';
+      {
+        set(name: string, value: any) {
+          self.customVariableMap[name] = value;
+        },
+        get(name: string) {
+          return self.customVariableMap[name];
+        },
+        has(name: string) {
+          return name in self.customVariableMap;
+        },
       },
-    }, {
-      set(name: string, value: any) {
-        self.customVariableMap[name] = value
-      },
-      get(name: string) {
-        return self.customVariableMap[name]
-      },
-      has(name: string) {
-        return name in self.customVariableMap
-      }
-    });
+    );
     return result.error ? result.error : result.result;
   }
   addRow(rowIndex: number, count: number): void {

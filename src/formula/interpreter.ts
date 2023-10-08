@@ -140,6 +140,9 @@ export class Interpreter implements Visitor {
       sheetId = this.cellDataMap.convertSheetNameToSheetId(
         data.sheetName.value,
       );
+      if (!sheetId) {
+        throw new CustomError('#NAME?');
+      }
     }
     const t = parseCell(data.value.value);
     if (t === null) {

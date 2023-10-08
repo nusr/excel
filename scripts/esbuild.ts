@@ -28,9 +28,7 @@ function openBrowser(url: string) {
         },
       );
       return true;
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
     cmd = 'open';
   } else if (process.platform === 'win32') {
     cmd = 'cmd.exe';
@@ -117,6 +115,8 @@ function buildBrowserConfig(options: BuildOptions): BuildOptions {
     sourcemap: true,
     minify,
     metafile: minify,
+    logLevel: 'error',
+    // external: ['react', 'react-dom'],
   };
   Object.assign(realOptions, options);
 

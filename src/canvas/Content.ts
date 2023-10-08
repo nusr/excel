@@ -6,6 +6,7 @@ import {
   intToColumnName,
   Range,
   theme,
+  canvasLog,
 } from '@/util';
 import {
   fillRect,
@@ -44,9 +45,19 @@ export class Content implements ContentView {
   }
 
   render({ changeSet }: EventType) {
-    if (changeSet.size === 0 || !changeSet.has('content')) {
+    if (changeSet.size === 0) {
       return;
     }
+    const check =
+      changeSet.has('content') ||
+      changeSet.has('sheetList') ||
+      changeSet.has('currentSheetId') ||
+      changeSet.has('setCellStyle') ||
+      changeSet.has('setCellValues');
+    if (!check) {
+      return;
+    }
+    canvasLog('render canvas content');
     const { width, height } = this.controller.getDomRect();
     const headerSize = this.controller.getHeaderSize();
     this.clear();

@@ -22,8 +22,7 @@ export const Select: FunctionComponent<SelectProps> = (props) => {
     title,
   } = props;
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value } = event.target;
-    onChange(value);
+    onChange(event.currentTarget.value);
   };
   return (
     <select

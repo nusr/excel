@@ -85,9 +85,10 @@ export class Controller implements IController {
     this.hooks = hooks;
   }
   private emitChange(): void {
-    controllerLog('emitChange', this.changeSet);
-    this.hooks.modelChange(this.changeSet);
+    const result = this.changeSet;
     this.changeSet = new Set<ChangeEventType>();
+    controllerLog('emitChange', result);
+    this.hooks.modelChange(result);
     this.model.record();
   }
   getActiveCell(): IRange {
@@ -326,6 +327,7 @@ export class Controller implements IController {
       };
     }
     this.changeSet.add('content');
+    this.changeSet.add('scroll');
     this.emitChange();
   }
   private parseText(text: string) {

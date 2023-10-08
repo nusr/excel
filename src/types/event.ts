@@ -5,7 +5,8 @@ export type ChangeEventType =
   | 'currentSheetId'
   | 'setActiveCell'
   | 'setCellStyle'
-  | 'setCellValues';
+  | 'setCellValues'
+  | 'scroll';
 
 export type IWindowSize = {
   width: number;

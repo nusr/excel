@@ -1,4 +1,4 @@
-import { assert } from '@/util';
+import { assert, isPlainObject } from '@/util';
 
 type StoreListener = () => void;
 
@@ -8,18 +8,14 @@ export class BaseStore<T> {
   constructor(initValue: T) {
     this.state = initValue;
   }
-  // set array number boolean
+  // set array number boolean or plain object
   setState(data: T) {
     this.state = data;
     this.emitChange();
   }
-  // set object
+  // set plain object
   mergeState(data: Partial<T>) {
-    const type = Object.prototype.toString.apply(data);
-    assert(
-      type === '[object Object]',
-      'mergeState argument must be a plain object',
-    );
+    assert(isPlainObject(data), 'mergeState argument must be a plain object');
     this.state = {
       ...this.state,
       ...data,
