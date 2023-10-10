@@ -31,6 +31,20 @@ export const MOCK_MODEL: WorkBookJSON = {
         sheetId: '',
       },
     },
+    {
+      sheetId: '3',
+      name: 'test3',
+      isHide: true,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      activeCell: {
+        row: 4,
+        col: 4,
+        rowCount: 2,
+        colCount: 2,
+        sheetId: '',
+      },
+    },
   ],
   worksheets: {
     1: {

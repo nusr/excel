@@ -144,16 +144,22 @@ export class Controller implements IController {
   deleteSheet = (sheetId?: string): void => {
     this.model.deleteSheet(sheetId);
     this.changeSet.add('sheetList');
+    this.changeSet.add('currentSheetId');
+    this.changeSet.add('setActiveCell');
     this.emitChange();
   };
   hideSheet(sheetId?: string | undefined): void {
     this.model.hideSheet(sheetId);
     this.changeSet.add('sheetList');
+    this.changeSet.add('currentSheetId');
+    this.changeSet.add('setActiveCell');
     this.emitChange();
   }
   unhideSheet(sheetId?: string | undefined): void {
     this.model.unhideSheet(sheetId);
     this.changeSet.add('sheetList');
+    this.changeSet.add('currentSheetId');
+    this.changeSet.add('setActiveCell');
     this.emitChange();
   }
   renameSheet(sheetName: string, sheetId?: string | undefined): void {

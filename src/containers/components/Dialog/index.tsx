@@ -1,56 +1,34 @@
-import React, { FunctionComponent, CSSProperties, useRef } from 'react';
-import { assert } from '@/util';
+import React, { FunctionComponent, CSSProperties } from 'react';
 import { Button } from '../Button';
 import styles from './index.module.css';
+import { classnames } from '@/util';
 
 export interface DialogProps {
-  dialogContent: React.ReactElement;
+  content: React.ReactElement;
   testId?: string;
   title: string;
   dialogStyle?: CSSProperties;
+  visible: boolean;
   onOk?: () => void;
   onCancel?: () => void;
 }
 
-export const Dialog: FunctionComponent<React.PropsWithChildren<DialogProps>> = (
-  props,
-) => {
-  const { dialogContent, title, dialogStyle, onCancel, onOk, children } = props;
-  const ref = useRef<HTMLDialogElement>(null);
+export const Dialog: FunctionComponent<DialogProps> = (props) => {
+  const { content, title, dialogStyle, onCancel, onOk, visible } = props;
+  if (!visible) {
+    return null;
+  }
   return (
-    <div className={styles['dialog-container']}>
-      <dialog
-        className={styles['dialog-element']}
-        style={dialogStyle}
-        ref={ref}
-      >
-        <form method="dialog">
-          <div className={styles['dialog-title']}>{title}</div>
-          <div className={styles['dialog-content']}>{dialogContent}</div>
-          <div className={styles['dialog-button']}>
-            <Button onClick={onCancel} buttonType="submit">
-              Cancel
-            </Button>
-            <Button
-              onClick={onOk}
-              buttonType="submit"
-              className={styles['dialog-cancel']}
-            >
-              Confirm
-            </Button>
-          </div>
-        </form>
-      </dialog>
-      <div
-        onClick={() => {
-          assert(
-            typeof ref.current!.showModal === 'function',
-            'Sorry, the <dialog> API is not supported by this browser.',
-          );
-          ref.current!.showModal();
-        }}
-      >
-        {children}
+    <div className={classnames(styles['dialog-modal'])}>
+      <div className={styles['dialog-container']} style={dialogStyle}>
+        <div className={styles['dialog-title']}>{title}</div>
+        <div className={styles['dialog-content']}>{content}</div>
+        <div className={styles['dialog-button']}>
+          <Button onClick={onCancel}>Cancel</Button>
+          <Button onClick={onOk} className={styles['dialog-cancel']}>
+            Confirm
+          </Button>
+        </div>
       </div>
     </div>
   );

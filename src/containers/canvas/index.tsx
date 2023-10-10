@@ -67,14 +67,12 @@ function handleModelChange(
   if (changeSet.has('sheetList')) {
     const sheetList = controller
       .getSheetList()
-      .filter((v) => !v.isHide)
-      .map((v) => ({ value: v.sheetId, label: v.name }));
+      .map((v) => ({ value: v.sheetId, label: v.name, disabled: v.isHide }));
     sheetListStore.setState(sheetList);
   }
   const state: Partial<CoreStore> = {};
   if (changeSet.has('currentSheetId')) {
     state.currentSheetId = controller.getCurrentSheetId();
-
   }
   if (changeSet.has('scroll')) {
     const scroll = controller.getScroll();

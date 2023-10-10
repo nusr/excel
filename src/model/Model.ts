@@ -101,19 +101,12 @@ export class Model implements IModel {
     const id = sheetId || this.currentSheetId;
     const index = this.workbook.findIndex((item) => item.sheetId === id);
     assert(index >= 0);
-    let lastIndex = 0;
-    if (index === 0) {
-      lastIndex = index + 1;
-      while (
-        lastIndex <= this.workbook.length - 2 &&
-        this.workbook[lastIndex].isHide
-      ) {
-        lastIndex++;
-      }
-    } else {
-      lastIndex = index - 1;
-      while (lastIndex >= 1 && this.workbook[lastIndex].isHide) {
-        lastIndex--;
+    let lastIndex = (index + 1) % this.workbook.length;
+    while (lastIndex !== index) {
+      if (this.workbook[lastIndex].isHide) {
+        lastIndex = (lastIndex + 1) % this.workbook.length;
+      } else {
+        break;
       }
     }
     return {
@@ -142,9 +135,9 @@ export class Model implements IModel {
     this.currentSheetId = this.workbook[lastIndex].sheetId;
   }
   unhideSheet(sheetId?: string | undefined): void {
-    const { index } = this.getSheetIndex(sheetId);
-    this.workbook[index].isHide = false;
-    this.currentSheetId = this.workbook[index].sheetId;
+    const item = this.getSheetInfo(sheetId);
+    item.isHide = false;
+    this.currentSheetId = item.sheetId;
   }
   renameSheet(sheetName: string, sheetId?: string | undefined): void {
     assert(!!sheetName, 'You typed a invalid name for a sheet.');

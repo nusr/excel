@@ -20,6 +20,8 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
     sheetListStore.subscribe,
     sheetListStore.getSnapshot,
   );
+  // filter hide sheet 
+  const realSheetList = sheetList.filter(v => !v.disabled);
   const { currentSheetId } = useSyncExternalStore(
     coreStore.subscribe,
     coreStore.getSnapshot,
@@ -46,7 +48,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
   return (
     <div className={styles['sheet-bar-wrapper']}>
       <div className={styles['sheet-bar-list']} data-testid="sheet-bar-list">
-        {sheetList.map((item) => {
+        {realSheetList.map((item) => {
           const isActive = currentSheetId === item.value;
           const showInput = isActive && editing;
           const cls = classnames(styles['sheet-bar-item'], {
