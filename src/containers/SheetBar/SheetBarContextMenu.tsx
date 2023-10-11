@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useSyncExternalStore } from 'react';
+import React, { useMemo, useState, useSyncExternalStore, useRef } from 'react';
 import { Button, Dialog, Select } from '../components';
 import { IController, OptionItem } from '@/types';
 import styles from './index.module.css';
@@ -18,8 +18,15 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
   hideMenu,
   editSheetName,
 }) => {
-  const [ref] = useClickOutside(hideMenu);
   const [visible, setVisible] = useState(false);
+  const refState = useRef(visible);
+  refState.current = visible;
+  const [ref] = useClickOutside(() => {
+    if (refState.current) {
+      return;
+    }
+    hideMenu();
+  });
   const sheetList = useSyncExternalStore(
     sheetListStore.subscribe,
     sheetListStore.getSnapshot,

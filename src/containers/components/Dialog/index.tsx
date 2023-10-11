@@ -1,4 +1,5 @@
 import React, { FunctionComponent, CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '../Button';
 import styles from './index.module.css';
 import { classnames } from '@/util';
@@ -18,7 +19,7 @@ export const Dialog: FunctionComponent<DialogProps> = (props) => {
   if (!visible) {
     return null;
   }
-  return (
+  const dialog = (
     <div className={classnames(styles['dialog-modal'])}>
       <div className={styles['dialog-container']} style={dialogStyle}>
         <div className={styles['dialog-title']}>{title}</div>
@@ -32,5 +33,6 @@ export const Dialog: FunctionComponent<DialogProps> = (props) => {
       </div>
     </div>
   );
+  return createPortal(dialog, document.body);
 };
 Dialog.displayName = 'Dialog';
