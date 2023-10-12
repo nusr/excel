@@ -1,17 +1,17 @@
-import React, { CSSProperties, useSyncExternalStore } from 'react';
+import React, { useMemo, useSyncExternalStore } from 'react';
 import { Button } from '../components';
 import { IController } from '@/types';
 import styles from './index.module.css';
 import { contextMenuStore } from '@/containers/store';
 import { DEFAULT_POSITION } from '@/util';
 import { useClickOutside } from '../hooks';
-const defaultStyle: CSSProperties = {
-  display: 'none',
-};
 
 type Props = {
   controller: IController;
 };
+
+const MENU_WIDTH = 110;
+const MENU_HEIGHT = 142;
 
 export const ContextMenuContainer: React.FunctionComponent<Props> = ({
   controller,
@@ -27,10 +27,27 @@ export const ContextMenuContainer: React.FunctionComponent<Props> = ({
     });
   };
   const [ref] = useClickOutside(hideContextMenu);
-  const style =
-    contextMenuPosition.top < 0 && contextMenuPosition.left < 0
-      ? defaultStyle
-      : { top: contextMenuPosition.top, left: contextMenuPosition.left };
+  const style = useMemo(() => {
+    // recompute menu position
+    let top = contextMenuPosition.top;
+    let left = contextMenuPosition.left;
+    const gap = 18;
+    if (top + MENU_HEIGHT > window.innerHeight) {
+      top = window.innerHeight - MENU_HEIGHT - gap;
+    }
+    if (left + MENU_WIDTH > window.innerWidth) {
+      left = window.innerWidth - MENU_WIDTH - gap;
+    }
+    return {
+      top,
+      left,
+    };
+  }, [contextMenuPosition]);
+  const showContextMenu =
+    contextMenuPosition.top >= 0 && contextMenuPosition.left >= 0;
+  if (!showContextMenu) {
+    return null;
+  }
 
   return (
     <div

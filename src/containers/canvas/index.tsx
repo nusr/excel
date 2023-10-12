@@ -241,6 +241,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         ref={ref}
+        data-testid="canvas-main"
       />
       <ScrollBar controller={controller} />
     </div>

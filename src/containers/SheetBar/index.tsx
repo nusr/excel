@@ -20,8 +20,8 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
     sheetListStore.subscribe,
     sheetListStore.getSnapshot,
   );
-  // filter hide sheet 
-  const realSheetList = sheetList.filter(v => !v.disabled);
+  // filter hide sheet
+  const realSheetList = sheetList.filter((v) => !v.disabled);
   const { currentSheetId } = useSyncExternalStore(
     coreStore.subscribe,
     coreStore.getSnapshot,
@@ -87,12 +87,14 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
           <Icon name="plus"></Icon>
         </Button>
       </div>
-      <SheetBarContextMenu
-        controller={controller}
-        position={menuPosition}
-        hideMenu={() => setMenuPosition(DEFAULT_POSITION)}
-        editSheetName={() => setEditing(true)}
-      />
+      {menuPosition >= 0 && (
+        <SheetBarContextMenu
+          controller={controller}
+          position={menuPosition}
+          hideMenu={() => setMenuPosition(DEFAULT_POSITION)}
+          editSheetName={() => setEditing(true)}
+        />
+      )}
     </div>
   );
 };

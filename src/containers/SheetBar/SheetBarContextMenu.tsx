@@ -36,19 +36,17 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
       .filter((v) => v.disabled)
       .map((item) => ({ value: String(item.value), label: item.label }));
   }, [sheetList]);
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState(String(hideSheetList[0]?.value) || '');
   const hideDialog = () => {
     setVisible(false);
     hideMenu();
   };
-  if (position < 0) {
-    return null;
-  }
   return (
     <div
       className={styles['sheet-bar-context-menu']}
       style={{ left: position }}
       ref={ref}
+      data-testid="sheet-bar-context-menu"
     >
       <Button
         onClick={() => {
@@ -94,22 +92,20 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
       </Button>
       <Dialog
         visible={visible}
-        content={
-          <Select
-            data={hideSheetList}
-            onChange={(value) => setValue(String(value))}
-            style={{ width: 300 }}
-            value={value}
-          />
-        }
         title="Unhide sheet:"
         onOk={() => {
-          const val = value || String(hideSheetList[0]?.value) || '';
-          controller.unhideSheet(val);
+          controller.unhideSheet(value);
           hideDialog();
         }}
         onCancel={hideDialog}
-      />
+      >
+        <Select
+          data={hideSheetList}
+          onChange={(value) => setValue(String(value))}
+          style={{ width: 300 }}
+          value={value}
+        />
+      </Dialog>
     </div>
   );
 };

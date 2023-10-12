@@ -1,8 +1,9 @@
 .context-menu {
-  position: fixed;
+  position: absolute;
   background-color: var(--white);
   border: 1px solid var(--borderColor);
   border-radius: var(--borderRadius);
+  width: 110px;
 }
 
 .context-menu > button {

@@ -88,6 +88,7 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
     <Fragment>
       <div
         className={styles['vertical-scroll-bar']}
+        data-testid="vertical-scroll-bar"
         style={{ top: headerSize.height }}
         onMouseLeave={handleDragEnd}
         onMouseDown={() => {
@@ -108,6 +109,7 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
       </div>
       <div
         className={styles['horizontal-scroll-bar']}
+        data-testid="horizontal-scroll-bar"
         style={{ left: headerSize.width }}
         onMouseLeave={handleDragEnd}
         onMouseDown={() => {
