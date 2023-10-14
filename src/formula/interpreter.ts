@@ -2,7 +2,7 @@ import { Range, mergeRange, parseCell } from '@/util';
 import {
   TokenType,
   CellDataMap,
-  VariableMap,
+  DefinedNamesMap,
   FormulaData,
   ReferenceType,
 } from '@/types';
@@ -28,17 +28,17 @@ export class Interpreter implements Visitor {
   private readonly expressions: Expression[];
   private readonly functionMap: FormulaData;
   private readonly cellDataMap: CellDataMap;
-  private readonly variableMap: VariableMap;
+  private readonly definedNamesMap: DefinedNamesMap;
   constructor(
     expressions: Expression[],
     cellDataMap: CellDataMap,
-    variableMap: VariableMap,
+    definedNamesMap: DefinedNamesMap,
     functionMap: FormulaData,
   ) {
     this.expressions = expressions;
     this.functionMap = functionMap;
     this.cellDataMap = cellDataMap;
-    this.variableMap = variableMap;
+    this.definedNamesMap = definedNamesMap;
   }
   interpret(): any {
     const result: any[] = [];
@@ -186,8 +186,9 @@ export class Interpreter implements Visitor {
   visitTokenExpression(expr: TokenExpression) {
     const { value, type } = expr.value;
     const defineName = value.toLowerCase();
-    if (this.variableMap.has(defineName)) {
-      return this.variableMap.get(defineName);
+    if (this.definedNamesMap.has(defineName)) {
+      const value = this.definedNamesMap.get(defineName);
+      return this.cellDataMap.get(value.row, value.col, value.sheetId);
     }
     const funcName = value.toUpperCase();
     if (this.functionMap[funcName]) {

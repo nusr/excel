@@ -130,7 +130,13 @@ export const MOCK_MODEL: WorkBookJSON = {
       1: 100,
     },
   },
-  customVariable: {
-    'foo': 1
-  }
+  definedNames: {
+    foo: {
+      row: 7,
+      col: 0,
+      rowCount: 2,
+      colCount: 2,
+      sheetId: '1',
+    },
+  },
 };

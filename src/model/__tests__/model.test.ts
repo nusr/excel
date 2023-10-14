@@ -37,7 +37,7 @@ describe('model.test.ts', () => {
       mergeCells: [],
       customHeight: {},
       customWidth: {},
-      customVariable: {}
+      definedNames: {}
     });
   });
   test('fromJSON', () => {
@@ -71,7 +71,7 @@ describe('model.test.ts', () => {
       ],
       customHeight: {},
       customWidth: {},
-      customVariable: {}
+      definedNames: {}
     }),
       expect(model.toJSON()).toEqual({
         workbook: [
@@ -102,7 +102,7 @@ describe('model.test.ts', () => {
         ],
         customHeight: {},
         customWidth: {},
-        customVariable: {}
+        definedNames: {}
       });
   });
 });

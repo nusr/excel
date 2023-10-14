@@ -47,19 +47,19 @@ export type ModelCellType = {
 export type ModelCellValue = ModelCellType & { col: number; row: number };
 
 export type ModelColType = Record<string, ModelCellType>;
-export type ModelRowType = Record<string, ModelColType>;
-export type CustomHeightOrWidthItem = Record<string, number>;
+export type ModelRowType = Record<string, ModelColType>; // key: col number
+export type CustomHeightOrWidthItem = Record<string, number>; // key: row number or col number value: height or width
 export type MergeCellItem = {
   start: Coordinate;
   end: Coordinate;
 };
 export type WorkBookJSON = {
-  workbook: WorksheetType[];
-  worksheets: Record<string, ModelRowType>;
-  mergeCells: IRange[];
-  customHeight: Record<string, CustomHeightOrWidthItem>;
-  customWidth: Record<string, CustomHeightOrWidthItem>;
-  customVariable: Record<string, ResultType>
+  workbook: WorksheetType[]; // workbook.xml_workbook_sheets
+  worksheets: Record<string, ModelRowType>; // key: row number worksheets_*.xml_worksheet_sheetData
+  mergeCells: IRange[]; // worksheets_*.xml_worksheet_mergeCells
+  customHeight: Record<string, CustomHeightOrWidthItem>; // key: sheetId worksheets_*.xml_worksheet_sheetData_customHeight
+  customWidth: Record<string, CustomHeightOrWidthItem>; // key: sheetId worksheets_*.xml_worksheet_sheetData_customHeight
+  definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
 };
 
 export interface IModel extends IBaseModel {

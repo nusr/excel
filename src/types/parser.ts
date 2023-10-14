@@ -1,3 +1,4 @@
+import { IRange } from '@/types'
 export type ResultType = boolean | string | number | null | undefined;
 export type ErrorTypes =
   | '#ERROR!'
@@ -45,9 +46,9 @@ export interface CellDataMap {
   convertSheetNameToSheetId(sheetName: string): string;
 }
 
-export interface VariableMap {
-  set(name: string, value: any): void;
-  get(name: string): any;
+export interface DefinedNamesMap {
+  set(name: string, value: IRange): void;
+  get(name: string): IRange;
   has(name: string): boolean;
 }
 

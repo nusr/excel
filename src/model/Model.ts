@@ -45,7 +45,7 @@ export class Model implements IModel {
   private customHeight: WorkBookJSON['customHeight'] = {};
   private customWidth: WorkBookJSON['customWidth'] = {};
   private history: IHistory;
-  private customVariableMap: WorkBookJSON['customVariable'] = {};
+  private definedNames: WorkBookJSON['definedNames'] = {};
   constructor(history: IHistory) {
     this.history = history;
   }
@@ -168,7 +168,7 @@ export class Model implements IModel {
       mergeCells = [],
       customHeight = {},
       customWidth = {},
-      customVariable = {},
+      definedNames = {},
     } = json;
     this.worksheets = worksheets;
     this.workbook = workbook;
@@ -176,7 +176,7 @@ export class Model implements IModel {
     this.mergeCells = mergeCells;
     this.customWidth = customWidth;
     this.customHeight = customHeight;
-    this.customVariableMap = customVariable;
+    this.definedNames = definedNames;
     this.computeAllCell();
     this.history.clear();
   };
@@ -187,7 +187,7 @@ export class Model implements IModel {
       mergeCells,
       customHeight,
       customWidth,
-      customVariableMap,
+      definedNames,
     } = this;
     return {
       workbook,
@@ -195,7 +195,7 @@ export class Model implements IModel {
       mergeCells,
       customHeight,
       customWidth,
-      customVariable: customVariableMap,
+      definedNames,
     };
   };
 
@@ -305,14 +305,14 @@ export class Model implements IModel {
         },
       },
       {
-        set(name: string, value: any) {
-          self.customVariableMap[name] = value;
+        set() {
+          throw new CustomError('#REF!');
         },
         get(name: string) {
-          return self.customVariableMap[name];
+          return self.definedNames[name];
         },
         has(name: string) {
-          return name in self.customVariableMap;
+          return name in self.definedNames;
         },
       },
     );

@@ -5,14 +5,15 @@ import { Interpreter } from './interpreter';
 import {
   CellDataMap,
   InterpreterResult,
-  VariableMap,
+  DefinedNamesMap,
   FormulaData,
+  IRange,
 } from '@/types';
 
 export function parseFormula(
   source: string,
   cellData: CellDataMap = new CellDataMapImpl(),
-  variableMap: VariableMap = new VariableMapImpl(),
+  definedNamesMap: DefinedNamesMap = new DefinedNamesMapImpl(),
   functionMap: FormulaData = formulas,
 ): InterpreterResult {
   let expressionStr = '';
@@ -22,7 +23,7 @@ export function parseFormula(
     const result = new Interpreter(
       expressions,
       cellData,
-      variableMap,
+      definedNamesMap,
       functionMap,
     ).interpret();
 
@@ -79,13 +80,13 @@ export class CellDataMapImpl implements CellDataMap {
   }
 }
 
-export class VariableMapImpl implements VariableMap {
-  private readonly map = new Map<string, any>();
-  set(name: string, value: any): void {
+export class DefinedNamesMapImpl implements DefinedNamesMap {
+  private readonly map = new Map<string, IRange>();
+  set(name: string, value: IRange): void {
     this.map.set(name, value);
   }
-  get(name: string): any {
-    return this.map.get(name);
+  get(name: string): IRange {
+    return this.map.get(name)!;
   }
   has(name: string): boolean {
     return this.map.has(name);
