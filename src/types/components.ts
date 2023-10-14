@@ -1,4 +1,4 @@
-import { ModelCellType } from './model';
+import { ModelCellValue } from './model';
 
 export type OptionItem = {
   value: string | number;
@@ -12,10 +12,6 @@ export type CanvasOverlayPosition = {
   height: number;
 };
 
-export interface Coordinate {
-  row: number;
-  col: number;
-}
 
 export type ScrollValue = {
   left: number;
@@ -26,7 +22,7 @@ export type ScrollValue = {
   scrollTop: number;
 };
 
-export type ActiveCellType = ModelCellType & Coordinate & CanvasOverlayPosition;
+export type ActiveCellType = ModelCellValue & CanvasOverlayPosition;
 
 export type Point = [x: number, y: number];
 

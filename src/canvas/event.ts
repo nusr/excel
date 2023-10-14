@@ -1,4 +1,4 @@
-import { IController, KeyboardEventItem } from '@/types';
+import { IController, KeyboardEventItem, ChangeEventType } from '@/types';
 import { debounce } from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';
@@ -10,7 +10,7 @@ function isInputEvent(event: any): boolean {
 
 export function registerGlobalEvent(
   controller: IController,
-  resizeWindow: () => void,
+  resizeWindow: (changeSet: Set<ChangeEventType>) => void,
 ) {
   function handleKeydown(event: KeyboardEvent) {
     const list = keyboardEventList.filter((v) => v.key === event.key);
@@ -76,7 +76,11 @@ export function registerGlobalEvent(
     controller.cut(event);
   }
 
-  window.addEventListener('resize', resizeWindow);
+  function handleResize() {
+    resizeWindow(new Set<ChangeEventType>(['content', 'setActiveCell']));
+  }
+
+  window.addEventListener('resize', handleResize);
   window.addEventListener('keydown', handleKeydown);
   window.addEventListener('wheel', handleWheel);
   document.body.addEventListener('paste', handlePaste);
@@ -84,7 +88,7 @@ export function registerGlobalEvent(
   document.body.addEventListener('cut', handleCut);
 
   return () => {
-    window.removeEventListener('resize', resizeWindow);
+    window.removeEventListener('resize', handleResize);
     window.removeEventListener('keydown', handleKeydown);
     window.removeEventListener('wheel', handleWheel);
     document.body.removeEventListener('paste', handlePaste);

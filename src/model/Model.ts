@@ -485,4 +485,31 @@ export class Model implements IModel {
       }
     }
   }
+  pasteRange(fromRange: IRange, isCut: boolean): IRange {
+    const currentSheetId = this.currentSheetId;
+    const { activeCell } = this.getSheetInfo(currentSheetId);
+    
+    const { row, col, rowCount, colCount, sheetId } = fromRange;
+    for (let r = row, i = 0, endRow = row + rowCount; r < endRow; r++, i++) {
+      for (let c = col, j = 0, endCol = col + colCount; c < endCol; c++, j++) {
+        const oldPath = `worksheets[${sheetId || currentSheetId}][${r}][${c}]`;
+        const temp = get<ModelCellType>(this, oldPath, {});
+        const realRow = activeCell.row + i;
+        const realCol = activeCell.col + j;
+        const path = `worksheets[${currentSheetId}][${realRow}][${realCol}]`;
+        setWith(this, path, { ...temp });
+        if (isCut) {
+          setWith(this, oldPath, {});
+        }
+      }
+    }
+    this.computeAllCell();
+    const range: IRange = {
+      ...activeCell,
+      rowCount,
+      colCount,
+    };
+
+    return range;
+  }
 }

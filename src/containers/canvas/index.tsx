@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { IController, ChangeEventType } from '@/types';
-import { getHitInfo, copy, cut, paste } from '@/util';
+import { getHitInfo, copy, cut, paste, debounce } from '@/util';
 import styles from './index.module.css';
 import {
   coreStore,
@@ -8,10 +8,9 @@ import {
   activeCellStore,
   sheetListStore,
   fontFamilyStore,
-  CoreStore,
+  scrollStore,
 } from '@/containers/store';
 import { MainCanvas, registerGlobalEvent, Content } from '@/canvas';
-import { MOCK_MODEL } from '@/model';
 import { ScrollBar } from './ScrollBar';
 
 type Props = {
@@ -27,7 +26,7 @@ function createCanvas() {
 
 const DOUBLE_CLICK_TIME = 300;
 
-function handleModelChange(
+function handleStateChange(
   changeSet: Set<ChangeEventType>,
   controller: IController,
 ) {
@@ -70,46 +69,54 @@ function handleModelChange(
       .map((v) => ({ value: v.sheetId, label: v.name, disabled: v.isHide }));
     sheetListStore.setState(sheetList);
   }
-  const state: Partial<CoreStore> = {};
   if (changeSet.has('currentSheetId')) {
-    state.currentSheetId = controller.getCurrentSheetId();
+    coreStore.mergeState({ currentSheetId: controller.getCurrentSheetId() });
   }
   if (changeSet.has('scroll')) {
     const scroll = controller.getScroll();
-    state.scrollLeft = scroll.scrollLeft;
-    state.scrollTop = scroll.scrollTop;
-  }
-  if (Object.keys(state).length > 0) {
-    coreStore.mergeState(state);
+    scrollStore.setState({
+      scrollLeft: scroll.scrollLeft,
+      scrollTop: scroll.scrollTop,
+    });
   }
 }
+
 function initCanvas(controller: IController) {
   const mainCanvas = new MainCanvas(
     controller,
     new Content(controller, createCanvas()),
   );
-  const resize = () => {
+  const resize = (changeSet: Set<ChangeEventType>) => {
     mainCanvas.resize();
     mainCanvas.render({
-      changeSet: new Set<ChangeEventType>(['content', 'setActiveCell']),
+      changeSet,
     });
   };
-  resize();
+
   const removeEvent = registerGlobalEvent(controller, resize);
   controller.setHooks({
     copy,
     cut,
     paste,
-    modelChange: (changeSet) => {
-      handleModelChange(changeSet, controller);
-      mainCanvas.render({ changeSet: changeSet });
-      const newChangeSet = controller.getChangeSet();
+    modelChange: debounce((changeSet) => {
+      handleStateChange(changeSet, controller);
+      mainCanvas.render({ changeSet });
       mainCanvas.render({
-        changeSet: newChangeSet,
+        changeSet: controller.getChangeSet(),
       });
-    },
+    }),
   });
-  controller.fromJSON(MOCK_MODEL);
+
+  const changeSet = new Set<ChangeEventType>([
+    'currentSheetId',
+    'scroll',
+    'content',
+    'setActiveCell',
+    'sheetList',
+  ]);
+  handleStateChange(changeSet, controller);
+  resize(changeSet);
+
   return removeEvent;
 }
 

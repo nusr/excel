@@ -3,7 +3,7 @@ import { IController, ScrollStatus, ScrollValue } from '@/types';
 import { SCROLL_SIZE } from '@/util';
 import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
 import styles from './index.module.css';
-import { coreStore } from '../store';
+import { scrollStore } from '../store';
 
 type Props = {
   controller: IController;
@@ -53,8 +53,8 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
   });
   const headerSize = controller.getHeaderSize();
   const { scrollLeft, scrollTop } = useSyncExternalStore(
-    coreStore.subscribe,
-    coreStore.getSnapshot,
+    scrollStore.subscribe,
+    scrollStore.getSnapshot,
   );
   function handleDrag(event: MouseEvent) {
     event.stopPropagation();

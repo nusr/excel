@@ -42,8 +42,8 @@ export class Controller implements IController {
   private scrollValue: Record<string, ScrollValue> = {};
   private model: IModel;
   private changeSet = new Set<ChangeEventType>();
-  private copyRanges: Array<IRange> = [];
-  private cutRanges: Array<IRange> = [];
+  private copyRanges: Array<IRange> = []; // cut or copy ranges
+  private isCut = false; // cut or copy
   private hooks: IHooks = {
     modelChange() {},
     async cut() {
@@ -87,7 +87,6 @@ export class Controller implements IController {
   private emitChange(): void {
     const result = this.changeSet;
     this.changeSet = new Set<ChangeEventType>();
-    controllerLog('emitChange', result);
     this.hooks.modelChange(result);
     this.model.record();
   }
@@ -363,18 +362,16 @@ export class Controller implements IController {
         colCount = item.length;
       }
     }
-    if (list.length === 0) {
-      return;
-    }
     const activeCell = this.getActiveCell();
-    const range: IRange = {
-      ...activeCell,
-      rowCount,
-      colCount,
+    return {
+      value: list,
+      style: [],
+      range: {
+        ...activeCell,
+        rowCount,
+        colCount,
+      },
     };
-    this.model.setCellValues(list, [], [range]);
-    this.changeSet.add('setCellValues');
-    this.setActiveCell(range);
   }
   private parseHTML(htmlString: string) {
     const parser = new DOMParser();
@@ -409,56 +406,20 @@ export class Controller implements IController {
         colCount = temp.length;
       }
     }
-    if (result.length === 0) {
-      return;
-    }
     const activeCell = this.getActiveCell();
-    const range: IRange = {
-      ...activeCell,
-      rowCount,
-      colCount,
+    return {
+      value: result,
+      style: resultStyle,
+      range: {
+        ...activeCell,
+        rowCount,
+        colCount,
+      },
     };
-    this.model.setCellValues(result, resultStyle, [range]);
-    this.changeSet.add('setCellValues');
-    this.changeSet.add('setCellStyle');
-    this.setActiveCell(range);
-  }
-  async paste(event?: ClipboardEvent) {
-    this.copyRanges = [];
-    if (this.cutRanges.length > 0) {
-      const [range] = this.cutRanges;
-      const result: string[][] = [];
-      for (let i = 0; i < range.rowCount; i++) {
-        result.push(new Array(range.colCount).fill(''));
-      }
-      // clear cut data
-      this.model.setCellValues(result, [], this.cutRanges);
-    }
-    let html: string = '';
-    let text: string = '';
-    if (!event) {
-      const data = await this.hooks.paste();
-      html = data[HTML_FORMAT];
-      text = data[PLAIN_FORMAT];
-    } else {
-      html = event.clipboardData?.getData(HTML_FORMAT) || '';
-      text = event.clipboardData?.getData(PLAIN_FORMAT) || '';
-    }
-    if (html) {
-      this.parseHTML(html);
-    } else {
-      this.parseText(text);
-    }
-    if (this.cutRanges.length) {
-      this.cutRanges = [];
-      this.hooks.copy({
-        [PLAIN_FORMAT]: '',
-        [HTML_FORMAT]: '',
-      });
-    }
   }
   private getCopyData(): ClipboardData {
-    const { row, col, rowCount, colCount } = this.getActiveCell();
+    const activeCell = this.getActiveCell();
+    const { row, col, rowCount, colCount } = activeCell;
     const result: ResultType[][] = [];
     const html: string[][] = [];
     let index = 1;
@@ -497,8 +458,47 @@ export class Controller implements IController {
       [HTML_FORMAT]: htmlData,
     };
   }
+  async paste(event?: ClipboardEvent) {
+    let html: string = '';
+    let text: string = '';
+    if (!event) {
+      const data = await this.hooks.paste();
+      html = data[HTML_FORMAT];
+      text = data[PLAIN_FORMAT];
+    } else {
+      html = event.clipboardData?.getData(HTML_FORMAT) || '';
+      text = event.clipboardData?.getData(PLAIN_FORMAT) || '';
+    }
+    let activeCell = this.getActiveCell();
+    this.changeSet.add('setCellValues');
+    controllerLog('paste data', this.copyRanges);
+    if (this.copyRanges.length > 0) {
+      const [range] = this.copyRanges.slice();
+      this.changeSet.add('setCellStyle');
+      activeCell = this.model.pasteRange(range, this.isCut);
+    } else if (html) {
+      const result = this.parseHTML(html);
+      activeCell = result.range;
+      this.changeSet.add('setCellStyle');
+      this.model.setCellValues(result.value, result.style, [result.range]);
+    } else {
+      const result = this.parseText(text);
+      activeCell = result.range;
+      this.model.setCellValues(result.value, [], [result.range]);
+    }
+    if (this.isCut) {
+      this.copyRanges = [];
+      this.isCut = false;
+      this.hooks.copy({
+        [PLAIN_FORMAT]: '',
+        [HTML_FORMAT]: '',
+      });
+    }
+    this.setActiveCell(activeCell);
+  }
   copy(event?: ClipboardEvent): void {
     this.copyRanges = [this.getActiveCell()];
+    this.isCut = false;
     const data = this.getCopyData();
     if (event) {
       const keyList = Object.keys(data) as ClipboardType[];
@@ -512,7 +512,8 @@ export class Controller implements IController {
     this.emitChange();
   }
   cut(event?: ClipboardEvent) {
-    this.cutRanges = [this.getActiveCell()];
+    this.copyRanges = [this.getActiveCell()];
+    this.isCut = true;
     this.copy(event);
   }
   getCopyRanges() {

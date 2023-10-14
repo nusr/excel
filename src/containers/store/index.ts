@@ -3,5 +3,4 @@ export { sheetListStore } from './sheetList';
 export { activeCellStore } from './activeCell';
 export { coreStore } from './core';
 export { fontFamilyStore } from './fontFamily';
-
-export type { CoreStore } from './core'
+export { scrollStore } from './scroll';

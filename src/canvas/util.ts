@@ -13,6 +13,7 @@ import {
 } from '@/util';
 import {
   ModelCellType,
+  CanvasOverlayPosition,
   ErrorTypes,
   Point,
   EUnderLine,
@@ -101,12 +102,7 @@ function convertValueToString(value: ResultType): string {
 
 export function renderCell(
   ctx: CanvasRenderingContext2D,
-  cellInfo: ModelCellType & {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-  },
+  cellInfo: ModelCellType & CanvasOverlayPosition,
 ): IRenderCellResult {
   const { style, value, left, top, width, height } = cellInfo;
   const isNum = isNumber(value);

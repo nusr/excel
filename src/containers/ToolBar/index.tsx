@@ -50,8 +50,8 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
   );
   const getItemStyle = (value: string | number): any => {
     return {
-      'fontFamily': String(value),
-      'fontSize': '16px',
+      fontFamily: String(value),
+      fontSize: '16px',
     };
   };
   const setCellStyle = (value: Partial<StyleType>) => {
@@ -108,6 +108,15 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         testId="toolbar-redo"
       >
         <Icon name="redo"></Icon>
+      </Button>
+      <Button onClick={() => controller.copy()} testId="toolbar-copy">
+        copy
+      </Button>
+      <Button onClick={() => controller.cut()} testId="toolbar-cut">
+        cut
+      </Button>
+      <Button onClick={() => controller.paste()} testId="toolbar-paste">
+        paste
       </Button>
       <Select
         data={fontFamilyList}

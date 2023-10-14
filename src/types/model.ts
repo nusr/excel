@@ -1,4 +1,3 @@
-import { Coordinate } from './components';
 import { ResultType } from './parser';
 import { IRange } from './range';
 export enum EVerticalAlign {
@@ -16,6 +15,58 @@ export enum EUnderLine {
   SINGLE,
   DOUBLE,
 }
+/**
+ * XML to model
+ * 1. styleId = worksheets_*.xml worksheet.sheetData.row.c.s
+ * 2. styles = styles.xml styleSheet
+ * 3. xf = styles.cellXfs.xf[styleId]
+ * 4. fillColor = xf.applyFill != undefined && xf.fillId != undefined && styles.fills.fill[xf.fillId]
+ * 5. font = xf.applyFont != undefined && xf.fontId != undefined && styles.fonts.font[xf.fontId]
+ * 6. fontColor = font.color,fontSize = font.sz,isBold= font.b,isItalic=font.i,underline=font.u,fontFamily=font.name
+ * 7. alignment = xf.ApplyAlignment != undefined && xf.alignment != undefined
+ * 8. verticalAlign = alignment.vertical,horizontalAlign = alignment.horizontal,isWrapText = alignment.wrapText
+ * 9. numberFormat = xl.applyNumberFormat != undefined && styles.numFmts.numFmt.find(v => v.numFmtId === xf.numFmtId).formatCode
+ *
+ * model to XML
+ */
+
+/**
+ * number format list
+ * [
+		"general",
+		"0",
+		"0.00",
+		"#,##0",
+		"#,##0.00",
+		"0%",
+		"0.00%",
+		"0.00E+00",
+		"# ?/?",
+		"# ??/??",
+		"mm-dd-yy",
+		"d-mmm-yy",
+		"d-mmm",
+		"mmm-yy",
+		"h:mm AM/PM",
+		"h:mm:ss AM/PM",
+		"hh:mm",
+		"hh:mm:ss",
+		"m/d/yy hh:mm",
+		"#,##0 ;(#,##0)",
+		"#,##0 ;[red](#,##0)",
+		"#,##0.00 ;(#,##0.00)",
+		"#,##0.00 ;[red](#,##0.00)",
+		"_(* #,##0_);_(* \\(#,##0\\);_(* \"-\"_);_(@_)",
+		"_(\"$\"* #,##0_);_(\"$\"* \\(#,##0\\);_(\"$\"* \"-\"_);_(@_)",
+		"_(* #,##0.00_);_(* \\(#,##0.00\\);_(* \"-\"??_);_(@_)",
+		"_(\"$\"* #,##0.00_);_(\"$\"* \\(#,##0.00\\);_(\"$\"* \"-\"??_);_(@_)",
+		"mm:ss",
+		"[h]:mm:ss",
+		"mm:ss.0",
+		"##0.0E+0",
+		"@",
+ ]
+ */
 export type StyleType = {
   fontColor: string;
   fillColor: string;
@@ -27,6 +78,7 @@ export type StyleType = {
   underline: EUnderLine;
   isItalic: boolean;
   isBold: boolean;
+  numberFormat: number; // number format list index
 };
 export type WorksheetType = {
   sheetId: string;
@@ -41,10 +93,12 @@ export type ModelCellType = {
   value?: ResultType;
   formula?: string;
   style?: Partial<StyleType>;
-  format?: string;
 };
-
-export type ModelCellValue = ModelCellType & { col: number; row: number };
+export interface Coordinate {
+  row: number;
+  col: number;
+}
+export type ModelCellValue = ModelCellType & Coordinate;
 
 export type ModelColType = Record<string, ModelCellType>;
 export type ModelRowType = Record<string, ModelColType>; // key: col number
@@ -64,10 +118,11 @@ export type WorkBookJSON = {
 
 export interface IModel extends IBaseModel {
   record(): void;
+  pasteRange(range: IRange, isCut: boolean): IRange;
 }
 
 export interface IBaseModel {
-  getCell(range: IRange): ModelCellType & Coordinate;
+  getCell(range: IRange): ModelCellValue;
   getColWidth(col: number): number;
   setColWidth(col: number, width: number): void;
   getRowHeight(row: number): number;
