@@ -18,6 +18,8 @@ import {
 import { StyleType, EUnderLine, OptionItem, IController } from '@/types';
 import styles from './index.module.css';
 import { activeCellStore, fontFamilyStore } from '@/containers/store';
+import { Import } from '../Excel';
+
 type Props = {
   controller: IController;
 };
@@ -109,6 +111,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
       >
         <Icon name="redo"></Icon>
       </Button>
+      <Import controller={controller} />
       <Button onClick={() => controller.copy()} testId="toolbar-copy">
         copy
       </Button>
@@ -173,6 +176,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         active={isWrapText}
         onClick={() => setCellStyle({ isWrapText: !isWrapText })}
         testId="toolbar-wrap-text"
+        style={{ minWidth: 80 }}
       >
         Wrap Text
       </Button>

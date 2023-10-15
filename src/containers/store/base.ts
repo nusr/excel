@@ -16,10 +16,11 @@ export class BaseStore<T> {
   // set plain object
   mergeState(data: Partial<T>) {
     assert(isPlainObject(data), 'mergeState argument must be a plain object');
-    this.state = {
+    const newState: T = {
       ...this.state,
       ...data,
     };
+    this.state = newState;
     this.emitChange();
   }
   subscribe = (listener: StoreListener) => {

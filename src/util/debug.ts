@@ -45,7 +45,12 @@ class Debug {
       Debug.colorMap.set(this.namespace, this.getRandomColor());
     }
   }
+  static disable(key: NameSpaceType) {
+    Debug.enableMap.set(key, false);
+  }
 }
+
+Debug.disable('canvas');
 
 export const reactLog = new Debug('react').init();
 export const controllerLog = new Debug('controller').init();

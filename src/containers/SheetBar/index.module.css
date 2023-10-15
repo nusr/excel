@@ -31,7 +31,7 @@
   left: 0;
   bottom: 32px;
   background-color: var(--white);
-  border: 1px solid var(--borderColor);
+  /* border: 1px solid var(--borderColor); */
   border-radius: var(--borderRadius);
   width: 100px;
 }

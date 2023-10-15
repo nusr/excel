@@ -1,4 +1,4 @@
-import { ErrorTypes } from '@/types';
+import { ErrorTypes, NumberFormatItem } from '@/types';
 export const SHEET_NAME_PREFIX = 'Sheet';
 export const DEFAULT_ROW_COUNT = 200;
 export const DEFAULT_COL_COUNT = 30;
@@ -97,22 +97,53 @@ export const ERROR_SET = new Set<ErrorTypes>([
   '#NAME?',
 ]);
 
-export const DEFAULT_STORE_VALUE = {
-  sheetList: [],
-  currentSheetId: '',
-  isCellEditing: false,
-  activeCell: {
-    value: '',
-    style: {},
-    row: 0,
-    col: 0,
-    left: -999,
-    top: -999,
-    width: 0,
-    height: 0,
+export const NUMBER_FORMAT_LIST: NumberFormatItem[] = [
+  { formatCode: 'general', label: '', id: 0 },
+  { formatCode: '0', label: '', id: 1 },
+  { formatCode: '0.00', label: '', id: 2 },
+  { formatCode: '#,##0', label: '', id: 3 },
+  { formatCode: '#,##0.00', label: '', id: 4 },
+  { formatCode: '0%', label: '', id: 9 },
+  { formatCode: '0.00%', label: '', id: 10 },
+  { formatCode: '0.00E+00', label: '', id: 11 },
+  { formatCode: '# ?/?', label: '', id: 12 },
+  { formatCode: '# ??/??', label: '', id: 13 },
+  { formatCode: 'mm-dd-yy', label: '', id: 14 },
+  { formatCode: 'd-mmm-yy', label: '', id: 15 },
+  { formatCode: 'd-mmm', label: '', id: 16 },
+  { formatCode: 'mmm-yy', label: '', id: 17 },
+  { formatCode: 'h:mm AM/PM', label: '', id: 18 },
+  { formatCode: 'h:mm:ss AM/PM', label: '', id: 19 },
+  { formatCode: 'hh:mm', label: '', id: 20 },
+  { formatCode: 'hh:mm:ss', label: '', id: 21 },
+  { formatCode: 'm/d/yy hh:mm', label: '', id: 22 },
+  { formatCode: '#,##0 ;(#,##0)', label: '', id: 37 },
+  { formatCode: '#,##0 ;[red](#,##0)', label: '', id: 38 },
+  { formatCode: '#,##0.00 ;(#,##0.00)', label: '', id: 39 },
+  { formatCode: '#,##0.00 ;[red](#,##0.00)', label: '', id: 40 },
+  {
+    formatCode: '_(* #,##0_);_(* \\(#,##0\\);_(* "-"_);_(@_)',
+    label: '',
+    id: 41,
   },
-  fontFamilyList: [],
-  contextMenuPosition: undefined,
-  sheetBarContextMenuLeft: undefined,
-  isSheetNameEditing: false,
-};
+  {
+    formatCode: '_("$"* #,##0_);_("$"* \\(#,##0\\);_("$"* "-"_);_(@_)',
+    label: '',
+    id: 42,
+  },
+  {
+    formatCode: '_(* #,##0.00_);_(* \\(#,##0.00\\);_(* "-"??_);_(@_)',
+    label: '',
+    id: 43,
+  },
+  {
+    formatCode: '_("$"* #,##0.00_);_("$"* \\(#,##0.00\\);_("$"* "-"??_);_(@_)',
+    label: '',
+    id: 44,
+  },
+  { formatCode: 'mm:ss', label: '', id: 45 },
+  { formatCode: '[h]:mm:ss', label: '', id: 46 },
+  { formatCode: 'mm:ss.0', label: '', id: 47 },
+  { formatCode: '##0.0E+0', label: '', id: 48 },
+  { formatCode: '@', label: '', id: 49 },
+];

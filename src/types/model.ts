@@ -2,7 +2,7 @@ import { ResultType } from './parser';
 import { IRange } from './range';
 export enum EVerticalAlign {
   TOP,
-  MIDDLE,
+  CENTER,
   BOTTOM,
 }
 export enum EHorizontalAlign {
@@ -29,44 +29,6 @@ export enum EUnderLine {
  *
  * model to XML
  */
-
-/**
- * number format list
- * [
-		"general",
-		"0",
-		"0.00",
-		"#,##0",
-		"#,##0.00",
-		"0%",
-		"0.00%",
-		"0.00E+00",
-		"# ?/?",
-		"# ??/??",
-		"mm-dd-yy",
-		"d-mmm-yy",
-		"d-mmm",
-		"mmm-yy",
-		"h:mm AM/PM",
-		"h:mm:ss AM/PM",
-		"hh:mm",
-		"hh:mm:ss",
-		"m/d/yy hh:mm",
-		"#,##0 ;(#,##0)",
-		"#,##0 ;[red](#,##0)",
-		"#,##0.00 ;(#,##0.00)",
-		"#,##0.00 ;[red](#,##0.00)",
-		"_(* #,##0_);_(* \\(#,##0\\);_(* \"-\"_);_(@_)",
-		"_(\"$\"* #,##0_);_(\"$\"* \\(#,##0\\);_(\"$\"* \"-\"_);_(@_)",
-		"_(* #,##0.00_);_(* \\(#,##0.00\\);_(* \"-\"??_);_(@_)",
-		"_(\"$\"* #,##0.00_);_(\"$\"* \\(#,##0.00\\);_(\"$\"* \"-\"??_);_(@_)",
-		"mm:ss",
-		"[h]:mm:ss",
-		"mm:ss.0",
-		"##0.0E+0",
-		"@",
- ]
- */
 export type StyleType = {
   fontColor: string;
   fillColor: string;
@@ -78,7 +40,7 @@ export type StyleType = {
   underline: EUnderLine;
   isItalic: boolean;
   isBold: boolean;
-  numberFormat: number; // number format list index
+  numberFormat: number; // NUMBER_FORMAT_LIST id
 };
 export type WorksheetType = {
   sheetId: string;
@@ -100,8 +62,8 @@ export interface Coordinate {
 }
 export type ModelCellValue = ModelCellType & Coordinate;
 
-export type ModelColType = Record<string, ModelCellType>;
-export type ModelRowType = Record<string, ModelColType>; // key: col number
+export type ModelColType = Record<string, ModelCellType>; // key: col number
+export type ModelRowType = Record<string, ModelColType>; // key: row number
 export type CustomHeightOrWidthItem = Record<string, number>; // key: row number or col number value: height or width
 export type MergeCellItem = {
   start: Coordinate;
@@ -109,7 +71,7 @@ export type MergeCellItem = {
 };
 export type WorkBookJSON = {
   workbook: WorksheetType[]; // workbook.xml_workbook_sheets
-  worksheets: Record<string, ModelRowType>; // key: row number worksheets_*.xml_worksheet_sheetData
+  worksheets: Record<string, ModelRowType>; // key: sheetId worksheets_*.xml_worksheet_sheetData
   mergeCells: IRange[]; // worksheets_*.xml_worksheet_mergeCells
   customHeight: Record<string, CustomHeightOrWidthItem>; // key: sheetId worksheets_*.xml_worksheet_sheetData_customHeight
   customWidth: Record<string, CustomHeightOrWidthItem>; // key: sheetId worksheets_*.xml_worksheet_sheetData_customHeight

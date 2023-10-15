@@ -1,5 +1,6 @@
 import { KeyboardEventItem, IController, EUnderLine } from '@/types';
 import { BOTTOM_BUFF, SCROLL_SIZE, isMac } from '@/util';
+import { coreStore } from '@/containers/store';
 
 export function computeScrollRowAndCol(
   controller: IController,
@@ -170,7 +171,10 @@ function recalculateScroll(controller: IController) {
 }
 
 function checkActiveElement(controller: IController) {
-  const inputDom = controller.getMainDom().input!;
+  const inputDom = controller.getMainDom()?.input;
+  if (!inputDom) {
+    return false;
+  }
   const isInputFocus = document.activeElement === inputDom;
   if (isInputFocus) {
     controller.setCellValues(
@@ -180,7 +184,12 @@ function checkActiveElement(controller: IController) {
     );
     inputDom.value = '';
     inputDom.blur();
+    coreStore.mergeState({
+      isCellEditing: true,
+    });
+    return true;
   }
+  return false;
 }
 
 export const keyboardEventList: KeyboardEventItem[] = [

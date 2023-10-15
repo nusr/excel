@@ -17,56 +17,58 @@ npm install
 npm run start
 ```
 
-## Features
+## Supported Features
 
-- Font
-- Font size
-- Font bold
-- Font italic
-- Font underline
-- Text color
-- Fill color
-- Text wrapping
-- Formulas
-- Insert row, column
-- Delete row, column
-- Insert Sheet
-- Delete Sheet
-- Rename Sheet
-- Hide Sheet
-- Unhide Sheet
-- Copy
-- Cut
-- Paste
+- [x] Font
+- [x] Font size
+- [x] Font bold
+- [x] Font italic
+- [x] Font underline
+- [x] Text color
+- [x] Fill color
+- [x] Text wrapping
+- [x] Formulas
+- [x] Insert row, column
+- [x] Delete row, column
+- [x] Insert Sheet
+- [x] Delete Sheet
+- [x] Rename Sheet
+- [x] Hide Sheet
+- [x] Unhide Sheet
+- [x] Copy
+- [x] Cut
+- [x] Paste
+- [x] Import XLSX
 
-### Formulas
+### Supported Formulas
 
-1. [x] ABS
-2. [x] ACOS
-3. [x] ACOSH
-4. [x] ACOT
-5. [x] ACOTH
-6. [x] ASIN
-7. [x] ASINH
-8. [x] ATAN
-9. [x] ATANH
-10. [x] CHAR
-11. [x] CODE
-12. [x] CONCAT
-13. [x] CONCATENATE
-14. [x] COS
-15. [x] COT
-16. [x] E
-17. [x] EXP
-18. [x] INT
-19. [x] LEN
-20. [x] LOWER
-21. [x] PI
-22. [x] SIN
-23. [x] SPLIT
-24. [x] SUM
-25. [x] T
-26. [x] TRIM
-27. [x] UNICHAR
-28. [x] UNICODE
-29. [x] UPPER
+- [x] ABS
+- [x] ACOS
+- [x] ACOSH
+- [x] ACOT
+- [x] ACOTH
+- [x] ASIN
+- [x] ASINH
+- [x] ATAN
+- [x] ATANH
+- [x] CHAR
+- [x] CODE
+- [x] CONCAT
+- [x] CONCATENATE
+- [x] COS
+- [x] COT
+- [x] E
+- [x] EXP
+- [x] INT
+- [x] LEN
+- [x] LOWER
+- [x] PI
+- [x] SIN
+- [x] SPLIT
+- [x] SUM
+- [x] T
+- [x] TRIM
+- [x] UNICHAR
+- [x] UNICODE
+- [x] UPPER
+

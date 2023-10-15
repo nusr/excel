@@ -1,4 +1,4 @@
-import React, { useSyncExternalStore } from 'react';
+import React, { useSyncExternalStore, useMemo } from 'react';
 import { FormulaEditor, getEditorStyle } from './FormulaEditor';
 import { intToColumnName, classnames } from '@/util';
 import styles from './index.module.css';
@@ -20,9 +20,14 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
     coreStore.subscribe,
     coreStore.getSnapshot,
   );
-  const name = `${intToColumnName(activeCell.col)}${activeCell.row + 1}`;
+  const name = useMemo(() => {
+    return `${intToColumnName(activeCell.col)}${activeCell.row + 1}`;
+  }, [activeCell]);
   const showText = !isCellEditing || activeCell.top > 0 || activeCell.left > 0;
   const editorValue = activeCell.formula || String(activeCell.value || '');
+  const style = useMemo(() => {
+    return getEditorStyle(activeCell);
+  }, [activeCell]);
   return (
     <div className={styles['formula-bar-wrapper']} data-testid="formula-bar">
       <div
@@ -36,7 +41,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
           <FormulaEditor
             controller={controller}
             initValue={editorValue}
-            style={getEditorStyle(activeCell)}
+            style={style}
           />
         ) : null}
         <div

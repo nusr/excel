@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { IController, ChangeEventType } from '@/types';
-import { getHitInfo, copy, cut, paste, debounce } from '@/util';
+import { getHitInfo, copy, cut, paste } from '@/util';
 import styles from './index.module.css';
 import {
   coreStore,
@@ -26,10 +26,10 @@ function createCanvas() {
 
 const DOUBLE_CLICK_TIME = 300;
 
-function handleStateChange(
+const handleStateChange = (
   changeSet: Set<ChangeEventType>,
   controller: IController,
-) {
+) => {
   if (
     changeSet.has('setActiveCell') ||
     changeSet.has('setCellStyle') ||
@@ -79,18 +79,22 @@ function handleStateChange(
       scrollTop: scroll.scrollTop,
     });
   }
-}
+};
 
 function initCanvas(controller: IController) {
   const mainCanvas = new MainCanvas(
     controller,
     new Content(controller, createCanvas()),
   );
+  const render = (changeSet: Set<ChangeEventType>) => {
+    mainCanvas.render({ changeSet });
+    mainCanvas.render({
+      changeSet: controller.getChangeSet(),
+    });
+  };
   const resize = (changeSet: Set<ChangeEventType>) => {
     mainCanvas.resize();
-    mainCanvas.render({
-      changeSet,
-    });
+    render(changeSet);
   };
 
   const removeEvent = registerGlobalEvent(controller, resize);
@@ -98,13 +102,10 @@ function initCanvas(controller: IController) {
     copy,
     cut,
     paste,
-    modelChange: debounce((changeSet) => {
+    modelChange: (changeSet) => {
       handleStateChange(changeSet, controller);
-      mainCanvas.render({ changeSet });
-      mainCanvas.render({
-        changeSet: controller.getChangeSet(),
-      });
-    }),
+      render(changeSet);
+    },
   });
 
   const changeSet = new Set<ChangeEventType>([

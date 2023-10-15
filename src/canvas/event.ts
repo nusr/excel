@@ -42,7 +42,7 @@ export function registerGlobalEvent(
     coreStore.mergeState({
       isCellEditing: true,
     });
-    controller.getMainDom().input!.focus();
+    controller.getMainDom().input?.focus();
   }
 
   const handleWheel = debounce(function (event: WheelEvent) {
@@ -77,7 +77,7 @@ export function registerGlobalEvent(
   }
 
   function handleResize() {
-    resizeWindow(new Set<ChangeEventType>(['content', 'setActiveCell']));
+    resizeWindow(new Set<ChangeEventType>(['content']));
   }
 
   window.addEventListener('resize', handleResize);

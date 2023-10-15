@@ -81,21 +81,38 @@ export function isObjectEqual(a: any, b: any): boolean {
   return a === b;
 }
 
-export function isArrayEqual(a: any[], b: any[]): boolean {
-  if (
-    a.length === b.length &&
-    a.every((item, index) => isObjectEqual(item, b[index]))
-  ) {
+export function deepEqual(x: any, y: any) {
+  if (x === y) {
+    return true;
+  }
+  if (typeof x == 'object' && x != null && typeof y == 'object' && y != null) {
+    if (Object.keys(x).length != Object.keys(y).length) return false;
+
+    for (let key in x) {
+      if (y.hasOwnProperty(key)) {
+        if (!deepEqual(x[key], y[key])) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
     return true;
   }
   return false;
 }
 
 export function isPlainObject(value: any) {
-	if (typeof value !== 'object' || value === null) {
-		return false;
-	}
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
 
-	const prototype = Object.getPrototypeOf(value);
-	return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(Symbol.toStringTag in value) && !(Symbol.iterator in value);
+  const prototype = Object.getPrototypeOf(value);
+  return (
+    (prototype === null ||
+      prototype === Object.prototype ||
+      Object.getPrototypeOf(prototype) === null) &&
+    !(Symbol.toStringTag in value) &&
+    !(Symbol.iterator in value)
+  );
 }
