@@ -9,8 +9,6 @@ import {
 } from '../components';
 import {
   FONT_SIZE_LIST,
-  DEFAULT_FONT_SIZE,
-  DEFAULT_FONT_COLOR,
   QUERY_ALL_LOCAL_FONT,
   LOCAL_FONT_KEY,
   isSupportFontFamily,
@@ -63,17 +61,16 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
       controller.getActiveCell(),
     ]);
   };
-  const { style = {} } = activeCell;
   const {
-    isBold = false,
-    isItalic = false,
-    fontSize = DEFAULT_FONT_SIZE,
-    fontColor = DEFAULT_FONT_COLOR,
+    isBold,
+    isItalic,
+    fontSize,
+    fontColor = '',
     fillColor = '',
-    isWrapText = false,
-    underline = EUnderLine.NONE,
-    fontFamily = '',
-  } = style;
+    isWrapText,
+    underline,
+    fontFamily,
+  } = activeCell;
   const handleFontFamilyChange = (value: string | number) => {
     const t = String(value);
     if (t === QUERY_ALL_LOCAL_FONT) {

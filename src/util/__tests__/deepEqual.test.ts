@@ -43,6 +43,50 @@ describe('deepEqual.test.ts', () => {
       expect(deepEqual(1, false)).toBeFalsy();
       expect(deepEqual({}, { 1: 2 })).toBeFalsy();
       expect(deepEqual([1], [2])).toBeFalsy();
+      expect(
+        deepEqual(
+          {
+            width: 68,
+            height: 19,
+            top: 286,
+            left: 474,
+            row: 4,
+            col: 6,
+            style: { fontFamily: '华文仿宋' },
+          },
+          {
+            width: 68,
+            height: 19,
+            top: 286,
+            left: 474,
+            row: 4,
+            col: 6,
+            style: { fontFamily: '华文仿宋', isBold: true },
+          },
+        ),
+      ).toBeFalsy();
+      expect(
+        deepEqual(
+          {
+            width: 68,
+            height: 19,
+            top: 286,
+            left: 474,
+            row: 4,
+            col: 6,
+            style: { fontFamily: '华文仿宋', isBold: true },
+          },
+          {
+            width: 68,
+            height: 19,
+            top: 286,
+            left: 474,
+            row: 4,
+            col: 6,
+            style: { fontFamily: '华文仿宋' },
+          },
+        ),
+      ).toBeFalsy();
     });
   });
 });

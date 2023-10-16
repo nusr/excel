@@ -1,6 +1,13 @@
 import React, { useRef, useEffect } from 'react';
-import { IController, ChangeEventType } from '@/types';
-import { getHitInfo, copy, cut, paste } from '@/util';
+import { IController, ChangeEventType, EUnderLine } from '@/types';
+import {
+  getHitInfo,
+  copy,
+  cut,
+  paste,
+  DEFAULT_FONT_SIZE,
+  DEFAULT_FONT_COLOR,
+} from '@/util';
 import styles from './index.module.css';
 import {
   coreStore,
@@ -57,10 +64,32 @@ const handleStateChange = (
       }
       cell.style.fontFamily = defaultFontFamily;
     }
-    // reset data
+    const {
+      isBold = false,
+      isItalic = false,
+      fontSize = DEFAULT_FONT_SIZE,
+      fontColor = DEFAULT_FONT_COLOR,
+      fillColor = '',
+      isWrapText = false,
+      underline = EUnderLine.NONE,
+      fontFamily = '',
+      numberFormat = 0,
+    } = cell.style;
     activeCellStore.setState({
       ...cellPosition,
-      ...cell,
+      row: cell.row,
+      col: cell.col,
+      value: cell.value,
+      formula: cell.formula,
+      isBold,
+      isItalic,
+      fontColor,
+      fontSize,
+      fontFamily,
+      fillColor,
+      isWrapText,
+      underline,
+      numberFormat,
     });
   }
   if (changeSet.has('sheetList')) {

@@ -1,10 +1,21 @@
-import type { ActiveCellType } from '@/types';
+import type { StyleType, ResultType } from '@/types';
 import { DEFAULT_POSITION } from '@/util';
 import { BaseStore } from './base';
 
-const cellData: ActiveCellType = {
+export type CellStoreType = Partial<StyleType> & {
+  value: ResultType;
+  formula?: string;
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+  row: number;
+  col: number;
+};
+
+const cellData: CellStoreType = {
   value: '',
-  style: {},
+  formula: '',
   row: 0,
   col: 0,
   left: DEFAULT_POSITION,
@@ -13,4 +24,4 @@ const cellData: ActiveCellType = {
   height: 0,
 };
 
-export const activeCellStore = new BaseStore<ActiveCellType>(cellData);
+export const activeCellStore = new BaseStore<CellStoreType>(cellData);

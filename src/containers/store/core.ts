@@ -1,5 +1,5 @@
 import { BaseStore } from './base';
-export type CoreStore = {
+type CoreStore = {
   currentSheetId: string;
   isCellEditing: boolean;
 };
