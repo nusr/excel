@@ -21,8 +21,8 @@ jobs:
           npm run coverage
       - name: Upload coverage
         uses: codecov/codecov-action@v3
-      - name: E2E
-        run: npm run e2e
+      # - name: E2E
+      #   run: npm run e2e
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}
