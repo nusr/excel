@@ -1,11 +1,14 @@
 import React, { Fragment, useRef } from 'react';
 import type { IController } from '@/types';
 import { Button } from '../components';
-import { parseXLSX } from './import';
+import { importXLSX } from './import';
+import { exportToXLSX } from './export';
 
 type Props = {
   controller: IController;
 };
+
+const buttonStyle = { minWidth: 80 };
 
 export const Import: React.FunctionComponent<Props> = ({ controller }) => {
   const ref = useRef<HTMLInputElement>(null);
@@ -14,7 +17,7 @@ export const Import: React.FunctionComponent<Props> = ({ controller }) => {
     if (!file) {
       return;
     }
-    const model = await parseXLSX(file);
+    const model = await importXLSX(file);
     controller.fromJSON(model);
     ref.current!.value = '';
     ref.current!.blur();
@@ -33,9 +36,26 @@ export const Import: React.FunctionComponent<Props> = ({ controller }) => {
         onClick={() => {
           ref.current!.click();
         }}
-        style={{ minWidth: 80 }}
+        style={buttonStyle}
       >
         import XLSX
+      </Button>
+    </Fragment>
+  );
+};
+
+export const Export: React.FunctionComponent<Props> = ({ controller }) => {
+  const handleExport = () => {
+    exportToXLSX('test.xlsx', controller);
+  };
+  return (
+    <Fragment>
+      <Button
+        testId="toolbar-export-xlsx"
+        onClick={handleExport}
+        style={buttonStyle}
+      >
+        Export XLSX
       </Button>
     </Fragment>
   );

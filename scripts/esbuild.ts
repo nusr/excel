@@ -15,7 +15,7 @@ const licenseText = fs.readFileSync(
 );
 const distDir = path.join(process.cwd(), 'dist');
 
-function openBrowser(url: string) {
+export function openBrowser(url: string) {
   let cmd: string = '';
   const args: string[] = [];
   if (process.platform === 'darwin') {
@@ -188,7 +188,7 @@ async function liveReload() {
   });
   const url = `http://localhost:${port}`;
   buildHtml();
-  openBrowser(url);
+  // openBrowser(url);
   console.log(`running in: ${url}`);
 }
 

@@ -358,7 +358,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
   return result;
 }
 
-export async function parseXLSX(file: File) {
+export async function importXLSX(file: File) {
   const jszip = await import('jszip');
   const zip = await jszip.default.loadAsync(file);
   const { files } = zip;

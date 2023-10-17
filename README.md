@@ -39,6 +39,7 @@ npm run start
 - [x] Cut
 - [x] Paste
 - [x] Import XLSX
+- [x] Export XLSX
 
 ### Supported Formulas
 

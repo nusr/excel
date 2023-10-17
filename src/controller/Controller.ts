@@ -14,6 +14,7 @@ import {
   ClipboardData,
   ClipboardType,
   MainDom,
+  ModelRowType,
 } from '@/types';
 import {
   controllerLog,
@@ -542,5 +543,8 @@ export class Controller implements IController {
   }
   getMainDom(): MainDom {
     return this.mainDom;
+  }
+  getSheetData(sheetId?: string): ModelRowType {
+    return this.model.getSheetData(sheetId);
   }
 }

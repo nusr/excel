@@ -1,4 +1,5 @@
-import { columnNameToInt, rowLabelToInt } from './convert';
+import { columnNameToInt, rowLabelToInt, intToColumnName } from './convert';
+import { IRange } from '@/types';
 import { Range } from './range';
 import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from './constant';
 
@@ -108,4 +109,20 @@ export function mergeRange(start: Range, end: Range): Range | null {
   const col = start.col < end.col ? start.col : end.col;
 
   return new Range(row, col, rowCount, colCount, start.sheetId);
+}
+
+function convertCell(row: number, col: number) {
+  return `${intToColumnName(col)}${row + 1}`;
+}
+
+export function convertToReference(range: IRange) {
+  const result = convertCell(range.row, range.col);
+  if (range.colCount > 1 && range.rowCount > 1) {
+    const end = convertCell(
+      range.row + range.rowCount,
+      range.col + range.colCount,
+    );
+    return `${result}:${end}`;
+  }
+  return result;
 }

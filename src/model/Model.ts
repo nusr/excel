@@ -9,6 +9,7 @@ import {
   IRange,
   IHistory,
   UndoRedoItem,
+  ModelRowType,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -511,5 +512,9 @@ export class Model implements IModel {
     };
 
     return range;
+  }
+  getSheetData(sheetId?: string): ModelRowType {
+    const id = sheetId || this.currentSheetId;
+    return this.worksheets[id];
   }
 }

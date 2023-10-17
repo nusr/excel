@@ -16,7 +16,7 @@ import {
 import { StyleType, EUnderLine, OptionItem, IController } from '@/types';
 import styles from './index.module.css';
 import { activeCellStore, fontFamilyStore } from '@/containers/store';
-import { Import } from '../Excel';
+import { Import, Export } from '../Excel';
 
 type Props = {
   controller: IController;
@@ -109,14 +109,15 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         <Icon name="redo"></Icon>
       </Button>
       <Import controller={controller} />
+      <Export controller={controller} />
       <Button onClick={() => controller.copy()} testId="toolbar-copy">
-        copy
+        Copy
       </Button>
       <Button onClick={() => controller.cut()} testId="toolbar-cut">
-        cut
+        Cut
       </Button>
       <Button onClick={() => controller.paste()} testId="toolbar-paste">
-        paste
+        Paste
       </Button>
       <Select
         data={fontFamilyList}
@@ -126,12 +127,12 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         }}
         getItemStyle={getItemStyle}
         onChange={handleFontFamilyChange}
-      ></Select>
+      />
       <Select
         data={FONT_SIZE_LIST}
         value={fontSize}
         onChange={(value) => setCellStyle({ fontSize: Number(value) })}
-      ></Select>
+      />
       <Button
         active={isBold}
         onClick={() => setCellStyle({ isBold: !isBold })}
