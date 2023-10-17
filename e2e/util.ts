@@ -17,7 +17,7 @@ export function sleep(milliseconds: number) {
 
 export async function openPage() {
   await setupPuppeteer();
-  const filePath = `file://${process.cwd()}/dist/index.html`;
+  const filePath = `http://localhost:8000`;
   await page.goto(filePath);
   await sleep(200);
 }

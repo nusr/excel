@@ -16,14 +16,13 @@ jobs:
       - name: Test
         run: |
           npm install
+          npm run build
+          npm run type-check
           npm run coverage
-          npx tsc
       - name: Upload coverage
         uses: codecov/codecov-action@v3
       - name: E2E
-        run: |
-          npm run build
-          npm run e2e
+        run: npm run e2e
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}
