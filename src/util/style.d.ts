@@ -1,0 +1,11 @@
+import { StyleType } from '@/types';
+export declare const DEFAULT_FONT_SIZE = 11;
+export declare const DEFAULT_FONT_COLOR = "#333333";
+export declare const ERROR_FORMULA_COLOR = "#ff0000";
+export declare const DEFAULT_FILL_COLOR = "transparent";
+export declare const MUST_FONT_FAMILY = "sans-serif";
+export declare const FONT_SIZE_LIST: number[];
+export declare function makeFont(fontStyle?: 'none' | 'normal' | 'italic' | 'oblique', fontWeight?: string, fontSize?: number, fontFamily?: string): string;
+export declare const DEFAULT_FONT_CONFIG: string;
+export declare function convertCanvasStyleToString(style: Partial<StyleType>): string;
+export declare function parseStyle(styleList: NodeListOf<HTMLStyleElement>, selector: string): Partial<StyleType>;

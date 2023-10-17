@@ -1,0 +1,12 @@
+import { ErrorTypes, NumberFormatItem } from '@/types';
+export declare const SHEET_NAME_PREFIX = "Sheet";
+export declare const DEFAULT_ROW_COUNT = 200;
+export declare const DEFAULT_COL_COUNT = 30;
+export declare const TEST_ID_KEY = "data-testid";
+export declare const SCROLL_SIZE = 30;
+export declare const BOTTOM_BUFF = 200;
+export declare const DEFAULT_POSITION = -999;
+export declare const DEBUG_COLOR_LIST: string[];
+export declare const MAX_PARAMS_COUNT = 256;
+export declare const ERROR_SET: Set<ErrorTypes>;
+export declare const NUMBER_FORMAT_LIST: NumberFormatItem[];

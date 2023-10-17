@@ -1,0 +1,48 @@
+import { assert } from './assert';
+import { DEBUG_COLOR_LIST } from './constant';
+class Debug {
+    namespace;
+    static colorMap = new Map();
+    static enableMap = new Map([]);
+    constructor(namespace) {
+        this.namespace = namespace;
+    }
+    init = () => {
+        this.setColor();
+        return this.log;
+    };
+    log = (...rest) => {
+        if (!this.enable()) {
+            return;
+        }
+        const { namespace } = this;
+        const color = Debug.colorMap.get(namespace);
+        const result = [`%c ${namespace}:`, `color:${color};`, ...rest];
+        console.log(...result);
+    };
+    getRandomColor = () => {
+        const index = Math.floor(Math.random() * DEBUG_COLOR_LIST.length);
+        assert(index >= 0 && index < DEBUG_COLOR_LIST.length, String(index));
+        return DEBUG_COLOR_LIST[index];
+    };
+    enable() {
+        return this.checkEnable() && Debug.enableMap.get(this.namespace) !== false;
+    }
+    checkEnable(storage = window.localStorage) {
+        return storage.getItem('debug') === '*';
+    }
+    setColor() {
+        if (!Debug.colorMap.has(this.namespace)) {
+            Debug.colorMap.set(this.namespace, this.getRandomColor());
+        }
+    }
+    static disable(key) {
+        Debug.enableMap.set(key, false);
+    }
+}
+Debug.disable('canvas');
+export const reactLog = new Debug('react').init();
+export const controllerLog = new Debug('controller').init();
+export const canvasLog = new Debug('canvas').init();
+export const modelLog = new Debug('model').init();
+//# sourceMappingURL=debug.js.map

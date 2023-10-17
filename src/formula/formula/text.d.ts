@@ -1,0 +1,12 @@
+import type { TextFormulaType } from '@/types';
+export declare const T: (...list: any[]) => string;
+export declare const LOWER: (...list: any[]) => string;
+export declare const CHAR: (...list: any[]) => string;
+export declare const CODE: (...list: any[]) => number;
+export declare const LEN: (...list: any[]) => number;
+export declare const SPLIT: (...list: any[]) => string[];
+export declare const UPPER: (...list: any[]) => string;
+export declare const TRIM: (...list: any[]) => string;
+export declare const CONCAT: (...list: any[]) => string;
+declare const textFormulas: TextFormulaType;
+export default textFormulas;
