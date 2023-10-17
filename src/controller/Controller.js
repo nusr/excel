@@ -508,5 +508,8 @@ export class Controller {
     getMainDom() {
         return this.mainDom;
     }
+    getSheetData(sheetId) {
+        return this.model.getSheetData(sheetId);
+    }
 }
 //# sourceMappingURL=Controller.js.map

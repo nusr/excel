@@ -1,4 +1,4 @@
-import { WorkBookJSON, StyleType, ChangeEventType, IController, IHooks, IModel, WorksheetType, IWindowSize, CanvasOverlayPosition, ScrollValue, IRange, MainDom } from '@/types';
+import { WorkBookJSON, StyleType, ChangeEventType, IController, IHooks, IModel, WorksheetType, IWindowSize, CanvasOverlayPosition, ScrollValue, IRange, MainDom, ModelRowType } from '@/types';
 export declare class Controller implements IController {
     private scrollValue;
     private model;
@@ -65,4 +65,5 @@ export declare class Controller implements IController {
     getDomRect(): CanvasOverlayPosition;
     setMainDom(dom: MainDom): void;
     getMainDom(): MainDom;
+    getSheetData(sheetId?: string): ModelRowType;
 }

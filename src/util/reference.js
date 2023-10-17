@@ -1,4 +1,4 @@
-import { columnNameToInt, rowLabelToInt } from './convert';
+import { columnNameToInt, rowLabelToInt, intToColumnName } from './convert';
 import { Range } from './range';
 import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from './constant';
 const isCharacter = (char) => (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z');
@@ -84,5 +84,16 @@ export function mergeRange(start, end) {
     const row = start.row < end.row ? start.row : end.row;
     const col = start.col < end.col ? start.col : end.col;
     return new Range(row, col, rowCount, colCount, start.sheetId);
+}
+function convertCell(row, col) {
+    return `${intToColumnName(col)}${row + 1}`;
+}
+export function convertToReference(range) {
+    const result = convertCell(range.row, range.col);
+    if (range.colCount > 1 && range.rowCount > 1) {
+        const end = convertCell(range.row + range.rowCount, range.col + range.colCount);
+        return `${result}:${end}`;
+    }
+    return result;
 }
 //# sourceMappingURL=reference.js.map

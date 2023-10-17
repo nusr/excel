@@ -4,7 +4,7 @@ import { FONT_SIZE_LIST, QUERY_ALL_LOCAL_FONT, LOCAL_FONT_KEY, isSupportFontFami
 import { EUnderLine } from '@/types';
 import styles from './index.module.css';
 import { activeCellStore, fontFamilyStore } from '@/containers/store';
-import { Import } from '../Excel';
+import { Import, Export } from '../Excel';
 const underlineList = [
     {
         value: EUnderLine.NONE,
@@ -62,9 +62,10 @@ export const ToolbarContainer = ({ controller, }) => {
         React.createElement(Button, { disabled: !controller.canRedo, onClick: () => controller.redo(), testId: "toolbar-redo" },
             React.createElement(Icon, { name: "redo" })),
         React.createElement(Import, { controller: controller }),
-        React.createElement(Button, { onClick: () => controller.copy(), testId: "toolbar-copy" }, "copy"),
-        React.createElement(Button, { onClick: () => controller.cut(), testId: "toolbar-cut" }, "cut"),
-        React.createElement(Button, { onClick: () => controller.paste(), testId: "toolbar-paste" }, "paste"),
+        React.createElement(Export, { controller: controller }),
+        React.createElement(Button, { onClick: () => controller.copy(), testId: "toolbar-copy" }, "Copy"),
+        React.createElement(Button, { onClick: () => controller.cut(), testId: "toolbar-cut" }, "Cut"),
+        React.createElement(Button, { onClick: () => controller.paste(), testId: "toolbar-paste" }, "Paste"),
         React.createElement(Select, { data: fontFamilyList, value: fontFamily, style: {
                 width: 140,
             }, getItemStyle: getItemStyle, onChange: handleFontFamilyChange }),

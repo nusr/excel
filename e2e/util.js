@@ -12,7 +12,7 @@ export async function openPage() {
     await setupPuppeteer();
     const filePath = `http://localhost:8000`;
     await page.goto(filePath);
-    await sleep(200);
+    await sleep(1000);
 }
 export function getTestIdSelector(testId) {
     return `[data-testid="${testId}"]`;

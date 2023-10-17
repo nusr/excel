@@ -1,4 +1,4 @@
-import { StyleType, WorkBookJSON, WorksheetType, IModel, ResultType, IRange, IHistory } from '@/types';
+import { StyleType, WorkBookJSON, WorksheetType, IModel, ResultType, IRange, IHistory, ModelRowType } from '@/types';
 import { Range } from '@/util';
 export declare class Model implements IModel {
     private currentSheetId;
@@ -53,4 +53,5 @@ export declare class Model implements IModel {
     record(): void;
     private executeOperate;
     pasteRange(fromRange: IRange, isCut: boolean): IRange;
+    getSheetData(sheetId?: string): ModelRowType;
 }

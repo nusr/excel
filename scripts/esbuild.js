@@ -10,7 +10,7 @@ const isDev = nodeEnv === 'development';
 const globalName = '__export__';
 const licenseText = fs.readFileSync(path.join(process.cwd(), 'LICENSE'), 'utf-8');
 const distDir = path.join(process.cwd(), 'dist');
-function openBrowser(url) {
+export function openBrowser(url) {
     let cmd = '';
     const args = [];
     if (process.platform === 'darwin') {
@@ -157,7 +157,6 @@ async function liveReload() {
     });
     const url = `http://localhost:${port}`;
     buildHtml();
-    openBrowser(url);
     console.log(`running in: ${url}`);
 }
 function init() {

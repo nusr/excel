@@ -1,6 +1,8 @@
 import React, { Fragment, useRef } from 'react';
 import { Button } from '../components';
-import { parseXLSX } from './import';
+import { importXLSX } from './import';
+import { exportToXLSX } from './export';
+const buttonStyle = { minWidth: 80 };
 export const Import = ({ controller }) => {
     const ref = useRef(null);
     const handleChange = async (event) => {
@@ -8,7 +10,7 @@ export const Import = ({ controller }) => {
         if (!file) {
             return;
         }
-        const model = await parseXLSX(file);
+        const model = await importXLSX(file);
         controller.fromJSON(model);
         ref.current.value = '';
         ref.current.blur();
@@ -17,6 +19,13 @@ export const Import = ({ controller }) => {
         React.createElement("input", { type: "file", ref: ref, style: { display: 'none' }, onChange: handleChange, accept: ".xlsx" }),
         React.createElement(Button, { testId: "toolbar-import-xlsx", onClick: () => {
                 ref.current.click();
-            }, style: { minWidth: 80 } }, "import XLSX")));
+            }, style: buttonStyle }, "import XLSX")));
+};
+export const Export = ({ controller }) => {
+    const handleExport = () => {
+        exportToXLSX('test.xlsx', controller);
+    };
+    return (React.createElement(Fragment, null,
+        React.createElement(Button, { testId: "toolbar-export-xlsx", onClick: handleExport, style: buttonStyle }, "Export XLSX")));
 };
 //# sourceMappingURL=index.js.map

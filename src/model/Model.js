@@ -441,5 +441,9 @@ export class Model {
         };
         return range;
     }
+    getSheetData(sheetId) {
+        const id = sheetId || this.currentSheetId;
+        return this.worksheets[id];
+    }
 }
 //# sourceMappingURL=Model.js.map
