@@ -1,13 +1,13 @@
-import React, { useMemo, useState, useSyncExternalStore, useRef } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { Button, Dialog, Select } from '../components';
 import { IController, OptionItem } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
-import { sheetListStore } from '../store';
 
 type Props = {
   controller: IController;
   position: number;
+  sheetList: OptionItem[];
   hideMenu: () => void;
   editSheetName: () => void;
 };
@@ -15,6 +15,7 @@ type Props = {
 export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
   controller,
   position,
+  sheetList,
   hideMenu,
   editSheetName,
 }) => {
@@ -27,10 +28,6 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
     }
     hideMenu();
   });
-  const sheetList = useSyncExternalStore(
-    sheetListStore.subscribe,
-    sheetListStore.getSnapshot,
-  );
   const hideSheetList: OptionItem[] = useMemo(() => {
     return sheetList
       .filter((v) => v.disabled)

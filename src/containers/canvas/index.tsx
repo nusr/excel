@@ -1,158 +1,24 @@
-import React, { useRef, useEffect } from 'react';
-import { IController, ChangeEventType, EUnderLine } from '@/types';
-import {
-  getHitInfo,
-  copy,
-  cut,
-  paste,
-  DEFAULT_FONT_SIZE,
-  DEFAULT_FONT_COLOR,
-} from '@/util';
+import React, { useRef, useEffect, Fragment, useState } from 'react';
+import { IController } from '@/types';
+import { getHitInfo, DEFAULT_POSITION } from '@/util';
 import styles from './index.module.css';
-import {
-  coreStore,
-  contextMenuStore,
-  activeCellStore,
-  sheetListStore,
-  fontFamilyStore,
-  scrollStore,
-} from '@/containers/store';
-import { MainCanvas, registerGlobalEvent, Content } from '@/canvas';
+import { coreStore } from '@/containers/store';
 import { ScrollBar } from './ScrollBar';
+import { ContextMenu } from './ContextMenu';
+import { initCanvas } from './util';
 
 type Props = {
   controller: IController;
 };
-
-function createCanvas() {
-  const canvas = document.createElement('canvas');
-  canvas.style.display = 'none';
-  document.body.appendChild(canvas);
-  return canvas;
-}
-
 const DOUBLE_CLICK_TIME = 300;
-
-const handleStateChange = (
-  changeSet: Set<ChangeEventType>,
-  controller: IController,
-) => {
-  if (
-    changeSet.has('setActiveCell') ||
-    changeSet.has('setCellStyle') ||
-    changeSet.has('setCellValues')
-  ) {
-    const { top } = controller.getDomRect();
-    const activeCell = controller.getActiveCell();
-    const cell = controller.getCell(activeCell);
-    const cellPosition = controller.computeCellPosition(
-      activeCell.row,
-      activeCell.col,
-    );
-    cellPosition.top = top + cellPosition.top;
-    if (!cell.style) {
-      cell.style = {};
-    }
-    if (!cell.style.fontFamily) {
-      let defaultFontFamily = '';
-      const list = fontFamilyStore.getSnapshot();
-      for (const item of list) {
-        if (!item.disabled) {
-          defaultFontFamily = String(item.value);
-          break;
-        }
-      }
-      cell.style.fontFamily = defaultFontFamily;
-    }
-    const {
-      isBold = false,
-      isItalic = false,
-      fontSize = DEFAULT_FONT_SIZE,
-      fontColor = DEFAULT_FONT_COLOR,
-      fillColor = '',
-      isWrapText = false,
-      underline = EUnderLine.NONE,
-      fontFamily = '',
-      numberFormat = 0,
-    } = cell.style;
-    activeCellStore.setState({
-      ...cellPosition,
-      row: cell.row,
-      col: cell.col,
-      value: cell.value,
-      formula: cell.formula,
-      isBold,
-      isItalic,
-      fontColor,
-      fontSize,
-      fontFamily,
-      fillColor,
-      isWrapText,
-      underline,
-      numberFormat,
-    });
-  }
-  if (changeSet.has('sheetList')) {
-    const sheetList = controller
-      .getSheetList()
-      .map((v) => ({ value: v.sheetId, label: v.name, disabled: v.isHide }));
-    sheetListStore.setState(sheetList);
-  }
-  if (changeSet.has('currentSheetId')) {
-    coreStore.mergeState({ currentSheetId: controller.getCurrentSheetId() });
-  }
-  if (changeSet.has('scroll')) {
-    const scroll = controller.getScroll();
-    scrollStore.setState({
-      scrollLeft: scroll.scrollLeft,
-      scrollTop: scroll.scrollTop,
-    });
-  }
-};
-
-function initCanvas(controller: IController) {
-  const mainCanvas = new MainCanvas(
-    controller,
-    new Content(controller, createCanvas()),
-  );
-  const render = (changeSet: Set<ChangeEventType>) => {
-    mainCanvas.render({ changeSet });
-    mainCanvas.render({
-      changeSet: controller.getChangeSet(),
-    });
-  };
-  const resize = (changeSet: Set<ChangeEventType>) => {
-    mainCanvas.resize();
-    render(changeSet);
-  };
-
-  const removeEvent = registerGlobalEvent(controller, resize);
-  controller.setHooks({
-    copy,
-    cut,
-    paste,
-    modelChange: (changeSet) => {
-      handleStateChange(changeSet, controller);
-      render(changeSet);
-    },
-  });
-
-  const changeSet = new Set<ChangeEventType>([
-    'currentSheetId',
-    'scroll',
-    'content',
-    'setActiveCell',
-    'sheetList',
-  ]);
-  handleStateChange(changeSet, controller);
-  resize(changeSet);
-
-  return removeEvent;
-}
 
 export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
   const { controller } = props;
   const lastTimeStamp = useRef(0);
+  const [menuPosition, setMenuPosition] = useState({
+    top: DEFAULT_POSITION,
+    left: DEFAULT_POSITION,
+  });
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     if (!ref.current) {
@@ -163,11 +29,17 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
   }, []);
   const handleContextMenu = (event: React.MouseEvent<HTMLCanvasElement>) => {
     event.preventDefault();
-    contextMenuStore.mergeState({
+    setMenuPosition({
       top: event.clientY,
       left: event.clientX,
     });
     return false;
+  };
+  const hideContextMenu = () => {
+    setMenuPosition({
+      top: DEFAULT_POSITION,
+      left: DEFAULT_POSITION,
+    });
   };
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const headerSize = controller.getHeaderSize();
@@ -271,17 +143,30 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     lastTimeStamp.current = timeStamp;
   };
   return (
-    <div className={styles['canvas-container']} data-testid="canvas-container">
-      <canvas
-        className={styles['canvas-content']}
-        onContextMenu={handleContextMenu}
-        onMouseMove={handleMouseMove}
-        onMouseDown={handleMouseDown}
-        ref={ref}
-        data-testid="canvas-main"
-      />
-      <ScrollBar controller={controller} />
-    </div>
+    <Fragment>
+      <div
+        className={styles['canvas-container']}
+        data-testid="canvas-container"
+      >
+        <canvas
+          className={styles['canvas-content']}
+          onContextMenu={handleContextMenu}
+          onMouseMove={handleMouseMove}
+          onMouseDown={handleMouseDown}
+          ref={ref}
+          data-testid="canvas-main"
+        />
+        <ScrollBar controller={controller} />
+      </div>
+      {menuPosition.top >= 0 && menuPosition.left >= 0 && (
+        <ContextMenu
+          controller={controller}
+          top={menuPosition.top}
+          left={menuPosition.left}
+          hideContextMenu={hideContextMenu}
+        />
+      )}
+    </Fragment>
   );
 };
 CanvasContainer.displayName = 'CanvasContainer';

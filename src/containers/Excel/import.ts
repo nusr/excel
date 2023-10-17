@@ -1,4 +1,3 @@
-import jszip from 'jszip';
 import {
   WorkBookJSON,
   WorksheetType,
@@ -360,7 +359,8 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
 }
 
 export async function parseXLSX(file: File) {
-  const zip = await jszip.loadAsync(file);
+  const jszip = await import('jszip');
+  const zip = await jszip.default.loadAsync(file);
   const { files } = zip;
   const result: Record<string, XMLFile> = {};
   for (const key of Object.keys(files)) {

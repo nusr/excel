@@ -1,53 +1,38 @@
-import React, { useMemo, useSyncExternalStore } from 'react';
+import React, { useMemo } from 'react';
 import { Button } from '../components';
 import { IController } from '@/types';
 import styles from './index.module.css';
-import { contextMenuStore } from '@/containers/store';
-import { DEFAULT_POSITION } from '@/util';
 import { useClickOutside } from '../hooks';
 
 type Props = {
   controller: IController;
+  top: number;
+  left: number;
+  hideContextMenu: () => void;
 };
 
 const MENU_WIDTH = 110;
 const MENU_HEIGHT = 142;
 
-export const ContextMenuContainer: React.FunctionComponent<Props> = ({
-  controller,
-}) => {
-  const contextMenuPosition = useSyncExternalStore(
-    contextMenuStore.subscribe,
-    contextMenuStore.getSnapshot,
-  );
-  const hideContextMenu = () => {
-    contextMenuStore.mergeState({
-      top: DEFAULT_POSITION,
-      left: DEFAULT_POSITION,
-    });
-  };
+export const ContextMenu: React.FunctionComponent<Props> = (props) => {
+  const { controller, top, left, hideContextMenu } = props;
   const [ref] = useClickOutside(hideContextMenu);
   const style = useMemo(() => {
     // recompute menu position
-    let top = contextMenuPosition.top;
-    let left = contextMenuPosition.left;
+    let realTop = top;
+    let realLeft = left;
     const gap = 18;
-    if (top + MENU_HEIGHT > window.innerHeight) {
-      top = window.innerHeight - MENU_HEIGHT - gap;
+    if (realTop + MENU_HEIGHT > window.innerHeight) {
+      realTop = window.innerHeight - MENU_HEIGHT - gap;
     }
-    if (left + MENU_WIDTH > window.innerWidth) {
-      left = window.innerWidth - MENU_WIDTH - gap;
+    if (realLeft + MENU_WIDTH > window.innerWidth) {
+      realLeft = window.innerWidth - MENU_WIDTH - gap;
     }
     return {
-      top,
-      left,
+      top: realTop,
+      left: realLeft,
     };
-  }, [contextMenuPosition]);
-  const showContextMenu =
-    contextMenuPosition.top >= 0 && contextMenuPosition.left >= 0;
-  if (!showContextMenu) {
-    return null;
-  }
+  }, [top, left]);
 
   return (
     <div
@@ -115,4 +100,4 @@ export const ContextMenuContainer: React.FunctionComponent<Props> = ({
     </div>
   );
 };
-ContextMenuContainer.displayName = 'ContextMenuContainer';
+ContextMenu.displayName = 'ContextMenuContainer';

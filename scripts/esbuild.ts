@@ -1,4 +1,4 @@
-import { build, BuildOptions, context } from 'esbuild';
+import { build, BuildOptions, context, analyzeMetafile } from 'esbuild';
 import packageJson from '../package.json';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -116,7 +116,6 @@ function buildBrowserConfig(options: BuildOptions): BuildOptions {
     minify,
     metafile: minify,
     logLevel: 'error',
-    // external: ['react', 'react-dom'],
   };
   Object.assign(realOptions, options);
 
@@ -146,12 +145,13 @@ async function main() {
   deleteDir('lib');
   deleteDir('dist');
 
-  const options = buildUMD('');
+  const options = buildESM('');
   const list = await Promise.all(
     [
       {
         ...options,
         outdir: distDir,
+        splitting: true,
         minify: true,
       },
       buildESM(packageJson.module),
@@ -160,6 +160,9 @@ async function main() {
       buildUMD(packageJson.main.replace('.js', '.min.js')),
     ].map(async (item) => {
       const result = await build(item);
+      if (result.metafile) {
+        console.log(await analyzeMetafile(result.metafile));
+      }
       return result;
     }),
   );
@@ -169,11 +172,13 @@ async function main() {
 
 async function liveReload() {
   deleteDir('dist');
-  const options = buildUMD('');
+  const options = buildESM('');
   const ctx = await context({
     ...options,
     outfile: undefined,
     outdir: distDir,
+    splitting: true,
+    minify: true,
   });
 
   await ctx.watch();

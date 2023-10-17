@@ -1,5 +1,4 @@
 import { CanvasContainer } from './canvas';
-import { ContextMenuContainer } from './ContextMenu';
 import { FormulaBarContainer } from './FormulaBar';
 import { ToolbarContainer } from './ToolBar';
 import { SheetBarContainer } from './SheetBar';
@@ -18,7 +17,6 @@ export const App: React.FunctionComponent<Props> = ({ controller }) => {
       <FormulaBarContainer controller={controller} />
       <CanvasContainer controller={controller} />
       <SheetBarContainer controller={controller} />
-      <ContextMenuContainer controller={controller} />
     </div>
   );
 };

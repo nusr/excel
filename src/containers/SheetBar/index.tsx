@@ -91,6 +91,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
         <SheetBarContextMenu
           controller={controller}
           position={menuPosition}
+          sheetList={sheetList}
           hideMenu={() => setMenuPosition(DEFAULT_POSITION)}
           editSheetName={() => setEditing(true)}
         />

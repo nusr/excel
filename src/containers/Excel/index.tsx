@@ -1,7 +1,7 @@
 import React, { Fragment, useRef } from 'react';
 import type { IController } from '@/types';
 import { Button } from '../components';
-import { parseXLSX } from './util';
+import { parseXLSX } from './import';
 
 type Props = {
   controller: IController;
