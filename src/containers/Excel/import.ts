@@ -52,7 +52,7 @@ type SheetDataRowItem = {
   c: ColItem[];
 };
 
-type XfItem = {
+export type XfItem = {
   fontId: string;
   fillId: string;
   numFmtId: string;
