@@ -2,7 +2,7 @@ import React, { Fragment, useRef } from 'react';
 import type { IController } from '@/types';
 import { Button } from '../components';
 import { importXLSX } from './import';
-import { exportToXLSX } from './export';
+import { exportToXLSX, exportToCsv } from './export';
 
 type Props = {
   controller: IController;
@@ -45,17 +45,27 @@ export const Import: React.FunctionComponent<Props> = ({ controller }) => {
 };
 
 export const Export: React.FunctionComponent<Props> = ({ controller }) => {
-  const handleExport = () => {
-    exportToXLSX('test.xlsx', controller);
+  const handleExportXLSX = () => {
+    exportToXLSX(`excel_${Date.now()}.xlsx`, controller);
+  };
+  const handleExportCSV = () => {
+    exportToCsv(`excel_${Date.now()}.csv`, controller);
   };
   return (
     <Fragment>
       <Button
         testId="toolbar-export-xlsx"
-        onClick={handleExport}
+        onClick={handleExportXLSX}
         style={buttonStyle}
       >
         Export XLSX
+      </Button>
+      <Button
+        testId="toolbar-export-csv"
+        onClick={handleExportCSV}
+        style={buttonStyle}
+      >
+        Export CSV
       </Button>
     </Fragment>
   );

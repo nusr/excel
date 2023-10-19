@@ -9,7 +9,6 @@ import {
   IRange,
   IHistory,
   UndoRedoItem,
-  ModelRowType,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -142,6 +141,13 @@ export class Model implements IModel {
   }
   renameSheet(sheetName: string, sheetId?: string | undefined): void {
     assert(!!sheetName, 'You typed a invalid name for a sheet.');
+    const item = this.workbook.find((v) => v.name === sheetName);
+    if (item) {
+      if (item.sheetId === sheetId) {
+        return;
+      }
+      assert(false, 'Cannot rename a sheet to the same name as another sheet');
+    }
     const sheetInfo = this.getSheetInfo(sheetId);
     sheetInfo.name = sheetName;
   }
@@ -183,14 +189,14 @@ export class Model implements IModel {
   };
   toJSON = (): WorkBookJSON => {
     const {
-      worksheets,
-      workbook,
-      mergeCells,
-      customHeight,
-      customWidth,
-      definedNames,
+      worksheets = {},
+      workbook = [],
+      mergeCells = [],
+      customHeight = {},
+      customWidth = {},
+      definedNames = {},
     } = this;
-    return {
+    const json = {
       workbook,
       worksheets,
       mergeCells,
@@ -198,6 +204,8 @@ export class Model implements IModel {
       customWidth,
       definedNames,
     };
+    modelLog('toJSON', json);
+    return json;
   };
 
   private setCellValue(value: ResultType, range: Coordinate): void {
@@ -489,7 +497,7 @@ export class Model implements IModel {
   pasteRange(fromRange: IRange, isCut: boolean): IRange {
     const currentSheetId = this.currentSheetId;
     const { activeCell } = this.getSheetInfo(currentSheetId);
-    
+
     const { row, col, rowCount, colCount, sheetId } = fromRange;
     for (let r = row, i = 0, endRow = row + rowCount; r < endRow; r++, i++) {
       for (let c = col, j = 0, endCol = col + colCount; c < endCol; c++, j++) {
@@ -512,9 +520,5 @@ export class Model implements IModel {
     };
 
     return range;
-  }
-  getSheetData(sheetId?: string): ModelRowType {
-    const id = sheetId || this.currentSheetId;
-    return this.worksheets[id];
   }
 }

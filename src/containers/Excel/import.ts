@@ -21,6 +21,7 @@ const WORKBOOK_PATH = 'xl/workbook.xml';
 const WORKBOOK_RELATION_PATH = 'xl/_rels/workbook.xml.rels';
 const THEME_PATH = 'xl/theme/theme1.xml';
 const SHEET_PATH_PREFIX = 'xl/worksheets/';
+export const CUSTOM_WIdTH_RADIO = 8;
 
 type ThemeData = Record<
   string,
@@ -42,14 +43,22 @@ type XMLFile = Record<string, any>;
 type ColItem = {
   r: string;
   s: string;
-  v: {
+  v?: {
     '#text': string;
   };
 };
 type SheetDataRowItem = {
-  customHeight: string;
+  customHeight?: string;
+  ht?: string;
   r: string;
   c: ColItem[];
+};
+
+type CustomColItem = {
+  min: string;
+  max: string;
+  width: string;
+  customWidth: string;
 };
 
 export type XfItem = {
@@ -189,7 +198,7 @@ function getCellStyle(
 ): Partial<StyleType> | undefined {
   const result: Partial<StyleType> = {};
   const xfList = get<XfItem[]>(xml, 'styleSheet.cellXfs.xf', []);
-  if (xfList.length === 0 || !xfList[styleId]) {
+  if (!styleId || xfList.length === 0 || !xfList[styleId]) {
     return undefined;
   }
   const xf = xfList[styleId];
@@ -323,10 +332,33 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     if (!Array.isArray(sheetData)) {
       sheetData = [sheetData];
     }
+    let customWidth: CustomColItem[] = get(
+      xmlData[sheetPath],
+      'worksheet.cols.col',
+      [],
+    );
+    customWidth = Array.isArray(customWidth) ? customWidth : [customWidth];
+    if (customWidth.length > 0) {
+      result.customWidth[item.sheetId] = {};
+      for (const col of customWidth) {
+        if (col && col.customWidth && col.width && col.min && col.max) {
+          const w = parseFloat(col.width) * CUSTOM_WIdTH_RADIO;
+          for (
+            let start = parseInt(col.min, 10) - 1, end = parseInt(col.max, 10);
+            start < end;
+            start++
+          ) {
+            result.customWidth[item.sheetId][start] = w;
+          }
+        }
+      }
+    }
+
     if (sheetData.length === 0) {
       continue;
     }
     result.worksheets[item.sheetId] = {};
+    result.customHeight[item.sheetId] = {};
 
     for (const row of sheetData) {
       if (!row) {
@@ -334,13 +366,16 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
       }
       const realRow = parseInt(row.r, 10) - 1;
       result.worksheets[item.sheetId][realRow] = {};
+      if (row.customHeight && row.ht) {
+        result.customHeight[item.sheetId][realRow] = parseFloat(row.ht);
+      }
       const colList = Array.isArray(row.c) ? row.c : [row.c];
       for (const col of colList) {
         if (!col) {
           continue;
         }
         const range = parseCell(col.r)!;
-        const val = col.v['#text'] || '';
+        const val = col?.v?.['#text'] || '';
         const styleId = parseInt(col.s, 10);
         const t: ModelCellType = {
           style: getCellStyle(xmlData[STYLE_PATH], styleId, themeData),

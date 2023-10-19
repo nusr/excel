@@ -1,8 +1,7 @@
-import { build, BuildOptions, context, analyzeMetafile } from 'esbuild';
+import { build, BuildOptions, context } from 'esbuild';
 import packageJson from '../package.json';
 import * as fs from 'fs';
 import * as path from 'path';
-import childProcess from 'child_process';
 
 const envConfig = getEnv();
 const productionMode = 'production';
@@ -14,32 +13,6 @@ const licenseText = fs.readFileSync(
   'utf-8',
 );
 const distDir = path.join(process.cwd(), 'dist');
-
-export function openBrowser(url: string) {
-  let cmd: string = '';
-  const args: string[] = [];
-  if (process.platform === 'darwin') {
-    try {
-      childProcess.execSync(
-        `osascript openChrome.applescript "${encodeURI(url)}"`,
-        {
-          cwd: __dirname,
-          stdio: 'ignore',
-        },
-      );
-      return true;
-    } catch (error) {}
-    cmd = 'open';
-  } else if (process.platform === 'win32') {
-    cmd = 'cmd.exe';
-    args.push('/c', 'start', '""', '/b');
-    url = url.replace(/&/g, '^&');
-  } else {
-    cmd = 'xdg-open';
-  }
-  args.push(url);
-  childProcess.spawn(cmd, args);
-}
 
 function getEnv(): Record<string, string> {
   const result: Record<string, string> = {};
@@ -141,10 +114,7 @@ function deleteDir(dir: string) {
   });
 }
 
-async function main() {
-  deleteDir('lib');
-  deleteDir('dist');
-
+async function buildProd() {
   const options = buildESM('');
   const list = await Promise.all(
     [
@@ -160,25 +130,22 @@ async function main() {
       buildUMD(packageJson.main.replace('.js', '.min.js')),
     ].map(async (item) => {
       const result = await build(item);
-      if (result.metafile) {
-        console.log(await analyzeMetafile(result.metafile));
-      }
+      // if (result.metafile) {
+      //   console.log(await analyzeMetafile(result.metafile));
+      // }
       return result;
     }),
   );
-  buildHtml();
   return list;
 }
 
-async function liveReload() {
-  deleteDir('dist');
+async function buildDev() {
   const options = buildESM('');
   const ctx = await context({
     ...options,
     outfile: undefined,
     outdir: distDir,
     splitting: true,
-    minify: true,
   });
 
   await ctx.watch();
@@ -187,16 +154,18 @@ async function liveReload() {
     servedir: distDir,
   });
   const url = `http://localhost:${port}`;
-  buildHtml();
-  // openBrowser(url);
+
   console.log(`running in: ${url}`);
 }
 
-function init() {
+async function init() {
+  deleteDir('lib');
+  deleteDir('dist');
   if (isDev) {
-    liveReload();
+    await buildDev();
   } else {
-    main();
+    await buildProd();
   }
+  buildHtml();
 }
 init();

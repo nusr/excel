@@ -1,4 +1,3 @@
-import { xmlData } from './mock';
 import { saveAs } from 'file-saver';
 import {
   IController,
@@ -8,9 +7,10 @@ import {
   EUnderLine,
   EHorizontalAlign,
   EVerticalAlign,
+  CustomHeightOrWidthItem,
 } from '@/types';
 import { convertToReference, isEmpty, NUMBER_FORMAT_LIST } from '@/util';
-import { XfItem } from './import';
+import { XfItem, CUSTOM_WIdTH_RADIO } from './import';
 import { convertColorToHex } from './color';
 
 type StyleData = {
@@ -32,23 +32,60 @@ function processRow(row: ResultType[]) {
       innerValue = t.toString();
     }
     let result = innerValue.replace(/"/g, '""');
-    if (result.search(/("|,|\n)/g) >= 0) result = '"' + result + '"';
-    if (j > 0) finalVal += ',';
+    if (result.search(/("|,|\n)/g) >= 0) {
+      result = '"' + result + '"';
+    }
+    if (j > 0) {
+      finalVal += ',';
+    }
     finalVal += result;
   }
   return finalVal + '\n';
 }
-export function exportToCsv(fileName: string, rows: ResultType[][]) {
+export function exportToCsv(fileName: string, controller: IController) {
+  const sheetData =
+    controller.toJSON().worksheets[controller.getCurrentSheetId()];
   let csvFile = '';
-  for (var i = 0; i < rows.length; i++) {
-    csvFile += processRow(rows[i]);
+  if (sheetData) {
+    for (const row of Object.keys(sheetData)) {
+      if (!sheetData[row]) {
+        continue;
+      }
+      const list: ResultType[] = [];
+      const r = sheetData[row];
+      for (const col of Object.keys(r)) {
+        const c = r[col];
+        if (!c) {
+          continue;
+        }
+        list.push(c.formula ?? c.value);
+      }
+      csvFile += processRow(list);
+    }
   }
-
   const blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
   saveAs(blob, fileName);
 }
 
-function getSheetData(activeCell: IRange, sheetData: string) {
+function getSheetData(
+  activeCell: IRange,
+  sheetData: string,
+  isActiveSheet: boolean,
+  customWidthMap: CustomHeightOrWidthItem,
+) {
+  let customWidth = '';
+  if (customWidthMap) {
+    const list: string[] = [];
+    for (const col of Object.keys(customWidthMap)) {
+      const t = parseInt(col, 10) + 1;
+      list.push(
+        `<col min="${t}" max="${t}" width="${
+          customWidthMap[col] / CUSTOM_WIdTH_RADIO
+        }" customWidth="1"/>`,
+      );
+    }
+    customWidth = `<cols>${list.join('')}</cols>`;
+  }
   const v = sheetData
     ? `<sheetData>
   ${sheetData}
@@ -64,7 +101,7 @@ function getSheetData(activeCell: IRange, sheetData: string) {
       <sheetPr/>
       <dimension ref="A1:B1"/>
       <sheetViews>
-        <sheetView tabSelected="1" workbookViewId="0">
+        <sheetView ${isActiveSheet ? 'tabSelected="1"' : ''} workbookViewId="0">
           <selection activeCell="${convertToReference({
             row: activeCell.row,
             col: activeCell.col,
@@ -75,6 +112,7 @@ function getSheetData(activeCell: IRange, sheetData: string) {
         </sheetView>
       </sheetViews>
       <sheetFormatPr defaultColWidth="9" defaultRowHeight="16.8" outlineLevelCol="1"/>
+      ${customWidth}
       ${v}
       <pageMargins left="0.75" right="0.75" top="1" bottom="1" header="0.5" footer="0.5"/>
       <headerFooter/>
@@ -85,7 +123,7 @@ function getSheetData(activeCell: IRange, sheetData: string) {
 // TODO: convert color to rgb
 function convertColorToRGB(val: string) {
   const t = convertColorToHex(val);
-  return t.slice(1, -2);
+  return 'FF' + t.slice(1, -2);
 }
 
 function convertStyle(styles: StyleData, style: Partial<StyleType>) {
@@ -744,18 +782,104 @@ function generateStyleFile(styles: StyleData) {
 export async function exportToXLSX(fileName: string, controller: IController) {
   const JSZip = (await import('jszip')).default;
 
-  const sheetList = controller.getSheetList();
+  const modelJson = controller.toJSON();
+  const currentSheetId = controller.getCurrentSheetId();
+  const sheetList = modelJson.workbook;
+
+  const sheetRelMap: Record<string, { rid: string; target: string }> = {};
+  for (let i = 0; i < sheetList.length; i++) {
+    const t = sheetList[i];
+    const a = i + 1;
+    sheetRelMap[t.sheetId] = {
+      rid: `rId${a}`,
+      target: `sheet${a}.xml`,
+    };
+  }
 
   const zip = new JSZip();
-  zip.file('[Content_Types].xml', xmlData['[Content_Types].xml']);
+  const contentType = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>
+  <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
+  <Override PartName="/docProps/custom.xml" ContentType="application/vnd.openxmlformats-officedocument.custom-properties+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+  <Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  ${sheetList
+    .map(
+      (item) =>
+        `<Override PartName="/xl/worksheets/${
+          sheetRelMap[item.sheetId]!.target
+        }" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`,
+    )
+    .join('')}
+</Types>`;
+  zip.file('[Content_Types].xml', contentType);
 
   const rel = zip.folder('_rels')!;
-  rel.file('.rels', xmlData['_rels/.rels']);
+  const relData = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+  <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
+  <Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties" Target="docProps/custom.xml"/>
+</Relationships>`;
+  rel.file('.rels', relData);
 
-  // const docProps = zip.folder('docProps')!;
-  // docProps.file('app.xml', '');
-  // docProps.file('core.xml', '');
-  // docProps.file('custom.xml', '');
+  const docProps = zip.folder('docProps')!;
+  docProps.file(
+    'app.xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"
+  xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+  <Application>WPS Spreadsheets</Application>
+  <HeadingPairs>
+    <vt:vector size="2" baseType="variant">
+      <vt:variant>
+        <vt:lpstr>工作表</vt:lpstr>
+      </vt:variant>
+      <vt:variant>
+        <vt:i4>1</vt:i4>
+      </vt:variant>
+    </vt:vector>
+  </HeadingPairs>
+  <TitlesOfParts>
+    <vt:vector size="${sheetList.length}" baseType="lpstr">
+      ${sheetList
+        .map(
+          (item) => `<vt:lpstr>${sheetRelMap[item.sheetId].target}</vt:lpstr>`,
+        )
+        .join('')}
+    </vt:vector>
+  </TitlesOfParts>
+</Properties>`,
+  );
+  const createDate = new Date().toLocaleDateString('zh').replaceAll('/', '-');
+  const createTime = new Date().toLocaleTimeString('zh');
+  docProps.file(
+    'core.xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:dcterms="http://purl.org/dc/terms/"
+  xmlns:dcmitype="http://purl.org/dc/dcmitype/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <dc:creator>Steve Xu</dc:creator>
+  <cp:lastModifiedBy>Steve Xu</cp:lastModifiedBy>
+  <dcterms:created xsi:type="dcterms:W3CDTF">${createDate}T${createTime}Z</dcterms:created>
+  <dcterms:modified xsi:type="dcterms:W3CDTF">${createDate}T${createTime}Z</dcterms:modified>
+</cp:coreProperties>`,
+  );
+  docProps.file(
+    'custom.xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties"
+  xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
+  <property fmtid="{D5CDD505-2E9C-101B-9397-08002B2CF9AE}" pid="2" name="ICV">
+    <vt:lpwstr>A43D6FDBA27248266CF32D6511460B89_41</vt:lpwstr>
+  </property>
+  <property fmtid="{D5CDD505-2E9C-101B-9397-08002B2CF9AE}" pid="3" name="KSOProductBuildVer">
+    <vt:lpwstr>1033-6.2.1.8344</vt:lpwstr>
+  </property>
+</Properties>`,
+  );
 
   const xl = zip.folder('xl')!;
   // TODO: export style
@@ -782,23 +906,16 @@ export async function exportToXLSX(fileName: string, controller: IController) {
     ],
   };
 
-  const sheetRelMap: Record<string, { rid: string; target: string }> = {};
-  for (let i = 0; i < sheetList.length; i++) {
-    const t = sheetList[i];
-    const a = i + 1;
-    sheetRelMap[t.sheetId] = {
-      rid: `rId${a}`,
-      target: `sheet${a}.xml`,
-    };
-  }
-
+  const activeIndex = sheetList.findIndex((v) => v.sheetId === currentSheetId);
   const workbook = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
     xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
     <fileVersion appName="xl" lastEdited="3" lowestEdited="5" rupBuild="9302"/>
     <workbookPr/>
     <bookViews>
-      <workbookView windowWidth="28800" windowHeight="11340"/>
+      <workbookView windowWidth="28800" windowHeight="11340" ${
+        activeIndex > 0 ? `activeTab="${activeIndex}"` : ''
+      } />
     </bookViews>
     <sheets>
       ${sheetList
@@ -806,10 +923,9 @@ export async function exportToXLSX(fileName: string, controller: IController) {
           (item) =>
             `<sheet name="${item.name}" sheetId="${item.sheetId}" r:id="${
               sheetRelMap[item.sheetId]!.rid
-            }"/>`,
+            }" ${item.isHide ? 'state="hidden"' : ''}/>`,
         )
         .join('')}
-      <sheet name="Sheet1" sheetId="1" r:id="rId1"/>
     </sheets>
     <calcPr calcId="144525"/>
   </workbook>`;
@@ -836,15 +952,264 @@ export async function exportToXLSX(fileName: string, controller: IController) {
   xlRel.file('workbook.xml.rels', workbookRel);
 
   const theme = xl.folder('theme')!;
-  theme.file('theme1.xml', xmlData['xl/theme/theme1.xml']);
+  const themeData = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="WPS">
+  <a:themeElements>
+    <a:clrScheme name="WPS">
+      <a:dk1>
+        <a:sysClr val="windowText" lastClr="000000"/>
+      </a:dk1>
+      <a:lt1>
+        <a:sysClr val="window" lastClr="FFFFFF"/>
+      </a:lt1>
+      <a:dk2>
+        <a:srgbClr val="44546A"/>
+      </a:dk2>
+      <a:lt2>
+        <a:srgbClr val="E7E6E6"/>
+      </a:lt2>
+      <a:accent1>
+        <a:srgbClr val="4874CB"/>
+      </a:accent1>
+      <a:accent2>
+        <a:srgbClr val="EE822F"/>
+      </a:accent2>
+      <a:accent3>
+        <a:srgbClr val="F2BA02"/>
+      </a:accent3>
+      <a:accent4>
+        <a:srgbClr val="75BD42"/>
+      </a:accent4>
+      <a:accent5>
+        <a:srgbClr val="30C0B4"/>
+      </a:accent5>
+      <a:accent6>
+        <a:srgbClr val="E54C5E"/>
+      </a:accent6>
+      <a:hlink>
+        <a:srgbClr val="0026E5"/>
+      </a:hlink>
+      <a:folHlink>
+        <a:srgbClr val="7E1FAD"/>
+      </a:folHlink>
+    </a:clrScheme>
+    <a:fontScheme name="WPS">
+      <a:majorFont>
+        <a:latin typeface="Calibri Light"/>
+        <a:ea typeface=""/>
+        <a:cs typeface=""/>
+        <a:font script="Jpan" typeface="ＭＳ Ｐゴシック"/>
+        <a:font script="Hang" typeface="맑은 고딕"/>
+        <a:font script="Hans" typeface="宋体"/>
+        <a:font script="Hant" typeface="新細明體"/>
+        <a:font script="Arab" typeface="Times New Roman"/>
+        <a:font script="Hebr" typeface="Times New Roman"/>
+        <a:font script="Thai" typeface="Tahoma"/>
+        <a:font script="Ethi" typeface="Nyala"/>
+        <a:font script="Beng" typeface="Vrinda"/>
+        <a:font script="Gujr" typeface="Shruti"/>
+        <a:font script="Khmr" typeface="MoolBoran"/>
+        <a:font script="Knda" typeface="Tunga"/>
+        <a:font script="Guru" typeface="Raavi"/>
+        <a:font script="Cans" typeface="Euphemia"/>
+        <a:font script="Cher" typeface="Plantagenet Cherokee"/>
+        <a:font script="Yiii" typeface="Microsoft Yi Baiti"/>
+        <a:font script="Tibt" typeface="Microsoft Himalaya"/>
+        <a:font script="Thaa" typeface="MV Boli"/>
+        <a:font script="Deva" typeface="Mangal"/>
+        <a:font script="Telu" typeface="Gautami"/>
+        <a:font script="Taml" typeface="Latha"/>
+        <a:font script="Syrc" typeface="Estrangelo Edessa"/>
+        <a:font script="Orya" typeface="Kalinga"/>
+        <a:font script="Mlym" typeface="Kartika"/>
+        <a:font script="Laoo" typeface="DokChampa"/>
+        <a:font script="Sinh" typeface="Iskoola Pota"/>
+        <a:font script="Mong" typeface="Mongolian Baiti"/>
+        <a:font script="Viet" typeface="Times New Roman"/>
+        <a:font script="Uigh" typeface="Microsoft Uighur"/>
+        <a:font script="Geor" typeface="Sylfaen"/>
+      </a:majorFont>
+      <a:minorFont>
+        <a:latin typeface="Calibri"/>
+        <a:ea typeface=""/>
+        <a:cs typeface=""/>
+        <a:font script="Jpan" typeface="ＭＳ Ｐゴシック"/>
+        <a:font script="Hang" typeface="맑은 고딕"/>
+        <a:font script="Hans" typeface="宋体"/>
+        <a:font script="Hant" typeface="新細明體"/>
+        <a:font script="Arab" typeface="Arial"/>
+        <a:font script="Hebr" typeface="Arial"/>
+        <a:font script="Thai" typeface="Tahoma"/>
+        <a:font script="Ethi" typeface="Nyala"/>
+        <a:font script="Beng" typeface="Vrinda"/>
+        <a:font script="Gujr" typeface="Shruti"/>
+        <a:font script="Khmr" typeface="DaunPenh"/>
+        <a:font script="Knda" typeface="Tunga"/>
+        <a:font script="Guru" typeface="Raavi"/>
+        <a:font script="Cans" typeface="Euphemia"/>
+        <a:font script="Cher" typeface="Plantagenet Cherokee"/>
+        <a:font script="Yiii" typeface="Microsoft Yi Baiti"/>
+        <a:font script="Tibt" typeface="Microsoft Himalaya"/>
+        <a:font script="Thaa" typeface="MV Boli"/>
+        <a:font script="Deva" typeface="Mangal"/>
+        <a:font script="Telu" typeface="Gautami"/>
+        <a:font script="Taml" typeface="Latha"/>
+        <a:font script="Syrc" typeface="Estrangelo Edessa"/>
+        <a:font script="Orya" typeface="Kalinga"/>
+        <a:font script="Mlym" typeface="Kartika"/>
+        <a:font script="Laoo" typeface="DokChampa"/>
+        <a:font script="Sinh" typeface="Iskoola Pota"/>
+        <a:font script="Mong" typeface="Mongolian Baiti"/>
+        <a:font script="Viet" typeface="Arial"/>
+        <a:font script="Uigh" typeface="Microsoft Uighur"/>
+        <a:font script="Geor" typeface="Sylfaen"/>
+      </a:minorFont>
+    </a:fontScheme>
+    <a:fmtScheme name="WPS">
+      <a:fillStyleLst>
+        <a:solidFill>
+          <a:schemeClr val="phClr"/>
+        </a:solidFill>
+        <a:gradFill>
+          <a:gsLst>
+            <a:gs pos="0">
+              <a:schemeClr val="phClr">
+                <a:lumOff val="17500"/>
+              </a:schemeClr>
+            </a:gs>
+            <a:gs pos="100000">
+              <a:schemeClr val="phClr"/>
+            </a:gs>
+          </a:gsLst>
+          <a:lin ang="2700000" scaled="0"/>
+        </a:gradFill>
+        <a:gradFill>
+          <a:gsLst>
+            <a:gs pos="0">
+              <a:schemeClr val="phClr">
+                <a:hueOff val="-2520000"/>
+              </a:schemeClr>
+            </a:gs>
+            <a:gs pos="100000">
+              <a:schemeClr val="phClr"/>
+            </a:gs>
+          </a:gsLst>
+          <a:lin ang="2700000" scaled="0"/>
+        </a:gradFill>
+      </a:fillStyleLst>
+      <a:lnStyleLst>
+        <a:ln w="12700" cap="flat" cmpd="sng" algn="ctr">
+          <a:solidFill>
+            <a:schemeClr val="phClr"/>
+          </a:solidFill>
+          <a:prstDash val="solid"/>
+          <a:miter lim="800000"/>
+        </a:ln>
+        <a:ln w="12700" cap="flat" cmpd="sng" algn="ctr">
+          <a:solidFill>
+            <a:schemeClr val="phClr"/>
+          </a:solidFill>
+          <a:prstDash val="solid"/>
+          <a:miter lim="800000"/>
+        </a:ln>
+        <a:ln w="12700" cap="flat" cmpd="sng" algn="ctr">
+          <a:gradFill>
+            <a:gsLst>
+              <a:gs pos="0">
+                <a:schemeClr val="phClr">
+                  <a:hueOff val="-4200000"/>
+                </a:schemeClr>
+              </a:gs>
+              <a:gs pos="100000">
+                <a:schemeClr val="phClr"/>
+              </a:gs>
+            </a:gsLst>
+            <a:lin ang="2700000" scaled="1"/>
+          </a:gradFill>
+          <a:prstDash val="solid"/>
+          <a:miter lim="800000"/>
+        </a:ln>
+      </a:lnStyleLst>
+      <a:effectStyleLst>
+        <a:effectStyle>
+          <a:effectLst>
+            <a:outerShdw blurRad="101600" dist="50800" dir="5400000" algn="ctr" rotWithShape="0">
+              <a:schemeClr val="phClr">
+                <a:alpha val="60000"/>
+              </a:schemeClr>
+            </a:outerShdw>
+          </a:effectLst>
+        </a:effectStyle>
+        <a:effectStyle>
+          <a:effectLst>
+            <a:reflection stA="50000" endA="300" endPos="40000" dist="25400" dir="5400000" sy="-100000" algn="bl" rotWithShape="0"/>
+          </a:effectLst>
+        </a:effectStyle>
+        <a:effectStyle>
+          <a:effectLst>
+            <a:outerShdw blurRad="57150" dist="19050" dir="5400000" algn="ctr" rotWithShape="0">
+              <a:srgbClr val="000000">
+                <a:alpha val="63000"/>
+              </a:srgbClr>
+            </a:outerShdw>
+          </a:effectLst>
+        </a:effectStyle>
+      </a:effectStyleLst>
+      <a:bgFillStyleLst>
+        <a:solidFill>
+          <a:schemeClr val="phClr"/>
+        </a:solidFill>
+        <a:solidFill>
+          <a:schemeClr val="phClr">
+            <a:tint val="95000"/>
+            <a:satMod val="170000"/>
+          </a:schemeClr>
+        </a:solidFill>
+        <a:gradFill rotWithShape="1">
+          <a:gsLst>
+            <a:gs pos="0">
+              <a:schemeClr val="phClr">
+                <a:tint val="93000"/>
+                <a:satMod val="150000"/>
+                <a:shade val="98000"/>
+                <a:lumMod val="102000"/>
+              </a:schemeClr>
+            </a:gs>
+            <a:gs pos="50000">
+              <a:schemeClr val="phClr">
+                <a:tint val="98000"/>
+                <a:satMod val="130000"/>
+                <a:shade val="90000"/>
+                <a:lumMod val="103000"/>
+              </a:schemeClr>
+            </a:gs>
+            <a:gs pos="100000">
+              <a:schemeClr val="phClr">
+                <a:shade val="63000"/>
+                <a:satMod val="120000"/>
+              </a:schemeClr>
+            </a:gs>
+          </a:gsLst>
+          <a:lin ang="5400000" scaled="0"/>
+        </a:gradFill>
+      </a:bgFillStyleLst>
+    </a:fmtScheme>
+  </a:themeElements>
+  <a:objectDefaults/>
+</a:theme>`;
+  theme.file('theme1.xml', themeData);
 
   const worksheets = xl.folder('worksheets')!;
   for (const item of sheetList) {
     const { activeCell } = item;
     const t = sheetRelMap[item.sheetId];
-    const cellData = controller.getSheetData(item.sheetId);
+    const cellData = modelJson.worksheets[item.sheetId];
+    const isActiveSheet = item.sheetId === currentSheetId;
+    const customWidth = modelJson.customWidth[item.sheetId];
     if (!cellData) {
-      worksheets.file(t.target, getSheetData(activeCell, ''));
+      worksheets.file(
+        t.target,
+        getSheetData(activeCell, '', isActiveSheet, customWidth),
+      );
       continue;
     }
     const rowList: string[] = [];
@@ -875,9 +1240,17 @@ export async function exportToXLSX(fileName: string, controller: IController) {
         </c>`);
         }
       }
-      rowList.push(`<row r="${realR + 1}">${colList.join('')}</row>`);
+      const customHeight = modelJson.customHeight?.[item.sheetId]?.[row];
+      let ht = '';
+      if (typeof customHeight === 'number') {
+        ht = `ht="${customHeight}" customHeight="1"`;
+      }
+      rowList.push(`<row r="${realR + 1}" ${ht}>${colList.join('')}</row>`);
     }
-    worksheets.file(t.target, getSheetData(activeCell, rowList.join('')));
+    worksheets.file(
+      t.target,
+      getSheetData(activeCell, rowList.join(''), isActiveSheet, customWidth),
+    );
   }
 
   xl.file('styles.xml', generateStyleFile(styles));

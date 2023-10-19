@@ -1,8 +1,9 @@
 import * as path from 'path';
+import type { Config } from 'jest';
 
 const rootDir = process.cwd();
 
-export default {
+const config: Config = {
   rootDir,
   testEnvironment: 'jsdom',
   testMatch: ['<rootDir>/src/**/*.test.[jt]s?(x)'],
@@ -28,10 +29,12 @@ export default {
     'json-summary',
     'html-spa',
   ],
-  
+
   moduleNameMapper: {
     '@/(.*)': '<rootDir>/src/$1',
   },
   // maxConcurrency: 1,
   // maxWorkers: '50%',
 };
+
+export default config;

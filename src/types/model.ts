@@ -115,7 +115,6 @@ export interface IBaseModel {
   canUndo(): boolean;
   undo(): void;
   redo(): void;
-  getSheetData(sheetId?: string): ModelRowType;
 }
 
 export type UndoRedoItem = {

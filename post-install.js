@@ -20,7 +20,7 @@ function init() {
           entryPoints: [filePath],
           outfile: temp,
           format: 'cjs',
-          target: "node14"
+          target: "es2020"
         });
       } else if (ext === '.js') {
         fs.unlink(filePath, () => {});

@@ -6,7 +6,12 @@ declare global {
 
 async function setupPuppeteer() {
   const browser = await puppeteer.launch({
-    headless: "new"
+    headless: 'new',
+    waitForInitialPage: true,
+    defaultViewport: {
+      width: 1600,
+      height: 800,
+    },
   });
   global.page = await browser.newPage();
 }
@@ -23,5 +28,5 @@ export async function openPage() {
 }
 
 export function getTestIdSelector(testId: string) {
-  return `[data-testid="${testId}"]`
+  return `[data-testid="${testId}"]`;
 }
