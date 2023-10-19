@@ -15,7 +15,7 @@
   <script src="./index.js" type="module"></script>
   <script>
     window.onload = function () {
-      if ("production" === 'development') {
+      if ("development" === 'development') {
         new EventSource('/esbuild').addEventListener('change', function () {
           location.reload();
         });
