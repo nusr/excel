@@ -15,6 +15,8 @@ import {
   reactLog,
   CELL_HEIGHT,
   CELL_WIDTH,
+  XLSX_MAX_ROW_COUNT,
+  XLSX_MAX_COL_COUNT,
 } from '@/util';
 
 const COMMON_PREFIX = 'xl';
@@ -377,11 +379,17 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     result.worksheets[item.sheetId] = {};
     result.customHeight[item.sheetId] = {};
 
+    let colCount = item.colCount;
+    let rowCount = item.rowCount;
     for (const row of sheetData) {
       if (!row) {
         continue;
       }
       const realRow = parseInt(row.r, 10) - 1;
+      rowCount = Math.max(rowCount, realRow + 1);
+      if (rowCount > XLSX_MAX_ROW_COUNT) {
+        continue;
+      }
       result.worksheets[item.sheetId][realRow] = {};
       if (row.customHeight && row.ht) {
         const isDefault = defaultWOrH.defaultRowHeight === row.ht;
@@ -396,6 +404,10 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
           continue;
         }
         const range = parseCell(col.r)!;
+        colCount = Math.max(colCount, range.col + 1);
+        if (colCount > XLSX_MAX_COL_COUNT) {
+          continue;
+        }
         const val = col?.v?.['#text'] || '';
         const styleId = parseInt(col.s, 10);
         const t: ModelCellType = {
@@ -408,8 +420,11 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
           t.value = val;
         }
         result.worksheets[item.sheetId][realRow][range.col] = t;
+        colCount = Math.max(colCount, range.col + 1);
       }
     }
+    item.rowCount = Math.max(item.rowCount, rowCount);
+    item.colCount = Math.max(item.colCount, colCount);
   }
   return result;
 }

@@ -23,11 +23,10 @@ import {
   isSameRange,
   CELL_HEIGHT,
   CELL_WIDTH,
+  XLSX_MAX_ROW_COUNT,
+  XLSX_MAX_COL_COUNT,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
-
-const XLSX_MAX_COL_COUNT = 16384; // XFD
-const XLSX_MAX_ROW_COUNT = 1048576;
 
 function convertToNumber(list: string[]) {
   const result = list
