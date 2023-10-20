@@ -23913,6 +23913,10 @@ var NUMBER_FORMAT_LIST = [
   { formatCode: "##0.0E+0", label: "", id: 48 },
   { formatCode: "@", label: "", id: 49 }
 ];
+var CELL_HEIGHT = 19;
+var CELL_WIDTH = 68;
+var XLSX_MAX_COL_COUNT = 16384;
+var XLSX_MAX_ROW_COUNT = 1048576;
 
 // src/util/util.ts
 function isNumber(value) {
@@ -25745,16 +25749,33 @@ var Content = class {
       }
     }
     const realWidth = Math.min(maxX, width);
+    let skip = false;
     for (let i = rowIndex; i < rowCount; i++) {
-      pointList.push([0, y], [realWidth, y]);
-      y += controller2.getRowHeight(i);
+      if (!skip) {
+        pointList.push([0, y], [realWidth, y]);
+      } else {
+        skip = false;
+      }
+      const h = controller2.getRowHeight(i);
+      if (h === 0) {
+        skip = true;
+      }
+      y += h;
       if (y > height) {
         break;
       }
     }
     for (let i = colIndex; i < colCount; i++) {
-      pointList.push([x, 0], [x, y]);
-      x += controller2.getColWidth(i);
+      if (!skip) {
+        pointList.push([x, 0], [x, y]);
+      } else {
+        skip = false;
+      }
+      const w = controller2.getColWidth(i);
+      if (w === 0) {
+        skip = true;
+      }
+      x += w;
       if (x > realWidth) {
         break;
       }
@@ -25793,7 +25814,9 @@ var Content = class {
         temp += thinLineWidth() / 2;
       }
       pointList.push([0, temp], [headerSize.width, temp]);
-      this.fillRowText(i + 1, headerSize.width, temp + rowHeight / 2);
+      if (rowHeight > 0) {
+        this.fillRowText(i + 1, headerSize.width, temp + rowHeight / 2);
+      }
       y += rowHeight;
       if (y > height) {
         break;
@@ -25825,11 +25848,13 @@ var Content = class {
         temp += thinLineWidth() / 2;
       }
       pointList.push([temp, 0], [temp, headerSize.height]);
-      this.fillColText(
-        intToColumnName(i),
-        temp + colWidth / 2,
-        headerSize.height
-      );
+      if (colWidth > 0) {
+        this.fillColText(
+          intToColumnName(i),
+          temp + colWidth / 2,
+          headerSize.height
+        );
+      }
       x += colWidth;
       if (x > width) {
         break;
@@ -26391,7 +26416,7 @@ var ContextMenu = (props) => {
           controller2.addCol(controller2.getActiveCell().col, 1);
         }
       },
-      "add a column"
+      "Add a column"
     ),
     /* @__PURE__ */ import_react9.default.createElement(
       Button,
@@ -26401,7 +26426,17 @@ var ContextMenu = (props) => {
           controller2.deleteCol(controller2.getActiveCell().col, 1);
         }
       },
-      "delete a column"
+      "Delete a column"
+    ),
+    /* @__PURE__ */ import_react9.default.createElement(
+      Button,
+      {
+        onClick: () => {
+          hideContextMenu();
+          controller2.hideCol(controller2.getActiveCell().col, 1);
+        }
+      },
+      "Hide a column"
     ),
     /* @__PURE__ */ import_react9.default.createElement(
       Button,
@@ -26411,7 +26446,7 @@ var ContextMenu = (props) => {
           controller2.addRow(controller2.getActiveCell().row, 1);
         }
       },
-      "add a row"
+      "Add a row"
     ),
     /* @__PURE__ */ import_react9.default.createElement(
       Button,
@@ -26421,7 +26456,17 @@ var ContextMenu = (props) => {
           controller2.deleteRow(controller2.getActiveCell().row, 1);
         }
       },
-      "delete a row"
+      "Delete a row"
+    ),
+    /* @__PURE__ */ import_react9.default.createElement(
+      Button,
+      {
+        onClick: () => {
+          hideContextMenu();
+          controller2.hideRow(controller2.getActiveCell().row, 1);
+        }
+      },
+      "Hide a row"
     ),
     /* @__PURE__ */ import_react9.default.createElement(
       Button,
@@ -26431,7 +26476,7 @@ var ContextMenu = (props) => {
           controller2.copy();
         }
       },
-      "copy"
+      "Copy"
     ),
     /* @__PURE__ */ import_react9.default.createElement(
       Button,
@@ -26441,7 +26486,7 @@ var ContextMenu = (props) => {
           controller2.cut();
         }
       },
-      "cut"
+      "Cut"
     ),
     /* @__PURE__ */ import_react9.default.createElement(
       Button,
@@ -26451,7 +26496,7 @@ var ContextMenu = (props) => {
           controller2.paste();
         }
       },
-      "paste"
+      "Paste"
     )
   );
 };
@@ -27071,13 +27116,23 @@ function convertXMLDataToModel(xmlData) {
       []
     );
     customWidth = Array.isArray(customWidth) ? customWidth : [customWidth];
+    const defaultWOrH = get(xmlData[sheetPath], "worksheet.sheetFormatPr", {
+      defaultColWidth: "",
+      defaultRowHeight: "",
+      outlineLevelRow: ""
+    });
     if (customWidth.length > 0) {
       result.customWidth[item.sheetId] = {};
       for (const col of customWidth) {
         if (col && col.customWidth && col.width && col.min && col.max) {
-          const w = parseFloat(col.width) * CUSTOM_WIdTH_RADIO;
+          const isDefault = defaultWOrH.defaultColWidth === col.width;
+          const w = isDefault ? CELL_WIDTH : parseFloat(col.width) * CUSTOM_WIdTH_RADIO;
+          const isHide = Boolean(col.hidden);
           for (let start = parseInt(col.min, 10) - 1, end = parseInt(col.max, 10); start < end; start++) {
-            result.customWidth[item.sheetId][start] = w;
+            result.customWidth[item.sheetId][start] = {
+              widthOrHeight: w,
+              isHide
+            };
           }
         }
       }
@@ -27087,14 +27142,24 @@ function convertXMLDataToModel(xmlData) {
     }
     result.worksheets[item.sheetId] = {};
     result.customHeight[item.sheetId] = {};
+    let colCount = item.colCount;
+    let rowCount = item.rowCount;
     for (const row of sheetData) {
       if (!row) {
         continue;
       }
       const realRow = parseInt(row.r, 10) - 1;
+      rowCount = Math.max(rowCount, realRow + 1);
+      if (rowCount > XLSX_MAX_ROW_COUNT) {
+        continue;
+      }
       result.worksheets[item.sheetId][realRow] = {};
       if (row.customHeight && row.ht) {
-        result.customHeight[item.sheetId][realRow] = parseFloat(row.ht);
+        const isDefault = defaultWOrH.defaultRowHeight === row.ht;
+        result.customHeight[item.sheetId][realRow] = {
+          widthOrHeight: isDefault ? CELL_HEIGHT : parseFloat(row.ht),
+          isHide: Boolean(row.hidden)
+        };
       }
       const colList = Array.isArray(row.c) ? row.c : [row.c];
       for (const col of colList) {
@@ -27102,6 +27167,10 @@ function convertXMLDataToModel(xmlData) {
           continue;
         }
         const range = parseCell(col.r);
+        colCount = Math.max(colCount, range.col + 1);
+        if (colCount > XLSX_MAX_COL_COUNT) {
+          continue;
+        }
         const val = col?.v?.["#text"] || "";
         const styleId = parseInt(col.s, 10);
         const t = {
@@ -27113,8 +27182,11 @@ function convertXMLDataToModel(xmlData) {
           t.value = val;
         }
         result.worksheets[item.sheetId][realRow][range.col] = t;
+        colCount = Math.max(colCount, range.col + 1);
       }
     }
+    item.rowCount = Math.max(item.rowCount, rowCount);
+    item.colCount = Math.max(item.colCount, colCount);
   }
   return result;
 }
@@ -27335,7 +27407,7 @@ function getSheetData(activeCell, sheetData, isActiveSheet, customWidthMap) {
     for (const col of Object.keys(customWidthMap)) {
       const t = parseInt(col, 10) + 1;
       list.push(
-        `<col min="${t}" max="${t}" width="${customWidthMap[col] / CUSTOM_WIdTH_RADIO}" customWidth="1"/>`
+        `<col min="${t}" max="${t}" width="${customWidthMap[col].widthOrHeight / CUSTOM_WIdTH_RADIO}" customWidth="1" ${customWidthMap[col].isHide ? 'hidden="1"' : ""}/>`
       );
     }
     customWidth = `<cols>${list.join("")}</cols>`;
@@ -28450,8 +28522,8 @@ async function exportToXLSX(fileName, controller2) {
       }
       const customHeight = modelJson.customHeight?.[item.sheetId]?.[row];
       let ht = "";
-      if (typeof customHeight === "number") {
-        ht = `ht="${customHeight}" customHeight="1"`;
+      if (customHeight) {
+        ht = `ht="${customHeight.widthOrHeight}" customHeight="1" ${customHeight.isHide ? 'hidden="1"' : ""}`;
       }
       rowList.push(`<row r="${realR + 1}" ${ht}>${colList.join("")}</row>`);
     }
@@ -29177,6 +29249,16 @@ var Controller = class {
   }
   deleteRow(rowIndex, count) {
     this.model.deleteRow(rowIndex, count);
+    this.changeSet.add("content");
+    this.emitChange();
+  }
+  hideCol(colIndex, count) {
+    this.model.hideCol(colIndex, count);
+    this.changeSet.add("content");
+    this.emitChange();
+  }
+  hideRow(rowIndex, count) {
+    this.model.hideRow(rowIndex, count);
     this.changeSet.add("content");
     this.emitChange();
   }
@@ -30489,10 +30571,6 @@ var DefinedNamesMapImpl = class {
 };
 
 // src/model/Model.ts
-var CELL_HEIGHT = 19;
-var CELL_WIDTH = 68;
-var XLSX_MAX_COL_COUNT = 16384;
-var XLSX_MAX_ROW_COUNT = 1048576;
 function convertToNumber(list) {
   const result = list.map((item) => parseInt(item, 10)).filter((v) => !isNaN(v));
   result.sort((a, b) => a - b);
@@ -30557,6 +30635,9 @@ var Model = class {
       this.workbook.splice(index + 1, 0, sheet);
     }
     this.currentSheetId = sheet.sheetId;
+    this.worksheets[sheet.sheetId] = {};
+    this.customHeight[sheet.sheetId];
+    this.customWidth[sheet.sheetId];
   }
   getSheetIndex(sheetId) {
     const id = sheetId || this.currentSheetId;
@@ -30576,14 +30657,18 @@ var Model = class {
     };
   }
   deleteSheet(sheetId) {
+    const id = sheetId || this.currentSheetId;
     const list = this.workbook.filter((v) => !v.isHide);
     assert(
       list.length >= 2,
       "A workbook must contains at least on visible worksheet"
     );
-    const { index, lastIndex } = this.getSheetIndex(sheetId);
+    const { index, lastIndex } = this.getSheetIndex(id);
     this.currentSheetId = this.workbook[lastIndex].sheetId;
     this.workbook.splice(index, 1);
+    if (this.worksheets[id]) {
+      this.worksheets[id] = {};
+    }
   }
   hideSheet(sheetId) {
     const list = this.workbook.filter((v) => !v.isHide);
@@ -30873,33 +30958,57 @@ var Model = class {
     const sheetInfo = this.getSheetInfo();
     sheetInfo.rowCount -= count;
   }
+  hideCol(colIndex, count) {
+    this.customWidth[this.currentSheetId] = this.customWidth[this.currentSheetId] || {};
+    for (let i = 0; i < count; i++) {
+      const c = colIndex + i;
+      this.customWidth[this.currentSheetId][c] = this.customWidth[this.currentSheetId][c] || {
+        widthOrHeight: CELL_WIDTH,
+        isHide: true
+      };
+      this.customWidth[this.currentSheetId][c].isHide = true;
+    }
+  }
   getColWidth(col) {
     const temp = this.customWidth[this.currentSheetId];
-    if (!temp) {
+    if (!temp || !temp[col]) {
       return CELL_WIDTH;
     }
-    if (typeof temp[col] === "number") {
-      return temp[col];
+    if (temp[col].isHide) {
+      return 0;
     }
-    return CELL_WIDTH;
+    return temp[col].widthOrHeight || CELL_WIDTH;
   }
   setColWidth(col, width) {
     this.customWidth[this.currentSheetId] = this.customWidth[this.currentSheetId] || {};
-    this.customWidth[this.currentSheetId][col] = width;
+    this.customWidth[this.currentSheetId][col] = this.customWidth[this.currentSheetId][col] || { widthOrHeight: 0, isHide: false };
+    this.customWidth[this.currentSheetId][col].widthOrHeight = width;
+  }
+  hideRow(rowIndex, count) {
+    this.customHeight[this.currentSheetId] = this.customHeight[this.currentSheetId] || {};
+    for (let i = 0; i < count; i++) {
+      const r = rowIndex + i;
+      this.customHeight[this.currentSheetId][r] = this.customHeight[this.currentSheetId][r] || {
+        widthOrHeight: CELL_HEIGHT,
+        isHide: true
+      };
+      this.customHeight[this.currentSheetId][r].isHide = true;
+    }
   }
   getRowHeight(row) {
     const temp = this.customHeight[this.currentSheetId];
-    if (!temp) {
+    if (!temp || !temp[row]) {
       return CELL_HEIGHT;
     }
-    if (typeof temp[row] === "number") {
-      return temp[row];
+    if (temp[row].isHide) {
+      return 0;
     }
-    return CELL_HEIGHT;
+    return temp[row].widthOrHeight || CELL_HEIGHT;
   }
   setRowHeight(row, height) {
     this.customHeight[this.currentSheetId] = this.customHeight[this.currentSheetId] || {};
-    this.customHeight[this.currentSheetId][row] = height;
+    this.customHeight[this.currentSheetId][row] = this.customHeight[this.currentSheetId][row] || { widthOrHeight: 0, isHide: false };
+    this.customHeight[this.currentSheetId][row].widthOrHeight = height;
   }
   canRedo() {
     return this.history.canRedo();
@@ -31087,12 +31196,22 @@ var MOCK_MODEL = {
   ],
   customHeight: {
     1: {
-      1: 100
+      1: {
+        widthOrHeight: 100,
+        isHide: false
+      },
+      5: {
+        widthOrHeight: 100,
+        isHide: true
+      }
     }
   },
   customWidth: {
     1: {
-      1: 100
+      1: {
+        widthOrHeight: 100,
+        isHide: true
+      }
     }
   },
   definedNames: {
