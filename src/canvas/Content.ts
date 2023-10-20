@@ -173,16 +173,33 @@ export class Content implements ContentView {
       }
     }
     const realWidth = Math.min(maxX, width);
+    let skip = false;
     for (let i = rowIndex; i < rowCount; i++) {
-      pointList.push([0, y], [realWidth, y]);
-      y += controller.getRowHeight(i);
+      if (!skip) {
+        pointList.push([0, y], [realWidth, y]);
+      } else {
+        skip = false;
+      }
+      const h = controller.getRowHeight(i);
+      if (h === 0) {
+        skip = true;
+      }
+      y += h;
       if (y > height) {
         break;
       }
     }
     for (let i = colIndex; i < colCount; i++) {
-      pointList.push([x, 0], [x, y]);
-      x += controller.getColWidth(i);
+      if (!skip) {
+        pointList.push([x, 0], [x, y]);
+      } else {
+        skip = false;
+      }
+      const w = controller.getColWidth(i);
+      if (w === 0) {
+        skip = true;
+      }
+      x += w;
       if (x > realWidth) {
         break;
       }
@@ -223,7 +240,9 @@ export class Content implements ContentView {
         temp += thinLineWidth() / 2;
       }
       pointList.push([0, temp], [headerSize.width, temp]);
-      this.fillRowText(i + 1, headerSize.width, temp + rowHeight / 2);
+      if (rowHeight > 0) {
+        this.fillRowText(i + 1, headerSize.width, temp + rowHeight / 2);
+      }
       y += rowHeight;
       if (y > height) {
         break;
@@ -257,11 +276,13 @@ export class Content implements ContentView {
         temp += thinLineWidth() / 2;
       }
       pointList.push([temp, 0], [temp, headerSize.height]);
-      this.fillColText(
-        intToColumnName(i),
-        temp + colWidth / 2,
-        headerSize.height,
-      );
+      if (colWidth > 0) {
+        this.fillColText(
+          intToColumnName(i),
+          temp + colWidth / 2,
+          headerSize.height,
+        );
+      }
       x += colWidth;
       if (x > width) {
         break;

@@ -149,7 +149,6 @@ async function buildDev() {
   });
 
   await ctx.watch();
-
   const { port } = await ctx.serve({
     servedir: distDir,
   });

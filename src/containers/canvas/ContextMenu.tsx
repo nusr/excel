@@ -47,7 +47,7 @@ export const ContextMenu: React.FunctionComponent<Props> = (props) => {
           controller.addCol(controller.getActiveCell().col, 1);
         }}
       >
-        add a column
+        Add a column
       </Button>
       <Button
         onClick={() => {
@@ -55,7 +55,15 @@ export const ContextMenu: React.FunctionComponent<Props> = (props) => {
           controller.deleteCol(controller.getActiveCell().col, 1);
         }}
       >
-        delete a column
+        Delete a column
+      </Button>
+      <Button
+        onClick={() => {
+          hideContextMenu();
+          controller.hideCol(controller.getActiveCell().col, 1);
+        }}
+      >
+        Hide a column
       </Button>
       <Button
         onClick={() => {
@@ -63,7 +71,7 @@ export const ContextMenu: React.FunctionComponent<Props> = (props) => {
           controller.addRow(controller.getActiveCell().row, 1);
         }}
       >
-        add a row
+        Add a row
       </Button>
       <Button
         onClick={() => {
@@ -71,15 +79,24 @@ export const ContextMenu: React.FunctionComponent<Props> = (props) => {
           controller.deleteRow(controller.getActiveCell().row, 1);
         }}
       >
-        delete a row
+        Delete a row
       </Button>
+      <Button
+        onClick={() => {
+          hideContextMenu();
+          controller.hideRow(controller.getActiveCell().row, 1);
+        }}
+      >
+        Hide a row
+      </Button>
+
       <Button
         onClick={() => {
           hideContextMenu();
           controller.copy();
         }}
       >
-        copy
+        Copy
       </Button>
       <Button
         onClick={() => {
@@ -87,7 +104,7 @@ export const ContextMenu: React.FunctionComponent<Props> = (props) => {
           controller.cut();
         }}
       >
-        cut
+        Cut
       </Button>
       <Button
         onClick={() => {
@@ -95,7 +112,7 @@ export const ContextMenu: React.FunctionComponent<Props> = (props) => {
           controller.paste();
         }}
       >
-        paste
+        Paste
       </Button>
     </div>
   );

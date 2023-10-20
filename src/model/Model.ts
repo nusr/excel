@@ -21,11 +21,11 @@ import {
   get,
   setWith,
   isSameRange,
+  CELL_HEIGHT,
+  CELL_WIDTH,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 
-const CELL_HEIGHT = 19;
-const CELL_WIDTH = 68;
 const XLSX_MAX_COL_COUNT = 16384; // XFD
 const XLSX_MAX_ROW_COUNT = 1048576;
 
@@ -96,6 +96,9 @@ export class Model implements IModel {
       this.workbook.splice(index + 1, 0, sheet);
     }
     this.currentSheetId = sheet.sheetId;
+    this.worksheets[sheet.sheetId] = {};
+    this.customHeight[sheet.sheetId];
+    this.customWidth[sheet.sheetId];
   }
   private getSheetIndex(sheetId?: string) {
     const id = sheetId || this.currentSheetId;
@@ -115,14 +118,18 @@ export class Model implements IModel {
     };
   }
   deleteSheet(sheetId?: string): void {
+    const id = sheetId || this.currentSheetId;
     const list = this.workbook.filter((v) => !v.isHide);
     assert(
       list.length >= 2,
       'A workbook must contains at least on visible worksheet',
     );
-    const { index, lastIndex } = this.getSheetIndex(sheetId);
+    const { index, lastIndex } = this.getSheetIndex(id);
     this.currentSheetId = this.workbook[lastIndex].sheetId;
     this.workbook.splice(index, 1);
+    if (this.worksheets[id]) {
+      this.worksheets[id] = {};
+    }
   }
   hideSheet(sheetId?: string | undefined): void {
     const list = this.workbook.filter((v) => !v.isHide);
@@ -422,35 +429,71 @@ export class Model implements IModel {
     const sheetInfo = this.getSheetInfo();
     sheetInfo.rowCount -= count;
   }
+
+  hideCol(colIndex: number, count: number): void {
+    this.customWidth[this.currentSheetId] =
+      this.customWidth[this.currentSheetId] || {};
+    for (let i = 0; i < count; i++) {
+      const c = colIndex + i;
+      this.customWidth[this.currentSheetId][c] = this.customWidth[
+        this.currentSheetId
+      ][c] || {
+        widthOrHeight: CELL_WIDTH,
+        isHide: true,
+      };
+      this.customWidth[this.currentSheetId][c].isHide = true;
+    }
+  }
   getColWidth(col: number): number {
     const temp = this.customWidth[this.currentSheetId];
-    if (!temp) {
+    if (!temp || !temp[col]) {
       return CELL_WIDTH;
     }
-    if (typeof temp[col] === 'number') {
-      return temp[col];
+    if (temp[col].isHide) {
+      return 0;
     }
-    return CELL_WIDTH;
+    return temp[col].widthOrHeight || CELL_WIDTH;
   }
   setColWidth(col: number, width: number): void {
     this.customWidth[this.currentSheetId] =
       this.customWidth[this.currentSheetId] || {};
-    this.customWidth[this.currentSheetId][col] = width;
+    this.customWidth[this.currentSheetId][col] = this.customWidth[
+      this.currentSheetId
+    ][col] || { widthOrHeight: 0, isHide: false };
+    this.customWidth[this.currentSheetId][col].widthOrHeight = width;
+  }
+
+  hideRow(rowIndex: number, count: number): void {
+    this.customHeight[this.currentSheetId] =
+      this.customHeight[this.currentSheetId] || {};
+    for (let i = 0; i < count; i++) {
+      const r = rowIndex + i;
+      this.customHeight[this.currentSheetId][r] = this.customHeight[
+        this.currentSheetId
+      ][r] || {
+        widthOrHeight: CELL_HEIGHT,
+        isHide: true,
+      };
+      this.customHeight[this.currentSheetId][r].isHide = true;
+    }
   }
   getRowHeight(row: number): number {
     const temp = this.customHeight[this.currentSheetId];
-    if (!temp) {
+    if (!temp || !temp[row]) {
       return CELL_HEIGHT;
     }
-    if (typeof temp[row] === 'number') {
-      return temp[row];
+    if (temp[row].isHide) {
+      return 0;
     }
-    return CELL_HEIGHT;
+    return temp[row].widthOrHeight || CELL_HEIGHT;
   }
   setRowHeight(row: number, height: number): void {
     this.customHeight[this.currentSheetId] =
       this.customHeight[this.currentSheetId] || {};
-    this.customHeight[this.currentSheetId][row] = height;
+    this.customHeight[this.currentSheetId][row] = this.customHeight[
+      this.currentSheetId
+    ][row] || { widthOrHeight: 0, isHide: false };
+    this.customHeight[this.currentSheetId][row].widthOrHeight = height;
   }
   canRedo(): boolean {
     return this.history.canRedo();

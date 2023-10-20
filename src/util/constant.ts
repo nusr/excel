@@ -147,3 +147,6 @@ export const NUMBER_FORMAT_LIST: NumberFormatItem[] = [
   { formatCode: '##0.0E+0', label: '', id: 48 },
   { formatCode: '@', label: '', id: 49 },
 ];
+
+export const CELL_HEIGHT = 19;
+export const CELL_WIDTH = 68;

@@ -80,8 +80,8 @@ function getSheetData(
       const t = parseInt(col, 10) + 1;
       list.push(
         `<col min="${t}" max="${t}" width="${
-          customWidthMap[col] / CUSTOM_WIdTH_RADIO
-        }" customWidth="1"/>`,
+          customWidthMap[col].widthOrHeight / CUSTOM_WIdTH_RADIO
+        }" customWidth="1" ${customWidthMap[col].isHide ? 'hidden="1"' : ''}/>`,
       );
     }
     customWidth = `<cols>${list.join('')}</cols>`;
@@ -1242,8 +1242,10 @@ export async function exportToXLSX(fileName: string, controller: IController) {
       }
       const customHeight = modelJson.customHeight?.[item.sheetId]?.[row];
       let ht = '';
-      if (typeof customHeight === 'number') {
-        ht = `ht="${customHeight}" customHeight="1"`;
+      if (customHeight) {
+        ht = `ht="${customHeight.widthOrHeight}" customHeight="1" ${
+          customHeight.isHide ? 'hidden="1"' : ''
+        }`;
       }
       rowList.push(`<row r="${realR + 1}" ${ht}>${colList.join('')}</row>`);
     }

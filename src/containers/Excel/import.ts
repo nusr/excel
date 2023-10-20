@@ -13,6 +13,8 @@ import {
   parseCell,
   NUMBER_FORMAT_LIST,
   reactLog,
+  CELL_HEIGHT,
+  CELL_WIDTH,
 } from '@/util';
 
 const COMMON_PREFIX = 'xl';
@@ -49,6 +51,7 @@ type ColItem = {
 };
 type SheetDataRowItem = {
   customHeight?: string;
+  hidden?: string;
   ht?: string;
   r: string;
   c: ColItem[];
@@ -59,6 +62,7 @@ type CustomColItem = {
   max: string;
   width: string;
   customWidth: string;
+  hidden?: string;
 };
 
 export type XfItem = {
@@ -338,17 +342,30 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
       [],
     );
     customWidth = Array.isArray(customWidth) ? customWidth : [customWidth];
+    const defaultWOrH = get(xmlData[sheetPath], 'worksheet.sheetFormatPr', {
+      defaultColWidth: '',
+      defaultRowHeight: '',
+      outlineLevelRow: '',
+    });
     if (customWidth.length > 0) {
       result.customWidth[item.sheetId] = {};
+
       for (const col of customWidth) {
         if (col && col.customWidth && col.width && col.min && col.max) {
-          const w = parseFloat(col.width) * CUSTOM_WIdTH_RADIO;
+          const isDefault = defaultWOrH.defaultColWidth === col.width;
+          const w = isDefault
+            ? CELL_WIDTH
+            : parseFloat(col.width) * CUSTOM_WIdTH_RADIO;
+          const isHide = Boolean(col.hidden);
           for (
             let start = parseInt(col.min, 10) - 1, end = parseInt(col.max, 10);
             start < end;
             start++
           ) {
-            result.customWidth[item.sheetId][start] = w;
+            result.customWidth[item.sheetId][start] = {
+              widthOrHeight: w,
+              isHide,
+            };
           }
         }
       }
@@ -367,7 +384,11 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
       const realRow = parseInt(row.r, 10) - 1;
       result.worksheets[item.sheetId][realRow] = {};
       if (row.customHeight && row.ht) {
-        result.customHeight[item.sheetId][realRow] = parseFloat(row.ht);
+        const isDefault = defaultWOrH.defaultRowHeight === row.ht;
+        result.customHeight[item.sheetId][realRow] = {
+          widthOrHeight: isDefault ? CELL_HEIGHT : parseFloat(row.ht),
+          isHide: Boolean(row.hidden),
+        };
       }
       const colList = Array.isArray(row.c) ? row.c : [row.c];
       for (const col of colList) {

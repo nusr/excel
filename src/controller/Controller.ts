@@ -304,6 +304,16 @@ export class Controller implements IController {
     this.changeSet.add('content');
     this.emitChange();
   }
+  hideCol(colIndex: number, count: number): void {
+    this.model.hideCol(colIndex, count);
+    this.changeSet.add('content');
+    this.emitChange();
+  }
+  hideRow(rowIndex: number, count: number): void {
+    this.model.hideRow(rowIndex, count);
+    this.changeSet.add('content');
+    this.emitChange();
+  }
   getChangeSet(): Set<ChangeEventType> {
     const result = this.changeSet;
     this.changeSet = new Set<ChangeEventType>();

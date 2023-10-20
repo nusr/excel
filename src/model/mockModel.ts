@@ -122,12 +122,22 @@ export const MOCK_MODEL: WorkBookJSON = {
   ],
   customHeight: {
     1: {
-      1: 100,
+      1: {
+        widthOrHeight: 100,
+        isHide: false,
+      },
+      5: {
+        widthOrHeight: 100,
+        isHide: true,
+      },
     },
   },
   customWidth: {
     1: {
-      1: 100,
+      1: {
+        widthOrHeight: 100,
+        isHide: true,
+      },
     },
   },
   definedNames: {

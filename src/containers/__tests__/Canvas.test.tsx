@@ -19,6 +19,6 @@ describe('CanvasContainer.test.ts', () => {
       clientY: 4000,
       clientX: 4000,
     });
-    expect(screen.getByTestId('context-menu')!.childNodes).toHaveLength(7);
+    expect(screen.getByTestId('context-menu')!.childNodes).toHaveLength(9);
   });
 });

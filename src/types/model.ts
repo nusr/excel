@@ -64,7 +64,12 @@ export type ModelCellValue = ModelCellType & Coordinate;
 
 export type ModelColType = Record<string, ModelCellType>; // key: col number
 export type ModelRowType = Record<string, ModelColType>; // key: row number
-export type CustomHeightOrWidthItem = Record<string, number>; // key: row number or col number value: height or width
+
+export type CustomItem = {
+  widthOrHeight: number; // width or height
+  isHide: boolean;
+};
+export type CustomHeightOrWidthItem = Record<string, CustomItem>; // key: row number or col number value: height or width
 export type MergeCellItem = {
   start: Coordinate;
   end: Coordinate;
@@ -111,6 +116,8 @@ export interface IBaseModel {
   addCol(colIndex: number, count: number): void;
   deleteCol(colIndex: number, count: number): void;
   deleteRow(rowIndex: number, count: number): void;
+  hideRow(rowIndex: number, count: number): void;
+  hideCol(colIndex: number, count: number): void;
   canRedo(): boolean;
   canUndo(): boolean;
   undo(): void;
