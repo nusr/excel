@@ -16,7 +16,7 @@ type Props = {
 
 export function getEditorStyle(
   data: ActiveCellType,
-): CSSProperties | undefined {
+): CSSProperties {
   const { style } = data;
   const cellPosition: CanvasOverlayPosition = {
     top: data.top,

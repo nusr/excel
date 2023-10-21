@@ -16,9 +16,9 @@ describe('CanvasContainer.test.ts', () => {
     const controller = initController();
     render(<CanvasContainer controller={controller} />);
     fireEvent.contextMenu(screen.getByTestId('canvas-main'), {
-      clientY: 4000,
-      clientX: 4000,
+      clientY: 200,
+      clientX: 200,
     });
-    expect(screen.getByTestId('context-menu')!.childNodes).toHaveLength(9);
+    expect(screen.getByTestId('context-menu')!.childNodes).toHaveLength(3);
   });
 });

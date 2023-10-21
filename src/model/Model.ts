@@ -563,4 +563,34 @@ export class Model implements IModel {
 
     return range;
   }
+  deleteAll(sheetId?: string): void {
+    const id = sheetId || this.currentSheetId;
+    this.worksheets[id] = {};
+    this.mergeCells = this.mergeCells.filter((v) => v.sheetId !== id);
+    this.customHeight[id] = {};
+    this.customWidth[id] = {};
+    const definedNames: WorkBookJSON['definedNames'] = {};
+    for (const key of Object.keys(this.definedNames)) {
+      const t = this.definedNames[key];
+      if (!t) {
+        continue;
+      }
+      if (t.sheetId !== id) {
+        definedNames[key] = t;
+      }
+    }
+    this.definedNames = definedNames;
+  }
+  getDefineName(row: number, col: number): string {
+    for (const key of Object.keys(this.definedNames)) {
+      const t = this.definedNames[key];
+      if (!t) {
+        continue;
+      }
+      if (t.row === row && t.col === col) {
+        return key;
+      }
+    }
+    return '';
+  }
 }

@@ -50,19 +50,17 @@ export const MOCK_MODEL: WorkBookJSON = {
     1: {
       0: {
         0: {
-          value: '',
-          // formula: '1',
+          value: '1',
           style: {
             fontColor: '#ff0000',
           },
         },
         1: {
           value: '',
-          formula: '=foo11',
         },
         2: {
           value: '',
-          // formula: '3',
+          formula: '=foo',
         },
         3: {
           value: '超大字',
@@ -142,10 +140,10 @@ export const MOCK_MODEL: WorkBookJSON = {
   },
   definedNames: {
     foo: {
-      row: 7,
+      row: 0,
       col: 0,
-      rowCount: 2,
-      colCount: 2,
+      rowCount: 1,
+      colCount: 1,
       sheetId: '1',
     },
   },

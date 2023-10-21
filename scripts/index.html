@@ -6,8 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Web Excel</title>
   <link rel="stylesheet" href="./index.css" />
-  <!-- <script src="http://www.unpkg.com/react/umd/react.production.min.js"></script> -->
-  <!-- <script src="http://www.unpkg.com/react-dom/umd/react-dom.production.min.js"></script> -->
 </head>
 
 <body>
@@ -16,6 +14,7 @@
   <script>
     window.onload = function () {
       if (process.env.NODE_ENV === 'development') {
+        // esbuild hot reload
         new EventSource('/esbuild').addEventListener('change', function () {
           location.reload();
         });

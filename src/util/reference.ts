@@ -1,5 +1,5 @@
 import { columnNameToInt, rowLabelToInt, intToColumnName } from './convert';
-import { IRange } from '@/types';
+import { IRange, ReferenceType } from '@/types';
 import { Range } from './range';
 import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from './constant';
 
@@ -111,18 +111,29 @@ export function mergeRange(start: Range, end: Range): Range | null {
   return new Range(row, col, rowCount, colCount, start.sheetId);
 }
 
-function convertCell(row: number, col: number) {
-  return `${intToColumnName(col)}${row + 1}`;
+function convertCell(row: number, col: number, referenceType: ReferenceType) {
+  const first = referenceType === 'absolute';
+  const second = referenceType === 'absolute';
+  return `${first ? '$' : ''}${intToColumnName(col)}${second ? '$' : ''}${
+    row + 1
+  }`;
 }
 
-export function convertToReference(range: IRange) {
-  const result = convertCell(range.row, range.col);
+export function convertToReference(
+  range: IRange,
+  referenceType: ReferenceType = 'relative',
+  convertSheetIdToSheetName = convertSheetNameToSheetId,
+) {
+  let result = convertCell(range.row, range.col, referenceType);
+  let sheetName = convertSheetIdToSheetName(range.sheetId);
+  sheetName = sheetName ? `${sheetName}!` : '';
   if (range.colCount > 1 && range.rowCount > 1) {
     const end = convertCell(
       range.row + range.rowCount,
       range.col + range.colCount,
+      referenceType,
     );
-    return `${result}:${end}`;
+    result = `${result}:${end}`;
   }
-  return result;
+  return sheetName + result;
 }

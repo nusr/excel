@@ -57,7 +57,7 @@
 }
 
 .context-menu {
-  position: absolute;
+  position: fixed;
   background-color: var(--white);
   border-radius: var(--borderRadius);
   width: 110px;

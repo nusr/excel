@@ -64,6 +64,7 @@ const handleStateChange = (
       fontFamily = '',
       numberFormat = 0,
     } = cell.style;
+    const defineName = controller.getDefineName(cell.row, cell.col);
     activeCellStore.setState({
       ...cellPosition,
       row: cell.row,
@@ -79,6 +80,7 @@ const handleStateChange = (
       isWrapText,
       underline,
       numberFormat,
+      defineName,
     });
   }
   if (changeSet.has('sheetList')) {

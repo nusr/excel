@@ -11,6 +11,7 @@ export type CellStoreType = Partial<StyleType> & {
   height: number;
   row: number;
   col: number;
+  defineName: string;
 };
 
 const cellData: CellStoreType = {
@@ -22,6 +23,7 @@ const cellData: CellStoreType = {
   top: DEFAULT_POSITION,
   width: 0,
   height: 0,
+  defineName: '',
 };
 
 export const activeCellStore = new BaseStore<CellStoreType>(cellData);

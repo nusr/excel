@@ -5,8 +5,11 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  file-saver:
+    specifier: 2.0.5
+    version: 2.0.5
   jszip:
-    specifier: ^3.10.1
+    specifier: 3.10.1
     version: 3.10.1
   react:
     specifier: 18.2.0
@@ -26,8 +29,8 @@ devDependencies:
     specifier: 29.5.6
     version: 29.5.6
   '@types/react':
-    specifier: 18.2.29
-    version: 18.2.29
+    specifier: 18.2.30
+    version: 18.2.30
   '@types/react-dom':
     specifier: 18.2.14
     version: 18.2.14
@@ -37,9 +40,6 @@ devDependencies:
   esbuild:
     specifier: 0.19.5
     version: 0.19.5
-  file-saver:
-    specifier: 2.0.5
-    version: 2.0.5
   jest:
     specifier: 29.7.0
     version: 29.7.0
@@ -1066,11 +1066,11 @@ packages:
   /@types/react-dom@18.2.14:
     resolution: {integrity: sha512-V835xgdSVmyQmI1KLV2BEIUgqEuinxp9O4G6g3FqO/SqLac049E53aysv0oEFD2kHfejeKU+ZqL2bcFWj9gLAQ==}
     dependencies:
-      '@types/react': 18.2.29
+      '@types/react': 18.2.30
     dev: true
 
-  /@types/react@18.2.29:
-    resolution: {integrity: sha512-Z+ZrIRocWtdD70j45izShRwDuiB4JZqDegqMFW/I8aG5DxxLKOzVNoq62UIO82v9bdgi+DO1jvsb9sTEZUSm+Q==}
+  /@types/react@18.2.30:
+    resolution: {integrity: sha512-OfqdJnDsSo4UNw0bqAjFCuBpLYQM7wvZidz0hVxHRjrEkzRlvZL1pJVyOSY55HMiKvRNEo9DUBRuEl7FNlJ/Vg==}
     dependencies:
       '@types/prop-types': 15.7.7
       '@types/scheduler': 0.16.4
@@ -1927,7 +1927,7 @@ packages:
 
   /file-saver@2.0.5:
     resolution: {integrity: sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==}
-    dev: true
+    dev: false
 
   /fill-range@7.0.1:
     resolution: {integrity: sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ==}

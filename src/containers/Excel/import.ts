@@ -113,6 +113,11 @@ type FillItem = {
   };
 };
 
+type DefineNameItem = {
+  name: string;
+  '#text': string;
+};
+
 function xmlToJson(xml: any) {
   // Create the return object
   let obj: XMLFile = {};
@@ -425,6 +430,22 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     }
     item.rowCount = Math.max(item.rowCount, rowCount);
     item.colCount = Math.max(item.colCount, colCount);
+  }
+
+  let definedNames: DefineNameItem[] = get(
+    workbook,
+    'workbook.definedNames.definedName',
+    [],
+  );
+  definedNames = Array.isArray(definedNames) ? definedNames : [definedNames];
+  const convertSheetName = (sheetName: string) => {
+    return result.workbook.find((v) => v.name === sheetName)?.sheetId || '';
+  };
+  for (const item of definedNames) {
+    const range = parseReference(item['#text'], convertSheetName);
+    if (range && range.sheetId) {
+      result.definedNames[item.name] = range;
+    }
   }
   return result;
 }

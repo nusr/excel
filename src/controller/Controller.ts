@@ -553,4 +553,12 @@ export class Controller implements IController {
   getMainDom(): MainDom {
     return this.mainDom;
   }
+  deleteAll(sheetId?: string): void {
+    this.model.deleteAll(sheetId);
+    this.changeSet.add('content');
+    this.emitChange();
+  }
+  getDefineName(row: number, col: number): string {
+    return this.model.getDefineName(row, col);
+  }
 }

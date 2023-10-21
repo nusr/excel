@@ -86,6 +86,10 @@ function getSheetData(
     }
     customWidth = `<cols>${list.join('')}</cols>`;
   }
+  const realActiveCell = {
+    ...activeCell,
+    sheetId: '',
+  };
   const v = sheetData
     ? `<sheetData>
   ${sheetData}
@@ -108,7 +112,7 @@ function getSheetData(
             rowCount: 1,
             colCount: 1,
             sheetId: '',
-          })}" sqref="${convertToReference(activeCell)}"/>
+          })}" sqref="${convertToReference(realActiveCell)}"/>
         </sheetView>
       </sheetViews>
       <sheetFormatPr defaultColWidth="9" defaultRowHeight="16.8" outlineLevelCol="1"/>
@@ -907,6 +911,20 @@ export async function exportToXLSX(fileName: string, controller: IController) {
   };
 
   const activeIndex = sheetList.findIndex((v) => v.sheetId === currentSheetId);
+  const convertSheetIdToSheetName = (sheetId: string) => {
+    const id = sheetId || currentSheetId;
+    return sheetList.find((v) => v.sheetId === id)?.name || '';
+  };
+  const defineNames: string[] = [];
+  for (const name of Object.keys(modelJson.definedNames)) {
+    const range = modelJson.definedNames[name];
+    const text = convertToReference(
+      range,
+      'absolute',
+      convertSheetIdToSheetName,
+    );
+    defineNames.push(`<definedName name="${name}">${text}</definedName>`);
+  }
   const workbook = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
     xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
@@ -927,6 +945,11 @@ export async function exportToXLSX(fileName: string, controller: IController) {
         )
         .join('')}
     </sheets>
+    ${
+      defineNames.length > 0
+        ? `<definedNames>${defineNames.join('')}</definedNames>`
+        : ''
+    }
     <calcPr calcId="144525"/>
   </workbook>`;
   xl.file('workbook.xml', workbook);
