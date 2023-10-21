@@ -51,7 +51,7 @@
   background-color: rgba(0, 0, 0, 0.2);
 }
 .canvas_context-menu {
-  position: absolute;
+  position: fixed;
   background-color: var(--white);
   border-radius: var(--borderRadius);
   width: 110px;

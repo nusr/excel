@@ -1034,7 +1034,7 @@ var require_react_development = __commonJS({
           }
           return false;
         }
-        function memo(type, compare) {
+        function memo2(type, compare) {
           {
             if (!isValidElementType(type)) {
               error("memo: The first argument must be a component. Instead received: %s", type === null ? "null" : typeof type);
@@ -1873,7 +1873,7 @@ var require_react_development = __commonJS({
         exports.forwardRef = forwardRef;
         exports.isValidElement = isValidElement;
         exports.lazy = lazy;
-        exports.memo = memo;
+        exports.memo = memo2;
         exports.startTransition = startTransition;
         exports.unstable_act = act;
         exports.useCallback = useCallback;
@@ -2435,7 +2435,7 @@ var require_react_dom_development = __commonJS({
         var HostPortal = 4;
         var HostComponent = 5;
         var HostText = 6;
-        var Fragment4 = 7;
+        var Fragment5 = 7;
         var Mode = 8;
         var ContextConsumer = 9;
         var ContextProvider = 10;
@@ -3591,7 +3591,7 @@ var require_react_dom_development = __commonJS({
               return "DehydratedFragment";
             case ForwardRef:
               return getWrappedName$1(type, type.render, "ForwardRef");
-            case Fragment4:
+            case Fragment5:
               return "Fragment";
             case HostComponent:
               return type;
@@ -13262,7 +13262,7 @@ var require_react_dom_development = __commonJS({
             }
           }
           function updateFragment2(returnFiber, current2, fragment, lanes, key) {
-            if (current2 === null || current2.tag !== Fragment4) {
+            if (current2 === null || current2.tag !== Fragment5) {
               var created = createFiberFromFragment(fragment, returnFiber.mode, lanes, key);
               created.return = returnFiber;
               return created;
@@ -13665,7 +13665,7 @@ var require_react_dom_development = __commonJS({
               if (child.key === key) {
                 var elementType = element.type;
                 if (elementType === REACT_FRAGMENT_TYPE) {
-                  if (child.tag === Fragment4) {
+                  if (child.tag === Fragment5) {
                     deleteRemainingChildren(returnFiber, child.sibling);
                     var existing = useFiber(child, element.props.children);
                     existing.return = returnFiber;
@@ -17840,7 +17840,7 @@ var require_react_dom_development = __commonJS({
               var _resolvedProps2 = workInProgress2.elementType === type ? _unresolvedProps2 : resolveDefaultProps(type, _unresolvedProps2);
               return updateForwardRef(current2, workInProgress2, type, _resolvedProps2, renderLanes2);
             }
-            case Fragment4:
+            case Fragment5:
               return updateFragment(current2, workInProgress2, renderLanes2);
             case Mode:
               return updateMode(current2, workInProgress2, renderLanes2);
@@ -18113,7 +18113,7 @@ var require_react_dom_development = __commonJS({
             case SimpleMemoComponent:
             case FunctionComponent8:
             case ForwardRef:
-            case Fragment4:
+            case Fragment5:
             case Mode:
             case Profiler:
             case ContextConsumer:
@@ -22372,7 +22372,7 @@ var require_react_dom_development = __commonJS({
           return fiber;
         }
         function createFiberFromFragment(elements, mode, lanes, key) {
-          var fiber = createFiber(Fragment4, elements, key, mode);
+          var fiber = createFiber(Fragment5, elements, key, mode);
           fiber.lanes = lanes;
           return fiber;
         }
@@ -24149,19 +24149,24 @@ function mergeRange(start, end) {
   const col = start.col < end.col ? start.col : end.col;
   return new Range(row, col, rowCount, colCount, start.sheetId);
 }
-function convertCell(row, col) {
-  return `${intToColumnName(col)}${row + 1}`;
+function convertCell(row, col, referenceType) {
+  const first = referenceType === "absolute";
+  const second = referenceType === "absolute";
+  return `${first ? "$" : ""}${intToColumnName(col)}${second ? "$" : ""}${row + 1}`;
 }
-function convertToReference(range) {
-  const result = convertCell(range.row, range.col);
+function convertToReference(range, referenceType = "relative", convertSheetIdToSheetName = convertSheetNameToSheetId) {
+  let result = convertCell(range.row, range.col, referenceType);
+  let sheetName = convertSheetIdToSheetName(range.sheetId);
+  sheetName = sheetName ? `${sheetName}!` : "";
   if (range.colCount > 1 && range.rowCount > 1) {
     const end = convertCell(
       range.row + range.rowCount,
-      range.col + range.colCount
+      range.col + range.colCount,
+      referenceType
     );
-    return `${result}:${end}`;
+    result = `${result}:${end}`;
   }
-  return result;
+  return sheetName + result;
 }
 
 // src/util/debug.ts
@@ -24711,7 +24716,8 @@ var cellData = {
   left: DEFAULT_POSITION,
   top: DEFAULT_POSITION,
   width: 0,
-  height: 0
+  height: 0,
+  defineName: ""
 };
 var activeCellStore = new BaseStore(cellData);
 
@@ -26381,25 +26387,44 @@ function useClickOutside(callback) {
 
 // src/containers/canvas/ContextMenu.tsx
 var MENU_WIDTH = 110;
-var MENU_HEIGHT = 142;
-var ContextMenu = (props) => {
+var ITEM_HEIGHT = 20;
+var ContextMenu = (0, import_react9.memo)((props) => {
   const { controller: controller2, top, left, hideContextMenu } = props;
   const [ref] = useClickOutside(hideContextMenu);
-  const style = (0, import_react9.useMemo)(() => {
+  const { style, position } = (0, import_react9.useMemo)(() => {
+    const headerSize = controller2.getHeaderSize();
+    const rect = controller2.getMainDom().canvas.getBoundingClientRect();
+    let position2 = 3 /* CONTENT */;
+    let menuHeight = ITEM_HEIGHT * 3;
+    const y = top - rect.top;
+    const x = left - rect.left;
+    if (y < headerSize.height && x < headerSize.width) {
+      position2 = 2 /* TRIANGLE */;
+    } else if (y < headerSize.height) {
+      position2 = 0 /* COLUMN_HEADER */;
+      menuHeight = ITEM_HEIGHT * 6;
+    } else if (x < headerSize.width) {
+      position2 = 1 /* ROW_HEADER */;
+      menuHeight = ITEM_HEIGHT * 6;
+    }
     let realTop = top;
     let realLeft = left;
     const gap = 18;
-    if (realTop + MENU_HEIGHT > window.innerHeight) {
-      realTop = window.innerHeight - MENU_HEIGHT - gap;
+    const height = rect.height + rect.top;
+    if (realTop + menuHeight > height) {
+      realTop = height - menuHeight - gap;
     }
-    if (realLeft + MENU_WIDTH > window.innerWidth) {
-      realLeft = window.innerWidth - MENU_WIDTH - gap;
+    if (realLeft + MENU_WIDTH > rect.width) {
+      realLeft = rect.width - MENU_WIDTH - gap;
     }
     return {
-      top: realTop,
-      left: realLeft
+      style: {
+        top: realTop,
+        left: realLeft
+      },
+      position: position2
     };
-  }, [top, left]);
+  }, []);
   return /* @__PURE__ */ import_react9.default.createElement(
     "div",
     {
@@ -26408,66 +26433,6 @@ var ContextMenu = (props) => {
       style,
       ref
     },
-    /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.addCol(controller2.getActiveCell().col, 1);
-        }
-      },
-      "Add a column"
-    ),
-    /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.deleteCol(controller2.getActiveCell().col, 1);
-        }
-      },
-      "Delete a column"
-    ),
-    /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.hideCol(controller2.getActiveCell().col, 1);
-        }
-      },
-      "Hide a column"
-    ),
-    /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.addRow(controller2.getActiveCell().row, 1);
-        }
-      },
-      "Add a row"
-    ),
-    /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.deleteRow(controller2.getActiveCell().row, 1);
-        }
-      },
-      "Delete a row"
-    ),
-    /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.hideRow(controller2.getActiveCell().row, 1);
-        }
-      },
-      "Hide a row"
-    ),
     /* @__PURE__ */ import_react9.default.createElement(
       Button,
       {
@@ -26497,9 +26462,75 @@ var ContextMenu = (props) => {
         }
       },
       "Paste"
-    )
+    ),
+    position === 2 /* TRIANGLE */ && /* @__PURE__ */ import_react9.default.createElement(import_react9.Fragment, null, /* @__PURE__ */ import_react9.default.createElement(
+      Button,
+      {
+        onClick: () => {
+          hideContextMenu();
+          controller2.deleteAll(controller2.getCurrentSheetId());
+        }
+      },
+      "Delete all"
+    )),
+    position === 0 /* COLUMN_HEADER */ && /* @__PURE__ */ import_react9.default.createElement(import_react9.Fragment, null, /* @__PURE__ */ import_react9.default.createElement(
+      Button,
+      {
+        onClick: () => {
+          hideContextMenu();
+          controller2.addCol(controller2.getActiveCell().col, 1);
+        }
+      },
+      "Insert a column"
+    ), /* @__PURE__ */ import_react9.default.createElement(
+      Button,
+      {
+        onClick: () => {
+          hideContextMenu();
+          controller2.deleteCol(controller2.getActiveCell().col, 1);
+        }
+      },
+      "Delete a column"
+    ), /* @__PURE__ */ import_react9.default.createElement(
+      Button,
+      {
+        onClick: () => {
+          hideContextMenu();
+          controller2.hideCol(controller2.getActiveCell().col, 1);
+        }
+      },
+      "Hide a column"
+    )),
+    position === 1 /* ROW_HEADER */ && /* @__PURE__ */ import_react9.default.createElement(import_react9.Fragment, null, /* @__PURE__ */ import_react9.default.createElement(
+      Button,
+      {
+        onClick: () => {
+          hideContextMenu();
+          controller2.addRow(controller2.getActiveCell().row, 1);
+        }
+      },
+      "Insert a row"
+    ), /* @__PURE__ */ import_react9.default.createElement(
+      Button,
+      {
+        onClick: () => {
+          hideContextMenu();
+          controller2.deleteRow(controller2.getActiveCell().row, 1);
+        }
+      },
+      "Delete a row"
+    ), /* @__PURE__ */ import_react9.default.createElement(
+      Button,
+      {
+        onClick: () => {
+          hideContextMenu();
+          controller2.hideRow(controller2.getActiveCell().row, 1);
+        }
+      },
+      "Hide a row"
+    ))
   );
-};
+});
 ContextMenu.displayName = "ContextMenuContainer";
 
 // src/containers/canvas/util.ts
@@ -26544,6 +26575,7 @@ var handleStateChange = (changeSet, controller2) => {
       fontFamily = "",
       numberFormat = 0
     } = cell.style;
+    const defineName = controller2.getDefineName(cell.row, cell.col);
     activeCellStore.setState({
       ...cellPosition,
       row: cell.row,
@@ -26558,7 +26590,8 @@ var handleStateChange = (changeSet, controller2) => {
       fillColor,
       isWrapText,
       underline,
-      numberFormat
+      numberFormat,
+      defineName
     });
   }
   if (changeSet.has("sheetList")) {
@@ -26850,7 +26883,7 @@ var FormulaBarContainer = ({
     coreStore.getSnapshot
   );
   const name = (0, import_react12.useMemo)(() => {
-    return `${intToColumnName(activeCell.col)}${activeCell.row + 1}`;
+    return activeCell.defineName || `${intToColumnName(activeCell.col)}${activeCell.row + 1}`;
   }, [activeCell]);
   const showText = !isCellEditing || activeCell.top > 0 || activeCell.left > 0;
   const editorValue = activeCell.formula || String(activeCell.value || "");
@@ -27188,6 +27221,21 @@ function convertXMLDataToModel(xmlData) {
     item.rowCount = Math.max(item.rowCount, rowCount);
     item.colCount = Math.max(item.colCount, colCount);
   }
+  let definedNames = get(
+    workbook,
+    "workbook.definedNames.definedName",
+    []
+  );
+  definedNames = Array.isArray(definedNames) ? definedNames : [definedNames];
+  const convertSheetName = (sheetName) => {
+    return result.workbook.find((v) => v.name === sheetName)?.sheetId || "";
+  };
+  for (const item of definedNames) {
+    const range = parseReference(item["#text"], convertSheetName);
+    if (range && range.sheetId) {
+      result.definedNames[item.name] = range;
+    }
+  }
   return result;
 }
 async function importXLSX(file) {
@@ -27412,6 +27460,10 @@ function getSheetData(activeCell, sheetData, isActiveSheet, customWidthMap) {
     }
     customWidth = `<cols>${list.join("")}</cols>`;
   }
+  const realActiveCell = {
+    ...activeCell,
+    sheetId: ""
+  };
   const v = sheetData ? `<sheetData>
   ${sheetData}
 </sheetData>` : "<sheetData/>";
@@ -27432,7 +27484,7 @@ function getSheetData(activeCell, sheetData, isActiveSheet, customWidthMap) {
     rowCount: 1,
     colCount: 1,
     sheetId: ""
-  })}" sqref="${convertToReference(activeCell)}"/>
+  })}" sqref="${convertToReference(realActiveCell)}"/>
         </sheetView>
       </sheetViews>
       <sheetFormatPr defaultColWidth="9" defaultRowHeight="16.8" outlineLevelCol="1"/>
@@ -28204,6 +28256,20 @@ async function exportToXLSX(fileName, controller2) {
     ]
   };
   const activeIndex = sheetList.findIndex((v) => v.sheetId === currentSheetId);
+  const convertSheetIdToSheetName = (sheetId) => {
+    const id = sheetId || currentSheetId;
+    return sheetList.find((v) => v.sheetId === id)?.name || "";
+  };
+  const defineNames = [];
+  for (const name of Object.keys(modelJson.definedNames)) {
+    const range = modelJson.definedNames[name];
+    const text = convertToReference(
+      range,
+      "absolute",
+      convertSheetIdToSheetName
+    );
+    defineNames.push(`<definedName name="${name}">${text}</definedName>`);
+  }
   const workbook = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
     xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
@@ -28217,6 +28283,7 @@ async function exportToXLSX(fileName, controller2) {
     (item) => `<sheet name="${item.name}" sheetId="${item.sheetId}" r:id="${sheetRelMap[item.sheetId].rid}" ${item.isHide ? 'state="hidden"' : ""}/>`
   ).join("")}
     </sheets>
+    ${defineNames.length > 0 ? `<definedNames>${defineNames.join("")}</definedNames>` : ""}
     <calcPr calcId="144525"/>
   </workbook>`;
   xl.file("workbook.xml", workbook);
@@ -29488,6 +29555,14 @@ var Controller = class {
   }
   getMainDom() {
     return this.mainDom;
+  }
+  deleteAll(sheetId) {
+    this.model.deleteAll(sheetId);
+    this.changeSet.add("content");
+    this.emitChange();
+  }
+  getDefineName(row, col) {
+    return this.model.getDefineName(row, col);
   }
 };
 
@@ -31072,6 +31147,36 @@ var Model = class {
     };
     return range;
   }
+  deleteAll(sheetId) {
+    const id = sheetId || this.currentSheetId;
+    this.worksheets[id] = {};
+    this.mergeCells = this.mergeCells.filter((v) => v.sheetId !== id);
+    this.customHeight[id] = {};
+    this.customWidth[id] = {};
+    const definedNames = {};
+    for (const key of Object.keys(this.definedNames)) {
+      const t = this.definedNames[key];
+      if (!t) {
+        continue;
+      }
+      if (t.sheetId !== id) {
+        definedNames[key] = t;
+      }
+    }
+    this.definedNames = definedNames;
+  }
+  getDefineName(row, col) {
+    for (const key of Object.keys(this.definedNames)) {
+      const t = this.definedNames[key];
+      if (!t) {
+        continue;
+      }
+      if (t.row === row && t.col === col) {
+        return key;
+      }
+    }
+    return "";
+  }
 };
 
 // src/model/mockModel.ts
@@ -31124,19 +31229,17 @@ var MOCK_MODEL = {
     1: {
       0: {
         0: {
-          value: "",
-          // formula: '1',
+          value: "1",
           style: {
             fontColor: "#ff0000"
           }
         },
         1: {
-          value: "",
-          formula: "=foo11"
+          value: ""
         },
         2: {
-          value: ""
-          // formula: '3',
+          value: "",
+          formula: "=foo"
         },
         3: {
           value: "\u8D85\u5927\u5B57",
@@ -31216,10 +31319,10 @@ var MOCK_MODEL = {
   },
   definedNames: {
     foo: {
-      row: 7,
+      row: 0,
       col: 0,
-      rowCount: 2,
-      colCount: 2,
+      rowCount: 1,
+      colCount: 1,
       sheetId: "1"
     }
   }
