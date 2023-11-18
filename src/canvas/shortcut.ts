@@ -2,6 +2,32 @@ import { KeyboardEventItem, IController, EUnderLine } from '@/types';
 import { BOTTOM_BUFF, SCROLL_SIZE, isMac } from '@/util';
 import { coreStore } from '@/containers/store';
 
+function handleTabClick(controller: IController) {
+  checkActiveElement(controller);
+  const activeCell = controller.getActiveCell();
+  controller.setActiveCell({
+    row: activeCell.row,
+    col: activeCell.col + 1,
+    rowCount: 1,
+    colCount: 1,
+    sheetId: '',
+  });
+  recalculateScroll(controller);
+}
+
+function handleEnterClick(controller: IController) {
+  checkActiveElement(controller);
+  const activeCell = controller.getActiveCell();
+  controller.setActiveCell({
+    row: activeCell.row + 1,
+    col: activeCell.col,
+    rowCount: 1,
+    colCount: 1,
+    sheetId: '',
+  });
+  recalculateScroll(controller);
+}
+
 export function computeScrollRowAndCol(
   controller: IController,
   left: number,
@@ -196,32 +222,12 @@ export const keyboardEventList: KeyboardEventItem[] = [
   {
     key: 'Enter',
     modifierKey: [],
-    handler: (controller) => {
-      checkActiveElement(controller);
-      const activeCell = controller.getActiveCell();
-      controller.setActiveCell({
-        row: activeCell.row + 1,
-        col: activeCell.col,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: '',
-      });
-    },
+    handler: handleEnterClick,
   },
   {
     key: 'Tab',
     modifierKey: [],
-    handler: (controller) => {
-      checkActiveElement(controller);
-      const activeCell = controller.getActiveCell();
-      controller.setActiveCell({
-        row: activeCell.row,
-        col: activeCell.col + 1,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: '',
-      });
-    },
+    handler: handleTabClick,
   },
   {
     key: 'ArrowDown',
@@ -262,18 +268,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
   {
     key: 'ArrowDown',
     modifierKey: [],
-    handler: (controller) => {
-      checkActiveElement(controller);
-      const activeCell = controller.getActiveCell();
-      controller.setActiveCell({
-        row: activeCell.row + 1,
-        col: activeCell.col,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: '',
-      });
-      recalculateScroll(controller);
-    },
+    handler: handleEnterClick,
   },
   {
     key: 'ArrowUp',
@@ -294,18 +289,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
   {
     key: 'ArrowRight',
     modifierKey: [],
-    handler: (controller) => {
-      checkActiveElement(controller);
-      const activeCell = controller.getActiveCell();
-      controller.setActiveCell({
-        row: activeCell.row,
-        col: activeCell.col + 1,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: '',
-      });
-      recalculateScroll(controller);
-    },
+    handler: handleTabClick,
   },
   {
     key: 'ArrowLeft',

@@ -3,7 +3,7 @@ import { deepEqual } from '@/util';
 type StoreListener = () => void;
 type PrimitiveType = boolean | number | string | null | undefined;
 type PlainObject = Record<string, PrimitiveType>;
-type BaseStoreType = PrimitiveType | PlainObject | Array<PlainObject>;
+type BaseStoreType = PrimitiveType | PlainObject | PlainObject[];
 
 // store value must be a primitive type or plain object or array of plain object
 export class BaseStore<T extends BaseStoreType> {

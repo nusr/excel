@@ -71,28 +71,35 @@ export class Scanner {
       this.next();
     }
   }
-  private number() {
-    this.allDigit()
-    if (this.match('E')) {
+  private matchScientificCounting() {
+    if (this.match('E') || this.match('e')) {
       // 1E-10 1E+10
       if (this.match('+') || this.match('-')) {
-        this.allDigit()
+        this.allDigit();
         this.addToken(TokenType.NUMBER);
-        return
+        return true;
+      }
+      if (this.isDigit(this.peek())) {
+        this.allDigit();
+        this.addToken(TokenType.NUMBER);
+        return true;
       }
       throw new CustomError('#VALUE!');
+    }
+    return false;
+  }
+  private number() {
+    this.allDigit();
+    const check1 = this.matchScientificCounting();
+    if (check1) {
+      return;
     }
     if (this.match('.')) {
-      this.allDigit()
+      this.allDigit();
     }
-    if (this.match('E')) {
-      // 1E-10 1E+10
-      if (this.match('+') || this.match('-')) {
-        this.allDigit()
-        this.addToken(TokenType.NUMBER);
-        return
-      }
-      throw new CustomError('#VALUE!');
+    const check2 = this.matchScientificCounting();
+    if (check2) {
+      return;
     }
     this.addToken(TokenType.NUMBER);
   }

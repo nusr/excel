@@ -1,4 +1,5 @@
-import { IRange } from '@/types'
+import { IRange } from '@/types';
+
 export type ResultType = boolean | string | number | null | undefined;
 export type ErrorTypes =
   | '#ERROR!'

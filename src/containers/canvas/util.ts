@@ -2,8 +2,7 @@ import { IController, ChangeEventType, EUnderLine } from '@/types';
 import {
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
-  copy,
-  cut,
+  copyOrCut,
   paste,
 } from '@/util';
 import {
@@ -118,8 +117,7 @@ export function initCanvas(controller: IController) {
 
   const removeEvent = registerGlobalEvent(controller, resize);
   controller.setHooks({
-    copy,
-    cut,
+    copyOrCut,
     paste,
     modelChange: (changeSet) => {
       handleStateChange(changeSet, controller);

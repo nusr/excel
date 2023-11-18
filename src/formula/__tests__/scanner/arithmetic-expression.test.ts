@@ -7,6 +7,8 @@ describe('arithmetic expressions', function () {
     ['1.5', [getToken(TokenType.NUMBER, '1.5')]],
     ['11.55', [getToken(TokenType.NUMBER, '11.55')]],
     ['1E-1', [getToken(TokenType.NUMBER, '1E-1')]],
+    ['1E1', [getToken(TokenType.NUMBER, '1E1')]],
+    ['1E10', [getToken(TokenType.NUMBER, '1E10')]],
     ['1.5E-10', [getToken(TokenType.NUMBER, '1.5E-10')]],
     ['1.55E+100', [getToken(TokenType.NUMBER, '1.55E+100')]],
     [

@@ -7,6 +7,7 @@ import {
   isEmpty,
 } from '@/util';
 import styles from './index.module.css';
+import { CellStoreType } from '../store'
 
 type Props = {
   controller: IController;
@@ -15,14 +16,13 @@ type Props = {
 };
 
 export function getEditorStyle(
-  data: ActiveCellType,
+  style: CellStoreType,
 ): CSSProperties {
-  const { style } = data;
   const cellPosition: CanvasOverlayPosition = {
-    top: data.top,
-    left: data.left,
-    width: data.width,
-    height: data.height,
+    top: style.top,
+    left: style.left,
+    width: style.width,
+    height: style.height,
   };
   if (isEmpty(style)) {
     return cellPosition;

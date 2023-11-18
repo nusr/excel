@@ -100,6 +100,35 @@ function convertValueToString(value: ResultType): string {
   return text;
 }
 
+function drawUnderlineData(
+  ctx: CanvasRenderingContext2D,
+  isNum: boolean,
+  style: ModelCellType['style'],
+  textHeight: number,
+  x: number,
+  y: number,
+  left: number,
+  textWidth: number,
+) {
+  if (!style?.underline) {
+    return;
+  }
+  const t = Math.floor(y + textHeight / 2);
+  let pointList: Array<Point> = [];
+  if (!isNum) {
+    pointList = [
+      [x, t],
+      [x + textWidth, t],
+    ];
+  } else {
+    pointList = [
+      [left, t],
+      [left + textWidth, t],
+    ];
+  }
+  drawUnderline(ctx, pointList, style?.underline);
+}
+
 export function renderCell(
   ctx: CanvasRenderingContext2D,
   cellInfo: ModelCellType & CanvasOverlayPosition,
@@ -181,23 +210,7 @@ export function renderCell(
         y = y + Math.floor(textHeight / 2) + offset;
         const b = textData.join('');
         fillText(ctx, b, x, y);
-
-        if (style?.underline) {
-          const t = Math.floor(y + textHeight / 2);
-          let pointList: Array<Point> = [];
-          if (!isNum) {
-            pointList = [
-              [x, t],
-              [x + width, t],
-            ];
-          } else {
-            pointList = [
-              [left, t],
-              [left + width, t],
-            ];
-          }
-          drawUnderline(ctx, pointList, style?.underline);
-        }
+        drawUnderlineData(ctx, isNum, style, textHeight, x, y, left, width);
         y = y + Math.floor(textHeight / 2);
       }
     }
@@ -218,23 +231,9 @@ export function renderCell(
         textWidth += textItemList[i].width;
       }
     }
+
     fillText(ctx, textData.join(''), x, y);
-    if (style?.underline) {
-      const t = Math.floor(y + textHeight / 2);
-      let pointList: Array<Point> = [];
-      if (!isNum) {
-        pointList = [
-          [x, t],
-          [x + textWidth, t],
-        ];
-      } else {
-        pointList = [
-          [left, t],
-          [left + textWidth, t],
-        ];
-      }
-      drawUnderline(ctx, pointList, style?.underline);
-    }
+    drawUnderlineData(ctx, isNum, style, textHeight, x, y, left, textWidth);
   }
   return result;
 }

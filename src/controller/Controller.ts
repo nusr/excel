@@ -46,11 +46,8 @@ export class Controller implements IController {
   private isCut = false; // cut or copy
   private hooks: IHooks = {
     modelChange() {},
-    async cut() {
-      return '';
-    },
-    async copy() {
-      return '';
+    async copyOrCut() {
+      return ''
     },
     async paste() {
       return {
@@ -182,7 +179,7 @@ export class Controller implements IController {
   }
 
   setCellValues(
-    value: string[][],
+    value: ResultType[][],
     style: Partial<StyleType>[][],
     ranges: IRange[],
   ): void {
@@ -499,10 +496,10 @@ export class Controller implements IController {
     if (this.isCut) {
       this.copyRanges = [];
       this.isCut = false;
-      this.hooks.copy({
+      this.hooks.copyOrCut({
         [PLAIN_FORMAT]: '',
         [HTML_FORMAT]: '',
-      });
+      }, 'copy');
     }
     this.setActiveCell(activeCell);
   }
@@ -516,7 +513,7 @@ export class Controller implements IController {
         event.clipboardData?.setData(key, data[key]);
       }
     } else {
-      this.hooks.copy(data);
+      this.hooks.copyOrCut(data, 'copy');
     }
     this.changeSet.add('antLine');
     this.emitChange();

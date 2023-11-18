@@ -47,6 +47,7 @@
   border-radius: unset;
   outline: none;
   font: inherit;
+  background-color: var(--white);
   overflow: hidden;
   position: fixed;
   box-sizing: border-box;

@@ -21,8 +21,7 @@ export type ClipboardData = Record<ClipboardType, string>;
 
 export type IHooks = {
   modelChange: (val: Set<ChangeEventType>) => void;
-  copy: (data: ClipboardData) => Promise<string>;
-  cut: (data: ClipboardData) => Promise<string>;
+  copyOrCut: (textData: ClipboardData, type: 'cut' | 'copy') => Promise<string>;
   paste: () => Promise<ClipboardData>;
 };
 

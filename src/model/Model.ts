@@ -230,9 +230,9 @@ export class Model implements IModel {
     setWith(this, key, formula);
   }
   setCellValues(
-    value: string[][],
+    value: ResultType[][],
     style: Partial<StyleType>[][],
-    ranges: Range[],
+    ranges: IRange[],
   ): void {
     const [range] = ranges;
     const { row, col } = range;
@@ -246,7 +246,7 @@ export class Model implements IModel {
         if (style[r] && style[r][c]) {
           this.setStyle(style[r][c], temp);
         }
-        if (t.startsWith('=')) {
+        if (t && typeof t === 'string' && t.startsWith('=')) {
           this.setCellFormula(t, temp);
         } else {
           this.setCellFormula('', temp);
@@ -261,7 +261,7 @@ export class Model implements IModel {
     this.history.pushRedo('set', stylePath, get(this, stylePath, {}));
     setWith(this, stylePath, style);
   }
-  setCellStyle(style: Partial<StyleType>, ranges: Range[]): void {
+  setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
     const [range] = ranges;
     const { row, col, rowCount, colCount } = range;
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {
@@ -338,6 +338,10 @@ export class Model implements IModel {
     if (isEmpty(sheetData)) {
       return;
     }
+    const sheetInfo = this.getSheetInfo();
+    if (sheetInfo.rowCount >= XLSX_MAX_ROW_COUNT) {
+      return;
+    }
     const rowKeys = convertToNumber(Object.keys(sheetData));
     for (let i = rowKeys.length - 1; i >= 0; i--) {
       const rowKey = rowKeys[i];
@@ -350,10 +354,7 @@ export class Model implements IModel {
       };
       sheetData[rowKey] = {};
     }
-    const sheetInfo = this.getSheetInfo();
-    if (sheetInfo.rowCount >= XLSX_MAX_ROW_COUNT) {
-      return;
-    }
+
     sheetInfo.rowCount += count;
   }
   addCol(colIndex: number, count: number): void {
@@ -362,8 +363,11 @@ export class Model implements IModel {
       return;
     }
     const sheetInfo = this.getSheetInfo();
-
+    if (sheetInfo.colCount >= XLSX_MAX_COL_COUNT) {
+      return;
+    }
     const rowKeys = Object.keys(sheetData);
+
     for (const rowKey of rowKeys) {
       const colKeys = convertToNumber(Object.keys(sheetData[rowKey]));
       for (let i = colKeys.length - 1; i >= 0; i--) {
@@ -378,9 +382,7 @@ export class Model implements IModel {
         sheetData[rowKey][colKey] = {};
       }
     }
-    if (sheetInfo.colCount >= XLSX_MAX_COL_COUNT) {
-      return;
-    }
+
     sheetInfo.colCount += count;
   }
   deleteCol(colIndex: number, count: number): void {

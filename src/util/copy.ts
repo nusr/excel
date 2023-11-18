@@ -93,25 +93,19 @@ const fakeCopyAction = (
   return selectedText;
 };
 
-export async function copy(textData: ClipboardData): Promise<string> {
+export async function copyOrCut(
+  textData: ClipboardData,
+  type: 'cut' | 'copy',
+): Promise<string> {
   try {
     await writeDataToClipboard(textData);
     return textData[PLAIN_FORMAT];
   } catch (error) {
     console.error(error);
-    return fakeCopyAction(textData[PLAIN_FORMAT], document.body, 'copy');
+    return fakeCopyAction(textData[PLAIN_FORMAT], document.body, type);
   }
 }
 
-export async function cut(textData: ClipboardData): Promise<string> {
-  try {
-    await writeDataToClipboard(textData);
-    return textData[PLAIN_FORMAT];
-  } catch (error) {
-    console.error(error);
-    return fakeCopyAction(textData[PLAIN_FORMAT], document.body, 'cut');
-  }
-}
 export async function paste(): Promise<ClipboardData> {
   try {
     return readDataFromClipboard();
@@ -124,7 +118,6 @@ export async function paste(): Promise<ClipboardData> {
     };
   }
 }
-
 
 export function generateHTML(style: string, content: string) {
   return `<html
@@ -225,5 +218,5 @@ export function generateHTML(style: string, content: string) {
       ${content}
     </table>
   </body>
-</html>`
+</html>`;
 }

@@ -3,6 +3,10 @@ import { parseFormula } from '../..';
 describe('parseFormula math', () => {
   it('operator +', () => {
     expect(parseFormula('10+10')).toEqual({ error: null, result: 20, expressionStr: '10+10' });
+
+    expect(parseFormula('1e2 + 1e1')).toEqual({ error: null, result: 110, expressionStr: '1e2+1e1' });
+    expect(parseFormula('1e-2 + 1e1')).toEqual({ error: null, result: 10.01, expressionStr: '1e-2+1e1' });
+
     expect(parseFormula('10 + 10')).toEqual({ error: null, result: 20, expressionStr: '10+10' });
     expect(parseFormula('10 + 11 + 23 + 11 + 2')).toEqual({
       error: null,

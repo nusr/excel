@@ -21,7 +21,10 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
     coreStore.getSnapshot,
   );
   const name = useMemo(() => {
-    return activeCell.defineName || `${intToColumnName(activeCell.col)}${activeCell.row + 1}`;
+    return (
+      activeCell.defineName ||
+      `${intToColumnName(activeCell.col)}${activeCell.row + 1}`
+    );
   }, [activeCell]);
   const showText = !isCellEditing || activeCell.top > 0 || activeCell.left > 0;
   const editorValue = activeCell.formula || String(activeCell.value || '');
