@@ -20,15 +20,7 @@ const config: Config = {
     '!src/react/modules/module.ts',
   ],
 
-  coverageReporters: [
-    'json',
-    'lcov',
-    'text',
-    'clover',
-    'html',
-    'json-summary',
-    'html-spa',
-  ],
+  coverageReporters: ['json', 'lcov', 'text', 'clover', 'html', 'json-summary', 'html-spa'],
 
   moduleNameMapper: {
     '@/(.*)': '<rootDir>/src/$1',

@@ -1,8 +1,8 @@
 import { itBlock, getToken, BlockType } from './util';
 import { TokenType } from '../../../types';
 
-describe('arithmetic expressions', function () {
-  const list: Array<BlockType> = [
+describe('arithmetic expressions', () => {
+  const list: BlockType[] = [
     ['1', [getToken(TokenType.NUMBER, '1')]],
     ['1.5', [getToken(TokenType.NUMBER, '1.5')]],
     ['11.55', [getToken(TokenType.NUMBER, '11.55')]],
@@ -11,30 +11,9 @@ describe('arithmetic expressions', function () {
     ['1E10', [getToken(TokenType.NUMBER, '1E10')]],
     ['1.5E-10', [getToken(TokenType.NUMBER, '1.5E-10')]],
     ['1.55E+100', [getToken(TokenType.NUMBER, '1.55E+100')]],
-    [
-      '1+2',
-      [
-        getToken(TokenType.NUMBER, '1'),
-        getToken(TokenType.PLUS, '+'),
-        getToken(TokenType.NUMBER, '2'),
-      ],
-    ],
-    [
-      '1+2',
-      [
-        getToken(TokenType.NUMBER, '1'),
-        getToken(TokenType.PLUS, '+'),
-        getToken(TokenType.NUMBER, '2'),
-      ],
-    ],
-    [
-      '1.1+2.2',
-      [
-        getToken(TokenType.NUMBER, '1.1'),
-        getToken(TokenType.PLUS, '+'),
-        getToken(TokenType.NUMBER, '2.2'),
-      ],
-    ],
+    ['1+2', [getToken(TokenType.NUMBER, '1'), getToken(TokenType.PLUS, '+'), getToken(TokenType.NUMBER, '2')]],
+    ['1+2', [getToken(TokenType.NUMBER, '1'), getToken(TokenType.PLUS, '+'), getToken(TokenType.NUMBER, '2')]],
+    ['1.1+2.2', [getToken(TokenType.NUMBER, '1.1'), getToken(TokenType.PLUS, '+'), getToken(TokenType.NUMBER, '2.2')]],
     [
       '(1+2)-3',
       [

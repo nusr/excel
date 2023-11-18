@@ -3,7 +3,7 @@ import { deepEqual } from '@/util';
 type StoreListener = () => void;
 type PrimitiveType = boolean | number | string | null | undefined;
 type PlainObject = Record<string, PrimitiveType>;
-type BaseStoreType = PrimitiveType | PlainObject | PlainObject[];
+type BaseStoreType = PlainObject | PlainObject[];
 
 // store value must be a primitive type or plain object or array of plain object
 export class BaseStore<T extends BaseStoreType> {
@@ -13,7 +13,7 @@ export class BaseStore<T extends BaseStoreType> {
     this.state = initValue;
   }
   // set array number boolean or plain object
-  setState = (data: T) => {
+  setState = (data: T): void => {
     if (deepEqual(data, this.state)) {
       return;
     }
@@ -21,8 +21,9 @@ export class BaseStore<T extends BaseStoreType> {
     this.emitChange();
   };
   // set plain object
-  mergeState = (data: Partial<T>) => {
+  mergeState = (data: Partial<T>): void => {
     const newState: T = {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       ...this.state,
       ...data,
@@ -33,13 +34,13 @@ export class BaseStore<T extends BaseStoreType> {
     this.state = newState;
     this.emitChange();
   };
-  subscribe = (listener: StoreListener) => {
+  subscribe = (listener: StoreListener): StoreListener => {
     this.listeners = [...this.listeners, listener];
     return () => {
       this.listeners = this.listeners.filter((l) => l !== listener);
     };
   };
-  getSnapshot = () => {
+  getSnapshot = (): T => {
     return this.state;
   };
   private emitChange() {

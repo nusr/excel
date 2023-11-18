@@ -1,6 +1,8 @@
-'use strict';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { buildSync } = require('esbuild');
 
 function init() {
@@ -20,10 +22,14 @@ function init() {
           entryPoints: [filePath],
           outfile: temp,
           format: 'cjs',
-          target: "es2020"
+          target: 'es2020',
         });
       } else if (ext === '.js') {
-        fs.unlink(filePath, () => {});
+        fs.unlink(filePath, (error) => {
+          if (error) {
+            console.log(error);
+          }
+        });
       }
     }
   });

@@ -1,17 +1,6 @@
 import { IController, ChangeEventType, EUnderLine } from '@/types';
-import {
-  DEFAULT_FONT_SIZE,
-  DEFAULT_FONT_COLOR,
-  copyOrCut,
-  paste,
-} from '@/util';
-import {
-  coreStore,
-  activeCellStore,
-  sheetListStore,
-  fontFamilyStore,
-  scrollStore,
-} from '@/containers/store';
+import { DEFAULT_FONT_SIZE, DEFAULT_FONT_COLOR, copyOrCut, paste } from '@/util';
+import { coreStore, activeCellStore, sheetListStore, fontFamilyStore, scrollStore } from '@/containers/store';
 import { MainCanvas, registerGlobalEvent, Content } from '@/canvas';
 
 function createCanvas() {
@@ -21,22 +10,12 @@ function createCanvas() {
   return canvas;
 }
 
-const handleStateChange = (
-  changeSet: Set<ChangeEventType>,
-  controller: IController,
-) => {
-  if (
-    changeSet.has('setActiveCell') ||
-    changeSet.has('setCellStyle') ||
-    changeSet.has('setCellValues')
-  ) {
+const handleStateChange = (changeSet: Set<ChangeEventType>, controller: IController) => {
+  if (changeSet.has('setActiveCell') || changeSet.has('setCellStyle') || changeSet.has('setCellValues')) {
     const { top } = controller.getDomRect();
     const activeCell = controller.getActiveCell();
     const cell = controller.getCell(activeCell);
-    const cellPosition = controller.computeCellPosition(
-      activeCell.row,
-      activeCell.col,
-    );
+    const cellPosition = controller.computeCellPosition(activeCell.row, activeCell.col);
     cellPosition.top = top + cellPosition.top;
     if (!cell.style) {
       cell.style = {};
@@ -83,9 +62,7 @@ const handleStateChange = (
     });
   }
   if (changeSet.has('sheetList')) {
-    const sheetList = controller
-      .getSheetList()
-      .map((v) => ({ value: v.sheetId, label: v.name, disabled: v.isHide }));
+    const sheetList = controller.getSheetList().map((v) => ({ value: v.sheetId, label: v.name, disabled: v.isHide }));
     sheetListStore.setState(sheetList);
   }
   if (changeSet.has('currentSheetId')) {
@@ -99,11 +76,8 @@ const handleStateChange = (
     });
   }
 };
-export function initCanvas(controller: IController) {
-  const mainCanvas = new MainCanvas(
-    controller,
-    new Content(controller, createCanvas()),
-  );
+export function initCanvas(controller: IController): () => void {
+  const mainCanvas = new MainCanvas(controller, new Content(controller, createCanvas()));
   const render = (changeSet: Set<ChangeEventType>) => {
     mainCanvas.render({ changeSet });
     mainCanvas.render({
@@ -125,13 +99,7 @@ export function initCanvas(controller: IController) {
     },
   });
 
-  const changeSet = new Set<ChangeEventType>([
-    'currentSheetId',
-    'scroll',
-    'content',
-    'setActiveCell',
-    'sheetList',
-  ]);
+  const changeSet = new Set<ChangeEventType>(['currentSheetId', 'scroll', 'content', 'setActiveCell', 'sheetList']);
   handleStateChange(changeSet, controller);
   resize(changeSet);
 

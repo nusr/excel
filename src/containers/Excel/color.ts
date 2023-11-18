@@ -22,7 +22,7 @@ const colorMap: Record<string, string> = {
 const hexStr = '(?:#([a-f0-9]{3,8}))';
 const numberStr = '\\s*([.\\d%]+)\\s*';
 const sopStr = '(?:,\\s*([.\\d]+)\\s*)?';
-const listStr = '\\(' + [numberStr, numberStr, numberStr] + sopStr + '\\)';
+const listStr = `\\(${[numberStr, numberStr, numberStr]}${sopStr}\\)`;
 const rgbStr = '(?:rgb)a?';
 const hslStr = '(?:hsl)a?';
 
@@ -32,36 +32,23 @@ const hslReg = RegExp(hslStr + listStr, 'i');
 
 function padZero(a: string) {
   if (a.length === 1) {
-    return '0' + a;
+    return `0${a}`;
   }
   return a;
 }
 function RGBAToHex(r: number, g: number, b: number, a: number) {
   const list = [r, g, b, a * 255];
-  return (
-    '#' + list.map((item) => padZero(Math.round(item).toString(16))).join('')
-  );
+  return `#${list.map((item) => padZero(Math.round(item).toString(16))).join('')}`;
 }
 function RGBtoHEX(r: string, g: string, b: string, a: string): string {
-  let alpha: number = 1;
+  let alpha = 1;
   if (a) {
     alpha = parseFloat(a);
   }
   const red = parseFloat(r);
   const green = parseFloat(g);
   const blue = parseFloat(b);
-  if (
-    !(
-      red <= 255 &&
-      red >= 0 &&
-      green <= 255 &&
-      green >= 0 &&
-      blue <= 255 &&
-      blue >= 0 &&
-      alpha <= 1 &&
-      alpha >= 0
-    )
-  ) {
+  if (!(red <= 255 && red >= 0 && green <= 255 && green >= 0 && blue <= 255 && blue >= 0 && alpha <= 1 && alpha >= 0)) {
     return '';
   }
   return RGBAToHex(red, green, blue, alpha);
@@ -84,23 +71,16 @@ function HSLAtoHEX(x: string, y: string, z: string, a: string) {
   const h = parseFloat(x) / 360;
   const s = parseFloat(y) / 360;
   const l = parseFloat(z) / 360;
-  if (
-    h > 1 ||
-    h < 0 ||
-    s > 1 ||
-    s < 0 ||
-    l > 1 ||
-    l < 0 ||
-    alpha > 1 ||
-    alpha < 0
-  ) {
+  if (h > 1 || h < 0 || s > 1 || s < 0 || l > 1 || l < 0 || alpha > 1 || alpha < 0) {
     return '';
   }
   let r: number;
   let g: number;
   let b: number;
   if (s === 0) {
-    r = g = b = l;
+    r = l;
+    g = l;
+    b = l;
   } else {
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
     const p = 2 * l - q;
@@ -119,7 +99,7 @@ function padHex(color: string) {
     return color.toUpperCase();
   }
   if (color.length === 7) {
-    const t = color + 'ff';
+    const t = `${color}ff`;
     return t.toUpperCase();
   }
   if (color.length === 5) {

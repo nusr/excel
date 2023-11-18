@@ -7,12 +7,9 @@ function SupportFontFamilyFactory(body = document.body) {
   const serifFont = 'serif';
   const container = document.createElement('span');
   container.innerHTML = '测试a11';
-  container.style.cssText = [
-    'position:absolute',
-    'width:auto',
-    'font-size:128px',
-    'left:-99999px',
-  ].join(' !important;');
+  container.style.cssText = ['position:absolute', 'width:auto', 'font-size:128px', 'left:-99999px'].join(
+    ' !important;',
+  );
 
   const getWidth = function (fontFamily: string) {
     container.style.fontFamily = fontFamily;
@@ -41,8 +38,8 @@ export { isSupportFontFamily };
 export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
   const cacheFont = localStorage.getItem(LOCAL_FONT_KEY);
   if (cacheFont) {
-    const fontList = JSON.parse(cacheFont) as string[];
-    return fontList.map((v) => ({ value: v, label: v, disabled: false }));
+    const list = JSON.parse(cacheFont) as string[];
+    return list.map((v) => ({ value: v, label: v, disabled: false }));
   }
   const list = fontList
     .map((v) => ({

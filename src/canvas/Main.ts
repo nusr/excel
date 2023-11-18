@@ -1,20 +1,6 @@
 import { dpr, npx, isCol, isRow, isSheet, theme, canvasLog } from '@/util';
-import {
-  EventType,
-  ContentView,
-  CanvasOverlayPosition,
-  IController,
-  Point,
-} from '@/types';
-import {
-  fillRect,
-  renderCell,
-  strokeRect,
-  drawLines,
-  clearRect,
-  drawAntLine,
-  resizeCanvas,
-} from './util';
+import { EventType, ContentView, CanvasOverlayPosition, IController, Point } from '@/types';
+import { fillRect, renderCell, strokeRect, drawLines, clearRect, drawAntLine, resizeCanvas } from './util';
 
 export class MainCanvas {
   private ctx: CanvasRenderingContext2D;
@@ -63,13 +49,7 @@ export class MainCanvas {
     canvasLog('render canvas ant line');
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
-    drawAntLine(
-      this.ctx,
-      position.left,
-      position.top,
-      position.width,
-      position.height,
-    );
+    drawAntLine(this.ctx, position.left, position.top, position.width, position.height);
   }
 
   private renderSelection(): CanvasOverlayPosition {
@@ -91,17 +71,8 @@ export class MainCanvas {
   private renderActiveCell() {
     const { controller } = this;
     const cellData = controller.getCell(controller.getActiveCell());
-    const activeCell = controller.computeCellPosition(
-      cellData.row,
-      cellData.col,
-    );
-    clearRect(
-      this.ctx,
-      activeCell.left,
-      activeCell.top,
-      activeCell.width,
-      activeCell.height,
-    );
+    const activeCell = controller.computeCellPosition(cellData.row, cellData.col);
+    clearRect(this.ctx, activeCell.left, activeCell.top, activeCell.width, activeCell.height);
     renderCell(this.ctx, { ...cellData, ...activeCell });
   }
   private renderSelectRange() {
@@ -132,10 +103,7 @@ export class MainCanvas {
       [activeCell.left, headerSize.height],
       [activeCell.left + width, headerSize.height],
     ];
-    list.push(
-      [headerSize.width, activeCell.top],
-      [headerSize.width, activeCell.top + height],
-    );
+    list.push([headerSize.width, activeCell.top], [headerSize.width, activeCell.top + height]);
     drawLines(this.ctx, list);
     if (check) {
       this.renderActiveCell();
@@ -145,8 +113,8 @@ export class MainCanvas {
     return {
       left: activeCell.left,
       top: activeCell.top,
-      width: width,
-      height: height,
+      width,
+      height,
     };
   }
   private renderSelectAll(): CanvasOverlayPosition {
@@ -159,13 +127,7 @@ export class MainCanvas {
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
     this.renderActiveCell();
-    strokeRect(
-      this.ctx,
-      headerSize.width,
-      headerSize.height,
-      width - headerSize.width,
-      height - headerSize.height,
-    );
+    strokeRect(this.ctx, headerSize.width, headerSize.height, width - headerSize.width, height - headerSize.height);
     return {
       left: headerSize.width,
       top: headerSize.height,
@@ -197,18 +159,12 @@ export class MainCanvas {
       [headerSize.width, height - headerSize.height],
     ];
     drawLines(this.ctx, list);
-    strokeRect(
-      this.ctx,
-      activeCell.left,
-      activeCell.top,
-      activeCell.width,
-      height,
-    );
+    strokeRect(this.ctx, activeCell.left, activeCell.top, activeCell.width, height);
     return {
       left: activeCell.left,
       top: activeCell.top,
       width: activeCell.width,
-      height: height,
+      height,
     };
   }
   private renderSelectRow() {
@@ -221,13 +177,7 @@ export class MainCanvas {
     fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
     fillRect(this.ctx, 0, activeCell.top, headerSize.width, activeCell.height);
 
-    fillRect(
-      this.ctx,
-      activeCell.left + activeCell.width,
-      activeCell.top,
-      width - activeCell.width,
-      activeCell.height,
-    );
+    fillRect(this.ctx, activeCell.left + activeCell.width, activeCell.top, width - activeCell.width, activeCell.height);
 
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
@@ -236,17 +186,11 @@ export class MainCanvas {
       [width - headerSize.width, headerSize.height],
     ];
     drawLines(this.ctx, list);
-    strokeRect(
-      this.ctx,
-      activeCell.left,
-      activeCell.top,
-      width,
-      activeCell.height,
-    );
+    strokeRect(this.ctx, activeCell.left, activeCell.top, width, activeCell.height);
     return {
       left: activeCell.left,
       top: activeCell.top,
-      width: width,
+      width,
       height: activeCell.height,
     };
   }

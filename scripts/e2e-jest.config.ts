@@ -13,5 +13,8 @@ const config: Config = {
   coverageReporters: ['text', 'lcov', 'json', 'json-summary', 'html'],
   globalSetup: path.join(__dirname, 'e2e-global-setup.js'),
   globalTeardown: path.join(__dirname, 'e2e-global-teardown.js'),
+  globals: {
+    __browserPort: 8000,
+  }
 };
 export default config;

@@ -7,8 +7,6 @@ describe('ToolbarContainer.test.ts', () => {
   afterEach(cleanup);
   test('normal', () => {
     render(<ToolbarContainer controller={initController()} />);
-    expect(
-      screen.getByTestId('toolbar')!.childNodes.length,
-    ).toBeGreaterThanOrEqual(3);
+    expect(screen.getByTestId('toolbar')!.childNodes.length).toBeGreaterThanOrEqual(3);
   });
 });

@@ -2,11 +2,11 @@ import React, { FunctionComponent, CSSProperties, useState } from 'react';
 import { classnames } from '@/util';
 import styles from './index.module.css';
 
-export type ColorPickerProps = {
+export interface ColorPickerProps {
   color: string;
   style?: CSSProperties;
   onChange: (value: string) => void;
-};
+}
 const NO_FILL = 'No Fill';
 const COLOR_LIST = [
   '#4D4D4D',
@@ -48,18 +48,12 @@ const COLOR_LIST = [
   NO_FILL,
 ];
 
-export const ColorPicker: FunctionComponent<
-  React.PropsWithChildren<ColorPickerProps>
-> = (props) => {
+export const ColorPicker: FunctionComponent<React.PropsWithChildren<ColorPickerProps>> = (props) => {
   const { color, style = {}, onChange, children } = props;
   const [visible, setVisible] = useState(false);
   return (
     <div className={styles['color-picker']} style={style}>
-      <div
-        className={styles['color-picker-trigger']}
-        style={{ color }}
-        onClick={() => setVisible(true)}
-      >
+      <div className={styles['color-picker-trigger']} style={{ color }} onClick={() => setVisible(true)}>
         {children}
       </div>
       <div

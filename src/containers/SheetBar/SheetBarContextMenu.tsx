@@ -4,13 +4,13 @@ import { IController, OptionItem } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
 
-type Props = {
+interface Props {
   controller: IController;
   position: number;
   sheetList: OptionItem[];
   hideMenu: () => void;
   editSheetName: () => void;
-};
+}
 
 export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
   controller,
@@ -29,9 +29,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
     hideMenu();
   });
   const hideSheetList: OptionItem[] = useMemo(() => {
-    return sheetList
-      .filter((v) => v.disabled)
-      .map((item) => ({ value: String(item.value), label: item.label }));
+    return sheetList.filter((v) => v.disabled).map((item) => ({ value: String(item.value), label: item.label, disabled: false }));
   }, [sheetList]);
   const [value, setValue] = useState(String(hideSheetList[0]?.value) || '');
   const hideDialog = () => {
@@ -98,7 +96,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
       >
         <Select
           data={hideSheetList}
-          onChange={(value) => setValue(String(value))}
+          onChange={(v) => setValue(String(v))}
           style={{ width: 300 }}
           value={value}
         />

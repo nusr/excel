@@ -42,12 +42,12 @@ export class Controller implements IController {
   private scrollValue: Record<string, ScrollValue> = {};
   private model: IModel;
   private changeSet = new Set<ChangeEventType>();
-  private copyRanges: Array<IRange> = []; // cut or copy ranges
+  private copyRanges: IRange[] = []; // cut or copy ranges
   private isCut = false; // cut or copy
   private hooks: IHooks = {
     modelChange() {},
     async copyOrCut() {
-      return ''
+      return '';
     },
     async paste() {
       return {
@@ -178,11 +178,7 @@ export class Controller implements IController {
     return this.model.toJSON();
   }
 
-  setCellValues(
-    value: ResultType[][],
-    style: Partial<StyleType>[][],
-    ranges: IRange[],
-  ): void {
+  setCellValues(value: ResultType[][], style: Array<Array<Partial<StyleType>>>, ranges: IRange[]): void {
     this.model.setCellValues(value, style, ranges);
     this.changeSet.add('setCellValues');
     this.emitChange();
@@ -236,8 +232,8 @@ export class Controller implements IController {
   private computeViewSize() {
     const headerSize = this.getHeaderSize();
     const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
-    let width = headerSize.width;
-    let height = headerSize.height;
+    let { width } = headerSize;
+    let { height } = headerSize;
     for (let i = 0; i < sheetInfo.colCount; i++) {
       width += this.getColWidth(i);
     }
@@ -364,7 +360,7 @@ export class Controller implements IController {
     }
     const rowCount = list.length;
     let colCount = 0;
-    for (let item of list) {
+    for (const item of list) {
       if (item.length > colCount) {
         colCount = item.length;
       }
@@ -382,25 +378,23 @@ export class Controller implements IController {
   }
   private parseHTML(htmlString: string) {
     const parser = new DOMParser();
-    const text = htmlString
-      .replace('<style>\r\n<!--table', '<style>')
-      .replace('-->\r\n</style>', '</style>');
+    const text = htmlString.replace('<style>\r\n<!--table', '<style>').replace('-->\r\n</style>', '</style>');
     const doc = parser.parseFromString(text, 'text/html');
     const trList = doc.querySelectorAll('tr');
     const styleList = doc.querySelectorAll('style');
     const result: string[][] = [];
-    const resultStyle: Partial<StyleType>[][] = [];
+    const resultStyle: Array<Array<Partial<StyleType>>> = [];
     const rowCount = trList.length;
     let colCount = 0;
 
     for (const item of trList) {
       const tdList = item.querySelectorAll('td');
       const temp: string[] = [];
-      const list: Partial<StyleType>[] = [];
+      const list: Array<Partial<StyleType>> = [];
       for (const td of tdList) {
         let itemStyle: Partial<StyleType> = {};
         if (td.className) {
-          itemStyle = parseStyle(styleList, '.' + td.className);
+          itemStyle = parseStyle(styleList, `.${td.className}`);
         } else {
           itemStyle = parseStyle(styleList, td.tagName.toLowerCase());
         }
@@ -455,19 +449,16 @@ export class Controller implements IController {
       result.push(temp);
       html.push(t);
     }
-    const htmlData = generateHTML(
-      classList.join('\n'),
-      html.map((item) => `<tr>${item.join('\n')}</tr>`).join('\n'),
-    );
-    const text = result.map((item) => item.join('\t')).join('\r\n') + '\r\n';
+    const htmlData = generateHTML(classList.join('\n'), html.map((item) => `<tr>${item.join('\n')}</tr>`).join('\n'));
+    const text = `${result.map((item) => item.join('\t')).join('\r\n')}\r\n`;
     return {
       [PLAIN_FORMAT]: text,
       [HTML_FORMAT]: htmlData,
     };
   }
   async paste(event?: ClipboardEvent) {
-    let html: string = '';
-    let text: string = '';
+    let html = '';
+    let text = '';
     if (!event) {
       const data = await this.hooks.paste();
       html = data[HTML_FORMAT];
@@ -496,10 +487,13 @@ export class Controller implements IController {
     if (this.isCut) {
       this.copyRanges = [];
       this.isCut = false;
-      this.hooks.copyOrCut({
-        [PLAIN_FORMAT]: '',
-        [HTML_FORMAT]: '',
-      }, 'copy');
+      this.hooks.copyOrCut(
+        {
+          [PLAIN_FORMAT]: '',
+          [HTML_FORMAT]: '',
+        },
+        'copy',
+      );
     }
     this.setActiveCell(activeCell);
   }
@@ -527,7 +521,7 @@ export class Controller implements IController {
     return this.copyRanges.slice();
   }
   getDomRect(): CanvasOverlayPosition {
-    const canvas = this.getMainDom().canvas;
+    const { canvas } = this.getMainDom();
     if (!canvas) {
       return {
         top: 0,

@@ -100,7 +100,7 @@ describe('controller.test.ts', () => {
     test('set', () => {
       const controller = new Controller(new Model(new History()));
       controller.addSheet();
-      let text: string = '';
+      let text = '';
       const textFormat = 'text/plain';
       const event = {
         clipboardData: {

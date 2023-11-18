@@ -5,9 +5,7 @@ import React from 'react';
 describe('ColorPicker.test.ts', () => {
   afterEach(cleanup);
   test('normal', () => {
-    const dom = render(
-      <ColorPicker color='#fff' onChange={()=> {}}/>
-    );
+    const dom = render(<ColorPicker color="#fff" onChange={() => {}} />);
     expect(dom).not.toBeNull();
   });
 });

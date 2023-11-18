@@ -1,31 +1,20 @@
-import React, {
-  FunctionComponent,
-  useSyncExternalStore,
-  useState,
-} from 'react';
-import { classnames } from '@/util';
-import { theme, DEFAULT_POSITION } from '@/util';
+import React, { FunctionComponent, useSyncExternalStore, useState } from 'react';
+import { classnames, theme, DEFAULT_POSITION } from '@/util';
 import { Button, Icon } from '../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
 import { IController } from '@/types';
 import { sheetListStore, coreStore } from '@/containers/store';
 
-type Props = {
+interface Props {
   controller: IController;
-};
+}
 
 export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
-  const sheetList = useSyncExternalStore(
-    sheetListStore.subscribe,
-    sheetListStore.getSnapshot,
-  );
+  const sheetList = useSyncExternalStore(sheetListStore.subscribe, sheetListStore.getSnapshot);
   // filter hide sheet
   const realSheetList = sheetList.filter((v) => !v.disabled);
-  const { currentSheetId } = useSyncExternalStore(
-    coreStore.subscribe,
-    coreStore.getSnapshot,
-  );
+  const { currentSheetId } = useSyncExternalStore(coreStore.subscribe, coreStore.getSnapshot);
   const [menuPosition, setMenuPosition] = useState(DEFAULT_POSITION);
   const [editing, setEditing] = useState(false);
 
@@ -64,15 +53,9 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
               }}
             >
               {showInput ? (
-                <input
-                  className={styles['sheet-bar-input']}
-                  defaultValue={item.label}
-                  onKeyDown={handleKeyDown}
-                ></input>
+                <input className={styles['sheet-bar-input']} defaultValue={item.label} onKeyDown={handleKeyDown} />
               ) : (
-                <span className={styles['sheet-bar-item-text']}>
-                  {item.label}
-                </span>
+                <span className={styles['sheet-bar-item-text']}>{item.label}</span>
               )}
             </div>
           );
@@ -84,7 +67,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
           type="circle"
           style={{ backgroundColor: theme.buttonActiveColor }}
         >
-          <Icon name="plus"></Icon>
+          <Icon name="plus" />
         </Button>
       </div>
       {menuPosition >= 0 && (

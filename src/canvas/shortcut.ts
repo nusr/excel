@@ -28,11 +28,7 @@ function handleEnterClick(controller: IController) {
   recalculateScroll(controller);
 }
 
-export function computeScrollRowAndCol(
-  controller: IController,
-  left: number,
-  top: number,
-) {
+export function computeScrollRowAndCol(controller: IController, left: number, top: number) {
   const oldScroll = controller.getScroll();
   let { row, col } = oldScroll;
   if (oldScroll.top !== top) {
@@ -66,20 +62,14 @@ export function computeScrollRowAndCol(
   };
 }
 
-export function computeScrollPosition(
-  controller: IController,
-  left: number,
-  top: number,
-) {
+export function computeScrollPosition(controller: IController, left: number, top: number) {
   const headerSize = controller.getHeaderSize();
   const canvasRect = controller.getDomRect();
   const viewSize = controller.getViewSize();
   const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
   const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-  const maxScrollHeight =
-    canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
-  const maxScrollWidth =
-    canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
+  const maxScrollHeight = canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
+  const maxScrollWidth = canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
 
   const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
   const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
@@ -93,14 +83,13 @@ export function computeScrollPosition(
   };
 }
 
-export function scrollBar(
-  controller: IController,
-  scrollX: number,
-  scrollY: number,
-) {
+export function scrollBar(controller: IController, scrollX: number, scrollY: number) {
   const oldScroll = controller.getScroll();
-  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } =
-    computeScrollPosition(controller, oldScroll.left, oldScroll.top);
+  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } = computeScrollPosition(
+    controller,
+    oldScroll.left,
+    oldScroll.top,
+  );
   let top = oldScroll.top + Math.ceil(scrollY);
   if (top < 0) {
     top = 0;
@@ -129,17 +118,17 @@ export function scrollBar(
 
 function recalculateScroll(controller: IController) {
   const activeCell = controller.getActiveCell();
-  const position = controller.computeCellPosition(
-    activeCell.row,
-    activeCell.col,
-  );
+  const position = controller.computeCellPosition(activeCell.row, activeCell.col);
   const domRect = controller.getDomRect();
   const oldScroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
   const headerSize = controller.getHeaderSize();
   const buff = 5;
-  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } =
-    computeScrollPosition(controller, oldScroll.left, oldScroll.top);
+  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } = computeScrollPosition(
+    controller,
+    oldScroll.left,
+    oldScroll.top,
+  );
   if (position.left + position.width + buff > domRect.width) {
     if (oldScroll.col <= sheetInfo.colCount - 2) {
       const col = oldScroll.col + 1;
@@ -203,11 +192,7 @@ function checkActiveElement(controller: IController) {
   }
   const isInputFocus = document.activeElement === inputDom;
   if (isInputFocus) {
-    controller.setCellValues(
-      [[inputDom.value]],
-      [],
-      [controller.getActiveCell()],
-    );
+    controller.setCellValues([[inputDom.value]], [], [controller.getActiveCell()]);
     inputDom.value = '';
     inputDom.blur();
     coreStore.mergeState({
@@ -333,10 +318,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     handler: (controller) => {
       const cellData = controller.getCell(controller.getActiveCell());
       const style = cellData.style || {};
-      if (
-        style.underline === undefined ||
-        style.underline === EUnderLine.NONE
-      ) {
+      if (style.underline === undefined || style.underline === EUnderLine.NONE) {
         style.underline = EUnderLine.SINGLE;
       } else {
         style.underline = EUnderLine.NONE;

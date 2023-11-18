@@ -1,4 +1,5 @@
-import type { TokenType } from '@/types'
+import type { TokenType } from '@/types';
+
 export class Token {
   type: TokenType;
   value: string;

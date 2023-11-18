@@ -1,5 +1,6 @@
 import { Model, History } from '..';
 import { Range } from '@/util';
+import { WorkBookJSON } from '@/types';
 
 describe('model.test.ts', () => {
   test('normal', () => {
@@ -16,11 +17,7 @@ describe('model.test.ts', () => {
       row: 0,
       col: 0,
     });
-    model.setCellValues(
-      [['test']],
-      [],
-      [new Range(0, 0, 1, 1, model.getCurrentSheetId())],
-    );
+    model.setCellValues([['test']], [], [new Range(0, 0, 1, 1, model.getCurrentSheetId())]);
     expect(model.getCell(new Range(0, 0, 1, 1, ''))).toEqual({
       style: undefined,
       value: 'test',
@@ -37,12 +34,12 @@ describe('model.test.ts', () => {
       mergeCells: [],
       customHeight: {},
       customWidth: {},
-      definedNames: {}
+      definedNames: {},
     });
   });
   test('fromJSON', () => {
     const model = new Model(new History());
-    model.fromJSON({
+    const json: WorkBookJSON = {
       workbook: [
         {
           sheetId: '1',
@@ -71,38 +68,39 @@ describe('model.test.ts', () => {
       ],
       customHeight: {},
       customWidth: {},
-      definedNames: {}
-    }),
-      expect(model.toJSON()).toEqual({
-        workbook: [
-          {
-            sheetId: '1',
-            activeCell: {
-              row: 0,
-              col: 1,
-              rowCount: 1,
-              colCount: 1,
-              sheetId: '',
-            },
-            isHide: false,
-            rowCount: 200,
-            colCount: 200,
-            name: 'test',
-          },
-        ],
-        worksheets: {},
-        mergeCells: [
-          {
-            row: 1,
+      definedNames: {},
+    };
+    model.fromJSON(json);
+    expect(model.toJSON()).toEqual({
+      workbook: [
+        {
+          sheetId: '1',
+          activeCell: {
+            row: 0,
             col: 1,
-            colCount: 3,
-            rowCount: 3,
-            sheetId: '1',
+            rowCount: 1,
+            colCount: 1,
+            sheetId: '',
           },
-        ],
-        customHeight: {},
-        customWidth: {},
-        definedNames: {}
-      });
+          isHide: false,
+          rowCount: 200,
+          colCount: 200,
+          name: 'test',
+        },
+      ],
+      worksheets: {},
+      mergeCells: [
+        {
+          row: 1,
+          col: 1,
+          colCount: 3,
+          rowCount: 3,
+          sheetId: '1',
+        },
+      ],
+      customHeight: {},
+      customWidth: {},
+      definedNames: {},
+    });
   });
 });

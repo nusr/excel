@@ -11,7 +11,7 @@ html {
 body {
   font-family: 'Microsoft Yahei UI', 'PingFang SC', 'Arial', sans-serif;
 }
-#root {
+.root-container {
   height: 100vh;
   overflow: hidden;
   box-sizing: border-box;

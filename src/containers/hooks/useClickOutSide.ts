@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 
-export function useClickOutside(
-  callback: () => void,
-): [ref: React.RefObject<HTMLDivElement>, clickedOutSide: boolean] {
+export function useClickOutside(callback: () => void): [ref: React.RefObject<HTMLDivElement>, clickedOutSide: boolean] {
   const ref = useRef<HTMLDivElement>(null);
   const [clickedOutSide, setState] = useState(false);
 

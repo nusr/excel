@@ -390,7 +390,7 @@ const ALL_FORMULAS = [
 ];
 const FORMULA_TAG = '## Formula';
 function handleFormula(data: any = {}) {
-  console.log(ALL_FORMULAS)
+  console.log(ALL_FORMULAS);
   const allFormulas = Object.keys(data);
   allFormulas.sort((a, b) => a.localeCompare(b));
   const set = new Set(Object.keys(data).filter((key) => Boolean(data[key])));
@@ -405,9 +405,7 @@ function handleFormula(data: any = {}) {
 
   fs.writeFileSync(
     mdPath,
-    `${mdText.slice(0, index + FORMULA_TAG.length)}\n\n${set.size}/${
-      allFormulas.length
-    }\n\n${text}`,
+    `${mdText.slice(0, index + FORMULA_TAG.length)}\n\n${set.size}/${allFormulas.length}\n\n${text}`,
   );
 }
 

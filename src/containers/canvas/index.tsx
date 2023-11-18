@@ -7,9 +7,9 @@ import { ScrollBar } from './ScrollBar';
 import { ContextMenu } from './ContextMenu';
 import { initCanvas } from './util';
 
-type Props = {
+interface Props {
   controller: IController;
-};
+}
 const DOUBLE_CLICK_TIME = 300;
 
 export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
@@ -113,15 +113,12 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
       return;
     }
     const activeCell = controller.getActiveCell();
-    const check =
-      activeCell.row >= 0 &&
-      activeCell.row === position.row &&
-      activeCell.col === position.col;
+    const check = activeCell.row >= 0 && activeCell.row === position.row && activeCell.col === position.col;
     if (!check) {
       const inputDom = controller.getMainDom().input!;
       const isInputFocus = document.activeElement === inputDom;
       if (isInputFocus) {
-        const value = inputDom.value;
+        const { value } = inputDom;
         controller.setCellValues([[value]], [], [controller.getActiveCell()]);
         coreStore.mergeState({ isCellEditing: false });
         inputDom.value = '';
@@ -144,10 +141,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
   };
   return (
     <Fragment>
-      <div
-        className={styles['canvas-container']}
-        data-testid="canvas-container"
-      >
+      <div className={styles['canvas-container']} data-testid="canvas-container">
         <canvas
           className={styles['canvas-content']}
           onContextMenu={handleContextMenu}

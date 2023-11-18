@@ -13,12 +13,12 @@ import { convertToReference, isEmpty, NUMBER_FORMAT_LIST } from '@/util';
 import { XfItem, CUSTOM_WIdTH_RADIO } from './import';
 import { convertColorToHex } from './color';
 
-type StyleData = {
+interface StyleData {
   cellXfs: string[];
   numFmts: string[];
   fonts: string[];
   fills: string[];
-};
+}
 
 function processRow(row: ResultType[]) {
   let finalVal = '';
@@ -33,18 +33,17 @@ function processRow(row: ResultType[]) {
     }
     let result = innerValue.replace(/"/g, '""');
     if (result.search(/("|,|\n)/g) >= 0) {
-      result = '"' + result + '"';
+      result = `"${result}"`;
     }
     if (j > 0) {
       finalVal += ',';
     }
     finalVal += result;
   }
-  return finalVal + '\n';
+  return `${finalVal}\n`;
 }
 export function exportToCsv(fileName: string, controller: IController) {
-  const sheetData =
-    controller.toJSON().worksheets[controller.getCurrentSheetId()];
+  const sheetData = controller.toJSON().worksheets[controller.getCurrentSheetId()];
   let csvFile = '';
   if (sheetData) {
     for (const row of Object.keys(sheetData)) {
@@ -79,9 +78,9 @@ function getSheetData(
     for (const col of Object.keys(customWidthMap)) {
       const t = parseInt(col, 10) + 1;
       list.push(
-        `<col min="${t}" max="${t}" width="${
-          customWidthMap[col].widthOrHeight / CUSTOM_WIdTH_RADIO
-        }" customWidth="1" ${customWidthMap[col].isHide ? 'hidden="1"' : ''}/>`,
+        `<col min="${t}" max="${t}" width="${customWidthMap[col].widthOrHeight / CUSTOM_WIdTH_RADIO}" customWidth="1" ${
+          customWidthMap[col].isHide ? 'hidden="1"' : ''
+        }/>`,
       );
     }
     customWidth = `<cols>${list.join('')}</cols>`;
@@ -107,12 +106,12 @@ function getSheetData(
       <sheetViews>
         <sheetView ${isActiveSheet ? 'tabSelected="1"' : ''} workbookViewId="0">
           <selection activeCell="${convertToReference({
-            row: activeCell.row,
-            col: activeCell.col,
-            rowCount: 1,
-            colCount: 1,
-            sheetId: '',
-          })}" sqref="${convertToReference(realActiveCell)}"/>
+    row: activeCell.row,
+    col: activeCell.col,
+    rowCount: 1,
+    colCount: 1,
+    sheetId: '',
+  })}" sqref="${convertToReference(realActiveCell)}"/>
         </sheetView>
       </sheetViews>
       <sheetFormatPr defaultColWidth="9" defaultRowHeight="16.8" outlineLevelCol="1"/>
@@ -127,7 +126,7 @@ function getSheetData(
 // TODO: convert color to rgb
 function convertColorToRGB(val: string) {
   const t = convertColorToHex(val);
-  return 'FF' + t.slice(1, -2);
+  return `FF${t.slice(1, -2)}`;
 }
 
 function convertStyle(styles: StyleData, style: Partial<StyleType>) {
@@ -146,7 +145,7 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
   };
   if (style.fillColor) {
     result.fillId = String(styles.fills.length);
-    extraList.push(`applyFill="1"`);
+    extraList.push('applyFill="1"');
     styles.fills.push(`<fill>
     <patternFill patternType="solid">
       <fgColor rgb="${convertColorToRGB(style.fillColor)}"/>
@@ -155,10 +154,7 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
   </fill>`);
   }
   const fontList: string[] = [];
-  if (
-    style.underline === EUnderLine.SINGLE ||
-    style.underline === EUnderLine.DOUBLE
-  ) {
+  if (style.underline === EUnderLine.SINGLE || style.underline === EUnderLine.DOUBLE) {
     fontList.push('<u/>');
   }
   if (style.isBold) {
@@ -179,32 +175,22 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
 
   if (fontList.length > 0) {
     result.fontId = String(styles.fonts.length);
-    extraList.push(`applyFont="1"`);
-    styles.fonts.push(
-      `<font>${fontList.join(
-        '',
-      )}<charset val="0"/><scheme val="minor"/></font>`,
-    );
+    extraList.push('applyFont="1"');
+    styles.fonts.push(`<font>${fontList.join('')}<charset val="0"/><scheme val="minor"/></font>`);
   }
 
   const item = NUMBER_FORMAT_LIST.find((v) => v.id === style.numberFormat);
   if (item) {
-    extraList.push(`applyNumberFormat="1"`);
+    extraList.push('applyNumberFormat="1"');
     result.numFmtId = String(style.numberFormat);
-    styles.numFmts.push(
-      `<numFmt numFmtId="${style.numberFormat}" formatCode="${item.formatCode}"/>`,
-    );
+    styles.numFmts.push(`<numFmt numFmtId="${style.numberFormat}" formatCode="${item.formatCode}"/>`);
   }
   let alignment = '<alignment vertical="center"/>';
-  if (
-    style.isWrapText ||
-    style.horizontalAlign !== undefined ||
-    style.verticalAlign !== undefined
-  ) {
+  if (style.isWrapText || style.horizontalAlign !== undefined || style.verticalAlign !== undefined) {
     const list: string[] = [];
-    extraList.push(`applyAlignment="1"`);
+    extraList.push('applyAlignment="1"');
     if (style.isWrapText) {
-      list.push(`wrapText="1"`);
+      list.push('wrapText="1"');
     }
     if (style.horizontalAlign !== undefined) {
       const alignMap = {
@@ -227,11 +213,9 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
     alignment = `<alignment ${list.join(' ')}/>`;
   }
 
-  const t = `<xf numFmtId="${result.numFmtId}" fontId="${
-    result.fontId
-  }" fillId="${result.fillId}" borderId="0" xfId="0" ${extraList.join(
-    ' ',
-  )}>${alignment}</xf>`;
+  const t = `<xf numFmtId="${result.numFmtId}" fontId="${result.fontId}" fillId="${
+    result.fillId
+  }" borderId="0" xfId="0" ${extraList.join(' ')}>${alignment}</xf>`;
   styles.cellXfs.push(t);
 }
 
@@ -848,11 +832,7 @@ export async function exportToXLSX(fileName: string, controller: IController) {
   </HeadingPairs>
   <TitlesOfParts>
     <vt:vector size="${sheetList.length}" baseType="lpstr">
-      ${sheetList
-        .map(
-          (item) => `<vt:lpstr>${sheetRelMap[item.sheetId].target}</vt:lpstr>`,
-        )
-        .join('')}
+      ${sheetList.map((item) => `<vt:lpstr>${sheetRelMap[item.sheetId].target}</vt:lpstr>`).join('')}
     </vt:vector>
   </TitlesOfParts>
 </Properties>`,
@@ -918,11 +898,7 @@ export async function exportToXLSX(fileName: string, controller: IController) {
   const defineNames: string[] = [];
   for (const name of Object.keys(modelJson.definedNames)) {
     const range = modelJson.definedNames[name];
-    const text = convertToReference(
-      range,
-      'absolute',
-      convertSheetIdToSheetName,
-    );
+    const text = convertToReference(range, 'absolute', convertSheetIdToSheetName);
     defineNames.push(`<definedName name="${name}">${text}</definedName>`);
   }
   const workbook = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -931,25 +907,19 @@ export async function exportToXLSX(fileName: string, controller: IController) {
     <fileVersion appName="xl" lastEdited="3" lowestEdited="5" rupBuild="9302"/>
     <workbookPr/>
     <bookViews>
-      <workbookView windowWidth="28800" windowHeight="11340" ${
-        activeIndex > 0 ? `activeTab="${activeIndex}"` : ''
-      } />
+      <workbookView windowWidth="28800" windowHeight="11340" ${activeIndex > 0 ? `activeTab="${activeIndex}"` : ''} />
     </bookViews>
     <sheets>
       ${sheetList
-        .map(
-          (item) =>
-            `<sheet name="${item.name}" sheetId="${item.sheetId}" r:id="${
-              sheetRelMap[item.sheetId]!.rid
-            }" ${item.isHide ? 'state="hidden"' : ''}/>`,
-        )
-        .join('')}
+    .map(
+      (item) =>
+        `<sheet name="${item.name}" sheetId="${item.sheetId}" r:id="${sheetRelMap[item.sheetId]!.rid}" ${
+          item.isHide ? 'state="hidden"' : ''
+        }/>`,
+    )
+    .join('')}
     </sheets>
-    ${
-      defineNames.length > 0
-        ? `<definedNames>${defineNames.join('')}</definedNames>`
-        : ''
-    }
+    ${defineNames.length > 0 ? `<definedNames>${defineNames.join('')}</definedNames>` : ''}
     <calcPr calcId="144525"/>
   </workbook>`;
   xl.file('workbook.xml', workbook);
@@ -959,18 +929,18 @@ export async function exportToXLSX(fileName: string, controller: IController) {
   const workbookRel = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
     <Relationship Id="rId${
-      sheetList.length + 2
-    }" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+  sheetList.length + 2
+}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
     <Relationship Id="rId${
-      sheetList.length + 1
-    }" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>
+  sheetList.length + 1
+}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>
     ${sheetList
-      .map((item) => {
-        const t = sheetRelMap[item.sheetId]!;
-        return `<Relationship Id="${t.rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/${t.target}"/>`;
-      })
-      .reverse()
-      .join('')}
+    .map((item) => {
+      const t = sheetRelMap[item.sheetId]!;
+      return `<Relationship Id="${t.rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/${t.target}"/>`;
+    })
+    .reverse()
+    .join('')}
   </Relationships>`;
   xlRel.file('workbook.xml.rels', workbookRel);
 
@@ -1229,10 +1199,7 @@ export async function exportToXLSX(fileName: string, controller: IController) {
     const isActiveSheet = item.sheetId === currentSheetId;
     const customWidth = modelJson.customWidth[item.sheetId];
     if (!cellData) {
-      worksheets.file(
-        t.target,
-        getSheetData(activeCell, '', isActiveSheet, customWidth),
-      );
+      worksheets.file(t.target, getSheetData(activeCell, '', isActiveSheet, customWidth));
       continue;
     }
     const rowList: string[] = [];
@@ -1266,16 +1233,11 @@ export async function exportToXLSX(fileName: string, controller: IController) {
       const customHeight = modelJson.customHeight?.[item.sheetId]?.[row];
       let ht = '';
       if (customHeight) {
-        ht = `ht="${customHeight.widthOrHeight}" customHeight="1" ${
-          customHeight.isHide ? 'hidden="1"' : ''
-        }`;
+        ht = `ht="${customHeight.widthOrHeight}" customHeight="1" ${customHeight.isHide ? 'hidden="1"' : ''}`;
       }
       rowList.push(`<row r="${realR + 1}" ${ht}>${colList.join('')}</row>`);
     }
-    worksheets.file(
-      t.target,
-      getSheetData(activeCell, rowList.join(''), isActiveSheet, customWidth),
-    );
+    worksheets.file(t.target, getSheetData(activeCell, rowList.join(''), isActiveSheet, customWidth));
   }
 
   xl.file('styles.xml', generateStyleFile(styles));

@@ -1,16 +1,11 @@
 import { buildTree } from './util';
-import {
-  BinaryExpression,
-  GroupExpression,
-  LiteralExpression,
-  PostUnaryExpression,
-} from '../../expression';
+import { BinaryExpression, GroupExpression, LiteralExpression, PostUnaryExpression } from '../../expression';
 import { Token } from '../../token';
 import { TokenType } from '../../../types';
 
-describe('operators', function () {
-  describe('precedence', function () {
-    it('1 + 2 >= 3 - 4', function () {
+describe('operators', () => {
+  describe('precedence', () => {
+    it('1 + 2 >= 3 - 4', () => {
       const tree = buildTree('1 + 2 >= 3 - 4');
       expect(tree).toEqual(
         new BinaryExpression(
@@ -29,7 +24,7 @@ describe('operators', function () {
       );
     });
 
-    it('1 + 2 & "a"', function () {
+    it('1 + 2 & "a"', () => {
       const tree = buildTree('1 + 2 & "a"');
       expect(tree).toEqual(
         new BinaryExpression(
@@ -44,7 +39,7 @@ describe('operators', function () {
       );
     });
 
-    it('1 + 2 * 3', function () {
+    it('1 + 2 * 3', () => {
       const tree = buildTree('1 + 2 * 3');
       expect(tree).toEqual(
         new BinaryExpression(
@@ -59,7 +54,7 @@ describe('operators', function () {
       );
     });
 
-    it('1 * 2 ^ 3', function () {
+    it('1 * 2 ^ 3', () => {
       const tree = buildTree('1 * 2 ^ 3');
 
       expect(tree).toEqual(
@@ -75,7 +70,7 @@ describe('operators', function () {
       );
     });
 
-    it('(1 * 2) ^ 3', function () {
+    it('(1 * 2) ^ 3', () => {
       const tree = buildTree('(1 * 2) ^ 3');
       expect(tree).toEqual(
         new BinaryExpression(
@@ -92,8 +87,8 @@ describe('operators', function () {
       );
     });
   });
-  describe('associativity', function () {
-    it('1 + 2 + 3', function () {
+  describe('associativity', () => {
+    it('1 + 2 + 3', () => {
       const tree = buildTree('1 + 2 + 3');
       expect(tree).toEqual(
         new BinaryExpression(
@@ -108,7 +103,7 @@ describe('operators', function () {
       );
     });
 
-    it('1 + (2 + 3)', function () {
+    it('1 + (2 + 3)', () => {
       const tree = buildTree('1 + (2 + 3)');
       expect(tree).toEqual(
         new BinaryExpression(
@@ -125,7 +120,7 @@ describe('operators', function () {
       );
     });
 
-    it('1 / 2 / 3', function () {
+    it('1 / 2 / 3', () => {
       const tree = buildTree('1 / 2 / 3');
       expect(tree).toEqual(
         new BinaryExpression(

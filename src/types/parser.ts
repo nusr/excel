@@ -42,24 +42,23 @@ export enum TokenType {
 }
 
 export interface CellDataMap {
-  set(row: number, col: number, sheetId: string, value: any): void;
-  get(row: number, col: number, sheetId: string): any;
-  convertSheetNameToSheetId(sheetName: string): string;
+  set: (row: number, col: number, sheetId: string, value: any) => void;
+  get: (row: number, col: number, sheetId: string) => any;
+  convertSheetNameToSheetId: (sheetName: string) => string;
 }
 
 export interface DefinedNamesMap {
-  set(name: string, value: IRange): void;
-  get(name: string): IRange;
-  has(name: string): boolean;
+  set: (name: string, value: IRange) => void;
+  get: (name: string) => IRange;
+  has: (name: string) => boolean;
 }
 
-export type InterpreterResult = {
+export interface InterpreterResult {
   result: any;
   error: ErrorTypes | null;
   expressionStr: string;
-};
+}
 
 export type ReferenceType = 'absolute' | 'mixed' | 'relative';
-
 
 export type ConvertSheetName = (value: string) => string;

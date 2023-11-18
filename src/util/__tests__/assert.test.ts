@@ -1,33 +1,33 @@
-import { assert } from "../assert";
+import { assert } from '../assert';
 
-describe("assert.test.ts", () => {
-  describe("assert", () => {
-    it("should throw 'assert error' error", function () {
+describe('assert.test.ts', () => {
+  describe('assert', () => {
+    it("should throw 'assert error' error", () => {
       function testFunc() {
         assert(false);
       }
-      expect(testFunc).toThrowError(new Error("assert error"));
+      expect(testFunc).toThrowError(new Error('assert error'));
     });
 
-    it("should throw error", function () {
+    it('should throw error', () => {
       function testFunc() {
-        assert(false, "test");
+        assert(false, 'test');
       }
-      expect(testFunc).toThrowError(new Error("test"));
+      expect(testFunc).toThrowError(new Error('test'));
     });
-    it("should not throw error", function () {
+    it('should not throw error', () => {
       function testFunc() {
-        assert(true, "test");
+        assert(true, 'test');
       }
-      expect(testFunc).not.toThrowError(new Error("test"));
+      expect(testFunc).not.toThrowError(new Error('test'));
     });
   });
-  describe("production assert", () => {
-    it("should not throw error", function () {
+  describe('production assert', () => {
+    it('should not throw error', () => {
       function testFunc() {
-        assert(true, "test", "production");
+        assert(true, 'test', 'production');
       }
-      expect(testFunc).not.toThrowError(new Error("test"));
+      expect(testFunc).not.toThrowError(new Error('test'));
     });
   });
 });

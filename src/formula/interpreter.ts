@@ -1,17 +1,6 @@
 import { Range, mergeRange, parseCell } from '@/util';
-import {
-  TokenType,
-  CellDataMap,
-  DefinedNamesMap,
-  FormulaData,
-  ReferenceType,
-} from '@/types';
-import type {
-  Visitor,
-  Expression,
-  CellRangeExpression,
-  PostUnaryExpression,
-} from './expression';
+import { TokenType, CellDataMap, DefinedNamesMap, FormulaData, ReferenceType } from '@/types';
+import type { Visitor, Expression, CellRangeExpression, PostUnaryExpression } from './expression';
 import {
   BinaryExpression,
   UnaryExpression,
@@ -21,7 +10,7 @@ import {
   TokenExpression,
   GroupExpression,
 } from './expression';
-import { CustomError } from './formula';
+import { CustomError, assert } from './formula';
 import { Token } from './token';
 
 export class Interpreter implements Visitor {
@@ -51,21 +40,7 @@ export class Interpreter implements Visitor {
       throw new CustomError('#ERROR!');
     }
   }
-  private getRangeCellValue(value: any): any {
-    if (value instanceof Range) {
-      if (value.colCount === value.rowCount && value.colCount === 1) {
-        return this.cellDataMap.get(value.row, value.col, value.sheetId);
-      } else {
-        throw new CustomError('#REF!');
-      }
-    }
-    return value;
-  }
-  private checkNumber(value: any) {
-    if (typeof value !== 'number') {
-      throw new CustomError('#VALUE!');
-    }
-  }
+
   visitBinaryExpression(data: BinaryExpression): any {
     let left = this.evaluate(data.left);
     let right = this.evaluate(data.right);
@@ -73,27 +48,27 @@ export class Interpreter implements Visitor {
     right = this.getRangeCellValue(right);
     switch (data.operator.type) {
       case TokenType.MINUS:
-        this.checkNumber(left);
-        this.checkNumber(right);
+        assert(typeof left === 'number');
+        assert(typeof right === 'number');
         return left - right;
       case TokenType.PLUS:
-        this.checkNumber(left);
-        this.checkNumber(right);
+        assert(typeof left === 'number');
+        assert(typeof right === 'number');
         return left + right;
       case TokenType.SLASH:
-        this.checkNumber(left);
-        this.checkNumber(right);
+        assert(typeof left === 'number');
+        assert(typeof right === 'number');
         if (right === 0) {
           throw new CustomError('#DIV/0!');
         }
         return left / right;
       case TokenType.STAR:
-        this.checkNumber(left);
-        this.checkNumber(right);
+        assert(typeof left === 'number');
+        assert(typeof right === 'number');
         return left * right;
       case TokenType.EXPONENT:
-        this.checkNumber(left);
-        this.checkNumber(right);
+        assert(typeof left === 'number');
+        assert(typeof right === 'number');
         return Math.pow(left, right);
       case TokenType.EQUAL:
         return left === right;
@@ -137,9 +112,7 @@ export class Interpreter implements Visitor {
   visitCellExpression(data: CellExpression) {
     let sheetId = '';
     if (data.sheetName) {
-      sheetId = this.cellDataMap.convertSheetNameToSheetId(
-        data.sheetName.value,
-      );
+      sheetId = this.cellDataMap.convertSheetNameToSheetId(data.sheetName.value);
       if (!sheetId) {
         throw new CustomError('#NAME?');
       }
@@ -173,22 +146,13 @@ export class Interpreter implements Visitor {
         throw new CustomError('#ERROR!');
     }
   }
-  private addCellExpression(
-    value: Token,
-    type: ReferenceType,
-    sheetName: Token | null,
-  ) {
-    value.value = value.value.toUpperCase();
-    const result = new CellExpression(value, type, sheetName);
-    return this.visitCellExpression(result);
-  }
 
   visitTokenExpression(expr: TokenExpression) {
     const { value, type } = expr.value;
     const defineName = value.toLowerCase();
     if (this.definedNamesMap.has(defineName)) {
-      const value = this.definedNamesMap.get(defineName);
-      return this.cellDataMap.get(value.row, value.col, value.sheetId);
+      const temp = this.definedNamesMap.get(defineName);
+      return this.cellDataMap.get(temp.row, temp.col, temp.sheetId);
     }
     const funcName = value.toUpperCase();
     if (this.functionMap[funcName]) {
@@ -196,11 +160,7 @@ export class Interpreter implements Visitor {
     }
     const realValue = funcName;
     const newToken = new Token(type, realValue);
-    if (
-      /^\$[A-Z]+\$\d+$/.test(realValue) ||
-      /^\$[A-Z]+$/.test(realValue) ||
-      /^\$\d+$/.test(realValue)
-    ) {
+    if (/^\$[A-Z]+\$\d+$/.test(realValue) || /^\$[A-Z]+$/.test(realValue) || /^\$\d+$/.test(realValue)) {
       return this.addCellExpression(newToken, 'absolute', null);
     }
     if (/^\$[A-Z]+\d+$/.test(realValue) || /^[A-Z]+\$\d+$/.test(realValue)) {
@@ -223,31 +183,7 @@ export class Interpreter implements Visitor {
         throw new CustomError('#VALUE!');
     }
   }
-  private convertToCellExpression(expr: Expression): CellExpression | null {
-    if (expr instanceof CellExpression) {
-      return expr;
-    }
-    if (expr instanceof TokenExpression) {
-      return new CellExpression(
-        new Token(TokenType.IDENTIFIER, expr.value.value.toUpperCase()),
-        'relative',
-        null,
-      );
-    }
-    if (expr instanceof LiteralExpression) {
-      if (
-        expr.value.type === TokenType.NUMBER &&
-        /^\d+$/.test(expr.value.value)
-      ) {
-        return new CellExpression(
-          new Token(TokenType.IDENTIFIER, expr.value.value),
-          'relative',
-          null,
-        );
-      }
-    }
-    return null;
-  }
+
   visitCellRangeExpression(expr: CellRangeExpression): any {
     switch (expr.operator.type) {
       case TokenType.COLON: {
@@ -264,7 +200,6 @@ export class Interpreter implements Visitor {
         } else {
           throw new CustomError('#NAME?');
         }
-        break;
       }
       case TokenType.EXCLAMATION: {
         const right = this.convertToCellExpression(expr.right);
@@ -272,9 +207,7 @@ export class Interpreter implements Visitor {
           throw new CustomError('#REF!');
         }
         if (expr.left instanceof TokenExpression) {
-          return this.visitCellExpression(
-            new CellExpression(right.value, right.type, expr.left.value),
-          );
+          return this.visitCellExpression(new CellExpression(right.value, right.type, expr.left.value));
         }
         throw new CustomError('#NAME?');
       }
@@ -289,7 +222,7 @@ export class Interpreter implements Visitor {
     const value = this.evaluate(expr.left);
     switch (expr.operator.type) {
       case TokenType.PERCENT:
-        this.checkNumber(value);
+        assert(typeof value === 'number');
         return value * 0.01;
       default:
         throw new CustomError('#VALUE!');
@@ -297,5 +230,34 @@ export class Interpreter implements Visitor {
   }
   private evaluate(expr: Expression) {
     return expr.accept(this);
+  }
+  private convertToCellExpression(expr: Expression): CellExpression | null {
+    if (expr instanceof CellExpression) {
+      return expr;
+    }
+    if (expr instanceof TokenExpression) {
+      return new CellExpression(new Token(TokenType.IDENTIFIER, expr.value.value.toUpperCase()), 'relative', null);
+    }
+    if (expr instanceof LiteralExpression) {
+      if (expr.value.type === TokenType.NUMBER && /^\d+$/.test(expr.value.value)) {
+        return new CellExpression(new Token(TokenType.IDENTIFIER, expr.value.value), 'relative', null);
+      }
+    }
+    return null;
+  }
+  private addCellExpression(value: Token, type: ReferenceType, sheetName: Token | null) {
+    value.value = value.value.toUpperCase();
+    const result = new CellExpression(value, type, sheetName);
+    return this.visitCellExpression(result);
+  }
+  private getRangeCellValue(value: any): any {
+    if (value instanceof Range) {
+      if (value.colCount === value.rowCount && value.colCount === 1) {
+        return this.cellDataMap.get(value.row, value.col, value.sheetId);
+      } else {
+        throw new CustomError('#REF!');
+      }
+    }
+    return value;
   }
 }

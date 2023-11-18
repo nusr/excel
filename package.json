@@ -9,11 +9,12 @@
     "build": "node ./scripts/esbuild.js",
     "test": "jest --config ./scripts/unit-test-jest.config.js --detectOpenHandles",
     "coverage": "npm run test -- --coverage",
-    "ci": "npm run test && npm run type-check && npm run build && npm run e2e",
+    "ci": "npm run test && npm run type-check && npm run build && npm run e2e && npm run lint",
     "type-check": "npx tsc",
     "postinstall": "node ./post-install.js",
     "prebuild": "node ./post-install.js",
-    "e2e": "jest --config ./scripts/e2e-jest.config.js --forceExit --detectOpenHandles"
+    "e2e": "jest --config ./scripts/e2e-jest.config.js --forceExit --detectOpenHandles",
+    "lint": "eslint --fix --quiet --ext  .ts,.tsx ./"
   },
   "repository": {
     "type": "git",
@@ -29,8 +30,11 @@
     "@types/jest": "29.5.8",
     "@types/react": "18.2.37",
     "@types/react-dom": "18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
     "canvas": "2.11.2",
     "esbuild": "0.19.5",
+    "eslint": "^8.54.0",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "puppeteer": "21.5.2",

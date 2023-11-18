@@ -5,7 +5,6 @@ import styles from './index.module.css';
 import { classnames } from '@/util';
 
 export interface DialogProps {
-  testId?: string;
   title: string;
   dialogStyle?: CSSProperties;
   visible: boolean;
@@ -13,9 +12,7 @@ export interface DialogProps {
   onCancel?: () => void;
 }
 
-export const Dialog: FunctionComponent<React.PropsWithChildren<DialogProps>> = (
-  props,
-) => {
+export const Dialog: FunctionComponent<React.PropsWithChildren<DialogProps>> = (props) => {
   const { children, title, dialogStyle, onCancel, onOk, visible } = props;
   if (!visible) {
     return null;

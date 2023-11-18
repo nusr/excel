@@ -37,10 +37,7 @@ function process(content: string, filename: string, config: any) {
   const options: Options = getOptions(config);
 
   const ext = getExt(filename);
-  const loader =
-    options?.loaders && options?.loaders[ext]
-      ? options.loaders[ext]
-      : path.extname(filename).slice(1);
+  const loader = options?.loaders && options?.loaders[ext] ? options.loaders[ext] : path.extname(filename).slice(1);
   const realOptions: TransformOptions = {
     loader,
     format: options?.format || 'cjs',

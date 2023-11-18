@@ -4,12 +4,12 @@ import { IController } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
 
-type Props = {
+interface Props {
   controller: IController;
   top: number;
   left: number;
   hideContextMenu: () => void;
-};
+}
 
 export enum ClickPosition {
   COLUMN_HEADER,
@@ -28,17 +28,17 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
     const headerSize = controller.getHeaderSize();
     const rect = controller.getMainDom().canvas!.getBoundingClientRect();
 
-    let position = ClickPosition.CONTENT;
+    let clickPosition = ClickPosition.CONTENT;
     let menuHeight = ITEM_HEIGHT * 3;
     const y = top - rect.top;
     const x = left - rect.left;
     if (y < headerSize.height && x < headerSize.width) {
-      position = ClickPosition.TRIANGLE;
+      clickPosition = ClickPosition.TRIANGLE;
     } else if (y < headerSize.height) {
-      position = ClickPosition.COLUMN_HEADER;
+      clickPosition = ClickPosition.COLUMN_HEADER;
       menuHeight = ITEM_HEIGHT * 6;
     } else if (x < headerSize.width) {
-      position = ClickPosition.ROW_HEADER;
+      clickPosition = ClickPosition.ROW_HEADER;
       menuHeight = ITEM_HEIGHT * 6;
     }
 
@@ -59,17 +59,12 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
         top: realTop,
         left: realLeft,
       },
-      position,
+      position: clickPosition,
     };
   }, []);
 
   return (
-    <div
-      className={styles['context-menu']}
-      data-testid="context-menu"
-      style={style}
-      ref={ref}
-    >
+    <div className={styles['context-menu']} data-testid="context-menu" style={style} ref={ref}>
       <Button
         onClick={() => {
           hideContextMenu();
@@ -99,7 +94,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           <Button
             onClick={() => {
               hideContextMenu();
-              controller.deleteAll(controller.getCurrentSheetId())
+              controller.deleteAll(controller.getCurrentSheetId());
             }}
           >
             Delete all

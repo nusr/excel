@@ -3,20 +3,20 @@ import type { ReferenceType } from '@/types';
 import { TokenType } from '@/types';
 
 export interface Visitor {
-  visitBinaryExpression(expr: BinaryExpression): any;
-  visitUnaryExpression(expr: UnaryExpression): any;
-  visitPostUnaryExpression(expr: PostUnaryExpression): any;
-  visitLiteralExpression(expr: LiteralExpression): any;
-  visitCellExpression(expr: CellExpression): any;
-  visitCellRangeExpression(expr: CellRangeExpression): any;
-  visitCallExpression(expr: CallExpression): any;
-  visitGroupExpression(expr: GroupExpression): any;
-  visitTokenExpression(expr: TokenExpression): any;
+  visitBinaryExpression: (expr: BinaryExpression) => any;
+  visitUnaryExpression: (expr: UnaryExpression) => any;
+  visitPostUnaryExpression: (expr: PostUnaryExpression) => any;
+  visitLiteralExpression: (expr: LiteralExpression) => any;
+  visitCellExpression: (expr: CellExpression) => any;
+  visitCellRangeExpression: (expr: CellRangeExpression) => any;
+  visitCallExpression: (expr: CallExpression) => any;
+  visitGroupExpression: (expr: GroupExpression) => any;
+  visitTokenExpression: (expr: TokenExpression) => any;
 }
 
 export interface Expression {
-  accept(visitor: Visitor): any;
-  toString(): string;
+  accept: (visitor: Visitor) => any;
+  toString: () => string;
 }
 
 export class BinaryExpression implements Expression {
@@ -106,7 +106,7 @@ export class CellExpression implements Expression {
   }
   toString(): string {
     if (this.sheetName) {
-      return this.sheetName.toString() + '!' + this.value.toString();
+      return `${this.sheetName.toString()}!${this.value.toString()}`;
     } else {
       return this.value.toString();
     }
@@ -124,9 +124,7 @@ export class CallExpression implements Expression {
     return visitor.visitCallExpression(this);
   }
   toString(): string {
-    return `${this.name.toString().toUpperCase()}(${this.params
-      .map((item) => item.toString())
-      .join(',')})`;
+    return `${this.name.toString().toUpperCase()}(${this.params.map((item) => item.toString()).join(',')})`;
   }
 }
 export class CellRangeExpression implements Expression {
@@ -142,9 +140,7 @@ export class CellRangeExpression implements Expression {
     return visitor.visitCellRangeExpression(this);
   }
   toString(): string {
-    return (
-      this.left.toString() + this.operator.toString() + this.right.toString()
-    );
+    return this.left.toString() + this.operator.toString() + this.right.toString();
   }
 }
 

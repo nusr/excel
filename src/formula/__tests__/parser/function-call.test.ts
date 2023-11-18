@@ -8,24 +8,21 @@ import {
 } from '../../expression';
 import { Token } from '../../token';
 import { TokenType } from '../../../types';
-describe('function calls', function () {
-  it('SUM()', function () {
+
+describe('function calls', () => {
+  it('SUM()', () => {
     const tree = buildTree('SUM()');
 
-    expect(tree).toEqual(
-      new CallExpression(new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')), []),
-    );
+    expect(tree).toEqual(new CallExpression(new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')), []));
   });
 
-  it('sum()', function () {
+  it('sum()', () => {
     const tree = buildTree('sum()');
 
-    expect(tree).toEqual(
-      new CallExpression(new TokenExpression(new Token(TokenType.IDENTIFIER, 'sum')), []),
-    );
+    expect(tree).toEqual(new CallExpression(new TokenExpression(new Token(TokenType.IDENTIFIER, 'sum')), []));
   });
 
-  it('-SUM()', function () {
+  it('-SUM()', () => {
     const tree = buildTree('-SUM()');
 
     expect(tree).toEqual(
@@ -36,7 +33,7 @@ describe('function calls', function () {
     );
   });
 
-  it('SUM(1)', function () {
+  it('SUM(1)', () => {
     const tree = buildTree('SUM(1)');
     expect(tree).toEqual(
       new CallExpression(new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')), [
@@ -45,7 +42,7 @@ describe('function calls', function () {
     );
   });
 
-  it('SUM(1, 2)', function () {
+  it('SUM(1, 2)', () => {
     const tree = buildTree('SUM(1, 2)');
     expect(tree).toEqual(
       new CallExpression(new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')), [
@@ -55,7 +52,7 @@ describe('function calls', function () {
     );
   });
 
-  it('SUM(1, SUM(2, 3))', function () {
+  it('SUM(1, SUM(2, 3))', () => {
     const tree = buildTree('SUM(1, SUM(2, 3))');
 
     expect(tree).toEqual(
@@ -69,7 +66,7 @@ describe('function calls', function () {
     );
   });
 
-  it('SUM(10 / 4, SUM(2, 3))', function () {
+  it('SUM(10 / 4, SUM(2, 3))', () => {
     const tree = buildTree('SUM(10 / 4, SUM(2, 3))');
     expect(tree).toEqual(
       new CallExpression(new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')), [
@@ -86,7 +83,7 @@ describe('function calls', function () {
     );
   });
 
-  it('2 + SUM(1)', function () {
+  it('2 + SUM(1)', () => {
     const tree = buildTree('2 + SUM(1)');
 
     expect(tree).toEqual(
@@ -100,7 +97,7 @@ describe('function calls', function () {
     );
   });
 
-  it('2 + SUM(1, 2, 3, 4)', function () {
+  it('2 + SUM(1, 2, 3, 4)', () => {
     const tree = buildTree('2 + SUM(1, 2, 3, 4)');
     expect(tree).toEqual(
       new BinaryExpression(
@@ -116,7 +113,7 @@ describe('function calls', function () {
     );
   });
 
-  it('SUM(2) + SUM(1)', function () {
+  it('SUM(2) + SUM(1)', () => {
     const tree = buildTree('SUM(2) + SUM(1)');
 
     expect(tree).toEqual(
@@ -132,7 +129,7 @@ describe('function calls', function () {
     );
   });
 
-  it('SUM(SUM(1), 2 + 3)', function () {
+  it('SUM(SUM(1), 2 + 3)', () => {
     const tree = buildTree('SUM(SUM(1), 2 + 3)');
     expect(tree).toEqual(
       new CallExpression(new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')), [

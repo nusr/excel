@@ -23,8 +23,6 @@ describe('SheetBarContainer.test.ts', () => {
     fireEvent.contextMenu(screen.getByTestId('sheet-bar-list')!.childNodes[0], {
       clientX: 199,
     });
-    expect(
-      screen.getByTestId('sheet-bar-context-menu').childNodes,
-    ).toHaveLength(5);
+    expect(screen.getByTestId('sheet-bar-context-menu').childNodes).toHaveLength(5);
   });
 });

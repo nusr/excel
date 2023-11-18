@@ -1,5 +1,6 @@
 import { ResultType } from './parser';
 import { IRange } from './range';
+
 export enum EVerticalAlign {
   TOP,
   CENTER,
@@ -29,7 +30,7 @@ export enum EUnderLine {
  *
  * model to XML
  */
-export type StyleType = {
+export interface StyleType {
   fontColor: string;
   fillColor: string;
   fontSize: number;
@@ -41,21 +42,21 @@ export type StyleType = {
   isItalic: boolean;
   isBold: boolean;
   numberFormat: number; // NUMBER_FORMAT_LIST id
-};
-export type WorksheetType = {
+}
+export interface WorksheetType {
   sheetId: string;
   name: string;
   isHide: boolean;
   activeCell: IRange;
   rowCount: number;
   colCount: number;
-};
+}
 
-export type ModelCellType = {
+export interface ModelCellType {
   value?: ResultType;
   formula?: string;
   style?: Partial<StyleType>;
-};
+}
 export interface Coordinate {
   row: number;
   col: number;
@@ -65,82 +66,78 @@ export type ModelCellValue = ModelCellType & Coordinate;
 export type ModelColType = Record<string, ModelCellType>; // key: col number
 export type ModelRowType = Record<string, ModelColType>; // key: row number
 
-export type CustomItem = {
+export interface CustomItem {
   widthOrHeight: number; // width or height
   isHide: boolean;
-};
+}
 export type CustomHeightOrWidthItem = Record<string, CustomItem>; // key: row number or col number value: height or width
-export type MergeCellItem = {
+export interface MergeCellItem {
   start: Coordinate;
   end: Coordinate;
-};
-export type WorkBookJSON = {
+}
+export interface WorkBookJSON {
   workbook: WorksheetType[]; // workbook.xml_workbook_sheets
   worksheets: Record<string, ModelRowType>; // key: sheetId worksheets_*.xml_worksheet_sheetData
   mergeCells: IRange[]; // worksheets_*.xml_worksheet_mergeCells
   customHeight: Record<string, CustomHeightOrWidthItem>; // key: sheetId worksheets_*.xml_worksheet_sheetData_customHeight
   customWidth: Record<string, CustomHeightOrWidthItem>; // key: sheetId worksheets_*.xml_worksheet_sheetData_customHeight
   definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
-};
+}
 
 export interface IModel extends IBaseModel {
-  record(): void;
-  pasteRange(range: IRange, isCut: boolean): IRange;
+  record: () => void;
+  pasteRange: (range: IRange, isCut: boolean) => IRange;
 }
 
 export interface IBaseModel {
-  getCell(range: IRange): ModelCellValue;
-  getColWidth(col: number): number;
-  setColWidth(col: number, width: number): void;
-  getRowHeight(row: number): number;
-  setRowHeight(row: number, height: number): void;
-  setCellValues(
-    value: ResultType[][],
-    style: Partial<StyleType>[][],
-    ranges: IRange[],
-  ): void;
-  setActiveCell(range: IRange): void;
-  setCurrentSheetId(id: string): void;
-  getCurrentSheetId(): string;
-  addSheet(): void;
-  deleteSheet(sheetId?: string): void;
-  hideSheet(sheetId?: string): void;
-  unhideSheet(sheetId?: string): void;
-  renameSheet(sheetName: string, sheetId?: string): void;
-  toJSON(): WorkBookJSON;
-  fromJSON(json: WorkBookJSON): void;
-  setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void;
-  getSheetInfo(sheetId: string): WorksheetType;
-  getSheetList(): WorkBookJSON['workbook'];
-  addRow(rowIndex: number, count: number): void;
-  addCol(colIndex: number, count: number): void;
-  deleteCol(colIndex: number, count: number): void;
-  deleteRow(rowIndex: number, count: number): void;
-  hideRow(rowIndex: number, count: number): void;
-  hideCol(colIndex: number, count: number): void;
-  canRedo(): boolean;
-  canUndo(): boolean;
-  undo(): void;
-  redo(): void;
-  deleteAll(sheetId?: string): void;
-  getDefineName(row: number, col: number): string;
+  getCell: (range: IRange) => ModelCellValue;
+  getColWidth: (col: number) => number;
+  setColWidth: (col: number, width: number) => void;
+  getRowHeight: (row: number) => number;
+  setRowHeight: (row: number, height: number) => void;
+  setCellValues: (value: ResultType[][], style: Array<Array<Partial<StyleType>>>, ranges: IRange[]) => void;
+  setActiveCell: (range: IRange) => void;
+  setCurrentSheetId: (id: string) => void;
+  getCurrentSheetId: () => string;
+  addSheet: () => void;
+  deleteSheet: (sheetId?: string) => void;
+  hideSheet: (sheetId?: string) => void;
+  unhideSheet: (sheetId?: string) => void;
+  renameSheet: (sheetName: string, sheetId?: string) => void;
+  toJSON: () => WorkBookJSON;
+  fromJSON: (json: WorkBookJSON) => void;
+  setCellStyle: (style: Partial<StyleType>, ranges: IRange[]) => void;
+  getSheetInfo: (sheetId: string) => WorksheetType;
+  getSheetList: () => WorkBookJSON['workbook'];
+  addRow: (rowIndex: number, count: number) => void;
+  addCol: (colIndex: number, count: number) => void;
+  deleteCol: (colIndex: number, count: number) => void;
+  deleteRow: (rowIndex: number, count: number) => void;
+  hideRow: (rowIndex: number, count: number) => void;
+  hideCol: (colIndex: number, count: number) => void;
+  canRedo: () => boolean;
+  canUndo: () => boolean;
+  undo: () => void;
+  redo: () => void;
+  deleteAll: (sheetId?: string) => void;
+  getDefineName: (row: number, col: number) => string;
 }
 
-export type UndoRedoItem = {
+export interface UndoRedoItem {
   op: UndoRedoType;
   path: string;
   value: any;
-};
+}
 
 export type UndoRedoType = 'set' | 'add-array' | 'delete-array';
 
 export interface IHistory {
-  clear(): void;
-  canRedo(): boolean;
-  canUndo(): boolean;
-  undo(): UndoRedoItem[];
-  redo(): UndoRedoItem[];
-  pushRedo(op: UndoRedoType, path: string, value: any): void;
-  pushUndo(op: UndoRedoType, path: string, value: any): void;
-  onChange(): void;
+  clear: () => void;
+  canRedo: () => boolean;
+  canUndo: () => boolean;
+  undo: () => UndoRedoItem[];
+  redo: () => UndoRedoItem[];
+  pushRedo: (op: UndoRedoType, path: string, value: any) => void;
+  pushUndo: (op: UndoRedoType, path: string, value: any) => void;
+  onChange: () => void;
 }

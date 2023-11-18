@@ -5,20 +5,23 @@ import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
 import styles from './index.module.css';
 import { scrollStore } from '../store';
 
-type Props = {
+interface Props {
   controller: IController;
-};
+}
 
-type State = {
+interface State {
   prevPageY: number;
   prevPageX: number;
   scrollStatus: ScrollStatus;
-};
+}
 
 function scrollBar(controller: IController, scrollX: number, scrollY: number) {
   const oldScroll = controller.getScroll();
-  const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } =
-    computeScrollPosition(controller, oldScroll.left, oldScroll.top);
+  const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } = computeScrollPosition(
+    controller,
+    oldScroll.left,
+    oldScroll.top,
+  );
 
   let scrollTop = oldScroll.scrollTop + Math.ceil(scrollY);
   let scrollLeft = oldScroll.scrollLeft + Math.ceil(scrollX);
@@ -52,10 +55,7 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
     scrollStatus: ScrollStatus.NONE,
   });
   const headerSize = controller.getHeaderSize();
-  const { scrollLeft, scrollTop } = useSyncExternalStore(
-    scrollStore.subscribe,
-    scrollStore.getSnapshot,
-  );
+  const { scrollLeft, scrollTop } = useSyncExternalStore(scrollStore.subscribe, scrollStore.getSnapshot);
   function handleDrag(event: MouseEvent) {
     event.stopPropagation();
     if (state.current.scrollStatus === ScrollStatus.VERTICAL) {
@@ -105,7 +105,7 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
             height: SCROLL_SIZE,
             transform: `translateY(${scrollTop}px)`,
           }}
-        ></div>
+        />
       </div>
       <div
         className={styles['horizontal-scroll-bar']}
@@ -126,7 +126,7 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
             width: SCROLL_SIZE,
             transform: `translateX(${scrollLeft}px)`,
           }}
-        ></div>
+        />
       </div>
     </Fragment>
   );

@@ -1,8 +1,6 @@
 import type { IHitInfo, IController } from '@/types';
-export function getHitInfo(
-  event: React.MouseEvent<HTMLCanvasElement>,
-  controller: IController,
-): IHitInfo | null {
+
+export function getHitInfo(event: React.MouseEvent<HTMLCanvasElement>, controller: IController): IHitInfo | null {
   const canvasSize = controller.getDomRect();
   const scroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
@@ -12,8 +10,8 @@ export function getHitInfo(
   const y = pageY - canvasSize.top;
   let resultX = headerSize.width;
   let resultY = headerSize.height;
-  let row = scroll.row;
-  let col = scroll.col;
+  let { row } = scroll;
+  let { col } = scroll;
   while (resultX + controller.getColWidth(col) <= x) {
     resultX += controller.getColWidth(col);
     col++;

@@ -1,7 +1,8 @@
 import * as puppeteer from 'puppeteer';
 
 declare global {
-  var page: puppeteer.Page;
+  // eslint-disable-next-line no-var
+  var __browserPage: puppeteer.Page;
 }
 
 async function setupPuppeteer() {
@@ -13,20 +14,22 @@ async function setupPuppeteer() {
       height: 800,
     },
   });
-  global.page = await browser.newPage();
+  __browserPage = await browser.newPage();
 }
 
-export function sleep(milliseconds: number) {
+export function sleep(milliseconds: number): Promise<unknown> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-export async function openPage() {
+export async function openPage(): Promise<void> {
   await setupPuppeteer();
-  const filePath = `http://localhost:8000`;
-  await page.goto(filePath);
+  const port = 8000;
+  const filePath = `https://localhost:${port}`;
+  console.log(filePath);
+  await __browserPage.goto(filePath);
   await sleep(1000);
 }
 
-export function getTestIdSelector(testId: string) {
+export function getTestIdSelector(testId: string): string {
   return `[data-testid="${testId}"]`;
 }

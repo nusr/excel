@@ -1,4 +1,5 @@
 import { IHistory, UndoRedoItem, UndoRedoType } from '@/types';
+
 export class History implements IHistory {
   private undoList: UndoRedoItem[][] = [];
   private redoList: UndoRedoItem[][] = [];

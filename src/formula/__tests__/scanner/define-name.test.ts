@@ -1,9 +1,7 @@
 import { itBlock, getToken, BlockType } from './util';
 import { TokenType } from '../../../types';
 
-describe('define name expression', function () {
-  const list: Array<BlockType> = [
-    ['foo', [getToken(TokenType.IDENTIFIER, 'foo')]],
-  ];
+describe('define name expression', () => {
+  const list: BlockType[] = [['foo', [getToken(TokenType.IDENTIFIER, 'foo')]]];
   itBlock(list);
 });

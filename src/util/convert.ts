@@ -2,7 +2,7 @@
  * convert column name to number. e.g A -> 0, a -> 0
  * @param { string } columnName
  */
-export function columnNameToInt(columnName = ""): number {
+export function columnNameToInt(columnName = ''): number {
   const temp = columnName.toUpperCase();
   let num = 0;
   for (let i = 0; i < temp.length; i++) {
@@ -16,7 +16,7 @@ export function columnNameToInt(columnName = ""): number {
  */
 export function intToColumnName(temp: number): string {
   const num = temp + 1;
-  let columnName = "";
+  let columnName = '';
   let dividend = Math.floor(Math.abs(num));
   let rest;
 
@@ -42,5 +42,5 @@ export function intToRowLabel(row: number): string {
   if (row >= 0) {
     return `${row + 1}`;
   }
-  return "";
+  return '';
 }

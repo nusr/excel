@@ -1,23 +1,16 @@
 import React, { CSSProperties, useRef, useEffect } from 'react';
-import { CanvasOverlayPosition, ActiveCellType, IController } from '@/types';
-import {
-  DEFAULT_FONT_COLOR,
-  makeFont,
-  DEFAULT_FONT_SIZE,
-  isEmpty,
-} from '@/util';
+import { CanvasOverlayPosition, IController } from '@/types';
+import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE, isEmpty } from '@/util';
 import styles from './index.module.css';
-import { CellStoreType } from '../store'
+import { CellStoreType } from '../store';
 
-type Props = {
+interface Props {
   controller: IController;
   initValue: string;
   style: CSSProperties | undefined;
-};
+}
 
-export function getEditorStyle(
-  style: CellStoreType,
-): CSSProperties {
+export function getEditorStyle(style: CellStoreType): CSSProperties {
   const cellPosition: CanvasOverlayPosition = {
     top: style.top,
     left: style.left,
@@ -41,11 +34,7 @@ export function getEditorStyle(
   };
 }
 
-export const FormulaEditor: React.FunctionComponent<Props> = ({
-  controller,
-  initValue,
-  style,
-}) => {
+export const FormulaEditor: React.FunctionComponent<Props> = ({ controller, initValue, style }) => {
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (!ref.current) {
@@ -53,15 +42,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = ({
     }
     controller.setMainDom({ input: ref.current });
   }, []);
-  return (
-    <input
-      className={styles['base-editor']}
-      ref={ref}
-      defaultValue={initValue}
-      type="text"
-      style={style}
-    />
-  );
+  return <input className={styles['base-editor']} ref={ref} defaultValue={initValue} type="text" style={style} />;
 };
 
 FormulaEditor.displayName = 'FormulaEditor';

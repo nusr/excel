@@ -8,10 +8,7 @@ export interface IconProps {
   className?: string;
 }
 
-export const Icon: FunctionComponent<IconProps> = ({
-  name,
-  className = '',
-}) => {
+export const Icon: FunctionComponent<IconProps> = ({ name, className = '' }) => {
   const paths = iconConfig[name].map((item) => ({ d: item }));
   return BaseIcon({ className, paths });
 };

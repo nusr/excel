@@ -4,9 +4,9 @@ import { Button } from '../components';
 import { importXLSX } from './import';
 import { exportToXLSX, exportToCsv } from './export';
 
-type Props = {
+interface Props {
   controller: IController;
-};
+}
 
 const buttonStyle = { minWidth: 80 };
 
@@ -24,13 +24,7 @@ export const Import: React.FunctionComponent<Props> = ({ controller }) => {
   };
   return (
     <Fragment>
-      <input
-        type="file"
-        ref={ref}
-        style={{ display: 'none' }}
-        onChange={handleChange}
-        accept=".xlsx"
-      />
+      <input type="file" ref={ref} style={{ display: 'none' }} onChange={handleChange} accept=".xlsx" />
       <Button
         testId="toolbar-import-xlsx"
         onClick={() => {
@@ -53,18 +47,10 @@ export const Export: React.FunctionComponent<Props> = ({ controller }) => {
   };
   return (
     <Fragment>
-      <Button
-        testId="toolbar-export-xlsx"
-        onClick={handleExportXLSX}
-        style={buttonStyle}
-      >
+      <Button testId="toolbar-export-xlsx" onClick={handleExportXLSX} style={buttonStyle}>
         Export XLSX
       </Button>
-      <Button
-        testId="toolbar-export-csv"
-        onClick={handleExportCSV}
-        style={buttonStyle}
-      >
+      <Button testId="toolbar-export-csv" onClick={handleExportCSV} style={buttonStyle}>
         Export CSV
       </Button>
     </Fragment>

@@ -3,18 +3,14 @@ import { IRange, ReferenceType } from '@/types';
 import { Range } from './range';
 import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from './constant';
 
-const isCharacter = (char: string) =>
-  (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z');
+const isCharacter = (char: string) => (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z');
 const isNum = (char: string) => char >= '0' && char <= '9';
 
 function convertSheetNameToSheetId(value: string) {
   return value;
 }
 
-export function parseCell(
-  ref: string,
-  convertSheetName = convertSheetNameToSheetId,
-): Range | null {
+export function parseCell(ref: string, convertSheetName = convertSheetNameToSheetId): Range | null {
   if (typeof ref !== 'string' || !ref) {
     return null;
   }
@@ -65,20 +61,11 @@ export function parseCell(
   if (row === -1 || col === -1) {
     return null;
   }
-  const range = new Range(
-    row,
-    col,
-    rowCount,
-    colCount,
-    convertSheetName(sheetName),
-  );
+  const range = new Range(row, col, rowCount, colCount, convertSheetName(sheetName));
   return range;
 }
 
-export function parseReference(
-  text: string,
-  convertSheetName = convertSheetNameToSheetId,
-): Range | null {
+export function parseReference(text: string, convertSheetName = convertSheetNameToSheetId): Range | null {
   const [cell1, cell2] = text.split(':');
   const startCell = parseCell(cell1, convertSheetName);
   if (!startCell) {
@@ -90,13 +77,7 @@ export function parseReference(
   }
   const rowCount = endCell.row - startCell.row + 1;
   const colCount = endCell.col - startCell.col + 1;
-  return new Range(
-    startCell.row,
-    startCell.col,
-    rowCount,
-    colCount,
-    endCell.sheetId,
-  );
+  return new Range(startCell.row, startCell.col, rowCount, colCount, endCell.sheetId);
 }
 
 export function mergeRange(start: Range, end: Range): Range | null {
@@ -114,9 +95,7 @@ export function mergeRange(start: Range, end: Range): Range | null {
 function convertCell(row: number, col: number, referenceType: ReferenceType) {
   const first = referenceType === 'absolute';
   const second = referenceType === 'absolute';
-  return `${first ? '$' : ''}${intToColumnName(col)}${second ? '$' : ''}${
-    row + 1
-  }`;
+  return `${first ? '$' : ''}${intToColumnName(col)}${second ? '$' : ''}${row + 1}`;
 }
 
 export function convertToReference(
@@ -128,11 +107,7 @@ export function convertToReference(
   let sheetName = convertSheetIdToSheetName(range.sheetId);
   sheetName = sheetName ? `${sheetName}!` : '';
   if (range.colCount > 1 && range.rowCount > 1) {
-    const end = convertCell(
-      range.row + range.rowCount,
-      range.col + range.colCount,
-      referenceType,
-    );
+    const end = convertCell(range.row + range.rowCount, range.col + range.colCount, referenceType);
     result = `${result}:${end}`;
   }
   return sheetName + result;

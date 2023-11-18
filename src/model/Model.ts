@@ -9,6 +9,7 @@ import {
   IRange,
   IHistory,
   UndoRedoItem,
+  ModelCellValue,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -29,9 +30,7 @@ import {
 import { parseFormula, CustomError } from '@/formula';
 
 function convertToNumber(list: string[]) {
-  const result = list
-    .map((item) => parseInt(item, 10))
-    .filter((v) => !isNaN(v));
+  const result = list.map((item) => parseInt(item, 10)).filter((v) => !isNaN(v));
   result.sort((a, b) => a - b);
   return result;
 }
@@ -86,9 +85,7 @@ export class Model implements IModel {
         sheetId: item.sheetId,
       },
     };
-    const index = this.workbook.findIndex(
-      (item) => item.sheetId === this.currentSheetId,
-    );
+    const index = this.workbook.findIndex((v) => v.sheetId === this.currentSheetId);
     if (index < 0) {
       this.workbook.push(sheet);
     } else {
@@ -96,33 +93,14 @@ export class Model implements IModel {
     }
     this.currentSheetId = sheet.sheetId;
     this.worksheets[sheet.sheetId] = {};
-    this.customHeight[sheet.sheetId];
-    this.customWidth[sheet.sheetId];
+    this.customHeight[sheet.sheetId] = {};
+    this.customWidth[sheet.sheetId] = {};
   }
-  private getSheetIndex(sheetId?: string) {
-    const id = sheetId || this.currentSheetId;
-    const index = this.workbook.findIndex((item) => item.sheetId === id);
-    assert(index >= 0);
-    let lastIndex = (index + 1) % this.workbook.length;
-    while (lastIndex !== index) {
-      if (this.workbook[lastIndex].isHide) {
-        lastIndex = (lastIndex + 1) % this.workbook.length;
-      } else {
-        break;
-      }
-    }
-    return {
-      index,
-      lastIndex,
-    };
-  }
+
   deleteSheet(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
     const list = this.workbook.filter((v) => !v.isHide);
-    assert(
-      list.length >= 2,
-      'A workbook must contains at least on visible worksheet',
-    );
+    assert(list.length >= 2, 'A workbook must contains at least on visible worksheet');
     const { index, lastIndex } = this.getSheetIndex(id);
     this.currentSheetId = this.workbook[lastIndex].sheetId;
     this.workbook.splice(index, 1);
@@ -132,10 +110,7 @@ export class Model implements IModel {
   }
   hideSheet(sheetId?: string | undefined): void {
     const list = this.workbook.filter((v) => !v.isHide);
-    assert(
-      list.length >= 2,
-      'A workbook must contains at least on visible worksheet',
-    );
+    assert(list.length >= 2, 'A workbook must contains at least on visible worksheet');
     const { index, lastIndex } = this.getSheetIndex(sheetId);
     this.workbook[index].isHide = true;
     this.currentSheetId = this.workbook[lastIndex].sheetId;
@@ -158,7 +133,7 @@ export class Model implements IModel {
     sheetInfo.name = sheetName;
   }
   getSheetInfo(id: string = this.currentSheetId): WorksheetType {
-    const item = this.workbook.find((item) => item.sheetId === id);
+    const item = this.workbook.find((v) => v.sheetId === id);
     assert(item !== undefined);
     return item;
   }
@@ -169,11 +144,8 @@ export class Model implements IModel {
   getCurrentSheetId(): string {
     return this.currentSheetId;
   }
-  private getSheetId() {
-    const list = this.workbook.filter((v) => !v.isHide);
-    return list[0].sheetId;
-  }
-  fromJSON = (json: WorkBookJSON) => {
+
+  fromJSON = (json: WorkBookJSON): void => {
     modelLog('fromJSON', json);
     const {
       worksheets = {},
@@ -214,26 +186,7 @@ export class Model implements IModel {
     return json;
   };
 
-  private setCellValue(value: ResultType, range: Coordinate): void {
-    const { row, col } = range;
-    const key = `worksheets[${this.currentSheetId}][${row}][${col}].value`;
-    this.history.pushRedo('set', key, get(this, key, undefined));
-
-    setWith(this, key, value);
-  }
-  private setCellFormula(formula: string, range: Coordinate): void {
-    const { row, col } = range;
-    const key = `worksheets[${this.currentSheetId}][${row}][${col}].formula`;
-
-    this.history.pushRedo('set', key, get(this, key, undefined));
-
-    setWith(this, key, formula);
-  }
-  setCellValues(
-    value: ResultType[][],
-    style: Partial<StyleType>[][],
-    ranges: IRange[],
-  ): void {
+  setCellValues(value: ResultType[][], style: Array<Array<Partial<StyleType>>>, ranges: IRange[]): void {
     const [range] = ranges;
     const { row, col } = range;
     for (let r = 0; r < value.length; r++) {
@@ -256,11 +209,7 @@ export class Model implements IModel {
     }
     this.computeAllCell();
   }
-  private setStyle(style: Partial<StyleType>, range: Coordinate) {
-    const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
-    this.history.pushRedo('set', stylePath, get(this, stylePath, {}));
-    setWith(this, stylePath, style);
-  }
+
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
     const [range] = ranges;
     const { row, col, rowCount, colCount } = range;
@@ -270,69 +219,17 @@ export class Model implements IModel {
       }
     }
   }
-  getCell = (range: IRange) => {
+  getCell = (range: IRange): ModelCellValue => {
     const { row, col, sheetId } = range;
     const realSheetId = sheetId || this.currentSheetId;
-    const cellData = get<ModelCellType>(
-      this,
-      `worksheets[${realSheetId}][${row}][${col}]`,
-      {},
-    );
+    const cellData = get<ModelCellType>(this, `worksheets[${realSheetId}][${row}][${col}]`, {});
     return {
       ...cellData,
       row,
       col,
     };
   };
-  private computeAllCell() {
-    const sheetData = this.worksheets[this.currentSheetId];
-    if (isEmpty(sheetData)) {
-      return [];
-    }
-    const rowKeys = Object.keys(sheetData);
-    for (const rowKey of rowKeys) {
-      const colKeys = Object.keys(sheetData[rowKey]);
-      for (const colKey of colKeys) {
-        const temp = sheetData[rowKey][colKey];
-        if (temp?.formula) {
-          temp.value = this.parseFormula(temp.formula);
-        }
-      }
-    }
-  }
-  private parseFormula(formula: string) {
-    const self = this;
-    const result = parseFormula(
-      formula,
-      {
-        get: (row: number, col: number, sheetId: string) => {
-          const sheetInfo = this.getSheetInfo(sheetId || this.currentSheetId);
-          if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
-            throw new CustomError('#REF!');
-          }
-          const temp = self.getCell(new Range(row, col, 1, 1, sheetId));
-          return temp.value;
-        },
-        set: () => {},
-        convertSheetNameToSheetId: (sheetName: string): string => {
-          const item = self.workbook.find((v) => v.name === sheetName);
-          return item?.sheetId || '';
-        },
-      },
-      {
-        set() {
-          throw new CustomError('#REF!');
-        },
-        get(name: string) {
-          return self.definedNames[name];
-        },
-        has(name: string) {
-          return name in self.definedNames;
-        },
-      },
-    );
-    return result.error ? result.error : result.result;
-  }
+
   addRow(rowIndex: number, count: number): void {
     const sheetData = this.worksheets[this.currentSheetId];
     if (isEmpty(sheetData)) {
@@ -432,13 +329,10 @@ export class Model implements IModel {
   }
 
   hideCol(colIndex: number, count: number): void {
-    this.customWidth[this.currentSheetId] =
-      this.customWidth[this.currentSheetId] || {};
+    this.customWidth[this.currentSheetId] = this.customWidth[this.currentSheetId] || {};
     for (let i = 0; i < count; i++) {
       const c = colIndex + i;
-      this.customWidth[this.currentSheetId][c] = this.customWidth[
-        this.currentSheetId
-      ][c] || {
+      this.customWidth[this.currentSheetId][c] = this.customWidth[this.currentSheetId][c] || {
         widthOrHeight: CELL_WIDTH,
         isHide: true,
       };
@@ -456,22 +350,19 @@ export class Model implements IModel {
     return temp[col].widthOrHeight || CELL_WIDTH;
   }
   setColWidth(col: number, width: number): void {
-    this.customWidth[this.currentSheetId] =
-      this.customWidth[this.currentSheetId] || {};
-    this.customWidth[this.currentSheetId][col] = this.customWidth[
-      this.currentSheetId
-    ][col] || { widthOrHeight: 0, isHide: false };
+    this.customWidth[this.currentSheetId] = this.customWidth[this.currentSheetId] || {};
+    this.customWidth[this.currentSheetId][col] = this.customWidth[this.currentSheetId][col] || {
+      widthOrHeight: 0,
+      isHide: false,
+    };
     this.customWidth[this.currentSheetId][col].widthOrHeight = width;
   }
 
   hideRow(rowIndex: number, count: number): void {
-    this.customHeight[this.currentSheetId] =
-      this.customHeight[this.currentSheetId] || {};
+    this.customHeight[this.currentSheetId] = this.customHeight[this.currentSheetId] || {};
     for (let i = 0; i < count; i++) {
       const r = rowIndex + i;
-      this.customHeight[this.currentSheetId][r] = this.customHeight[
-        this.currentSheetId
-      ][r] || {
+      this.customHeight[this.currentSheetId][r] = this.customHeight[this.currentSheetId][r] || {
         widthOrHeight: CELL_HEIGHT,
         isHide: true,
       };
@@ -489,11 +380,11 @@ export class Model implements IModel {
     return temp[row].widthOrHeight || CELL_HEIGHT;
   }
   setRowHeight(row: number, height: number): void {
-    this.customHeight[this.currentSheetId] =
-      this.customHeight[this.currentSheetId] || {};
-    this.customHeight[this.currentSheetId][row] = this.customHeight[
-      this.currentSheetId
-    ][row] || { widthOrHeight: 0, isHide: false };
+    this.customHeight[this.currentSheetId] = this.customHeight[this.currentSheetId] || {};
+    this.customHeight[this.currentSheetId][row] = this.customHeight[this.currentSheetId][row] || {
+      widthOrHeight: 0,
+      isHide: false,
+    };
     this.customHeight[this.currentSheetId][row].widthOrHeight = height;
   }
   canRedo(): boolean {
@@ -502,13 +393,13 @@ export class Model implements IModel {
   canUndo(): boolean {
     return this.history.canUndo();
   }
-  undo() {
+  undo(): void {
     if (!this.canUndo()) {
       return;
     }
     this.executeOperate(this.history.undo());
   }
-  redo() {
+  redo(): void {
     if (!this.canRedo()) {
       return;
     }
@@ -518,28 +409,8 @@ export class Model implements IModel {
     this.history.onChange();
   }
 
-  private executeOperate(list: UndoRedoItem[]) {
-    for (const item of list) {
-      const { op, path, value } = item;
-      switch (op) {
-        case 'set': {
-          this.history.pushUndo(op, path, get(this, path, undefined));
-          this.record();
-          setWith(this, path, value);
-          break;
-        }
-        // case 'add-array':
-        //   break;
-        // case 'delete-array':
-        //   break;
-        default:
-          console.error(`not support type: ${op}`);
-          break;
-      }
-    }
-  }
   pasteRange(fromRange: IRange, isCut: boolean): IRange {
-    const currentSheetId = this.currentSheetId;
+    const { currentSheetId } = this;
     const { activeCell } = this.getSheetInfo(currentSheetId);
 
     const { row, col, rowCount, colCount, sheetId } = fromRange;
@@ -594,5 +465,117 @@ export class Model implements IModel {
       }
     }
     return '';
+  }
+
+  private setCellValue(value: ResultType, range: Coordinate): void {
+    const { row, col } = range;
+    const key = `worksheets[${this.currentSheetId}][${row}][${col}].value`;
+    this.history.pushRedo('set', key, get(this, key, undefined));
+
+    setWith(this, key, value);
+  }
+  private setCellFormula(formula: string, range: Coordinate): void {
+    const { row, col } = range;
+    const key = `worksheets[${this.currentSheetId}][${row}][${col}].formula`;
+
+    this.history.pushRedo('set', key, get(this, key, undefined));
+
+    setWith(this, key, formula);
+  }
+  private computeAllCell() {
+    const sheetData = this.worksheets[this.currentSheetId];
+    if (isEmpty(sheetData)) {
+      return [];
+    }
+    const rowKeys = Object.keys(sheetData);
+    for (const rowKey of rowKeys) {
+      const colKeys = Object.keys(sheetData[rowKey]);
+      for (const colKey of colKeys) {
+        const temp = sheetData[rowKey][colKey];
+        if (temp?.formula) {
+          temp.value = this.parseFormula(temp.formula);
+        }
+      }
+    }
+  }
+  private parseFormula(formula: string) {
+    const result = parseFormula(
+      formula,
+      {
+        get: (row: number, col: number, sheetId: string) => {
+          const sheetInfo = this.getSheetInfo(sheetId || this.currentSheetId);
+          if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
+            throw new CustomError('#REF!');
+          }
+          const temp = this.getCell(new Range(row, col, 1, 1, sheetId));
+          return temp.value;
+        },
+        set: () => {
+          throw new CustomError('#REF!');
+        },
+        convertSheetNameToSheetId: (sheetName: string): string => {
+          const item = this.workbook.find((v) => v.name === sheetName);
+          return item?.sheetId || '';
+        },
+      },
+      {
+        set: () => {
+          throw new CustomError('#REF!');
+        },
+        get: (name: string) => {
+          return this.definedNames[name];
+        },
+        has: (name: string) => {
+          return name in this.definedNames;
+        },
+      },
+    );
+    return result.error ? result.error : result.result;
+  }
+  private getSheetIndex(sheetId?: string) {
+    const id = sheetId || this.currentSheetId;
+    const index = this.workbook.findIndex((item) => item.sheetId === id);
+    assert(index >= 0);
+    let lastIndex = (index + 1) % this.workbook.length;
+    while (lastIndex !== index) {
+      if (this.workbook[lastIndex].isHide) {
+        lastIndex = (lastIndex + 1) % this.workbook.length;
+      } else {
+        break;
+      }
+    }
+    return {
+      index,
+      lastIndex,
+    };
+  }
+  private getSheetId() {
+    const list = this.workbook.filter((v) => !v.isHide);
+    return list[0].sheetId;
+  }
+  private setStyle(style: Partial<StyleType>, range: Coordinate) {
+    const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
+    this.history.pushRedo('set', stylePath, get(this, stylePath, {}));
+    setWith(this, stylePath, style);
+  }
+  private executeOperate(list: UndoRedoItem[]) {
+    for (const item of list) {
+      const { op, path, value } = item;
+      switch (op) {
+        case 'set': {
+          this.history.pushUndo(op, path, get(this, path, undefined));
+          this.record();
+          setWith(this, path, value);
+          break;
+        }
+        // case 'add-array':
+        //   break;
+        // case 'delete-array':
+        //   break;
+        default:
+          console.error(`not support type: ${op}`);
+          break;
+      }
+    }
   }
 }

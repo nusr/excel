@@ -1,5 +1,6 @@
 import { SHEET_NAME_PREFIX } from './constant';
 import type { WorksheetType } from '@/types';
+
 export const isString = (value: any): boolean => {
   return typeof value === 'string';
 };
@@ -44,9 +45,7 @@ export function getListMaxNum(list: string[] = []): number {
   return Math.max(Math.max(...idList), 0);
 }
 
-export function getDefaultSheetInfo(
-  list: WorksheetType[] = [],
-): Pick<WorksheetType, 'name' | 'sheetId'> {
+export function getDefaultSheetInfo(list: WorksheetType[] = []): Pick<WorksheetType, 'name' | 'sheetId'> {
   const sheetId = getListMaxNum(list.map((item) => item.sheetId)) + 1;
   return {
     name: `${SHEET_NAME_PREFIX}${sheetId}`,

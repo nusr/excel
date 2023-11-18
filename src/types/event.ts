@@ -8,14 +8,14 @@ export type ChangeEventType =
   | 'setCellValues'
   | 'scroll';
 
-export type IWindowSize = {
+export interface IWindowSize {
   width: number;
   height: number;
-};
+}
 
-export type EventType = {
+export interface EventType {
   changeSet: Set<ChangeEventType>;
-};
+}
 
 export interface IHitInfo {
   width: number;

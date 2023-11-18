@@ -8,10 +8,7 @@ function isInputEvent(event: any): boolean {
   return name === 'input' || name === 'textarea';
 }
 
-export function registerGlobalEvent(
-  controller: IController,
-  resizeWindow: (changeSet: Set<ChangeEventType>) => void,
-) {
+export function registerGlobalEvent(controller: IController, resizeWindow: (changeSet: Set<ChangeEventType>) => void) {
   function handleKeydown(event: KeyboardEvent) {
     const list = keyboardEventList.filter((v) => v.key === event.key);
     list.sort((a, b) => b.modifierKey.length - a.modifierKey.length);
@@ -45,7 +42,7 @@ export function registerGlobalEvent(
     controller.getMainDom().input?.focus();
   }
 
-  const handleWheel = debounce(function (event: WheelEvent) {
+  const handleWheel = debounce((event: WheelEvent) => {
     if (event.target !== controller.getMainDom().canvas!) {
       return;
     }

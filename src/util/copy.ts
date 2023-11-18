@@ -17,13 +17,12 @@ function select(element: HTMLTextAreaElement) {
   return element.value;
 }
 
-export function isSupported(action = ['copy', 'cut']) {
+export function isSupported(action = ['copy', 'cut']): boolean {
   const actions = typeof action === 'string' ? [action] : action;
   let support = !!document.queryCommandSupported;
-
-  actions.forEach((action) => {
-    support = support && !!document.queryCommandSupported(action);
-  });
+  for (const v of actions) {
+    support = support && !!document.queryCommandSupported(v);
+  }
 
   return support;
 }
@@ -41,7 +40,7 @@ function createFakeElement(value: string) {
   fakeElement.style.position = 'absolute';
   fakeElement.style[isRTL ? 'right' : 'left'] = '-9999px';
   // Move element to the same position vertically
-  let yPosition = window.pageYOffset || document.documentElement.scrollTop;
+  const yPosition = window.pageYOffset || document.documentElement.scrollTop;
   fakeElement.style.top = `${yPosition}px`;
 
   fakeElement.setAttribute('readonly', '');
@@ -79,11 +78,7 @@ async function readDataFromClipboard(): Promise<ClipboardData> {
   return result;
 }
 
-const fakeCopyAction = (
-  value: string,
-  container: HTMLElement,
-  type: 'copy' | 'cut',
-) => {
+const fakeCopyAction = (value: string, container: HTMLElement, type: 'copy' | 'cut') => {
   const fakeElement = createFakeElement(value);
   container.appendChild(fakeElement);
   const selectedText = select(fakeElement);
@@ -93,10 +88,7 @@ const fakeCopyAction = (
   return selectedText;
 };
 
-export async function copyOrCut(
-  textData: ClipboardData,
-  type: 'cut' | 'copy',
-): Promise<string> {
+export async function copyOrCut(textData: ClipboardData, type: 'cut' | 'copy'): Promise<string> {
   try {
     await writeDataToClipboard(textData);
     return textData[PLAIN_FORMAT];
@@ -119,7 +111,7 @@ export async function paste(): Promise<ClipboardData> {
   }
 }
 
-export function generateHTML(style: string, content: string) {
+export function generateHTML(style: string, content: string): string {
   return `<html
   xmlns:v="urn:schemas-microsoft-com:vml"
   xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -132,8 +124,8 @@ export function generateHTML(style: string, content: string) {
     <meta name="Generator" content="Microsoft Excel 15" />
     <style>
        {
-        mso-displayed-decimal-separator: '\.';
-        mso-displayed-thousand-separator: '\,';
+        mso-displayed-decimal-separator: '.';
+        mso-displayed-thousand-separator: ',';
       }
       @page {
         margin: 0.75in 0.7in 0.75in 0.7in;

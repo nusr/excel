@@ -5,8 +5,6 @@ import {
   Expression,
   GroupExpression,
   PostUnaryExpression,
-} from './expression';
-import {
   BinaryExpression,
   UnaryExpression,
   CallExpression,
@@ -15,16 +13,7 @@ import {
 } from './expression';
 import { CustomError } from './formula';
 
-const errorSet = new Set<ErrorTypes>([
-  '#ERROR!',
-  '#DIV/0!',
-  '#NULL!',
-  '#NUM!',
-  '#REF!',
-  '#VALUE!',
-  '#N/A',
-  '#NAME?',
-]);
+const errorSet = new Set<ErrorTypes>(['#ERROR!', '#DIV/0!', '#NULL!', '#NUM!', '#REF!', '#VALUE!', '#N/A', '#NAME?']);
 
 export class Parser {
   private readonly tokens: Token[];
@@ -32,7 +21,7 @@ export class Parser {
   constructor(tokens: Token[]) {
     this.tokens = tokens;
   }
-  parse() {
+  parse(): Expression[] {
     const result: Expression[] = [];
     while (!this.isAtEnd()) {
       result.push(this.expression());
@@ -124,7 +113,8 @@ export class Parser {
   }
   private call(): Expression {
     let expr = this.primary();
-    while (true) {
+    // eslint-disable-next-line no-constant-condition
+    while (1) {
       if (this.match(TokenType.LEFT_BRACKET)) {
         expr = this.finishCall(expr);
       } else {
@@ -154,14 +144,7 @@ export class Parser {
       this.expect(TokenType.RIGHT_BRACKET);
       return new GroupExpression(value);
     }
-    if (
-      this.match(
-        TokenType.NUMBER,
-        TokenType.STRING,
-        TokenType.TRUE,
-        TokenType.FALSE,
-      )
-    ) {
+    if (this.match(TokenType.NUMBER, TokenType.STRING, TokenType.TRUE, TokenType.FALSE)) {
       return new LiteralExpression(this.previous());
     }
 
@@ -205,7 +188,7 @@ export class Parser {
     throw new CustomError('#ERROR!');
   }
   private match(...types: TokenType[]): boolean {
-    const type = this.peek().type;
+    const { type } = this.peek();
     if (types.includes(type)) {
       this.next();
       return true;

@@ -1,5 +1,6 @@
 import { isPlainObject } from '..';
 import { runInNewContext } from 'node:vm';
+
 function Foo() {
   return 1;
 }
@@ -7,7 +8,7 @@ class Test {}
 
 describe('isPlainObject.test.ts', () => {
   describe('isPlainObject', () => {
-    it('should be true', function () {
+    it('should be true', () => {
       expect(isPlainObject({})).toBeTruthy();
       expect(isPlainObject({ 1: 2 })).toBeTruthy();
       expect(isPlainObject({ constructor: Foo })).toBeTruthy();
@@ -16,7 +17,7 @@ describe('isPlainObject.test.ts', () => {
       expect(isPlainObject({ test: 2 })).toBeTruthy();
       expect(isPlainObject(runInNewContext('({})'))).toBeTruthy();
     });
-    it('should be false', function () {
+    it('should be false', () => {
       expect(isPlainObject([1, 'test'])).toBeFalsy();
       expect(isPlainObject(undefined)).toBeFalsy();
       expect(isPlainObject(Atomics)).toBeFalsy();
@@ -28,8 +29,10 @@ describe('isPlainObject.test.ts', () => {
       expect(isPlainObject(1.0)).toBeFalsy();
       expect(isPlainObject(Number.NaN)).toBeFalsy();
       expect(isPlainObject(/./)).toBeFalsy();
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       expect(isPlainObject(() => {})).toBeFalsy();
-      expect(isPlainObject(function () {})).toBeFalsy();
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      expect(isPlainObject(() => {})).toBeFalsy();
       expect(isPlainObject(Foo)).toBeFalsy();
       expect(isPlainObject(Foo())).toBeFalsy();
       expect(isPlainObject(new Test())).toBeFalsy();
@@ -37,6 +40,7 @@ describe('isPlainObject.test.ts', () => {
       expect(isPlainObject(true)).toBeFalsy();
       expect(isPlainObject(Math)).toBeFalsy();
       (function () {
+        // eslint-disable-next-line prefer-rest-params
         expect(isPlainObject(arguments)).toBeFalsy();
       })();
     });

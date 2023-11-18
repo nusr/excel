@@ -1,8 +1,8 @@
 import { itBlock, getToken, BlockType } from './util';
 import { TokenType } from '../../../types';
 
-describe('arrays', function () {
-  const list: Array<BlockType> = [
+describe('arrays', () => {
+  const list: BlockType[] = [
     [
       '{1,2,3}',
       [

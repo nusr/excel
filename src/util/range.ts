@@ -1,4 +1,5 @@
 import { IRange } from '@/types';
+
 export function isSheet(range: IRange): boolean {
   return isRow(range) && isCol(range);
 }
@@ -28,13 +29,7 @@ export class Range implements IRange {
   colCount = 0;
   rowCount = 0;
   sheetId = '';
-  constructor(
-    row: number,
-    col: number,
-    rowCount: number,
-    colCount: number,
-    sheetId: string,
-  ) {
+  constructor(row: number, col: number, rowCount: number, colCount: number, sheetId: string) {
     this.row = row;
     this.col = col;
     this.colCount = colCount;
@@ -43,17 +38,9 @@ export class Range implements IRange {
   }
 
   isValid(): boolean {
-    return (
-      this.row >= 0 && this.col >= 0 && this.colCount >= 0 && this.rowCount >= 0
-    );
+    return this.row >= 0 && this.col >= 0 && this.colCount >= 0 && this.rowCount >= 0;
   }
   static makeRange(range: IRange): Range {
-    return new Range(
-      range.row,
-      range.col,
-      range.rowCount,
-      range.colCount,
-      range.sheetId,
-    );
+    return new Range(range.row, range.col, range.rowCount, range.colCount, range.sheetId);
   }
 }

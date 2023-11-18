@@ -2,13 +2,7 @@ import { Scanner } from './scanner';
 import { Parser } from './parser';
 import formulas, { CustomError } from './formula';
 import { Interpreter } from './interpreter';
-import {
-  CellDataMap,
-  InterpreterResult,
-  DefinedNamesMap,
-  FormulaData,
-  IRange,
-} from '@/types';
+import { CellDataMap, InterpreterResult, DefinedNamesMap, FormulaData, IRange } from '@/types';
 
 export function parseFormula(
   source: string,
@@ -20,12 +14,7 @@ export function parseFormula(
   try {
     const list = new Scanner(source).scan();
     const expressions = new Parser(list).parse();
-    const result = new Interpreter(
-      expressions,
-      cellData,
-      definedNamesMap,
-      functionMap,
-    ).interpret();
+    const result = new Interpreter(expressions, cellData, definedNamesMap, functionMap).interpret();
 
     const strList: string[] = [];
     for (const item of expressions) {
@@ -34,7 +23,7 @@ export function parseFormula(
     expressionStr = strList.join('');
 
     return {
-      result: result,
+      result,
       error: null,
       expressionStr,
     };
@@ -57,7 +46,7 @@ export function parseFormula(
 export class CellDataMapImpl implements CellDataMap {
   private readonly map = new Map<string, any>();
   private sheetNameMap: Record<string, string> = {};
-  private getKey(row: number, col: number, sheetId: string = '') {
+  private getKey(row: number, col: number, sheetId = '') {
     const key = `${row}_${col}_${sheetId}`;
     return key;
   }
@@ -68,7 +57,7 @@ export class CellDataMapImpl implements CellDataMap {
     const key = this.getKey(row, col, sheetId);
     this.map.set(key, value);
   }
-  get(row: number, col: number, sheetId: string = ''): any {
+  get(row: number, col: number, sheetId = ''): any {
     const key = this.getKey(row, col, sheetId);
     return this.map.get(key);
   }

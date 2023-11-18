@@ -3,24 +3,17 @@ import { classnames } from '@/util';
 import { OptionItem } from '@/types';
 import styles from './index.module.css';
 
-export type SelectProps = {
+export interface SelectProps {
   value?: string | number;
   style?: CSSProperties;
   data: Array<string | number | OptionItem>;
   getItemStyle?: (value: string | number) => CSSProperties;
   onChange: (value: string | number) => void;
   title?: string;
-};
+}
 
 export const Select: FunctionComponent<SelectProps> = (props) => {
-  const {
-    data,
-    value: activeValue,
-    style = {},
-    onChange,
-    getItemStyle = () => ({}),
-    title,
-  } = props;
+  const { data, value: activeValue, style = {}, onChange, getItemStyle = () => ({}), title } = props;
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onChange(event.currentTarget.value);
   };
@@ -42,13 +35,7 @@ export const Select: FunctionComponent<SelectProps> = (props) => {
           [styles['disabled']]: disabled,
         });
         return (
-          <option
-            key={value}
-            value={value}
-            disabled={!!disabled}
-            className={cls}
-            style={itemStyle}
-          >
+          <option key={value} value={value} disabled={!!disabled} className={cls} style={itemStyle}>
             {label}
           </option>
         );

@@ -28,46 +28,46 @@ const SHEET_PATH_PREFIX = 'xl/worksheets/';
 export const CUSTOM_WIdTH_RADIO = 8;
 
 type ThemeData = Record<
-  string,
-  {
-    'a:srgbClr': { val: string };
-    'a:sysClr': { lastClr: string; val: string };
-  }
+string,
+{
+  'a:srgbClr': { val: string };
+  'a:sysClr': { lastClr: string; val: string };
+}
 >;
 type SheetItem = Pick<WorksheetType, 'name' | 'sheetId'> & {
   'r:id': string;
   state?: string;
 };
-type RelationItem = {
+interface RelationItem {
   Id: string;
   Target: string;
-};
+}
 
 type XMLFile = Record<string, any>;
-type ColItem = {
+interface ColItem {
   r: string;
   s: string;
   v?: {
     '#text': string;
   };
-};
-type SheetDataRowItem = {
+}
+interface SheetDataRowItem {
   customHeight?: string;
   hidden?: string;
   ht?: string;
   r: string;
   c: ColItem[];
-};
+}
 
-type CustomColItem = {
+interface CustomColItem {
   min: string;
   max: string;
   width: string;
   customWidth: string;
   hidden?: string;
-};
+}
 
-export type XfItem = {
+export interface XfItem {
   fontId: string;
   fillId: string;
   numFmtId: string;
@@ -80,17 +80,17 @@ export type XfItem = {
     horizontal?: 'left' | 'center' | 'right';
     wrapText?: string;
   };
-};
+}
 
 type ObjectItem = Record<string, any>;
-type ColorItem = {
+interface ColorItem {
   rgb?: string;
   theme?: string;
   indexed?: string;
   tint?: string;
   auto?: string;
-};
-type FontItem = {
+}
+interface FontItem {
   b?: ObjectItem;
   i?: ObjectItem;
   u?: ObjectItem;
@@ -101,8 +101,8 @@ type FontItem = {
   sz: {
     val: string;
   };
-};
-type FillItem = {
+}
+interface FillItem {
   patternFill?: {
     patternType: string;
     fgColor: ColorItem;
@@ -111,12 +111,12 @@ type FillItem = {
   gradientFill?: {
     stop: Array<{ color: ColorItem }>;
   };
-};
+}
 
-type DefineNameItem = {
+interface DefineNameItem {
   name: string;
   '#text': string;
-};
+}
 
 function xmlToJson(xml: any) {
   // Create the return object
@@ -139,11 +139,11 @@ function xmlToJson(xml: any) {
   if (xml.childNodes.length > 0) {
     for (const item of xml.childNodes) {
       const n = item.nodeName;
-      if (typeof obj[n] == 'undefined') {
+      if (typeof obj[n] === 'undefined') {
         obj[n] = xmlToJson(item);
       } else {
-        if (typeof obj[n].push == 'undefined') {
-          var old = obj[n];
+        if (typeof obj[n].push === 'undefined') {
+          const old = obj[n];
           obj[n] = [];
           obj[n].push(old);
         }
@@ -202,11 +202,7 @@ function convertColor(themeData: ThemeData, color?: ColorItem) {
   return convertRGB(color.rgb);
 }
 
-function getCellStyle(
-  xml: XMLFile,
-  styleId: number,
-  themeData: ThemeData,
-): Partial<StyleType> | undefined {
+function getCellStyle(xml: XMLFile, styleId: number, themeData: ThemeData): Partial<StyleType> | undefined {
   const result: Partial<StyleType> = {};
   const xfList = get<XfItem[]>(xml, 'styleSheet.cellXfs.xf', []);
   if (!styleId || xfList.length === 0 || !xfList[styleId]) {
@@ -242,7 +238,7 @@ function getCellStyle(
       result.fontSize = parseInt(font.sz.val, 10);
       result.isBold = Boolean(font.b);
       result.isItalic = Boolean(font.i);
-      result.underline = Boolean(font.u) ? EUnderLine.SINGLE : EUnderLine.NONE;
+      result.underline = font.u ? EUnderLine.SINGLE : EUnderLine.NONE;
       result.fontFamily = font.name.val;
       const color = convertColor(themeData, font.color);
       if (color) {
@@ -281,11 +277,7 @@ function getCellStyle(
 
 function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
   const workbook = xmlData[WORKBOOK_PATH];
-  const themeData = get<ThemeData>(
-    xmlData[THEME_PATH],
-    'a:theme.a:themeElements.a:clrScheme',
-    {},
-  );
+  const themeData = get<ThemeData>(xmlData[THEME_PATH], 'a:theme.a:themeElements.a:clrScheme', {});
 
   const result: WorkBookJSON = {
     workbook: [],
@@ -297,11 +289,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
   };
   const sheetPathMap: Record<string, string> = {};
   const sheetMap: Record<string, string> = {};
-  for (const item of get<RelationItem[]>(
-    xmlData[WORKBOOK_RELATION_PATH],
-    'Relationships.Relationship',
-    [],
-  )) {
+  for (const item of get<RelationItem[]>(xmlData[WORKBOOK_RELATION_PATH], 'Relationships.Relationship', [])) {
     if (!item) {
       continue;
     }
@@ -318,11 +306,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     const sheetPath = `${COMMON_PREFIX}/${sheetMap[item['r:id']]}`;
     sheetPathMap[item.sheetId] = sheetPath;
     const range = parseReference(
-      get<string>(
-        xmlData[sheetPath],
-        'worksheet.sheetViews.sheetView.selection.sqref',
-        '',
-      ),
+      get<string>(xmlData[sheetPath], 'worksheet.sheetViews.sheetView.selection.sqref', ''),
     )!;
     range.sheetId = item.sheetId;
     result.workbook.push({
@@ -336,18 +320,11 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
   }
   for (const item of result.workbook) {
     const sheetPath = sheetPathMap[item.sheetId];
-    let sheetData: SheetDataRowItem[] = get(
-      xmlData[sheetPath],
-      'worksheet.sheetData.row',
-    );
+    let sheetData: SheetDataRowItem[] = get(xmlData[sheetPath], 'worksheet.sheetData.row');
     if (!Array.isArray(sheetData)) {
       sheetData = [sheetData];
     }
-    let customWidth: CustomColItem[] = get(
-      xmlData[sheetPath],
-      'worksheet.cols.col',
-      [],
-    );
+    let customWidth: CustomColItem[] = get(xmlData[sheetPath], 'worksheet.cols.col', []);
     customWidth = Array.isArray(customWidth) ? customWidth : [customWidth];
     const defaultWOrH = get(xmlData[sheetPath], 'worksheet.sheetFormatPr', {
       defaultColWidth: '',
@@ -360,15 +337,9 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
       for (const col of customWidth) {
         if (col && col.customWidth && col.width && col.min && col.max) {
           const isDefault = defaultWOrH.defaultColWidth === col.width;
-          const w = isDefault
-            ? CELL_WIDTH
-            : parseFloat(col.width) * CUSTOM_WIdTH_RADIO;
+          const w = isDefault ? CELL_WIDTH : parseFloat(col.width) * CUSTOM_WIdTH_RADIO;
           const isHide = Boolean(col.hidden);
-          for (
-            let start = parseInt(col.min, 10) - 1, end = parseInt(col.max, 10);
-            start < end;
-            start++
-          ) {
+          for (let start = parseInt(col.min, 10) - 1, end = parseInt(col.max, 10); start < end; start++) {
             result.customWidth[item.sheetId][start] = {
               widthOrHeight: w,
               isHide,
@@ -384,8 +355,8 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     result.worksheets[item.sheetId] = {};
     result.customHeight[item.sheetId] = {};
 
-    let colCount = item.colCount;
-    let rowCount = item.rowCount;
+    let { colCount } = item;
+    let { rowCount } = item;
     for (const row of sheetData) {
       if (!row) {
         continue;
@@ -432,11 +403,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     item.colCount = Math.max(item.colCount, colCount);
   }
 
-  let definedNames: DefineNameItem[] = get(
-    workbook,
-    'workbook.definedNames.definedName',
-    [],
-  );
+  let definedNames: DefineNameItem[] = get(workbook, 'workbook.definedNames.definedName', []);
   definedNames = Array.isArray(definedNames) ? definedNames : [definedNames];
   const convertSheetName = (sheetName: string) => {
     return result.workbook.find((v) => v.name === sheetName)?.sheetId || '';
@@ -460,9 +427,8 @@ export async function importXLSX(file: File) {
       continue;
     }
     const check =
-      [STYLE_PATH, WORKBOOK_PATH, WORKBOOK_RELATION_PATH, THEME_PATH].includes(
-        key,
-      ) || key.startsWith(SHEET_PATH_PREFIX);
+      [STYLE_PATH, WORKBOOK_PATH, WORKBOOK_RELATION_PATH, THEME_PATH].includes(key) ||
+      key.startsWith(SHEET_PATH_PREFIX);
     if (!check) {
       continue;
     }

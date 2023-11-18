@@ -1,8 +1,8 @@
 import { itBlock, getToken, BlockType } from './util';
 import { TokenType } from '../../../types';
 
-describe('range operators', function () {
-  const list: Array<BlockType> = [
+describe('range operators', () => {
+  const list: BlockType[] = [
     [
       'A1:C1,A2:C2',
       [

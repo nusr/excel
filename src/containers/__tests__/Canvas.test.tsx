@@ -8,9 +8,7 @@ describe('CanvasContainer.test.ts', () => {
   test('normal', () => {
     render(<CanvasContainer controller={initController()} />);
     expect(screen.getByTestId('canvas-container')!.childNodes).toHaveLength(3);
-    expect(
-      screen.getByTestId('canvas-container')!.firstChild!.nodeName,
-    ).toEqual('CANVAS');
+    expect(screen.getByTestId('canvas-container')!.firstChild!.nodeName).toEqual('CANVAS');
   });
   test('context menu', () => {
     const controller = initController();

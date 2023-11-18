@@ -15,9 +15,7 @@ export interface ButtonProps {
   buttonType?: React.ButtonHTMLAttributes<string>['type'];
 }
 
-export const Button: FunctionComponent<React.PropsWithChildren<ButtonProps>> = (
-  props,
-) => {
+export const Button: FunctionComponent<React.PropsWithChildren<ButtonProps>> = (props) => {
   const {
     className = '',
     onClick = () => {},

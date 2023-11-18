@@ -6,9 +6,9 @@ import styles from './index.module.css';
 import React from 'react';
 import type { IController } from '@/types';
 
-type Props = {
+interface Props {
   controller: IController;
-};
+}
 
 export const App: React.FunctionComponent<Props> = ({ controller }) => {
   return (

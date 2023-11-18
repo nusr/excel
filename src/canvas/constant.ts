@@ -1,14 +1,8 @@
-import { thinLineWidth, DEFAULT_FONT_CONFIG } from '@/util';
-import { theme } from '@/util';
+import { thinLineWidth, DEFAULT_FONT_CONFIG, theme } from '@/util';
 
 export const HEADER_STYLE: Pick<
-  CanvasRenderingContext2D,
-  | 'textAlign'
-  | 'textBaseline'
-  | 'font'
-  | 'fillStyle'
-  | 'lineWidth'
-  | 'strokeStyle'
+CanvasRenderingContext2D,
+'textAlign' | 'textBaseline' | 'font' | 'fillStyle' | 'lineWidth' | 'strokeStyle'
 > = {
   textAlign: 'center',
   textBaseline: 'middle',

@@ -6,8 +6,8 @@ export interface IRange {
   sheetId: string;
 }
 
-export type NumberFormatItem = {
+export interface NumberFormatItem {
   formatCode: string;
   label: string;
   id: number;
-};
+}

@@ -1,33 +1,33 @@
 import { buildTree } from './util';
 
-describe('invalid expressions', function () {
-  it('SUM(', function () {
-    expect(function () {
+describe('invalid expressions', () => {
+  it('SUM(', () => {
+    expect(() => {
       buildTree('SUM(');
     }).toThrow();
   });
-  it('+', function () {
-    expect(function () {
+  it('+', () => {
+    expect(() => {
       buildTree('+');
     }).toThrow();
   });
-  it('SUM(,,', function () {
-    expect(function () {
+  it('SUM(,,', () => {
+    expect(() => {
       buildTree('SUM(,,');
     }).toThrow();
   });
-  it('>', function () {
-    expect(function () {
+  it('>', () => {
+    expect(() => {
       buildTree('>');
     }).toThrow();
   });
-  it('a >', function () {
-    expect(function () {
+  it('a >', () => {
+    expect(() => {
       buildTree('a >');
     }).toThrow();
   });
-  it('> b', function () {
-    expect(function () {
+  it('> b', () => {
+    expect(() => {
       buildTree('> b');
     }).toThrow();
   });

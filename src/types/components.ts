@@ -1,26 +1,30 @@
 import { ModelCellValue } from './model';
 
-export type OptionItem = {
+export interface OptionItem extends ExtendIndex {
   value: string | number;
   label: string;
-  disabled?: boolean;
-};
-export type CanvasOverlayPosition = {
+  disabled: boolean;
+}
+
+export interface ExtendIndex {
+  [key: string]: boolean | number | string | null | undefined;
+}
+
+export interface CanvasOverlayPosition {
   top: number;
   left: number;
   width: number;
   height: number;
-};
+}
 
-
-export type ScrollValue = {
+export interface ScrollValue {
   left: number;
   top: number;
   row: number;
   col: number;
   scrollLeft: number;
   scrollTop: number;
-};
+}
 
 export type ActiveCellType = ModelCellValue & CanvasOverlayPosition;
 

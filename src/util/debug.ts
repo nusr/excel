@@ -1,18 +1,13 @@
 import { assert } from './assert';
 import { DEBUG_COLOR_LIST } from './constant';
+
 type NameSpaceType = 'react' | 'controller' | 'canvas' | 'model';
 
 class Debug {
   namespace: NameSpaceType;
 
-  static readonly colorMap: Map<NameSpaceType, string> = new Map<
-    NameSpaceType,
-    string
-  >();
-  static readonly enableMap: Map<NameSpaceType, boolean> = new Map<
-    NameSpaceType,
-    boolean
-  >([]);
+  static readonly colorMap: Map<NameSpaceType, string> = new Map<NameSpaceType, string>();
+  static readonly enableMap: Map<NameSpaceType, boolean> = new Map<NameSpaceType, boolean>([]);
   constructor(namespace: NameSpaceType) {
     this.namespace = namespace;
   }
@@ -20,7 +15,7 @@ class Debug {
     this.setColor();
     return this.log;
   };
-  log = (...rest: Array<unknown>): void => {
+  log = (...rest: unknown[]): void => {
     if (!this.enable()) {
       return;
     }

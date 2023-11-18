@@ -16,31 +16,13 @@ export const ERROR_FORMULA_COLOR = '#ff0000';
 export const DEFAULT_FILL_COLOR = 'transparent';
 export const MUST_FONT_FAMILY = 'sans-serif';
 
-export const FONT_SIZE_LIST = [
-  6,
-  8,
-  9,
-  10,
-  DEFAULT_FONT_SIZE,
-  12,
-  14,
-  16,
-  18,
-  20,
-  22,
-  24,
-  26,
-  28,
-  36,
-  48,
-  72,
-];
+export const FONT_SIZE_LIST = [6, 8, 9, 10, DEFAULT_FONT_SIZE, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
 
 export function makeFont(
   fontStyle: 'none' | 'normal' | 'italic' | 'oblique' = 'normal',
   fontWeight = 'normal',
   fontSize = 12,
-  fontFamily: string = '',
+  fontFamily = '',
 ): string {
   const temp = `${fontStyle} ${fontWeight} ${fontSize}px `;
   if (!fontFamily) {
@@ -49,11 +31,7 @@ export function makeFont(
   return `${temp}${fontFamily},${MUST_FONT_FAMILY}`;
 }
 
-export const DEFAULT_FONT_CONFIG = makeFont(
-  undefined,
-  '500',
-  npx(DEFAULT_FONT_SIZE),
-);
+export const DEFAULT_FONT_CONFIG = makeFont(undefined, '500', npx(DEFAULT_FONT_SIZE));
 
 export function convertCanvasStyleToString(style: Partial<StyleType>): string {
   let result = '';
@@ -70,13 +48,13 @@ export function convertCanvasStyleToString(style: Partial<StyleType>): string {
     result += `font-family:${style.fontFamily};`;
   }
   if (style.isItalic) {
-    result += `font-style:italic;`;
+    result += 'font-style:italic;';
   }
   if (style.isBold) {
-    result += `font-weight:700;`;
+    result += 'font-weight:700;';
   }
   if (style.isWrapText) {
-    result += `white-space:normal;`;
+    result += 'white-space:normal;';
   }
   if (style.underline) {
     result += 'text-decoration:underline;';
@@ -94,16 +72,7 @@ function convertCSSStyleToCanvasStyle(
   style: Partial<CSSStyleDeclaration>,
   selectorCSSText: string,
 ): Partial<StyleType> {
-  const {
-    color,
-    backgroundColor,
-    fontSize,
-    fontFamily,
-    fontStyle,
-    fontWeight,
-    whiteSpace,
-    textDecoration,
-  } = style;
+  const { color, backgroundColor, fontSize, fontFamily, fontStyle, fontWeight, whiteSpace, textDecoration } = style;
   const result: Partial<StyleType> = {};
   if (color) {
     result.fontColor = color;
@@ -126,17 +95,7 @@ function convertCSSStyleToCanvasStyle(
   if (fontWeight && ['700', '800', '900', 'bold'].includes(fontWeight)) {
     result.isBold = true;
   }
-  if (
-    whiteSpace &&
-    [
-      'normal',
-      'pre-wrap',
-      'pre-line',
-      'break-spaces',
-      'revert',
-      'unset',
-    ].includes(whiteSpace)
-  ) {
+  if (whiteSpace && ['normal', 'pre-wrap', 'pre-line', 'break-spaces', 'revert', 'unset'].includes(whiteSpace)) {
     result.isWrapText = true;
   }
   if (textDecoration === 'underline') {
@@ -148,16 +107,13 @@ function convertCSSStyleToCanvasStyle(
   return result;
 }
 
-export function parseStyle(
-  styleList: NodeListOf<HTMLStyleElement>,
-  selector: string,
-): Partial<StyleType> {
+export function parseStyle(styleList: NodeListOf<HTMLStyleElement>, selector: string): Partial<StyleType> {
   for (const item of styleList) {
     if (!item.sheet?.cssRules) {
       continue;
     }
     const cssText = item.textContent || '';
-    for (const rule of item.sheet?.cssRules) {
+    for (const rule of item.sheet.cssRules) {
       if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
         const startIndex = cssText.indexOf(selector);
         let endIndex = startIndex;
@@ -166,9 +122,7 @@ export function parseStyle(
         }
         let plainText = '';
         if (startIndex >= 0) {
-          plainText = cssText
-            .slice(startIndex + selector.length, endIndex)
-            .replace(/\s/g, '');
+          plainText = cssText.slice(startIndex + selector.length, endIndex).replace(/\s/g, '');
         }
         return convertCSSStyleToCanvasStyle(rule.style, plainText);
       }

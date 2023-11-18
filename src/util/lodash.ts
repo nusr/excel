@@ -9,7 +9,6 @@ export const debounce = (fn: (...params: any[]) => void) => {
 };
 
 export function get<T>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   obj: Record<string, any> | null | undefined,
   path: string,
   defaultValue?: T,
@@ -18,29 +17,24 @@ export function get<T>(
     obj == null
       ? undefined
       : path
-          .replace(/\[/g, '.')
-          .replace(/\]/g, '')
-          .split('.')
-          .reduce((res, key) => {
-            return res == null ? res : res[key];
-          }, obj);
+        .replace(/\[/g, '.')
+        .replace(/\]/g, '')
+        .split('.')
+        .reduce((res, key) => {
+          return res == null ? res : res[key];
+        }, obj);
   return (result === undefined ? defaultValue : result) as T;
 }
 
 export function isEmpty(value: unknown): boolean {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const temp: any = value || {};
-  return (
-    [Object, Array].includes(temp.constructor) && !Object.entries(temp).length
-  );
+  return [Object, Array].includes(temp.constructor) && !Object.entries(temp).length;
 }
 
 export function setWith<ValueType>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   obj: Record<string, any> | null | undefined,
   path: string,
   value: ValueType,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Record<string, any> | null | undefined {
   if (obj == null || typeof obj !== 'object') {
     return obj;
@@ -52,10 +46,8 @@ export function setWith<ValueType>(
     .reduce((res, key, index, arr) => {
       if (index === arr.length - 1) {
         res[key] = value;
-      } else {
-        if (res[key] == null) {
-          res[key] = {};
-        }
+      } else if (res[key] == null) {
+        res[key] = {};
       }
       return res[key];
     }, obj);
@@ -85,11 +77,11 @@ export function deepEqual(x: any, y: any) {
   if (x === y) {
     return true;
   }
-  if (typeof x == 'object' && x != null && typeof y == 'object' && y != null) {
-    if (Object.keys(x).length != Object.keys(y).length) return false;
+  if (typeof x === 'object' && x != null && typeof y === 'object' && y != null) {
+    if (Object.keys(x).length !== Object.keys(y).length) return false;
 
-    for (let key in x) {
-      if (y.hasOwnProperty(key)) {
+    for (const key in x) {
+      if (Object.prototype.hasOwnProperty.call(y, key)) {
         if (!deepEqual(x[key], y[key])) {
           return false;
         }
@@ -109,9 +101,7 @@ export function isPlainObject(value: any) {
 
   const prototype = Object.getPrototypeOf(value);
   return (
-    (prototype === null ||
-      prototype === Object.prototype ||
-      Object.getPrototypeOf(prototype) === null) &&
+    (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) &&
     !(Symbol.toStringTag in value) &&
     !(Symbol.iterator in value)
   );

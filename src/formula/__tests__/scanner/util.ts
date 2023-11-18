@@ -3,7 +3,7 @@ import { Scanner } from '../../scanner';
 import type { TokenType } from '../../../types';
 
 export type BlockType = [string, Token[]];
-export function itBlock(list: Array<BlockType>) {
+export function itBlock(list: BlockType[]) {
   for (const item of list) {
     const [formula, expected] = item;
     it(formula, () => {
