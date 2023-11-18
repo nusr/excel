@@ -23614,25 +23614,7 @@ var DEFAULT_FONT_SIZE = 11;
 var DEFAULT_FONT_COLOR = "#333333";
 var ERROR_FORMULA_COLOR = "#ff0000";
 var MUST_FONT_FAMILY = "sans-serif";
-var FONT_SIZE_LIST = [
-  6,
-  8,
-  9,
-  10,
-  DEFAULT_FONT_SIZE,
-  12,
-  14,
-  16,
-  18,
-  20,
-  22,
-  24,
-  26,
-  28,
-  36,
-  48,
-  72
-];
+var FONT_SIZE_LIST = [6, 8, 9, 10, DEFAULT_FONT_SIZE, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
 function makeFont(fontStyle = "normal", fontWeight = "normal", fontSize = 12, fontFamily = "") {
   const temp = `${fontStyle} ${fontWeight} ${fontSize}px `;
   if (!fontFamily) {
@@ -23640,11 +23622,7 @@ function makeFont(fontStyle = "normal", fontWeight = "normal", fontSize = 12, fo
   }
   return `${temp}${fontFamily},${MUST_FONT_FAMILY}`;
 }
-var DEFAULT_FONT_CONFIG = makeFont(
-  void 0,
-  "500",
-  npx(DEFAULT_FONT_SIZE)
-);
+var DEFAULT_FONT_CONFIG = makeFont(void 0, "500", npx(DEFAULT_FONT_SIZE));
 function convertCanvasStyleToString(style) {
   let result = "";
   if (style.fontColor) {
@@ -23660,13 +23638,13 @@ function convertCanvasStyleToString(style) {
     result += `font-family:${style.fontFamily};`;
   }
   if (style.isItalic) {
-    result += `font-style:italic;`;
+    result += "font-style:italic;";
   }
   if (style.isBold) {
-    result += `font-weight:700;`;
+    result += "font-weight:700;";
   }
   if (style.isWrapText) {
-    result += `white-space:normal;`;
+    result += "white-space:normal;";
   }
   if (style.underline) {
     result += "text-decoration:underline;";
@@ -23679,16 +23657,7 @@ function convertCanvasStyleToString(style) {
   return result;
 }
 function convertCSSStyleToCanvasStyle(style, selectorCSSText) {
-  const {
-    color: color2,
-    backgroundColor,
-    fontSize,
-    fontFamily,
-    fontStyle,
-    fontWeight,
-    whiteSpace,
-    textDecoration
-  } = style;
+  const { color: color2, backgroundColor, fontSize, fontFamily, fontStyle, fontWeight, whiteSpace, textDecoration } = style;
   const result = {};
   if (color2) {
     result.fontColor = color2;
@@ -23711,14 +23680,7 @@ function convertCSSStyleToCanvasStyle(style, selectorCSSText) {
   if (fontWeight && ["700", "800", "900", "bold"].includes(fontWeight)) {
     result.isBold = true;
   }
-  if (whiteSpace && [
-    "normal",
-    "pre-wrap",
-    "pre-line",
-    "break-spaces",
-    "revert",
-    "unset"
-  ].includes(whiteSpace)) {
+  if (whiteSpace && ["normal", "pre-wrap", "pre-line", "break-spaces", "revert", "unset"].includes(whiteSpace)) {
     result.isWrapText = true;
   }
   if (textDecoration === "underline") {
@@ -23735,7 +23697,7 @@ function parseStyle(styleList, selector) {
       continue;
     }
     const cssText = item.textContent || "";
-    for (const rule of item.sheet?.cssRules) {
+    for (const rule of item.sheet.cssRules) {
       if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
         const startIndex = cssText.indexOf(selector);
         let endIndex = startIndex;
@@ -24044,13 +24006,7 @@ var Range = class _Range {
     return this.row >= 0 && this.col >= 0 && this.colCount >= 0 && this.rowCount >= 0;
   }
   static makeRange(range) {
-    return new _Range(
-      range.row,
-      range.col,
-      range.rowCount,
-      range.colCount,
-      range.sheetId
-    );
+    return new _Range(range.row, range.col, range.rowCount, range.colCount, range.sheetId);
   }
 };
 
@@ -24110,13 +24066,7 @@ function parseCell(ref, convertSheetName = convertSheetNameToSheetId) {
   if (row === -1 || col === -1) {
     return null;
   }
-  const range = new Range(
-    row,
-    col,
-    rowCount,
-    colCount,
-    convertSheetName(sheetName)
-  );
+  const range = new Range(row, col, rowCount, colCount, convertSheetName(sheetName));
   return range;
 }
 function parseReference(text, convertSheetName = convertSheetNameToSheetId) {
@@ -24131,13 +24081,7 @@ function parseReference(text, convertSheetName = convertSheetNameToSheetId) {
   }
   const rowCount = endCell.row - startCell.row + 1;
   const colCount = endCell.col - startCell.col + 1;
-  return new Range(
-    startCell.row,
-    startCell.col,
-    rowCount,
-    colCount,
-    endCell.sheetId
-  );
+  return new Range(startCell.row, startCell.col, rowCount, colCount, endCell.sheetId);
 }
 function mergeRange(start, end) {
   if (start.sheetId !== end.sheetId) {
@@ -24159,11 +24103,7 @@ function convertToReference(range, referenceType = "relative", convertSheetIdToS
   let sheetName = convertSheetIdToSheetName(range.sheetId);
   sheetName = sheetName ? `${sheetName}!` : "";
   if (range.colCount > 1 && range.rowCount > 1) {
-    const end = convertCell(
-      range.row + range.rowCount,
-      range.col + range.colCount,
-      referenceType
-    );
+    const end = convertCell(range.row + range.rowCount, range.col + range.colCount, referenceType);
     result = `${result}:${end}`;
   }
   return sheetName + result;
@@ -24288,12 +24228,9 @@ function SupportFontFamilyFactory(body = document.body) {
   const serifFont = "serif";
   const container = document.createElement("span");
   container.innerHTML = "\u6D4B\u8BD5a11";
-  container.style.cssText = [
-    "position:absolute",
-    "width:auto",
-    "font-size:128px",
-    "left:-99999px"
-  ].join(" !important;");
+  container.style.cssText = ["position:absolute", "width:auto", "font-size:128px", "left:-99999px"].join(
+    " !important;"
+  );
   const getWidth = function(fontFamily) {
     container.style.fontFamily = fontFamily;
     body.appendChild(container);
@@ -24313,8 +24250,8 @@ var isSupportFontFamily = SupportFontFamilyFactory();
 function initFontFamilyList(fontList = FONT_FAMILY_LIST) {
   const cacheFont = localStorage.getItem(LOCAL_FONT_KEY);
   if (cacheFont) {
-    const fontList2 = JSON.parse(cacheFont);
-    return fontList2.map((v) => ({ value: v, label: v, disabled: false }));
+    const list2 = JSON.parse(cacheFont);
+    return list2.map((v) => ({ value: v, label: v, disabled: false }));
   }
   const list = fontList.map((v) => ({
     label: v,
@@ -24355,7 +24292,7 @@ function createFakeElement(value) {
   fakeElement.style.margin = "0";
   fakeElement.style.position = "absolute";
   fakeElement.style[isRTL ? "right" : "left"] = "-9999px";
-  let yPosition = window.pageYOffset || document.documentElement.scrollTop;
+  const yPosition = window.pageYOffset || document.documentElement.scrollTop;
   fakeElement.style.top = `${yPosition}px`;
   fakeElement.setAttribute("readonly", "");
   fakeElement.value = value;
@@ -24396,22 +24333,13 @@ var fakeCopyAction = (value, container, type) => {
   fakeElement.remove();
   return selectedText;
 };
-async function copy(textData) {
+async function copyOrCut(textData, type) {
   try {
     await writeDataToClipboard(textData);
     return textData[PLAIN_FORMAT];
   } catch (error) {
     console.error(error);
-    return fakeCopyAction(textData[PLAIN_FORMAT], document.body, "copy");
-  }
-}
-async function cut(textData) {
-  try {
-    await writeDataToClipboard(textData);
-    return textData[PLAIN_FORMAT];
-  } catch (error) {
-    console.error(error);
-    return fakeCopyAction(textData[PLAIN_FORMAT], document.body, "cut");
+    return fakeCopyAction(textData[PLAIN_FORMAT], document.body, type);
   }
 }
 async function paste() {
@@ -24555,10 +24483,8 @@ function setWith(obj, path, value) {
   path.replace(/\[/g, ".").replace(/\]/g, "").split(".").reduce((res, key, index, arr) => {
     if (index === arr.length - 1) {
       res[key] = value;
-    } else {
-      if (res[key] == null) {
-        res[key] = {};
-      }
+    } else if (res[key] == null) {
+      res[key] = {};
     }
     return res[key];
   }, obj);
@@ -24568,11 +24494,11 @@ function deepEqual(x, y) {
   if (x === y) {
     return true;
   }
-  if (typeof x == "object" && x != null && typeof y == "object" && y != null) {
-    if (Object.keys(x).length != Object.keys(y).length)
+  if (typeof x === "object" && x != null && typeof y === "object" && y != null) {
+    if (Object.keys(x).length !== Object.keys(y).length)
       return false;
-    for (let key in x) {
-      if (y.hasOwnProperty(key)) {
+    for (const key in x) {
+      if (Object.prototype.hasOwnProperty.call(y, key)) {
         if (!deepEqual(x[key], y[key])) {
           return false;
         }
@@ -24632,8 +24558,8 @@ function getHitInfo(event, controller2) {
   const y = pageY - canvasSize.top;
   let resultX = headerSize.width;
   let resultY = headerSize.height;
-  let row = scroll.row;
-  let col = scroll.col;
+  let { row } = scroll;
+  let { col } = scroll;
   while (resultX + controller2.getColWidth(col) <= x) {
     resultX += controller2.getColWidth(col);
     col++;
@@ -24678,6 +24604,7 @@ var BaseStore = class {
   // set plain object
   mergeState = (data) => {
     const newState = {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       ...this.state,
       ...data
@@ -24750,9 +24677,7 @@ function measureText(ctx, char) {
     const { actualBoundingBoxDescent, actualBoundingBoxAscent, width } = ctx.measureText(char);
     const result = {
       width: Math.ceil(width / dpr()),
-      height: Math.ceil(
-        (actualBoundingBoxDescent + actualBoundingBoxAscent) / dpr()
-      )
+      height: Math.ceil((actualBoundingBoxDescent + actualBoundingBoxAscent) / dpr())
     };
     measureTextMap.set(mapKey, result);
     temp = result;
@@ -24779,6 +24704,25 @@ function convertValueToString(value) {
     text = "";
   }
   return text;
+}
+function drawUnderlineData(ctx, isNum2, style, textHeight, x, y, left, textWidth) {
+  if (!style?.underline) {
+    return;
+  }
+  const t = Math.floor(y + textHeight / 2);
+  let pointList = [];
+  if (!isNum2) {
+    pointList = [
+      [x, t],
+      [x + textWidth, t]
+    ];
+  } else {
+    pointList = [
+      [left, t],
+      [left + textWidth, t]
+    ];
+  }
+  drawUnderline(ctx, pointList, style?.underline);
 }
 function renderCell(ctx, cellInfo) {
   const { style, value, left, top, width, height } = cellInfo;
@@ -24848,30 +24792,12 @@ function renderCell(ctx, cellInfo) {
           }
           textData.push(textItemList[k].char);
         }
-        result.fontSizeHeight = Math.max(
-          result.fontSizeHeight || 0,
-          textHeight
-        );
+        result.fontSizeHeight = Math.max(result.fontSizeHeight || 0, textHeight);
         y = y + Math.floor(textHeight / 2) + offset;
         const b = textData.join("");
         fillText(ctx, b, x, y);
-        if (style?.underline) {
-          const t2 = Math.floor(y + textHeight / 2);
-          let pointList = [];
-          if (!isNum2) {
-            pointList = [
-              [x, t2],
-              [x + width, t2]
-            ];
-          } else {
-            pointList = [
-              [left, t2],
-              [left + width, t2]
-            ];
-          }
-          drawUnderline(ctx, pointList, style?.underline);
-        }
-        y = y + Math.floor(textHeight / 2);
+        drawUnderlineData(ctx, isNum2, style, textHeight, x, y, left, width);
+        y += Math.floor(textHeight / 2);
       }
     }
     y += offset;
@@ -24892,22 +24818,7 @@ function renderCell(ctx, cellInfo) {
       }
     }
     fillText(ctx, textData.join(""), x, y);
-    if (style?.underline) {
-      const t2 = Math.floor(y + textHeight / 2);
-      let pointList = [];
-      if (!isNum2) {
-        pointList = [
-          [x, t2],
-          [x + textWidth, t2]
-        ];
-      } else {
-        pointList = [
-          [left, t2],
-          [left + textWidth, t2]
-        ];
-      }
-      drawUnderline(ctx, pointList, style?.underline);
-    }
+    drawUnderlineData(ctx, isNum2, style, textHeight, x, y, left, textWidth);
   }
   return result;
 }
@@ -24933,13 +24844,7 @@ function drawAntLine(ctx, x, y, width, height) {
   const oldDash = ctx.getLineDash();
   ctx.setLineDash([npx(8), npx(6)]);
   const offset = dpr() / 2;
-  strokeRect(
-    ctx,
-    x + offset,
-    y + offset,
-    width - offset * 2,
-    height - offset * 2
-  );
+  strokeRect(ctx, x + offset, y + offset, width - offset * 2, height - offset * 2);
   ctx.setLineDash(oldDash);
 }
 function drawUnderline(ctx, pointList, underline) {
@@ -24956,8 +24861,8 @@ function drawUnderline(ctx, pointList, underline) {
   drawLines(ctx, list);
 }
 function resizeCanvas(canvas, width, height) {
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
   const realWidth = npx(width);
   const realHeight = npx(height);
   canvas.width = realWidth;
@@ -25011,13 +24916,7 @@ var MainCanvas = class {
     canvasLog("render canvas ant line");
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
-    drawAntLine(
-      this.ctx,
-      position.left,
-      position.top,
-      position.width,
-      position.height
-    );
+    drawAntLine(this.ctx, position.left, position.top, position.width, position.height);
   }
   renderSelection() {
     const { controller: controller2 } = this;
@@ -25037,17 +24936,8 @@ var MainCanvas = class {
   renderActiveCell() {
     const { controller: controller2 } = this;
     const cellData2 = controller2.getCell(controller2.getActiveCell());
-    const activeCell = controller2.computeCellPosition(
-      cellData2.row,
-      cellData2.col
-    );
-    clearRect(
-      this.ctx,
-      activeCell.left,
-      activeCell.top,
-      activeCell.width,
-      activeCell.height
-    );
+    const activeCell = controller2.computeCellPosition(cellData2.row, cellData2.col);
+    clearRect(this.ctx, activeCell.left, activeCell.top, activeCell.width, activeCell.height);
     renderCell(this.ctx, { ...cellData2, ...activeCell });
   }
   renderSelectRange() {
@@ -25073,10 +24963,7 @@ var MainCanvas = class {
       [activeCell.left, headerSize.height],
       [activeCell.left + width, headerSize.height]
     ];
-    list.push(
-      [headerSize.width, activeCell.top],
-      [headerSize.width, activeCell.top + height]
-    );
+    list.push([headerSize.width, activeCell.top], [headerSize.width, activeCell.top + height]);
     drawLines(this.ctx, list);
     if (check) {
       this.renderActiveCell();
@@ -25098,13 +24985,7 @@ var MainCanvas = class {
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
     this.renderActiveCell();
-    strokeRect(
-      this.ctx,
-      headerSize.width,
-      headerSize.height,
-      width - headerSize.width,
-      height - headerSize.height
-    );
+    strokeRect(this.ctx, headerSize.width, headerSize.height, width - headerSize.width, height - headerSize.height);
     return {
       left: headerSize.width,
       top: headerSize.height,
@@ -25135,13 +25016,7 @@ var MainCanvas = class {
       [headerSize.width, height - headerSize.height]
     ];
     drawLines(this.ctx, list);
-    strokeRect(
-      this.ctx,
-      activeCell.left,
-      activeCell.top,
-      activeCell.width,
-      height
-    );
+    strokeRect(this.ctx, activeCell.left, activeCell.top, activeCell.width, height);
     return {
       left: activeCell.left,
       top: activeCell.top,
@@ -25158,13 +25033,7 @@ var MainCanvas = class {
     const activeCell = controller2.computeCellPosition(range.row, range.col);
     fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
     fillRect(this.ctx, 0, activeCell.top, headerSize.width, activeCell.height);
-    fillRect(
-      this.ctx,
-      activeCell.left + activeCell.width,
-      activeCell.top,
-      width - activeCell.width,
-      activeCell.height
-    );
+    fillRect(this.ctx, activeCell.left + activeCell.width, activeCell.top, width - activeCell.width, activeCell.height);
     this.ctx.strokeStyle = theme.primaryColor;
     this.ctx.lineWidth = dpr();
     const list = [
@@ -25172,13 +25041,7 @@ var MainCanvas = class {
       [width - headerSize.width, headerSize.height]
     ];
     drawLines(this.ctx, list);
-    strokeRect(
-      this.ctx,
-      activeCell.left,
-      activeCell.top,
-      width,
-      activeCell.height
-    );
+    strokeRect(this.ctx, activeCell.left, activeCell.top, width, activeCell.height);
     return {
       left: activeCell.left,
       top: activeCell.top,
@@ -25189,6 +25052,30 @@ var MainCanvas = class {
 };
 
 // src/canvas/shortcut.ts
+function handleTabClick(controller2) {
+  checkActiveElement(controller2);
+  const activeCell = controller2.getActiveCell();
+  controller2.setActiveCell({
+    row: activeCell.row,
+    col: activeCell.col + 1,
+    rowCount: 1,
+    colCount: 1,
+    sheetId: ""
+  });
+  recalculateScroll(controller2);
+}
+function handleEnterClick(controller2) {
+  checkActiveElement(controller2);
+  const activeCell = controller2.getActiveCell();
+  controller2.setActiveCell({
+    row: activeCell.row + 1,
+    col: activeCell.col,
+    rowCount: 1,
+    colCount: 1,
+    sheetId: ""
+  });
+  recalculateScroll(controller2);
+}
 function computeScrollRowAndCol(controller2, left, top) {
   const oldScroll = controller2.getScroll();
   let { row, col } = oldScroll;
@@ -25242,7 +25129,11 @@ function computeScrollPosition(controller2, left, top) {
 }
 function scrollBar(controller2, scrollX, scrollY) {
   const oldScroll = controller2.getScroll();
-  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } = computeScrollPosition(controller2, oldScroll.left, oldScroll.top);
+  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } = computeScrollPosition(
+    controller2,
+    oldScroll.left,
+    oldScroll.top
+  );
   let top = oldScroll.top + Math.ceil(scrollY);
   if (top < 0) {
     top = 0;
@@ -25269,16 +25160,17 @@ function scrollBar(controller2, scrollX, scrollY) {
 }
 function recalculateScroll(controller2) {
   const activeCell = controller2.getActiveCell();
-  const position = controller2.computeCellPosition(
-    activeCell.row,
-    activeCell.col
-  );
+  const position = controller2.computeCellPosition(activeCell.row, activeCell.col);
   const domRect = controller2.getDomRect();
   const oldScroll = controller2.getScroll();
   const sheetInfo = controller2.getSheetInfo(controller2.getCurrentSheetId());
   const headerSize = controller2.getHeaderSize();
   const buff = 5;
-  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } = computeScrollPosition(controller2, oldScroll.left, oldScroll.top);
+  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } = computeScrollPosition(
+    controller2,
+    oldScroll.left,
+    oldScroll.top
+  );
   if (position.left + position.width + buff > domRect.width) {
     if (oldScroll.col <= sheetInfo.colCount - 2) {
       const col = oldScroll.col + 1;
@@ -25339,11 +25231,7 @@ function checkActiveElement(controller2) {
   }
   const isInputFocus = document.activeElement === inputDom;
   if (isInputFocus) {
-    controller2.setCellValues(
-      [[inputDom.value]],
-      [],
-      [controller2.getActiveCell()]
-    );
+    controller2.setCellValues([[inputDom.value]], [], [controller2.getActiveCell()]);
     inputDom.value = "";
     inputDom.blur();
     coreStore.mergeState({
@@ -25357,32 +25245,12 @@ var keyboardEventList = [
   {
     key: "Enter",
     modifierKey: [],
-    handler: (controller2) => {
-      checkActiveElement(controller2);
-      const activeCell = controller2.getActiveCell();
-      controller2.setActiveCell({
-        row: activeCell.row + 1,
-        col: activeCell.col,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: ""
-      });
-    }
+    handler: handleEnterClick
   },
   {
     key: "Tab",
     modifierKey: [],
-    handler: (controller2) => {
-      checkActiveElement(controller2);
-      const activeCell = controller2.getActiveCell();
-      controller2.setActiveCell({
-        row: activeCell.row,
-        col: activeCell.col + 1,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: ""
-      });
-    }
+    handler: handleTabClick
   },
   {
     key: "ArrowDown",
@@ -25423,18 +25291,7 @@ var keyboardEventList = [
   {
     key: "ArrowDown",
     modifierKey: [],
-    handler: (controller2) => {
-      checkActiveElement(controller2);
-      const activeCell = controller2.getActiveCell();
-      controller2.setActiveCell({
-        row: activeCell.row + 1,
-        col: activeCell.col,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: ""
-      });
-      recalculateScroll(controller2);
-    }
+    handler: handleEnterClick
   },
   {
     key: "ArrowUp",
@@ -25455,18 +25312,7 @@ var keyboardEventList = [
   {
     key: "ArrowRight",
     modifierKey: [],
-    handler: (controller2) => {
-      checkActiveElement(controller2);
-      const activeCell = controller2.getActiveCell();
-      controller2.setActiveCell({
-        row: activeCell.row,
-        col: activeCell.col + 1,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: ""
-      });
-      recalculateScroll(controller2);
-    }
+    handler: handleTabClick
   },
   {
     key: "ArrowLeft",
@@ -25557,7 +25403,7 @@ function registerGlobalEvent(controller2, resizeWindow) {
     });
     controller2.getMainDom().input?.focus();
   }
-  const handleWheel = debounce(function(event) {
+  const handleWheel = debounce((event) => {
     if (event.target !== controller2.getMainDom().canvas) {
       return;
     }
@@ -25633,10 +25479,6 @@ var Content = class {
     const { width, height } = this.controller.getDomRect();
     resizeCanvas(this.canvas, width, height);
   }
-  clear() {
-    const { width, height } = this.controller.getDomRect();
-    this.ctx.clearRect(0, 0, npx(width), npx(height));
-  }
   render({ changeSet }) {
     if (changeSet.size === 0) {
       return;
@@ -25656,6 +25498,10 @@ var Content = class {
     this.renderColsHeader(contentWidth);
     this.renderTriangle();
     this.renderContent();
+  }
+  clear() {
+    const { width, height } = this.controller.getDomRect();
+    this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
   renderContent() {
     const { controller: controller2, ctx } = this;
@@ -25689,17 +25535,15 @@ var Content = class {
     const endCol = c;
     ctx.save();
     y = headerSize.height;
-    for (let r2 = row; r2 < endRow; r2++) {
+    for (let rowIndex = row; rowIndex < endRow; rowIndex++) {
       x = headerSize.width;
-      for (let c2 = col; c2 < endCol; c2++) {
-        const cellInfo = controller2.getCell(
-          new Range(r2, c2, 1, 1, currentSheetId)
-        );
+      for (let colIndex = col; colIndex < endCol; colIndex++) {
+        const cellInfo = controller2.getCell(new Range(rowIndex, colIndex, 1, 1, currentSheetId));
         if (isEmpty(cellInfo.value) && isEmpty(cellInfo.style)) {
-          x += controller2.getColWidth(c2);
+          x += controller2.getColWidth(colIndex);
           continue;
         }
-        const cellSize = controller2.getCellSize(r2, c2);
+        const cellSize = controller2.getCellSize(rowIndex, colIndex);
         const { wrapHeight = 0, fontSizeHeight = 0 } = renderCell(ctx, {
           ...cellInfo,
           ...cellSize,
@@ -25708,11 +25552,11 @@ var Content = class {
         });
         const t = Math.max(wrapHeight, fontSizeHeight);
         if (t > cellSize.height) {
-          controller2.setRowHeight(r2, t);
+          controller2.setRowHeight(rowIndex, t);
         }
-        x += controller2.getColWidth(c2);
+        x += controller2.getColWidth(colIndex);
       }
-      y += controller2.getRowHeight(r2);
+      y += controller2.getRowHeight(rowIndex);
     }
     ctx.restore();
   }
@@ -25735,9 +25579,7 @@ var Content = class {
     const { controller: controller2 } = this;
     const headerSize = controller2.getHeaderSize();
     const { row: rowIndex, col: colIndex } = controller2.getScroll();
-    const { rowCount, colCount } = this.controller.getSheetInfo(
-      this.controller.getCurrentSheetId()
-    );
+    const { rowCount, colCount } = this.controller.getSheetInfo(this.controller.getCurrentSheetId());
     const lineWidth = thinLineWidth();
     this.ctx.save();
     this.ctx.fillStyle = theme.white;
@@ -25803,9 +25645,7 @@ var Content = class {
     const { controller: controller2 } = this;
     const { row: rowIndex } = controller2.getScroll();
     const headerSize = controller2.getHeaderSize();
-    const { rowCount } = controller2.getSheetInfo(
-      controller2.getCurrentSheetId()
-    );
+    const { rowCount } = controller2.getSheetInfo(controller2.getCurrentSheetId());
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
     fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
@@ -25837,9 +25677,7 @@ var Content = class {
     const { controller: controller2 } = this;
     const { col: colIndex } = controller2.getScroll();
     const headerSize = controller2.getHeaderSize();
-    const { colCount } = controller2.getSheetInfo(
-      controller2.getCurrentSheetId()
-    );
+    const { colCount } = controller2.getSheetInfo(controller2.getCurrentSheetId());
     const pointList = [];
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
@@ -25855,11 +25693,7 @@ var Content = class {
       }
       pointList.push([temp, 0], [temp, headerSize.height]);
       if (colWidth > 0) {
-        this.fillColText(
-          intToColumnName(i),
-          temp + colWidth / 2,
-          headerSize.height
-        );
+        this.fillColText(intToColumnName(i), temp + colWidth / 2, headerSize.height);
       }
       x += colWidth;
       if (x > width) {
@@ -25876,7 +25710,11 @@ var Content = class {
 // src/containers/canvas/ScrollBar.tsx
 function scrollBar2(controller2, scrollX, scrollY) {
   const oldScroll = controller2.getScroll();
-  const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } = computeScrollPosition(controller2, oldScroll.left, oldScroll.top);
+  const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } = computeScrollPosition(
+    controller2,
+    oldScroll.left,
+    oldScroll.top
+  );
   let scrollTop = oldScroll.scrollTop + Math.ceil(scrollY);
   let scrollLeft = oldScroll.scrollLeft + Math.ceil(scrollX);
   if (scrollTop < 0) {
@@ -25909,10 +25747,7 @@ var ScrollBar = ({ controller: controller2 }) => {
     scrollStatus: 0 /* NONE */
   });
   const headerSize = controller2.getHeaderSize();
-  const { scrollLeft, scrollTop } = (0, import_react.useSyncExternalStore)(
-    scrollStore.subscribe,
-    scrollStore.getSnapshot
-  );
+  const { scrollLeft, scrollTop } = (0, import_react.useSyncExternalStore)(scrollStore.subscribe, scrollStore.getSnapshot);
   function handleDrag(event) {
     event.stopPropagation();
     if (state.current.scrollStatus === 1 /* VERTICAL */) {
@@ -26065,7 +25900,8 @@ var Github = () => {
       href: "https://github.com/nusr/excel",
       "aria-label": "View source on Github",
       target: "_blank",
-      title: "github link"
+      title: "github link",
+      rel: "noreferrer"
     },
     /* @__PURE__ */ import_react3.default.createElement("svg", { className: Github_default.githubWrapper, viewBox: "0 0 250 250", "aria-hidden": true }, /* @__PURE__ */ import_react3.default.createElement("path", { d: "M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" }), /* @__PURE__ */ import_react3.default.createElement(
       "path",
@@ -26131,19 +25967,8 @@ var BaseIcon_default = {
 
 // src/containers/components/BaseIcon/BaseIcon.tsx
 var import_react4 = __toESM(require_react());
-var BaseIcon = ({
-  className = "",
-  paths = []
-}) => {
-  return /* @__PURE__ */ import_react4.default.createElement(
-    "svg",
-    {
-      className: classnames(BaseIcon_default.baseIcon, className),
-      viewBox: "0 0 1137 1024",
-      "aria-hidden": true
-    },
-    paths.map((item, i) => /* @__PURE__ */ import_react4.default.createElement("path", { d: item.d, key: i, fillOpacity: item["fill-opacity"] }))
-  );
+var BaseIcon = ({ className = "", paths = [] }) => {
+  return /* @__PURE__ */ import_react4.default.createElement("svg", { className: classnames(BaseIcon_default.baseIcon, className), viewBox: "0 0 1137 1024", "aria-hidden": true }, paths.map((item, i) => /* @__PURE__ */ import_react4.default.createElement("path", { d: item.d, key: i, fillOpacity: item["fill-opacity"] })));
 };
 BaseIcon.displayName = "BaseIcon";
 
@@ -26164,10 +25989,7 @@ var FillColorIcon = () => {
 FillColorIcon.displayName = "FillColorIcon";
 
 // src/containers/components/BaseIcon/index.tsx
-var Icon = ({
-  name,
-  className = ""
-}) => {
+var Icon = ({ name, className = "" }) => {
   const paths = icon_default[name].map((item) => ({ d: item }));
   return BaseIcon({ className, paths });
 };
@@ -26185,14 +26007,7 @@ var Select_default = {
 
 // src/containers/components/Select/index.tsx
 var Select = (props) => {
-  const {
-    data,
-    value: activeValue,
-    style = {},
-    onChange,
-    getItemStyle = () => ({}),
-    title
-  } = props;
+  const { data, value: activeValue, style = {}, onChange, getItemStyle = () => ({}), title } = props;
   const handleChange = (event) => {
     onChange(event.currentTarget.value);
   };
@@ -26214,17 +26029,7 @@ var Select = (props) => {
       const cls = classnames(Select_default.selectItem, {
         [Select_default["disabled"]]: disabled
       });
-      return /* @__PURE__ */ import_react5.default.createElement(
-        "option",
-        {
-          key: value,
-          value,
-          disabled: !!disabled,
-          className: cls,
-          style: itemStyle
-        },
-        label
-      );
+      return /* @__PURE__ */ import_react5.default.createElement("option", { key: value, value, disabled: !!disabled, className: cls, style: itemStyle }, label);
     })
   );
 };
@@ -26289,15 +26094,7 @@ var COLOR_LIST = [
 var ColorPicker = (props) => {
   const { color: color2, style = {}, onChange, children } = props;
   const [visible, setVisible] = (0, import_react6.useState)(false);
-  return /* @__PURE__ */ import_react6.default.createElement("div", { className: ColorPicker_default["color-picker"], style }, /* @__PURE__ */ import_react6.default.createElement(
-    "div",
-    {
-      className: ColorPicker_default["color-picker-trigger"],
-      style: { color: color2 },
-      onClick: () => setVisible(true)
-    },
-    children
-  ), /* @__PURE__ */ import_react6.default.createElement(
+  return /* @__PURE__ */ import_react6.default.createElement("div", { className: ColorPicker_default["color-picker"], style }, /* @__PURE__ */ import_react6.default.createElement("div", { className: ColorPicker_default["color-picker-trigger"], style: { color: color2 }, onClick: () => setVisible(true) }, children), /* @__PURE__ */ import_react6.default.createElement(
     "div",
     {
       className: classnames(ColorPicker_default["color-picker-wrapper"], {
@@ -26394,17 +26191,17 @@ var ContextMenu = (0, import_react9.memo)((props) => {
   const { style, position } = (0, import_react9.useMemo)(() => {
     const headerSize = controller2.getHeaderSize();
     const rect = controller2.getMainDom().canvas.getBoundingClientRect();
-    let position2 = 3 /* CONTENT */;
+    let clickPosition = 3 /* CONTENT */;
     let menuHeight = ITEM_HEIGHT * 3;
     const y = top - rect.top;
     const x = left - rect.left;
     if (y < headerSize.height && x < headerSize.width) {
-      position2 = 2 /* TRIANGLE */;
+      clickPosition = 2 /* TRIANGLE */;
     } else if (y < headerSize.height) {
-      position2 = 0 /* COLUMN_HEADER */;
+      clickPosition = 0 /* COLUMN_HEADER */;
       menuHeight = ITEM_HEIGHT * 6;
     } else if (x < headerSize.width) {
-      position2 = 1 /* ROW_HEADER */;
+      clickPosition = 1 /* ROW_HEADER */;
       menuHeight = ITEM_HEIGHT * 6;
     }
     let realTop = top;
@@ -26422,114 +26219,100 @@ var ContextMenu = (0, import_react9.memo)((props) => {
         top: realTop,
         left: realLeft
       },
-      position: position2
+      position: clickPosition
     };
   }, []);
-  return /* @__PURE__ */ import_react9.default.createElement(
-    "div",
+  return /* @__PURE__ */ import_react9.default.createElement("div", { className: canvas_default["context-menu"], "data-testid": "context-menu", style, ref }, /* @__PURE__ */ import_react9.default.createElement(
+    Button,
     {
-      className: canvas_default["context-menu"],
-      "data-testid": "context-menu",
-      style,
-      ref
+      onClick: () => {
+        hideContextMenu();
+        controller2.copy();
+      }
     },
-    /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.copy();
-        }
-      },
-      "Copy"
-    ),
-    /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.cut();
-        }
-      },
-      "Cut"
-    ),
-    /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.paste();
-        }
-      },
-      "Paste"
-    ),
-    position === 2 /* TRIANGLE */ && /* @__PURE__ */ import_react9.default.createElement(import_react9.Fragment, null, /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.deleteAll(controller2.getCurrentSheetId());
-        }
-      },
-      "Delete all"
-    )),
-    position === 0 /* COLUMN_HEADER */ && /* @__PURE__ */ import_react9.default.createElement(import_react9.Fragment, null, /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.addCol(controller2.getActiveCell().col, 1);
-        }
-      },
-      "Insert a column"
-    ), /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.deleteCol(controller2.getActiveCell().col, 1);
-        }
-      },
-      "Delete a column"
-    ), /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.hideCol(controller2.getActiveCell().col, 1);
-        }
-      },
-      "Hide a column"
-    )),
-    position === 1 /* ROW_HEADER */ && /* @__PURE__ */ import_react9.default.createElement(import_react9.Fragment, null, /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.addRow(controller2.getActiveCell().row, 1);
-        }
-      },
-      "Insert a row"
-    ), /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.deleteRow(controller2.getActiveCell().row, 1);
-        }
-      },
-      "Delete a row"
-    ), /* @__PURE__ */ import_react9.default.createElement(
-      Button,
-      {
-        onClick: () => {
-          hideContextMenu();
-          controller2.hideRow(controller2.getActiveCell().row, 1);
-        }
-      },
-      "Hide a row"
-    ))
-  );
+    "Copy"
+  ), /* @__PURE__ */ import_react9.default.createElement(
+    Button,
+    {
+      onClick: () => {
+        hideContextMenu();
+        controller2.cut();
+      }
+    },
+    "Cut"
+  ), /* @__PURE__ */ import_react9.default.createElement(
+    Button,
+    {
+      onClick: () => {
+        hideContextMenu();
+        controller2.paste();
+      }
+    },
+    "Paste"
+  ), position === 2 /* TRIANGLE */ && /* @__PURE__ */ import_react9.default.createElement(import_react9.Fragment, null, /* @__PURE__ */ import_react9.default.createElement(
+    Button,
+    {
+      onClick: () => {
+        hideContextMenu();
+        controller2.deleteAll(controller2.getCurrentSheetId());
+      }
+    },
+    "Delete all"
+  )), position === 0 /* COLUMN_HEADER */ && /* @__PURE__ */ import_react9.default.createElement(import_react9.Fragment, null, /* @__PURE__ */ import_react9.default.createElement(
+    Button,
+    {
+      onClick: () => {
+        hideContextMenu();
+        controller2.addCol(controller2.getActiveCell().col, 1);
+      }
+    },
+    "Insert a column"
+  ), /* @__PURE__ */ import_react9.default.createElement(
+    Button,
+    {
+      onClick: () => {
+        hideContextMenu();
+        controller2.deleteCol(controller2.getActiveCell().col, 1);
+      }
+    },
+    "Delete a column"
+  ), /* @__PURE__ */ import_react9.default.createElement(
+    Button,
+    {
+      onClick: () => {
+        hideContextMenu();
+        controller2.hideCol(controller2.getActiveCell().col, 1);
+      }
+    },
+    "Hide a column"
+  )), position === 1 /* ROW_HEADER */ && /* @__PURE__ */ import_react9.default.createElement(import_react9.Fragment, null, /* @__PURE__ */ import_react9.default.createElement(
+    Button,
+    {
+      onClick: () => {
+        hideContextMenu();
+        controller2.addRow(controller2.getActiveCell().row, 1);
+      }
+    },
+    "Insert a row"
+  ), /* @__PURE__ */ import_react9.default.createElement(
+    Button,
+    {
+      onClick: () => {
+        hideContextMenu();
+        controller2.deleteRow(controller2.getActiveCell().row, 1);
+      }
+    },
+    "Delete a row"
+  ), /* @__PURE__ */ import_react9.default.createElement(
+    Button,
+    {
+      onClick: () => {
+        hideContextMenu();
+        controller2.hideRow(controller2.getActiveCell().row, 1);
+      }
+    },
+    "Hide a row"
+  )));
 });
 ContextMenu.displayName = "ContextMenuContainer";
 
@@ -26545,10 +26328,7 @@ var handleStateChange = (changeSet, controller2) => {
     const { top } = controller2.getDomRect();
     const activeCell = controller2.getActiveCell();
     const cell = controller2.getCell(activeCell);
-    const cellPosition = controller2.computeCellPosition(
-      activeCell.row,
-      activeCell.col
-    );
+    const cellPosition = controller2.computeCellPosition(activeCell.row, activeCell.col);
     cellPosition.top = top + cellPosition.top;
     if (!cell.style) {
       cell.style = {};
@@ -26610,10 +26390,7 @@ var handleStateChange = (changeSet, controller2) => {
   }
 };
 function initCanvas(controller2) {
-  const mainCanvas = new MainCanvas(
-    controller2,
-    new Content(controller2, createCanvas())
-  );
+  const mainCanvas = new MainCanvas(controller2, new Content(controller2, createCanvas()));
   const render = (changeSet2) => {
     mainCanvas.render({ changeSet: changeSet2 });
     mainCanvas.render({
@@ -26626,21 +26403,14 @@ function initCanvas(controller2) {
   };
   const removeEvent = registerGlobalEvent(controller2, resize);
   controller2.setHooks({
-    copy,
-    cut,
+    copyOrCut,
     paste,
     modelChange: (changeSet2) => {
       handleStateChange(changeSet2, controller2);
       render(changeSet2);
     }
   });
-  const changeSet = /* @__PURE__ */ new Set([
-    "currentSheetId",
-    "scroll",
-    "content",
-    "setActiveCell",
-    "sheetList"
-  ]);
+  const changeSet = /* @__PURE__ */ new Set(["currentSheetId", "scroll", "content", "setActiveCell", "sheetList"]);
   handleStateChange(changeSet, controller2);
   resize(changeSet);
   return removeEvent;
@@ -26754,7 +26524,7 @@ var CanvasContainer = (props) => {
       const inputDom = controller2.getMainDom().input;
       const isInputFocus = document.activeElement === inputDom;
       if (isInputFocus) {
-        const value = inputDom.value;
+        const { value } = inputDom;
         controller2.setCellValues([[value]], [], [controller2.getActiveCell()]);
         coreStore.mergeState({ isCellEditing: false });
         inputDom.value = "";
@@ -26774,25 +26544,17 @@ var CanvasContainer = (props) => {
     }
     lastTimeStamp.current = timeStamp;
   };
-  return /* @__PURE__ */ import_react10.default.createElement(import_react10.Fragment, null, /* @__PURE__ */ import_react10.default.createElement(
-    "div",
+  return /* @__PURE__ */ import_react10.default.createElement(import_react10.Fragment, null, /* @__PURE__ */ import_react10.default.createElement("div", { className: canvas_default["canvas-container"], "data-testid": "canvas-container" }, /* @__PURE__ */ import_react10.default.createElement(
+    "canvas",
     {
-      className: canvas_default["canvas-container"],
-      "data-testid": "canvas-container"
-    },
-    /* @__PURE__ */ import_react10.default.createElement(
-      "canvas",
-      {
-        className: canvas_default["canvas-content"],
-        onContextMenu: handleContextMenu,
-        onMouseMove: handleMouseMove,
-        onMouseDown: handleMouseDown,
-        ref,
-        "data-testid": "canvas-main"
-      }
-    ),
-    /* @__PURE__ */ import_react10.default.createElement(ScrollBar, { controller: controller2 })
-  ), menuPosition.top >= 0 && menuPosition.left >= 0 && /* @__PURE__ */ import_react10.default.createElement(
+      className: canvas_default["canvas-content"],
+      onContextMenu: handleContextMenu,
+      onMouseMove: handleMouseMove,
+      onMouseDown: handleMouseDown,
+      ref,
+      "data-testid": "canvas-main"
+    }
+  ), /* @__PURE__ */ import_react10.default.createElement(ScrollBar, { controller: controller2 })), menuPosition.top >= 0 && menuPosition.left >= 0 && /* @__PURE__ */ import_react10.default.createElement(
     ContextMenu,
     {
       controller: controller2,
@@ -26821,13 +26583,12 @@ var FormulaBar_default = {
 };
 
 // src/containers/FormulaBar/FormulaEditor.tsx
-function getEditorStyle(data) {
-  const { style } = data;
+function getEditorStyle(style) {
   const cellPosition = {
-    top: data.top,
-    left: data.left,
-    width: data.width,
-    height: data.height
+    top: style.top,
+    left: style.left,
+    width: style.width,
+    height: style.height
   };
   if (isEmpty(style)) {
     return cellPosition;
@@ -26845,11 +26606,7 @@ function getEditorStyle(data) {
     font
   };
 }
-var FormulaEditor = ({
-  controller: controller2,
-  initValue,
-  style
-}) => {
+var FormulaEditor = ({ controller: controller2, initValue, style }) => {
   const ref = (0, import_react11.useRef)(null);
   (0, import_react11.useEffect)(() => {
     if (!ref.current) {
@@ -26857,31 +26614,14 @@ var FormulaEditor = ({
     }
     controller2.setMainDom({ input: ref.current });
   }, []);
-  return /* @__PURE__ */ import_react11.default.createElement(
-    "input",
-    {
-      className: FormulaBar_default["base-editor"],
-      ref,
-      defaultValue: initValue,
-      type: "text",
-      style
-    }
-  );
+  return /* @__PURE__ */ import_react11.default.createElement("input", { className: FormulaBar_default["base-editor"], ref, defaultValue: initValue, type: "text", style });
 };
 FormulaEditor.displayName = "FormulaEditor";
 
 // src/containers/FormulaBar/index.tsx
-var FormulaBarContainer = ({
-  controller: controller2
-}) => {
-  const activeCell = (0, import_react12.useSyncExternalStore)(
-    activeCellStore.subscribe,
-    activeCellStore.getSnapshot
-  );
-  const { isCellEditing } = (0, import_react12.useSyncExternalStore)(
-    coreStore.subscribe,
-    coreStore.getSnapshot
-  );
+var FormulaBarContainer = ({ controller: controller2 }) => {
+  const activeCell = (0, import_react12.useSyncExternalStore)(activeCellStore.subscribe, activeCellStore.getSnapshot);
+  const { isCellEditing } = (0, import_react12.useSyncExternalStore)(coreStore.subscribe, coreStore.getSnapshot);
   const name = (0, import_react12.useMemo)(() => {
     return activeCell.defineName || `${intToColumnName(activeCell.col)}${activeCell.row + 1}`;
   }, [activeCell]);
@@ -26890,21 +26630,7 @@ var FormulaBarContainer = ({
   const style = (0, import_react12.useMemo)(() => {
     return getEditorStyle(activeCell);
   }, [activeCell]);
-  return /* @__PURE__ */ import_react12.default.createElement("div", { className: FormulaBar_default["formula-bar-wrapper"], "data-testid": "formula-bar" }, /* @__PURE__ */ import_react12.default.createElement(
-    "div",
-    {
-      className: FormulaBar_default["formula-bar-name"],
-      "data-testid": "formula-bar-name"
-    },
-    name
-  ), /* @__PURE__ */ import_react12.default.createElement("div", { className: FormulaBar_default["formula-bar-editor-wrapper"] }, isCellEditing ? /* @__PURE__ */ import_react12.default.createElement(
-    FormulaEditor,
-    {
-      controller: controller2,
-      initValue: editorValue,
-      style
-    }
-  ) : null, /* @__PURE__ */ import_react12.default.createElement(
+  return /* @__PURE__ */ import_react12.default.createElement("div", { className: FormulaBar_default["formula-bar-wrapper"], "data-testid": "formula-bar" }, /* @__PURE__ */ import_react12.default.createElement("div", { className: FormulaBar_default["formula-bar-name"], "data-testid": "formula-bar-name" }, name), /* @__PURE__ */ import_react12.default.createElement("div", { className: FormulaBar_default["formula-bar-editor-wrapper"] }, isCellEditing ? /* @__PURE__ */ import_react12.default.createElement(FormulaEditor, { controller: controller2, initValue: editorValue, style }) : null, /* @__PURE__ */ import_react12.default.createElement(
     "div",
     {
       className: classnames(FormulaBar_default["formula-bar-value"], {
@@ -26949,11 +26675,11 @@ function xmlToJson(xml) {
   if (xml.childNodes.length > 0) {
     for (const item of xml.childNodes) {
       const n = item.nodeName;
-      if (typeof obj[n] == "undefined") {
+      if (typeof obj[n] === "undefined") {
         obj[n] = xmlToJson(item);
       } else {
-        if (typeof obj[n].push == "undefined") {
-          var old = obj[n];
+        if (typeof obj[n].push === "undefined") {
+          const old = obj[n];
           obj[n] = [];
           obj[n].push(old);
         }
@@ -27045,7 +26771,7 @@ function getCellStyle(xml, styleId, themeData) {
       result.fontSize = parseInt(font.sz.val, 10);
       result.isBold = Boolean(font.b);
       result.isItalic = Boolean(font.i);
-      result.underline = Boolean(font.u) ? 1 /* SINGLE */ : 0 /* NONE */;
+      result.underline = font.u ? 1 /* SINGLE */ : 0 /* NONE */;
       result.fontFamily = font.name.val;
       const color2 = convertColor(themeData, font.color);
       if (color2) {
@@ -27082,11 +26808,7 @@ function getCellStyle(xml, styleId, themeData) {
 }
 function convertXMLDataToModel(xmlData) {
   const workbook = xmlData[WORKBOOK_PATH];
-  const themeData = get(
-    xmlData[THEME_PATH],
-    "a:theme.a:themeElements.a:clrScheme",
-    {}
-  );
+  const themeData = get(xmlData[THEME_PATH], "a:theme.a:themeElements.a:clrScheme", {});
   const result = {
     workbook: [],
     worksheets: {},
@@ -27097,11 +26819,7 @@ function convertXMLDataToModel(xmlData) {
   };
   const sheetPathMap = {};
   const sheetMap = {};
-  for (const item of get(
-    xmlData[WORKBOOK_RELATION_PATH],
-    "Relationships.Relationship",
-    []
-  )) {
+  for (const item of get(xmlData[WORKBOOK_RELATION_PATH], "Relationships.Relationship", [])) {
     if (!item) {
       continue;
     }
@@ -27118,11 +26836,7 @@ function convertXMLDataToModel(xmlData) {
     const sheetPath = `${COMMON_PREFIX}/${sheetMap[item["r:id"]]}`;
     sheetPathMap[item.sheetId] = sheetPath;
     const range = parseReference(
-      get(
-        xmlData[sheetPath],
-        "worksheet.sheetViews.sheetView.selection.sqref",
-        ""
-      )
+      get(xmlData[sheetPath], "worksheet.sheetViews.sheetView.selection.sqref", "")
     );
     range.sheetId = item.sheetId;
     result.workbook.push({
@@ -27136,18 +26850,11 @@ function convertXMLDataToModel(xmlData) {
   }
   for (const item of result.workbook) {
     const sheetPath = sheetPathMap[item.sheetId];
-    let sheetData = get(
-      xmlData[sheetPath],
-      "worksheet.sheetData.row"
-    );
+    let sheetData = get(xmlData[sheetPath], "worksheet.sheetData.row");
     if (!Array.isArray(sheetData)) {
       sheetData = [sheetData];
     }
-    let customWidth = get(
-      xmlData[sheetPath],
-      "worksheet.cols.col",
-      []
-    );
+    let customWidth = get(xmlData[sheetPath], "worksheet.cols.col", []);
     customWidth = Array.isArray(customWidth) ? customWidth : [customWidth];
     const defaultWOrH = get(xmlData[sheetPath], "worksheet.sheetFormatPr", {
       defaultColWidth: "",
@@ -27175,8 +26882,8 @@ function convertXMLDataToModel(xmlData) {
     }
     result.worksheets[item.sheetId] = {};
     result.customHeight[item.sheetId] = {};
-    let colCount = item.colCount;
-    let rowCount = item.rowCount;
+    let { colCount } = item;
+    let { rowCount } = item;
     for (const row of sheetData) {
       if (!row) {
         continue;
@@ -27221,11 +26928,7 @@ function convertXMLDataToModel(xmlData) {
     item.rowCount = Math.max(item.rowCount, rowCount);
     item.colCount = Math.max(item.colCount, colCount);
   }
-  let definedNames = get(
-    workbook,
-    "workbook.definedNames.definedName",
-    []
-  );
+  let definedNames = get(workbook, "workbook.definedNames.definedName", []);
   definedNames = Array.isArray(definedNames) ? definedNames : [definedNames];
   const convertSheetName = (sheetName) => {
     return result.workbook.find((v) => v.name === sheetName)?.sheetId || "";
@@ -27247,9 +26950,7 @@ async function importXLSX(file) {
     if (files[key].dir) {
       continue;
     }
-    const check = [STYLE_PATH, WORKBOOK_PATH, WORKBOOK_RELATION_PATH, THEME_PATH].includes(
-      key
-    ) || key.startsWith(SHEET_PATH_PREFIX);
+    const check = [STYLE_PATH, WORKBOOK_PATH, WORKBOOK_RELATION_PATH, THEME_PATH].includes(key) || key.startsWith(SHEET_PATH_PREFIX);
     if (!check) {
       continue;
     }
@@ -27291,7 +26992,7 @@ var colorMap = {
 var hexStr = "(?:#([a-f0-9]{3,8}))";
 var numberStr = "\\s*([.\\d%]+)\\s*";
 var sopStr = "(?:,\\s*([.\\d]+)\\s*)?";
-var listStr = "\\(" + [numberStr, numberStr, numberStr] + sopStr + "\\)";
+var listStr = `\\(${[numberStr, numberStr, numberStr]}${sopStr}\\)`;
 var rgbStr = "(?:rgb)a?";
 var hslStr = "(?:hsl)a?";
 var hexReg = RegExp(hexStr, "i");
@@ -27299,13 +27000,13 @@ var rgbReg = RegExp(rgbStr + listStr, "i");
 var hslReg = RegExp(hslStr + listStr, "i");
 function padZero(a) {
   if (a.length === 1) {
-    return "0" + a;
+    return `0${a}`;
   }
   return a;
 }
 function RGBAToHex(r, g, b, a) {
   const list = [r, g, b, a * 255];
-  return "#" + list.map((item) => padZero(Math.round(item).toString(16))).join("");
+  return `#${list.map((item) => padZero(Math.round(item).toString(16))).join("")}`;
 }
 function RGBtoHEX(r, g, b, a) {
   let alpha = 1;
@@ -27348,7 +27049,9 @@ function HSLAtoHEX(x, y, z, a) {
   let g;
   let b;
   if (s === 0) {
-    r = g = b = l;
+    r = l;
+    g = l;
+    b = l;
   } else {
     const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
     const p = 2 * l - q;
@@ -27366,7 +27069,7 @@ function padHex(color2) {
     return color2.toUpperCase();
   }
   if (color2.length === 7) {
-    const t = color2 + "ff";
+    const t = `${color2}ff`;
     return t.toUpperCase();
   }
   if (color2.length === 5) {
@@ -27416,14 +27119,15 @@ function processRow(row) {
     }
     let result = innerValue.replace(/"/g, '""');
     if (result.search(/("|,|\n)/g) >= 0) {
-      result = '"' + result + '"';
+      result = `"${result}"`;
     }
     if (j > 0) {
       finalVal += ",";
     }
     finalVal += result;
   }
-  return finalVal + "\n";
+  return `${finalVal}
+`;
 }
 function exportToCsv(fileName, controller2) {
   const sheetData = controller2.toJSON().worksheets[controller2.getCurrentSheetId()];
@@ -27497,7 +27201,7 @@ function getSheetData(activeCell, sheetData, isActiveSheet, customWidthMap) {
 }
 function convertColorToRGB(val) {
   const t = convertColorToHex(val);
-  return "FF" + t.slice(1, -2);
+  return `FF${t.slice(1, -2)}`;
 }
 function convertStyle(styles, style) {
   if (!style || isEmpty(style)) {
@@ -27515,7 +27219,7 @@ function convertStyle(styles, style) {
   };
   if (style.fillColor) {
     result.fillId = String(styles.fills.length);
-    extraList.push(`applyFill="1"`);
+    extraList.push('applyFill="1"');
     styles.fills.push(`<fill>
     <patternFill patternType="solid">
       <fgColor rgb="${convertColorToRGB(style.fillColor)}"/>
@@ -27544,27 +27248,21 @@ function convertStyle(styles, style) {
   }
   if (fontList.length > 0) {
     result.fontId = String(styles.fonts.length);
-    extraList.push(`applyFont="1"`);
-    styles.fonts.push(
-      `<font>${fontList.join(
-        ""
-      )}<charset val="0"/><scheme val="minor"/></font>`
-    );
+    extraList.push('applyFont="1"');
+    styles.fonts.push(`<font>${fontList.join("")}<charset val="0"/><scheme val="minor"/></font>`);
   }
   const item = NUMBER_FORMAT_LIST.find((v) => v.id === style.numberFormat);
   if (item) {
-    extraList.push(`applyNumberFormat="1"`);
+    extraList.push('applyNumberFormat="1"');
     result.numFmtId = String(style.numberFormat);
-    styles.numFmts.push(
-      `<numFmt numFmtId="${style.numberFormat}" formatCode="${item.formatCode}"/>`
-    );
+    styles.numFmts.push(`<numFmt numFmtId="${style.numberFormat}" formatCode="${item.formatCode}"/>`);
   }
   let alignment = '<alignment vertical="center"/>';
   if (style.isWrapText || style.horizontalAlign !== void 0 || style.verticalAlign !== void 0) {
     const list = [];
-    extraList.push(`applyAlignment="1"`);
+    extraList.push('applyAlignment="1"');
     if (style.isWrapText) {
-      list.push(`wrapText="1"`);
+      list.push('wrapText="1"');
     }
     if (style.horizontalAlign !== void 0) {
       const alignMap = {
@@ -27586,9 +27284,7 @@ function convertStyle(styles, style) {
     }
     alignment = `<alignment ${list.join(" ")}/>`;
   }
-  const t = `<xf numFmtId="${result.numFmtId}" fontId="${result.fontId}" fillId="${result.fillId}" borderId="0" xfId="0" ${extraList.join(
-    " "
-  )}>${alignment}</xf>`;
+  const t = `<xf numFmtId="${result.numFmtId}" fontId="${result.fontId}" fillId="${result.fillId}" borderId="0" xfId="0" ${extraList.join(" ")}>${alignment}</xf>`;
   styles.cellXfs.push(t);
 }
 function generateStyleFile(styles) {
@@ -28196,9 +27892,7 @@ async function exportToXLSX(fileName, controller2) {
   </HeadingPairs>
   <TitlesOfParts>
     <vt:vector size="${sheetList.length}" baseType="lpstr">
-      ${sheetList.map(
-      (item) => `<vt:lpstr>${sheetRelMap[item.sheetId].target}</vt:lpstr>`
-    ).join("")}
+      ${sheetList.map((item) => `<vt:lpstr>${sheetRelMap[item.sheetId].target}</vt:lpstr>`).join("")}
     </vt:vector>
   </TitlesOfParts>
 </Properties>`
@@ -28263,11 +27957,7 @@ async function exportToXLSX(fileName, controller2) {
   const defineNames = [];
   for (const name of Object.keys(modelJson.definedNames)) {
     const range = modelJson.definedNames[name];
-    const text = convertToReference(
-      range,
-      "absolute",
-      convertSheetIdToSheetName
-    );
+    const text = convertToReference(range, "absolute", convertSheetIdToSheetName);
     defineNames.push(`<definedName name="${name}">${text}</definedName>`);
   }
   const workbook = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -28553,10 +28243,7 @@ async function exportToXLSX(fileName, controller2) {
     const isActiveSheet = item.sheetId === currentSheetId;
     const customWidth = modelJson.customWidth[item.sheetId];
     if (!cellData2) {
-      worksheets.file(
-        t.target,
-        getSheetData(activeCell, "", isActiveSheet, customWidth)
-      );
+      worksheets.file(t.target, getSheetData(activeCell, "", isActiveSheet, customWidth));
       continue;
     }
     const rowList = [];
@@ -28594,10 +28281,7 @@ async function exportToXLSX(fileName, controller2) {
       }
       rowList.push(`<row r="${realR + 1}" ${ht}>${colList.join("")}</row>`);
     }
-    worksheets.file(
-      t.target,
-      getSheetData(activeCell, rowList.join(""), isActiveSheet, customWidth)
-    );
+    worksheets.file(t.target, getSheetData(activeCell, rowList.join(""), isActiveSheet, customWidth));
   }
   xl.file("styles.xml", generateStyleFile(styles));
   const blob = await zip.generateAsync({ type: "blob" });
@@ -28618,16 +28302,7 @@ var Import = ({ controller: controller2 }) => {
     ref.current.value = "";
     ref.current.blur();
   };
-  return /* @__PURE__ */ import_react13.default.createElement(import_react13.Fragment, null, /* @__PURE__ */ import_react13.default.createElement(
-    "input",
-    {
-      type: "file",
-      ref,
-      style: { display: "none" },
-      onChange: handleChange,
-      accept: ".xlsx"
-    }
-  ), /* @__PURE__ */ import_react13.default.createElement(
+  return /* @__PURE__ */ import_react13.default.createElement(import_react13.Fragment, null, /* @__PURE__ */ import_react13.default.createElement("input", { type: "file", ref, style: { display: "none" }, onChange: handleChange, accept: ".xlsx" }), /* @__PURE__ */ import_react13.default.createElement(
     Button,
     {
       testId: "toolbar-import-xlsx",
@@ -28646,51 +28321,30 @@ var Export = ({ controller: controller2 }) => {
   const handleExportCSV = () => {
     exportToCsv(`excel_${Date.now()}.csv`, controller2);
   };
-  return /* @__PURE__ */ import_react13.default.createElement(import_react13.Fragment, null, /* @__PURE__ */ import_react13.default.createElement(
-    Button,
-    {
-      testId: "toolbar-export-xlsx",
-      onClick: handleExportXLSX,
-      style: buttonStyle
-    },
-    "Export XLSX"
-  ), /* @__PURE__ */ import_react13.default.createElement(
-    Button,
-    {
-      testId: "toolbar-export-csv",
-      onClick: handleExportCSV,
-      style: buttonStyle
-    },
-    "Export CSV"
-  ));
+  return /* @__PURE__ */ import_react13.default.createElement(import_react13.Fragment, null, /* @__PURE__ */ import_react13.default.createElement(Button, { testId: "toolbar-export-xlsx", onClick: handleExportXLSX, style: buttonStyle }, "Export XLSX"), /* @__PURE__ */ import_react13.default.createElement(Button, { testId: "toolbar-export-csv", onClick: handleExportCSV, style: buttonStyle }, "Export CSV"));
 };
 
 // src/containers/ToolBar/index.tsx
 var underlineList = [
   {
     value: 0 /* NONE */,
-    label: "none"
+    label: "none",
+    disabled: false
   },
   {
     value: 1 /* SINGLE */,
-    label: "single underline"
+    label: "single underline",
+    disabled: false
   },
   {
     value: 2 /* DOUBLE */,
-    label: "double underline"
+    label: "double underline",
+    disabled: false
   }
 ];
-var ToolbarContainer = ({
-  controller: controller2
-}) => {
-  const activeCell = (0, import_react14.useSyncExternalStore)(
-    activeCellStore.subscribe,
-    activeCellStore.getSnapshot
-  );
-  const fontFamilyList = (0, import_react14.useSyncExternalStore)(
-    fontFamilyStore.subscribe,
-    fontFamilyStore.getSnapshot
-  );
+var ToolbarContainer = ({ controller: controller2 }) => {
+  const activeCell = (0, import_react14.useSyncExternalStore)(activeCellStore.subscribe, activeCellStore.getSnapshot);
+  const fontFamilyList = (0, import_react14.useSyncExternalStore)(fontFamilyStore.subscribe, fontFamilyStore.getSnapshot);
   const getItemStyle = (value) => {
     return {
       fontFamily: String(value),
@@ -28700,28 +28354,15 @@ var ToolbarContainer = ({
   const setCellStyle = (value) => {
     const cellData2 = controller2.getCell(controller2.getActiveCell());
     const styleData = cellData2.style || {};
-    controller2.setCellStyle(Object.assign(styleData, value), [
-      controller2.getActiveCell()
-    ]);
+    controller2.setCellStyle(Object.assign(styleData, value), [controller2.getActiveCell()]);
   };
-  const {
-    isBold,
-    isItalic,
-    fontSize,
-    fontColor = "",
-    fillColor = "",
-    isWrapText,
-    underline,
-    fontFamily
-  } = activeCell;
+  const { isBold, isItalic, fontSize, fontColor = "", fillColor = "", isWrapText, underline, fontFamily } = activeCell;
   const handleFontFamilyChange = (value) => {
     const t = String(value);
     if (t === QUERY_ALL_LOCAL_FONT) {
       window.queryLocalFonts().then((list) => {
         let fontList = list.map((v) => v.fullName);
-        fontList = Array.from(new Set(fontList)).filter(
-          (v) => isSupportFontFamily(v)
-        );
+        fontList = Array.from(new Set(fontList)).filter((v) => isSupportFontFamily(v));
         fontList.sort((a, b) => a.localeCompare(b));
         localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(fontList));
         const l = fontList.map((v) => ({
@@ -28735,23 +28376,7 @@ var ToolbarContainer = ({
       setCellStyle({ fontFamily: String(value) });
     }
   };
-  return /* @__PURE__ */ import_react14.default.createElement("div", { className: ToolBar_default["toolbar-wrapper"], "data-testid": "toolbar" }, /* @__PURE__ */ import_react14.default.createElement(
-    Button,
-    {
-      disabled: !controller2.canUndo,
-      onClick: () => controller2.undo(),
-      testId: "toolbar-undo"
-    },
-    /* @__PURE__ */ import_react14.default.createElement(Icon, { name: "undo" })
-  ), /* @__PURE__ */ import_react14.default.createElement(
-    Button,
-    {
-      disabled: !controller2.canRedo,
-      onClick: () => controller2.redo(),
-      testId: "toolbar-redo"
-    },
-    /* @__PURE__ */ import_react14.default.createElement(Icon, { name: "redo" })
-  ), /* @__PURE__ */ import_react14.default.createElement(Import, { controller: controller2 }), /* @__PURE__ */ import_react14.default.createElement(Export, { controller: controller2 }), /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: () => controller2.copy(), testId: "toolbar-copy" }, "Copy"), /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: () => controller2.cut(), testId: "toolbar-cut" }, "Cut"), /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: () => controller2.paste(), testId: "toolbar-paste" }, "Paste"), /* @__PURE__ */ import_react14.default.createElement(
+  return /* @__PURE__ */ import_react14.default.createElement("div", { className: ToolBar_default["toolbar-wrapper"], "data-testid": "toolbar" }, /* @__PURE__ */ import_react14.default.createElement(Button, { disabled: !controller2.canUndo, onClick: () => controller2.undo(), testId: "toolbar-undo" }, /* @__PURE__ */ import_react14.default.createElement(Icon, { name: "undo" })), /* @__PURE__ */ import_react14.default.createElement(Button, { disabled: !controller2.canRedo, onClick: () => controller2.redo(), testId: "toolbar-redo" }, /* @__PURE__ */ import_react14.default.createElement(Icon, { name: "redo" })), /* @__PURE__ */ import_react14.default.createElement(Import, { controller: controller2 }), /* @__PURE__ */ import_react14.default.createElement(Export, { controller: controller2 }), /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: () => controller2.copy(), testId: "toolbar-copy" }, "Copy"), /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: () => controller2.cut(), testId: "toolbar-cut" }, "Cut"), /* @__PURE__ */ import_react14.default.createElement(Button, { onClick: () => controller2.paste(), testId: "toolbar-paste" }, "Paste"), /* @__PURE__ */ import_react14.default.createElement(
     Select,
     {
       data: fontFamilyList,
@@ -28762,23 +28387,7 @@ var ToolbarContainer = ({
       getItemStyle,
       onChange: handleFontFamilyChange
     }
-  ), /* @__PURE__ */ import_react14.default.createElement(
-    Select,
-    {
-      data: FONT_SIZE_LIST,
-      value: fontSize,
-      onChange: (value) => setCellStyle({ fontSize: Number(value) })
-    }
-  ), /* @__PURE__ */ import_react14.default.createElement(
-    Button,
-    {
-      active: isBold,
-      onClick: () => setCellStyle({ isBold: !isBold }),
-      testId: "toolbar-bold",
-      title: "Bold"
-    },
-    /* @__PURE__ */ import_react14.default.createElement(Icon, { name: "bold" })
-  ), /* @__PURE__ */ import_react14.default.createElement(
+  ), /* @__PURE__ */ import_react14.default.createElement(Select, { data: FONT_SIZE_LIST, value: fontSize, onChange: (value) => setCellStyle({ fontSize: Number(value) }) }), /* @__PURE__ */ import_react14.default.createElement(Button, { active: isBold, onClick: () => setCellStyle({ isBold: !isBold }), testId: "toolbar-bold", title: "Bold" }, /* @__PURE__ */ import_react14.default.createElement(Icon, { name: "bold" })), /* @__PURE__ */ import_react14.default.createElement(
     Button,
     {
       active: isItalic,
@@ -28796,23 +28405,7 @@ var ToolbarContainer = ({
       title: "Underline",
       onChange: (value) => setCellStyle({ underline: Number(value) })
     }
-  ), /* @__PURE__ */ import_react14.default.createElement(
-    ColorPicker,
-    {
-      key: "fill-color",
-      color: fillColor,
-      onChange: (value) => setCellStyle({ fillColor: value })
-    },
-    /* @__PURE__ */ import_react14.default.createElement(FillColorIcon, null)
-  ), /* @__PURE__ */ import_react14.default.createElement(
-    ColorPicker,
-    {
-      key: "font-color",
-      color: fontColor,
-      onChange: (value) => setCellStyle({ fontColor: value })
-    },
-    /* @__PURE__ */ import_react14.default.createElement(Icon, { name: "fontColor" })
-  ), /* @__PURE__ */ import_react14.default.createElement(
+  ), /* @__PURE__ */ import_react14.default.createElement(ColorPicker, { key: "fill-color", color: fillColor, onChange: (value) => setCellStyle({ fillColor: value }) }, /* @__PURE__ */ import_react14.default.createElement(FillColorIcon, null)), /* @__PURE__ */ import_react14.default.createElement(ColorPicker, { key: "font-color", color: fontColor, onChange: (value) => setCellStyle({ fontColor: value }) }, /* @__PURE__ */ import_react14.default.createElement(Icon, { name: "fontColor" })), /* @__PURE__ */ import_react14.default.createElement(
     Button,
     {
       active: isWrapText,
@@ -28862,7 +28455,7 @@ var SheetBarContextMenu = ({
     hideMenu();
   });
   const hideSheetList = (0, import_react15.useMemo)(() => {
-    return sheetList.filter((v) => v.disabled).map((item) => ({ value: String(item.value), label: item.label }));
+    return sheetList.filter((v) => v.disabled).map((item) => ({ value: String(item.value), label: item.label, disabled: false }));
   }, [sheetList]);
   const [value, setValue] = (0, import_react15.useState)(String(hideSheetList[0]?.value) || "");
   const hideDialog = () => {
@@ -28944,7 +28537,7 @@ var SheetBarContextMenu = ({
         Select,
         {
           data: hideSheetList,
-          onChange: (value2) => setValue(String(value2)),
+          onChange: (v) => setValue(String(v)),
           style: { width: 300 },
           value
         }
@@ -28956,15 +28549,9 @@ SheetBarContextMenu.displayName = "SheetBarContextMenu";
 
 // src/containers/SheetBar/index.tsx
 var SheetBarContainer = ({ controller: controller2 }) => {
-  const sheetList = (0, import_react16.useSyncExternalStore)(
-    sheetListStore.subscribe,
-    sheetListStore.getSnapshot
-  );
+  const sheetList = (0, import_react16.useSyncExternalStore)(sheetListStore.subscribe, sheetListStore.getSnapshot);
   const realSheetList = sheetList.filter((v) => !v.disabled);
-  const { currentSheetId } = (0, import_react16.useSyncExternalStore)(
-    coreStore.subscribe,
-    coreStore.getSnapshot
-  );
+  const { currentSheetId } = (0, import_react16.useSyncExternalStore)(coreStore.subscribe, coreStore.getSnapshot);
   const [menuPosition, setMenuPosition] = (0, import_react16.useState)(DEFAULT_POSITION);
   const [editing, setEditing] = (0, import_react16.useState)(false);
   const setSheetName = (sheetName) => {
@@ -28999,14 +28586,7 @@ var SheetBarContainer = ({ controller: controller2 }) => {
           controller2.setCurrentSheetId(String(item.value));
         }
       },
-      showInput ? /* @__PURE__ */ import_react16.default.createElement(
-        "input",
-        {
-          className: SheetBar_default["sheet-bar-input"],
-          defaultValue: item.label,
-          onKeyDown: handleKeyDown
-        }
-      ) : /* @__PURE__ */ import_react16.default.createElement("span", { className: SheetBar_default["sheet-bar-item-text"] }, item.label)
+      showInput ? /* @__PURE__ */ import_react16.default.createElement("input", { className: SheetBar_default["sheet-bar-input"], defaultValue: item.label, onKeyDown: handleKeyDown }) : /* @__PURE__ */ import_react16.default.createElement("span", { className: SheetBar_default["sheet-bar-item-text"] }, item.label)
     );
   })), /* @__PURE__ */ import_react16.default.createElement("div", { className: SheetBar_default["sheet-bar-add"] }, /* @__PURE__ */ import_react16.default.createElement(
     Button,
@@ -29067,10 +28647,7 @@ var Controller = class {
   hooks = {
     modelChange() {
     },
-    async cut() {
-      return "";
-    },
-    async copy() {
+    async copyOrCut() {
       return "";
     },
     async paste() {
@@ -29255,8 +28832,8 @@ var Controller = class {
   computeViewSize() {
     const headerSize = this.getHeaderSize();
     const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
-    let width = headerSize.width;
-    let height = headerSize.height;
+    let { width } = headerSize;
+    let { height } = headerSize;
     for (let i = 0; i < sheetInfo.colCount; i++) {
       width += this.getColWidth(i);
     }
@@ -29374,7 +28951,7 @@ var Controller = class {
     }
     const rowCount = list.length;
     let colCount = 0;
-    for (let item of list) {
+    for (const item of list) {
       if (item.length > colCount) {
         colCount = item.length;
       }
@@ -29407,7 +28984,7 @@ var Controller = class {
       for (const td of tdList) {
         let itemStyle = {};
         if (td.className) {
-          itemStyle = parseStyle(styleList, "." + td.className);
+          itemStyle = parseStyle(styleList, `.${td.className}`);
         } else {
           itemStyle = parseStyle(styleList, td.tagName.toLowerCase());
         }
@@ -29461,11 +29038,9 @@ var Controller = class {
       result.push(temp);
       html.push(t);
     }
-    const htmlData = generateHTML(
-      classList.join("\n"),
-      html.map((item) => `<tr>${item.join("\n")}</tr>`).join("\n")
-    );
-    const text = result.map((item) => item.join("	")).join("\r\n") + "\r\n";
+    const htmlData = generateHTML(classList.join("\n"), html.map((item) => `<tr>${item.join("\n")}</tr>`).join("\n"));
+    const text = `${result.map((item) => item.join("	")).join("\r\n")}\r
+`;
     return {
       [PLAIN_FORMAT]: text,
       [HTML_FORMAT]: htmlData
@@ -29502,10 +29077,13 @@ var Controller = class {
     if (this.isCut) {
       this.copyRanges = [];
       this.isCut = false;
-      this.hooks.copy({
-        [PLAIN_FORMAT]: "",
-        [HTML_FORMAT]: ""
-      });
+      this.hooks.copyOrCut(
+        {
+          [PLAIN_FORMAT]: "",
+          [HTML_FORMAT]: ""
+        },
+        "copy"
+      );
     }
     this.setActiveCell(activeCell);
   }
@@ -29519,7 +29097,7 @@ var Controller = class {
         event.clipboardData?.setData(key, data[key]);
       }
     } else {
-      this.hooks.copy(data);
+      this.hooks.copyOrCut(data, "copy");
     }
     this.changeSet.add("antLine");
     this.emitChange();
@@ -29533,7 +29111,7 @@ var Controller = class {
     return this.copyRanges.slice();
   }
   getDomRect() {
-    const canvas = this.getMainDom().canvas;
+    const { canvas } = this.getMainDom();
     if (!canvas) {
       return {
         top: 0,
@@ -29846,26 +29424,34 @@ var Scanner = class {
       this.next();
     }
   }
-  number() {
-    this.allDigit();
-    if (this.match("E")) {
+  matchScientificCounting() {
+    if (this.match("E") || this.match("e")) {
       if (this.match("+") || this.match("-")) {
         this.allDigit();
         this.addToken(18 /* NUMBER */);
-        return;
+        return true;
+      }
+      if (this.isDigit(this.peek())) {
+        this.allDigit();
+        this.addToken(18 /* NUMBER */);
+        return true;
       }
       throw new CustomError("#VALUE!");
+    }
+    return false;
+  }
+  number() {
+    this.allDigit();
+    const check1 = this.matchScientificCounting();
+    if (check1) {
+      return;
     }
     if (this.match(".")) {
       this.allDigit();
     }
-    if (this.match("E")) {
-      if (this.match("+") || this.match("-")) {
-        this.allDigit();
-        this.addToken(18 /* NUMBER */);
-        return;
-      }
-      throw new CustomError("#VALUE!");
+    const check2 = this.matchScientificCounting();
+    if (check2) {
+      return;
     }
     this.addToken(18 /* NUMBER */);
   }
@@ -30062,7 +29648,7 @@ var CellExpression = class {
   }
   toString() {
     if (this.sheetName) {
-      return this.sheetName.toString() + "!" + this.value.toString();
+      return `${this.sheetName.toString()}!${this.value.toString()}`;
     } else {
       return this.value.toString();
     }
@@ -30124,16 +29710,7 @@ var TokenExpression = class {
 };
 
 // src/formula/parser.ts
-var errorSet = /* @__PURE__ */ new Set([
-  "#ERROR!",
-  "#DIV/0!",
-  "#NULL!",
-  "#NUM!",
-  "#REF!",
-  "#VALUE!",
-  "#N/A",
-  "#NAME?"
-]);
+var errorSet = /* @__PURE__ */ new Set(["#ERROR!", "#DIV/0!", "#NULL!", "#NUM!", "#REF!", "#VALUE!", "#N/A", "#NAME?"]);
 var Parser = class {
   tokens;
   current = 0;
@@ -30229,7 +29806,7 @@ var Parser = class {
   }
   call() {
     let expr = this.primary();
-    while (true) {
+    while (1) {
       if (this.match(21 /* LEFT_BRACKET */)) {
         expr = this.finishCall(expr);
       } else {
@@ -30257,12 +29834,7 @@ var Parser = class {
       this.expect(22 /* RIGHT_BRACKET */);
       return new GroupExpression(value);
     }
-    if (this.match(
-      18 /* NUMBER */,
-      17 /* STRING */,
-      19 /* TRUE */,
-      20 /* FALSE */
-    )) {
+    if (this.match(18 /* NUMBER */, 17 /* STRING */, 19 /* TRUE */, 20 /* FALSE */)) {
       return new LiteralExpression(this.previous());
     }
     if (this.match(16 /* IDENTIFIER */)) {
@@ -30276,7 +29848,7 @@ var Parser = class {
     throw new CustomError("#ERROR!");
   }
   match(...types) {
-    const type = this.peek().type;
+    const { type } = this.peek();
     if (types.includes(type)) {
       this.next();
       return true;
@@ -30334,21 +29906,6 @@ var Interpreter = class {
       throw new CustomError("#ERROR!");
     }
   }
-  getRangeCellValue(value) {
-    if (value instanceof Range) {
-      if (value.colCount === value.rowCount && value.colCount === 1) {
-        return this.cellDataMap.get(value.row, value.col, value.sheetId);
-      } else {
-        throw new CustomError("#REF!");
-      }
-    }
-    return value;
-  }
-  checkNumber(value) {
-    if (typeof value !== "number") {
-      throw new CustomError("#VALUE!");
-    }
-  }
   visitBinaryExpression(data) {
     let left = this.evaluate(data.left);
     let right = this.evaluate(data.right);
@@ -30356,27 +29913,27 @@ var Interpreter = class {
     right = this.getRangeCellValue(right);
     switch (data.operator.type) {
       case 3 /* MINUS */:
-        this.checkNumber(left);
-        this.checkNumber(right);
+        assert2(typeof left === "number");
+        assert2(typeof right === "number");
         return left - right;
       case 2 /* PLUS */:
-        this.checkNumber(left);
-        this.checkNumber(right);
+        assert2(typeof left === "number");
+        assert2(typeof right === "number");
         return left + right;
       case 5 /* SLASH */:
-        this.checkNumber(left);
-        this.checkNumber(right);
+        assert2(typeof left === "number");
+        assert2(typeof right === "number");
         if (right === 0) {
           throw new CustomError("#DIV/0!");
         }
         return left / right;
       case 4 /* STAR */:
-        this.checkNumber(left);
-        this.checkNumber(right);
+        assert2(typeof left === "number");
+        assert2(typeof right === "number");
         return left * right;
       case 6 /* EXPONENT */:
-        this.checkNumber(left);
-        this.checkNumber(right);
+        assert2(typeof left === "number");
+        assert2(typeof right === "number");
         return Math.pow(left, right);
       case 0 /* EQUAL */:
         return left === right;
@@ -30420,9 +29977,7 @@ var Interpreter = class {
   visitCellExpression(data) {
     let sheetId = "";
     if (data.sheetName) {
-      sheetId = this.cellDataMap.convertSheetNameToSheetId(
-        data.sheetName.value
-      );
+      sheetId = this.cellDataMap.convertSheetNameToSheetId(data.sheetName.value);
       if (!sheetId) {
         throw new CustomError("#NAME?");
       }
@@ -30456,17 +30011,12 @@ var Interpreter = class {
         throw new CustomError("#ERROR!");
     }
   }
-  addCellExpression(value, type, sheetName) {
-    value.value = value.value.toUpperCase();
-    const result = new CellExpression(value, type, sheetName);
-    return this.visitCellExpression(result);
-  }
   visitTokenExpression(expr) {
     const { value, type } = expr.value;
     const defineName = value.toLowerCase();
     if (this.definedNamesMap.has(defineName)) {
-      const value2 = this.definedNamesMap.get(defineName);
-      return this.cellDataMap.get(value2.row, value2.col, value2.sheetId);
+      const temp = this.definedNamesMap.get(defineName);
+      return this.cellDataMap.get(temp.row, temp.col, temp.sheetId);
     }
     const funcName = value.toUpperCase();
     if (this.functionMap[funcName]) {
@@ -30496,28 +30046,6 @@ var Interpreter = class {
         throw new CustomError("#VALUE!");
     }
   }
-  convertToCellExpression(expr) {
-    if (expr instanceof CellExpression) {
-      return expr;
-    }
-    if (expr instanceof TokenExpression) {
-      return new CellExpression(
-        new Token(16 /* IDENTIFIER */, expr.value.value.toUpperCase()),
-        "relative",
-        null
-      );
-    }
-    if (expr instanceof LiteralExpression) {
-      if (expr.value.type === 18 /* NUMBER */ && /^\d+$/.test(expr.value.value)) {
-        return new CellExpression(
-          new Token(16 /* IDENTIFIER */, expr.value.value),
-          "relative",
-          null
-        );
-      }
-    }
-    return null;
-  }
   visitCellRangeExpression(expr) {
     switch (expr.operator.type) {
       case 10 /* COLON */: {
@@ -30534,7 +30062,6 @@ var Interpreter = class {
         } else {
           throw new CustomError("#NAME?");
         }
-        break;
       }
       case 26 /* EXCLAMATION */: {
         const right = this.convertToCellExpression(expr.right);
@@ -30542,9 +30069,7 @@ var Interpreter = class {
           throw new CustomError("#REF!");
         }
         if (expr.left instanceof TokenExpression) {
-          return this.visitCellExpression(
-            new CellExpression(right.value, right.type, expr.left.value)
-          );
+          return this.visitCellExpression(new CellExpression(right.value, right.type, expr.left.value));
         }
         throw new CustomError("#NAME?");
       }
@@ -30559,7 +30084,7 @@ var Interpreter = class {
     const value = this.evaluate(expr.left);
     switch (expr.operator.type) {
       case 13 /* PERCENT */:
-        this.checkNumber(value);
+        assert2(typeof value === "number");
         return value * 0.01;
       default:
         throw new CustomError("#VALUE!");
@@ -30567,6 +30092,35 @@ var Interpreter = class {
   }
   evaluate(expr) {
     return expr.accept(this);
+  }
+  convertToCellExpression(expr) {
+    if (expr instanceof CellExpression) {
+      return expr;
+    }
+    if (expr instanceof TokenExpression) {
+      return new CellExpression(new Token(16 /* IDENTIFIER */, expr.value.value.toUpperCase()), "relative", null);
+    }
+    if (expr instanceof LiteralExpression) {
+      if (expr.value.type === 18 /* NUMBER */ && /^\d+$/.test(expr.value.value)) {
+        return new CellExpression(new Token(16 /* IDENTIFIER */, expr.value.value), "relative", null);
+      }
+    }
+    return null;
+  }
+  addCellExpression(value, type, sheetName) {
+    value.value = value.value.toUpperCase();
+    const result = new CellExpression(value, type, sheetName);
+    return this.visitCellExpression(result);
+  }
+  getRangeCellValue(value) {
+    if (value instanceof Range) {
+      if (value.colCount === value.rowCount && value.colCount === 1) {
+        return this.cellDataMap.get(value.row, value.col, value.sheetId);
+      } else {
+        throw new CustomError("#REF!");
+      }
+    }
+    return value;
   }
 };
 
@@ -30576,12 +30130,7 @@ function parseFormula(source, cellData2 = new CellDataMapImpl(), definedNamesMap
   try {
     const list = new Scanner(source).scan();
     const expressions = new Parser(list).parse();
-    const result = new Interpreter(
-      expressions,
-      cellData2,
-      definedNamesMap,
-      functionMap
-    ).interpret();
+    const result = new Interpreter(expressions, cellData2, definedNamesMap, functionMap).interpret();
     const strList = [];
     for (const item of expressions) {
       strList.push(item.toString());
@@ -30701,9 +30250,7 @@ var Model = class {
         sheetId: item.sheetId
       }
     };
-    const index = this.workbook.findIndex(
-      (item2) => item2.sheetId === this.currentSheetId
-    );
+    const index = this.workbook.findIndex((v) => v.sheetId === this.currentSheetId);
     if (index < 0) {
       this.workbook.push(sheet);
     } else {
@@ -30711,33 +30258,13 @@ var Model = class {
     }
     this.currentSheetId = sheet.sheetId;
     this.worksheets[sheet.sheetId] = {};
-    this.customHeight[sheet.sheetId];
-    this.customWidth[sheet.sheetId];
-  }
-  getSheetIndex(sheetId) {
-    const id = sheetId || this.currentSheetId;
-    const index = this.workbook.findIndex((item) => item.sheetId === id);
-    assert(index >= 0);
-    let lastIndex = (index + 1) % this.workbook.length;
-    while (lastIndex !== index) {
-      if (this.workbook[lastIndex].isHide) {
-        lastIndex = (lastIndex + 1) % this.workbook.length;
-      } else {
-        break;
-      }
-    }
-    return {
-      index,
-      lastIndex
-    };
+    this.customHeight[sheet.sheetId] = {};
+    this.customWidth[sheet.sheetId] = {};
   }
   deleteSheet(sheetId) {
     const id = sheetId || this.currentSheetId;
     const list = this.workbook.filter((v) => !v.isHide);
-    assert(
-      list.length >= 2,
-      "A workbook must contains at least on visible worksheet"
-    );
+    assert(list.length >= 2, "A workbook must contains at least on visible worksheet");
     const { index, lastIndex } = this.getSheetIndex(id);
     this.currentSheetId = this.workbook[lastIndex].sheetId;
     this.workbook.splice(index, 1);
@@ -30747,10 +30274,7 @@ var Model = class {
   }
   hideSheet(sheetId) {
     const list = this.workbook.filter((v) => !v.isHide);
-    assert(
-      list.length >= 2,
-      "A workbook must contains at least on visible worksheet"
-    );
+    assert(list.length >= 2, "A workbook must contains at least on visible worksheet");
     const { index, lastIndex } = this.getSheetIndex(sheetId);
     this.workbook[index].isHide = true;
     this.currentSheetId = this.workbook[lastIndex].sheetId;
@@ -30773,7 +30297,7 @@ var Model = class {
     sheetInfo.name = sheetName;
   }
   getSheetInfo(id = this.currentSheetId) {
-    const item = this.workbook.find((item2) => item2.sheetId === id);
+    const item = this.workbook.find((v) => v.sheetId === id);
     assert(item !== void 0);
     return item;
   }
@@ -30783,10 +30307,6 @@ var Model = class {
   }
   getCurrentSheetId() {
     return this.currentSheetId;
-  }
-  getSheetId() {
-    const list = this.workbook.filter((v) => !v.isHide);
-    return list[0].sheetId;
   }
   fromJSON = (json) => {
     modelLog("fromJSON", json);
@@ -30828,18 +30348,6 @@ var Model = class {
     modelLog("toJSON", json);
     return json;
   };
-  setCellValue(value, range) {
-    const { row, col } = range;
-    const key = `worksheets[${this.currentSheetId}][${row}][${col}].value`;
-    this.history.pushRedo("set", key, get(this, key, void 0));
-    setWith(this, key, value);
-  }
-  setCellFormula(formula, range) {
-    const { row, col } = range;
-    const key = `worksheets[${this.currentSheetId}][${row}][${col}].formula`;
-    this.history.pushRedo("set", key, get(this, key, void 0));
-    setWith(this, key, formula);
-  }
   setCellValues(value, style, ranges) {
     const [range] = ranges;
     const { row, col } = range;
@@ -30853,7 +30361,7 @@ var Model = class {
         if (style[r] && style[r][c]) {
           this.setStyle(style[r][c], temp);
         }
-        if (t.startsWith("=")) {
+        if (t && typeof t === "string" && t.startsWith("=")) {
           this.setCellFormula(t, temp);
         } else {
           this.setCellFormula("", temp);
@@ -30862,11 +30370,6 @@ var Model = class {
       }
     }
     this.computeAllCell();
-  }
-  setStyle(style, range) {
-    const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
-    this.history.pushRedo("set", stylePath, get(this, stylePath, {}));
-    setWith(this, stylePath, style);
   }
   setCellStyle(style, ranges) {
     const [range] = ranges;
@@ -30880,70 +30383,20 @@ var Model = class {
   getCell = (range) => {
     const { row, col, sheetId } = range;
     const realSheetId = sheetId || this.currentSheetId;
-    const cellData2 = get(
-      this,
-      `worksheets[${realSheetId}][${row}][${col}]`,
-      {}
-    );
+    const cellData2 = get(this, `worksheets[${realSheetId}][${row}][${col}]`, {});
     return {
       ...cellData2,
       row,
       col
     };
   };
-  computeAllCell() {
-    const sheetData = this.worksheets[this.currentSheetId];
-    if (isEmpty(sheetData)) {
-      return [];
-    }
-    const rowKeys = Object.keys(sheetData);
-    for (const rowKey of rowKeys) {
-      const colKeys = Object.keys(sheetData[rowKey]);
-      for (const colKey of colKeys) {
-        const temp = sheetData[rowKey][colKey];
-        if (temp?.formula) {
-          temp.value = this.parseFormula(temp.formula);
-        }
-      }
-    }
-  }
-  parseFormula(formula) {
-    const self2 = this;
-    const result = parseFormula(
-      formula,
-      {
-        get: (row, col, sheetId) => {
-          const sheetInfo = this.getSheetInfo(sheetId || this.currentSheetId);
-          if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
-            throw new CustomError("#REF!");
-          }
-          const temp = self2.getCell(new Range(row, col, 1, 1, sheetId));
-          return temp.value;
-        },
-        set: () => {
-        },
-        convertSheetNameToSheetId: (sheetName) => {
-          const item = self2.workbook.find((v) => v.name === sheetName);
-          return item?.sheetId || "";
-        }
-      },
-      {
-        set() {
-          throw new CustomError("#REF!");
-        },
-        get(name) {
-          return self2.definedNames[name];
-        },
-        has(name) {
-          return name in self2.definedNames;
-        }
-      }
-    );
-    return result.error ? result.error : result.result;
-  }
   addRow(rowIndex, count) {
     const sheetData = this.worksheets[this.currentSheetId];
     if (isEmpty(sheetData)) {
+      return;
+    }
+    const sheetInfo = this.getSheetInfo();
+    if (sheetInfo.rowCount >= XLSX_MAX_ROW_COUNT) {
       return;
     }
     const rowKeys = convertToNumber(Object.keys(sheetData));
@@ -30958,10 +30411,6 @@ var Model = class {
       };
       sheetData[rowKey] = {};
     }
-    const sheetInfo = this.getSheetInfo();
-    if (sheetInfo.rowCount >= XLSX_MAX_ROW_COUNT) {
-      return;
-    }
     sheetInfo.rowCount += count;
   }
   addCol(colIndex, count) {
@@ -30970,6 +30419,9 @@ var Model = class {
       return;
     }
     const sheetInfo = this.getSheetInfo();
+    if (sheetInfo.colCount >= XLSX_MAX_COL_COUNT) {
+      return;
+    }
     const rowKeys = Object.keys(sheetData);
     for (const rowKey of rowKeys) {
       const colKeys = convertToNumber(Object.keys(sheetData[rowKey]));
@@ -30984,9 +30436,6 @@ var Model = class {
         };
         sheetData[rowKey][colKey] = {};
       }
-    }
-    if (sheetInfo.colCount >= XLSX_MAX_COL_COUNT) {
-      return;
     }
     sheetInfo.colCount += count;
   }
@@ -31056,7 +30505,10 @@ var Model = class {
   }
   setColWidth(col, width) {
     this.customWidth[this.currentSheetId] = this.customWidth[this.currentSheetId] || {};
-    this.customWidth[this.currentSheetId][col] = this.customWidth[this.currentSheetId][col] || { widthOrHeight: 0, isHide: false };
+    this.customWidth[this.currentSheetId][col] = this.customWidth[this.currentSheetId][col] || {
+      widthOrHeight: 0,
+      isHide: false
+    };
     this.customWidth[this.currentSheetId][col].widthOrHeight = width;
   }
   hideRow(rowIndex, count) {
@@ -31082,7 +30534,10 @@ var Model = class {
   }
   setRowHeight(row, height) {
     this.customHeight[this.currentSheetId] = this.customHeight[this.currentSheetId] || {};
-    this.customHeight[this.currentSheetId][row] = this.customHeight[this.currentSheetId][row] || { widthOrHeight: 0, isHide: false };
+    this.customHeight[this.currentSheetId][row] = this.customHeight[this.currentSheetId][row] || {
+      widthOrHeight: 0,
+      isHide: false
+    };
     this.customHeight[this.currentSheetId][row].widthOrHeight = height;
   }
   canRedo() {
@@ -31106,24 +30561,8 @@ var Model = class {
   record() {
     this.history.onChange();
   }
-  executeOperate(list) {
-    for (const item of list) {
-      const { op, path, value } = item;
-      switch (op) {
-        case "set": {
-          this.history.pushUndo(op, path, get(this, path, void 0));
-          this.record();
-          setWith(this, path, value);
-          break;
-        }
-        default:
-          console.error(`not support type: ${op}`);
-          break;
-      }
-    }
-  }
   pasteRange(fromRange, isCut) {
-    const currentSheetId = this.currentSheetId;
+    const { currentSheetId } = this;
     const { activeCell } = this.getSheetInfo(currentSheetId);
     const { row, col, rowCount, colCount, sheetId } = fromRange;
     for (let r = row, i = 0, endRow = row + rowCount; r < endRow; r++, i++) {
@@ -31176,6 +30615,110 @@ var Model = class {
       }
     }
     return "";
+  }
+  setCellValue(value, range) {
+    const { row, col } = range;
+    const key = `worksheets[${this.currentSheetId}][${row}][${col}].value`;
+    this.history.pushRedo("set", key, get(this, key, void 0));
+    setWith(this, key, value);
+  }
+  setCellFormula(formula, range) {
+    const { row, col } = range;
+    const key = `worksheets[${this.currentSheetId}][${row}][${col}].formula`;
+    this.history.pushRedo("set", key, get(this, key, void 0));
+    setWith(this, key, formula);
+  }
+  computeAllCell() {
+    const sheetData = this.worksheets[this.currentSheetId];
+    if (isEmpty(sheetData)) {
+      return [];
+    }
+    const rowKeys = Object.keys(sheetData);
+    for (const rowKey of rowKeys) {
+      const colKeys = Object.keys(sheetData[rowKey]);
+      for (const colKey of colKeys) {
+        const temp = sheetData[rowKey][colKey];
+        if (temp?.formula) {
+          temp.value = this.parseFormula(temp.formula);
+        }
+      }
+    }
+  }
+  parseFormula(formula) {
+    const result = parseFormula(
+      formula,
+      {
+        get: (row, col, sheetId) => {
+          const sheetInfo = this.getSheetInfo(sheetId || this.currentSheetId);
+          if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
+            throw new CustomError("#REF!");
+          }
+          const temp = this.getCell(new Range(row, col, 1, 1, sheetId));
+          return temp.value;
+        },
+        set: () => {
+          throw new CustomError("#REF!");
+        },
+        convertSheetNameToSheetId: (sheetName) => {
+          const item = this.workbook.find((v) => v.name === sheetName);
+          return item?.sheetId || "";
+        }
+      },
+      {
+        set: () => {
+          throw new CustomError("#REF!");
+        },
+        get: (name) => {
+          return this.definedNames[name];
+        },
+        has: (name) => {
+          return name in this.definedNames;
+        }
+      }
+    );
+    return result.error ? result.error : result.result;
+  }
+  getSheetIndex(sheetId) {
+    const id = sheetId || this.currentSheetId;
+    const index = this.workbook.findIndex((item) => item.sheetId === id);
+    assert(index >= 0);
+    let lastIndex = (index + 1) % this.workbook.length;
+    while (lastIndex !== index) {
+      if (this.workbook[lastIndex].isHide) {
+        lastIndex = (lastIndex + 1) % this.workbook.length;
+      } else {
+        break;
+      }
+    }
+    return {
+      index,
+      lastIndex
+    };
+  }
+  getSheetId() {
+    const list = this.workbook.filter((v) => !v.isHide);
+    return list[0].sheetId;
+  }
+  setStyle(style, range) {
+    const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
+    this.history.pushRedo("set", stylePath, get(this, stylePath, {}));
+    setWith(this, stylePath, style);
+  }
+  executeOperate(list) {
+    for (const item of list) {
+      const { op, path, value } = item;
+      switch (op) {
+        case "set": {
+          this.history.pushUndo(op, path, get(this, path, void 0));
+          this.record();
+          setWith(this, path, value);
+          break;
+        }
+        default:
+          console.error(`not support type: ${op}`);
+          break;
+      }
+    }
   }
 };
 

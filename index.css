@@ -90,9 +90,9 @@
 .Github_githubWrapper {
   color: rgb(255, 255, 255);
   position: absolute;
-  top: 0px;
-  border: 0px;
-  right: 0px;
+  top: 0;
+  border: 0;
+  right: 0;
   fill: var(--primaryColor);
   height: 40px;
   width: 40px;
@@ -102,7 +102,7 @@
 .BaseIcon_baseIcon {
   width: 1em;
   height: 1em;
-  fill: currentColor;
+  fill: currentcolor;
   overflow: hidden;
 }
 
@@ -251,6 +251,7 @@
   border-radius: unset;
   outline: none;
   font: inherit;
+  background-color: var(--white);
   overflow: hidden;
   position: fixed;
   box-sizing: border-box;
@@ -356,7 +357,7 @@ body {
     "Arial",
     sans-serif;
 }
-#root {
+.root-container {
   height: 100vh;
   overflow: hidden;
   box-sizing: border-box;
