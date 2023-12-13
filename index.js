@@ -23923,6 +23923,10 @@ function getDefaultSheetInfo(list = []) {
     sheetId: String(sheetId)
   };
 }
+function splitToWords(str) {
+  const list = new Intl.Segmenter().segment(str);
+  return [...list].map((x) => x.segment);
+}
 
 // src/util/convert.ts
 function columnNameToInt(columnName = "") {
@@ -24748,7 +24752,7 @@ function renderCell(ctx, cellInfo) {
     fillStyle = ERROR_FORMULA_COLOR;
   }
   const result = {};
-  const texts = [...text];
+  const texts = splitToWords(text);
   if (texts.length === 0) {
     return result;
   }
@@ -29368,7 +29372,7 @@ var Scanner = class {
   start = 0;
   tokens = [];
   constructor(source) {
-    this.list = [...source];
+    this.list = splitToWords(source);
   }
   scan() {
     while (!this.isAtEnd()) {
@@ -30130,7 +30134,12 @@ function parseFormula(source, cellData2 = new CellDataMapImpl(), definedNamesMap
   try {
     const list = new Scanner(source).scan();
     const expressions = new Parser(list).parse();
-    const result = new Interpreter(expressions, cellData2, definedNamesMap, functionMap).interpret();
+    const result = new Interpreter(
+      expressions,
+      cellData2,
+      definedNamesMap,
+      functionMap
+    ).interpret();
     const strList = [];
     for (const item of expressions) {
       strList.push(item.toString());
@@ -30772,7 +30781,7 @@ var MOCK_MODEL = {
     1: {
       0: {
         0: {
-          value: "1",
+          value: "1abcd",
           style: {
             fontColor: "#ff0000"
           }
@@ -30796,6 +30805,33 @@ var MOCK_MODEL = {
             isWrapText: true,
             underline: 1 /* SINGLE */
           }
+        },
+        6: {
+          formula: '=CONCAT("\u{1F60A}", "\u{1F468}\u200D\u{1F468}\u200D\u{1F467}\u200D\u{1F467}", "\u{1F466}\u{1F3FE}")',
+          style: {
+            fontSize: 30
+          }
+        },
+        7: {
+          value: "Z\u0351\u036B\u0343\u036A\u0302\u036B\u033D\u034F\u0334\u0319\u0324\u031E\u0349\u035A\u032F\u031E\u0320\u034DA\u036B\u0357\u0334\u0362\u0335\u031C\u0330\u0354L\u0368\u0367\u0369\u0358\u0320G\u0311\u0357\u030E\u0305\u035B\u0341\u0334\u033B\u0348\u034D\u0354\u0339O\u0342\u030C\u030C\u0358\u0328\u0335\u0339\u033B\u031D\u0333!\u033F\u030B\u0365\u0365\u0302\u0363\u0310\u0301\u0301\u035E\u035C\u0356\u032C\u0330\u0319\u0317",
+          style: {
+            fontSize: 30
+          }
+        },
+        8: {
+          value: "\u1103\u1167\u1109\u1170",
+          style: {
+            fontSize: 30
+          }
+        },
+        9: {
+          value: "L\u0301o\u0342r\u030Ce\u0327m\u0305",
+          style: {
+            fontSize: 30
+          }
+        },
+        10: {
+          value: "\u{1F337}\u{1F381}\u{1F4A9}\u{1F61C}\u{1F44D}\u{1F3F3}\uFE0F\u200D\u{1F308}"
         }
       },
       3: {
@@ -30857,6 +30893,18 @@ var MOCK_MODEL = {
       1: {
         widthOrHeight: 100,
         isHide: true
+      },
+      6: {
+        widthOrHeight: 200,
+        isHide: false
+      },
+      7: {
+        widthOrHeight: 200,
+        isHide: false
+      },
+      10: {
+        widthOrHeight: 100,
+        isHide: false
       }
     }
   },
