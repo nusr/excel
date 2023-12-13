@@ -16,7 +16,6 @@ jobs:
       - name: Test
         run: |
           npm install
-          npm run build
           npm run type-check
           npm run lint
           npm run coverage
@@ -24,6 +23,8 @@ jobs:
         uses: codecov/codecov-action@v3
       - name: E2E
         run: npm run e2e
+      - name: Build
+        run: npm run build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}

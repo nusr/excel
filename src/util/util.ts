@@ -65,6 +65,7 @@ export function isDevEnv(): boolean {
 
 export function splitToWords(str: string): string[] {
   // unicode
+  // graphemer
   const list = new Intl.Segmenter().segment(str);
   return [...list].map((x) => x.segment);
 }
