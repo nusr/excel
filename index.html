@@ -12,7 +12,7 @@
     <script src="./index.js" type="module"></script>
     <script>
       window.onload = function () {
-        if ("development" === 'development') {
+        if ("production" === 'development') {
           // esbuild hot reload
           new EventSource('/esbuild').addEventListener('change', function () {
             location.reload();
