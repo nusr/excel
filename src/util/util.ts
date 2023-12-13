@@ -45,7 +45,9 @@ export function getListMaxNum(list: string[] = []): number {
   return Math.max(Math.max(...idList), 0);
 }
 
-export function getDefaultSheetInfo(list: WorksheetType[] = []): Pick<WorksheetType, 'name' | 'sheetId'> {
+export function getDefaultSheetInfo(
+  list: WorksheetType[] = [],
+): Pick<WorksheetType, 'name' | 'sheetId'> {
   const sheetId = getListMaxNum(list.map((item) => item.sheetId)) + 1;
   return {
     name: `${SHEET_NAME_PREFIX}${sheetId}`,
@@ -59,4 +61,10 @@ export function isTestEnv(): boolean {
 
 export function isDevEnv(): boolean {
   return process.env.NODE_ENV === 'development';
+}
+
+export function splitToWords(str: string): string[] {
+  // unicode
+  const list = new Intl.Segmenter().segment(str);
+  return [...list].map((x) => x.segment);
 }

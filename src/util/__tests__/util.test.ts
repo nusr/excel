@@ -1,4 +1,10 @@
-import { getListMaxNum, isNumber, parseNumber, getDefaultSheetInfo } from '../util';
+import {
+  getListMaxNum,
+  isNumber,
+  parseNumber,
+  getDefaultSheetInfo,
+  splitToWords,
+} from '../util';
 
 describe('util.test.ts', () => {
   describe('getListMaxNum', () => {
@@ -72,6 +78,11 @@ describe('util.test.ts', () => {
     });
     it("should convert '1.2' to 1.2", () => {
       expect(parseNumber('1.2')).toEqual(1.2);
+    });
+  });
+  describe('splitToWords', () => {
+    it('should splitToWords', () => {
+      expect(splitToWords('😊👨‍👨‍👧‍👧👦🏾')).toEqual(['😊', '👨‍👨‍👧‍👧', '👦🏾']);
     });
   });
 });

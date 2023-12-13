@@ -10,6 +10,7 @@ import {
   ERROR_FORMULA_COLOR,
   dpr,
   isEmpty,
+  splitToWords,
 } from '@/util';
 import { ModelCellType, CanvasOverlayPosition, ErrorTypes, Point, EUnderLine, IWindowSize, ResultType } from '@/types';
 
@@ -116,8 +117,7 @@ export function renderCell(
     fillStyle = ERROR_FORMULA_COLOR;
   }
   const result: IRenderCellResult = {};
-  // unicode
-  const texts = [...text];
+  const texts = splitToWords(text)
   if (texts.length === 0) {
     return result;
   }

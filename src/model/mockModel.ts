@@ -50,7 +50,7 @@ export const MOCK_MODEL: WorkBookJSON = {
     1: {
       0: {
         0: {
-          value: '1',
+          value: '1abcd',
           style: {
             fontColor: '#ff0000',
           },
@@ -74,6 +74,33 @@ export const MOCK_MODEL: WorkBookJSON = {
             isWrapText: true,
             underline: EUnderLine.SINGLE,
           },
+        },
+        6: {
+          formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
+          style: {
+            fontSize: 30,
+          },
+        },
+        7: {
+          value: 'Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞',
+          style: {
+            fontSize: 30,
+          },
+        },
+        8: {
+          value: '뎌쉐',
+          style: {
+            fontSize: 30,
+          },
+        },
+        9: {
+          value: 'Ĺo͂řȩm̅',
+          style: {
+            fontSize: 30,
+          },
+        },
+        10: {
+          value: '🌷🎁💩😜👍🏳️‍🌈',
         },
       },
       3: {
@@ -135,6 +162,18 @@ export const MOCK_MODEL: WorkBookJSON = {
       1: {
         widthOrHeight: 100,
         isHide: true,
+      },
+      6: {
+        widthOrHeight: 200,
+        isHide: false
+      },
+      7: {
+        widthOrHeight: 200,
+        isHide: false
+      },
+      10: {
+        widthOrHeight: 100,
+        isHide: false
       },
     },
   },

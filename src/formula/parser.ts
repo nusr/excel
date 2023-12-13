@@ -154,35 +154,7 @@ export class Parser {
       if (errorSet.has(realValue as ErrorTypes)) {
         throw new CustomError(realValue as ErrorTypes);
       }
-      // if (this.match(TokenType.EXCLAMATION)) {
-      //   const expr = this.expression();
-      //   if (expr instanceof TokenExpression) {
-      //     return this.addCellExpression(expr.value, expr.type, name);
-      //   }
-      //   throw new CustomError('#REF!');
-      // }
       return new TokenExpression(name);
-      // const newToken = new Token(type, realValue);
-      // if (this.isFunctionName(realValue)) {
-      //   return new TokenExpression(new Token(type, getFunctionName(realValue)))
-      // }
-      // if (/^[a-z]+$/i.test(value)) {
-      //   return new TokenExpression(name);
-      // }
-      // if (
-      //   /^\$[A-Z]+\$\d+$/.test(realValue) ||
-      //   /^\$[A-Z]+$/.test(realValue) ||
-      //   /^\$\d+$/.test(realValue)
-      // ) {
-      //   return this.addCellExpression(newToken, 'absolute', null);
-      // }
-      // if (/^\$[A-Z]+\d+$/.test(realValue) || /^[A-Z]+\$\d+$/.test(realValue)) {
-      //   return this.addCellExpression(newToken, 'mixed', null);
-      // }
-      // if (/^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue)) {
-      //   return this.addCellExpression(newToken, 'relative', null);
-      // }
-      // return new TokenExpression(name);
     }
 
     throw new CustomError('#ERROR!');

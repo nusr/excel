@@ -77,4 +77,11 @@ describe('parseFormula function', () => {
       expressionStr: '',
     });
   });
+  it('function CONCAT', () => {
+    expect(parseFormula('CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")')).toEqual({
+      error: null,
+      result: '😊👨‍👨‍👧‍👧👦🏾',
+      expressionStr: 'CONCAT(😊,👨‍👨‍👧‍👧,👦🏾)',
+    });
+  });
 });

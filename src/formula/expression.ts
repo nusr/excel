@@ -124,7 +124,9 @@ export class CallExpression implements Expression {
     return visitor.visitCallExpression(this);
   }
   toString(): string {
-    return `${this.name.toString().toUpperCase()}(${this.params.map((item) => item.toString()).join(',')})`;
+    return `${this.name.toString().toUpperCase()}(${this.params
+      .map((item) => item.toString())
+      .join(',')})`;
   }
 }
 export class CellRangeExpression implements Expression {
@@ -140,7 +142,9 @@ export class CellRangeExpression implements Expression {
     return visitor.visitCellRangeExpression(this);
   }
   toString(): string {
-    return this.left.toString() + this.operator.toString() + this.right.toString();
+    return (
+      this.left.toString() + this.operator.toString() + this.right.toString()
+    );
   }
 }
 
