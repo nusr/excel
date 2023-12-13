@@ -1,8 +1,10 @@
 import * as puppeteer from 'puppeteer';
+import fs from 'fs';
 
 declare global {
   // eslint-disable-next-line no-var
   var __browserPage: puppeteer.Page;
+  const __portFilePath: string;
 }
 
 async function setupPuppeteer() {
@@ -22,10 +24,20 @@ export function sleep(milliseconds: number): Promise<unknown> {
 }
 
 export async function openPage(): Promise<void> {
-  await setupPuppeteer();
-  const port = 8000;
-  const filePath = `https://localhost:${port}`;
+  const check = fs.existsSync(__portFilePath);
+  let port = 8000;
+  if (check) {
+    const portData = fs.readFileSync(__portFilePath, 'utf-8');
+    const t = parseInt(portData, 10);
+    if (!isNaN(t)) {
+      port = t;
+    }
+    fs.unlinkSync(__portFilePath);
+  }
+
+  const filePath = `http://localhost:${port}`;
   console.log(filePath);
+  await setupPuppeteer();
   await __browserPage.goto(filePath);
   await sleep(1000);
 }

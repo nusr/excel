@@ -14,7 +14,7 @@ const config: Config = {
   globalSetup: path.join(__dirname, 'e2e-global-setup.js'),
   globalTeardown: path.join(__dirname, 'e2e-global-teardown.js'),
   globals: {
-    __browserPort: 8000,
-  }
+    __portFilePath: path.join(process.cwd(), 'port.txt'),
+  },
 };
 export default config;

@@ -8,7 +8,10 @@ const productionMode = 'production';
 const nodeEnv = envConfig['NODE_ENV'] || productionMode;
 const isDev = nodeEnv === 'development';
 const globalName = '__export__';
-const licenseText = fs.readFileSync(path.join(process.cwd(), 'LICENSE'), 'utf-8');
+const licenseText = fs.readFileSync(
+  path.join(process.cwd(), 'LICENSE'),
+  'utf-8',
+);
 const distDir = path.join(process.cwd(), 'dist');
 
 function getEnv(): Record<string, string> {
@@ -97,15 +100,17 @@ function buildHtml() {
     fs.mkdirSync(distDir);
   }
   const data = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf-8');
-  fs.writeFileSync(path.join(distDir, 'index.html'), data.replace('process.env.NODE_ENV', JSON.stringify(nodeEnv)));
+  fs.writeFileSync(
+    path.join(distDir, 'index.html'),
+    data.replace('process.env.NODE_ENV', JSON.stringify(nodeEnv)),
+  );
 }
 
 function deleteDir(dir: string) {
-  fs.rm(path.join(process.cwd(), dir), { recursive: true }, (error) => {
-    if (error) {
-      console.log(error);
-    }
-  });
+  const t = path.join(process.cwd(), dir);
+  if (fs.existsSync(t)) {
+    fs.rmSync(t, { recursive: true, force: true });
+  }
 }
 
 async function buildProd() {
