@@ -78,25 +78,25 @@ export const MOCK_MODEL: WorkBookJSON = {
         6: {
           formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
           style: {
-            fontSize: 30,
+            fontSize: 36,
           },
         },
         7: {
           value: 'Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞',
           style: {
-            fontSize: 30,
+            fontSize: 36,
           },
         },
         8: {
           value: '뎌쉐',
           style: {
-            fontSize: 30,
+            fontSize: 36,
           },
         },
         9: {
           value: 'Ĺo͂řȩm̅',
           style: {
-            fontSize: 30,
+            fontSize: 36,
           },
         },
         10: {
@@ -169,6 +169,14 @@ export const MOCK_MODEL: WorkBookJSON = {
       },
       7: {
         widthOrHeight: 200,
+        isHide: false
+      },
+      8: {
+        widthOrHeight: 100,
+        isHide: false
+      },
+      9: {
+        widthOrHeight: 100,
         isHide: false
       },
       10: {
