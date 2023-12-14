@@ -5,6 +5,7 @@ import { SheetBarContainer } from './SheetBar';
 import styles from './index.module.css';
 import React from 'react';
 import type { IController } from '@/types';
+import { MenuBarContainer } from './MenuBar';
 
 interface Props {
   controller: IController;
@@ -13,6 +14,7 @@ interface Props {
 export const App: React.FunctionComponent<Props> = ({ controller }) => {
   return (
     <div className={styles['app-container']}>
+      <MenuBarContainer controller={controller} />
       <ToolbarContainer controller={controller} />
       <FormulaBarContainer controller={controller} />
       <CanvasContainer controller={controller} />

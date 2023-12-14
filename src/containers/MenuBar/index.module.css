@@ -1,0 +1,4 @@
+.menubar {
+  border-bottom: 1px solid var(--borderColor);
+  padding: var(--mediumPadding) var(--largePadding);
+}

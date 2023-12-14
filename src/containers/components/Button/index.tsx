@@ -3,7 +3,7 @@ import { classnames } from '@/util';
 import styles from './index.module.css';
 
 export interface ButtonProps {
-  type?: 'normal' | 'circle';
+  type?: 'normal' | 'circle' | 'plain';
   style?: CSSProperties;
   active?: boolean;
   disabled?: boolean;
@@ -33,6 +33,7 @@ export const Button: FunctionComponent<React.PropsWithChildren<ButtonProps>> = (
     [styles['disabled']]: disabled,
     [styles['active']]: active,
     [styles['circle']]: type === 'circle',
+    [styles['plain']]: type === 'plain',
   });
   return (
     <button

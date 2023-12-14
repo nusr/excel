@@ -9,7 +9,7 @@
     "build": "node ./scripts/esbuild.js",
     "test": "jest --config ./scripts/unit-test-jest.config.js --forceExit --detectOpenHandles",
     "coverage": "npm run test -- --coverage",
-    "ci": "npm run test && npm run type-check && npm run build && npm run e2e && npm run lint",
+    "ci": "npm run test && npm run e2e && npm run build && npm run type-check && npm run lint",
     "type-check": "npx tsc",
     "postinstall": "node ./post-install.js",
     "prebuild": "node ./post-install.js",

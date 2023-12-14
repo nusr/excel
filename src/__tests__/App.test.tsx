@@ -8,6 +8,6 @@ describe('App.test.ts', () => {
   test('normal', () => {
     const controller = initController();
     const component = render(<App controller={controller} />);
-    expect(component.container.firstChild!.childNodes).toHaveLength(4);
+    expect(component.container.firstChild!.childNodes).toHaveLength(5);
   });
 });

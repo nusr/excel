@@ -1,8 +1,6 @@
 .toolbar-wrapper {
-  width: 100%;
-  padding: 10px 20px;
+  padding: var(--mediumPadding) var(--largePadding);
   box-sizing: border-box;
-  background-color: #f3f3f3;
   border-bottom: 1px solid var(--gridStrokeColor);
   display: flex;
   align-items: center;

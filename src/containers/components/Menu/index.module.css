@@ -1,0 +1,45 @@
+.container {
+  position: relative;
+}
+.portal {
+  position: absolute;
+  z-index: 3;
+  background-color: var(--white);
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 5px -3px,
+    rgba(0, 0, 0, 0.14) 0px 8px 10px 1px, rgba(0, 0, 0, 0.12) 0px 3px 14px 2px;
+  transition: 251ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}
+.menuContainer {
+  left: 0;
+}
+
+.subMenuContainer {
+  top: 0;
+  left: 100%;
+}
+.menu {
+  list-style: none;
+  margin: 0px;
+  padding: 8px 0px;
+  outline: 0px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  border-radius: var(--borderRadius);
+}
+.menuItem {
+  padding: 6px 16px;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  user-select: none;
+}
+
+.menuItem + .menuItem {
+  border-top: 1px solid var(--borderColor);
+}
+
+.menuItem:hover {
+  background-color: var(--hoverColor);
+}

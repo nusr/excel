@@ -17,6 +17,7 @@ import {
   CELL_WIDTH,
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
+  FONT_SIZE_LIST,
 } from '@/util';
 
 const COMMON_PREFIX = 'xl';
@@ -235,11 +236,12 @@ function getCellStyle(xml: XMLFile, styleId: number, themeData: ThemeData): Part
     const fontId = parseInt(xf.fontId, 10);
     if (fontList.length > 0 && fontList[fontId]) {
       const font = fontList[fontId];
-      result.fontSize = parseInt(font.sz.val, 10);
+      const fz = parseInt(font?.sz?.val, 10);
+      result.fontSize = isNaN(fz) ? FONT_SIZE_LIST[0] : fz;
       result.isBold = Boolean(font.b);
       result.isItalic = Boolean(font.i);
       result.underline = font.u ? EUnderLine.SINGLE : EUnderLine.NONE;
-      result.fontFamily = font.name.val;
+      result.fontFamily = font?.name?.val;
       const color = convertColor(themeData, font.color);
       if (color) {
         result.fontColor = color;

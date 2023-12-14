@@ -1,20 +1,20 @@
 .formula-bar-wrapper {
   width: 100%;
-  box-sizing: border-box;
-  height: 42px;
+  box-sizing: content-box;
+  padding: var(--mediumPadding) var(--largePadding);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   background-color: var(--backgroundColor);
+  height: 22px;
+  border-bottom: 1px solid var(--borderColor);
 }
 
 .formula-bar-name {
   border: 1px solid var(--gridStrokeColor);
   width: 100px;
-  height: 21px;
-  line-height: 21px;
+  height: 100%;
   margin-right: 10px;
-  margin-left: 5px;
   border-radius: 2px;
   text-align: center;
   background-color: var(--white);
@@ -24,7 +24,7 @@
 .formula-bar-editor-wrapper {
   border: 1px solid var(--gridStrokeColor);
   flex: 1;
-  height: 21px;
+  height: 100%;
   border-radius: 2px;
   background-color: var(--white);
 }
