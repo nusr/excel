@@ -35,3 +35,9 @@ export enum ScrollStatus {
   VERTICAL,
   HORIZONTAL,
 }
+
+export enum EditorStatus {
+  NONE = 0,
+  EDIT_CELL,
+  EDIT_FORMULA_BAR,
+}

@@ -120,7 +120,8 @@ export interface IBaseModel {
   undo: () => void;
   redo: () => void;
   deleteAll: (sheetId?: string) => void;
-  getDefineName: (row: number, col: number) => string;
+  getDefineName: (range: IRange) => string;
+  setDefineName: (range: IRange, name: string) => void;
 }
 
 export interface UndoRedoItem {

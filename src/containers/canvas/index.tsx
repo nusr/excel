@@ -1,11 +1,12 @@
 import React, { useRef, useEffect, Fragment, useState } from 'react';
-import { IController } from '@/types';
+import { IController, EditorStatus } from '@/types';
 import { getHitInfo, DEFAULT_POSITION } from '@/util';
 import styles from './index.module.css';
 import { coreStore } from '@/containers/store';
 import { ScrollBar } from './ScrollBar';
 import { ContextMenu } from './ContextMenu';
 import { initCanvas } from './util';
+import { checkFocus, setActiveCellValue } from '@/canvas';
 
 interface Props {
   controller: IController;
@@ -113,15 +114,13 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
       return;
     }
     const activeCell = controller.getActiveCell();
-    const check = activeCell.row >= 0 && activeCell.row === position.row && activeCell.col === position.col;
+    const check =
+      activeCell.row >= 0 &&
+      activeCell.row === position.row &&
+      activeCell.col === position.col;
     if (!check) {
-      const inputDom = controller.getMainDom().input!;
-      const isInputFocus = document.activeElement === inputDom;
-      if (isInputFocus) {
-        const { value } = inputDom;
-        controller.setCellValues([[value]], [], [controller.getActiveCell()]);
-        coreStore.mergeState({ isCellEditing: false });
-        inputDom.value = '';
+      if (checkFocus(controller)) {
+        setActiveCellValue(controller);
       }
       controller.setActiveCell({
         row: position.row,
@@ -133,7 +132,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     } else {
       const delay = timeStamp - lastTimeStamp.current;
       if (delay < DOUBLE_CLICK_TIME) {
-        coreStore.mergeState({ isCellEditing: true });
+        coreStore.mergeState({ editorStatus: EditorStatus.EDIT_CELL });
       }
     }
 
@@ -141,7 +140,10 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
   };
   return (
     <Fragment>
-      <div className={styles['canvas-container']} data-testid="canvas-container">
+      <div
+        className={styles['canvas-container']}
+        data-testid="canvas-container"
+      >
         <canvas
           className={styles['canvas-content']}
           onContextMenu={handleContextMenu}

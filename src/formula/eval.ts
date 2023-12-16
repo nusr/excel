@@ -6,15 +6,15 @@ import {
   CellDataMap,
   InterpreterResult,
   DefinedNamesMap,
-  FormulaData,
   IRange,
+  FormulaType,
 } from '@/types';
 
 export function parseFormula(
   source: string,
   cellData: CellDataMap = new CellDataMapImpl(),
   definedNamesMap: DefinedNamesMap = new DefinedNamesMapImpl(),
-  functionMap: FormulaData = formulas,
+  functionMap: FormulaType = formulas,
 ): InterpreterResult {
   let expressionStr = '';
   try {

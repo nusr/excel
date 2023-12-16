@@ -1,36 +1,58 @@
 import React, { useSyncExternalStore, useMemo } from 'react';
 import { FormulaEditor, getEditorStyle } from './FormulaEditor';
-import { intToColumnName, classnames } from '@/util';
+import { classnames, intToColumnName } from '@/util';
 import styles from './index.module.css';
-import { IController } from '@/types';
+import { IController, EditorStatus } from '@/types';
 import { activeCellStore, coreStore } from '@/containers/store';
+import { DefineName } from './DefineName';
 
 interface Props {
   controller: IController;
 }
 
-export const FormulaBarContainer: React.FunctionComponent<Props> = ({ controller }) => {
-  const activeCell = useSyncExternalStore(activeCellStore.subscribe, activeCellStore.getSnapshot);
-  const { isCellEditing } = useSyncExternalStore(coreStore.subscribe, coreStore.getSnapshot);
-  const name = useMemo(() => {
-    return activeCell.defineName || `${intToColumnName(activeCell.col)}${activeCell.row + 1}`;
+export const FormulaBarContainer: React.FunctionComponent<Props> = ({
+  controller,
+}) => {
+  const activeCell = useSyncExternalStore(
+    activeCellStore.subscribe,
+    activeCellStore.getSnapshot,
+  );
+  const { editorStatus } = useSyncExternalStore(
+    coreStore.subscribe,
+    coreStore.getSnapshot,
+  );
+  const displayName = useMemo(() => {
+    return (
+      activeCell.defineName ||
+      `${intToColumnName(activeCell.col)}${activeCell.row + 1}`
+    );
   }, [activeCell]);
-  const showText = !isCellEditing || activeCell.top > 0 || activeCell.left > 0;
   const editorValue = activeCell.formula || String(activeCell.value || '');
   const style = useMemo(() => {
-    return getEditorStyle(activeCell);
-  }, [activeCell]);
+    return getEditorStyle(activeCell, editorStatus);
+  }, [activeCell, editorStatus]);
+  const handleClick = () => {
+    coreStore.mergeState({
+      editorStatus: EditorStatus.EDIT_FORMULA_BAR,
+    });
+    controller.getMainDom().input?.focus();
+  };
   return (
     <div className={styles['formula-bar-wrapper']} data-testid="formula-bar">
-      <div className={styles['formula-bar-name']} data-testid="formula-bar-name">
-        {name}
-      </div>
+      <DefineName controller={controller} displayName={displayName} />
       <div className={styles['formula-bar-editor-wrapper']}>
-        {isCellEditing ? <FormulaEditor controller={controller} initValue={editorValue} style={style} /> : null}
+        {editorStatus !== EditorStatus.NONE ? (
+          <FormulaEditor
+            controller={controller}
+            initValue={editorValue}
+            style={style}
+          />
+        ) : null}
         <div
           className={classnames(styles['formula-bar-value'], {
-            [styles['show']]: showText,
+            [styles['show']]: editorStatus !== EditorStatus.EDIT_FORMULA_BAR,
           })}
+          onClick={handleClick}
         >
           {editorValue}
         </div>

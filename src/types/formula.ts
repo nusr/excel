@@ -1,4 +1,8 @@
-type FormulaFunction = (...data: any[]) => number | string | boolean | string[];
+import { ResultType } from './parser';
+
+type FormulaFunction = (
+  ...data: ResultType[]
+) => number | string | boolean | string[];
 
 export type TextFormulaKeys =
   | 'CONCATENATE'
@@ -39,4 +43,3 @@ export type FormulaKeys = TextFormulaKeys | MathFormulaKeys;
 export type TextFormulaType = Record<TextFormulaKeys, FormulaFunction>;
 export type MathFormulaType = Record<MathFormulaKeys, FormulaFunction>;
 export type FormulaType = Record<FormulaKeys, FormulaFunction>;
-export type FormulaData = Record<string, FormulaFunction>;

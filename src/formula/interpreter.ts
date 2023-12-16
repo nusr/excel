@@ -1,5 +1,5 @@
 import { Range, mergeRange, parseCell } from '@/util';
-import { TokenType, CellDataMap, DefinedNamesMap, FormulaData, ReferenceType } from '@/types';
+import { TokenType, CellDataMap, DefinedNamesMap, FormulaType, ReferenceType, FormulaKeys } from '@/types';
 import type { Visitor, Expression, CellRangeExpression, PostUnaryExpression } from './expression';
 import {
   BinaryExpression,
@@ -15,14 +15,14 @@ import { Token } from './token';
 
 export class Interpreter implements Visitor {
   private readonly expressions: Expression[];
-  private readonly functionMap: FormulaData;
+  private readonly functionMap: FormulaType;
   private readonly cellDataMap: CellDataMap;
   private readonly definedNamesMap: DefinedNamesMap;
   constructor(
     expressions: Expression[],
     cellDataMap: CellDataMap,
     definedNamesMap: DefinedNamesMap,
-    functionMap: FormulaData,
+    functionMap: FormulaType,
   ) {
     this.expressions = expressions;
     this.functionMap = functionMap;
@@ -155,8 +155,9 @@ export class Interpreter implements Visitor {
       return this.cellDataMap.get(temp.row, temp.col, temp.sheetId);
     }
     const funcName = value.toUpperCase();
-    if (this.functionMap[funcName]) {
-      return this.functionMap[funcName];
+    const func = this.functionMap[funcName as FormulaKeys];
+    if (func) {
+      return func;
     }
     const realValue = funcName;
     const newToken = new Token(type, realValue);

@@ -549,7 +549,12 @@ export class Controller implements IController {
     this.changeSet.add('content');
     this.emitChange();
   }
-  getDefineName(row: number, col: number): string {
-    return this.model.getDefineName(row, col);
+  getDefineName(range: IRange): string {
+    return this.model.getDefineName(range);
+  }
+  setDefineName(range: IRange, name: string): void {
+    this.model.setDefineName(range, name);
+    this.changeSet.add('content');
+    this.emitChange();
   }
 }

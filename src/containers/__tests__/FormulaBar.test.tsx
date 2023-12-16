@@ -7,7 +7,7 @@ describe('FormulaBarContainer.test.ts', () => {
   afterEach(cleanup);
   test('normal', () => {
     render(<FormulaBarContainer controller={initController()} />);
-    expect(screen.getByTestId('formula-bar-name')!.textContent).toEqual('A1');
+    expect(screen.getByTestId('formula-bar-name')!.querySelector('input')!.value).toEqual('A1');
     expect(screen.getByTestId('formula-bar')!.childNodes).toHaveLength(2);
   });
 });

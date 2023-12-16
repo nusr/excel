@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useState } from 'react';
 import styles from './index.module.css';
 import { classnames } from '@/util';
+import { useClickOutside } from '../../hooks';
 
 type MenuItemProps = {
   onClick?: () => void;
@@ -32,6 +33,7 @@ export const SubMenu: FunctionComponent<
   const handleClick = () => {
     setOpen((v) => !v);
   };
+
   return (
     <li className={styles.menuItem} onClick={handleClick} data-testid={testId}>
       <div>{label}</div>
@@ -56,8 +58,12 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = ({
   const handleClick = () => {
     setOpen((v) => !v);
   };
+  const [ref] = useClickOutside(() => setOpen(false));
   return (
-    <div className={styles.container} onMouseLeave={() => setOpen(false)}>
+    <div
+      className={styles.container}
+      ref={ref}
+    >
       <div onClick={handleClick}>{menuButton}</div>
       {open && (
         <div

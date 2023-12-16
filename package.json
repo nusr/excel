@@ -14,7 +14,9 @@
     "postinstall": "node ./post-install.js",
     "prebuild": "node ./post-install.js",
     "e2e": "jest --config ./scripts/e2e-jest.config.js --forceExit --detectOpenHandles",
-    "lint": "eslint --fix --quiet --ext  .ts,.tsx ./"
+    "lint": "npm run lint-es && npm run lint-ox",
+    "lint-es": "eslint --fix --quiet --ext  .ts,.tsx ./",
+    "lint-ox": "pnpm dlx oxlint@latest"
   },
   "repository": {
     "type": "git",
@@ -28,15 +30,15 @@
     "@testing-library/react": "14.1.2",
     "@types/jest": "29.5.11",
     "@types/react": "18.2.45",
-    "@types/react-dom": "18.2.17",
+    "@types/react-dom": "18.2.18",
     "@typescript-eslint/eslint-plugin": "6.14.0",
     "@typescript-eslint/parser": "6.14.0",
     "canvas": "2.11.2",
     "esbuild": "0.19.9",
-    "eslint": "8.55.0",
+    "eslint": "8.56.0",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
-    "puppeteer": "21.6.0",
+    "puppeteer": "21.6.1",
     "typescript": "5.3.3"
   },
   "engines": {

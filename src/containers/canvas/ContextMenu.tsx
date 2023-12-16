@@ -64,7 +64,12 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
   }, []);
 
   return (
-    <div className={styles['context-menu']} data-testid="context-menu" style={style} ref={ref}>
+    <div
+      className={styles['context-menu']}
+      data-testid="context-menu"
+      style={style}
+      ref={ref}
+    >
       <Button
         onClick={() => {
           hideContextMenu();
@@ -90,16 +95,14 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
         Paste
       </Button>
       {position === ClickPosition.TRIANGLE && (
-        <Fragment>
-          <Button
-            onClick={() => {
-              hideContextMenu();
-              controller.deleteAll(controller.getCurrentSheetId());
-            }}
-          >
-            Delete all
-          </Button>
-        </Fragment>
+        <Button
+          onClick={() => {
+            hideContextMenu();
+            controller.deleteAll(controller.getCurrentSheetId());
+          }}
+        >
+          Delete all
+        </Button>
       )}
       {position === ClickPosition.COLUMN_HEADER && (
         <Fragment>

@@ -1,6 +1,11 @@
-import { IController, KeyboardEventItem, ChangeEventType } from '@/types';
+import {
+  IController,
+  KeyboardEventItem,
+  ChangeEventType,
+  EditorStatus,
+} from '@/types';
 import { debounce } from '@/util';
-import { keyboardEventList, scrollBar } from './shortcut';
+import { keyboardEventList, scrollBar, checkFocus } from './shortcut';
 import { coreStore } from '@/containers/store';
 
 function isInputEvent(event: any): boolean {
@@ -8,8 +13,14 @@ function isInputEvent(event: any): boolean {
   return name === 'input' || name === 'textarea';
 }
 
-export function registerGlobalEvent(controller: IController, resizeWindow: (changeSet: Set<ChangeEventType>) => void) {
+export function registerGlobalEvent(
+  controller: IController,
+  resizeWindow: (changeSet: Set<ChangeEventType>) => void,
+) {
   function handleKeydown(event: KeyboardEvent) {
+    if (isInputEvent(event) && !checkFocus(controller)) {
+      return;
+    }
     const list = keyboardEventList.filter((v) => v.key === event.key);
     list.sort((a, b) => b.modifierKey.length - a.modifierKey.length);
     let temp: KeyboardEventItem | null = null;
@@ -25,19 +36,18 @@ export function registerGlobalEvent(controller: IController, resizeWindow: (chan
       }
     }
     if (temp) {
-      event.preventDefault();
       temp.handler(controller);
       return;
     }
     if (event.metaKey || event.ctrlKey) {
       return;
     }
-    if (isInputEvent(event)) {
+    if (checkFocus(controller)) {
       return;
     }
 
     coreStore.mergeState({
-      isCellEditing: true,
+      editorStatus: EditorStatus.EDIT_CELL,
     });
     controller.getMainDom().input?.focus();
   }

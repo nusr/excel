@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: space-between;
   background-color: var(--backgroundColor);
-  height: 22px;
+  height: var(--largePadding);
   border-bottom: 1px solid var(--borderColor);
 }
 
@@ -20,6 +20,18 @@
   background-color: var(--white);
   user-select: none;
 }
+.formula-bar-name-editor {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: none;
+  text-align: center;
+  border-radius: unset;
+  outline: none;
+  font: inherit;
+  overflow: hidden;
+  box-sizing: border-box;
+}
 
 .formula-bar-editor-wrapper {
   border: 1px solid var(--gridStrokeColor);
@@ -30,8 +42,12 @@
 }
 
 .formula-bar-value {
-  padding: 0 4px;
+  padding: 0 var(--tinyPadding);
+  margin: 0;
   display: none;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .formula-bar-value.show {
@@ -40,7 +56,8 @@
 
 .base-editor {
   width: 100%;
-  padding: 0 4px;
+  min-height: 18px;
+  padding: 0 var(--tinyPadding);
   margin: 0;
   border: none;
   border-radius: unset;

@@ -8,9 +8,6 @@ export class CustomError extends Error {
   }
 }
 
-export const paramsError = new CustomError('#VALUE!');
-export const resultError = new CustomError('#NUM!');
-
 export function assert(condition: boolean, message: ErrorTypes = '#VALUE!'): asserts condition {
   if (!condition) {
     throw new CustomError(message);

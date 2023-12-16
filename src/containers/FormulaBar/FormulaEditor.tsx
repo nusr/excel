@@ -1,6 +1,10 @@
 import React, { CSSProperties, useRef, useEffect } from 'react';
-import { CanvasOverlayPosition, IController } from '@/types';
-import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE, isEmpty } from '@/util';
+import { CanvasOverlayPosition, IController, EditorStatus } from '@/types';
+import {
+  DEFAULT_FONT_COLOR,
+  makeFont,
+  DEFAULT_FONT_SIZE,
+} from '@/util';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
 
@@ -10,31 +14,44 @@ interface Props {
   style: CSSProperties | undefined;
 }
 
-export function getEditorStyle(style: CellStoreType): CSSProperties {
+export function getEditorStyle(
+  style: CellStoreType,
+  editorStatus: EditorStatus,
+): CSSProperties | undefined {
+  if (editorStatus === EditorStatus.NONE) {
+    return undefined;
+  }
   const cellPosition: CanvasOverlayPosition = {
     top: style.top,
     left: style.left,
     width: style.width,
     height: style.height,
   };
-  if (isEmpty(style)) {
-    return cellPosition;
-  }
   const font = makeFont(
     style?.isItalic ? 'italic' : 'normal',
     style?.isBold ? 'bold' : '500',
     style?.fontSize || DEFAULT_FONT_SIZE,
     style?.fontFamily,
   );
-  return {
-    ...cellPosition,
+  const editorStyle = {
     backgroundColor: style?.fillColor || 'inherit',
     color: style?.fontColor || DEFAULT_FONT_COLOR,
     font,
   };
+  if (editorStatus === EditorStatus.EDIT_CELL) {
+    return {
+      ...editorStyle,
+      ...cellPosition,
+    };
+  }
+  return editorStyle;
 }
 
-export const FormulaEditor: React.FunctionComponent<Props> = ({ controller, initValue, style }) => {
+export const FormulaEditor: React.FunctionComponent<Props> = ({
+  controller,
+  initValue,
+  style,
+}) => {
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (!ref.current) {
@@ -42,7 +59,15 @@ export const FormulaEditor: React.FunctionComponent<Props> = ({ controller, init
     }
     controller.setMainDom({ input: ref.current });
   }, []);
-  return <input className={styles['base-editor']} ref={ref} defaultValue={initValue} type="text" style={style} />;
+  return (
+    <input
+      className={styles['base-editor']}
+      ref={ref}
+      defaultValue={initValue}
+      type="text"
+      style={style}
+    />
+  );
 };
 
 FormulaEditor.displayName = 'FormulaEditor';

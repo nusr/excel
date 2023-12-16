@@ -30,7 +30,9 @@ import {
 import { parseFormula, CustomError } from '@/formula';
 
 function convertToNumber(list: string[]) {
-  const result = list.map((item) => parseInt(item, 10)).filter((v) => !isNaN(v));
+  const result = list
+    .map((item) => parseInt(item, 10))
+    .filter((v) => !isNaN(v));
   result.sort((a, b) => a - b);
   return result;
 }
@@ -85,7 +87,9 @@ export class Model implements IModel {
         sheetId: item.sheetId,
       },
     };
-    const index = this.workbook.findIndex((v) => v.sheetId === this.currentSheetId);
+    const index = this.workbook.findIndex(
+      (v) => v.sheetId === this.currentSheetId,
+    );
     if (index < 0) {
       this.workbook.push(sheet);
     } else {
@@ -100,7 +104,10 @@ export class Model implements IModel {
   deleteSheet(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
     const list = this.workbook.filter((v) => !v.isHide);
-    assert(list.length >= 2, 'A workbook must contains at least on visible worksheet');
+    assert(
+      list.length >= 2,
+      'A workbook must contains at least on visible worksheet',
+    );
     const { index, lastIndex } = this.getSheetIndex(id);
     this.currentSheetId = this.workbook[lastIndex].sheetId;
     this.workbook.splice(index, 1);
@@ -110,7 +117,10 @@ export class Model implements IModel {
   }
   hideSheet(sheetId?: string | undefined): void {
     const list = this.workbook.filter((v) => !v.isHide);
-    assert(list.length >= 2, 'A workbook must contains at least on visible worksheet');
+    assert(
+      list.length >= 2,
+      'A workbook must contains at least on visible worksheet',
+    );
     const { index, lastIndex } = this.getSheetIndex(sheetId);
     this.workbook[index].isHide = true;
     this.currentSheetId = this.workbook[lastIndex].sheetId;
@@ -186,7 +196,11 @@ export class Model implements IModel {
     return json;
   };
 
-  setCellValues(value: ResultType[][], style: Array<Array<Partial<StyleType>>>, ranges: IRange[]): void {
+  setCellValues(
+    value: ResultType[][],
+    style: Array<Array<Partial<StyleType>>>,
+    ranges: IRange[],
+  ): void {
     const [range] = ranges;
     const { row, col } = range;
     for (let r = 0; r < value.length; r++) {
@@ -222,7 +236,11 @@ export class Model implements IModel {
   getCell = (range: IRange): ModelCellValue => {
     const { row, col, sheetId } = range;
     const realSheetId = sheetId || this.currentSheetId;
-    const cellData = get<ModelCellType>(this, `worksheets[${realSheetId}][${row}][${col}]`, {});
+    const cellData = get<ModelCellType>(
+      this,
+      `worksheets[${realSheetId}][${row}][${col}]`,
+      {},
+    );
     return {
       ...cellData,
       row,
@@ -329,10 +347,13 @@ export class Model implements IModel {
   }
 
   hideCol(colIndex: number, count: number): void {
-    this.customWidth[this.currentSheetId] = this.customWidth[this.currentSheetId] || {};
+    this.customWidth[this.currentSheetId] =
+      this.customWidth[this.currentSheetId] || {};
     for (let i = 0; i < count; i++) {
       const c = colIndex + i;
-      this.customWidth[this.currentSheetId][c] = this.customWidth[this.currentSheetId][c] || {
+      this.customWidth[this.currentSheetId][c] = this.customWidth[
+        this.currentSheetId
+      ][c] || {
         widthOrHeight: CELL_WIDTH,
         isHide: true,
       };
@@ -350,8 +371,11 @@ export class Model implements IModel {
     return temp[col].widthOrHeight || CELL_WIDTH;
   }
   setColWidth(col: number, width: number): void {
-    this.customWidth[this.currentSheetId] = this.customWidth[this.currentSheetId] || {};
-    this.customWidth[this.currentSheetId][col] = this.customWidth[this.currentSheetId][col] || {
+    this.customWidth[this.currentSheetId] =
+      this.customWidth[this.currentSheetId] || {};
+    this.customWidth[this.currentSheetId][col] = this.customWidth[
+      this.currentSheetId
+    ][col] || {
       widthOrHeight: 0,
       isHide: false,
     };
@@ -359,10 +383,13 @@ export class Model implements IModel {
   }
 
   hideRow(rowIndex: number, count: number): void {
-    this.customHeight[this.currentSheetId] = this.customHeight[this.currentSheetId] || {};
+    this.customHeight[this.currentSheetId] =
+      this.customHeight[this.currentSheetId] || {};
     for (let i = 0; i < count; i++) {
       const r = rowIndex + i;
-      this.customHeight[this.currentSheetId][r] = this.customHeight[this.currentSheetId][r] || {
+      this.customHeight[this.currentSheetId][r] = this.customHeight[
+        this.currentSheetId
+      ][r] || {
         widthOrHeight: CELL_HEIGHT,
         isHide: true,
       };
@@ -380,8 +407,11 @@ export class Model implements IModel {
     return temp[row].widthOrHeight || CELL_HEIGHT;
   }
   setRowHeight(row: number, height: number): void {
-    this.customHeight[this.currentSheetId] = this.customHeight[this.currentSheetId] || {};
-    this.customHeight[this.currentSheetId][row] = this.customHeight[this.currentSheetId][row] || {
+    this.customHeight[this.currentSheetId] =
+      this.customHeight[this.currentSheetId] || {};
+    this.customHeight[this.currentSheetId][row] = this.customHeight[
+      this.currentSheetId
+    ][row] || {
       widthOrHeight: 0,
       isHide: false,
     };
@@ -454,17 +484,31 @@ export class Model implements IModel {
     }
     this.definedNames = definedNames;
   }
-  getDefineName(row: number, col: number): string {
+  getDefineName(range: IRange): string {
+    const sheetId = range.sheetId || this.currentSheetId;
     for (const key of Object.keys(this.definedNames)) {
       const t = this.definedNames[key];
       if (!t) {
         continue;
       }
-      if (t.row === row && t.col === col) {
+      if (t.row === range.row && t.col === range.col && t.sheetId === sheetId) {
         return key;
       }
     }
     return '';
+  }
+  setDefineName(range: IRange, name: string): void {
+    const oldName = this.getDefineName(range);
+    if (oldName in this.definedNames) {
+      delete this.definedNames[oldName];
+    }
+    this.definedNames[name] = {
+      ...range,
+      sheetId: this.currentSheetId,
+      colCount: 1,
+      rowCount: 1,
+    };
+    this.computeAllCell();
   }
 
   private setCellValue(value: ResultType, range: Coordinate): void {

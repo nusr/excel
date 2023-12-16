@@ -2,6 +2,7 @@
   position: relative;
 }
 .portal {
+  border-radius: var(--borderRadius);
   position: absolute;
   z-index: 3;
   background-color: var(--white);
@@ -25,7 +26,6 @@
   width: 100%;
   box-sizing: border-box;
   text-align: center;
-  border-radius: var(--borderRadius);
 }
 .menuItem {
   padding: 6px 16px;
