@@ -510,6 +510,9 @@ export class Model implements IModel {
     };
     this.computeAllCell();
   }
+  checkDefineName (name: string): IRange | undefined {
+    return this.definedNames[name];
+  }
 
   private setCellValue(value: ResultType, range: Coordinate): void {
     const { row, col } = range;

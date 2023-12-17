@@ -411,8 +411,8 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
   };
   for (const item of definedNames) {
     const range = parseReference(item['#text'], convertSheetName);
-    if (range && range.sheetId) {
-      result.definedNames[item.name] = range;
+    if (range && range.sheetId && item?.name) {
+      result.definedNames[item.name.toLowerCase()] = range;
     }
   }
   return result;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { IController } from '@/types';
 import styles from './index.module.css';
+import { parseCell } from '@/util';
 
 interface Props {
   controller: IController;
@@ -20,14 +21,23 @@ export const DefineName: React.FunctionComponent<Props> = ({
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      const t = event.currentTarget.value;
+      const t = event.currentTarget.value.toLowerCase();
+      ref.current?.blur();
+      const oldRange = controller.checkDefineName(t);
+      if (oldRange) {
+        controller.setActiveCell(oldRange);
+        return;
+      } 
       if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(t) && t.length <= 255) {
-        controller.setDefineName(controller.getActiveCell(), t);
+        const range = parseCell(t);
+        if (range) {
+          controller.setActiveCell(range);
+        } else {
+          controller.setDefineName(controller.getActiveCell(), t);
+        }
       } else {
         setValue(displayName);
       }
-      // TODO: Define name may be cell reference, should jump to cell reference
-      ref.current?.blur();
     }
   };
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

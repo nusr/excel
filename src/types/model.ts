@@ -122,6 +122,7 @@ export interface IBaseModel {
   deleteAll: (sheetId?: string) => void;
   getDefineName: (range: IRange) => string;
   setDefineName: (range: IRange, name: string) => void;
+  checkDefineName: (name: string) => IRange | undefined;
 }
 
 export interface UndoRedoItem {

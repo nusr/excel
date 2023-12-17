@@ -178,7 +178,11 @@ export class Controller implements IController {
     return this.model.toJSON();
   }
 
-  setCellValues(value: ResultType[][], style: Array<Array<Partial<StyleType>>>, ranges: IRange[]): void {
+  setCellValues(
+    value: ResultType[][],
+    style: Array<Array<Partial<StyleType>>>,
+    ranges: IRange[],
+  ): void {
     this.model.setCellValues(value, style, ranges);
     this.changeSet.add('setCellValues');
     this.emitChange();
@@ -378,7 +382,9 @@ export class Controller implements IController {
   }
   private parseHTML(htmlString: string) {
     const parser = new DOMParser();
-    const text = htmlString.replace('<style>\r\n<!--table', '<style>').replace('-->\r\n</style>', '</style>');
+    const text = htmlString
+      .replace('<style>\r\n<!--table', '<style>')
+      .replace('-->\r\n</style>', '</style>');
     const doc = parser.parseFromString(text, 'text/html');
     const trList = doc.querySelectorAll('tr');
     const styleList = doc.querySelectorAll('style');
@@ -449,7 +455,10 @@ export class Controller implements IController {
       result.push(temp);
       html.push(t);
     }
-    const htmlData = generateHTML(classList.join('\n'), html.map((item) => `<tr>${item.join('\n')}</tr>`).join('\n'));
+    const htmlData = generateHTML(
+      classList.join('\n'),
+      html.map((item) => `<tr>${item.join('\n')}</tr>`).join('\n'),
+    );
     const text = `${result.map((item) => item.join('\t')).join('\r\n')}\r\n`;
     return {
       [PLAIN_FORMAT]: text,
@@ -556,5 +565,8 @@ export class Controller implements IController {
     this.model.setDefineName(range, name);
     this.changeSet.add('content');
     this.emitChange();
+  }
+  checkDefineName(name: string): IRange | undefined {
+    return this.model.checkDefineName(name);
   }
 }
