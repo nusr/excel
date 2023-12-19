@@ -151,9 +151,10 @@ async function buildDev() {
   const { port } = await ctx.serve({
     servedir: distDir,
   });
+  fs.writeFileSync(path.join(process.cwd(), 'port.txt'), String(port), 'utf-8');
   const url = `http://localhost:${port}`;
 
-  console.log(`running in: ${url}`);
+  console.log(url);
 }
 
 async function init() {

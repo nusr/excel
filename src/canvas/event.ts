@@ -18,9 +18,6 @@ export function registerGlobalEvent(
   resizeWindow: (changeSet: Set<ChangeEventType>) => void,
 ) {
   function handleKeydown(event: KeyboardEvent) {
-    if (isInputEvent(event) && !checkFocus(controller)) {
-      return;
-    }
     const list = keyboardEventList.filter((v) => v.key === event.key);
     list.sort((a, b) => b.modifierKey.length - a.modifierKey.length);
     let temp: KeyboardEventItem | null = null;

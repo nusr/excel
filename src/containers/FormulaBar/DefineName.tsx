@@ -20,6 +20,8 @@ export const DefineName: React.FunctionComponent<Props> = ({
   }, [displayName]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    console.log('define name');
+    event.stopPropagation();
     if (event.key === 'Enter') {
       const t = event.currentTarget.value.toLowerCase();
       ref.current?.blur();

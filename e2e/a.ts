@@ -1,9 +1,10 @@
 import * as puppeteer from 'puppeteer';
 import fs from 'fs';
+import path from 'path';
+
 declare global {
   // eslint-disable-next-line no-var
   var browserPage: puppeteer.Page;
-  const __portFilePath: string;
 }
 
 let port = 8000;
@@ -30,7 +31,7 @@ async function setupPuppeteer() {
 }
 
 function getPort() {
-  const filePath = __portFilePath;
+  const filePath = path.join(process.cwd(), 'port.txt');
   const check = fs.existsSync(filePath);
   if (check) {
     const portData = fs.readFileSync(filePath, 'utf-8');

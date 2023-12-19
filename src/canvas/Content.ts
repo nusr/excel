@@ -1,5 +1,21 @@
-import { isEmpty, thinLineWidth, npx, dpr, intToColumnName, Range, theme, canvasLog } from '@/util';
-import { fillRect, fillText, drawLines, renderCell, drawTriangle, resizeCanvas } from './util';
+import {
+  isEmpty,
+  thinLineWidth,
+  npx,
+  dpr,
+  intToColumnName,
+  Range,
+  theme,
+  canvasLog,
+} from '@/util';
+import {
+  fillRect,
+  fillText,
+  drawLines,
+  renderCell,
+  drawTriangle,
+  resizeCanvas,
+} from './util';
 import { HEADER_STYLE } from './constant';
 import { Point, ContentView, IController, EventType } from '@/types';
 
@@ -92,12 +108,17 @@ export class Content implements ContentView {
     for (let rowIndex = row; rowIndex < endRow; rowIndex++) {
       x = headerSize.width;
       for (let colIndex = col; colIndex < endCol; colIndex++) {
-        const cellInfo = controller.getCell(new Range(rowIndex, colIndex, 1, 1, currentSheetId));
+        const cellInfo = controller.getCell(
+          new Range(rowIndex, colIndex, 1, 1, currentSheetId),
+        );
         if (isEmpty(cellInfo.value) && isEmpty(cellInfo.style)) {
           x += controller.getColWidth(colIndex);
           continue;
         }
         const cellSize = controller.getCellSize(rowIndex, colIndex);
+        if (cellSize.width <= 0 || cellSize.height <= 0) {
+          continue
+        }
         const { wrapHeight = 0, fontSizeHeight = 0 } = renderCell(ctx, {
           ...cellInfo,
           ...cellSize,
@@ -136,7 +157,9 @@ export class Content implements ContentView {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
     const { row: rowIndex, col: colIndex } = controller.getScroll();
-    const { rowCount, colCount } = this.controller.getSheetInfo(this.controller.getCurrentSheetId());
+    const { rowCount, colCount } = this.controller.getSheetInfo(
+      this.controller.getCurrentSheetId(),
+    );
     const lineWidth = thinLineWidth();
     this.ctx.save();
     this.ctx.fillStyle = theme.white;
@@ -203,7 +226,9 @@ export class Content implements ContentView {
     const { controller } = this;
     const { row: rowIndex } = controller.getScroll();
     const headerSize = controller.getHeaderSize();
-    const { rowCount } = controller.getSheetInfo(controller.getCurrentSheetId());
+    const { rowCount } = controller.getSheetInfo(
+      controller.getCurrentSheetId(),
+    );
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
     fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
@@ -237,7 +262,9 @@ export class Content implements ContentView {
 
     const { col: colIndex } = controller.getScroll();
     const headerSize = controller.getHeaderSize();
-    const { colCount } = controller.getSheetInfo(controller.getCurrentSheetId());
+    const { colCount } = controller.getSheetInfo(
+      controller.getCurrentSheetId(),
+    );
     const pointList: Point[] = [];
     this.ctx.save();
     this.ctx.fillStyle = theme.backgroundColor;
@@ -254,7 +281,11 @@ export class Content implements ContentView {
       }
       pointList.push([temp, 0], [temp, headerSize.height]);
       if (colWidth > 0) {
-        this.fillColText(intToColumnName(i), temp + colWidth / 2, headerSize.height);
+        this.fillColText(
+          intToColumnName(i),
+          temp + colWidth / 2,
+          headerSize.height,
+        );
       }
       x += colWidth;
       if (x > width) {

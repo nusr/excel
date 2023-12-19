@@ -7,12 +7,50 @@ import {
 import { BOTTOM_BUFF, SCROLL_SIZE, isMac } from '@/util';
 import { coreStore } from '@/containers/store';
 
+function nextRow(controller: IController, start: number, prev = false): number {
+  let result = start;
+  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+  while (controller.getRowHeight(result) <= 0) {
+    if (prev) {
+      if (result === 0) {
+        break;
+      }
+      result--;
+    } else {
+      if (result === sheetInfo.rowCount - 1) {
+        break;
+      }
+      result++;
+    }
+  }
+  return result;
+}
+
+function nextCol(controller: IController, start: number, prev = false): number {
+  let result = start;
+  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+  while (controller.getColWidth(result) <= 0) {
+    if (prev) {
+      if (result === 0) {
+        break;
+      }
+      result--;
+    } else {
+      if (result === sheetInfo.colCount - 1) {
+        break;
+      }
+      result++;
+    }
+  }
+  return result;
+}
+
 function handleTabClick(controller: IController) {
   checkActiveElement(controller);
   const activeCell = controller.getActiveCell();
   controller.setActiveCell({
     row: activeCell.row,
-    col: activeCell.col + 1,
+    col: nextCol(controller, activeCell.col + 1),
     rowCount: 1,
     colCount: 1,
     sheetId: '',
@@ -24,7 +62,7 @@ function handleEnterClick(controller: IController) {
   checkActiveElement(controller);
   const activeCell = controller.getActiveCell();
   controller.setActiveCell({
-    row: activeCell.row + 1,
+    row: nextRow(controller, activeCell.row + 1),
     col: activeCell.col,
     rowCount: 1,
     colCount: 1,
@@ -310,7 +348,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
       checkActiveElement(controller);
       const activeCell = controller.getActiveCell();
       controller.setActiveCell({
-        row: activeCell.row - 1,
+        row: nextRow(controller, activeCell.row - 1, true),
         col: activeCell.col,
         rowCount: 1,
         colCount: 1,
@@ -340,7 +378,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
       const activeCell = controller.getActiveCell();
       controller.setActiveCell({
         row: activeCell.row,
-        col: activeCell.col - 1,
+        col: nextCol(controller, activeCell.col - 1, true),
         rowCount: 1,
         colCount: 1,
         sheetId: '',
