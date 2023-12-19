@@ -1,5 +1,9 @@
 import React, { useSyncExternalStore, useMemo } from 'react';
-import { FormulaEditor, getEditorStyle } from './FormulaEditor';
+import {
+  FormulaEditor,
+  getEditorStyle,
+  getDisplayStyle,
+} from './FormulaEditor';
 import { classnames, intToColumnName } from '@/util';
 import styles from './index.module.css';
 import { IController, EditorStatus } from '@/types';
@@ -52,6 +56,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
           className={classnames(styles['formula-bar-value'], {
             [styles['show']]: editorStatus !== EditorStatus.EDIT_FORMULA_BAR,
           })}
+          style={getDisplayStyle(activeCell)}
           onClick={handleClick}
         >
           {editorValue}

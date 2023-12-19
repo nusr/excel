@@ -51,7 +51,8 @@
 }
 
 .formula-bar-value.show {
-  display: block;
+  display: flex;
+  align-items: center;
 }
 
 .base-editor {

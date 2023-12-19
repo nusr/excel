@@ -1,6 +1,5 @@
 import React, { CSSProperties, useRef, useEffect } from 'react';
 import { CanvasOverlayPosition, IController, EditorStatus } from '@/types';
-import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE } from '@/util';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
 import { handleTabClick, handleEnterClick } from '../../canvas/shortcut';
@@ -10,7 +9,31 @@ interface Props {
   initValue: string;
   style: CSSProperties | undefined;
 }
-
+export function getDisplayStyle(
+  style: CellStoreType,
+  isFormulaBar = true,
+): CSSProperties {
+  const result: CSSProperties = {};
+  if (style?.isItalic) {
+    result.fontStyle = 'italic';
+  }
+  if (style?.isBold) {
+    result.fontWeight = 'bold';
+  }
+  if (style?.fontFamily) {
+    result.fontFamily = style?.fontFamily;
+  }
+  if (style?.fontSize && !isFormulaBar) {
+    result.fontSize = style?.fontSize;
+  }
+  if (style?.fillColor && !isFormulaBar) {
+    result.backgroundColor = style.fillColor;
+  }
+  if (style?.fontColor && !isFormulaBar) {
+    result.color = style?.fontColor;
+  }
+  return result;
+}
 export function getEditorStyle(
   style: CellStoreType,
   editorStatus: EditorStatus,
@@ -18,30 +41,22 @@ export function getEditorStyle(
   if (editorStatus === EditorStatus.NONE) {
     return undefined;
   }
+  const isFormulaBar = editorStatus === EditorStatus.EDIT_FORMULA_BAR;
   const cellPosition: CanvasOverlayPosition = {
     top: style.top,
     left: style.left,
     width: style.width,
     height: style.height,
   };
-  const font = makeFont(
-    style?.isItalic ? 'italic' : 'normal',
-    style?.isBold ? 'bold' : '500',
-    style?.fontSize || DEFAULT_FONT_SIZE,
-    style?.fontFamily,
-  );
-  const editorStyle = {
-    backgroundColor: style?.fillColor || 'inherit',
-    color: style?.fontColor || DEFAULT_FONT_COLOR,
-    font,
-  };
-  if (editorStatus === EditorStatus.EDIT_CELL) {
-    return {
-      ...editorStyle,
-      ...cellPosition,
-    };
+  const editorStyle = getDisplayStyle(style, isFormulaBar);
+  if (isFormulaBar) {
+    return editorStyle;
   }
-  return editorStyle;
+
+  return {
+    ...editorStyle,
+    ...cellPosition,
+  };
 }
 
 export const FormulaEditor: React.FunctionComponent<Props> = ({

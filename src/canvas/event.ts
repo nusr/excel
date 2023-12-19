@@ -83,16 +83,16 @@ export function registerGlobalEvent(
   }
 
   window.addEventListener('resize', handleResize);
-  window.addEventListener('keydown', handleKeydown);
-  window.addEventListener('wheel', handleWheel);
+  document.body.addEventListener('keydown', handleKeydown);
+  document.body.addEventListener('wheel', handleWheel);
   document.body.addEventListener('paste', handlePaste);
   document.body.addEventListener('copy', handleCopy);
   document.body.addEventListener('cut', handleCut);
 
   return () => {
     window.removeEventListener('resize', handleResize);
-    window.removeEventListener('keydown', handleKeydown);
-    window.removeEventListener('wheel', handleWheel);
+    document.body.removeEventListener('keydown', handleKeydown);
+    document.body.removeEventListener('wheel', handleWheel);
     document.body.removeEventListener('paste', handlePaste);
     document.body.removeEventListener('copy', handleCopy);
     document.body.removeEventListener('cut', handleCut);
