@@ -10,7 +10,7 @@ let port = 8000;
 
 beforeAll(async () => {
   await setupPuppeteer();
-  await sleep(500);
+  await sleep(1000);
   getPort();
 });
 afterAll(async () => {
@@ -49,7 +49,7 @@ export function sleep(milliseconds: number): Promise<unknown> {
 export async function openPage(): Promise<void> {
   const filePath = `http://localhost:${port}`;
   await browserPage.goto(filePath);
-  await sleep(200);
+  await sleep(500);
 }
 
 export function getTestIdSelector(testId: string): string {

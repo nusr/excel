@@ -44,7 +44,7 @@ export const CONCAT = (...list: ResultType[]): string => {
   return list.join('');
 };
 
-const textFormulas: TextFormulaType = {
+const formulas: TextFormulaType = {
   CONCAT,
   CONCATENATE: CONCAT,
   SPLIT,
@@ -59,4 +59,4 @@ const textFormulas: TextFormulaType = {
   T,
 };
 
-export default textFormulas;
+export default formulas;

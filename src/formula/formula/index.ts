@@ -2,9 +2,9 @@ import textFormulas from './text';
 import mathFormulas from './math';
 import type { FormulaType } from '@/types';
 
-const formulas: FormulaType = {
+const allFormulas: FormulaType = {
   ...textFormulas,
   ...mathFormulas,
 };
 export * from './error';
-export default formulas;
+export default allFormulas;

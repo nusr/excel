@@ -28,6 +28,7 @@ npm run start
 - [x] Fill color
 - [x] Text wrapping
 - [x] Formulas
+- [x] Define Name
 - [x] Insert row, column
 - [x] Delete row, column
 - [x] Insert Sheet
@@ -51,6 +52,7 @@ npm run start
 - [x] ASIN
 - [x] ASINH
 - [x] ATAN
+- [x] ATAN2
 - [x] ATANH
 - [x] CHAR
 - [x] CODE
@@ -72,4 +74,3 @@ npm run start
 - [x] UNICHAR
 - [x] UNICODE
 - [x] UPPER
-

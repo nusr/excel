@@ -1,6 +1,6 @@
 import { Scanner } from './scanner';
 import { Parser } from './parser';
-import formulas, { CustomError } from './formula';
+import allFormulas, { CustomError } from './formula';
 import { Interpreter } from './interpreter';
 import {
   CellDataMap,
@@ -14,7 +14,7 @@ export function parseFormula(
   source: string,
   cellData: CellDataMap = new CellDataMapImpl(),
   definedNamesMap: DefinedNamesMap = new DefinedNamesMapImpl(),
-  functionMap: FormulaType = formulas,
+  functionMap: FormulaType = allFormulas,
 ): InterpreterResult {
   let expressionStr = '';
   try {

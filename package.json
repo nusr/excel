@@ -9,14 +9,13 @@
     "build": "node ./scripts/esbuild.js",
     "test": "jest --config ./scripts/unit-test-jest.config.js --forceExit --detectOpenHandles",
     "coverage": "npm run test -- --coverage",
-    "ci": "npm run test && npm run e2e && npm run build && npm run type-check && npm run lint",
+    "ci": "npm run test && npm run e2e && npm run build && npm run type-check && npm run update-md && npm run lint",
     "type-check": "npx tsc",
     "postinstall": "node ./post-install.js",
-    "prebuild": "node ./post-install.js",
+    "prebuild": "npm run postinstall",
     "e2e": "jest --config ./scripts/e2e-jest.config.js --forceExit --detectOpenHandles",
-    "lint": "npm run lint-es && npm run lint-ox",
-    "lint-es": "eslint --fix --quiet --ext  .ts,.tsx ./",
-    "lint-ox": "pnpm dlx oxlint@latest"
+    "lint": "pnpm dlx oxlint@latest && eslint --fix --quiet --ext  .ts,.tsx ./",
+    "update-md": "node ./scripts/update-md.js"
   },
   "repository": {
     "type": "git",

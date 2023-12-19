@@ -23,18 +23,21 @@ export const DefineName: React.FunctionComponent<Props> = ({
     if (event.key === 'Enter') {
       const t = event.currentTarget.value.toLowerCase();
       ref.current?.blur();
-      const oldRange = controller.checkDefineName(t);
-      if (oldRange) {
-        controller.setActiveCell(oldRange);
+      const range = controller.checkDefineName(t);
+      if (range) {
+        setValue(displayName);
+        controller.setActiveCell(range);
         return;
-      } 
+      }
+      const r = parseCell(t);
+      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+      if (r && r.col < sheetInfo.colCount && r.row < sheetInfo.rowCount) {
+        setValue(displayName);
+        controller.setActiveCell(r);
+        return;
+      }
       if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(t) && t.length <= 255) {
-        const range = parseCell(t);
-        if (range) {
-          controller.setActiveCell(range);
-        } else {
-          controller.setDefineName(controller.getActiveCell(), t);
-        }
+        controller.setDefineName(controller.getActiveCell(), t);
       } else {
         setValue(displayName);
       }
