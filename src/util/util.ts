@@ -1,9 +1,6 @@
 import { SHEET_NAME_PREFIX } from './constant';
-import type { WorksheetType } from '@/types';
+import type { WorksheetType, ResultType } from '@/types';
 
-export const isString = (value: any): boolean => {
-  return typeof value === 'string';
-};
 export function isNumber(value: any): boolean {
   if (typeof value === 'number' && !window.isNaN(value)) {
     return true;
@@ -55,17 +52,22 @@ export function getDefaultSheetInfo(
   };
 }
 
-export function isTestEnv(): boolean {
-  return process.env.NODE_ENV === 'test';
-}
-
-export function isDevEnv(): boolean {
-  return process.env.NODE_ENV === 'development';
-}
-
 export function splitToWords(str: string): string[] {
   // unicode
   // graphemer
   const list = new Intl.Segmenter().segment(str);
   return [...list].map((x) => x.segment);
+}
+
+export function convertResultTypeToString(value: ResultType): string {
+  let text = String(value);
+  if (
+    typeof value === 'boolean' ||
+    ['TRUE', 'FALSE'].includes(text.toUpperCase())
+  ) {
+    text = text.toUpperCase();
+  } else if (value === undefined || value === null) {
+    text = '';
+  }
+  return text;
 }

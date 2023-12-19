@@ -5,7 +5,7 @@ import {
   EditorStatus,
 } from '@/types';
 import { debounce } from '@/util';
-import { keyboardEventList, scrollBar, checkFocus } from './shortcut';
+import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';
 
 function isInputEvent(event: any): boolean {
@@ -39,9 +39,6 @@ export function registerGlobalEvent(
     if (event.metaKey || event.ctrlKey) {
       return;
     }
-    if (checkFocus(controller)) {
-      return;
-    }
 
     coreStore.mergeState({
       editorStatus: EditorStatus.EDIT_CELL,
@@ -68,6 +65,7 @@ export function registerGlobalEvent(
     if (isInputEvent(event)) {
       return;
     }
+
     event.preventDefault();
     controller.copy(event);
   }

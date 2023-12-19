@@ -45,7 +45,7 @@ function nextCol(controller: IController, start: number, prev = false): number {
   return result;
 }
 
-function handleTabClick(controller: IController) {
+export function handleTabClick(controller: IController) {
   checkActiveElement(controller);
   const activeCell = controller.getActiveCell();
   controller.setActiveCell({
@@ -58,7 +58,7 @@ function handleTabClick(controller: IController) {
   recalculateScroll(controller);
 }
 
-function handleEnterClick(controller: IController) {
+export function handleEnterClick(controller: IController) {
   checkActiveElement(controller);
   const activeCell = controller.getActiveCell();
   controller.setActiveCell({

@@ -54,25 +54,6 @@ export function setWith<ValueType>(
   return obj;
 }
 
-export function isObjectEqual(a: any, b: any): boolean {
-  if (a === b && a === null) {
-    return true;
-  }
-  if (typeof a === 'object' && typeof b === 'object') {
-    const list1 = Object.keys(a);
-    const list2 = Object.keys(b);
-    if (list1.length === list2.length) {
-      for (const key of list1) {
-        if (a[key] !== b[key]) {
-          return false;
-        }
-      }
-      return true;
-    }
-  }
-  return a === b;
-}
-
 export function deepEqual(x: any, y: any) {
   if (x === y) {
     return true;
@@ -92,17 +73,4 @@ export function deepEqual(x: any, y: any) {
     return true;
   }
   return false;
-}
-
-export function isPlainObject(value: any) {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const prototype = Object.getPrototypeOf(value);
-  return (
-    (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) &&
-    !(Symbol.toStringTag in value) &&
-    !(Symbol.iterator in value)
-  );
 }

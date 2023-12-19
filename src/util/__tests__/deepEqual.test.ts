@@ -8,7 +8,13 @@ describe('deepEqual.test.ts', () => {
       expect(deepEqual(true, true)).toBeTruthy();
       expect(deepEqual(false, false)).toBeTruthy();
       expect(deepEqual([1, 2], [1, 2])).toBeTruthy();
-      expect(deepEqual([{ a: { b: { c: { d: 1 } } } }], [{ a: { b: { c: { d: 1 } } } }])).toBeTruthy();
+      expect(deepEqual([[1, 2], [3]], [[1, 2], [3]])).toBeTruthy();
+      expect(
+        deepEqual(
+          [{ a: { b: { c: { d: 1 } } } }],
+          [{ a: { b: { c: { d: 1 } } } }],
+        ),
+      ).toBeTruthy();
       expect(deepEqual({ test: 1 }, { test: 1 })).toBeTruthy();
       expect(
         deepEqual(
@@ -38,6 +44,8 @@ describe('deepEqual.test.ts', () => {
       expect(deepEqual(1, false)).toBeFalsy();
       expect(deepEqual({}, { 1: 2 })).toBeFalsy();
       expect(deepEqual([1], [2])).toBeFalsy();
+
+      expect(deepEqual([[1, 2], [2]], [[1, 2], [3]])).toBeFalsy();
       expect(
         deepEqual(
           {

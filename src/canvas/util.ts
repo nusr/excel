@@ -11,19 +11,33 @@ import {
   dpr,
   isEmpty,
   splitToWords,
+  convertResultTypeToString,
 } from '@/util';
-import { ModelCellType, CanvasOverlayPosition, ErrorTypes, Point, EUnderLine, IWindowSize, ResultType } from '@/types';
+import {
+  ModelCellType,
+  CanvasOverlayPosition,
+  ErrorTypes,
+  Point,
+  EUnderLine,
+  IWindowSize,
+} from '@/types';
 
 const measureTextMap = new Map<string, IWindowSize>();
 
-export function measureText(ctx: CanvasRenderingContext2D, char: string): IWindowSize {
+export function measureText(
+  ctx: CanvasRenderingContext2D,
+  char: string,
+): IWindowSize {
   const mapKey = `${char}__${ctx.font}`;
   let temp = measureTextMap.get(mapKey);
   if (!temp) {
-    const { actualBoundingBoxDescent, actualBoundingBoxAscent, width } = ctx.measureText(char);
+    const { actualBoundingBoxDescent, actualBoundingBoxAscent, width } =
+      ctx.measureText(char);
     const result: IWindowSize = {
       width: Math.ceil(width / dpr()),
-      height: Math.ceil((actualBoundingBoxDescent + actualBoundingBoxAscent) / dpr()),
+      height: Math.ceil(
+        (actualBoundingBoxDescent + actualBoundingBoxAscent) / dpr(),
+      ),
     };
     measureTextMap.set(mapKey, result);
     temp = result;
@@ -31,34 +45,47 @@ export function measureText(ctx: CanvasRenderingContext2D, char: string): IWindo
   return temp;
 }
 
-export function fillRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number): void {
+export function fillRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): void {
   ctx.fillRect(npx(x), npx(y), npx(width), npx(height));
 }
-export function strokeRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number): void {
+export function strokeRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): void {
   ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
 }
 
-export function clearRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number): void {
+export function clearRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): void {
   ctx.clearRect(npx(x), npx(y), npx(width), npx(height));
 }
 
-export function fillText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number) {
+export function fillText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+) {
   ctx.fillText(text, npx(x), npx(y));
 }
 
 interface IRenderCellResult {
   wrapHeight?: number;
   fontSizeHeight?: number;
-}
-
-function convertValueToString(value: ResultType): string {
-  let text = String(value);
-  if (typeof value === 'boolean' || ['TRUE', 'FALSE'].includes(text.toUpperCase())) {
-    text = text.toUpperCase();
-  } else if (value === undefined || value === null) {
-    text = '';
-  }
-  return text;
 }
 
 function drawUnderlineData(
@@ -112,12 +139,12 @@ export function renderCell(
       fillRect(ctx, left, top, width, height);
     }
   }
-  const text = convertValueToString(value);
+  const text = convertResultTypeToString(value);
   if (ERROR_SET.has(text as ErrorTypes)) {
     fillStyle = ERROR_FORMULA_COLOR;
   }
   const result: IRenderCellResult = {};
-  const texts = splitToWords(text)
+  const texts = splitToWords(text);
   if (texts.length === 0) {
     return result;
   }
@@ -146,7 +173,7 @@ export function renderCell(
   if (style?.isWrapText) {
     let y = top;
     const offset = 4;
-    for (let i = 0; i < textItemList.length;) {
+    for (let i = 0; i < textItemList.length; ) {
       let t = width;
       const lastIndex = i;
       while (i < textItemList.length && textItemList[i].width < t) {
@@ -162,7 +189,10 @@ export function renderCell(
           }
           textData.push(textItemList[k].char);
         }
-        result.fontSizeHeight = Math.max(result.fontSizeHeight || 0, textHeight);
+        result.fontSizeHeight = Math.max(
+          result.fontSizeHeight || 0,
+          textHeight,
+        );
 
         y = y + Math.floor(textHeight / 2) + offset;
         const b = textData.join('');
@@ -195,7 +225,10 @@ export function renderCell(
   return result;
 }
 
-export function drawLines(ctx: CanvasRenderingContext2D, pointList: Point[]): void {
+export function drawLines(
+  ctx: CanvasRenderingContext2D,
+  pointList: Point[],
+): void {
   assert(pointList.length > 0);
   ctx.beginPath();
   for (let i = 0; i < pointList.length; i += 2) {
@@ -207,7 +240,12 @@ export function drawLines(ctx: CanvasRenderingContext2D, pointList: Point[]): vo
   ctx.stroke();
 }
 
-export function drawTriangle(ctx: CanvasRenderingContext2D, point1: Point, point2: Point, point3: Point) {
+export function drawTriangle(
+  ctx: CanvasRenderingContext2D,
+  point1: Point,
+  point2: Point,
+  point3: Point,
+) {
   ctx.beginPath();
   ctx.moveTo(npx(point1[0]), npx(point1[1]));
   ctx.lineTo(npx(point2[0]), npx(point2[1]));
@@ -215,15 +253,31 @@ export function drawTriangle(ctx: CanvasRenderingContext2D, point1: Point, point
   ctx.fill();
 }
 
-export function drawAntLine(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) {
+export function drawAntLine(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
   const oldDash = ctx.getLineDash();
   ctx.setLineDash([npx(8), npx(6)]);
   const offset = dpr() / 2;
-  strokeRect(ctx, x + offset, y + offset, width - offset * 2, height - offset * 2);
+  strokeRect(
+    ctx,
+    x + offset,
+    y + offset,
+    width - offset * 2,
+    height - offset * 2,
+  );
   ctx.setLineDash(oldDash);
 }
 
-export function drawUnderline(ctx: CanvasRenderingContext2D, pointList: Point[], underline: EUnderLine) {
+export function drawUnderline(
+  ctx: CanvasRenderingContext2D,
+  pointList: Point[],
+  underline: EUnderLine,
+) {
   const [start, end] = pointList;
   const offset = dpr();
   const list: Point[] = [
@@ -237,7 +291,11 @@ export function drawUnderline(ctx: CanvasRenderingContext2D, pointList: Point[],
   drawLines(ctx, list);
 }
 
-export function resizeCanvas(canvas: HTMLCanvasElement, width: number, height: number): void {
+export function resizeCanvas(
+  canvas: HTMLCanvasElement,
+  width: number,
+  height: number,
+): void {
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;
   const realWidth = npx(width);

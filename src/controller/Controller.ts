@@ -21,9 +21,11 @@ import {
   isEmpty,
   PLAIN_FORMAT,
   HTML_FORMAT,
+  deepEqual,
   generateHTML,
   convertCanvasStyleToString,
   parseStyle,
+  convertResultTypeToString,
 } from '@/util';
 
 const ROW_TITLE_HEIGHT = 19;
@@ -392,7 +394,6 @@ export class Controller implements IController {
     const resultStyle: Array<Array<Partial<StyleType>>> = [];
     const rowCount = trList.length;
     let colCount = 0;
-
     for (const item of trList) {
       const tdList = item.querySelectorAll('td');
       const temp: string[] = [];
@@ -465,6 +466,26 @@ export class Controller implements IController {
       [HTML_FORMAT]: htmlData,
     };
   }
+  private clearCopyRanges(result: string[][]) {
+    if (this.copyRanges.length === 0 || this.isCut || result.length === 0) {
+      return;
+    }
+    const list: string[][] = [];
+    const [fromRange] = this.copyRanges;
+    const { row, col, rowCount, colCount, sheetId } = fromRange;
+    for (let r = row, i = 0, endRow = row + rowCount; r < endRow; r++, i++) {
+      const arr: string[] = [];
+      for (let c = col, j = 0, endCol = col + colCount; c < endCol; c++, j++) {
+        const v = this.model.getCell(new Range(r, c, 1, 1, sheetId));
+        const t = convertResultTypeToString(v.value);
+        arr.push(t);
+      }
+      list.push(arr);
+    }
+    if (!deepEqual(list, result)) {
+      this.copyRanges = [];
+    }
+  }
   async paste(event?: ClipboardEvent) {
     let html = '';
     let text = '';
@@ -478,20 +499,30 @@ export class Controller implements IController {
     }
     let activeCell = this.getActiveCell();
     this.changeSet.add('setCellValues');
-    controllerLog('paste data', this.copyRanges);
-    if (this.copyRanges.length > 0) {
+    let check = false;
+    if (html) {
+      const result = this.parseHTML(html);
+      if (result.value.length > 0) {
+        activeCell = result.range;
+        this.changeSet.add('setCellStyle');
+        this.model.setCellValues(result.value, result.style, [result.range]);
+        check = true;
+        this.clearCopyRanges(result.value);
+      }
+    }
+    if (!check && text) {
+      const result = this.parseText(text);
+      if (result.value.length > 0) {
+        activeCell = result.range;
+        this.model.setCellValues(result.value, [], [result.range]);
+        check = true;
+        this.clearCopyRanges(result.value);
+      }
+    }
+    if (!check && this.copyRanges.length > 0) {
       const [range] = this.copyRanges.slice();
       this.changeSet.add('setCellStyle');
       activeCell = this.model.pasteRange(range, this.isCut);
-    } else if (html) {
-      const result = this.parseHTML(html);
-      activeCell = result.range;
-      this.changeSet.add('setCellStyle');
-      this.model.setCellValues(result.value, result.style, [result.range]);
-    } else {
-      const result = this.parseText(text);
-      activeCell = result.range;
-      this.model.setCellValues(result.value, [], [result.range]);
     }
     if (this.isCut) {
       this.copyRanges = [];

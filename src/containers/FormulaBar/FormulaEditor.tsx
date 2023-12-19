@@ -1,12 +1,9 @@
 import React, { CSSProperties, useRef, useEffect } from 'react';
 import { CanvasOverlayPosition, IController, EditorStatus } from '@/types';
-import {
-  DEFAULT_FONT_COLOR,
-  makeFont,
-  DEFAULT_FONT_SIZE,
-} from '@/util';
+import { DEFAULT_FONT_COLOR, makeFont, DEFAULT_FONT_SIZE } from '@/util';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
+import { handleTabClick, handleEnterClick } from '../../canvas/shortcut';
 
 interface Props {
   controller: IController;
@@ -59,11 +56,20 @@ export const FormulaEditor: React.FunctionComponent<Props> = ({
     }
     controller.setMainDom({ input: ref.current });
   }, []);
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    event.stopPropagation();
+    if (event.key === 'Enter') {
+      handleEnterClick(controller);
+    } else if (event.key === 'Tab') {
+      handleTabClick(controller);
+    }
+  };
   return (
     <input
       className={styles['base-editor']}
       ref={ref}
       defaultValue={initValue}
+      onKeyDown={handleKeyDown}
       type="text"
       style={style}
     />
