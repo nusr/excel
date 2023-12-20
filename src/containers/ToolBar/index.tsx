@@ -15,7 +15,11 @@ import {
 } from '@/util';
 import { StyleType, EUnderLine, OptionItem, IController } from '@/types';
 import styles from './index.module.css';
-import { activeCellStore, fontFamilyStore } from '@/containers/store';
+import {
+  activeCellStore,
+  fontFamilyStore,
+  coreStore,
+} from '@/containers/store';
 
 interface Props {
   controller: IController;
@@ -42,6 +46,10 @@ const underlineList: OptionItem[] = [
 export const ToolbarContainer: React.FunctionComponent<Props> = ({
   controller,
 }) => {
+  const { canRedo, canUndo } = useSyncExternalStore(
+    coreStore.subscribe,
+    coreStore.getSnapshot,
+  );
   const activeCell = useSyncExternalStore(
     activeCellStore.subscribe,
     activeCellStore.getSnapshot,
@@ -97,7 +105,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
   return (
     <div className={styles['toolbar-wrapper']} data-testid="toolbar">
       <Button
-        disabled={!controller.canUndo}
+        disabled={!canUndo}
         onClick={() => controller.undo()}
         testId="toolbar-undo"
         title="undo"
@@ -105,7 +113,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         <Icon name="undo" />
       </Button>
       <Button
-        disabled={!controller.canRedo}
+        disabled={!canRedo}
         onClick={() => controller.redo()}
         testId="toolbar-redo"
         title="redo"

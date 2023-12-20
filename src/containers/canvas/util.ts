@@ -92,7 +92,16 @@ const handleStateChange = (
     sheetListStore.setState(sheetList);
   }
   if (changeSet.has('currentSheetId')) {
-    coreStore.mergeState({ currentSheetId: controller.getCurrentSheetId() });
+    coreStore.mergeState({
+      currentSheetId: controller.getCurrentSheetId(),
+      canRedo: controller.canRedo(),
+      canUndo: controller.canUndo(),
+    });
+  } else {
+    coreStore.mergeState({
+      canRedo: controller.canRedo(),
+      canUndo: controller.canUndo(),
+    });
   }
   if (changeSet.has('scroll')) {
     const scroll = controller.getScroll();

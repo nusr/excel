@@ -32,13 +32,15 @@ function getSheetKey(sheetId: string) {
   return `${WORK_SHEETS_PREFIX}${sheetId}`;
 }
 
+const modelName = 'model';
+
 export class Model implements IModel {
-  private model: Y.Map<any>;
   private doc: Y.Doc;
   private undoManager: Y.UndoManager;
   constructor() {
     const doc = new Y.Doc();
-    const model = doc.getMap('model');
+    const model = doc.getMap(modelName);
+
     const workbook = new Y.Array();
     const mergeCells = new Y.Array();
     const worksheets = new Y.Map();
@@ -52,13 +54,15 @@ export class Model implements IModel {
     model.set('customHeight', customHeight);
     model.set('customWidth', customWidth);
     model.set('definedNames', definedNames);
-    this.model = model;
-    this.undoManager = new Y.UndoManager(workbook);
+
     this.doc = doc;
-    // doc.on('update', (a, b, c, tr: Y.Transaction) => {
-    //   console.log(tr.changed.values());
-    //   console.log(tr.changed.keys());
+    // doc.on('update', (...args: any[]) => {
+    //   console.log(args[3]);
     // });
+    this.undoManager = new Y.UndoManager(model);
+  }
+  private get model(): Y.Map<any> {
+    return this.doc.getMap(modelName);
   }
   private get workbook(): Y.Array<WorksheetType> {
     return this.model.get('workbook');
@@ -204,9 +208,10 @@ export class Model implements IModel {
     const sheetInfo = this.workbook.get(index);
     sheetInfo.name = sheetName;
   }
-  getSheetInfo(id: string = this.currentSheetId): WorksheetType {
+  getSheetInfo(id?: string): WorksheetType {
     const list = this.getSheetList();
-    const item = list.find((v) => v.sheetId === id);
+    const sheetId = id || this.currentSheetId;
+    const item = list.find((v) => v.sheetId === sheetId);
     assert(item !== undefined);
     return item;
   }
@@ -244,6 +249,7 @@ export class Model implements IModel {
       }
     }
     this.computeAllCell();
+    this.undoManager.clear(true, true);
   };
   toJSON = (): WorkBookJSON => {
     const json: any = {
@@ -469,10 +475,10 @@ export class Model implements IModel {
     this.customHeight.set(key, data);
   }
   canRedo(): boolean {
-    return true;
+    return this.undoManager.canRedo();
   }
   canUndo(): boolean {
-    return true;
+    return this.undoManager.canUndo();
   }
   undo(): void {
     this.undoManager.undo();

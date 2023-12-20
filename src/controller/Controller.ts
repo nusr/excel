@@ -110,40 +110,46 @@ export class Controller implements IController {
     if (id === this.getCurrentSheetId()) {
       return;
     }
-    this.model.setCurrentSheetId(id);
-    this.changeSet.add('currentSheetId');
-    const pos = this.getActiveCell();
-    this.setSheetCell(pos);
-    this.computeViewSize();
-    this.setScroll(this.getScroll());
+    this.model.transaction(() => {
+      this.model.setCurrentSheetId(id);
+      this.changeSet.add('currentSheetId');
+      const pos = this.getActiveCell();
+      this.setSheetCell(pos);
+      this.computeViewSize();
+      this.setScroll(this.getScroll());
+    });
   }
   addSheet = (): void => {
     this.changeSet.add('sheetList');
     this.changeSet.add('currentSheetId');
-    this.model.addSheet();
-    this.setSheetCell({
-      row: 0,
-      col: 0,
-      rowCount: 1,
-      colCount: 1,
-      sheetId: '',
-    });
-    this.computeViewSize();
-    this.setScroll({
-      top: 0,
-      left: 0,
-      row: 0,
-      col: 0,
-      scrollLeft: 0,
-      scrollTop: 0,
+    this.model.transaction(() => {
+      this.model.addSheet();
+      this.setSheetCell({
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
+      this.computeViewSize();
+      this.setScroll({
+        top: 0,
+        left: 0,
+        row: 0,
+        col: 0,
+        scrollLeft: 0,
+        scrollTop: 0,
+      });
     });
   };
   deleteSheet = (sheetId?: string): void => {
-    this.model.deleteSheet(sheetId);
-    this.changeSet.add('sheetList');
-    this.changeSet.add('currentSheetId');
-    this.changeSet.add('setActiveCell');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.deleteSheet(sheetId);
+      this.changeSet.add('sheetList');
+      this.changeSet.add('currentSheetId');
+      this.changeSet.add('setActiveCell');
+      this.emitChange();
+    });
   };
   hideSheet(sheetId?: string | undefined): void {
     this.model.hideSheet(sheetId);
@@ -166,14 +172,16 @@ export class Controller implements IController {
   }
   fromJSON(json: WorkBookJSON): void {
     controllerLog('loadJSON', json);
-    this.model.fromJSON(json);
-    const activeCell = this.getActiveCell();
-    this.changeSet.add('sheetList');
-    this.changeSet.add('currentSheetId');
-    this.changeSet.add('setActiveCell');
-    this.setSheetCell(activeCell);
-    this.computeViewSize();
-    this.emitChange();
+    this.model.transaction(() => {
+      this.model.fromJSON(json);
+      const activeCell = this.getActiveCell();
+      this.changeSet.add('sheetList');
+      this.changeSet.add('currentSheetId');
+      this.changeSet.add('setActiveCell');
+      this.setSheetCell(activeCell);
+      this.computeViewSize();
+      this.emitChange();
+    });
   }
   toJSON(): WorkBookJSON {
     return this.model.toJSON();
@@ -184,17 +192,21 @@ export class Controller implements IController {
     style: Array<Array<Partial<StyleType>>>,
     ranges: IRange[],
   ): void {
-    this.model.setCellValues(value, style, ranges);
-    this.changeSet.add('setCellValues');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.setCellValues(value, style, ranges);
+      this.changeSet.add('setCellValues');
+      this.emitChange();
+    });
   }
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
     if (isEmpty(style)) {
       return;
     }
-    this.model.setCellStyle(style, ranges);
-    this.changeSet.add('setCellStyle');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.setCellStyle(style, ranges);
+      this.changeSet.add('setCellStyle');
+      this.emitChange();
+    });
   }
   getCell = (range: IRange) => {
     const result = this.model.getCell(range);
@@ -207,20 +219,24 @@ export class Controller implements IController {
     return this.model.canUndo();
   }
   undo() {
-    this.model.undo();
-    this.changeSet.add('setActiveCell');
-    this.changeSet.add('sheetList');
-    this.changeSet.add('currentSheetId');
-    this.changeSet.add('scroll');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.undo();
+      this.changeSet.add('setActiveCell');
+      this.changeSet.add('sheetList');
+      this.changeSet.add('currentSheetId');
+      this.changeSet.add('scroll');
+      this.emitChange();
+    });
   }
   redo() {
-    this.model.redo();
-    this.changeSet.add('setActiveCell');
-    this.changeSet.add('sheetList');
-    this.changeSet.add('currentSheetId');
-    this.changeSet.add('scroll');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.redo();
+      this.changeSet.add('setActiveCell');
+      this.changeSet.add('sheetList');
+      this.changeSet.add('currentSheetId');
+      this.changeSet.add('scroll');
+      this.emitChange();
+    });
   }
   getColWidth(col: number): number {
     return this.model.getColWidth(col);
@@ -489,7 +505,12 @@ export class Controller implements IController {
       this.copyRanges = [];
     }
   }
-  async paste(event?: ClipboardEvent) {
+  paste(event?: ClipboardEvent) {
+    this.transaction(() => {
+      this.basePaste(event);
+    });
+  }
+  private async basePaste(event?: ClipboardEvent) {
     let html = '';
     let text = '';
     if (!event) {
@@ -541,19 +562,21 @@ export class Controller implements IController {
     this.setActiveCell(activeCell);
   }
   copy(event?: ClipboardEvent): void {
-    this.copyRanges = [this.getActiveCell()];
-    this.isCut = false;
-    const data = this.getCopyData();
-    if (event) {
-      const keyList = Object.keys(data) as ClipboardType[];
-      for (const key of keyList) {
-        event.clipboardData?.setData(key, data[key]);
+    this.transaction(() => {
+      this.copyRanges = [this.getActiveCell()];
+      this.isCut = false;
+      const data = this.getCopyData();
+      if (event) {
+        const keyList = Object.keys(data) as ClipboardType[];
+        for (const key of keyList) {
+          event.clipboardData?.setData(key, data[key]);
+        }
+      } else {
+        this.hooks.copyOrCut(data, 'copy');
       }
-    } else {
-      this.hooks.copyOrCut(data, 'copy');
-    }
-    this.changeSet.add('antLine');
-    this.emitChange();
+      this.changeSet.add('antLine');
+      this.emitChange();
+    });
   }
   cut(event?: ClipboardEvent) {
     this.copyRanges = [this.getActiveCell()];
