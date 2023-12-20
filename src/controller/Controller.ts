@@ -87,7 +87,6 @@ export class Controller implements IController {
     const result = this.changeSet;
     this.changeSet = new Set<ChangeEventType>();
     this.hooks.modelChange(result);
-    this.model.record();
   }
   getActiveCell(): IRange {
     const currentSheetId = this.model.getCurrentSheetId();
@@ -209,14 +208,18 @@ export class Controller implements IController {
   }
   undo() {
     this.model.undo();
-    this.changeSet.add('setCellValues');
-    this.changeSet.add('setCellStyle');
+    this.changeSet.add('setActiveCell');
+    this.changeSet.add('sheetList');
+    this.changeSet.add('currentSheetId');
+    this.changeSet.add('scroll');
     this.emitChange();
   }
   redo() {
     this.model.redo();
-    this.changeSet.add('setCellValues');
-    this.changeSet.add('setCellStyle');
+    this.changeSet.add('setActiveCell');
+    this.changeSet.add('sheetList');
+    this.changeSet.add('currentSheetId');
+    this.changeSet.add('scroll');
     this.emitChange();
   }
   getColWidth(col: number): number {
@@ -599,5 +602,8 @@ export class Controller implements IController {
   }
   checkDefineName(name: string): IRange | undefined {
     return this.model.checkDefineName(name);
+  }
+  transaction(func: () => void): void {
+    this.model.transaction(func);
   }
 }

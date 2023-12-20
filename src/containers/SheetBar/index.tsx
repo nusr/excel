@@ -1,4 +1,8 @@
-import React, { FunctionComponent, useSyncExternalStore, useState } from 'react';
+import React, {
+  FunctionComponent,
+  useSyncExternalStore,
+  useState,
+} from 'react';
 import { classnames, theme, DEFAULT_POSITION } from '@/util';
 import { Button, Icon } from '../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
@@ -11,10 +15,16 @@ interface Props {
 }
 
 export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
-  const sheetList = useSyncExternalStore(sheetListStore.subscribe, sheetListStore.getSnapshot);
+  const sheetList = useSyncExternalStore(
+    sheetListStore.subscribe,
+    sheetListStore.getSnapshot,
+  );
   // filter hide sheet
   const realSheetList = sheetList.filter((v) => !v.disabled);
-  const { currentSheetId } = useSyncExternalStore(coreStore.subscribe, coreStore.getSnapshot);
+  const { currentSheetId } = useSyncExternalStore(
+    coreStore.subscribe,
+    coreStore.getSnapshot,
+  );
   const [menuPosition, setMenuPosition] = useState(DEFAULT_POSITION);
   const [editing, setEditing] = useState(false);
 
@@ -29,8 +39,8 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
     return false;
   };
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    event.stopPropagation();
     if (event.key === 'Enter') {
-      event.stopPropagation();
       setSheetName(event.currentTarget.value);
     }
   };
@@ -53,9 +63,15 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
               }}
             >
               {showInput ? (
-                <input className={styles['sheet-bar-input']} defaultValue={item.label} onKeyDown={handleKeyDown} />
+                <input
+                  className={styles['sheet-bar-input']}
+                  defaultValue={item.label}
+                  onKeyDown={handleKeyDown}
+                />
               ) : (
-                <span className={styles['sheet-bar-item-text']}>{item.label}</span>
+                <span className={styles['sheet-bar-item-text']}>
+                  {item.label}
+                </span>
               )}
             </div>
           );

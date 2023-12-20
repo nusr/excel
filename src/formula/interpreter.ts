@@ -151,7 +151,7 @@ export class Interpreter implements Visitor {
     const { value, type } = expr.value;
     const defineName = value.toLowerCase();
     if (this.definedNamesMap.has(defineName)) {
-      const temp = this.definedNamesMap.get(defineName);
+      const temp = this.definedNamesMap.get(defineName)!;
       return this.cellDataMap.get(temp.row, temp.col, temp.sheetId);
     }
     const funcName = value.toUpperCase();

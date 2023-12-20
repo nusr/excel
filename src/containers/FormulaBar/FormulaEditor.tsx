@@ -74,9 +74,13 @@ export const FormulaEditor: React.FunctionComponent<Props> = ({
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     event.stopPropagation();
     if (event.key === 'Enter') {
-      handleEnterClick(controller);
+      controller.transaction(() => {
+        handleEnterClick(controller);
+      });
     } else if (event.key === 'Tab') {
-      handleTabClick(controller);
+      controller.transaction(() => {
+        handleTabClick(controller);
+      });
     }
   };
   return (

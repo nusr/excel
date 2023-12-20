@@ -49,7 +49,7 @@ export interface CellDataMap {
 
 export interface DefinedNamesMap {
   set: (name: string, value: IRange) => void;
-  get: (name: string) => IRange;
+  get: (name: string) => IRange | undefined;
   has: (name: string) => boolean;
 }
 

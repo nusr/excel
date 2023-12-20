@@ -20,6 +20,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = ({
     exportToCsv(`excel_${Date.now()}.csv`, controller);
   };
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.stopPropagation();
     const file = event.target.files?.[0];
     if (!file) {
       return;

@@ -100,6 +100,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         disabled={!controller.canUndo}
         onClick={() => controller.undo()}
         testId="toolbar-undo"
+        title="undo"
       >
         <Icon name="undo" />
       </Button>
@@ -107,6 +108,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         disabled={!controller.canRedo}
         onClick={() => controller.redo()}
         testId="toolbar-redo"
+        title="redo"
       >
         <Icon name="redo" />
       </Button>

@@ -85,17 +85,21 @@ export interface WorkBookJSON {
 }
 
 export interface IModel extends IBaseModel {
-  record: () => void;
   pasteRange: (range: IRange, isCut: boolean) => IRange;
 }
 
 export interface IBaseModel {
+  transaction: (func: () => void) => void;
   getCell: (range: IRange) => ModelCellValue;
   getColWidth: (col: number) => number;
   setColWidth: (col: number, width: number) => void;
   getRowHeight: (row: number) => number;
   setRowHeight: (row: number, height: number) => void;
-  setCellValues: (value: ResultType[][], style: Array<Array<Partial<StyleType>>>, ranges: IRange[]) => void;
+  setCellValues: (
+    value: ResultType[][],
+    style: Array<Array<Partial<StyleType>>>,
+    ranges: IRange[],
+  ) => void;
   setActiveCell: (range: IRange) => void;
   setCurrentSheetId: (id: string) => void;
   getCurrentSheetId: () => string;

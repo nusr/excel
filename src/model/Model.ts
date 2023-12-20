@@ -1,15 +1,14 @@
 import {
   StyleType,
-  ModelCellType,
   WorkBookJSON,
   WorksheetType,
   Coordinate,
   IModel,
   ResultType,
   IRange,
-  IHistory,
-  UndoRedoItem,
   ModelCellValue,
+  CustomHeightOrWidthItem,
+  ModelRowType,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -19,7 +18,6 @@ import {
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
   isEmpty,
-  get,
   setWith,
   isSameRange,
   CELL_HEIGHT,
@@ -28,6 +26,7 @@ import {
   XLSX_MAX_COL_COUNT,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
+import * as Y from 'yjs';
 
 function convertToNumber(list: string[]) {
   const result = list
@@ -38,27 +37,94 @@ function convertToNumber(list: string[]) {
 }
 
 export class Model implements IModel {
-  private currentSheetId = '';
-  private workbook: WorkBookJSON['workbook'] = [];
-  private worksheets: WorkBookJSON['worksheets'] = {};
-  private mergeCells: WorkBookJSON['mergeCells'] = [];
-  private customHeight: WorkBookJSON['customHeight'] = {};
-  private customWidth: WorkBookJSON['customWidth'] = {};
-  private history: IHistory;
-  private definedNames: WorkBookJSON['definedNames'] = {};
-  constructor(history: IHistory) {
-    this.history = history;
+  private model: Y.Map<any>;
+  private doc: Y.Doc;
+  private undoManager: Y.UndoManager;
+  constructor() {
+    const doc = new Y.Doc();
+    const model = doc.getMap('model');
+    const workbook = new Y.Array();
+    const mergeCells = new Y.Array();
+    const worksheets = new Y.Map();
+    const customHeight = new Y.Map();
+    const customWidth = new Y.Map();
+    const definedNames = new Y.Map();
+    model.set('workbook', workbook);
+    model.set('currentSheetId', '');
+    model.set('mergeCells', mergeCells);
+    model.set('worksheets', worksheets);
+    model.set('customHeight', customHeight);
+    model.set('customWidth', customWidth);
+    model.set('definedNames', definedNames);
+    this.model = model;
+    (window as any).model = model;
+    this.undoManager = new Y.UndoManager(workbook);
+    this.doc = doc;
+    doc.on('update', (update: Uint8Array, _, doc: Y.Doc, tr: Y.Transaction) => {
+      console.log(update);
+      console.log(doc);
+      console.log(tr);
+    });
   }
+  private get workbook(): Y.Array<WorksheetType> {
+    return this.model.get('workbook');
+  }
+  private set workbook(arr: WorksheetType[]) {
+    const list = new Y.Array();
+    list.push(arr);
+    this.model.set('workbook', list);
+  }
+  private get mergeCells(): Y.Array<IRange> {
+    return this.model.get('mergeCells');
+  }
+  private set mergeCells(arr: IRange[]) {
+    const list = new Y.Array();
+    list.push(arr);
+    this.model.set('mergeCells', list);
+  }
+
+  private get definedNames(): Y.Map<IRange> {
+    return this.model.get('definedNames');
+  }
+  private set definedNames(obj: Record<string, IRange>) {
+    this.model.set('definedNames', new Y.Map(Object.entries(obj)));
+  }
+
+  private get customHeight(): Y.Map<CustomHeightOrWidthItem> {
+    return this.model.get('customHeight');
+  }
+  private set customHeight(obj: WorkBookJSON['customHeight']) {
+    this.model.set('customHeight', new Y.Map(Object.entries(obj)));
+  }
+
+  private get customWidth(): Y.Map<CustomHeightOrWidthItem> {
+    return this.model.get('customWidth');
+  }
+  private set customWidth(obj: WorkBookJSON['customWidth']) {
+    this.model.set('customWidth', new Y.Map(Object.entries(obj)));
+  }
+
+  private get worksheets(): Y.Map<ModelRowType> {
+    return this.model.get('worksheets');
+  }
+  private set worksheets(obj: WorkBookJSON['worksheets']) {
+    this.model.set('worksheets', new Y.Map(Object.entries(obj)));
+  }
+
   getSheetList(): WorkBookJSON['workbook'] {
-    return this.workbook.slice();
+    if (!this.workbook) {
+      return [];
+    }
+    return this.workbook.toArray();
   }
   setActiveCell(range: IRange): void {
-    const index = this.workbook.findIndex((v) => v.sheetId === range.sheetId);
+    const list = this.getSheetList();
+    const index = list.findIndex((v) => v.sheetId === range.sheetId);
     if (index < 0) {
       return;
     }
     const { row, col } = range;
-    const sheet = this.workbook[index];
+    const sheet = list[index];
     if (row < 0 || col < 0 || row >= sheet.rowCount || col >= sheet.colCount) {
       return;
     }
@@ -66,14 +132,11 @@ export class Model implements IModel {
     if (isSameRange(oldValue, range)) {
       return;
     }
-    const key = `workbook.${index}.activeCell`;
-    this.history.pushRedo('set', key, {
-      ...oldValue,
-    });
-    setWith(this, key, { ...range });
+    this.workbook.get(index).activeCell = range;
   }
   addSheet(): void {
-    const item = getDefaultSheetInfo(this.workbook);
+    const list = this.getSheetList();
+    const item = getDefaultSheetInfo(list);
     const sheet: WorksheetType = {
       ...item,
       isHide: false,
@@ -87,74 +150,88 @@ export class Model implements IModel {
         sheetId: item.sheetId,
       },
     };
-    const index = this.workbook.findIndex(
-      (v) => v.sheetId === this.currentSheetId,
-    );
+    const index = list.findIndex((v) => v.sheetId === this.getCurrentSheetId());
     if (index < 0) {
-      this.workbook.push(sheet);
+      this.workbook.push([sheet]);
     } else {
-      this.workbook.splice(index + 1, 0, sheet);
+      this.workbook.insert(index + 1, [sheet]);
     }
-    this.currentSheetId = sheet.sheetId;
-    this.worksheets[sheet.sheetId] = {};
-    this.customHeight[sheet.sheetId] = {};
-    this.customWidth[sheet.sheetId] = {};
+    this.setCurrentSheetId(sheet.sheetId);
+    this.setCurrentSheetId(sheet.sheetId);
+    this.worksheets.set(sheet.sheetId, {});
+    this.customHeight.set(sheet.sheetId, {});
+    this.customWidth.set(sheet.sheetId, {});
   }
 
   deleteSheet(sheetId?: string): void {
-    const id = sheetId || this.currentSheetId;
-    const list = this.workbook.filter((v) => !v.isHide);
+    const id = sheetId || this.getCurrentSheetId();
+    const sheetList = this.getSheetList();
+    const list = sheetList.filter((v) => !v.isHide);
     assert(
       list.length >= 2,
       'A workbook must contains at least on visible worksheet',
     );
     const { index, lastIndex } = this.getSheetIndex(id);
-    this.currentSheetId = this.workbook[lastIndex].sheetId;
-    this.workbook.splice(index, 1);
-    if (this.worksheets[id]) {
-      this.worksheets[id] = {};
-    }
+    this.setCurrentSheetId(sheetList[lastIndex].sheetId);
+    this.workbook.delete(index);
+    this.worksheets.delete(id);
   }
   hideSheet(sheetId?: string | undefined): void {
-    const list = this.workbook.filter((v) => !v.isHide);
+    const sheetList = this.getSheetList();
+    const list = sheetList.filter((v) => !v.isHide);
     assert(
       list.length >= 2,
       'A workbook must contains at least on visible worksheet',
     );
     const { index, lastIndex } = this.getSheetIndex(sheetId);
-    this.workbook[index].isHide = true;
-    this.currentSheetId = this.workbook[lastIndex].sheetId;
+    this.workbook.get(index).isHide = true;
+    this.setCurrentSheetId(sheetList[lastIndex].sheetId);
   }
   unhideSheet(sheetId?: string | undefined): void {
-    const item = this.getSheetInfo(sheetId);
+    const list = this.getSheetList();
+    const index = list.findIndex(
+      (v) => v.sheetId === (sheetId || this.getCurrentSheetId()),
+    );
+    const item = this.workbook.get(index);
     item.isHide = false;
-    this.currentSheetId = item.sheetId;
+    this.setCurrentSheetId(item.sheetId);
   }
   renameSheet(sheetName: string, sheetId?: string | undefined): void {
     assert(!!sheetName, 'You typed a invalid name for a sheet.');
-    const item = this.workbook.find((v) => v.name === sheetName);
+    const sheetList = this.getSheetList();
+    const item = sheetList.find((v) => v.name === sheetName);
     if (item) {
       if (item.sheetId === sheetId) {
         return;
       }
       assert(false, 'Cannot rename a sheet to the same name as another sheet');
     }
-    const sheetInfo = this.getSheetInfo(sheetId);
+    const index = sheetList.findIndex(
+      (v) => v.sheetId === (sheetId || this.currentSheetId),
+    );
+    const sheetInfo = this.workbook.get(index);
     sheetInfo.name = sheetName;
   }
   getSheetInfo(id: string = this.currentSheetId): WorksheetType {
-    const item = this.workbook.find((v) => v.sheetId === id);
-    assert(item !== undefined);
-    return item;
+    const list = this.getSheetList();
+    const item = list.find((v) => v.sheetId === id);
+    // assert(item !== undefined);
+    return item!;
   }
   setCurrentSheetId(id: string): void {
-    this.currentSheetId = id;
+    this.model.set('currentSheetId', id || '');
     this.computeAllCell();
   }
   getCurrentSheetId(): string {
-    return this.currentSheetId;
+    return this.model.get('currentSheetId') || '';
+  }
+  private get currentSheetId() {
+    return this.model.get('currentSheetId') || '';
   }
 
+  private set currentSheetId(id: string) {
+    this.model.set('currentSheetId', id || '');
+  }
   fromJSON = (json: WorkBookJSON): void => {
     modelLog('fromJSON', json);
     const {
@@ -173,24 +250,15 @@ export class Model implements IModel {
     this.customHeight = customHeight;
     this.definedNames = definedNames;
     this.computeAllCell();
-    this.history.clear();
   };
   toJSON = (): WorkBookJSON => {
-    const {
-      worksheets = {},
-      workbook = [],
-      mergeCells = [],
-      customHeight = {},
-      customWidth = {},
-      definedNames = {},
-    } = this;
     const json = {
-      workbook,
-      worksheets,
-      mergeCells,
-      customHeight,
-      customWidth,
-      definedNames,
+      workbook: this.workbook.toArray(),
+      worksheets: this.worksheets.toJSON(),
+      mergeCells: this.mergeCells.toArray(),
+      customHeight: this.customHeight.toJSON(),
+      customWidth: this.customWidth.toJSON(),
+      definedNames: this.definedNames.toJSON(),
     };
     modelLog('toJSON', json);
     return json;
@@ -236,11 +304,8 @@ export class Model implements IModel {
   getCell = (range: IRange): ModelCellValue => {
     const { row, col, sheetId } = range;
     const realSheetId = sheetId || this.currentSheetId;
-    const cellData = get<ModelCellType>(
-      this,
-      `worksheets[${realSheetId}][${row}][${col}]`,
-      {},
-    );
+    const sheetData = this.worksheets.get(realSheetId) || {};
+    const cellData = sheetData?.[row]?.[col] || {};
     return {
       ...cellData,
       row,
@@ -249,8 +314,8 @@ export class Model implements IModel {
   };
 
   addRow(rowIndex: number, count: number): void {
-    const sheetData = this.worksheets[this.currentSheetId];
-    if (isEmpty(sheetData)) {
+    const sheetData = this.worksheets.get(this.currentSheetId);
+    if (!sheetData || isEmpty(sheetData)) {
       return;
     }
     const sheetInfo = this.getSheetInfo();
@@ -273,8 +338,8 @@ export class Model implements IModel {
     sheetInfo.rowCount += count;
   }
   addCol(colIndex: number, count: number): void {
-    const sheetData = this.worksheets[this.currentSheetId];
-    if (isEmpty(sheetData)) {
+    const sheetData = this.worksheets.get(this.currentSheetId);
+    if (!sheetData || isEmpty(sheetData)) {
       return;
     }
     const sheetInfo = this.getSheetInfo();
@@ -301,8 +366,8 @@ export class Model implements IModel {
     sheetInfo.colCount += count;
   }
   deleteCol(colIndex: number, count: number): void {
-    const sheetData = this.worksheets[this.currentSheetId];
-    if (isEmpty(sheetData)) {
+    const sheetData = this.worksheets.get(this.currentSheetId);
+    if (!sheetData || isEmpty(sheetData)) {
       return;
     }
     const sheetInfo = this.getSheetInfo();
@@ -326,8 +391,8 @@ export class Model implements IModel {
     sheetInfo.colCount -= count;
   }
   deleteRow(rowIndex: number, count: number): void {
-    const sheetData = this.worksheets[this.currentSheetId];
-    if (isEmpty(sheetData)) {
+    const sheetData = this.worksheets.get(this.currentSheetId);
+    if (!sheetData || isEmpty(sheetData)) {
       return;
     }
     const rowKeys = convertToNumber(Object.keys(sheetData));
@@ -347,21 +412,21 @@ export class Model implements IModel {
   }
 
   hideCol(colIndex: number, count: number): void {
-    this.customWidth[this.currentSheetId] =
-      this.customWidth[this.currentSheetId] || {};
+    const data = this.customWidth.get(this.currentSheetId);
+    const newData = data || {};
+
     for (let i = 0; i < count; i++) {
       const c = colIndex + i;
-      this.customWidth[this.currentSheetId][c] = this.customWidth[
-        this.currentSheetId
-      ][c] || {
+      newData[c] = newData[c] || {
         widthOrHeight: CELL_WIDTH,
         isHide: true,
       };
-      this.customWidth[this.currentSheetId][c].isHide = true;
+      newData[c].isHide = true;
     }
+    this.customWidth.set(this.currentSheetId, newData);
   }
   getColWidth(col: number): number {
-    const temp = this.customWidth[this.currentSheetId];
+    const temp = this.customWidth.get(this.currentSheetId);
     if (!temp || !temp[col]) {
       return CELL_WIDTH;
     }
@@ -371,33 +436,32 @@ export class Model implements IModel {
     return temp[col].widthOrHeight || CELL_WIDTH;
   }
   setColWidth(col: number, width: number): void {
-    this.customWidth[this.currentSheetId] =
-      this.customWidth[this.currentSheetId] || {};
-    this.customWidth[this.currentSheetId][col] = this.customWidth[
-      this.currentSheetId
-    ][col] || {
+    const data = this.customWidth.get(this.currentSheetId);
+    const newData = data || {};
+
+    newData[col] = newData[col] || {
       widthOrHeight: 0,
       isHide: false,
     };
-    this.customWidth[this.currentSheetId][col].widthOrHeight = width;
+    newData[col].widthOrHeight = width;
+    this.customWidth.set(this.currentSheetId, newData);
   }
 
   hideRow(rowIndex: number, count: number): void {
-    this.customHeight[this.currentSheetId] =
-      this.customHeight[this.currentSheetId] || {};
+    const data = this.customHeight.get(this.currentSheetId);
+    const newData = data || {};
     for (let i = 0; i < count; i++) {
       const r = rowIndex + i;
-      this.customHeight[this.currentSheetId][r] = this.customHeight[
-        this.currentSheetId
-      ][r] || {
+      newData[r] = newData[r] || {
         widthOrHeight: CELL_HEIGHT,
         isHide: true,
       };
-      this.customHeight[this.currentSheetId][r].isHide = true;
+      newData[r].isHide = true;
     }
+    this.customHeight.set(this.currentSheetId, newData);
   }
   getRowHeight(row: number): number {
-    const temp = this.customHeight[this.currentSheetId];
+    const temp = this.customHeight.get(this.currentSheetId);
     if (!temp || !temp[row]) {
       return CELL_HEIGHT;
     }
@@ -407,36 +471,27 @@ export class Model implements IModel {
     return temp[row].widthOrHeight || CELL_HEIGHT;
   }
   setRowHeight(row: number, height: number): void {
-    this.customHeight[this.currentSheetId] =
-      this.customHeight[this.currentSheetId] || {};
-    this.customHeight[this.currentSheetId][row] = this.customHeight[
-      this.currentSheetId
-    ][row] || {
+    const data = this.customHeight.get(this.currentSheetId);
+    const newData = data || {};
+
+    newData[row] = newData[row] || {
       widthOrHeight: 0,
       isHide: false,
     };
-    this.customHeight[this.currentSheetId][row].widthOrHeight = height;
+    newData[row].widthOrHeight = height;
+    this.customHeight.set(this.currentSheetId, newData);
   }
   canRedo(): boolean {
-    return this.history.canRedo();
+    return true;
   }
   canUndo(): boolean {
-    return this.history.canUndo();
+    return true;
   }
   undo(): void {
-    if (!this.canUndo()) {
-      return;
-    }
-    this.executeOperate(this.history.undo());
+    this.undoManager.undo();
   }
   redo(): void {
-    if (!this.canRedo()) {
-      return;
-    }
-    this.executeOperate(this.history.redo());
-  }
-  record(): void {
-    this.history.onChange();
+    this.undoManager.redo();
   }
 
   pasteRange(fromRange: IRange, isCut: boolean): IRange {
@@ -444,19 +499,22 @@ export class Model implements IModel {
     const { activeCell } = this.getSheetInfo(currentSheetId);
 
     const { row, col, rowCount, colCount, sheetId } = fromRange;
+    const realSheetId = sheetId || currentSheetId;
+    const sheetData = this.worksheets.get(realSheetId) || {};
     for (let r = row, i = 0, endRow = row + rowCount; r < endRow; r++, i++) {
       for (let c = col, j = 0, endCol = col + colCount; c < endCol; c++, j++) {
-        const oldPath = `worksheets[${sheetId || currentSheetId}][${r}][${c}]`;
-        const temp = get<ModelCellType>(this, oldPath, {});
+        const oldPath = `${r}.${c}`;
+        const temp = sheetData?.[r]?.[c] || {};
         const realRow = activeCell.row + i;
         const realCol = activeCell.col + j;
-        const path = `worksheets[${currentSheetId}][${realRow}][${realCol}]`;
-        setWith(this, path, { ...temp });
+        const path = `${realRow}.${realCol}`;
+        setWith(sheetData, path, { ...temp });
         if (isCut) {
-          setWith(this, oldPath, {});
+          setWith(sheetData, oldPath, {});
         }
       }
     }
+    this.worksheets.set(realSheetId, sheetData);
     this.computeAllCell();
     const range: IRange = {
       ...activeCell,
@@ -468,13 +526,14 @@ export class Model implements IModel {
   }
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
-    this.worksheets[id] = {};
-    this.mergeCells = this.mergeCells.filter((v) => v.sheetId !== id);
-    this.customHeight[id] = {};
-    this.customWidth[id] = {};
+    this.worksheets.delete(id);
+    this.mergeCells = this.mergeCells.toArray().filter((v) => v.sheetId !== id);
+    this.customHeight.set(id, {});
+    this.customWidth.set(id, {});
     const definedNames: WorkBookJSON['definedNames'] = {};
-    for (const key of Object.keys(this.definedNames)) {
-      const t = this.definedNames[key];
+    const oldDefineNames = this.definedNames.toJSON();
+    for (const key of Object.keys(oldDefineNames)) {
+      const t = oldDefineNames[key];
       if (!t) {
         continue;
       }
@@ -486,8 +545,8 @@ export class Model implements IModel {
   }
   getDefineName(range: IRange): string {
     const sheetId = range.sheetId || this.currentSheetId;
-    for (const key of Object.keys(this.definedNames)) {
-      const t = this.definedNames[key];
+    for (const key of this.definedNames.keys()) {
+      const t = this.definedNames.get(key);
       if (!t) {
         continue;
       }
@@ -499,39 +558,42 @@ export class Model implements IModel {
   }
   setDefineName(range: IRange, name: string): void {
     const oldName = this.getDefineName(range);
-    if (oldName in this.definedNames) {
-      delete this.definedNames[oldName];
+    if (oldName in this.definedNames.toJSON()) {
+      this.definedNames.delete(oldName);
     }
-    this.definedNames[name] = {
+    const result: IRange = {
       ...range,
       sheetId: this.currentSheetId,
       colCount: 1,
       rowCount: 1,
     };
+    this.definedNames.set(name, result);
     this.computeAllCell();
   }
-  checkDefineName (name: string): IRange | undefined {
-    return this.definedNames[name];
+  checkDefineName(name: string): IRange | undefined {
+    return this.definedNames.get(name);
   }
 
   private setCellValue(value: ResultType, range: Coordinate): void {
     const { row, col } = range;
-    const key = `worksheets[${this.currentSheetId}][${row}][${col}].value`;
-    this.history.pushRedo('set', key, get(this, key, undefined));
+    const data = this.worksheets.get(this.currentSheetId) || {};
 
-    setWith(this, key, value);
+    const key = `${row}.${col}.value`;
+
+    setWith(data, key, value);
+    this.worksheets.set(this.currentSheetId, data);
   }
   private setCellFormula(formula: string, range: Coordinate): void {
     const { row, col } = range;
-    const key = `worksheets[${this.currentSheetId}][${row}][${col}].formula`;
+    const data = this.worksheets.get(this.currentSheetId) || {};
+    const key = `${row}.${col}.formula`;
 
-    this.history.pushRedo('set', key, get(this, key, undefined));
-
-    setWith(this, key, formula);
+    setWith(data, key, formula);
+    this.worksheets.set(this.currentSheetId, data);
   }
   private computeAllCell() {
-    const sheetData = this.worksheets[this.currentSheetId];
-    if (isEmpty(sheetData)) {
+    const sheetData = this.worksheets.get(this.currentSheetId);
+    if (!sheetData || isEmpty(sheetData)) {
       return [];
     }
     const rowKeys = Object.keys(sheetData);
@@ -561,7 +623,7 @@ export class Model implements IModel {
           throw new CustomError('#REF!');
         },
         convertSheetNameToSheetId: (sheetName: string): string => {
-          const item = this.workbook.find((v) => v.name === sheetName);
+          const item = this.getSheetList().find((v) => v.name === sheetName);
           return item?.sheetId || '';
         },
       },
@@ -570,10 +632,11 @@ export class Model implements IModel {
           throw new CustomError('#REF!');
         },
         get: (name: string) => {
-          return this.definedNames[name];
+          const t = this.definedNames.get(name);
+          return t;
         },
         has: (name: string) => {
-          return name in this.definedNames;
+          return this.definedNames.has(name);
         },
       },
     );
@@ -581,12 +644,13 @@ export class Model implements IModel {
   }
   private getSheetIndex(sheetId?: string) {
     const id = sheetId || this.currentSheetId;
-    const index = this.workbook.findIndex((item) => item.sheetId === id);
+    const list = this.getSheetList();
+    const index = list.findIndex((item) => item.sheetId === id);
     assert(index >= 0);
-    let lastIndex = (index + 1) % this.workbook.length;
+    let lastIndex = (index + 1) % list.length;
     while (lastIndex !== index) {
-      if (this.workbook[lastIndex].isHide) {
-        lastIndex = (lastIndex + 1) % this.workbook.length;
+      if (list[lastIndex].isHide) {
+        lastIndex = (lastIndex + 1) % list.length;
       } else {
         break;
       }
@@ -597,32 +661,17 @@ export class Model implements IModel {
     };
   }
   private getSheetId() {
-    const list = this.workbook.filter((v) => !v.isHide);
-    return list[0].sheetId;
+    const list = this.getSheetList();
+    const result = list.filter((v) => !v.isHide);
+    return result[0].sheetId;
   }
   private setStyle(style: Partial<StyleType>, range: Coordinate) {
-    const stylePath = `worksheets[${this.currentSheetId}][${range.row}][${range.col}].style`;
-    this.history.pushRedo('set', stylePath, get(this, stylePath, {}));
-    setWith(this, stylePath, style);
+    const sheetData = this.worksheets.get(this.currentSheetId) || {};
+    const stylePath = `${range.row}.${range.col}.style`;
+    setWith(sheetData, stylePath, style);
+    this.worksheets.set(this.currentSheetId, sheetData);
   }
-  private executeOperate(list: UndoRedoItem[]) {
-    for (const item of list) {
-      const { op, path, value } = item;
-      switch (op) {
-        case 'set': {
-          this.history.pushUndo(op, path, get(this, path, undefined));
-          this.record();
-          setWith(this, path, value);
-          break;
-        }
-        // case 'add-array':
-        //   break;
-        // case 'delete-array':
-        //   break;
-        default:
-          console.error(`not support type: ${op}`);
-          break;
-      }
-    }
+  transaction(func: () => void): void {
+    this.doc.transact(func);
   }
 }

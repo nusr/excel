@@ -1,16 +1,16 @@
-import { Model, History } from '..';
+import { Model } from '..';
 import { Range } from '@/util';
 import { WorkBookJSON } from '@/types';
 
 describe('model.test.ts', () => {
   test('normal', () => {
-    const model = new Model(new History());
+    const model = new Model();
     expect(model.getSheetList()).toHaveLength(0);
     model.addSheet();
     expect(model.getSheetList()).toHaveLength(1);
   });
   test('setCellValue', () => {
-    const model = new Model(new History());
+    const model = new Model();
     model.addSheet();
     expect(model.getCell(new Range(0, 0, 1, 1, ''))).toEqual({
       style: undefined,
@@ -27,7 +27,7 @@ describe('model.test.ts', () => {
     });
   });
   test('toJSON', () => {
-    const model = new Model(new History());
+    const model = new Model();
     expect(model.toJSON()).toEqual({
       workbook: [],
       worksheets: {},
@@ -38,7 +38,7 @@ describe('model.test.ts', () => {
     });
   });
   test('fromJSON', () => {
-    const model = new Model(new History());
+    const model = new Model();
     const json: WorkBookJSON = {
       workbook: [
         {
