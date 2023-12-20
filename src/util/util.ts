@@ -1,5 +1,5 @@
 import { SHEET_NAME_PREFIX } from './constant';
-import type { WorksheetType, ResultType } from '@/types';
+import type { WorksheetType, ResultType, Coordinate } from '@/types';
 
 export function isNumber(value: any): boolean {
   if (typeof value === 'number' && !window.isNaN(value)) {
@@ -70,4 +70,20 @@ export function convertResultTypeToString(value: ResultType): string {
     text = '';
   }
   return text;
+}
+
+const gapSplitter = '_';
+
+export function coordinateToString(row: number, col: number) {
+  return `${row}${gapSplitter}${col}`;
+}
+
+export function stringToCoordinate(key: string): Coordinate {
+  const [row, col] = key.split(gapSplitter);
+  const r = parseInt(row, 1);
+  const c = parseInt(col, 1);
+  return {
+    row: isNaN(r) ? 0 : r,
+    col: isNaN(c) ? 0 : c,
+  };
 }

@@ -7,6 +7,7 @@ export const TEST_ID_KEY = 'data-testid';
 export const SCROLL_SIZE = 30;
 export const BOTTOM_BUFF = 200;
 export const DEFAULT_POSITION = -999;
+export const WORK_SHEETS_PREFIX = 'worksheets_';
 export const DEBUG_COLOR_LIST = [
   '#0000CC',
   '#0000FF',

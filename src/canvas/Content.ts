@@ -117,7 +117,7 @@ export class Content implements ContentView {
         }
         const cellSize = controller.getCellSize(rowIndex, colIndex);
         if (cellSize.width <= 0 || cellSize.height <= 0) {
-          continue
+          continue;
         }
         const { wrapHeight = 0, fontSizeHeight = 0 } = renderCell(ctx, {
           ...cellInfo,

@@ -12,7 +12,9 @@ import {
   convertToReference,
   isEmpty,
   NUMBER_FORMAT_LIST,
+  WORK_SHEETS_PREFIX,
   saveAs,
+  stringToCoordinate,
 } from '@/util';
 import { XfItem, CUSTOM_WIdTH_RADIO } from './import';
 import { convertColorToHex } from './color';
@@ -48,24 +50,16 @@ function processRow(row: ResultType[]) {
 }
 export function exportToCsv(fileName: string, controller: IController) {
   const sheetData =
-    controller.toJSON().worksheets[controller.getCurrentSheetId()];
+    controller.toJSON()[
+      `${WORK_SHEETS_PREFIX}${controller.getCurrentSheetId()}`
+    ];
   let csvFile = '';
   if (sheetData) {
-    for (const row of Object.keys(sheetData)) {
-      if (!sheetData[row]) {
-        continue;
-      }
-      const list: ResultType[] = [];
-      const r = sheetData[row];
-      for (const col of Object.keys(r)) {
-        const c = r[col];
-        if (!c) {
-          continue;
-        }
-        list.push(c.formula ?? c.value);
-      }
-      csvFile += processRow(list);
+    const list: ResultType[] = [];
+    for (const c of Object.values(sheetData)) {
+      list.push(c.formula || c.value);
     }
+    csvFile += processRow(list);
   }
   const blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
   saveAs(blob, fileName);
@@ -76,16 +70,21 @@ function getSheetData(
   sheetData: string,
   isActiveSheet: boolean,
   customWidthMap: CustomHeightOrWidthItem,
+  sheetId: string,
 ) {
   let customWidth = '';
   if (customWidthMap) {
     const list: string[] = [];
     for (const col of Object.keys(customWidthMap)) {
-      const t = parseInt(col, 10) + 1;
+      if (!col.startsWith(sheetId)) {
+        continue;
+      }
+      const t = parseInt(col.slice(sheetId.length + 1), 10) + 1;
+      const data = customWidthMap[col];
       list.push(
         `<col min="${t}" max="${t}" width="${
-          customWidthMap[col].widthOrHeight / CUSTOM_WIdTH_RADIO
-        }" customWidth="1" ${customWidthMap[col].isHide ? 'hidden="1"' : ''}/>`,
+          data.widthOrHeight / CUSTOM_WIdTH_RADIO
+        }" customWidth="1" ${data.isHide ? 'hidden="1"' : ''}/>`,
       );
     }
     customWidth = `<cols>${list.join('')}</cols>`;
@@ -1229,56 +1228,68 @@ export async function exportToXLSX(fileName: string, controller: IController) {
   for (const item of sheetList) {
     const { activeCell } = item;
     const t = sheetRelMap[item.sheetId];
-    const cellData = modelJson.worksheets[item.sheetId];
+    const cellData = modelJson[`${WORK_SHEETS_PREFIX}${item.sheetId}`];
     const isActiveSheet = item.sheetId === currentSheetId;
-    const customWidth = modelJson.customWidth[item.sheetId];
     if (!cellData) {
       worksheets.file(
         t.target,
-        getSheetData(activeCell, '', isActiveSheet, customWidth),
+        getSheetData(
+          activeCell,
+          '',
+          isActiveSheet,
+          modelJson.customWidth,
+          item.sheetId,
+        ),
       );
       continue;
     }
+    const rowMap: Record<string, string[]> = {};
     const rowList: string[] = [];
-    for (const row of Object.keys(cellData)) {
-      const r = cellData[row];
-      const colList: string[] = [];
-      const realR = parseInt(row, 10);
-      if (!isEmpty(r)) {
-        for (const c of Object.keys(r)) {
-          const v = r[c];
-          const ref = convertToReference({
-            row: realR,
-            col: parseInt(c, 10),
-            rowCount: 1,
-            colCount: 1,
-            sheetId: '',
-          });
-          const f = v.formula ? `<f>${v.formula.slice(1)}</f>` : '';
-          const val = f ? '' : `<v>${v.value || ''}</v>`;
-          let s = '';
-          if (v.style && !isEmpty(v.style)) {
-            s = `s="${styles.cellXfs.length}"`;
-            convertStyle(styles, v.style);
-          }
-          colList.push(`<c r="${ref}" ${s}>
-          ${f}
-          ${val}
-        </c>`);
-        }
+    for (const [key, v] of Object.entries(cellData)) {
+      const range = stringToCoordinate(key);
+      const ref = convertToReference({
+        ...range,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
+      if (!rowMap[range.row]) {
+        rowMap[range.row] = [];
       }
-      const customHeight = modelJson.customHeight?.[item.sheetId]?.[row];
+      const f = v.formula ? `<f>${v.formula.slice(1)}</f>` : '';
+      const val = f ? '' : `<v>${v.value || ''}</v>`;
+      let s = '';
+      if (v.style && !isEmpty(v.style)) {
+        s = `s="${styles.cellXfs.length}"`;
+        convertStyle(styles, v.style);
+      }
+      rowMap[range.row].push(`<c r="${ref}" ${s}>
+      ${f}
+      ${val}
+    </c>`);
+    }
+    for (const [row, list] of Object.entries(rowMap)) {
+      const customHeight = modelJson.customHeight[`${item.sheetId}_${row}`];
       let ht = '';
       if (customHeight) {
         ht = `ht="${customHeight.widthOrHeight}" customHeight="1" ${
           customHeight.isHide ? 'hidden="1"' : ''
         }`;
       }
-      rowList.push(`<row r="${realR + 1}" ${ht}>${colList.join('')}</row>`);
+      rowList.push(
+        `<row r="${parseInt(row, 10) + 1}" ${ht}>${list.join('')}</row>`,
+      );
     }
+
     worksheets.file(
       t.target,
-      getSheetData(activeCell, rowList.join(''), isActiveSheet, customWidth),
+      getSheetData(
+        activeCell,
+        rowList.join(''),
+        isActiveSheet,
+        modelJson.customWidth,
+        item.sheetId,
+      ),
     );
   }
 

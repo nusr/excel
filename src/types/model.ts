@@ -70,19 +70,21 @@ export interface CustomItem {
   widthOrHeight: number; // width or height
   isHide: boolean;
 }
-export type CustomHeightOrWidthItem = Record<string, CustomItem>; // key: row number or col number value: height or width
+export type CustomHeightOrWidthItem = Record<string, CustomItem>; // key: sheetId + '_' + row number or col number value: height or width
 export interface MergeCellItem {
   start: Coordinate;
   end: Coordinate;
 }
-export interface WorkBookJSON {
+
+export type WorkBookJSON = {
+  [key: `worksheets_${string}`]: Record<string, ModelCellType>; // [key: string]: Record<string, ModelCellType> key: worksheets_ + sheetId
   workbook: WorksheetType[]; // workbook.xml_workbook_sheets
-  worksheets: Record<string, ModelRowType>; // key: sheetId worksheets_*.xml_worksheet_sheetData
+  // worksheets: Record<string, ModelCellType>; // key: sheetId + '_' + row + '_' + col worksheets_*.xml_worksheet_sheetData
   mergeCells: IRange[]; // worksheets_*.xml_worksheet_mergeCells
-  customHeight: Record<string, CustomHeightOrWidthItem>; // key: sheetId worksheets_*.xml_worksheet_sheetData_customHeight
-  customWidth: Record<string, CustomHeightOrWidthItem>; // key: sheetId worksheets_*.xml_worksheet_sheetData_customHeight
+  customHeight: CustomHeightOrWidthItem; // key: sheetId_row worksheets_*.xml_worksheet_sheetData_customHeight
+  customWidth: CustomHeightOrWidthItem; // key: sheetId_col worksheets_*.xml_worksheet_sheetData_customHeight
   definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
-}
+};
 
 export interface IModel extends IBaseModel {
   pasteRange: (range: IRange, isCut: boolean) => IRange;

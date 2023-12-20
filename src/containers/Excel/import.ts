@@ -17,6 +17,8 @@ import {
   CELL_WIDTH,
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
+  WORK_SHEETS_PREFIX,
+  coordinateToString,
 } from '@/util';
 
 const COMMON_PREFIX = 'xl';
@@ -28,11 +30,11 @@ const SHEET_PATH_PREFIX = 'xl/worksheets/';
 export const CUSTOM_WIdTH_RADIO = 8;
 
 type ThemeData = Record<
-string,
-{
-  'a:srgbClr': { val: string };
-  'a:sysClr': { lastClr: string; val: string };
-}
+  string,
+  {
+    'a:srgbClr': { val: string };
+    'a:sysClr': { lastClr: string; val: string };
+  }
 >;
 type SheetItem = Pick<WorksheetType, 'name' | 'sheetId'> & {
   'r:id': string;
@@ -202,7 +204,11 @@ function convertColor(themeData: ThemeData, color?: ColorItem) {
   return convertRGB(color.rgb);
 }
 
-function getCellStyle(xml: XMLFile, styleId: number, themeData: ThemeData): Partial<StyleType> | undefined {
+function getCellStyle(
+  xml: XMLFile,
+  styleId: number,
+  themeData: ThemeData,
+): Partial<StyleType> | undefined {
   const result: Partial<StyleType> = {};
   const xfList = get<XfItem[]>(xml, 'styleSheet.cellXfs.xf', []);
   if (!styleId || xfList.length === 0 || !xfList[styleId]) {
@@ -278,11 +284,14 @@ function getCellStyle(xml: XMLFile, styleId: number, themeData: ThemeData): Part
 
 function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
   const workbook = xmlData[WORKBOOK_PATH];
-  const themeData = get<ThemeData>(xmlData[THEME_PATH], 'a:theme.a:themeElements.a:clrScheme', {});
+  const themeData = get<ThemeData>(
+    xmlData[THEME_PATH],
+    'a:theme.a:themeElements.a:clrScheme',
+    {},
+  );
 
   const result: WorkBookJSON = {
     workbook: [],
-    worksheets: {},
     mergeCells: [],
     customHeight: {},
     customWidth: {},
@@ -290,7 +299,11 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
   };
   const sheetPathMap: Record<string, string> = {};
   const sheetMap: Record<string, string> = {};
-  for (const item of get<RelationItem[]>(xmlData[WORKBOOK_RELATION_PATH], 'Relationships.Relationship', [])) {
+  for (const item of get<RelationItem[]>(
+    xmlData[WORKBOOK_RELATION_PATH],
+    'Relationships.Relationship',
+    [],
+  )) {
     if (!item) {
       continue;
     }
@@ -307,7 +320,11 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     const sheetPath = `${COMMON_PREFIX}/${sheetMap[item['r:id']]}`;
     sheetPathMap[item.sheetId] = sheetPath;
     const range = parseReference(
-      get<string>(xmlData[sheetPath], 'worksheet.sheetViews.sheetView.selection.sqref', ''),
+      get<string>(
+        xmlData[sheetPath],
+        'worksheet.sheetViews.sheetView.selection.sqref',
+        '',
+      ),
     )!;
     range.sheetId = item.sheetId;
     result.workbook.push({
@@ -321,11 +338,18 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
   }
   for (const item of result.workbook) {
     const sheetPath = sheetPathMap[item.sheetId];
-    let sheetData: SheetDataRowItem[] = get(xmlData[sheetPath], 'worksheet.sheetData.row');
+    let sheetData: SheetDataRowItem[] = get(
+      xmlData[sheetPath],
+      'worksheet.sheetData.row',
+    );
     if (!Array.isArray(sheetData)) {
       sheetData = [sheetData];
     }
-    let customWidth: CustomColItem[] = get(xmlData[sheetPath], 'worksheet.cols.col', []);
+    let customWidth: CustomColItem[] = get(
+      xmlData[sheetPath],
+      'worksheet.cols.col',
+      [],
+    );
     customWidth = Array.isArray(customWidth) ? customWidth : [customWidth];
     const defaultWOrH = get(xmlData[sheetPath], 'worksheet.sheetFormatPr', {
       defaultColWidth: '',
@@ -333,15 +357,19 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
       outlineLevelRow: '',
     });
     if (customWidth.length > 0) {
-      result.customWidth[item.sheetId] = {};
-
       for (const col of customWidth) {
         if (col && col.customWidth && col.width && col.min && col.max) {
           const isDefault = defaultWOrH.defaultColWidth === col.width;
-          const w = isDefault ? CELL_WIDTH : parseFloat(col.width) * CUSTOM_WIdTH_RADIO;
+          const w = isDefault
+            ? CELL_WIDTH
+            : parseFloat(col.width) * CUSTOM_WIdTH_RADIO;
           const isHide = Boolean(col.hidden);
-          for (let start = parseInt(col.min, 10) - 1, end = parseInt(col.max, 10); start < end; start++) {
-            result.customWidth[item.sheetId][start] = {
+          for (
+            let start = parseInt(col.min, 10) - 1, end = parseInt(col.max, 10);
+            start < end;
+            start++
+          ) {
+            result.customWidth[`${item.sheetId}_${start}`] = {
               widthOrHeight: w,
               isHide,
             };
@@ -353,8 +381,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     if (sheetData.length === 0) {
       continue;
     }
-    result.worksheets[item.sheetId] = {};
-    result.customHeight[item.sheetId] = {};
+    result[`${WORK_SHEETS_PREFIX}${item.sheetId}`] = {};
 
     let { colCount } = item;
     let { rowCount } = item;
@@ -367,10 +394,9 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
       if (rowCount > XLSX_MAX_ROW_COUNT) {
         continue;
       }
-      result.worksheets[item.sheetId][realRow] = {};
       if (row.customHeight && row.ht) {
         const isDefault = defaultWOrH.defaultRowHeight === row.ht;
-        result.customHeight[item.sheetId][realRow] = {
+        result.customHeight[`${item.sheetId}_${realRow}`] = {
           widthOrHeight: isDefault ? CELL_HEIGHT : parseFloat(row.ht),
           isHide: Boolean(row.hidden),
         };
@@ -396,7 +422,9 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
         } else {
           t.value = val;
         }
-        result.worksheets[item.sheetId][realRow][range.col] = t;
+        result[`${WORK_SHEETS_PREFIX}${item.sheetId}`][
+          `${coordinateToString(realRow, range.col)}`
+        ] = t;
         colCount = Math.max(colCount, range.col + 1);
       }
     }
@@ -404,7 +432,11 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     item.colCount = Math.max(item.colCount, colCount);
   }
 
-  let definedNames: DefineNameItem[] = get(workbook, 'workbook.definedNames.definedName', []);
+  let definedNames: DefineNameItem[] = get(
+    workbook,
+    'workbook.definedNames.definedName',
+    [],
+  );
   definedNames = Array.isArray(definedNames) ? definedNames : [definedNames];
   const convertSheetName = (sheetName: string) => {
     return result.workbook.find((v) => v.name === sheetName)?.sheetId || '';
@@ -428,8 +460,9 @@ export async function importXLSX(file: File) {
       continue;
     }
     const check =
-      [STYLE_PATH, WORKBOOK_PATH, WORKBOOK_RELATION_PATH, THEME_PATH].includes(key) ||
-      key.startsWith(SHEET_PATH_PREFIX);
+      [STYLE_PATH, WORKBOOK_PATH, WORKBOOK_RELATION_PATH, THEME_PATH].includes(
+        key,
+      ) || key.startsWith(SHEET_PATH_PREFIX);
     if (!check) {
       continue;
     }

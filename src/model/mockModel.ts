@@ -46,94 +46,84 @@ export const MOCK_MODEL: WorkBookJSON = {
       },
     },
   ],
-  worksheets: {
-    1: {
-      0: {
-        0: {
-          value: '1abcd',
-          style: {
-            fontColor: '#ff0000',
-          },
-        },
-        1: {
-          value: '',
-        },
-        2: {
-          value: '',
-          formula: '=foo',
-        },
-        3: {
-          value: '超大字',
-          style: {
-            fontSize: 36,
-          },
-        },
-        4: {
-          value: '这是一段非常长的文案，需要换行展示',
-          style: {
-            isWrapText: true,
-            underline: EUnderLine.SINGLE,
-          },
-        },
-        6: {
-          formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
-          style: {
-            fontSize: 36,
-          },
-        },
-        7: {
-          value: 'Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞',
-          style: {
-            fontSize: 36,
-          },
-        },
-        8: {
-          value: '뎌쉐',
-          style: {
-            fontSize: 36,
-          },
-        },
-        9: {
-          value: 'Ĺo͂řȩm̅',
-          style: {
-            fontSize: 36,
-          },
-        },
-        10: {
-          value: '🌷🎁💩😜👍🏳️‍🌈',
-        },
-      },
-      3: {
-        0: {
-          style: {
-            fillColor: 'red',
-          },
-        },
-        1: {
-          style: {
-            fillColor: 'red',
-          },
-        },
-      },
-      4: {
-        0: {
-          style: {
-            fillColor: 'red',
-          },
-        },
-        1: {
-          style: {
-            fillColor: 'red',
-          },
-        },
+  worksheets_1: {
+    '0_0': {
+      value: '1abcd',
+      style: {
+        fontColor: '#ff0000',
       },
     },
-    2: {
-      0: {
-        0: {
-          // formula: '=Sheet1!A1',
-        },
+    '0_1': {
+      value: '',
+    },
+    '0_2': {
+      value: '',
+      formula: '=foo',
+    },
+    '0_3': {
+      value: '超大字',
+      style: {
+        fontSize: 36,
       },
+    },
+    '0_4': {
+      value: '这是一段非常长的文案，需要换行展示',
+      style: {
+        isWrapText: true,
+        underline: EUnderLine.SINGLE,
+      },
+    },
+    '0_6': {
+      formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
+      style: {
+        fontSize: 36,
+      },
+    },
+    '0_7': {
+      value: 'Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞',
+      style: {
+        fontSize: 36,
+      },
+    },
+    '0_8': {
+      value: '뎌쉐',
+      style: {
+        fontSize: 36,
+      },
+    },
+    '0_9': {
+      value: 'Ĺo͂řȩm̅',
+      style: {
+        fontSize: 36,
+      },
+    },
+    '0_10': {
+      value: '🌷🎁💩😜👍🏳️‍🌈',
+    },
+    3_0: {
+      style: {
+        fillColor: 'red',
+      },
+    },
+    3_1: {
+      style: {
+        fillColor: 'red',
+      },
+    },
+    4_0: {
+      style: {
+        fillColor: 'red',
+      },
+    },
+    4_1: {
+      style: {
+        fillColor: 'red',
+      },
+    },
+  },
+  worksheets_2: {
+    '0_0': {
+      formula: '=Sheet1!A1',
     },
   },
   mergeCells: [
@@ -146,43 +136,39 @@ export const MOCK_MODEL: WorkBookJSON = {
     },
   ],
   customHeight: {
-    1: {
-      1: {
-        widthOrHeight: 100,
-        isHide: false,
-      },
-      5: {
-        widthOrHeight: 100,
-        isHide: true,
-      },
+    1_1: {
+      widthOrHeight: 100,
+      isHide: false,
+    },
+    1_5: {
+      widthOrHeight: 100,
+      isHide: true,
     },
   },
   customWidth: {
-    1: {
-      1: {
-        widthOrHeight: 100,
-        isHide: true,
-      },
-      6: {
-        widthOrHeight: 200,
-        isHide: false
-      },
-      7: {
-        widthOrHeight: 200,
-        isHide: false
-      },
-      8: {
-        widthOrHeight: 100,
-        isHide: false
-      },
-      9: {
-        widthOrHeight: 100,
-        isHide: false
-      },
-      10: {
-        widthOrHeight: 100,
-        isHide: false
-      },
+    1_1: {
+      widthOrHeight: 100,
+      isHide: true,
+    },
+    1_6: {
+      widthOrHeight: 200,
+      isHide: false,
+    },
+    1_7: {
+      widthOrHeight: 200,
+      isHide: false,
+    },
+    1_8: {
+      widthOrHeight: 100,
+      isHide: false,
+    },
+    1_9: {
+      widthOrHeight: 100,
+      isHide: false,
+    },
+    1_10: {
+      widthOrHeight: 100,
+      isHide: false,
     },
   },
   definedNames: {

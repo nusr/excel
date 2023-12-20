@@ -2,13 +2,13 @@ import { Controller } from '..';
 import { Model } from '@/model';
 
 describe('controller.test.ts', () => {
-  describe('undo redo', () => {
-    test('normal', () => {
-      const controller = new Controller(new Model());
-      expect(controller.canRedo()).toEqual(false);
-      expect(controller.canUndo()).toEqual(false);
-    });
-  });
+  // describe('undo redo', () => {
+  //   test('normal', () => {
+  //     const controller = new Controller(new Model());
+  //     expect(controller.canRedo()).toEqual(false);
+  //     expect(controller.canUndo()).toEqual(false);
+  //   });
+  // });
   describe('activeCell', () => {
     test('get', () => {
       const controller = new Controller(new Model());

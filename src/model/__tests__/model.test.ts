@@ -30,7 +30,6 @@ describe('model.test.ts', () => {
     const model = new Model();
     expect(model.toJSON()).toEqual({
       workbook: [],
-      worksheets: {},
       mergeCells: [],
       customHeight: {},
       customWidth: {},
@@ -56,7 +55,6 @@ describe('model.test.ts', () => {
           name: 'test',
         },
       ],
-      worksheets: {},
       mergeCells: [
         {
           row: 1,
@@ -69,6 +67,11 @@ describe('model.test.ts', () => {
       customHeight: {},
       customWidth: {},
       definedNames: {},
+      worksheets_2: {
+        '0_0': {
+          formula: '=Sheet1!A1',
+        },
+      },
     };
     model.fromJSON(json);
     expect(model.toJSON()).toEqual({
@@ -88,7 +91,6 @@ describe('model.test.ts', () => {
           name: 'test',
         },
       ],
-      worksheets: {},
       mergeCells: [
         {
           row: 1,
@@ -101,6 +103,12 @@ describe('model.test.ts', () => {
       customHeight: {},
       customWidth: {},
       definedNames: {},
+      worksheets_2: {
+        '0_0': {
+          formula: '=Sheet1!A1',
+          "value": "#NAME?",
+        },
+      },
     });
   });
 });
