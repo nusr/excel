@@ -2,6 +2,7 @@ import { WorkBookJSON, EUnderLine } from '@/types';
 import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from '@/util';
 
 export const MOCK_MODEL: WorkBookJSON = {
+  currentSheetId: '',
   workbook: [
     {
       sheetId: '1',
@@ -100,22 +101,22 @@ export const MOCK_MODEL: WorkBookJSON = {
     '0_10': {
       value: '🌷🎁💩😜👍🏳️‍🌈',
     },
-    3_0: {
+    '3_0': {
       style: {
         fillColor: 'red',
       },
     },
-    3_1: {
+    '3_1': {
       style: {
         fillColor: 'red',
       },
     },
-    4_0: {
+    '4_0': {
       style: {
         fillColor: 'red',
       },
     },
-    4_1: {
+    '4_1': {
       style: {
         fillColor: 'red',
       },
@@ -136,37 +137,37 @@ export const MOCK_MODEL: WorkBookJSON = {
     },
   ],
   customHeight: {
-    1_1: {
+    '1_1': {
       widthOrHeight: 100,
       isHide: false,
     },
-    1_5: {
+    '1_5': {
       widthOrHeight: 100,
       isHide: true,
     },
   },
   customWidth: {
-    1_1: {
+    '1_1': {
       widthOrHeight: 100,
       isHide: true,
     },
-    1_6: {
+    '1_6': {
       widthOrHeight: 200,
       isHide: false,
     },
-    1_7: {
+    '1_7': {
       widthOrHeight: 200,
       isHide: false,
     },
-    1_8: {
+    '1_8': {
       widthOrHeight: 100,
       isHide: false,
     },
-    1_9: {
+    '1_9': {
       widthOrHeight: 100,
       isHide: false,
     },
-    1_10: {
+    '1_10': {
       widthOrHeight: 100,
       isHide: false,
     },

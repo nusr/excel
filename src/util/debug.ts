@@ -6,8 +6,14 @@ type NameSpaceType = 'react' | 'controller' | 'canvas' | 'model';
 class Debug {
   namespace: NameSpaceType;
 
-  static readonly colorMap: Map<NameSpaceType, string> = new Map<NameSpaceType, string>();
-  static readonly enableMap: Map<NameSpaceType, boolean> = new Map<NameSpaceType, boolean>([]);
+  static readonly colorMap: Map<NameSpaceType, string> = new Map<
+    NameSpaceType,
+    string
+  >();
+  static readonly enableMap: Map<NameSpaceType, boolean> = new Map<
+    NameSpaceType,
+    boolean
+  >([]);
   constructor(namespace: NameSpaceType) {
     this.namespace = namespace;
   }
@@ -44,8 +50,6 @@ class Debug {
     Debug.enableMap.set(key, false);
   }
 }
-
-Debug.disable('canvas');
 
 export const reactLog = new Debug('react').init();
 export const controllerLog = new Debug('controller').init();

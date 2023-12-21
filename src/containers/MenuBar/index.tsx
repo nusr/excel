@@ -2,7 +2,8 @@ import React, { useRef } from 'react';
 import { IController } from '@/types';
 import { Menu, MenuItem, SubMenu, Button } from '../components';
 import { importXLSX } from '../Excel/import';
-import { exportToXLSX, exportToCsv } from '../Excel/export';
+import { exportToXLSX } from '../Excel/exportXLSX';
+import { exportToCsv } from '../Excel/exportCSV';
 import styles from './index.module.css';
 
 interface Props {

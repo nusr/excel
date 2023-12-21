@@ -24,13 +24,12 @@ import {
   WORK_SHEETS_PREFIX,
   coordinateToString,
   stringToCoordinate,
+  getWorkSheetKey,
+  getCustomWidthOrHeightKey,
+  modelLog,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 import * as Y from 'yjs';
-
-function getSheetKey(sheetId: string) {
-  return `${WORK_SHEETS_PREFIX}${sheetId}`;
-}
 
 const modelName = 'model';
 
@@ -41,74 +40,91 @@ export class Model implements IModel {
     const doc = new Y.Doc();
     const model = doc.getMap(modelName);
 
-    const workbook = new Y.Array();
-    const mergeCells = new Y.Array();
-    const worksheets = new Y.Map();
-    const customHeight = new Y.Map();
-    const customWidth = new Y.Map();
-    const definedNames = new Y.Map();
-    model.set('workbook', workbook);
-    model.set('currentSheetId', '');
-    model.set('mergeCells', mergeCells);
-    model.set('worksheets', worksheets);
-    model.set('customHeight', customHeight);
-    model.set('customWidth', customWidth);
-    model.set('definedNames', definedNames);
-
     this.doc = doc;
-    // doc.on('update', (...args: any[]) => {
-    //   console.log(args[3]);
-    // });
+    doc.on('update', (...args: any[]) => {
+      modelLog(args[3]);
+    });
     this.undoManager = new Y.UndoManager(model);
   }
   private get model(): Y.Map<any> {
     return this.doc.getMap(modelName);
   }
   private get workbook(): Y.Array<WorksheetType> {
-    return this.model.get('workbook');
+    const result = this.model.get('workbook');
+    if (!result) {
+      const list = new Y.Array<WorksheetType>();
+      this.model.set('workbook', list);
+      return list;
+    } else {
+      return result;
+    }
   }
   private set workbook(arr: WorksheetType[]) {
-    const list = new Y.Array();
-    list.push(arr);
-    this.model.set('workbook', list);
+    if (arr.length > 0) {
+      this.workbook.push(arr);
+    }
   }
   private get mergeCells(): Y.Array<IRange> {
-    return this.model.get('mergeCells');
+    const result = this.model.get('mergeCells');
+    if (result) {
+      return result;
+    }
+    const list = new Y.Array<IRange>();
+    this.model.set('mergeCells', list);
+    return list;
   }
   private set mergeCells(arr: IRange[]) {
-    const list = new Y.Array();
-    list.push(arr);
-    this.model.set('mergeCells', list);
+    if (arr.length > 0) {
+      this.mergeCells.push(arr);
+    }
   }
 
   private get definedNames(): Y.Map<IRange> {
-    return this.model.get('definedNames');
+    const result = this.model.get('definedNames');
+    if (result) {
+      return result;
+    }
+    const list = new Y.Map<IRange>();
+    this.model.set('definedNames', list);
+    return list;
   }
   private set definedNames(obj: Record<string, IRange>) {
     this.model.set('definedNames', new Y.Map(Object.entries(obj)));
   }
 
   private get customHeight(): Y.Map<CustomItem> {
-    return this.model.get('customHeight');
+    const result = this.model.get('customHeight');
+    if (result) {
+      return result;
+    }
+    const list = new Y.Map<CustomItem>();
+    this.model.set('customHeight', list);
+    return list;
   }
   private set customHeight(obj: WorkBookJSON['customHeight']) {
     this.model.set('customHeight', new Y.Map(Object.entries(obj)));
   }
 
   private get customWidth(): Y.Map<CustomItem> {
-    return this.model.get('customWidth');
+    const result = this.model.get('customWidth');
+    if (result) {
+      return result;
+    }
+    const list = new Y.Map<CustomItem>();
+    this.model.set('customWidth', list);
+    return list;
   }
   private set customWidth(obj: WorkBookJSON['customWidth']) {
     this.model.set('customWidth', new Y.Map(Object.entries(obj)));
   }
 
   private getSheetData(sheetId?: string): Y.Map<ModelCellType> | undefined {
-    const t = this.model.get(getSheetKey(sheetId || this.currentSheetId));
+    const t = this.model.get(getWorkSheetKey(sheetId || this.currentSheetId));
     return t;
   }
   private setSheetData(sheetId: string, data: Record<string, ModelCellType>) {
     const result = new Y.Map<ModelCellType>(Object.entries(data));
-    this.model.set(getSheetKey(sheetId || this.currentSheetId), result);
+    this.model.set(getWorkSheetKey(sheetId || this.currentSheetId), result);
   }
   getSheetList(): WorkBookJSON['workbook'] {
     if (!this.workbook) {
@@ -170,7 +186,7 @@ export class Model implements IModel {
     const { index, lastIndex } = this.getSheetIndex(id);
     this.currentSheetId = sheetList[lastIndex].sheetId;
     this.workbook.delete(index);
-    this.model.delete(getSheetKey(id));
+    this.model.delete(getWorkSheetKey(id));
   }
   hideSheet(sheetId?: string | undefined): void {
     const sheetList = this.getSheetList();
@@ -236,9 +252,10 @@ export class Model implements IModel {
       customHeight = {},
       customWidth = {},
       definedNames = {},
+      currentSheetId,
     } = json;
     this.workbook = workbook;
-    this.currentSheetId = this.getSheetId() || this.currentSheetId;
+    this.currentSheetId = currentSheetId || this.getSheetId();
     this.mergeCells = mergeCells;
     this.customWidth = customWidth;
     this.customHeight = customHeight;
@@ -258,6 +275,7 @@ export class Model implements IModel {
       customHeight: this.customHeight.toJSON(),
       customWidth: this.customWidth.toJSON(),
       definedNames: this.definedNames.toJSON(),
+      currentSheetId: this.currentSheetId,
     };
     for (const [key, value] of this.model.entries()) {
       if (key.startsWith(WORK_SHEETS_PREFIX)) {
@@ -394,7 +412,7 @@ export class Model implements IModel {
   hideCol(colIndex: number, count: number): void {
     for (let i = 0; i < count; i++) {
       const c = colIndex + i;
-      const key = `${this.currentSheetId}_${c}`;
+      const key = getCustomWidthOrHeightKey(this.currentSheetId, c);
       const oldData = this.customWidth.get(key);
       if (oldData && oldData.isHide) {
         continue;
@@ -408,7 +426,7 @@ export class Model implements IModel {
     }
   }
   getColWidth(col: number): number {
-    const key = `${this.currentSheetId}_${col}`;
+    const key = getCustomWidthOrHeightKey(this.currentSheetId, col);
     const temp = this.customWidth.get(key);
     if (!temp) {
       return CELL_WIDTH;
@@ -416,7 +434,7 @@ export class Model implements IModel {
     return temp.isHide ? 0 : temp.widthOrHeight || CELL_WIDTH;
   }
   setColWidth(col: number, width: number): void {
-    const key = `${this.currentSheetId}_${col}`;
+    const key = getCustomWidthOrHeightKey(this.currentSheetId, col);
 
     const data = this.customWidth.get(key);
     if (data && data.widthOrHeight === width) {
@@ -435,7 +453,7 @@ export class Model implements IModel {
   hideRow(rowIndex: number, count: number): void {
     for (let i = 0; i < count; i++) {
       const r = rowIndex + i;
-      const key = `${this.currentSheetId}_${r}`;
+      const key = getCustomWidthOrHeightKey(this.currentSheetId, r);
       const newData = this.customHeight.get(key);
 
       if (newData && newData.isHide) {
@@ -451,7 +469,7 @@ export class Model implements IModel {
     }
   }
   getRowHeight(row: number): number {
-    const key = `${this.currentSheetId}_${row}`;
+    const key = getCustomWidthOrHeightKey(this.currentSheetId, row);
     const temp = this.customHeight.get(key);
     if (!temp) {
       return CELL_HEIGHT;
@@ -460,7 +478,7 @@ export class Model implements IModel {
     return temp.isHide ? 0 : temp.widthOrHeight || CELL_HEIGHT;
   }
   setRowHeight(row: number, height: number): void {
-    const key = `${this.currentSheetId}_${row}`;
+    const key = getCustomWidthOrHeightKey(this.currentSheetId, row);
 
     const oldData = this.customHeight.get(key);
     if (oldData && oldData.widthOrHeight === height) {
@@ -588,7 +606,7 @@ export class Model implements IModel {
       this.setSheetData('', {});
     }
     const sheetData = this.getSheetData()!;
-    const key = `${row}_${col}`;
+    const key = coordinateToString(row, col);
     const data = sheetData.get(key) || {};
     if (data.value === value) {
       return;
@@ -602,7 +620,7 @@ export class Model implements IModel {
       this.setSheetData('', {});
     }
     const sheetData = this.getSheetData()!;
-    const key = `${row}_${col}`;
+    const key = coordinateToString(row, col);
     const data = sheetData.get(key) || {};
     if (data.formula === formula) {
       return;

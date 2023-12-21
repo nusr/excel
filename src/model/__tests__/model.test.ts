@@ -17,7 +17,11 @@ describe('model.test.ts', () => {
       row: 0,
       col: 0,
     });
-    model.setCellValues([['test']], [], [new Range(0, 0, 1, 1, model.getCurrentSheetId())]);
+    model.setCellValues(
+      [['test']],
+      [],
+      [new Range(0, 0, 1, 1, model.getCurrentSheetId())],
+    );
     expect(model.getCell(new Range(0, 0, 1, 1, ''))).toEqual({
       style: undefined,
       value: 'test',
@@ -34,11 +38,13 @@ describe('model.test.ts', () => {
       customHeight: {},
       customWidth: {},
       definedNames: {},
+      currentSheetId: '',
     });
   });
   test('fromJSON', () => {
     const model = new Model();
     const json: WorkBookJSON = {
+      currentSheetId: '',
       workbook: [
         {
           sheetId: '1',
@@ -75,6 +81,7 @@ describe('model.test.ts', () => {
     };
     model.fromJSON(json);
     expect(model.toJSON()).toEqual({
+      currentSheetId: '1',
       workbook: [
         {
           sheetId: '1',
@@ -106,7 +113,7 @@ describe('model.test.ts', () => {
       worksheets_2: {
         '0_0': {
           formula: '=Sheet1!A1',
-          "value": "#NAME?",
+          value: '#NAME?',
         },
       },
     });

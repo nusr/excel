@@ -17,8 +17,9 @@ import {
   CELL_WIDTH,
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
-  WORK_SHEETS_PREFIX,
   coordinateToString,
+  getWorkSheetKey,
+  getCustomWidthOrHeightKey,
 } from '@/util';
 
 const COMMON_PREFIX = 'xl';
@@ -27,8 +28,14 @@ const WORKBOOK_PATH = 'xl/workbook.xml';
 const WORKBOOK_RELATION_PATH = 'xl/_rels/workbook.xml.rels';
 const THEME_PATH = 'xl/theme/theme1.xml';
 const SHEET_PATH_PREFIX = 'xl/worksheets/';
+const SHARED_STRINGS = 'xl/sharedStrings.xml';
 export const CUSTOM_WIdTH_RADIO = 8;
 
+type SharedStringItem = {
+  t?: {
+    '#text': string;
+  };
+};
 type ThemeData = Record<
   string,
   {
@@ -49,6 +56,7 @@ type XMLFile = Record<string, any>;
 interface ColItem {
   r: string;
   s: string;
+  t?: string;
   v?: {
     '#text': string;
   };
@@ -284,6 +292,15 @@ function getCellStyle(
 
 function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
   const workbook = xmlData[WORKBOOK_PATH];
+
+  let sharedStrings: SharedStringItem[] = get(
+    xmlData[SHARED_STRINGS],
+    'sst.si',
+    [],
+  );
+  if (!Array.isArray(sharedStrings)) {
+    sharedStrings = [sharedStrings];
+  }
   const themeData = get<ThemeData>(
     xmlData[THEME_PATH],
     'a:theme.a:themeElements.a:clrScheme',
@@ -296,6 +313,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     customHeight: {},
     customWidth: {},
     definedNames: {},
+    currentSheetId: ''
   };
   const sheetPathMap: Record<string, string> = {};
   const sheetMap: Record<string, string> = {};
@@ -326,6 +344,15 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
         '',
       ),
     )!;
+    const tabSelected = get<string>(
+      xmlData[sheetPath],
+      'worksheet.sheetViews.sheetView.tabSelected',
+      '',
+    );
+    if (tabSelected === '1') {
+      result.currentSheetId = item.sheetId;
+    }
+
     range.sheetId = item.sheetId;
     result.workbook.push({
       sheetId: item.sheetId,
@@ -369,10 +396,11 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
             start < end;
             start++
           ) {
-            result.customWidth[`${item.sheetId}_${start}`] = {
-              widthOrHeight: w,
-              isHide,
-            };
+            result.customWidth[getCustomWidthOrHeightKey(item.sheetId, start)] =
+              {
+                widthOrHeight: w,
+                isHide,
+              };
           }
         }
       }
@@ -381,7 +409,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     if (sheetData.length === 0) {
       continue;
     }
-    result[`${WORK_SHEETS_PREFIX}${item.sheetId}`] = {};
+    const workSheetKey = getWorkSheetKey(item.sheetId);
 
     let { colCount } = item;
     let { rowCount } = item;
@@ -396,10 +424,11 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
       }
       if (row.customHeight && row.ht) {
         const isDefault = defaultWOrH.defaultRowHeight === row.ht;
-        result.customHeight[`${item.sheetId}_${realRow}`] = {
-          widthOrHeight: isDefault ? CELL_HEIGHT : parseFloat(row.ht),
-          isHide: Boolean(row.hidden),
-        };
+        result.customHeight[getCustomWidthOrHeightKey(item.sheetId, realRow)] =
+          {
+            widthOrHeight: isDefault ? CELL_HEIGHT : parseFloat(row.ht),
+            isHide: Boolean(row.hidden),
+          };
       }
       const colList = Array.isArray(row.c) ? row.c : [row.c];
       for (const col of colList) {
@@ -411,20 +440,33 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
         if (colCount > XLSX_MAX_COL_COUNT) {
           continue;
         }
-        const val = col?.v?.['#text'] || '';
+        let val = col?.v?.['#text'] || '';
         const styleId = parseInt(col.s, 10);
-        const t: ModelCellType = {
-          style: getCellStyle(xmlData[STYLE_PATH], styleId, themeData),
-        };
-
+        const style = getCellStyle(xmlData[STYLE_PATH], styleId, themeData);
+        const t: ModelCellType = {};
+        if (style) {
+          t.style = style;
+        }
+        if (col.t === 's') {
+          const i = parseInt(val, 10);
+          if (!isNaN(i)) {
+            const data = sharedStrings[i];
+            const text = data?.t?.['#text'] || '';
+            if (text) {
+              val = text;
+            }
+          }
+        }
         if (val.startsWith('=')) {
           t.formula = val;
         } else {
           t.value = val;
         }
-        result[`${WORK_SHEETS_PREFIX}${item.sheetId}`][
-          `${coordinateToString(realRow, range.col)}`
-        ] = t;
+
+        if (!result[workSheetKey]) {
+          result[workSheetKey] = {};
+        }
+        result[workSheetKey][coordinateToString(realRow, range.col)] = t;
         colCount = Math.max(colCount, range.col + 1);
       }
     }
@@ -443,8 +485,8 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
   };
   for (const item of definedNames) {
     const range = parseReference(item['#text'], convertSheetName);
-    if (range && range.sheetId && item?.name) {
-      result.definedNames[item.name.toLowerCase()] = range;
+    if (range && range.sheetId && range.isValid() && item?.name) {
+      result.definedNames[item.name.toLowerCase()] = range.toIRange();
     }
   }
   return result;
@@ -460,9 +502,13 @@ export async function importXLSX(file: File) {
       continue;
     }
     const check =
-      [STYLE_PATH, WORKBOOK_PATH, WORKBOOK_RELATION_PATH, THEME_PATH].includes(
-        key,
-      ) || key.startsWith(SHEET_PATH_PREFIX);
+      [
+        STYLE_PATH,
+        WORKBOOK_PATH,
+        WORKBOOK_RELATION_PATH,
+        THEME_PATH,
+        SHARED_STRINGS,
+      ].includes(key) || key.startsWith(SHEET_PATH_PREFIX);
     if (!check) {
       continue;
     }

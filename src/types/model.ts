@@ -70,20 +70,24 @@ export interface CustomItem {
   widthOrHeight: number; // width or height
   isHide: boolean;
 }
-export type CustomHeightOrWidthItem = Record<string, CustomItem>; // key: sheetId + '_' + row number or col number value: height or width
+export type CustomHeightOrWidthItem = {
+  [key: `${string}_${number}`]: CustomItem;
+}; // key: sheetId + '_' + row number or col number value: height or width
 export interface MergeCellItem {
   start: Coordinate;
   end: Coordinate;
 }
 
 export type WorkBookJSON = {
-  [key: `worksheets_${string}`]: Record<string, ModelCellType>; // [key: string]: Record<string, ModelCellType> key: worksheets_ + sheetId
+  [key: `worksheets_${string}`]: { // key: worksheets_ + sheetId
+    [key: `${number}_${number}`]: ModelCellType; // key: row + col worksheets_*.xml_worksheet_sheetData
+  };
   workbook: WorksheetType[]; // workbook.xml_workbook_sheets
-  // worksheets: Record<string, ModelCellType>; // key: sheetId + '_' + row + '_' + col worksheets_*.xml_worksheet_sheetData
   mergeCells: IRange[]; // worksheets_*.xml_worksheet_mergeCells
   customHeight: CustomHeightOrWidthItem; // key: sheetId_row worksheets_*.xml_worksheet_sheetData_customHeight
   customWidth: CustomHeightOrWidthItem; // key: sheetId_col worksheets_*.xml_worksheet_sheetData_customHeight
   definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
+  currentSheetId: string;
 };
 
 export interface IModel extends IBaseModel {

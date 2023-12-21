@@ -219,24 +219,20 @@ export class Controller implements IController {
     return this.model.canUndo();
   }
   undo() {
-    this.transaction(() => {
-      this.model.undo();
-      this.changeSet.add('setActiveCell');
-      this.changeSet.add('sheetList');
-      this.changeSet.add('currentSheetId');
-      this.changeSet.add('scroll');
-      this.emitChange();
-    });
+    this.model.undo();
+    this.changeSet.add('setActiveCell');
+    this.changeSet.add('sheetList');
+    this.changeSet.add('currentSheetId');
+    this.changeSet.add('scroll');
+    this.emitChange();
   }
   redo() {
-    this.transaction(() => {
-      this.model.redo();
-      this.changeSet.add('setActiveCell');
-      this.changeSet.add('sheetList');
-      this.changeSet.add('currentSheetId');
-      this.changeSet.add('scroll');
-      this.emitChange();
-    });
+    this.model.redo();
+    this.changeSet.add('setActiveCell');
+    this.changeSet.add('sheetList');
+    this.changeSet.add('currentSheetId');
+    this.changeSet.add('scroll');
+    this.emitChange();
   }
   getColWidth(col: number): number {
     return this.model.getColWidth(col);

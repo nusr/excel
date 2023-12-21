@@ -1,4 +1,4 @@
-import { SHEET_NAME_PREFIX } from './constant';
+import { SHEET_NAME_PREFIX, SPLITTER, WORK_SHEETS_PREFIX } from './constant';
 import type { WorksheetType, ResultType, Coordinate } from '@/types';
 
 export function isNumber(value: any): boolean {
@@ -72,18 +72,29 @@ export function convertResultTypeToString(value: ResultType): string {
   return text;
 }
 
-const gapSplitter = '_';
-
-export function coordinateToString(row: number, col: number) {
-  return `${row}${gapSplitter}${col}`;
+export function coordinateToString(
+  row: number,
+  col: number,
+): `${number}_${number}` {
+  return `${row}${SPLITTER}${col}`;
 }
 
 export function stringToCoordinate(key: string): Coordinate {
-  const [row, col] = key.split(gapSplitter);
-  const r = parseInt(row, 1);
-  const c = parseInt(col, 1);
+  const [row, col] = key.split(SPLITTER);
+  const r = parseInt(row, 10);
+  const c = parseInt(col, 10);
   return {
     row: isNaN(r) ? 0 : r,
     col: isNaN(c) ? 0 : c,
   };
+}
+export function getWorkSheetKey(sheetId: string): `worksheets_${string}` {
+  return `${WORK_SHEETS_PREFIX}${sheetId}`;
+}
+
+export function getCustomWidthOrHeightKey(
+  sheetId: string,
+  rowOrCol: number,
+): `${string}_${number}` {
+  return `${sheetId}${SPLITTER}${rowOrCol}`;
 }
