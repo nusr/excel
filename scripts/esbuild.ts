@@ -2,30 +2,32 @@ import { build, BuildOptions, context } from 'esbuild';
 import packageJson from '../package.json';
 import * as fs from 'fs';
 import * as path from 'path';
+import { parseArgs } from 'util';
 
-const envConfig = getEnv();
-const productionMode = 'production';
-const nodeEnv = envConfig['NODE_ENV'] || productionMode;
-const isDev = nodeEnv === 'development';
-const globalName = '__export__';
+const { values: envConfig } = parseArgs({
+  options: {
+    help: {
+      type: 'boolean',
+      short: 'h',
+      default: false,
+    },
+    // production development test
+    nodeEnv: {
+      type: 'string',
+      short: 'e',
+    },
+  },
+  allowPositionals: true,
+});
+
+const nodeEnv = envConfig.nodeEnv || 'production';
+
 const licenseText = fs.readFileSync(
   path.join(process.cwd(), 'LICENSE'),
   'utf-8',
 );
+const globalName = '__export__';
 const distDir = path.join(process.cwd(), 'dist');
-
-function getEnv(): Record<string, string> {
-  const result: Record<string, string> = {};
-  const rest = process.argv.slice(2);
-  return rest.reduce((prev, current = '') => {
-    const [key = '', value = ''] = current.trim().split('=');
-    const t = key.trim();
-    if (t) {
-      prev[t] = value.trim();
-    }
-    return prev;
-  }, result);
-}
 
 function umdWrapper() {
   const header = `(function (global, factory) {
@@ -160,7 +162,7 @@ async function buildDev() {
 async function init() {
   deleteDir('lib');
   deleteDir('dist');
-  if (isDev) {
+  if (nodeEnv === 'development') {
     await buildDev();
   } else {
     await buildProd();

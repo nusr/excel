@@ -23,7 +23,9 @@ describe('parseFormula variable', () => {
   it('should evaluate custom variables', () => {
     const temp = new VariableMapImpl();
     const cellDataMap = new CellDataMapImpl();
-    cellDataMap.set(0, 0, '', '222');
+    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [
+      ['222'],
+    ]);
     temp.set('foo', {
       row: 0,
       col: 0,

@@ -1,4 +1,4 @@
-import { parseReference, parseCell } from '../reference';
+import { parseReference, parseCell, mergeRange } from '../reference';
 import { Range } from '../range';
 
 describe('reference.test.ts', () => {
@@ -13,6 +13,13 @@ describe('reference.test.ts', () => {
       const result = parseReference('a1:c1');
       expect(result).toEqual(new Range(0, 0, 1, 3, ''));
     });
+
+    it('A1:C1', () => {
+      expect(parseReference('A1:C1')).toEqual(new Range(0, 0, 1, 3, ''));
+    });
+    it('D1:E1', () => {
+      expect(parseReference('D1:E1')).toEqual(new Range(0, 3, 1, 2, ''));
+    });
   });
   describe('parseCell', () => {
     it('should convert a1 to { row:0,col:0,rowCount:1,colCount: 1 } ', () => {
@@ -20,6 +27,10 @@ describe('reference.test.ts', () => {
     });
     it('should convert c1', () => {
       expect(parseCell('c1')).toEqual(new Range(0, 2, 1, 1, ''));
+    });
+
+    it('should convert B2', () => {
+      expect(parseCell('B2')).toEqual(new Range(1, 1, 1, 1, ''));
     });
     it('should convert A to { row:0,col:0,rowCount:200,colCount: 0 } ', () => {
       expect(parseCell('A')).toEqual(new Range(0, 0, 200, 0, ''));
@@ -35,6 +46,29 @@ describe('reference.test.ts', () => {
     });
     it('should convert Sheet1!A1 to { row:0,col:0,rowCount:1,colCount: 1, sheetId: Sheet1 } ', () => {
       expect(parseCell('Sheet1!A1')).toEqual(new Range(0, 0, 1, 1, 'Sheet1'));
+    });
+  });
+  describe('mergeRange', () => {
+    it('A1:B2', () => {
+      expect(
+        mergeRange(new Range(0, 0, 1, 1, ''), new Range(1, 1, 1, 1, '')),
+      ).toEqual(new Range(0, 0, 2, 2, ''));
+    });
+    it('B:B', () => {
+      expect(
+        mergeRange(new Range(0, 1, 200, 0, ''), new Range(0, 1, 200, 0, '')),
+      ).toEqual(new Range(0, 1, 200, 0, ''));
+    });
+    it('B:B2', () => {
+      expect(
+        mergeRange(new Range(0, 1, 200, 0, ''), new Range(1, 1, 1, 1, '')),
+      ).toBeNull();
+    });
+
+    it('A1:C1', () => {
+      expect(
+        mergeRange(new Range(0, 0, 1, 1, ''), new Range(0, 2, 1, 1, '')),
+      ).toEqual(new Range(0, 0, 1, 3, ''));
     });
   });
 });

@@ -42,8 +42,8 @@ export enum TokenType {
 }
 
 export interface CellDataMap {
-  set: (row: number, col: number, sheetId: string, value: any) => void;
-  get: (row: number, col: number, sheetId: string) => any;
+  set: (range: IRange, value: ResultType[][]) => void;
+  get: (range: IRange) => ResultType[];
   convertSheetNameToSheetId: (sheetName: string) => string;
 }
 
@@ -54,7 +54,7 @@ export interface DefinedNamesMap {
 }
 
 export interface InterpreterResult {
-  result: any;
+  result: ResultType;
   error: ErrorTypes | null;
   expressionStr: string;
 }

@@ -5,7 +5,7 @@
   "main": "lib/excel.umd.js",
   "module": "lib/excel.esm.js",
   "scripts": {
-    "start": "npm run build -- NODE_ENV=development",
+    "start": "npm run build -- --nodeEnv development",
     "build": "node ./scripts/esbuild.js",
     "test": "jest --config ./scripts/unit-test-jest.config.js --forceExit --detectOpenHandles",
     "coverage": "npm run test -- --coverage",

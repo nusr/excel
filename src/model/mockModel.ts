@@ -74,6 +74,9 @@ export const MOCK_MODEL: WorkBookJSON = {
         underline: EUnderLine.SINGLE,
       },
     },
+    '0_5': {
+      value: '10',
+    },
     '0_6': {
       formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
       style: {
@@ -100,6 +103,12 @@ export const MOCK_MODEL: WorkBookJSON = {
     },
     '0_10': {
       value: '🌷🎁💩😜👍🏳️‍🌈',
+    },
+    '1_0': {
+      formula: '=SUM(F:F)',
+    },
+    '1_5': {
+      value: '5',
     },
     '3_0': {
       style: {

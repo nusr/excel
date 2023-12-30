@@ -27,6 +27,7 @@ import {
   getWorkSheetKey,
   getCustomWidthOrHeightKey,
   modelLog,
+  FORMULA_PREFIX,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 import * as Y from 'yjs';
@@ -51,18 +52,17 @@ export class Model implements IModel {
   }
   private get workbook(): Y.Array<WorksheetType> {
     const result = this.model.get('workbook');
-    if (!result) {
-      const list = new Y.Array<WorksheetType>();
-      this.model.set('workbook', list);
-      return list;
-    } else {
+    if (result) {
       return result;
     }
+    const list = new Y.Array<WorksheetType>();
+    this.model.set('workbook', list);
+    return list;
   }
   private set workbook(arr: WorksheetType[]) {
-    if (arr.length > 0) {
-      this.workbook.push(arr);
-    }
+    const list = new Y.Array<WorksheetType>();
+    list.push(arr);
+    this.model.set('workbook', list);
   }
   private get mergeCells(): Y.Array<IRange> {
     const result = this.model.get('mergeCells');
@@ -74,9 +74,9 @@ export class Model implements IModel {
     return list;
   }
   private set mergeCells(arr: IRange[]) {
-    if (arr.length > 0) {
-      this.mergeCells.push(arr);
-    }
+    const list = new Y.Array<IRange>();
+    list.push(arr);
+    this.model.set('mergeCells', list);
   }
 
   private get definedNames(): Y.Map<IRange> {
@@ -269,7 +269,7 @@ export class Model implements IModel {
     this.undoManager.clear(true, true);
   };
   toJSON = (): WorkBookJSON => {
-    const json: any = {
+    const json = {
       workbook: this.workbook.toArray(),
       mergeCells: this.mergeCells.toArray(),
       customHeight: this.customHeight.toJSON(),
@@ -279,6 +279,8 @@ export class Model implements IModel {
     };
     for (const [key, value] of this.model.entries()) {
       if (key.startsWith(WORK_SHEETS_PREFIX)) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         json[key] = value.toJSON();
       }
     }
@@ -302,7 +304,7 @@ export class Model implements IModel {
         if (style[r] && style[r][c]) {
           this.setStyle(style[r][c], temp);
         }
-        if (t && typeof t === 'string' && t.startsWith('=')) {
+        if (t && typeof t === 'string' && t.startsWith(FORMULA_PREFIX)) {
           this.setCellFormula(t, temp);
         } else {
           this.setCellFormula('', temp);
@@ -622,10 +624,9 @@ export class Model implements IModel {
     const sheetData = this.getSheetData()!;
     const key = coordinateToString(row, col);
     const data = sheetData.get(key) || {};
-    if (data.formula === formula) {
-      return;
-    }
-    data.formula = formula;
+    const result = this.parseFormula(formula);
+    data.formula = result.expressionStr;
+    data.value = result.error ? result.error : result.result;
     sheetData.set(key, data);
   }
   private computeAllCell() {
@@ -635,7 +636,8 @@ export class Model implements IModel {
       }
       for (const value of sheetData.values()) {
         if (value?.formula) {
-          value.value = this.parseFormula(value.formula);
+          const result = this.parseFormula(value.formula);
+          value.value = result.error ? result.error : result.result;
         }
       }
     }
@@ -644,13 +646,41 @@ export class Model implements IModel {
     const result = parseFormula(
       formula,
       {
-        get: (row: number, col: number, sheetId: string) => {
+        get: (range: IRange) => {
+          const { row, col, colCount, rowCount, sheetId } = range;
+          const result: ResultType[] = [];
           const sheetInfo = this.getSheetInfo(sheetId || this.currentSheetId);
           if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
             throw new CustomError('#REF!');
           }
-          const temp = this.getCell(new Range(row, col, 1, 1, sheetId));
-          return temp.value;
+          if (colCount === 0 && rowCount > 0) {
+            for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+              const temp = this.getCell(new Range(r, col, 1, 1, sheetId));
+              result.push(temp.value);
+            }
+          } else if (rowCount === 0 && colCount > 0) {
+            for (let c = col, endCol = col + colCount; c < endCol; c++) {
+              const temp = this.getCell(new Range(row, c, 1, 1, sheetId));
+              result.push(temp.value);
+            }
+          } else {
+            for (
+              let r = row, endRow = row + (rowCount || sheetInfo.rowCount);
+              r < endRow;
+              r++
+            ) {
+              for (
+                let c = col, endCol = col + (colCount || sheetInfo.colCount);
+                c < endCol;
+                c++
+              ) {
+                const temp = this.getCell(new Range(r, c, 1, 1, sheetId));
+                result.push(temp.value);
+              }
+            }
+          }
+
+          return result;
         },
         set: () => {
           throw new CustomError('#REF!');
@@ -664,16 +694,13 @@ export class Model implements IModel {
         set: () => {
           throw new CustomError('#REF!');
         },
-        get: (name: string) => {
-          const t = this.definedNames.get(name);
-          return t;
-        },
+        get: (name: string) => this.definedNames.get(name),
         has: (name: string) => {
           return this.definedNames.has(name);
         },
       },
     );
-    return result.error ? result.error : result.result;
+    return result;
   }
   private getSheetIndex(sheetId?: string) {
     const id = sheetId || this.currentSheetId;

@@ -8,6 +8,7 @@ import {
   DefinedNamesMap,
   IRange,
   FormulaType,
+  ResultType,
 } from '@/types';
 
 export function parseFormula(
@@ -55,22 +56,35 @@ export function parseFormula(
 }
 
 export class CellDataMapImpl implements CellDataMap {
-  private readonly map = new Map<string, any>();
+  private readonly map = new Map<string, ResultType>();
   private sheetNameMap: Record<string, string> = {};
-  private getKey(row: number, col: number, sheetId = '') {
+  private getKey(row: number, col: number, sheetId = '1') {
     const key = `${row}_${col}_${sheetId}`;
     return key;
   }
   setSheetNameMap(sheetNameMap: Record<string, string>) {
     this.sheetNameMap = sheetNameMap;
   }
-  set(row: number, col: number, sheetId: string, value: any): void {
-    const key = this.getKey(row, col, sheetId);
-    this.map.set(key, value);
+  set(range: IRange, value: ResultType[][]): void {
+    const { row, col, sheetId } = range;
+    for (let i = 0; i < value.length; i++) {
+      for (let j = 0; j < value[i].length; j++) {
+        const key = this.getKey(row + i, col + j, sheetId);
+        this.map.set(key, value[i][j]);
+      }
+    }
   }
-  get(row: number, col: number, sheetId = ''): any {
-    const key = this.getKey(row, col, sheetId);
-    return this.map.get(key);
+  get(range: IRange): ResultType[] {
+    const list: ResultType[] = [];
+    const { row, col, rowCount, colCount, sheetId } = range;
+    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+      for (let c = col, endCol = col + colCount; c < endCol; c++) {
+        const key = this.getKey(r, c, sheetId);
+        list.push(this.map.get(key));
+      }
+    }
+
+    return list;
   }
   convertSheetNameToSheetId(sheetName: string): string {
     if (!sheetName) {
