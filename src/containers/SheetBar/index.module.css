@@ -1,8 +1,7 @@
 .sheet-bar-wrapper {
   width: 100%;
   box-sizing: border-box;
-  padding: 0 10px;
-  background-color: var(--backgroundColor);
+  padding: 0 var(--largePadding);
   display: flex;
   align-items: center;
   position: relative;
@@ -31,7 +30,6 @@
   left: 0;
   bottom: 32px;
   background-color: var(--white);
-  /* border: 1px solid var(--borderColor); */
   border-radius: var(--borderRadius);
   width: 100px;
 }

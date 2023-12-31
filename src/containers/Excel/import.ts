@@ -10,7 +10,6 @@ import {
 import {
   get,
   parseReference,
-  parseCell,
   NUMBER_FORMAT_LIST,
   reactLog,
   CELL_HEIGHT,
@@ -435,7 +434,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
         if (!col) {
           continue;
         }
-        const range = parseCell(col.r)!;
+        const range = parseReference(col.r)!;
         colCount = Math.max(colCount, range.col + 1);
         if (colCount > XLSX_MAX_COL_COUNT) {
           continue;

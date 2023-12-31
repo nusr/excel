@@ -1,4 +1,4 @@
-import { parseReference, parseCell, mergeRange } from '../reference';
+import { parseReference, mergeRange } from '../reference';
 import { Range } from '../range';
 
 describe('reference.test.ts', () => {
@@ -23,29 +23,29 @@ describe('reference.test.ts', () => {
   });
   describe('parseCell', () => {
     it('should convert a1 to { row:0,col:0,rowCount:1,colCount: 1 } ', () => {
-      expect(parseCell('a1')).toEqual(new Range(0, 0, 1, 1, ''));
+      expect(parseReference('a1')).toEqual(new Range(0, 0, 1, 1, ''));
     });
     it('should convert c1', () => {
-      expect(parseCell('c1')).toEqual(new Range(0, 2, 1, 1, ''));
+      expect(parseReference('c1')).toEqual(new Range(0, 2, 1, 1, ''));
     });
 
     it('should convert B2', () => {
-      expect(parseCell('B2')).toEqual(new Range(1, 1, 1, 1, ''));
+      expect(parseReference('B2')).toEqual(new Range(1, 1, 1, 1, ''));
     });
     it('should convert A to { row:0,col:0,rowCount:200,colCount: 0 } ', () => {
-      expect(parseCell('A')).toEqual(new Range(0, 0, 200, 0, ''));
+      expect(parseReference('A')).toEqual(new Range(0, 0, 200, 0, ''));
     });
     it('should convert 1 to { row:0,col:0,rowCount:0,colCount: 30 } ', () => {
-      expect(parseCell('1')).toEqual(new Range(0, 0, 0, 30, ''));
+      expect(parseReference('1')).toEqual(new Range(0, 0, 0, 30, ''));
     });
     it('should convert Sheet1!1 to { row:0,col:0,rowCount:0,colCount: 30, sheetId: Sheet1 } ', () => {
-      expect(parseCell('Sheet1!1')).toEqual(new Range(0, 0, 0, 30, 'Sheet1'));
+      expect(parseReference('Sheet1!1')).toEqual(new Range(0, 0, 0, 30, 'Sheet1'));
     });
     it('should convert Sheet1!A to { row:0,col:0,rowCount:200,colCount: 0, sheetId: Sheet1 } ', () => {
-      expect(parseCell('Sheet1!A')).toEqual(new Range(0, 0, 200, 0, 'Sheet1'));
+      expect(parseReference('Sheet1!A')).toEqual(new Range(0, 0, 200, 0, 'Sheet1'));
     });
     it('should convert Sheet1!A1 to { row:0,col:0,rowCount:1,colCount: 1, sheetId: Sheet1 } ', () => {
-      expect(parseCell('Sheet1!A1')).toEqual(new Range(0, 0, 1, 1, 'Sheet1'));
+      expect(parseReference('Sheet1!A1')).toEqual(new Range(0, 0, 1, 1, 'Sheet1'));
     });
   });
   describe('mergeRange', () => {

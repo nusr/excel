@@ -1,4 +1,4 @@
-import { Range, mergeRange, parseCell } from '@/util';
+import { Range, mergeRange, parseReference } from '@/util';
 import {
   TokenType,
   CellDataMap,
@@ -128,7 +128,7 @@ export class Interpreter implements Visitor {
         throw new CustomError('#NAME?');
       }
     }
-    const t = parseCell(data.value.value);
+    const t = parseReference(data.value.value);
     if (t === null) {
       throw new CustomError('#NAME?');
     }

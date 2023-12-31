@@ -7,6 +7,7 @@ import { ScrollBar } from './ScrollBar';
 import { ContextMenu } from './ContextMenu';
 import { initCanvas } from './util';
 import { checkFocus, setActiveCellValue } from '@/canvas';
+import { BottomBar } from './BottomBar';
 
 interface Props {
   controller: IController;
@@ -153,6 +154,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
           data-testid="canvas-main"
         />
         <ScrollBar controller={controller} />
+        <BottomBar controller={controller} />
       </div>
       {menuPosition.top >= 0 && menuPosition.left >= 0 && (
         <ContextMenu

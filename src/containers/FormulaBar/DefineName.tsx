@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { IController } from '@/types';
 import styles from './index.module.css';
-import { parseCell } from '@/util';
+import { parseReference } from '@/util';
 
 interface Props {
   controller: IController;
@@ -30,7 +30,7 @@ export const DefineName: React.FunctionComponent<Props> = ({
         controller.setActiveCell(range);
         return;
       }
-      const r = parseCell(t);
+      const r = parseReference(t);
       const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
       if (r && r.col < sheetInfo.colCount && r.row < sheetInfo.rowCount) {
         setValue(displayName);

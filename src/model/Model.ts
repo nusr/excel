@@ -51,31 +51,29 @@ export class Model implements IModel {
     return this.doc.getMap(modelName);
   }
   private get workbook(): Y.Array<WorksheetType> {
-    const result = this.model.get('workbook');
-    if (result) {
-      return result;
+    if (!this.model.get('workbook')) {
+      this.workbook = [];
     }
-    const list = new Y.Array<WorksheetType>();
-    this.model.set('workbook', list);
-    return list;
+    return this.model.get('workbook');
   }
   private set workbook(arr: WorksheetType[]) {
     const list = new Y.Array<WorksheetType>();
-    list.push(arr);
+    if (arr.length > 0) {
+      list.push(arr);
+    }
     this.model.set('workbook', list);
   }
   private get mergeCells(): Y.Array<IRange> {
-    const result = this.model.get('mergeCells');
-    if (result) {
-      return result;
+    if (!this.model.get('mergeCells')) {
+      this.mergeCells = [];
     }
-    const list = new Y.Array<IRange>();
-    this.model.set('mergeCells', list);
-    return list;
+    return this.model.get('mergeCells');
   }
   private set mergeCells(arr: IRange[]) {
     const list = new Y.Array<IRange>();
-    list.push(arr);
+    if (arr.length > 0) {
+      list.push(arr);
+    }
     this.model.set('mergeCells', list);
   }
 
@@ -119,17 +117,13 @@ export class Model implements IModel {
   }
 
   private getSheetData(sheetId?: string): Y.Map<ModelCellType> | undefined {
-    const t = this.model.get(getWorkSheetKey(sheetId || this.currentSheetId));
-    return t;
+    return this.model.get(getWorkSheetKey(sheetId || this.currentSheetId));
   }
   private setSheetData(sheetId: string, data: Record<string, ModelCellType>) {
     const result = new Y.Map<ModelCellType>(Object.entries(data));
     this.model.set(getWorkSheetKey(sheetId || this.currentSheetId), result);
   }
   getSheetList(): WorkBookJSON['workbook'] {
-    if (!this.workbook) {
-      return [];
-    }
     return this.workbook.toArray();
   }
   setActiveCell(range: IRange): void {
@@ -346,15 +340,22 @@ export class Model implements IModel {
     if (!sheetData) {
       return;
     }
-    for (const [key, value] of sheetData.entries()) {
-      const range = stringToCoordinate(key);
-      if (range.row < rowIndex) {
-        continue;
+    const list = Array.from(sheetData.keys()).map((key) =>
+      stringToCoordinate(key),
+    );
+    list.sort((a, b) => a.row - b.row);
+    for (let i = list.length - 1; i >= 0; i--) {
+      const item = list[i];
+      if (item.row <= rowIndex) {
+        break;
       }
-      const newKey = coordinateToString(range.row + count, range.col);
+      const key = coordinateToString(item.row, item.col);
+      const newKey = coordinateToString(item.row + count, item.col);
+      const value = sheetData.get(key);
       sheetData.set(newKey, { ...value });
-      sheetData.set(key, {});
+      sheetData.delete(key);
     }
+    this.computeAllCell();
   }
   addCol(colIndex: number, count: number): void {
     const sheetInfo = this.getSheetInfo();
@@ -366,15 +367,22 @@ export class Model implements IModel {
     if (!sheetData) {
       return;
     }
-    for (const [key, value] of sheetData.entries()) {
-      const range = stringToCoordinate(key);
-      if (range.col < colIndex) {
-        continue;
+    const list = Array.from(sheetData.keys()).map((key) =>
+      stringToCoordinate(key),
+    );
+    list.sort((a, b) => a.col - b.col);
+    for (let i = list.length - 1; i >= 0; i--) {
+      const item = list[i];
+      if (item.col <= colIndex) {
+        break;
       }
-      const newKey = coordinateToString(range.row, range.col + count);
+      const key = coordinateToString(item.row, item.col);
+      const newKey = coordinateToString(item.row, item.col + count);
+      const value = sheetData.get(key);
       sheetData.set(newKey, { ...value });
-      sheetData.set(key, {});
+      sheetData.delete(key);
     }
+    this.computeAllCell();
   }
   deleteCol(colIndex: number, count: number): void {
     const sheetInfo = this.getSheetInfo();
@@ -383,15 +391,23 @@ export class Model implements IModel {
     if (!sheetData) {
       return;
     }
-    for (const [key, value] of sheetData.entries()) {
-      const range = stringToCoordinate(key);
-      if (range.col < colIndex) {
+    const list = Array.from(sheetData.keys()).map((key) =>
+      stringToCoordinate(key),
+    );
+    list.sort((a, b) => a.col - b.col);
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      if (item.col < colIndex) {
         continue;
       }
-      const newKey = coordinateToString(range.row, range.col - count);
-      sheetData.set(newKey, { ...value });
-      sheetData.set(key, {});
+      const key = coordinateToString(item.row, item.col);
+      if (item.col >= colIndex + count) {
+        const newKey = coordinateToString(item.row, item.col - count);
+        sheetData.set(newKey, { ...sheetData.get(key) });
+      }
+      sheetData.delete(key);
     }
+    this.computeAllCell();
   }
   deleteRow(rowIndex: number, count: number): void {
     const sheetInfo = this.getSheetInfo();
@@ -400,15 +416,23 @@ export class Model implements IModel {
     if (!sheetData) {
       return;
     }
-    for (const [key, value] of sheetData.entries()) {
-      const range = stringToCoordinate(key);
-      if (range.row < rowIndex) {
+    const list = Array.from(sheetData.keys()).map((key) =>
+      stringToCoordinate(key),
+    );
+    list.sort((a, b) => a.row - b.row);
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+      if (item.row < rowIndex) {
         continue;
       }
-      const newKey = coordinateToString(range.row - count, range.col);
-      sheetData.set(newKey, { ...value });
-      sheetData.set(key, {});
+      const key = coordinateToString(item.row, item.col);
+      if (item.row >= rowIndex + count) {
+        const newKey = coordinateToString(item.row - count, item.col);
+        sheetData.set(newKey, { ...sheetData.get(key) });
+      }
+      sheetData.delete(key);
     }
+    this.computeAllCell();
   }
 
   hideCol(colIndex: number, count: number): void {
@@ -512,7 +536,7 @@ export class Model implements IModel {
     const { activeCell } = this.getSheetInfo(currentSheetId);
 
     const { row, col, rowCount, colCount, sheetId } = fromRange;
-    const sheetData = this.getSheetData(sheetId);
+    const fromSheetData = this.getSheetData(sheetId);
 
     const realRange: IRange = {
       ...activeCell,
@@ -520,33 +544,32 @@ export class Model implements IModel {
       colCount,
     };
 
-    if (!sheetData) {
+    if (!fromSheetData) {
       return realRange;
     }
     if (!this.getSheetData(currentSheetId)) {
       this.setSheetData(currentSheetId, {});
     }
     const currentSheetData = this.getSheetData(currentSheetId)!;
-    for (let r = row, i = 0, endRow = row + rowCount; r < endRow; r++, i++) {
-      for (let c = col, j = 0, endCol = col + colCount; c < endCol; c++, j++) {
-        const oldPath = coordinateToString(r, c);
-        const temp = sheetData.get(oldPath) || {};
-        const realRow = activeCell.row + i;
-        const realCol = activeCell.col + j;
-        const path = coordinateToString(realRow, realCol);
-        currentSheetData.set(path, { ...temp });
-        if (isCut) {
-          sheetData.delete(oldPath);
-        }
+    this.iterateRange(fromRange, (r, c) => {
+      const oldPath = coordinateToString(r, c);
+      const temp = fromSheetData.get(oldPath) || {};
+      const realRow = activeCell.row + (r - row);
+      const realCol = activeCell.col + (c - col);
+      const path = coordinateToString(realRow, realCol);
+      currentSheetData.set(path, { ...temp });
+      if (isCut) {
+        fromSheetData.delete(oldPath);
       }
-    }
+    });
+
     this.computeAllCell();
 
     return realRange;
   }
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
-    this.model.delete(id);
+    this.model.delete(getWorkSheetKey(id));
     this.mergeCells = this.mergeCells.toArray().filter((v) => v.sheetId !== id);
     for (const key of this.customHeight.keys()) {
       if (key.startsWith(id)) {
@@ -558,18 +581,11 @@ export class Model implements IModel {
         this.customWidth.delete(key);
       }
     }
-    const definedNames: WorkBookJSON['definedNames'] = {};
-    const oldDefineNames = this.definedNames.toJSON();
-    for (const key of Object.keys(oldDefineNames)) {
-      const t = oldDefineNames[key];
-      if (!t) {
-        continue;
-      }
-      if (t.sheetId !== id) {
-        definedNames[key] = t;
+    for (const [key, range] of this.definedNames.entries()) {
+      if (range && range.sheetId === id) {
+        this.definedNames.delete(key);
       }
     }
-    this.definedNames = definedNames;
   }
   getDefineName(range: IRange): string {
     const sheetId = range.sheetId || this.currentSheetId;
@@ -625,8 +641,13 @@ export class Model implements IModel {
     const key = coordinateToString(row, col);
     const data = sheetData.get(key) || {};
     const result = this.parseFormula(formula);
-    data.formula = result.expressionStr;
-    data.value = result.error ? result.error : result.result;
+    if (result.error) {
+      data.value = result.error;
+      data.formula = '';
+    } else {
+      data.formula = FORMULA_PREFIX + result.expressionStr;
+      data.value = result.result;
+    }
     sheetData.set(key, data);
   }
   private computeAllCell() {
@@ -634,10 +655,37 @@ export class Model implements IModel {
       if (!key.startsWith(WORK_SHEETS_PREFIX)) {
         continue;
       }
-      for (const value of sheetData.values()) {
-        if (value?.formula) {
-          const result = this.parseFormula(value.formula);
-          value.value = result.error ? result.error : result.result;
+      for (const data of sheetData.values()) {
+        if (data?.formula) {
+          const result = this.parseFormula(data.formula);
+          data.value = result.error ? result.error : result.result;
+        }
+      }
+    }
+  }
+  private iterateRange(range: IRange, fn: (row: number, col: number) => void) {
+    const { row, col, rowCount, colCount, sheetId } = range;
+    const sheetInfo = this.getSheetInfo(sheetId);
+    if (colCount === 0 && rowCount > 0) {
+      for (let r = row, endRow = row + sheetInfo.rowCount; r < endRow; r++) {
+        fn(r, col);
+      }
+    } else if (rowCount === 0 && colCount > 0) {
+      for (let c = col, endCol = col + sheetInfo.colCount; c < endCol; c++) {
+        fn(row, c);
+      }
+    } else {
+      for (
+        let r = row, endRow = row + (rowCount || sheetInfo.rowCount);
+        r < endRow;
+        r++
+      ) {
+        for (
+          let c = col, endCol = col + (colCount || sheetInfo.colCount);
+          c < endCol;
+          c++
+        ) {
+          fn(r, c);
         }
       }
     }
@@ -647,39 +695,16 @@ export class Model implements IModel {
       formula,
       {
         get: (range: IRange) => {
-          const { row, col, colCount, rowCount, sheetId } = range;
+          const { row, col, sheetId } = range;
           const result: ResultType[] = [];
           const sheetInfo = this.getSheetInfo(sheetId || this.currentSheetId);
           if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
             throw new CustomError('#REF!');
           }
-          if (colCount === 0 && rowCount > 0) {
-            for (let r = row, endRow = row + rowCount; r < endRow; r++) {
-              const temp = this.getCell(new Range(r, col, 1, 1, sheetId));
-              result.push(temp.value);
-            }
-          } else if (rowCount === 0 && colCount > 0) {
-            for (let c = col, endCol = col + colCount; c < endCol; c++) {
-              const temp = this.getCell(new Range(row, c, 1, 1, sheetId));
-              result.push(temp.value);
-            }
-          } else {
-            for (
-              let r = row, endRow = row + (rowCount || sheetInfo.rowCount);
-              r < endRow;
-              r++
-            ) {
-              for (
-                let c = col, endCol = col + (colCount || sheetInfo.colCount);
-                c < endCol;
-                c++
-              ) {
-                const temp = this.getCell(new Range(r, c, 1, 1, sheetId));
-                result.push(temp.value);
-              }
-            }
-          }
-
+          this.iterateRange(range, (r, c) => {
+            const temp = this.getCell(new Range(r, c, 1, 1, sheetId));
+            result.push(temp.value);
+          });
           return result;
         },
         set: () => {

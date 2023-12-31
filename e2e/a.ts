@@ -21,6 +21,7 @@ afterAll(async () => {
 async function setupPuppeteer() {
   const browser = await puppeteer.launch({
     headless: 'new',
+    // headless: false,
     waitForInitialPage: true,
     defaultViewport: {
       width: 1600,
@@ -62,7 +63,22 @@ export async function clickDom(selector: string): Promise<void> {
   await sleep(200);
 }
 
+async function isVisible(testId: string) {
+  const isVisible = await browserPage.evaluate((selector: string) => {
+    const element = document.querySelector(selector);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return element?.offsetParent !== null;
+  }, getTestIdSelector(testId));
+  return isVisible;
+}
+
 export async function checkExist(selector: string): Promise<void> {
-  const dom = await browserPage.$(getTestIdSelector(selector));
-  expect(dom).not.toBeNull();
+  const check = await isVisible(selector);
+  expect(check).toBeTruthy();
+}
+
+export async function checkNotExist(selector: string): Promise<void> {
+  const check = await isVisible(selector);
+  expect(check).toBeFalsy();
 }

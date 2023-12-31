@@ -10,7 +10,7 @@ html {
 }
 body {
   font-family: 'Microsoft Yahei UI', 'PingFang SC', 'Arial', sans-serif;
-  background-color: #f3f3f3;
+  background-color: var(--backgroundColor);
 }
 .root-container {
   height: 100vh;

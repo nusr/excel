@@ -84,6 +84,7 @@ export class Controller implements IController {
     this.hooks = hooks;
   }
   private emitChange(): void {
+    this.computeViewSize();
     const result = this.changeSet;
     this.changeSet = new Set<ChangeEventType>();
     this.hooks.modelChange(result);
@@ -102,9 +103,11 @@ export class Controller implements IController {
     this.model.setActiveCell(range);
   }
   setActiveCell(range: IRange): void {
-    this.setSheetCell(range);
-    this.changeSet.add('setActiveCell');
-    this.emitChange();
+    this.transaction(() => {
+      this.setSheetCell(range);
+      this.changeSet.add('setActiveCell');
+      this.emitChange();
+    });
   }
   setCurrentSheetId(id: string): void {
     if (id === this.getCurrentSheetId()) {
@@ -115,14 +118,14 @@ export class Controller implements IController {
       this.changeSet.add('currentSheetId');
       const pos = this.getActiveCell();
       this.setSheetCell(pos);
-      this.computeViewSize();
+
       this.setScroll(this.getScroll());
     });
   }
   addSheet = (): void => {
-    this.changeSet.add('sheetList');
-    this.changeSet.add('currentSheetId');
-    this.model.transaction(() => {
+    this.transaction(() => {
+      this.changeSet.add('sheetList');
+      this.changeSet.add('currentSheetId');
       this.model.addSheet();
       this.setSheetCell({
         row: 0,
@@ -131,7 +134,7 @@ export class Controller implements IController {
         colCount: 1,
         sheetId: '',
       });
-      this.computeViewSize();
+
       this.setScroll({
         top: 0,
         left: 0,
@@ -152,23 +155,29 @@ export class Controller implements IController {
     });
   };
   hideSheet(sheetId?: string | undefined): void {
-    this.model.hideSheet(sheetId);
-    this.changeSet.add('sheetList');
-    this.changeSet.add('currentSheetId');
-    this.changeSet.add('setActiveCell');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.hideSheet(sheetId);
+      this.changeSet.add('sheetList');
+      this.changeSet.add('currentSheetId');
+      this.changeSet.add('setActiveCell');
+      this.emitChange();
+    });
   }
   unhideSheet(sheetId?: string | undefined): void {
-    this.model.unhideSheet(sheetId);
-    this.changeSet.add('sheetList');
-    this.changeSet.add('currentSheetId');
-    this.changeSet.add('setActiveCell');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.unhideSheet(sheetId);
+      this.changeSet.add('sheetList');
+      this.changeSet.add('currentSheetId');
+      this.changeSet.add('setActiveCell');
+      this.emitChange();
+    });
   }
   renameSheet(sheetName: string, sheetId?: string | undefined): void {
-    this.model.renameSheet(sheetName, sheetId);
-    this.changeSet.add('sheetList');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.renameSheet(sheetName, sheetId);
+      this.changeSet.add('sheetList');
+      this.emitChange();
+    });
   }
   fromJSON(json: WorkBookJSON): void {
     controllerLog('loadJSON', json);
@@ -179,7 +188,7 @@ export class Controller implements IController {
       this.changeSet.add('currentSheetId');
       this.changeSet.add('setActiveCell');
       this.setSheetCell(activeCell);
-      this.computeViewSize();
+
       this.emitChange();
     });
   }
@@ -238,17 +247,20 @@ export class Controller implements IController {
     return this.model.getColWidth(col);
   }
   setColWidth(col: number, width: number): void {
-    this.model.setColWidth(col, width);
-    this.computeViewSize();
-    this.changeSet.add('content');
+    this.transaction(() => {
+      this.model.setColWidth(col, width);
+
+      this.changeSet.add('content');
+    });
   }
   getRowHeight(row: number): number {
     return this.model.getRowHeight(row);
   }
   setRowHeight(row: number, height: number) {
-    this.model.setRowHeight(row, height);
-    this.computeViewSize();
-    this.changeSet.add('content');
+    this.transaction(() => {
+      this.model.setRowHeight(row, height);
+      this.changeSet.add('content');
+    });
   }
   private computeViewSize() {
     const headerSize = this.getHeaderSize();
@@ -299,34 +311,52 @@ export class Controller implements IController {
   }
 
   addRow(rowIndex: number, count: number): void {
-    this.model.addRow(rowIndex, count);
-    this.changeSet.add('content');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.addRow(rowIndex, count);
+
+      this.changeSet.add('content');
+      this.emitChange();
+    });
   }
   addCol(colIndex: number, count: number): void {
-    this.model.addCol(colIndex, count);
-    this.changeSet.add('content');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.addCol(colIndex, count);
+
+      this.changeSet.add('content');
+      this.emitChange();
+    });
   }
   deleteCol(colIndex: number, count: number): void {
-    this.model.deleteCol(colIndex, count);
-    this.changeSet.add('content');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.deleteCol(colIndex, count);
+
+      this.changeSet.add('content');
+      this.emitChange();
+    });
   }
   deleteRow(rowIndex: number, count: number): void {
-    this.model.deleteRow(rowIndex, count);
-    this.changeSet.add('content');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.deleteRow(rowIndex, count);
+
+      this.changeSet.add('content');
+      this.emitChange();
+    });
   }
   hideCol(colIndex: number, count: number): void {
-    this.model.hideCol(colIndex, count);
-    this.changeSet.add('content');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.hideCol(colIndex, count);
+
+      this.changeSet.add('content');
+      this.emitChange();
+    });
   }
   hideRow(rowIndex: number, count: number): void {
-    this.model.hideRow(rowIndex, count);
-    this.changeSet.add('content');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.hideRow(rowIndex, count);
+
+      this.changeSet.add('content');
+      this.emitChange();
+    });
   }
   getChangeSet(): Set<ChangeEventType> {
     const result = this.changeSet;
@@ -517,6 +547,8 @@ export class Controller implements IController {
       html = event.clipboardData?.getData(HTML_FORMAT) || '';
       text = event.clipboardData?.getData(PLAIN_FORMAT) || '';
     }
+    html = html.trim();
+    text = text.trim();
     let activeCell = this.getActiveCell();
     this.changeSet.add('setCellValues');
     let check = false;
@@ -558,9 +590,17 @@ export class Controller implements IController {
     this.setActiveCell(activeCell);
   }
   copy(event?: ClipboardEvent): void {
+    this.copyRanges = [this.getActiveCell()];
+    this.isCut = false;
+    this.baseCopy('copy', event);
+  }
+  cut(event?: ClipboardEvent) {
+    this.copyRanges = [this.getActiveCell()];
+    this.isCut = true;
+    this.baseCopy('cut', event);
+  }
+  private baseCopy(type: 'cut' | 'copy', event?: ClipboardEvent) {
     this.transaction(() => {
-      this.copyRanges = [this.getActiveCell()];
-      this.isCut = false;
       const data = this.getCopyData();
       if (event) {
         const keyList = Object.keys(data) as ClipboardType[];
@@ -568,16 +608,12 @@ export class Controller implements IController {
           event.clipboardData?.setData(key, data[key]);
         }
       } else {
-        this.hooks.copyOrCut(data, 'copy');
+        this.hooks.copyOrCut(data, type);
       }
       this.changeSet.add('antLine');
+
       this.emitChange();
     });
-  }
-  cut(event?: ClipboardEvent) {
-    this.copyRanges = [this.getActiveCell()];
-    this.isCut = true;
-    this.copy(event);
   }
   getCopyRanges() {
     return this.copyRanges.slice();
@@ -607,17 +643,21 @@ export class Controller implements IController {
     return this.mainDom;
   }
   deleteAll(sheetId?: string): void {
-    this.model.deleteAll(sheetId);
-    this.changeSet.add('content');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.deleteAll(sheetId);
+      this.changeSet.add('content');
+      this.emitChange();
+    });
   }
   getDefineName(range: IRange): string {
     return this.model.getDefineName(range);
   }
   setDefineName(range: IRange, name: string): void {
-    this.model.setDefineName(range, name);
-    this.changeSet.add('content');
-    this.emitChange();
+    this.transaction(() => {
+      this.model.setDefineName(range, name);
+      this.changeSet.add('content');
+      this.emitChange();
+    });
   }
   checkDefineName(name: string): IRange | undefined {
     return this.model.checkDefineName(name);

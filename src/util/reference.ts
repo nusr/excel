@@ -11,7 +11,7 @@ function convertSheetNameToSheetId(value: string) {
   return value;
 }
 
-export function parseCell(
+function parseCell(
   ref: string,
   convertSheetName = convertSheetNameToSheetId,
 ): Range | null {

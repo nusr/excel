@@ -5,5 +5,6 @@ export {
   computeScrollPosition,
   checkFocus,
   setActiveCellValue,
+  scrollBar,
 } from './shortcut';
 export { Content } from './Content';

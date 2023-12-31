@@ -67,3 +67,18 @@
   width: 100%;
   background-color: var(--white);
 }
+
+.bottom-bar {
+  position: absolute;
+  display: none;
+  align-items: center;
+  background-color: var(--backgroundColor);
+  padding: var(--tinyPadding) var(--mediumPadding);
+  padding-top: 50px;
+  right: 18px;
+  bottom: 18px;
+}
+
+.bottom-bar-text {
+  margin: 0 var(--tinyPadding);
+}
