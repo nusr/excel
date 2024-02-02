@@ -9,7 +9,7 @@
     "build": "node ./scripts/esbuild.js",
     "test": "jest --config ./scripts/unit-test-jest.config.js --forceExit --detectOpenHandles",
     "coverage": "npm run test -- --coverage",
-    "ci": "npm run test && npm run e2e && npm run build && npm run type-check && npm run update-md && npm run lint",
+    "ci": "npm run e2e && npm run test && npm run build && npm run type-check && npm run update-md && npm run lint",
     "type-check": "npx tsc",
     "postinstall": "node ./post-install.js",
     "prebuild": "npm run postinstall",
@@ -26,18 +26,18 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
-    "@testing-library/react": "14.1.2",
-    "@types/jest": "29.5.11",
-    "@types/react": "18.2.45",
+    "@testing-library/react": "14.2.1",
+    "@types/jest": "29.5.12",
+    "@types/react": "18.2.51",
     "@types/react-dom": "18.2.18",
-    "@typescript-eslint/eslint-plugin": "6.15.0",
-    "@typescript-eslint/parser": "6.15.0",
+    "@typescript-eslint/eslint-plugin": "6.20.0",
+    "@typescript-eslint/parser": "6.20.0",
     "canvas": "2.11.2",
-    "esbuild": "0.19.10",
+    "esbuild": "0.20.0",
     "eslint": "8.56.0",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
-    "puppeteer": "21.6.1",
+    "puppeteer": "21.11.0",
     "typescript": "5.3.3"
   },
   "engines": {
@@ -47,6 +47,6 @@
     "jszip": "3.10.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "yjs": "13.6.10"
+    "yjs": "13.6.11"
   }
 }
