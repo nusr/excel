@@ -12,7 +12,9 @@ export interface DialogProps {
   onCancel?: () => void;
 }
 
-export const Dialog: FunctionComponent<React.PropsWithChildren<DialogProps>> = (props) => {
+export const Dialog: FunctionComponent<React.PropsWithChildren<DialogProps>> = (
+  props,
+) => {
   const { children, title, dialogStyle, onCancel, onOk, visible } = props;
   if (!visible) {
     return null;

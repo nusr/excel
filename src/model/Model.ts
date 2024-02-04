@@ -473,6 +473,9 @@ export class Model implements IModel {
     };
 
     newData.widthOrHeight = width;
+    if (width === 0) {
+      newData.isHide = true;
+    }
     this.customWidth.set(key, newData);
   }
 
@@ -516,6 +519,9 @@ export class Model implements IModel {
       isHide: false,
     };
     data.widthOrHeight = height;
+    if (height === 0) {
+      data.isHide = true;
+    }
     this.customHeight.set(key, data);
   }
   canRedo(): boolean {

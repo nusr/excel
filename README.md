@@ -31,6 +31,9 @@ npm run start
 - [x] Define Name
 - [x] Insert row, column
 - [x] Delete row, column
+- [x] Hide row, column
+- [x] Change row height
+- [x] Change column width
 - [x] Insert Sheet
 - [x] Delete Sheet
 - [x] Rename Sheet

@@ -1,4 +1,4 @@
-import React, { useMemo, Fragment, memo } from 'react';
+import React, { Fragment, memo } from 'react';
 import { Button } from '../components';
 import { IController } from '@/types';
 import styles from './index.module.css';
@@ -6,9 +6,10 @@ import { useClickOutside } from '../hooks';
 
 interface Props {
   controller: IController;
-  top: number;
-  left: number;
+  style: React.CSSProperties;
+  position: ClickPosition;
   hideContextMenu: () => void;
+  showDialog: (position: ClickPosition) => void;
 }
 
 export enum ClickPosition {
@@ -21,47 +22,59 @@ export enum ClickPosition {
 const MENU_WIDTH = 110;
 const ITEM_HEIGHT = 20;
 
-export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
-  const { controller, top, left, hideContextMenu } = props;
-  const [ref] = useClickOutside(hideContextMenu);
-  const { style, position } = useMemo(() => {
-    const headerSize = controller.getHeaderSize();
-    const rect = controller.getMainDom().canvas!.getBoundingClientRect();
-
-    let clickPosition = ClickPosition.CONTENT;
-    let menuHeight = ITEM_HEIGHT * 3;
-    const y = top - rect.top;
-    const x = left - rect.left;
-    if (y < headerSize.height && x < headerSize.width) {
-      clickPosition = ClickPosition.TRIANGLE;
-    } else if (y < headerSize.height) {
-      clickPosition = ClickPosition.COLUMN_HEADER;
-      menuHeight = ITEM_HEIGHT * 6;
-    } else if (x < headerSize.width) {
-      clickPosition = ClickPosition.ROW_HEADER;
-      menuHeight = ITEM_HEIGHT * 6;
-    }
-
-    // recompute menu position
-    let realTop = top;
-    let realLeft = left;
-    const gap = 18;
-    const height = rect.height + rect.top;
-    if (realTop + menuHeight > height) {
-      realTop = height - menuHeight - gap;
-    }
-    if (realLeft + MENU_WIDTH > rect.width) {
-      realLeft = rect.width - MENU_WIDTH - gap;
-    }
-
+export function computeMenuStyle(
+  controller: IController,
+  top: number,
+  left: number,
+) {
+  if (top < 0 || left < 0) {
     return {
       style: {
-        top: realTop,
-        left: realLeft,
+        display: 'none',
       },
-      position: clickPosition,
+      position: ClickPosition.CONTENT,
     };
-  }, []);
+  }
+  const headerSize = controller.getHeaderSize();
+  const rect = controller.getMainDom().canvas!.getBoundingClientRect();
+  let clickPosition = ClickPosition.CONTENT;
+  let menuHeight = ITEM_HEIGHT * 3;
+  const y = top - rect.top;
+  const x = left - rect.left;
+  if (y < headerSize.height && x < headerSize.width) {
+    clickPosition = ClickPosition.TRIANGLE;
+  } else if (y < headerSize.height) {
+    clickPosition = ClickPosition.COLUMN_HEADER;
+    menuHeight = ITEM_HEIGHT * 6;
+  } else if (x < headerSize.width) {
+    clickPosition = ClickPosition.ROW_HEADER;
+    menuHeight = ITEM_HEIGHT * 6;
+  }
+
+  // recompute menu position
+  let realTop = top;
+  let realLeft = left;
+  const gap = 18;
+  const height = rect.height + rect.top;
+  if (realTop + menuHeight > height) {
+    realTop = height - menuHeight - gap;
+  }
+  if (realLeft + MENU_WIDTH > rect.width) {
+    realLeft = rect.width - MENU_WIDTH - gap;
+  }
+
+  return {
+    style: {
+      top: realTop,
+      left: realLeft,
+    },
+    position: clickPosition,
+  };
+}
+
+export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
+  const { controller, style, position, hideContextMenu, showDialog } = props;
+  const [ref] = useClickOutside(hideContextMenu);
 
   return (
     <div
@@ -101,7 +114,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
             controller.deleteAll(controller.getCurrentSheetId());
           }}
         >
-          Delete all
+          Delete
         </Button>
       )}
       {position === ClickPosition.COLUMN_HEADER && (
@@ -112,7 +125,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.addCol(controller.getActiveCell().col, 1);
             }}
           >
-            Insert a column
+            Insert a Column
           </Button>
           <Button
             onClick={() => {
@@ -120,7 +133,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.deleteCol(controller.getActiveCell().col, 1);
             }}
           >
-            Delete a column
+            Delete a Column
           </Button>
           <Button
             onClick={() => {
@@ -128,7 +141,15 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.hideCol(controller.getActiveCell().col, 1);
             }}
           >
-            Hide a column
+            Hide a Column
+          </Button>
+          <Button
+            onClick={() => {
+              showDialog(position);
+              hideContextMenu();
+            }}
+          >
+            Column Width
           </Button>
         </Fragment>
       )}
@@ -140,7 +161,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.addRow(controller.getActiveCell().row, 1);
             }}
           >
-            Insert a row
+            Insert a Row
           </Button>
           <Button
             onClick={() => {
@@ -148,7 +169,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.deleteRow(controller.getActiveCell().row, 1);
             }}
           >
-            Delete a row
+            Delete a Row
           </Button>
           <Button
             onClick={() => {
@@ -156,7 +177,15 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.hideRow(controller.getActiveCell().row, 1);
             }}
           >
-            Hide a row
+            Hide a Row
+          </Button>
+          <Button
+            onClick={() => {
+              showDialog(position);
+              hideContextMenu();
+            }}
+          >
+            Row Height
           </Button>
         </Fragment>
       )}

@@ -131,7 +131,7 @@ export function initCanvas(controller: IController): () => void {
   controller.setHooks({
     copyOrCut,
     paste,
-    modelChange: (changeSet) => {
+    modelChange: (changeSet: Set<ChangeEventType>) => {
       handleStateChange(changeSet, controller);
       render(changeSet);
     },

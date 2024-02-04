@@ -246,20 +246,25 @@ export class Controller implements IController {
   getColWidth(col: number): number {
     return this.model.getColWidth(col);
   }
-  setColWidth(col: number, width: number): void {
+  setColWidth(col: number, width: number, isChanged: boolean): void {
     this.transaction(() => {
-      this.model.setColWidth(col, width);
-
+      this.model.setColWidth(col, width, isChanged);
       this.changeSet.add('content');
+      if (isChanged) {
+        this.emitChange();
+      }
     });
   }
   getRowHeight(row: number): number {
     return this.model.getRowHeight(row);
   }
-  setRowHeight(row: number, height: number) {
+  setRowHeight(row: number, height: number, isChanged: boolean) {
     this.transaction(() => {
-      this.model.setRowHeight(row, height);
+      this.model.setRowHeight(row, height, isChanged);
       this.changeSet.add('content');
+      if (isChanged) {
+        this.emitChange();
+      }
     });
   }
   private computeViewSize() {

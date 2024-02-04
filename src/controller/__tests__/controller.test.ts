@@ -141,7 +141,7 @@ describe('controller.test.ts', () => {
     test('set', () => {
       const controller = new Controller(new Model());
       controller.addSheet();
-      controller.setRowHeight(0, 100);
+      controller.setRowHeight(0, 100, true);
       expect(controller.getRowHeight(0)).toEqual(100);
     });
     test('hide', () => {
@@ -162,7 +162,7 @@ describe('controller.test.ts', () => {
     test('set', () => {
       const controller = new Controller(new Model());
       controller.addSheet();
-      controller.setColWidth(0, 100);
+      controller.setColWidth(0, 100, true);
       expect(controller.getColWidth(0)).toEqual(100);
     });
     test('hide', () => {

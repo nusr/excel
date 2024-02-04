@@ -39,6 +39,9 @@ export function registerGlobalEvent(
     if (event.metaKey || event.ctrlKey) {
       return;
     }
+    if (isInputEvent(event)) {
+      return;
+    }
 
     coreStore.mergeState({
       editorStatus: EditorStatus.EDIT_CELL,

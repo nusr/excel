@@ -79,7 +79,8 @@ export interface MergeCellItem {
 }
 
 export type WorkBookJSON = {
-  [key: `worksheets_${string}`]: { // key: worksheets_ + sheetId
+  [key: `worksheets_${string}`]: {
+    // key: worksheets_ + sheetId
     [key: `${number}_${number}`]: ModelCellType; // key: row + col worksheets_*.xml_worksheet_sheetData
   };
   workbook: WorksheetType[]; // workbook.xml_workbook_sheets
@@ -98,9 +99,9 @@ export interface IBaseModel {
   transaction: (func: () => void) => void;
   getCell: (range: IRange) => ModelCellValue;
   getColWidth: (col: number) => number;
-  setColWidth: (col: number, width: number) => void;
+  setColWidth: (col: number, width: number, isChanged: boolean) => void;
   getRowHeight: (row: number) => number;
-  setRowHeight: (row: number, height: number) => void;
+  setRowHeight: (row: number, height: number, isChanged: boolean) => void;
   setCellValues: (
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,

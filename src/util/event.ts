@@ -1,6 +1,9 @@
 import type { IHitInfo, IController } from '@/types';
 
-export function getHitInfo(event: React.MouseEvent<HTMLCanvasElement>, controller: IController): IHitInfo | null {
+export function getHitInfo(
+  event: React.MouseEvent<HTMLCanvasElement>,
+  controller: IController,
+): IHitInfo | null {
   const canvasSize = controller.getDomRect();
   const scroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());

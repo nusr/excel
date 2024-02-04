@@ -127,7 +127,7 @@ export class Content implements ContentView {
         });
         const t = Math.max(wrapHeight, fontSizeHeight);
         if (t > cellSize.height) {
-          controller.setRowHeight(rowIndex, t);
+          controller.setRowHeight(rowIndex, t, false);
         }
         x += controller.getColWidth(colIndex);
       }

@@ -1,16 +1,15 @@
 .selectList {
-  width: 80px;
-  color: #000;
+  color: var(--black);
 }
 .selectItem {
   font-size: var(--font);
   cursor: pointer;
 }
 .selectItem.disabled {
-  background-color: #fff;
+  background-color: var(--white);
   cursor: not-allowed;
   color: var(--disabledColor);
 }
 .selectItem.disabled:hover {
-  background-color: #fff;
+  background-color: var(--white);
 }
