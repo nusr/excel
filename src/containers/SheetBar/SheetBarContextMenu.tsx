@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useRef } from 'react';
-import { Button, Dialog, Select } from '../components';
+import React, { useMemo } from 'react';
+import { Button, Select, info } from '../components';
 import { IController, OptionItem } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
@@ -19,22 +19,37 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
   hideMenu,
   editSheetName,
 }) => {
-  const [visible, setVisible] = useState(false);
-  const refState = useRef(visible);
-  refState.current = visible;
   const [ref] = useClickOutside(() => {
-    if (refState.current) {
-      return;
-    }
     hideMenu();
   });
   const hideSheetList: OptionItem[] = useMemo(() => {
-    return sheetList.filter((v) => v.disabled).map((item) => ({ value: String(item.value), label: item.label, disabled: false }));
+    return sheetList
+      .filter((v) => v.disabled)
+      .map((item) => ({
+        value: String(item.value),
+        label: item.label,
+        disabled: false,
+      }));
   }, [sheetList]);
-  const [value, setValue] = useState(String(hideSheetList[0]?.value) || '');
-  const hideDialog = () => {
-    setVisible(false);
-    hideMenu();
+  const handleUnhide = () => {
+    let value = String(hideSheetList[0]?.value) || '';
+    info({
+      visible: true,
+      title: 'Unhide sheet:',
+      children: (
+        <Select
+          data={hideSheetList}
+          onChange={(v) => (value = String(v))}
+          style={{ width: 300 }}
+          value={value}
+        />
+      ),
+      onCancel: hideMenu,
+      onOk() {
+        controller.unhideSheet(value);
+        hideMenu();
+      },
+    });
   };
   return (
     <div
@@ -79,28 +94,10 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
         dataType="unhideSheet"
         className={styles['sheet-bar-unhide']}
         disabled={hideSheetList.length === 0}
-        onClick={() => {
-          setVisible(true);
-        }}
+        onClick={handleUnhide}
       >
         Unhide
       </Button>
-      <Dialog
-        visible={visible}
-        title="Unhide sheet:"
-        onOk={() => {
-          controller.unhideSheet(value);
-          hideDialog();
-        }}
-        onCancel={hideDialog}
-      >
-        <Select
-          data={hideSheetList}
-          onChange={(v) => setValue(String(v))}
-          style={{ width: 300 }}
-          value={value}
-        />
-      </Dialog>
     </div>
   );
 };

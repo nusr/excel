@@ -1,14 +1,13 @@
-import React, { useRef, useEffect, Fragment, useState, useMemo } from 'react';
+import React, { useRef, useEffect, Fragment, useState } from 'react';
 import { IController, EditorStatus } from '@/types';
 import { getHitInfo, DEFAULT_POSITION } from '@/util';
 import styles from './index.module.css';
 import { coreStore } from '@/containers/store';
 import { ScrollBar } from './ScrollBar';
-import { ContextMenu, computeMenuStyle, ClickPosition } from './ContextMenu';
+import { ContextMenu } from './ContextMenu';
 import { initCanvas } from './util';
 import { checkFocus, setActiveCellValue } from '@/canvas';
 import { BottomBar } from './BottomBar';
-import { Dialog } from '../components';
 
 interface Props {
   controller: IController;
@@ -17,28 +16,19 @@ const DOUBLE_CLICK_TIME = 300;
 
 type State = {
   timeStamp: number;
-  row: number;
-  col: number;
 };
 
 export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
   const { controller } = props;
   const state = useRef<State>({
     timeStamp: 0,
-    row: 0,
-    col: 0,
   });
-  const [value, setValue] = useState(0);
-  const [clickPosition, setClickPosition] = useState(ClickPosition.CONTENT);
   const [menuPosition, setMenuPosition] = useState({
     top: DEFAULT_POSITION,
     left: DEFAULT_POSITION,
   });
 
   const ref = useRef<HTMLCanvasElement>(null);
-  const menuStyle = useMemo(() => {
-    return computeMenuStyle(controller, menuPosition.top, menuPosition.left);
-  }, [menuPosition]);
   useEffect(() => {
     if (!ref.current) {
       return;
@@ -48,11 +38,6 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
   }, []);
   const handleContextMenu = (event: React.MouseEvent<HTMLCanvasElement>) => {
     event.preventDefault();
-    const data = getHitInfo(event, controller);
-    if (data) {
-      state.current.row = data.row;
-      state.current.col = data.col;
-    }
     setMenuPosition({
       top: event.clientY,
       left: event.clientX,
@@ -75,7 +60,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
       return;
     }
     if (x > headerSize.width && y > headerSize.height) {
-      const position = getHitInfo(event, controller);
+      const position = getHitInfo(controller, clientX, clientY);
       if (!position) {
         return;
       }
@@ -100,7 +85,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     const { timeStamp, clientX, clientY } = event;
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;
-    const position = getHitInfo(event, controller);
+    const position = getHitInfo(controller, clientX, clientY);
     if (!position) {
       return;
     }
@@ -162,22 +147,6 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     state.current.timeStamp = timeStamp;
   };
 
-  const showDialog = (position: ClickPosition) => {
-    setClickPosition(position);
-    if (position === ClickPosition.COLUMN_HEADER) {
-      setValue(controller.getColWidth(state.current.col));
-    }
-    if (position === ClickPosition.ROW_HEADER) {
-      setValue(controller.getRowHeight(state.current.row));
-    }
-  };
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const val = event.currentTarget.value;
-    setValue(parseInt(val, 10));
-    event.stopPropagation();
-  };
-
   return (
     <Fragment>
       <div
@@ -198,41 +167,10 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
       {menuPosition.top >= 0 && menuPosition.left >= 0 && (
         <ContextMenu
           controller={controller}
-          style={menuStyle.style}
-          position={menuStyle.position}
+          {...menuPosition}
           hideContextMenu={hideContextMenu}
-          showDialog={showDialog}
         />
       )}
-      <Dialog
-        visible={
-          clickPosition === ClickPosition.ROW_HEADER ||
-          clickPosition === ClickPosition.COLUMN_HEADER
-        }
-        title={
-          clickPosition === ClickPosition.ROW_HEADER
-            ? 'Row Height'
-            : 'Column Width'
-        }
-        onOk={() => {
-          if (clickPosition === ClickPosition.ROW_HEADER) {
-            controller.setRowHeight(state.current.row, value, true);
-          }
-          if (clickPosition === ClickPosition.COLUMN_HEADER) {
-            controller.setColWidth(state.current.col, value, true);
-          }
-          setClickPosition(ClickPosition.CONTENT);
-        }}
-        onCancel={() => setClickPosition(ClickPosition.CONTENT)}
-      >
-        <input
-          type="number"
-          min="0"
-          max="10000"
-          value={value}
-          onChange={handleChange}
-        />
-      </Dialog>
     </Fragment>
   );
 };

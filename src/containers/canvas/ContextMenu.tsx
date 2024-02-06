@@ -1,18 +1,18 @@
-import React, { Fragment, memo } from 'react';
-import { Button } from '../components';
+import React, { Fragment, memo, useMemo } from 'react';
+import { Button, info } from '../components';
 import { IController } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
+import { getHitInfo } from '@/util';
 
 interface Props {
   controller: IController;
-  style: React.CSSProperties;
-  position: ClickPosition;
+  top: number;
+  left: number;
   hideContextMenu: () => void;
-  showDialog: (position: ClickPosition) => void;
 }
 
-export enum ClickPosition {
+enum ClickPosition {
   COLUMN_HEADER,
   ROW_HEADER,
   TRIANGLE,
@@ -22,19 +22,7 @@ export enum ClickPosition {
 const MENU_WIDTH = 110;
 const ITEM_HEIGHT = 20;
 
-export function computeMenuStyle(
-  controller: IController,
-  top: number,
-  left: number,
-) {
-  if (top < 0 || left < 0) {
-    return {
-      style: {
-        display: 'none',
-      },
-      position: ClickPosition.CONTENT,
-    };
-  }
+function computeMenuStyle(controller: IController, top: number, left: number) {
   const headerSize = controller.getHeaderSize();
   const rect = controller.getMainDom().canvas!.getBoundingClientRect();
   let clickPosition = ClickPosition.CONTENT;
@@ -73,9 +61,50 @@ export function computeMenuStyle(
 }
 
 export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
-  const { controller, style, position, hideContextMenu, showDialog } = props;
+  const { controller, top, left, hideContextMenu } = props;
   const [ref] = useClickOutside(hideContextMenu);
-
+  const { style, position, row, col } = useMemo(() => {
+    const temp = computeMenuStyle(controller, top, left);
+    const data = getHitInfo(controller, left, top);
+    return {
+      ...temp,
+      row: data?.row || 0,
+      col: data?.col || 0,
+    };
+  }, [top, left]);
+  const handleDialog = (isRow: boolean) => {
+    let value = isRow
+      ? controller.getRowHeight(row)
+      : controller.getColWidth(col);
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      value = parseInt(event.currentTarget.value, 10);
+      event.stopPropagation();
+    };
+    info({
+      visible: true,
+      title: isRow ? 'Row Height' : 'Column Width',
+      children: (
+        <input
+          type="number"
+          min="0"
+          max="10000"
+          defaultValue={value}
+          onChange={handleChange}
+        />
+      ),
+      onOk: () => {
+        if (isRow) {
+          controller.setRowHeight(row, value, true);
+        } else {
+          controller.setColWidth(col, value, true);
+        }
+        hideContextMenu();
+      },
+      onCancel: () => {
+        hideContextMenu();
+      },
+    });
+  };
   return (
     <div
       className={styles['context-menu']}
@@ -145,8 +174,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           </Button>
           <Button
             onClick={() => {
-              showDialog(position);
-              hideContextMenu();
+              handleDialog(false);
             }}
           >
             Column Width
@@ -181,8 +209,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           </Button>
           <Button
             onClick={() => {
-              showDialog(position);
-              hideContextMenu();
+              handleDialog(true);
             }}
           >
             Row Height

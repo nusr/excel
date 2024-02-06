@@ -1,25 +1,34 @@
 import React, { FunctionComponent, CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { Button } from '../Button';
 import styles from './index.module.css';
 import { classnames } from '@/util';
 
-export interface DialogProps {
+interface DialogProps {
   title: string;
   dialogStyle?: CSSProperties;
   visible: boolean;
-  onOk?: () => void;
-  onCancel?: () => void;
+  children?: React.ReactNode;
+  getContainer?: () => HTMLElement;
+  onOk?: React.MouseEventHandler<HTMLButtonElement>;
+  onCancel?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
-export const Dialog: FunctionComponent<React.PropsWithChildren<DialogProps>> = (
-  props,
-) => {
-  const { children, title, dialogStyle, onCancel, onOk, visible } = props;
+export const Dialog: FunctionComponent<DialogProps> = (props) => {
+  const {
+    children,
+    title,
+    dialogStyle,
+    onCancel,
+    onOk,
+    visible,
+    getContainer = () => document.body,
+  } = props;
   if (!visible) {
     return null;
   }
-  const dialog = (
+  return createPortal(
     <div className={classnames(styles['dialog-modal'])}>
       <div className={styles['dialog-container']} style={dialogStyle}>
         <div className={styles['dialog-title']}>{title}</div>
@@ -31,8 +40,50 @@ export const Dialog: FunctionComponent<React.PropsWithChildren<DialogProps>> = (
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    getContainer(),
   );
-  return createPortal(dialog, document.body);
 };
 Dialog.displayName = 'Dialog';
+
+export function info(props: DialogProps) {
+  const container = document.createDocumentFragment();
+  let root: Root | null = null;
+  function close() {
+    root?.unmount();
+    root = null;
+  }
+
+  function render(modalProps: DialogProps) {
+    root = root || createRoot(container);
+    root.render(
+      <Dialog
+        visible={modalProps.visible}
+        title={modalProps.title}
+        dialogStyle={modalProps.dialogStyle}
+        onCancel={(event) => {
+          event.stopPropagation();
+          if (modalProps.onCancel) {
+            modalProps.onCancel(event);
+          }
+          close();
+        }}
+        onOk={(event) => {
+          event.stopPropagation();
+          if (modalProps.onOk) {
+            modalProps.onOk(event);
+          }
+          close();
+        }}
+      >
+        {modalProps.children}
+      </Dialog>,
+    );
+  }
+
+  render(props);
+
+  return {
+    close,
+  };
+}
