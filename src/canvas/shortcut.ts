@@ -413,6 +413,19 @@ export const keyboardEventList: KeyboardEventItem[] = [
     },
   },
   {
+    key: '5',
+    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    handler: (controller) => {
+      if (checkFocus(controller)) {
+        return;
+      }
+      const cellData = controller.getCell(controller.getActiveCell());
+      const style = cellData.style || {};
+      style.isStrike = !style.isStrike;
+      controller.setCellStyle(style, [controller.getActiveCell()]);
+    },
+  },
+  {
     key: 'u',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {

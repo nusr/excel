@@ -3,7 +3,7 @@ import { classnames } from '@/util';
 import styles from './index.module.css';
 
 export interface ButtonProps {
-  type?: 'normal' | 'circle' | 'plain';
+  type?: 'normal' | 'circle' | 'plain' | 'primary';
   style?: CSSProperties;
   active?: boolean;
   disabled?: boolean;
@@ -15,7 +15,9 @@ export interface ButtonProps {
   buttonType?: React.ButtonHTMLAttributes<string>['type'];
 }
 
-export const Button: FunctionComponent<React.PropsWithChildren<ButtonProps>> = (props) => {
+export const Button: FunctionComponent<React.PropsWithChildren<ButtonProps>> = (
+  props,
+) => {
   const {
     className = '',
     onClick = () => {},
@@ -34,6 +36,7 @@ export const Button: FunctionComponent<React.PropsWithChildren<ButtonProps>> = (
     [styles['active']]: active,
     [styles['circle']]: type === 'circle',
     [styles['plain']]: type === 'plain',
+    [styles['primary']]: type === 'primary',
   });
   return (
     <button

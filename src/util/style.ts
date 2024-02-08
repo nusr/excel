@@ -16,7 +16,25 @@ export const ERROR_FORMULA_COLOR = '#ff0000';
 export const DEFAULT_FILL_COLOR = 'transparent';
 export const MUST_FONT_FAMILY = 'sans-serif';
 
-export const FONT_SIZE_LIST = [6, 8, 9, 10, DEFAULT_FONT_SIZE, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72];
+export const FONT_SIZE_LIST = [
+  6,
+  8,
+  9,
+  10,
+  DEFAULT_FONT_SIZE,
+  12,
+  14,
+  16,
+  18,
+  20,
+  22,
+  24,
+  26,
+  28,
+  36,
+  48,
+  72,
+];
 
 export function makeFont(
   fontStyle: 'none' | 'normal' | 'italic' | 'oblique' = 'normal',
@@ -31,7 +49,11 @@ export function makeFont(
   return `${temp}${fontFamily},${MUST_FONT_FAMILY}`;
 }
 
-export const DEFAULT_FONT_CONFIG = makeFont(undefined, '500', npx(DEFAULT_FONT_SIZE));
+export const DEFAULT_FONT_CONFIG = makeFont(
+  undefined,
+  '500',
+  npx(DEFAULT_FONT_SIZE),
+);
 
 export function convertCanvasStyleToString(style: Partial<StyleType>): string {
   let result = '';
@@ -56,13 +78,15 @@ export function convertCanvasStyleToString(style: Partial<StyleType>): string {
   if (style.isWrapText) {
     result += 'white-space:normal;';
   }
-  if (style.underline) {
-    result += 'text-decoration:underline;';
-    if (style.underline === EUnderLine.DOUBLE) {
-      result += 'text-decoration-style: double;';
-    } else {
-      result += 'text-decoration-style: single;';
-    }
+  if (style.underline && style.isStrike) {
+    result += 'text-decoration-line:underline line-through;';
+  } else if (style.underline) {
+    result += 'text-decoration-line:underline;';
+  } else if (style.isStrike) {
+    result += 'text-decoration-line:line-through;';
+  }
+  if (style.underline === EUnderLine.DOUBLE) {
+    result += 'text-decoration-style: double;';
   }
 
   return result;
@@ -72,7 +96,16 @@ function convertCSSStyleToCanvasStyle(
   style: Partial<CSSStyleDeclaration>,
   selectorCSSText: string,
 ): Partial<StyleType> {
-  const { color, backgroundColor, fontSize, fontFamily, fontStyle, fontWeight, whiteSpace, textDecoration } = style;
+  const {
+    color,
+    backgroundColor,
+    fontSize,
+    fontFamily,
+    fontStyle,
+    fontWeight,
+    whiteSpace,
+    textDecorationLine,
+  } = style;
   const result: Partial<StyleType> = {};
   if (color) {
     result.fontColor = color;
@@ -95,19 +128,35 @@ function convertCSSStyleToCanvasStyle(
   if (fontWeight && ['700', '800', '900', 'bold'].includes(fontWeight)) {
     result.isBold = true;
   }
-  if (whiteSpace && ['normal', 'pre-wrap', 'pre-line', 'break-spaces', 'revert', 'unset'].includes(whiteSpace)) {
+  if (
+    whiteSpace &&
+    [
+      'normal',
+      'pre-wrap',
+      'pre-line',
+      'break-spaces',
+      'revert',
+      'unset',
+    ].includes(whiteSpace)
+  ) {
     result.isWrapText = true;
   }
-  if (textDecoration === 'underline') {
+  if (textDecorationLine?.includes('underline')) {
     result.underline = EUnderLine.SINGLE;
     if (selectorCSSText.includes('text-underline-style:double')) {
       result.underline = EUnderLine.DOUBLE;
     }
   }
+  if (textDecorationLine?.includes('line-through')) {
+    result.isStrike = true;
+  }
   return result;
 }
 
-export function parseStyle(styleList: NodeListOf<HTMLStyleElement>, selector: string): Partial<StyleType> {
+export function parseStyle(
+  styleList: NodeListOf<HTMLStyleElement>,
+  selector: string,
+): Partial<StyleType> {
   for (const item of styleList) {
     if (!item.sheet?.cssRules) {
       continue;
@@ -122,7 +171,9 @@ export function parseStyle(styleList: NodeListOf<HTMLStyleElement>, selector: st
         }
         let plainText = '';
         if (startIndex >= 0) {
-          plainText = cssText.slice(startIndex + selector.length, endIndex).replace(/\s/g, '');
+          plainText = cssText
+            .slice(startIndex + selector.length, endIndex)
+            .replace(/\s/g, '');
         }
         return convertCSSStyleToCanvasStyle(rule.style, plainText);
       }

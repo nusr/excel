@@ -41,6 +41,7 @@ export interface StyleType {
   underline: EUnderLine;
   isItalic: boolean;
   isBold: boolean;
+  isStrike: boolean;
   numberFormat: number; // NUMBER_FORMAT_LIST id
 }
 export interface WorksheetType {

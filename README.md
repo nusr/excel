@@ -23,6 +23,7 @@ npm run start
 - [x] Font size
 - [x] Font bold
 - [x] Font italic
+- [x] Font strike
 - [x] Font underline
 - [x] Text color
 - [x] Fill color

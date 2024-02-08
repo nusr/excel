@@ -1,5 +1,10 @@
 import React, { CSSProperties, useRef, useEffect } from 'react';
-import { CanvasOverlayPosition, IController, EditorStatus } from '@/types';
+import {
+  CanvasOverlayPosition,
+  IController,
+  EditorStatus,
+  EUnderLine,
+} from '@/types';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
 import { handleTabClick, handleEnterClick } from '../../canvas/shortcut';
@@ -32,6 +37,16 @@ export function getDisplayStyle(
   if (style?.fontColor && !isFormulaBar) {
     result.color = style?.fontColor;
   }
+  if (style?.underline && style?.isStrike) {
+    result.textDecorationLine = 'underline line-through';
+  } else if (style?.underline) {
+    result.textDecorationLine = 'underline';
+  } else if (style?.isStrike) {
+    result.textDecorationLine = 'line-through';
+  }
+  // if (style.underline === EUnderLine.DOUBLE) {
+  //   result.textDecorationStyle = 'double';
+  // }
   return result;
 }
 export function getEditorStyle(

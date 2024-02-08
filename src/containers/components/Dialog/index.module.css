@@ -17,6 +17,11 @@
   border-radius: var(--borderRadius);
 }
 
+.dialog-title {
+  font-weight: bold;
+  font-size: var(--largeFont);
+}
+
 .dialog-content {
   padding-top: var(--mediumPadding);
 }

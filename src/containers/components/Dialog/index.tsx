@@ -35,7 +35,11 @@ export const Dialog: FunctionComponent<DialogProps> = (props) => {
         <div className={styles['dialog-content']}>{children}</div>
         <div className={styles['dialog-button']}>
           <Button onClick={onCancel}>Cancel</Button>
-          <Button onClick={onOk} className={styles['dialog-cancel']}>
+          <Button
+            onClick={onOk}
+            className={styles['dialog-cancel']}
+            type="primary"
+          >
             Confirm
           </Button>
         </div>

@@ -19,30 +19,22 @@ import {
   ErrorTypes,
   Point,
   EUnderLine,
-  IWindowSize,
 } from '@/types';
 
-const measureTextMap = new Map<string, IWindowSize>();
+const measureTextMap = new Map<string, number>();
 
 export function measureText(
   ctx: CanvasRenderingContext2D,
   char: string,
-): IWindowSize {
+): number {
   const mapKey = `${char}__${ctx.font}`;
-  let temp = measureTextMap.get(mapKey);
-  if (!temp) {
-    const { actualBoundingBoxDescent, actualBoundingBoxAscent, width } =
-      ctx.measureText(char);
-    const result: IWindowSize = {
-      width: Math.ceil(width / dpr()),
-      height: Math.ceil(
-        (actualBoundingBoxDescent + actualBoundingBoxAscent) / dpr(),
-      ),
-    };
-    measureTextMap.set(mapKey, result);
-    temp = result;
+  if (measureTextMap.has(mapKey)) {
+    return measureTextMap.get(mapKey)!;
   }
-  return temp;
+  const { width } = ctx.measureText(char);
+  const result = Math.ceil(width / dpr());
+  measureTextMap.set(mapKey, result);
+  return result;
 }
 
 export function fillRect(
@@ -95,26 +87,45 @@ function drawUnderlineData(
   textHeight: number,
   x: number,
   y: number,
-  left: number,
   textWidth: number,
 ) {
-  if (!style?.underline) {
-    return;
+  let list: Point[] = [];
+  if (style?.underline) {
+    let pointList: Point[] = [];
+    const isDouble = style?.underline === EUnderLine.DOUBLE;
+    const t = Math.floor(y + textHeight * (isDouble ? 0.7 : 0.6));
+    if (isNum) {
+      pointList = [
+        [x - textWidth, t],
+        [x, t],
+      ];
+    } else {
+      pointList = [
+        [x, t],
+        [x + textWidth, t],
+      ];
+    }
+    list = list.concat(getPointList(pointList, isDouble));
   }
-  const t = Math.floor(y + textHeight / 2);
-  let pointList: Point[] = [];
-  if (!isNum) {
-    pointList = [
-      [x, t],
-      [x + textWidth, t],
-    ];
-  } else {
-    pointList = [
-      [left, t],
-      [left + textWidth, t],
-    ];
+  if (style?.isStrike) {
+    let pointList: Point[] = [];
+    const t = Math.floor(y + textHeight * 0.2);
+    if (isNum) {
+      pointList = [
+        [x - textWidth, t],
+        [x, t],
+      ];
+    } else {
+      pointList = [
+        [x, t],
+        [x + textWidth, t],
+      ];
+    }
+    list = list.concat(getPointList(pointList, false));
   }
-  drawUnderline(ctx, pointList, style?.underline);
+  if (list.length > 0) {
+    drawLines(ctx, list);
+  }
 }
 
 export function renderCell(
@@ -125,8 +136,8 @@ export function renderCell(
   const isNum = isNumber(value);
   let font = DEFAULT_FONT_CONFIG;
   let fillStyle = DEFAULT_FONT_COLOR;
+  const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
   if (!isEmpty(style)) {
-    const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
     font = makeFont(
       style?.isItalic ? 'italic' : 'normal',
       style?.isBold ? 'bold' : '500',
@@ -152,75 +163,61 @@ export function renderCell(
   ctx.font = font;
   ctx.fillStyle = fillStyle;
   ctx.textBaseline = 'middle';
-  const textItemList: Array<IWindowSize & { char: string }> = [];
-  for (const char of texts) {
-    if (char) {
-      const t = measureText(ctx, char);
-      textItemList.push({
-        ...t,
-        char,
-      });
-    }
-  }
-  if (textItemList.length === 0) {
+  if (texts.length === 0) {
     return result;
   }
   const x = left + (isNum ? width : 0);
   if (style?.underline) {
     ctx.strokeStyle = fillStyle;
   }
-
+  const textHeight = fontSize + 2;
   if (style?.isWrapText) {
     let y = top;
-    const offset = 4;
-    for (let i = 0; i < textItemList.length; ) {
+    const offset = 2;
+    for (let i = 0; i < texts.length; ) {
       let t = width;
       const lastIndex = i;
-      while (i < textItemList.length && textItemList[i].width < t) {
-        t -= textItemList[i].width;
-        i++;
+      while (i < texts.length) {
+        const w = measureText(ctx, texts[i]);
+        if (w < t) {
+          t -= w;
+          i++;
+        } else {
+          break;
+        }
       }
       if (lastIndex !== i) {
-        let textHeight = 0;
         const textData: string[] = [];
         for (let k = lastIndex; k < i; k++) {
-          if (textItemList[k].height > textHeight) {
-            textHeight = textItemList[k].height;
-          }
-          textData.push(textItemList[k].char);
+          textData.push(texts[k]);
         }
-        result.fontSizeHeight = Math.max(
-          result.fontSizeHeight || 0,
-          textHeight,
-        );
 
         y = y + Math.floor(textHeight / 2) + offset;
         const b = textData.join('');
         fillText(ctx, b, x, y);
-        drawUnderlineData(ctx, isNum, style, textHeight, x, y, left, width);
+        drawUnderlineData(ctx, isNum, style, textHeight, x, y, width);
         y += Math.floor(textHeight / 2);
       }
     }
     y += offset;
     result.wrapHeight = y - top;
   } else {
-    const textHeight = Math.max(...textItemList.map((v) => v.height), 0);
-    result.fontSizeHeight = textHeight;
     const offset = Math.max(0, Math.floor(height - textHeight) / 2);
     const y = Math.floor(top + textHeight / 2 + offset);
     let textWidth = 0;
     const textData: string[] = [];
     let t = width;
-    for (let i = 0; i < textItemList.length; i++) {
-      if (textItemList[i].width < t) {
-        t -= textItemList[i].width;
-        textData.push(textItemList[i].char);
-        textWidth += textItemList[i].width;
+    for (let i = 0; i < texts.length; i++) {
+      const w = measureText(ctx, texts[i]);
+      if (w < t) {
+        t -= w;
+        textData.push(texts[i]);
+        textWidth += w;
       }
     }
 
     fillText(ctx, textData.join(''), x, y);
-    drawUnderlineData(ctx, isNum, style, textHeight, x, y, left, textWidth);
+    drawUnderlineData(ctx, isNum, style, textHeight, x, y, textWidth);
   }
   return result;
 }
@@ -273,22 +270,18 @@ export function drawAntLine(
   ctx.setLineDash(oldDash);
 }
 
-export function drawUnderline(
-  ctx: CanvasRenderingContext2D,
-  pointList: Point[],
-  underline: EUnderLine,
-) {
+export function getPointList(pointList: Point[], isExtra: boolean) {
   const [start, end] = pointList;
   const offset = dpr();
   const list: Point[] = [
     [start[0], start[1] - offset],
     [end[0], end[1] - offset],
   ];
-  if (underline === EUnderLine.DOUBLE) {
+  if (isExtra) {
     const t = offset * 2;
     list.push([start[0], start[1] - t], [end[0], end[1] - t]);
   }
-  drawLines(ctx, list);
+  return list;
 }
 
 export function resizeCanvas(

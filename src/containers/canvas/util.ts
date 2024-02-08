@@ -56,6 +56,7 @@ const handleStateChange = (
     const {
       isBold = false,
       isItalic = false,
+      isStrike = false,
       fontSize = DEFAULT_FONT_SIZE,
       fontColor = DEFAULT_FONT_COLOR,
       fillColor = '',
@@ -75,6 +76,7 @@ const handleStateChange = (
       formula: cell.formula,
       isBold,
       isItalic,
+      isStrike,
       fontColor,
       fontSize,
       fontFamily,

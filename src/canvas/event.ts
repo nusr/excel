@@ -33,6 +33,7 @@ export function registerGlobalEvent(
       }
     }
     if (temp) {
+      event.preventDefault();
       temp.handler(controller);
       return;
     }

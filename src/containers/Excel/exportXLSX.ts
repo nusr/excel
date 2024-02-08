@@ -129,6 +129,9 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
   if (style.isItalic) {
     fontList.push('<i/>');
   }
+  if (style.isStrike) {
+    fontList.push('<strike/>');
+  }
   if (typeof style.fontSize !== 'undefined') {
     fontList.push(`<sz val="${style.fontSize}"/>`);
   }

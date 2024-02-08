@@ -71,7 +71,9 @@ export const MOCK_MODEL: WorkBookJSON = {
       value: '这是一段非常长的文案，需要换行展示',
       style: {
         isWrapText: true,
-        underline: EUnderLine.SINGLE,
+        isStrike: true,
+        isItalic: true,
+        underline: EUnderLine.DOUBLE,
       },
     },
     '0_5': {

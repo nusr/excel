@@ -88,6 +88,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           type="number"
           min="0"
           max="10000"
+          style={{ width: '92%' }}
           defaultValue={value}
           onChange={handleChange}
         />

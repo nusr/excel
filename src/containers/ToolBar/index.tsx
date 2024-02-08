@@ -74,6 +74,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
   const {
     isBold,
     isItalic,
+    isStrike,
     fontSize,
     fontColor = '',
     fillColor = '',
@@ -149,7 +150,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         testId="toolbar-bold"
         title="Bold"
       >
-        <Icon name="bold" />
+        <span style={{ fontWeight: 'bold' }}>B</span>
       </Button>
       <Button
         active={isItalic}
@@ -157,7 +158,15 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         testId="toolbar-italic"
         title="Italic"
       >
-        <Icon name="italic" />
+        <span style={{ fontStyle: 'italic' }}>I</span>
+      </Button>
+      <Button
+        active={isStrike}
+        onClick={() => setCellStyle({ isStrike: !isStrike })}
+        testId="toolbar-strike"
+        title="Strike"
+      >
+        <span style={{ textDecorationLine: 'line-through' }}>A</span>
       </Button>
       <Select
         data={underlineList}

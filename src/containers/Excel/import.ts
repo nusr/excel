@@ -103,6 +103,7 @@ interface FontItem {
   b?: ObjectItem;
   i?: ObjectItem;
   u?: ObjectItem;
+  strike?: ObjectItem;
   color: ColorItem;
   name?: {
     val: string;
@@ -252,6 +253,7 @@ function getCellStyle(
       result.fontSize = fz ? fz : undefined;
       result.isBold = Boolean(font.b);
       result.isItalic = Boolean(font.i);
+      result.isStrike = Boolean(font.strike);
       result.underline = font.u ? EUnderLine.SINGLE : EUnderLine.NONE;
       result.fontFamily = font?.name?.val;
       const color = convertColor(themeData, font.color);
@@ -312,7 +314,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     customHeight: {},
     customWidth: {},
     definedNames: {},
-    currentSheetId: ''
+    currentSheetId: '',
   };
   const sheetPathMap: Record<string, string> = {};
   const sheetMap: Record<string, string> = {};

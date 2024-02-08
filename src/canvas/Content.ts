@@ -119,15 +119,14 @@ export class Content implements ContentView {
         if (cellSize.width <= 0 || cellSize.height <= 0) {
           continue;
         }
-        const { wrapHeight = 0, fontSizeHeight = 0 } = renderCell(ctx, {
+        const { wrapHeight = 0 } = renderCell(ctx, {
           ...cellInfo,
           ...cellSize,
           top: y,
           left: x,
         });
-        const t = Math.max(wrapHeight, fontSizeHeight);
-        if (t > cellSize.height) {
-          controller.setRowHeight(rowIndex, t, false);
+        if (wrapHeight > cellSize.height) {
+          controller.setRowHeight(rowIndex, wrapHeight, false);
         }
         x += controller.getColWidth(colIndex);
       }
