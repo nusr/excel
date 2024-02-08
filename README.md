@@ -46,7 +46,9 @@ npm run start
 - [x] Import XLSX
 - [x] Export XLSX
 
-### Supported Formulas
+## Supported Formulas
+
+### Math
 
 - [x] ABS
 - [x] ACOS
@@ -58,21 +60,24 @@ npm run start
 - [x] ATAN
 - [x] ATAN2
 - [x] ATANH
-- [x] CHAR
-- [x] CODE
-- [x] CONCAT
-- [x] CONCATENATE
 - [x] COS
 - [x] COT
 - [x] E
 - [x] EXP
 - [x] INT
-- [x] LEN
-- [x] LOWER
 - [x] PI
 - [x] SIN
-- [x] SPLIT
 - [x] SUM
+
+### Text
+
+- [x] CHAR
+- [x] CODE
+- [x] CONCAT
+- [x] CONCATENATE
+- [x] LEN
+- [x] LOWER
+- [x] SPLIT
 - [x] T
 - [x] TRIM
 - [x] UNICHAR
