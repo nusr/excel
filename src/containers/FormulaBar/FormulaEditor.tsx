@@ -3,7 +3,6 @@ import {
   CanvasOverlayPosition,
   IController,
   EditorStatus,
-  EUnderLine,
 } from '@/types';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
