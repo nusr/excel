@@ -446,22 +446,29 @@ export class Controller implements IController {
     let colCount = 0;
     for (const item of trList) {
       const tdList = item.querySelectorAll('td');
-      const temp: string[] = [];
+      const textList: string[] = [];
       const list: Array<Partial<StyleType>> = [];
       for (const td of tdList) {
+        let temp: HTMLElement = td;
         let itemStyle: Partial<StyleType> = {};
-        if (td.className) {
-          itemStyle = parseStyle(styleList, `.${td.className}`);
-        } else {
-          itemStyle = parseStyle(styleList, td.tagName.toLowerCase());
+        while (temp.nodeType !== Node.TEXT_NODE) {
+          const tagName = temp.tagName.toLowerCase();
+          const sel = temp.className ? `.${temp.className}` : tagName;
+          const style = parseStyle(styleList, temp.style, sel, tagName);
+          itemStyle = Object.assign(itemStyle, style);
+          if (temp.firstChild) {
+            temp = temp.firstChild as HTMLElement;
+          } else {
+            break;
+          }
         }
         list.push(itemStyle);
-        temp.push(td.textContent || '');
+        textList.push(temp.textContent || '');
       }
-      result.push(temp);
+      result.push(textList);
       resultStyle.push(list);
-      if (temp.length > colCount) {
-        colCount = temp.length;
+      if (textList.length > colCount) {
+        colCount = textList.length;
       }
     }
     const activeCell = this.getActiveCell();

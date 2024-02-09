@@ -105,6 +105,7 @@ function convertCSSStyleToCanvasStyle(
     fontWeight,
     whiteSpace,
     textDecorationLine,
+    textDecorationStyle,
   } = style;
   const result: Partial<StyleType> = {};
   if (color) {
@@ -143,7 +144,10 @@ function convertCSSStyleToCanvasStyle(
   }
   if (textDecorationLine?.includes('underline')) {
     result.underline = EUnderLine.SINGLE;
-    if (selectorCSSText.includes('text-underline-style:double')) {
+    if (
+      selectorCSSText.includes('text-underline-style:double') ||
+      textDecorationStyle === 'double'
+    ) {
       result.underline = EUnderLine.DOUBLE;
     }
   }
@@ -155,29 +159,31 @@ function convertCSSStyleToCanvasStyle(
 
 export function parseStyle(
   styleList: NodeListOf<HTMLStyleElement>,
+  style: CSSStyleDeclaration,
   selector: string,
+  tagName: string,
 ): Partial<StyleType> {
-  for (const item of styleList) {
-    if (!item.sheet?.cssRules) {
-      continue;
-    }
-    const cssText = item.textContent || '';
-    for (const rule of item.sheet.cssRules) {
+  let result: Partial<StyleType> = {};
+  const cssStyle = styleList[0];
+  if (cssStyle && cssStyle.sheet?.cssRules) {
+    for (const rule of cssStyle.sheet.cssRules) {
       if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
-        const startIndex = cssText.indexOf(selector);
-        let endIndex = startIndex;
-        while (cssText[endIndex] !== '}' && endIndex < cssText.length) {
-          endIndex++;
-        }
-        let plainText = '';
-        if (startIndex >= 0) {
-          plainText = cssText
-            .slice(startIndex + selector.length, endIndex)
-            .replace(/\s/g, '');
-        }
-        return convertCSSStyleToCanvasStyle(rule.style, plainText);
+        result = convertCSSStyleToCanvasStyle(rule.style, rule.cssText);
+        break;
       }
     }
   }
-  return {};
+
+  result = Object.assign(result, convertCSSStyleToCanvasStyle(style, ''));
+
+  if (tagName === 's' || tagName === 'strike') {
+    result.isStrike = true;
+  } else if (tagName === 'i') {
+    result.isItalic = true;
+  } else if (tagName === 'b' || tagName === 'strong') {
+    result.isBold = true;
+  } else if (tagName === 'u') {
+    result.underline = EUnderLine.SINGLE;
+  }
+  return result;
 }

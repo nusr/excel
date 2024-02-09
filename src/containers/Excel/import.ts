@@ -28,11 +28,12 @@ const WORKBOOK_RELATION_PATH = 'xl/_rels/workbook.xml.rels';
 const THEME_PATH = 'xl/theme/theme1.xml';
 const SHEET_PATH_PREFIX = 'xl/worksheets/';
 const SHARED_STRINGS = 'xl/sharedStrings.xml';
+const textKey = '#text';
 export const CUSTOM_WIdTH_RADIO = 8;
 
 type SharedStringItem = {
   t?: {
-    '#text': string;
+    [textKey]: string;
   };
 };
 type ThemeData = Record<
@@ -57,7 +58,7 @@ interface ColItem {
   s: string;
   t?: string;
   v?: {
-    '#text': string;
+    [textKey]: string;
   };
 }
 interface SheetDataRowItem {
@@ -125,14 +126,14 @@ interface FillItem {
 
 interface DefineNameItem {
   name: string;
-  '#text': string;
+  [textKey]: string;
 }
 
 function xmlToJson(xml: any) {
   // Create the return object
   let obj: XMLFile = {};
 
-  if (xml.nodeType == 1) {
+  if (xml.nodeType === Node.ELEMENT_NODE) {
     // element
     // do attributes
     if (xml.attributes.length > 0) {
@@ -140,7 +141,7 @@ function xmlToJson(xml: any) {
         obj[attribute.nodeName] = attribute.nodeValue;
       }
     }
-  } else if (xml.nodeType == 3) {
+  } else if (xml.nodeType === Node.TEXT_NODE) {
     // text
     obj = xml.nodeValue;
   }
@@ -149,13 +150,15 @@ function xmlToJson(xml: any) {
   if (xml.childNodes.length > 0) {
     for (const item of xml.childNodes) {
       const n = item.nodeName;
+      // clear empty text
+      if (typeof item.nodeValue === 'string' && !item.nodeValue.trim()) {
+        continue;
+      }
       if (typeof obj[n] === 'undefined') {
         obj[n] = xmlToJson(item);
       } else {
         if (typeof obj[n].push === 'undefined') {
-          const old = obj[n];
-          obj[n] = [];
-          obj[n].push(old);
+          obj[n] = [obj[n]];
         }
         obj[n].push(xmlToJson(item));
       }
@@ -164,7 +167,7 @@ function xmlToJson(xml: any) {
   return obj;
 }
 
-function convertXMLToJSON(xmlStr: string) {
+export function convertXMLToJSON(xmlStr: string) {
   const parser = new DOMParser();
   const xml = parser.parseFromString(xmlStr, 'text/xml');
   const json = xmlToJson(xml);
@@ -183,6 +186,7 @@ function convertRGB(c?: string) {
   }
   return '';
 }
+
 function convertColor(themeData: ThemeData, color?: ColorItem) {
   if (!color) {
     return '';
@@ -441,7 +445,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
         if (colCount > XLSX_MAX_COL_COUNT) {
           continue;
         }
-        let val = col?.v?.['#text'] || '';
+        let val = col?.v?.[textKey] || '';
         const styleId = parseInt(col.s, 10);
         const style = getCellStyle(xmlData[STYLE_PATH], styleId, themeData);
         const t: ModelCellType = {};
@@ -452,7 +456,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
           const i = parseInt(val, 10);
           if (!isNaN(i)) {
             const data = sharedStrings[i];
-            const text = data?.t?.['#text'] || '';
+            const text = data?.t?.[textKey] || '';
             if (text) {
               val = text;
             }
@@ -485,7 +489,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     return result.workbook.find((v) => v.name === sheetName)?.sheetId || '';
   };
   for (const item of definedNames) {
-    const range = parseReference(item['#text'], convertSheetName);
+    const range = parseReference(item[textKey], convertSheetName);
     if (range && range.sheetId && range.isValid() && item?.name) {
       result.definedNames[item.name.toLowerCase()] = range.toIRange();
     }
