@@ -1,4 +1,12 @@
 import { ModelCellValue } from './model';
+import type {
+  ChartType,
+  DefaultDataPoint,
+  ChartData,
+  UpdateMode,
+  ChartOptions,
+  Plugin,
+} from 'chart.js';
 
 export interface OptionItem {
   value: string | number;
@@ -36,4 +44,20 @@ export enum EditorStatus {
   NONE = 0,
   EDIT_CELL,
   EDIT_FORMULA_BAR,
+}
+
+export interface ChartProps<
+  TType extends ChartType = ChartType,
+  TData = DefaultDataPoint<TType>,
+  TLabel = unknown,
+> {
+  width: number;
+  height: number;
+  uuid?: string;
+  type: ChartType;
+  data: ChartData<TType, TData, TLabel>;
+  options?: ChartOptions<TType>;
+  plugins?: Plugin<TType>[];
+  redraw?: boolean;
+  updateMode?: UpdateMode;
 }

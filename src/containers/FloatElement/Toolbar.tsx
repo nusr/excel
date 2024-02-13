@@ -38,7 +38,9 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = ({
     if (!file) {
       return;
     }
-    const fileName = file.name;
+    let fileName = file.name;
+    const fileType = file.type.slice('image/'.length);
+    fileName = fileName.slice(0, -(fileType.length + 1));
     const reader = new FileReader();
     reader.onload = function (e) {
       ref.current!.value = '';

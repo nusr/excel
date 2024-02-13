@@ -52,6 +52,7 @@ export const DefineName: React.FunctionComponent<Props> = ({
       <input
         value={value}
         ref={ref}
+        type="text"
         onChange={handleChange}
         className={styles['formula-bar-name-editor']}
         onKeyDown={handleKeyDown}

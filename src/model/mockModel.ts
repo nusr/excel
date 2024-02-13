@@ -222,7 +222,7 @@ export const MOCK_MODEL: WorkBookJSON = {
   },
   drawings: [
     {
-      title: 'lyf.jpeg',
+      title: 'lyf',
       type: 'floating-picture',
       uuid: generateUUID(),
       imageSrc: mockImage,

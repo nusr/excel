@@ -2,37 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import { IController } from '@/types';
 import styles from './FloatElement.module.css';
 import { FloatElementItem } from '@/containers/store';
-import { Line, Bar } from './Chart';
-import { DEBUG_COLOR_LIST } from '@/util';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-function getRandomColor() {
-  const index = Math.floor(Math.random() * DEBUG_COLOR_LIST.length);
-  return DEBUG_COLOR_LIST[index];
-}
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+import { Chart } from './Chart';
+import { ContextMenu } from './ContextMenu';
+import { DEFAULT_POSITION } from '@/util';
 
 type FloatElementProps = FloatElementItem & { controller: IController };
 
@@ -48,6 +20,10 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
   const prePosition = useRef({
     x: 0,
     y: 0,
+  });
+  const [contextMenuPosition, setContextMenuPosition] = useState({
+    top: DEFAULT_POSITION,
+    left: DEFAULT_POSITION,
   });
   useEffect(() => {
     document.addEventListener('mouseup', handleMouseUp);
@@ -103,47 +79,52 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
     });
   };
 
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setContextMenuPosition({ top: event.clientY, left: event.clientX });
+    return false;
+  };
+  const hideContextMenu = () => {
+    setContextMenuPosition({
+      top: DEFAULT_POSITION,
+      left: DEFAULT_POSITION,
+    });
+  };
+
   let children = null;
   if (props.type === 'floating-picture') {
     children = (
       <img title={props.title} alt={props.title} src={props.imageSrc!} />
     );
   } else if (props.type === 'chart') {
-    const chartProps = {
-      width: props.width,
-      height: props.height,
-      labels: props.labels,
-      datasets: props.datasets,
-      title: props.title,
-      redraw: true,
-    };
-    chartProps.datasets = chartProps.datasets.map((v) => ({
-      ...v,
-      backgroundColor: getRandomColor(),
-    }));
-    if (props.chartType === 'line') {
-      children = <Line {...chartProps} />;
-    } else if (props.chartType === 'bar') {
-      children = <Bar {...chartProps} />;
-    } else {
-      console.error('not support chart type', props.chartType);
-      return null;
-    }
-  } else {
+    children = <Chart {...props} />;
+  }
+  if (!children) {
     return null;
   }
 
   return (
-    <div
-      onMouseDown={handleMouseDown}
-      className={styles['float-element']}
-      style={{
-        width: props.width,
-        height: props.height,
-        transform: `translateX(${position.left}px) translateY(${position.top}px)`,
-      }}
-    >
-      {children}
-    </div>
+    <React.Fragment>
+      <div
+        onMouseDown={handleMouseDown}
+        onContextMenu={handleContextMenu}
+        className={styles['float-element']}
+        style={{
+          transform: `translateX(${position.left}px) translateY(${position.top}px)`,
+        }}
+      >
+        {children}
+      </div>
+      {contextMenuPosition.top >= 0 && contextMenuPosition.left >= 0 && (
+        <ContextMenu
+          {...contextMenuPosition}
+          uuid={props.uuid}
+          type={props.type}
+          controller={controller}
+          hideContextMenu={hideContextMenu}
+        />
+      )}
+    </React.Fragment>
   );
 };

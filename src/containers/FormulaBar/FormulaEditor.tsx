@@ -1,9 +1,5 @@
 import React, { CSSProperties, useRef, useEffect } from 'react';
-import {
-  CanvasOverlayPosition,
-  IController,
-  EditorStatus,
-} from '@/types';
+import { CanvasOverlayPosition, IController, EditorStatus } from '@/types';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
 import { handleTabClick, handleEnterClick } from '../../canvas/shortcut';
@@ -56,20 +52,21 @@ export function getEditorStyle(
     return undefined;
   }
   const isFormulaBar = editorStatus === EditorStatus.EDIT_FORMULA_BAR;
+
+  const editorStyle = getDisplayStyle(style, isFormulaBar);
+  if (isFormulaBar) {
+    return editorStyle;
+  }
   const cellPosition: CanvasOverlayPosition = {
     top: style.top,
     left: style.left,
     width: style.width,
     height: style.height,
   };
-  const editorStyle = getDisplayStyle(style, isFormulaBar);
-  if (isFormulaBar) {
-    return editorStyle;
-  }
-
   return {
     ...editorStyle,
     ...cellPosition,
+    border: '1px solid var(--primaryColor)',
   };
 }
 

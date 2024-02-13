@@ -1,4 +1,4 @@
-import { IController, ChangeEventType, EUnderLine } from '@/types';
+import { IController, ChangeEventType, EUnderLine, IRange } from '@/types';
 import {
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
@@ -23,6 +23,37 @@ function createCanvas() {
   canvas.style.display = 'none';
   document.body.appendChild(canvas);
   return canvas;
+}
+
+function getChartData(
+  range: IRange,
+  controller: IController,
+): Pick<FloatElementItem, 'labels' | 'datasets'> {
+  const { row, col, rowCount, colCount, sheetId } = range;
+  const result: Pick<FloatElementItem, 'labels' | 'datasets'> = {
+    labels: [],
+    datasets: [],
+  };
+  for (
+    let r = row, index = 1, endRow = row + rowCount;
+    r < endRow;
+    r++, index++
+  ) {
+    result.labels.push(String(index));
+    const list = [];
+    for (let c = col, endCol = col + colCount; c < endCol; c++) {
+      const t = controller.getCell({
+        row: r,
+        col: c,
+        rowCount: 1,
+        colCount: 1,
+        sheetId,
+      });
+      list.push(parseNumber(t.value));
+    }
+    result.datasets.push({ label: `Series${index}`, data: list });
+  }
+  return result;
 }
 
 const handleStateChange = (
@@ -115,11 +146,26 @@ const handleStateChange = (
       scrollTop: scroll.scrollTop,
     });
   }
+  if (changeSet.has('row') || changeSet.has('col')) {
+    // just update position
+    const list = floatElementStore.getSnapshot();
+    floatElementStore.setState(
+      list.map((v) => {
+        const size = controller.computeCellPosition(v.fromRow, v.fromCol);
+        return {
+          ...v,
+          top: size.top,
+          left: size.left,
+        };
+      }),
+    );
+  }
   if (changeSet.has('floatElement') || changeSet.has('setCellValues')) {
     const list = controller.getFloatElementList(controller.getCurrentSheetId());
     floatElementStore.setState(
       list.map((v) => {
         const size = controller.computeCellPosition(v.fromRow, v.fromCol);
+
         const result: FloatElementItem = {
           ...v,
           top: size.top,
@@ -128,26 +174,9 @@ const handleStateChange = (
           datasets: [],
         };
         if (v.type === 'chart' && v.chartRange) {
-          const { row, col, rowCount, colCount, sheetId } = v.chartRange;
-          for (
-            let r = row, index = 1, endRow = row + rowCount;
-            r < endRow;
-            r++, index++
-          ) {
-            result.labels.push(String(index));
-            const list = [];
-            for (let c = col, endCol = col + colCount; c < endCol; c++) {
-              const t = controller.getCell({
-                row: r,
-                col: c,
-                rowCount: 1,
-                colCount: 1,
-                sheetId,
-              });
-              list.push(parseNumber(t.value));
-            }
-            result.datasets.push({ label: `Series${index}`, data: list });
-          }
+          const c = getChartData(v.chartRange, controller);
+          result.labels = c.labels;
+          result.datasets = c.datasets;
         }
         return result;
       }),

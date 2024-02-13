@@ -68,6 +68,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
                   className={styles['sheet-bar-input']}
                   defaultValue={item.label}
                   onKeyDown={handleKeyDown}
+                  type="text"
                 />
               ) : (
                 <span className={styles['sheet-bar-item-text']}>

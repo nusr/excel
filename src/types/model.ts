@@ -155,6 +155,10 @@ export interface IBaseModel {
   checkDefineName: (name: string) => IRange | undefined;
   getFloatElementList: (sheetId: string) => FloatElement[];
   addFloatElement: (data: FloatElement) => void;
-  updateFloatElement: (data: FloatElement) => void;
+  updateFloatElement<T extends keyof FloatElement>(
+    uuid: string,
+    key: T,
+    value: FloatElement[T],
+  ): void;
   deleteFloatElement: (uuid: string) => void;
 }

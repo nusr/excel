@@ -6,7 +6,34 @@
   left: 0;
   border: 1px solid var(--borderColor);
   background-color: var(--white);
+  z-index: 2;
 }
 .float-element > img {
   display: block;
+}
+
+.context-menu {
+  position: fixed;
+  background-color: var(--white);
+  border-radius: var(--borderRadius);
+  width: 150px;
+  z-index: 3;
+}
+
+.context-menu > button {
+  width: 100%;
+  background-color: var(--white);
+}
+
+.title {
+  /* text-align: center; */
+  font-weight: bold;
+  width: 98%;
+  border: none;
+  padding: var(--tinyPadding);
+  z-index: 9;
+}
+
+.chart {
+  background-color: var(--white);
 }

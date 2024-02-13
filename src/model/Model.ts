@@ -79,39 +79,30 @@ export class Model implements IModel {
   }
 
   private get definedNames(): Y.Map<IRange> {
-    const result = this.model.get('definedNames');
-    if (result) {
-      return result;
+    if (!this.model.get('definedNames')) {
+      this.definedNames = {};
     }
-    const list = new Y.Map<IRange>();
-    this.model.set('definedNames', list);
-    return list;
+    return this.model.get('definedNames');
   }
   private set definedNames(obj: Record<string, IRange>) {
     this.model.set('definedNames', new Y.Map(Object.entries(obj)));
   }
 
   private get customHeight(): Y.Map<CustomItem> {
-    const result = this.model.get('customHeight');
-    if (result) {
-      return result;
+    if (!this.model.get('customHeight')) {
+      this.customHeight = {};
     }
-    const list = new Y.Map<CustomItem>();
-    this.model.set('customHeight', list);
-    return list;
+    return this.model.get('customHeight');
   }
   private set customHeight(obj: WorkBookJSON['customHeight']) {
     this.model.set('customHeight', new Y.Map(Object.entries(obj)));
   }
 
   private get customWidth(): Y.Map<CustomItem> {
-    const result = this.model.get('customWidth');
-    if (result) {
-      return result;
+    if (!this.model.get('customWidth')) {
+      this.customWidth = {};
     }
-    const list = new Y.Map<CustomItem>();
-    this.model.set('customWidth', list);
-    return list;
+    return this.model.get('customWidth');
   }
   private set customWidth(obj: WorkBookJSON['customWidth']) {
     this.model.set('customWidth', new Y.Map(Object.entries(obj)));
@@ -794,12 +785,16 @@ export class Model implements IModel {
   addFloatElement(data: FloatElement) {
     this.drawings.push([data]);
   }
-  updateFloatElement(data: FloatElement) {
-    const i = this.drawings.toArray().findIndex((v) => v.uuid === data.uuid);
+  updateFloatElement<T extends keyof FloatElement>(
+    uuid: string,
+    key: T,
+    value: FloatElement[T],
+  ) {
+    const i = this.drawings.toArray().findIndex((v) => v.uuid === uuid);
     if (i < 0) {
       return;
     }
-    this.drawings.insert(i, [data]);
+    this.drawings.get(i)[key] = value;
   }
   deleteFloatElement(uuid: string) {
     const i = this.drawings.toArray().findIndex((v) => v.uuid === uuid);

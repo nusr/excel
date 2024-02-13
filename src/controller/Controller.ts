@@ -320,7 +320,7 @@ export class Controller implements IController {
   addRow(rowIndex: number, count: number): void {
     this.transaction(() => {
       this.model.addRow(rowIndex, count);
-
+      this.changeSet.add('row');
       this.changeSet.add('content');
       this.emitChange();
     });
@@ -328,7 +328,7 @@ export class Controller implements IController {
   addCol(colIndex: number, count: number): void {
     this.transaction(() => {
       this.model.addCol(colIndex, count);
-
+      this.changeSet.add('col');
       this.changeSet.add('content');
       this.emitChange();
     });
@@ -336,7 +336,7 @@ export class Controller implements IController {
   deleteCol(colIndex: number, count: number): void {
     this.transaction(() => {
       this.model.deleteCol(colIndex, count);
-
+      this.changeSet.add('col');
       this.changeSet.add('content');
       this.emitChange();
     });
@@ -344,7 +344,7 @@ export class Controller implements IController {
   deleteRow(rowIndex: number, count: number): void {
     this.transaction(() => {
       this.model.deleteRow(rowIndex, count);
-
+      this.changeSet.add('row');
       this.changeSet.add('content');
       this.emitChange();
     });
@@ -352,7 +352,7 @@ export class Controller implements IController {
   hideCol(colIndex: number, count: number): void {
     this.transaction(() => {
       this.model.hideCol(colIndex, count);
-
+      this.changeSet.add('col');
       this.changeSet.add('content');
       this.emitChange();
     });
@@ -360,7 +360,7 @@ export class Controller implements IController {
   hideRow(rowIndex: number, count: number): void {
     this.transaction(() => {
       this.model.hideRow(rowIndex, count);
-
+      this.changeSet.add('row');
       this.changeSet.add('content');
       this.emitChange();
     });
@@ -689,9 +689,13 @@ export class Controller implements IController {
       this.emitChange();
     });
   }
-  updateFloatElement(data: FloatElement) {
+  updateFloatElement<T extends keyof FloatElement>(
+    uuid: string,
+    key: T,
+    value: FloatElement[T],
+  ) {
     this.transaction(() => {
-      this.model.updateFloatElement(data);
+      this.model.updateFloatElement(uuid, key, value);
       this.changeSet.add('floatElement');
       this.emitChange();
     });
