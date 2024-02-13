@@ -1,5 +1,6 @@
 import { WorkBookJSON, EUnderLine } from '@/types';
-import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from '@/util';
+import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT, generateUUID } from '@/util';
+import { mockImage } from './mockData';
 
 export const MOCK_MODEL: WorkBookJSON = {
   currentSheetId: '',
@@ -132,6 +133,33 @@ export const MOCK_MODEL: WorkBookJSON = {
         fillColor: 'red',
       },
     },
+    '6_6': {
+      value: 3,
+    },
+    '6_7': {
+      value: 6,
+    },
+    '6_8': {
+      value: 29,
+    },
+    '7_6': {
+      value: 35,
+    },
+    '7_7': {
+      value: 15,
+    },
+    '7_8': {
+      value: 34,
+    },
+    '8_6': {
+      value: 23,
+    },
+    '8_7': {
+      value: 24,
+    },
+    '8_8': {
+      value: 15,
+    },
   },
   worksheets_2: {
     '0_0': {
@@ -192,4 +220,39 @@ export const MOCK_MODEL: WorkBookJSON = {
       sheetId: '1',
     },
   },
+  drawings: [
+    {
+      title: 'lyf.jpeg',
+      type: 'floating-picture',
+      uuid: generateUUID(),
+      imageSrc: mockImage,
+      width: 200,
+      height: 266,
+      sheetId: '1',
+      fromCol: 1,
+      fromRow: 1,
+      top: -1,
+      left: -1,
+    },
+    {
+      title: 'Chart Title',
+      type: 'chart',
+      uuid: generateUUID(),
+      width: 400,
+      height: 266,
+      top: -1,
+      left: -1,
+      sheetId: '1',
+      fromCol: 5,
+      fromRow: 5,
+      chartType: 'bar',
+      chartRange: {
+        row: 6,
+        col: 6,
+        colCount: 3,
+        rowCount: 3,
+        sheetId: '1',
+      },
+    },
+  ],
 };

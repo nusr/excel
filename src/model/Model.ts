@@ -9,6 +9,7 @@ import {
   ModelCellValue,
   CustomItem,
   ModelCellType,
+  FloatElement,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -114,6 +115,20 @@ export class Model implements IModel {
   }
   private set customWidth(obj: WorkBookJSON['customWidth']) {
     this.model.set('customWidth', new Y.Map(Object.entries(obj)));
+  }
+
+  private get drawings(): Y.Array<FloatElement> {
+    if (!this.model.get('drawings')) {
+      this.drawings = [];
+    }
+    return this.model.get('drawings');
+  }
+  private set drawings(arr: FloatElement[]) {
+    const list = new Y.Array<FloatElement>();
+    if (arr.length > 0) {
+      list.push(arr);
+    }
+    this.model.set('drawings', list);
   }
 
   private getSheetData(sheetId?: string): Y.Map<ModelCellType> | undefined {
@@ -246,7 +261,8 @@ export class Model implements IModel {
       customHeight = {},
       customWidth = {},
       definedNames = {},
-      currentSheetId,
+      currentSheetId = '',
+      drawings = [],
     } = json;
     this.workbook = workbook;
     this.currentSheetId = currentSheetId || this.getSheetId();
@@ -254,6 +270,7 @@ export class Model implements IModel {
     this.customWidth = customWidth;
     this.customHeight = customHeight;
     this.definedNames = definedNames;
+    this.drawings = drawings;
     for (const [key, value] of Object.entries(json)) {
       if (key.startsWith(WORK_SHEETS_PREFIX)) {
         this.model.set(key, new Y.Map<ModelCellType>(Object.entries(value)));
@@ -270,6 +287,7 @@ export class Model implements IModel {
       customWidth: this.customWidth.toJSON(),
       definedNames: this.definedNames.toJSON(),
       currentSheetId: this.currentSheetId,
+      drawings: this.drawings.toJSON(),
     };
     for (const [key, value] of this.model.entries()) {
       if (key.startsWith(WORK_SHEETS_PREFIX)) {
@@ -768,5 +786,26 @@ export class Model implements IModel {
   }
   transaction(func: () => void): void {
     this.doc.transact(func);
+  }
+  getFloatElementList(sheetId: string): FloatElement[] {
+    const id = sheetId || this.currentSheetId;
+    return this.drawings.toArray().filter((v) => v.sheetId === id);
+  }
+  addFloatElement(data: FloatElement) {
+    this.drawings.push([data]);
+  }
+  updateFloatElement(data: FloatElement) {
+    const i = this.drawings.toArray().findIndex((v) => v.uuid === data.uuid);
+    if (i < 0) {
+      return;
+    }
+    this.drawings.insert(i, [data]);
+  }
+  deleteFloatElement(uuid: string) {
+    const i = this.drawings.toArray().findIndex((v) => v.uuid === uuid);
+    if (i < 0) {
+      return;
+    }
+    this.drawings.delete(i, 1);
   }
 }

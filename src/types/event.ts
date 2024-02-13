@@ -6,7 +6,10 @@ export type ChangeEventType =
   | 'setActiveCell'
   | 'setCellStyle'
   | 'setCellValues'
-  | 'scroll';
+  | 'scroll'
+  | 'floatElement'
+  | 'row'
+  | 'col';
 
 export interface IWindowSize {
   width: number;
@@ -24,6 +27,4 @@ export interface IHitInfo {
   y: number;
   row: number;
   col: number;
-  pageX: number;
-  pageY: number;
 }

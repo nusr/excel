@@ -20,6 +20,7 @@ import {
   fontFamilyStore,
   coreStore,
 } from '@/containers/store';
+import { InsertFloatingPicture, InsertChart } from '../FloatElement';
 
 interface Props {
   controller: IController;
@@ -197,6 +198,8 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
       >
         Wrap Text
       </Button>
+      <InsertFloatingPicture controller={controller} />
+      <InsertChart controller={controller} />
       <Github />
     </div>
   );

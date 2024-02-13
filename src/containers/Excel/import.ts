@@ -319,6 +319,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     customWidth: {},
     definedNames: {},
     currentSheetId: '',
+    drawings: [],
   };
   const sheetPathMap: Record<string, string> = {};
   const sheetMap: Record<string, string> = {};

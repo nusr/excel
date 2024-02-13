@@ -1,12 +1,11 @@
 import { BaseStore } from './base';
-import { ExtendIndex } from '@/types';
 
 export interface ScrollStore {
   scrollTop: number;
   scrollLeft: number;
 }
 
-export const scrollStore = new BaseStore<ScrollStore & ExtendIndex>({
+export const scrollStore = new BaseStore<ScrollStore>({
   scrollTop: 0,
   scrollLeft: 0,
 });

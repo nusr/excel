@@ -2,15 +2,15 @@ import type { IHitInfo, IController } from '@/types';
 
 export function getHitInfo(
   controller: IController,
-  clientX: number,
-  clientY: number,
+  x: number,
+  y: number,
 ): IHitInfo | null {
-  const canvasSize = controller.getDomRect();
+  if (x < 0 || y < 0) {
+    return null;
+  }
   const scroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
   const headerSize = controller.getHeaderSize();
-  const x = clientX - canvasSize.left;
-  const y = clientY - canvasSize.top;
   let resultX = headerSize.width;
   let resultY = headerSize.height;
   let { row } = scroll;
@@ -27,5 +27,5 @@ export function getHitInfo(
     return null;
   }
   const cellSize = controller.getCellSize(row, col);
-  return { ...cellSize, row, col, pageY: clientY, pageX: clientX, x, y };
+  return { ...cellSize, row, col, x, y };
 }

@@ -1,5 +1,5 @@
 import { BaseStore } from './base';
-import { ExtendIndex, EditorStatus } from '@/types';
+import { EditorStatus } from '@/types';
 export interface CoreStore {
   currentSheetId: string;
   editorStatus: EditorStatus;
@@ -7,7 +7,7 @@ export interface CoreStore {
   canUndo: boolean;
 }
 
-export const coreStore = new BaseStore<CoreStore & ExtendIndex>({
+export const coreStore = new BaseStore<CoreStore>({
   currentSheetId: '',
   editorStatus: EditorStatus.NONE,
   canRedo: false,

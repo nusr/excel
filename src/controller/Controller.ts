@@ -14,6 +14,7 @@ import {
   ClipboardData,
   ClipboardType,
   MainDom,
+  FloatElement,
 } from '@/types';
 import {
   controllerLog,
@@ -187,6 +188,7 @@ export class Controller implements IController {
       this.changeSet.add('sheetList');
       this.changeSet.add('currentSheetId');
       this.changeSet.add('setActiveCell');
+      this.changeSet.add('floatElement');
       this.setSheetCell(activeCell);
 
       this.emitChange();
@@ -676,5 +678,29 @@ export class Controller implements IController {
   }
   transaction(func: () => void): void {
     this.model.transaction(func);
+  }
+  getFloatElementList(sheetId: string): FloatElement[] {
+    return this.model.getFloatElementList(sheetId);
+  }
+  addFloatElement(data: FloatElement) {
+    this.transaction(() => {
+      this.model.addFloatElement(data);
+      this.changeSet.add('floatElement');
+      this.emitChange();
+    });
+  }
+  updateFloatElement(data: FloatElement) {
+    this.transaction(() => {
+      this.model.updateFloatElement(data);
+      this.changeSet.add('floatElement');
+      this.emitChange();
+    });
+  }
+  deleteFloatElement(uuid: string) {
+    this.transaction(() => {
+      this.model.deleteFloatElement(uuid);
+      this.changeSet.add('floatElement');
+      this.emitChange();
+    });
   }
 }

@@ -8,6 +8,7 @@ import { ContextMenu } from './ContextMenu';
 import { initCanvas } from './util';
 import { checkFocus, setActiveCellValue } from '@/canvas';
 import { BottomBar } from './BottomBar';
+import { FloatElementContainer } from '../FloatElement';
 
 interface Props {
   controller: IController;
@@ -60,7 +61,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
       return;
     }
     if (x > headerSize.width && y > headerSize.height) {
-      const position = getHitInfo(controller, clientX, clientY);
+      const position = getHitInfo(controller, x, y);
       if (!position) {
         return;
       }
@@ -85,7 +86,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     const { timeStamp, clientX, clientY } = event;
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;
-    const position = getHitInfo(controller, clientX, clientY);
+    const position = getHitInfo(controller, x, y);
     if (!position) {
       return;
     }
@@ -163,11 +164,12 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
         />
         <ScrollBar controller={controller} />
         <BottomBar controller={controller} />
+        <FloatElementContainer controller={controller} />
       </div>
       {menuPosition.top >= 0 && menuPosition.left >= 0 && (
         <ContextMenu
-          controller={controller}
           {...menuPosition}
+          controller={controller}
           hideContextMenu={hideContextMenu}
         />
       )}

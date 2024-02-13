@@ -1,7 +1,8 @@
 .canvas-container {
   flex: 1;
-  height: 0;
+  /* height: 0; */
   position: relative;
+  overflow: hidden;
 }
 
 .canvas-content {

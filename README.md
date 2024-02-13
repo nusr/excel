@@ -45,6 +45,8 @@ npm run start
 - [x] Paste
 - [x] Import XLSX
 - [x] Export XLSX
+- [x] Floating Picture
+- [x] Chart
 
 ## Supported Formulas
 

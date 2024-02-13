@@ -5,6 +5,7 @@ import {
   copyOrCut,
   paste,
   Range,
+  parseNumber,
 } from '@/util';
 import {
   coreStore,
@@ -12,6 +13,8 @@ import {
   sheetListStore,
   fontFamilyStore,
   scrollStore,
+  floatElementStore,
+  FloatElementItem,
 } from '@/containers/store';
 import { MainCanvas, registerGlobalEvent, Content } from '@/canvas';
 
@@ -112,6 +115,44 @@ const handleStateChange = (
       scrollTop: scroll.scrollTop,
     });
   }
+  if (changeSet.has('floatElement')) {
+    const list = controller.getFloatElementList(controller.getCurrentSheetId());
+    floatElementStore.setState(
+      list.map((v) => {
+        const size = controller.computeCellPosition(v.fromRow, v.fromCol);
+        const result: FloatElementItem = {
+          ...v,
+          top: size.top,
+          left: size.left,
+          labels: [],
+          datasets: [],
+        };
+        if (v.type === 'chart' && v.chartRange) {
+          const { row, col, rowCount, colCount, sheetId } = v.chartRange;
+          for (
+            let r = row, index = 1, endRow = row + rowCount;
+            r < endRow;
+            r++, index++
+          ) {
+            result.labels.push(String(index));
+            const list = [];
+            for (let c = col, endCol = col + colCount; c < endCol; c++) {
+              const t = controller.getCell({
+                row: r,
+                col: c,
+                rowCount: 1,
+                colCount: 1,
+                sheetId,
+              });
+              list.push(parseNumber(t.value));
+            }
+            result.datasets.push({ label: `Series${index}`, data: list });
+          }
+        }
+        return result;
+      }),
+    );
+  }
 };
 export function initCanvas(controller: IController): () => void {
   const mainCanvas = new MainCanvas(
@@ -145,6 +186,7 @@ export function initCanvas(controller: IController): () => void {
     'content',
     'setActiveCell',
     'sheetList',
+    'floatElement',
   ]);
   handleStateChange(changeSet, controller);
   resize(changeSet);

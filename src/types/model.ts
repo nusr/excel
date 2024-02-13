@@ -1,5 +1,6 @@
 import { ResultType } from './parser';
 import { IRange } from './range';
+import type { ChartType } from 'chart.js';
 
 export enum EVerticalAlign {
   TOP,
@@ -79,6 +80,22 @@ export interface MergeCellItem {
   end: Coordinate;
 }
 
+export type FloatElement = {
+  title: string;
+  type: 'floating-picture' | 'chart';
+  uuid: string;
+  width: number;
+  height: number;
+  fromCol: number; // insert col
+  fromRow: number; // insert row
+  sheetId: string; // insert sheetId
+  top: number;
+  left: number;
+  imageSrc?: string; // floating-picture src
+  chartType?: ChartType;
+  chartRange?: IRange; // chart reference range
+};
+
 export type WorkBookJSON = {
   [key: `worksheets_${string}`]: {
     // key: worksheets_ + sheetId
@@ -90,6 +107,7 @@ export type WorkBookJSON = {
   customWidth: CustomHeightOrWidthItem; // key: sheetId_col worksheets_*.xml_worksheet_sheetData_customHeight
   definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
   currentSheetId: string;
+  drawings: FloatElement[]; //  chart floatImage
 };
 
 export interface IModel extends IBaseModel {
@@ -135,23 +153,8 @@ export interface IBaseModel {
   getDefineName: (range: IRange) => string;
   setDefineName: (range: IRange, name: string) => void;
   checkDefineName: (name: string) => IRange | undefined;
-}
-
-export interface UndoRedoItem {
-  op: UndoRedoType;
-  path: string;
-  value: any;
-}
-
-export type UndoRedoType = 'set' | 'add-array' | 'delete-array';
-
-export interface IHistory {
-  clear: () => void;
-  canRedo: () => boolean;
-  canUndo: () => boolean;
-  undo: () => UndoRedoItem[];
-  redo: () => UndoRedoItem[];
-  pushRedo: (op: UndoRedoType, path: string, value: any) => void;
-  pushUndo: (op: UndoRedoType, path: string, value: any) => void;
-  onChange: () => void;
+  getFloatElementList: (sheetId: string) => FloatElement[];
+  addFloatElement: (data: FloatElement) => void;
+  updateFloatElement: (data: FloatElement) => void;
+  deleteFloatElement: (uuid: string) => void;
 }

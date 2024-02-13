@@ -1,13 +1,9 @@
 import { ModelCellValue } from './model';
 
-export interface OptionItem extends ExtendIndex {
+export interface OptionItem {
   value: string | number;
   label: string;
   disabled: boolean;
-}
-
-export interface ExtendIndex {
-  [key: string]: boolean | number | string | null | undefined;
 }
 
 export interface CanvasOverlayPosition {

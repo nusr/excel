@@ -1,0 +1,12 @@
+.float-element {
+  cursor: move;
+  user-select: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 1px solid var(--borderColor);
+  background-color: var(--white);
+}
+.float-element > img {
+  display: block;
+}

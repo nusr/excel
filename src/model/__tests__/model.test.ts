@@ -39,6 +39,7 @@ describe('model.test.ts', () => {
       customWidth: {},
       definedNames: {},
       currentSheetId: '',
+      drawings: [],
     });
   });
   test('fromJSON', () => {
@@ -78,6 +79,7 @@ describe('model.test.ts', () => {
           formula: '=Sheet1!A1',
         },
       },
+      drawings: [],
     };
     model.fromJSON(json);
     expect(model.toJSON()).toEqual({
@@ -116,6 +118,7 @@ describe('model.test.ts', () => {
           value: '#NAME?',
         },
       },
+      drawings: [],
     });
   });
 });

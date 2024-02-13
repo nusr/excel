@@ -1,4 +1,4 @@
-import type { StyleType, ResultType, ExtendIndex } from '@/types';
+import type { StyleType, ResultType } from '@/types';
 import { DEFAULT_POSITION } from '@/util';
 import { BaseStore } from './base';
 
@@ -12,7 +12,7 @@ export type CellStoreType = Partial<StyleType> & {
   row: number;
   col: number;
   defineName: string;
-} & ExtendIndex;
+};
 
 const cellData: CellStoreType = {
   value: '',
