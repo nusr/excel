@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, memo } from 'react';
 import { Chart as ChartJS, BarController, LineController } from 'chart.js';
 import type {
   ChartType,
@@ -8,7 +8,7 @@ import type {
   UpdateMode,
 } from 'chart.js';
 
-export interface ChartProps<
+interface ChartProps<
   TType extends ChartType = ChartType,
   TData = DefaultDataPoint<TType>,
   TLabel = unknown,
@@ -42,7 +42,9 @@ function ChartComponent<
   const chartRef = useRef<ChartJS | null>();
 
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current) {
+      return;
+    }
 
     if (redraw) {
       destroyChart();
@@ -50,14 +52,7 @@ function ChartComponent<
     } else {
       chartRef.current.update(updateMode);
     }
-  }, [redraw, updateMode]);
-
-  useEffect(() => {
-    if (!chartRef.current) return;
-
-    destroyChart();
-    setTimeout(renderChart);
-  }, [type]);
+  }, [redraw, updateMode, datasets, labels]);
 
   useEffect(() => {
     renderChart();
@@ -105,9 +100,9 @@ function createTypedChart<T extends ChartType>(
 ) {
   ChartJS.register(controller);
 
-  return (props: Omit<ChartProps<T>, 'type'>) => (
+  return memo((props: Omit<ChartProps<T>, 'type'>) => (
     <ChartComponent {...props} type={type} />
-  );
+  ));
 }
 
 export const Line = createTypedChart('line', LineController);

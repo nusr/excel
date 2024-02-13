@@ -115,6 +115,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
       labels: props.labels,
       datasets: props.datasets,
       title: props.title,
+      redraw: true,
     };
     chartProps.datasets = chartProps.datasets.map((v) => ({
       ...v,

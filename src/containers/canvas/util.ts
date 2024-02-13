@@ -115,7 +115,7 @@ const handleStateChange = (
       scrollTop: scroll.scrollTop,
     });
   }
-  if (changeSet.has('floatElement')) {
+  if (changeSet.has('floatElement') || changeSet.has('setCellValues')) {
     const list = controller.getFloatElementList(controller.getCurrentSheetId());
     floatElementStore.setState(
       list.map((v) => {
