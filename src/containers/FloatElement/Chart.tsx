@@ -224,9 +224,6 @@ export const Chart: React.FunctionComponent<FloatElementItem> = memo(
     } else {
       console.error('not support chart type', chartType);
     }
-    if (!node) {
-      return null;
-    }
-    return <React.Fragment>{node}</React.Fragment>;
+    return node;
   },
 );

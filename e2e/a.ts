@@ -20,8 +20,7 @@ afterAll(async () => {
 
 async function setupPuppeteer() {
   const browser = await puppeteer.launch({
-    headless: 'new',
-    // headless: false,
+    headless: true,
     waitForInitialPage: true,
     defaultViewport: {
       width: 1600,
