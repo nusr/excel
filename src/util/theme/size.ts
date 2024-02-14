@@ -7,6 +7,7 @@ const size = {
   mediumPadding: '8px',
   largePadding: '20px',
   borderRadius: '4px',
+  borderLargeRadius: '8px',
   tinyPadding: '4px',
 };
 export default size;

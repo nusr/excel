@@ -88,6 +88,7 @@ export function parseReference(
   if (!endCell) {
     return startCell;
   }
+  endCell.sheetId = startCell.sheetId;
   return mergeRange(startCell, endCell);
 }
 

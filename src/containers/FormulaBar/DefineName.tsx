@@ -22,7 +22,10 @@ export const DefineName: React.FunctionComponent<Props> = ({
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     event.stopPropagation();
     if (event.key === 'Enter') {
-      const t = event.currentTarget.value.toLowerCase();
+      const t = event.currentTarget.value.trim().toLowerCase();
+      if (!t) {
+        return;
+      }
       ref.current?.blur();
       const range = controller.checkDefineName(t);
       if (range) {

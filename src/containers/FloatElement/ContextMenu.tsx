@@ -1,10 +1,15 @@
 import React, { memo } from 'react';
-import { Button, info, Select } from '../components';
+import { Button, info, Select, toast } from '../components';
 import { IController } from '@/types';
 import styles from './FloatElement.module.css';
 import { useClickOutside } from '../hooks';
 import type { ChartType } from 'chart.js';
-import { saveAs } from '@/util';
+import {
+  saveAs,
+  convertToReference,
+  parseReference,
+  isSameRange,
+} from '@/util';
 import { FloatElementItem } from '@/containers/store';
 
 type Props = FloatElementItem & {
@@ -65,6 +70,55 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       hideContextMenu,
     } = props;
     const [ref] = useClickOutside(hideContextMenu);
+    const selectData = () => {
+      let value = convertToReference(
+        props.chartRange!,
+        'absolute',
+        (sheetId: string) => {
+          return controller.getSheetInfo(sheetId).name;
+        },
+      );
+      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        value = event.currentTarget.value;
+        event.stopPropagation();
+      };
+      info({
+        visible: true,
+        title: 'Edit Data Source',
+        children: (
+          <input
+            type="text"
+            style={{ width: '400px' }}
+            defaultValue={value}
+            onChange={handleChange}
+          />
+        ),
+        onOk: () => {
+          const realValue = value.trim();
+          if (!realValue) {
+            toast({ type: 'error', message: 'empty reference' });
+            return;
+          }
+          const sheetList = controller.getSheetList();
+          const range = parseReference(realValue, (sheetName: string) => {
+            return sheetList.find((v) => v.name === sheetName)?.sheetId || '';
+          });
+          if (
+            !range ||
+            !range.isValid() ||
+            isSameRange(range, props.chartRange!)
+          ) {
+            toast({ type: 'error', message: 'reference is not valid' });
+            return;
+          }
+          controller.updateFloatElement(uuid, 'chartRange', range);
+          hideContextMenu();
+        },
+        onCancel: () => {
+          hideContextMenu();
+        },
+      });
+    };
     const changeChartTitle = () => {
       let value = title;
       const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,13 +131,18 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         children: (
           <input
             type="text"
-            style={{ width: '92%' }}
+            style={{ width: '200px' }}
             defaultValue={value}
             onChange={handleChange}
           />
         ),
         onOk: () => {
-          controller.updateFloatElement(uuid, 'title', value);
+          const realValue = value.trim();
+          if (!realValue) {
+            toast({ type: 'error', message: 'empty title' });
+            return;
+          }
+          controller.updateFloatElement(uuid, 'title', realValue);
           hideContextMenu();
         },
         onCancel: () => {
@@ -155,6 +214,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         </Button>
         {type === 'chart' ? (
           <React.Fragment>
+            <Button onClick={selectData}>Select Data</Button>
             <Button onClick={changeChartTitle}>Change Chart Title</Button>
             <Button onClick={changeChartType}>Change Chart Type</Button>
             {/* TODO: select chart reference data */}

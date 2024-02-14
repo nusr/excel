@@ -84,10 +84,14 @@ export function info(props: DialogProps) {
       </Dialog>,
     );
   }
+  function update(modalProps: DialogProps) {
+    render(modalProps);
+  }
 
   render(props);
 
   return {
     close,
+    update,
   };
 }

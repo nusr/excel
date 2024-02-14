@@ -5,3 +5,4 @@ export * from './Select';
 export * from './ColorPicker';
 export * from './Dialog';
 export * from './Menu';
+export * from './Toast';

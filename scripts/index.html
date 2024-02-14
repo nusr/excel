@@ -1,30 +1,29 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Excel</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Web Excel</title>
-  <link rel="stylesheet" href="./index.css" />
-</head>
-
-<body>
-  <div id="root" class="root-container"></div>
-  <script src="./index.js" type="module"></script>
-  <script>
-    window.onload = function () {
-      if (process.env.NODE_ENV === 'development') {
-        // esbuild hot reload
-        const eventSource = new EventSource('/esbuild');
-        eventSource.addEventListener('change', function () {
-          location.reload();
-        });
-        eventSource.onerror = function () {
-          eventSource.close();
+  <body>
+    <div id="root" class="root-container"></div>
+    <script src="./index.js" type="module"></script>
+    <script>
+      window.onload = function () {
+        if (process.env.NODE_ENV === 'development') {
+          // esbuild hot reload
+          const eventSource = new EventSource('/esbuild');
+          eventSource.addEventListener('change', function () {
+            console.log('reload');
+            location.reload();
+          });
+          eventSource.onerror = function () {
+            eventSource.close();
+          };
         }
-      }
-    };
-  </script>
-</body>
-
+      };
+    </script>
+  </body>
 </html>
