@@ -1,19 +1,18 @@
 import React, { memo } from 'react';
 import { Button, info, Select } from '../components';
-import { IController, FloatElement } from '@/types';
+import { IController } from '@/types';
 import styles from './FloatElement.module.css';
 import { useClickOutside } from '../hooks';
 import type { ChartType } from 'chart.js';
 import { saveAs } from '@/util';
+import { FloatElementItem } from '@/containers/store';
 
-interface Props {
+type Props = FloatElementItem & {
   controller: IController;
-  top: number;
-  left: number;
-  uuid: string;
-  type: FloatElement['type'];
+  menuLeft: number;
+  menuTop: number;
   hideContextMenu: () => void;
-}
+};
 
 function extractTypeFromBase64(base64: string) {
   const text = 'data:image/';
@@ -53,73 +52,117 @@ const chartList: Array<{ value: ChartType; label: string }> = [
   },
 ];
 
-export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
-  const { controller, top, left, uuid, type, hideContextMenu } = props;
-  const [ref] = useClickOutside(hideContextMenu);
-  const changeChartType = () => {
-    let chartType: ChartType = 'line';
-    info({
-      title: 'Change Chart Type',
-      visible: true,
-      children: (
-        <Select
-          style={{ width: '100%' }}
-          data={chartList.map((v) => ({ ...v, disabled: false }))}
-          onChange={(v) => (chartType = String(v) as ChartType)}
-        />
-      ),
-      onCancel() {
-        hideContextMenu();
-      },
-      onOk() {
-        controller.updateFloatElement(uuid, 'chartType', chartType);
-        hideContextMenu();
-      },
-    });
-  };
-  const saveAsPicture = () => {
-    hideContextMenu();
-    const list = controller.getFloatElementList(controller.getCurrentSheetId());
-    const item = list.find((v) => v.uuid === uuid);
-    if (!item) {
-      return;
-    }
-    if (type === 'floating-picture' && item.imageSrc) {
-      saveAs(
-        item.imageSrc,
-        item.title + '.' + extractTypeFromBase64(item.imageSrc),
+export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
+  (props) => {
+    const {
+      controller,
+      menuLeft,
+      menuTop,
+      uuid,
+      type,
+      chartType,
+      title,
+      hideContextMenu,
+    } = props;
+    const [ref] = useClickOutside(hideContextMenu);
+    const changeChartTitle = () => {
+      let value = title;
+      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        value = event.currentTarget.value;
+        event.stopPropagation();
+      };
+      info({
+        visible: true,
+        title: 'Change Chart Title',
+        children: (
+          <input
+            type="text"
+            style={{ width: '92%' }}
+            defaultValue={value}
+            onChange={handleChange}
+          />
+        ),
+        onOk: () => {
+          controller.updateFloatElement(uuid, 'title', value);
+          hideContextMenu();
+        },
+        onCancel: () => {
+          hideContextMenu();
+        },
+      });
+    };
+    const changeChartType = () => {
+      let newChartType: ChartType = chartType!;
+      info({
+        title: 'Change Chart Type',
+        visible: true,
+        children: (
+          <Select
+            style={{ width: '100%' }}
+            defaultValue={newChartType}
+            data={chartList.map((v) => ({ ...v, disabled: false }))}
+            onChange={(v) => (newChartType = String(v) as ChartType)}
+          />
+        ),
+        onCancel() {
+          hideContextMenu();
+        },
+        onOk() {
+          controller.updateFloatElement(uuid, 'chartType', newChartType);
+          hideContextMenu();
+        },
+      });
+    };
+    const saveAsPicture = () => {
+      hideContextMenu();
+      const list = controller.getFloatElementList(
+        controller.getCurrentSheetId(),
       );
-    }
-    if (type === 'chart') {
-      const dom = document.querySelector<HTMLCanvasElement>(
-        `canvas[data-uuid="${uuid}"]`,
-      );
-      if (!dom) {
+      const item = list.find((v) => v.uuid === uuid);
+      if (!item) {
         return;
       }
-      saveAs(dom.toDataURL(), item.title + '.png');
-    }
-  };
-  return (
-    <div
-      className={styles['context-menu']}
-      data-testid="float-element-context-menu"
-      ref={ref}
-      style={{ top, left }}
-    >
-      <Button
-        onClick={() => {
-          hideContextMenu();
-          controller.deleteFloatElement(uuid);
-        }}
+      if (type === 'floating-picture' && item.imageSrc) {
+        saveAs(
+          item.imageSrc,
+          item.title + '.' + extractTypeFromBase64(item.imageSrc),
+        );
+      }
+      if (type === 'chart') {
+        const dom = document.querySelector<HTMLCanvasElement>(
+          `canvas[data-uuid="${uuid}"]`,
+        );
+        if (!dom) {
+          return;
+        }
+        saveAs(dom.toDataURL(), item.title + '.png');
+      }
+    };
+    return (
+      <div
+        className={styles['context-menu']}
+        data-testid="float-element-context-menu"
+        ref={ref}
+        style={{ top: menuTop, left: menuLeft }}
       >
-        Delete
-      </Button>
-      {type === 'chart' ? (
-        <Button onClick={changeChartType}>Change Chart Type</Button>
-      ) : null}
-      <Button onClick={saveAsPicture}>Save as Picture</Button>
-    </div>
-  );
-});
-ContextMenu.displayName = 'ContextMenuContainer';
+        <Button
+          onClick={() => {
+            hideContextMenu();
+            controller.deleteFloatElement(uuid);
+          }}
+        >
+          Delete
+        </Button>
+        {type === 'chart' ? (
+          <React.Fragment>
+            <Button onClick={changeChartTitle}>Change Chart Title</Button>
+            <Button onClick={changeChartType}>Change Chart Type</Button>
+            {/* TODO: select chart reference data */}
+          </React.Fragment>
+        ) : null}
+        <Button onClick={saveAsPicture}>Save as Picture</Button>
+      </div>
+    );
+  },
+);
+FloatElementContextMenu.displayName = 'FloatElementContextMenu';

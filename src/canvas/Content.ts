@@ -43,11 +43,13 @@ export class Content implements ContentView {
       return;
     }
     const check =
-      changeSet.has('content') ||
+      changeSet.has('row') ||
+      changeSet.has('col') ||
       changeSet.has('sheetList') ||
       changeSet.has('currentSheetId') ||
-      changeSet.has('setCellStyle') ||
-      changeSet.has('setCellValues');
+      changeSet.has('cellStyle') ||
+      changeSet.has('cellValue') ||
+      changeSet.has('scroll');
     if (!check) {
       return;
     }

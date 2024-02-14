@@ -4,7 +4,6 @@
 .color-picker-wrapper {
   width: 228px;
   position: absolute;
-  z-index: 2;
   top: 22px;
   left: 0;
   display: none;

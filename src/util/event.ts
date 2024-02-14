@@ -13,8 +13,7 @@ export function getHitInfo(
   const headerSize = controller.getHeaderSize();
   let resultX = headerSize.width;
   let resultY = headerSize.height;
-  let { row } = scroll;
-  let { col } = scroll;
+  let { row, col } = scroll;
   while (resultX + controller.getColWidth(col) <= x) {
     resultX += controller.getColWidth(col);
     col++;

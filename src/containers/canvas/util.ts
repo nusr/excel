@@ -61,9 +61,9 @@ const handleStateChange = (
   controller: IController,
 ) => {
   if (
-    changeSet.has('setActiveCell') ||
-    changeSet.has('setCellStyle') ||
-    changeSet.has('setCellValues')
+    changeSet.has('range') ||
+    changeSet.has('cellStyle') ||
+    changeSet.has('cellValue')
   ) {
     const { top } = controller.getDomRect();
     const activeCell = controller.getActiveCell();
@@ -146,26 +146,18 @@ const handleStateChange = (
       scrollTop: scroll.scrollTop,
     });
   }
-  if (changeSet.has('row') || changeSet.has('col')) {
-    // just update position
-    const list = floatElementStore.getSnapshot();
-    floatElementStore.setState(
-      list.map((v) => {
-        const size = controller.computeCellPosition(v.fromRow, v.fromCol);
-        return {
-          ...v,
-          top: size.top,
-          left: size.left,
-        };
-      }),
-    );
-  }
-  if (changeSet.has('floatElement') || changeSet.has('setCellValues')) {
+  if (
+    changeSet.has('floatElement') ||
+    changeSet.has('cellValue') ||
+    changeSet.has('row') ||
+    changeSet.has('col') ||
+    changeSet.has('currentSheetId') ||
+    changeSet.has('scroll')
+  ) {
     const list = controller.getFloatElementList(controller.getCurrentSheetId());
     floatElementStore.setState(
       list.map((v) => {
         const size = controller.computeCellPosition(v.fromRow, v.fromCol);
-
         const result: FloatElementItem = {
           ...v,
           top: size.top,
@@ -212,8 +204,7 @@ export function initCanvas(controller: IController): () => void {
   const changeSet = new Set<ChangeEventType>([
     'currentSheetId',
     'scroll',
-    'content',
-    'setActiveCell',
+    'range',
     'sheetList',
     'floatElement',
   ]);

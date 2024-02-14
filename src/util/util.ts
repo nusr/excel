@@ -100,6 +100,10 @@ export function getCustomWidthOrHeightKey(
 }
 
 export function generateUUID() {
+  if (typeof crypto === 'object' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
   let d = new Date().getTime();
 
   const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(

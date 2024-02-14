@@ -82,7 +82,7 @@ export function registerGlobalEvent(
   }
 
   function handleResize() {
-    resizeWindow(new Set<ChangeEventType>(['content']));
+    resizeWindow(new Set<ChangeEventType>(['row']));
   }
 
   window.addEventListener('resize', handleResize);

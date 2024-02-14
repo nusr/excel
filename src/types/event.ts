@@ -1,15 +1,15 @@
 export type ChangeEventType =
-  | 'content'
   | 'antLine'
   | 'sheetList'
   | 'currentSheetId'
-  | 'setActiveCell'
-  | 'setCellStyle'
-  | 'setCellValues'
   | 'scroll'
   | 'floatElement'
   | 'row'
-  | 'col';
+  | 'col'
+  | 'cellValue'
+  | 'cellStyle'
+  | 'range'
+  | 'defineName';
 
 export interface IWindowSize {
   width: number;

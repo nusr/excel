@@ -3,21 +3,23 @@ import { IController } from '@/types';
 import styles from './FloatElement.module.css';
 import { FloatElementItem } from '@/containers/store';
 import { Chart } from './Chart';
-import { ContextMenu } from './ContextMenu';
-import { DEFAULT_POSITION } from '@/util';
+import { FloatElementContextMenu } from './ContextMenu';
+import { DEFAULT_POSITION, getHitInfo } from '@/util';
 
 type FloatElementProps = FloatElementItem & { controller: IController };
 
 export const FloatElement: React.FunctionComponent<FloatElementProps> = (
   props,
 ) => {
-  const { controller } = props;
+  const { controller, uuid, fromRow, fromCol, top, left } = props;
   const isMouseDown = useRef(false);
+  const latestPosition = useRef({ top: 0, left: 0 });
   const [position, setPosition] = useState({
-    top: props.top,
-    left: props.left,
+    top,
+    left,
   });
-  const prePosition = useRef({
+  latestPosition.current = position;
+  const preMovePosition = useRef({
     x: 0,
     y: 0,
   });
@@ -26,6 +28,9 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
     left: DEFAULT_POSITION,
   });
   useEffect(() => {
+    setPosition({ top, left });
+  }, [top, left]);
+  useEffect(() => {
     document.addEventListener('mouseup', handleMouseUp);
     document.addEventListener('mousemove', handleMouseMove);
     return () => {
@@ -33,9 +38,24 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
       document.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
-  function handleMouseUp() {
+  const handleMouseUp = () => {
     isMouseDown.current = false;
-  }
+    const newRange = getHitInfo(
+      controller,
+      latestPosition.current.left,
+      latestPosition.current.top,
+    );
+    if (!newRange) {
+      return;
+    }
+    if (fromRow === newRange.row && fromCol === newRange.col) {
+      return;
+    }
+    controller.transaction(() => {
+      controller.updateFloatElement(uuid, 'fromCol', newRange.col);
+      controller.updateFloatElement(uuid, 'fromRow', newRange.row);
+    });
+  };
 
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.button !== 0) {
@@ -44,7 +64,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
     event.preventDefault();
     event.stopPropagation();
     isMouseDown.current = true;
-    prePosition.current = {
+    preMovePosition.current = {
       x: event.clientX,
       y: event.clientY,
     };
@@ -54,9 +74,9 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
     if (!isMouseDown.current) {
       return;
     }
-    const diffX = event.clientX - prePosition.current.x;
-    const diffY = event.clientY - prePosition.current.y;
-    prePosition.current = {
+    const diffX = event.clientX - preMovePosition.current.x;
+    const diffY = event.clientY - preMovePosition.current.y;
+    preMovePosition.current = {
       x: event.clientX,
       y: event.clientY,
     };
@@ -117,11 +137,10 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
         {children}
       </div>
       {contextMenuPosition.top >= 0 && contextMenuPosition.left >= 0 && (
-        <ContextMenu
-          {...contextMenuPosition}
-          uuid={props.uuid}
-          type={props.type}
-          controller={controller}
+        <FloatElementContextMenu
+          {...props}
+          menuLeft={contextMenuPosition.left}
+          menuTop={contextMenuPosition.top}
           hideContextMenu={hideContextMenu}
         />
       )}

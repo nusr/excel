@@ -6,7 +6,6 @@
   left: 0;
   border: 1px solid var(--borderColor);
   background-color: var(--white);
-  z-index: 2;
 }
 .float-element > img {
   display: block;
@@ -17,7 +16,7 @@
   background-color: var(--white);
   border-radius: var(--borderRadius);
   width: 150px;
-  z-index: 3;
+  z-index: var(--lowZIndex);
 }
 
 .context-menu > button {
@@ -26,12 +25,12 @@
 }
 
 .title {
-  /* text-align: center; */
+  text-align: center;
   font-weight: bold;
   width: 98%;
   border: none;
   padding: var(--tinyPadding);
-  z-index: 9;
+  z-index: var(--middleZIndex);
 }
 
 .chart {
