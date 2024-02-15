@@ -115,7 +115,6 @@ describe('model.test.ts', () => {
       worksheets_2: {
         '0_0': {
           formula: '=Sheet1!A1',
-          value: '#NAME?',
         },
       },
       drawings: [],
