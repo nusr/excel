@@ -217,7 +217,6 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             <Button onClick={selectData}>Select Data</Button>
             <Button onClick={changeChartTitle}>Change Chart Title</Button>
             <Button onClick={changeChartType}>Change Chart Type</Button>
-            {/* TODO: select chart reference data */}
           </React.Fragment>
         ) : null}
         <Button onClick={saveAsPicture}>Save as Picture</Button>

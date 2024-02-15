@@ -85,7 +85,11 @@ export class Controller implements IController {
   private emitChange(): void {
     this.computeViewSize();
     const result = this.changeSet;
+    if (this.changeSet.has('cellValue')) {
+      this.model.computeAllCell();
+    }
     this.changeSet = new Set<ChangeEventType>();
+
     this.hooks.modelChange(result);
   }
   getActiveCell(): IRange {
@@ -97,6 +101,7 @@ export class Controller implements IController {
     };
   }
   private setSheetCell(range: IRange) {
+    this.changeSet.add('range');
     const id = range.sheetId || this.model.getCurrentSheetId();
     range.sheetId = id;
     this.model.setActiveCell(range);
@@ -115,9 +120,10 @@ export class Controller implements IController {
     this.model.transaction(() => {
       this.model.setCurrentSheetId(id);
       this.changeSet.add('currentSheetId');
+      this.changeSet.add('cellValue');
+
       const pos = this.getActiveCell();
       this.setSheetCell(pos);
-
       this.setScroll(this.getScroll());
     });
   }

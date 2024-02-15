@@ -233,7 +233,6 @@ export class Model implements IModel {
   }
   setCurrentSheetId(id: string): void {
     this.currentSheetId = id;
-    this.computeAllCell();
   }
   getCurrentSheetId(): string {
     return this.model.get('currentSheetId') || '';
@@ -267,7 +266,7 @@ export class Model implements IModel {
         this.model.set(key, new Y.Map<ModelCellType>(Object.entries(value)));
       }
     }
-    this.computeAllCell();
+
     this.undoManager.clear(true, true);
   };
   toJSON = (): WorkBookJSON => {
@@ -315,7 +314,6 @@ export class Model implements IModel {
         }
       }
     }
-    this.computeAllCell();
   }
 
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
@@ -364,7 +362,6 @@ export class Model implements IModel {
       sheetData.set(newKey, { ...value });
       sheetData.delete(key);
     }
-    this.computeAllCell();
   }
   addCol(colIndex: number, count: number): void {
     const sheetInfo = this.getSheetInfo();
@@ -391,12 +388,30 @@ export class Model implements IModel {
       sheetData.set(newKey, { ...value });
       sheetData.delete(key);
     }
-    this.computeAllCell();
   }
   deleteCol(colIndex: number, count: number): void {
     const sheetInfo = this.getSheetInfo();
     sheetInfo.colCount -= count;
     const sheetData = this.getSheetData();
+    this.drawings.forEach((item) => {
+      if (item.fromCol >= colIndex) {
+        item.fromCol -= count;
+        if (item.fromCol < 0) {
+          item.fromCol = 0;
+        }
+      }
+      if (item.type === 'chart' && item.chartRange!.col >= colIndex) {
+        item.chartRange!.col -= count;
+        if (item.chartRange!.col < 0) {
+          item.chartRange!.colCount += item.chartRange!.col;
+          item.chartRange!.col = 0;
+          if (item.chartRange!.colCount < 0) {
+            item.chartRange!.colCount = 1;
+          }
+        }
+      }
+    });
+
     if (!sheetData) {
       return;
     }
@@ -416,12 +431,31 @@ export class Model implements IModel {
       }
       sheetData.delete(key);
     }
-    this.computeAllCell();
   }
   deleteRow(rowIndex: number, count: number): void {
     const sheetInfo = this.getSheetInfo();
     sheetInfo.rowCount -= count;
     const sheetData = this.getSheetData();
+
+    this.drawings.forEach((item) => {
+      if (item.fromRow >= rowIndex) {
+        item.fromRow -= count;
+        if (item.fromRow < 0) {
+          item.fromRow = 0;
+        }
+      }
+      if (item.type === 'chart' && item.chartRange!.row >= rowIndex) {
+        item.chartRange!.row -= count;
+        if (item.chartRange!.row < 0) {
+          item.chartRange!.rowCount += item.chartRange!.row;
+          item.chartRange!.row = 0;
+          if (item.chartRange!.rowCount < 0) {
+            item.chartRange!.rowCount = 1;
+          }
+        }
+      }
+    });
+
     if (!sheetData) {
       return;
     }
@@ -441,7 +475,6 @@ export class Model implements IModel {
       }
       sheetData.delete(key);
     }
-    this.computeAllCell();
   }
 
   hideCol(colIndex: number, count: number): void {
@@ -578,8 +611,6 @@ export class Model implements IModel {
       }
     });
 
-    this.computeAllCell();
-
     return realRange;
   }
   deleteAll(sheetId?: string): void {
@@ -627,7 +658,6 @@ export class Model implements IModel {
       rowCount: 1,
     };
     this.definedNames.set(name, result);
-    this.computeAllCell();
   }
   checkDefineName(name: string): IRange | undefined {
     return this.definedNames.get(name);
@@ -665,7 +695,7 @@ export class Model implements IModel {
     }
     sheetData.set(key, data);
   }
-  private computeAllCell() {
+  computeAllCell() {
     for (const [key, sheetData] of this.model.entries()) {
       if (!key.startsWith(WORK_SHEETS_PREFIX)) {
         continue;

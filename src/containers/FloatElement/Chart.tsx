@@ -25,11 +25,6 @@ import { FloatElementItem } from '@/containers/store';
 import { ChartProps } from '@/types';
 import styles from './FloatElement.module.css';
 
-function getRandomColor() {
-  const index = Math.floor(Math.random() * DEBUG_COLOR_LIST.length);
-  return DEBUG_COLOR_LIST[index];
-}
-
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -144,7 +139,7 @@ export const Chart: React.FunctionComponent<FloatElementItem> = memo(
       labels,
       datasets: datasets.map((v, i) => ({
         ...v,
-        backgroundColor: DEBUG_COLOR_LIST[i],
+        backgroundColor: DEBUG_COLOR_LIST[i + 6],
       })),
     };
     const extra = {
@@ -175,7 +170,7 @@ export const Chart: React.FunctionComponent<FloatElementItem> = memo(
       const data = {
         labels,
         datasets: datasets.map((v, i) => {
-          const c = getRandomColor();
+          const c = DEBUG_COLOR_LIST[i];
           return {
             ...v,
             fill: true,
@@ -184,7 +179,7 @@ export const Chart: React.FunctionComponent<FloatElementItem> = memo(
             pointBorderColor: '#fff',
             pointHoverBackgroundColor: '#fff',
             pointHoverBorderColor: c,
-            backgroundColor: DEBUG_COLOR_LIST[i],
+            backgroundColor: DEBUG_COLOR_LIST[i + 6],
           };
         }),
       };
@@ -202,7 +197,7 @@ export const Chart: React.FunctionComponent<FloatElementItem> = memo(
           return {
             label: v.label,
             data: v.data.map((t, i) => ({ y: t, x: parseNumber(labels[i]) })),
-            backgroundColor: DEBUG_COLOR_LIST[i],
+            backgroundColor: DEBUG_COLOR_LIST[i + 6],
           };
         }),
       };
@@ -213,7 +208,7 @@ export const Chart: React.FunctionComponent<FloatElementItem> = memo(
         datasets: datasets.map((v) => {
           const list = Array.from({ length: v.data.length })
             .fill('')
-            .map(() => getRandomColor());
+            .map((_, i) => DEBUG_COLOR_LIST[i + 6]);
           return {
             ...v,
             backgroundColor: list,

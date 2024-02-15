@@ -1,7 +1,6 @@
 import { IBaseModel } from './model';
-import { CanvasOverlayPosition } from './components';
+import { CanvasOverlayPosition, ScrollValue } from './components';
 import { IRange } from './range';
-import { IScrollValue } from './scroll';
 import { ChangeEventType, IWindowSize } from './event';
 
 export enum EBorderLineType {
@@ -32,7 +31,7 @@ export interface MainDom {
   canvas?: HTMLCanvasElement;
 }
 
-export interface IController extends IScrollValue, IBaseModel {
+export interface IController extends IBaseModel {
   getViewSize: () => IWindowSize;
   getHeaderSize: () => IWindowSize;
   setHooks: (hooks: IHooks) => void;
@@ -47,4 +46,6 @@ export interface IController extends IScrollValue, IBaseModel {
   getDomRect: () => CanvasOverlayPosition;
   setMainDom: (dom: MainDom) => void;
   getMainDom: () => MainDom;
+  setScroll: (scroll: ScrollValue) => void;
+  getScroll: () => ScrollValue;
 }

@@ -112,6 +112,7 @@ export type WorkBookJSON = {
 
 export interface IModel extends IBaseModel {
   pasteRange: (range: IRange, isCut: boolean) => IRange;
+  computeAllCell(): void;
 }
 
 export interface IBaseModel {

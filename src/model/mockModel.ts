@@ -182,13 +182,13 @@ export const MOCK_MODEL: WorkBookJSON = {
     },
     '1_5': {
       widthOrHeight: 100,
-      isHide: true,
+      isHide: false,
     },
   },
   customWidth: {
     '1_1': {
       widthOrHeight: 100,
-      isHide: true,
+      isHide: false,
     },
     '1_6': {
       widthOrHeight: 200,
@@ -229,8 +229,8 @@ export const MOCK_MODEL: WorkBookJSON = {
       width: 200,
       height: 266,
       sheetId: '1',
-      fromCol: 2,
-      fromRow: 2,
+      fromCol: 1,
+      fromRow: 1,
       top: -1,
       left: -1,
     },
@@ -239,12 +239,12 @@ export const MOCK_MODEL: WorkBookJSON = {
       type: 'chart',
       uuid: generateUUID(),
       width: 400,
-      height: 266,
+      height: 250,
       top: -1,
       left: -1,
       sheetId: '1',
-      fromCol: 5,
-      fromRow: 5,
+      fromCol: 4,
+      fromRow: 4,
       chartType: 'bar',
       chartRange: {
         row: 6,

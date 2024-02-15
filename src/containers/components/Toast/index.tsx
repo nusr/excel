@@ -33,8 +33,12 @@ export function toast(props: Props) {
   document.body.appendChild(container);
   const root = createRoot(container);
   root.render(<Toast {...rest} />);
-  setTimeout(() => {
+
+  function close() {
     root.unmount();
     document.body.removeChild(container);
-  }, duration * 1000);
+  }
+
+  setTimeout(close, duration * 1000);
+  return close;
 }
