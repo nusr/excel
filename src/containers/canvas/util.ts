@@ -6,6 +6,7 @@ import {
   paste,
   Range,
   parseNumber,
+  HIDE_CELL,
 } from '@/util';
 import {
   coreStore,
@@ -39,7 +40,10 @@ function getChartData(
     r < endRow;
     r++, index++
   ) {
-    result.labels.push(String(index));
+    const rowHeight = controller.getRowHeight(r);
+    if (rowHeight === HIDE_CELL) {
+      continue;
+    }
     const list = [];
     for (let c = col, endCol = col + colCount; c < endCol; c++) {
       const t = controller.getCell({
@@ -49,11 +53,82 @@ function getChartData(
         colCount: 1,
         sheetId,
       });
+      if (!t || typeof t.value === 'undefined') {
+        continue;
+      }
       list.push(parseNumber(t.value));
     }
-    result.datasets.push({ label: `Series${index}`, data: list });
+    if (list.length > 0) {
+      result.datasets.push({ label: `Series${index}`, data: list });
+    }
+  }
+  if (result.datasets[0].data.length > 0) {
+    result.labels = Array.from({ length: result.datasets[0].data.length })
+      .fill('')
+      .map((_value, i) => String(i + 1));
   }
   return result;
+}
+
+function updateActiveCell(controller: IController) {
+  const { top } = controller.getDomRect();
+  const activeCell = controller.getActiveCell();
+  const cell = controller.getCell(activeCell);
+  if (!cell) {
+    return;
+  }
+  const cellPosition = controller.computeCellPosition(
+    activeCell.row,
+    activeCell.col,
+  );
+  cellPosition.top = top + cellPosition.top;
+  if (!cell.style) {
+    cell.style = {};
+  }
+  if (!cell.style.fontFamily) {
+    let defaultFontFamily = '';
+    const list = fontFamilyStore.getSnapshot();
+    for (const item of list) {
+      if (!item.disabled) {
+        defaultFontFamily = String(item.value);
+        break;
+      }
+    }
+    cell.style.fontFamily = defaultFontFamily;
+  }
+  const {
+    isBold = false,
+    isItalic = false,
+    isStrike = false,
+    fontSize = DEFAULT_FONT_SIZE,
+    fontColor = DEFAULT_FONT_COLOR,
+    fillColor = '',
+    isWrapText = false,
+    underline = EUnderLine.NONE,
+    fontFamily = '',
+    numberFormat = 0,
+  } = cell.style;
+  const defineName = controller.getDefineName(
+    new Range(cell.row, cell.col, 1, 1, controller.getCurrentSheetId()),
+  );
+  activeCellStore.setState({
+    ...cellPosition,
+    row: cell.row,
+    col: cell.col,
+    value: cell.value,
+    formula: cell.formula,
+    isBold,
+    isItalic,
+    isStrike,
+    fontColor,
+    fontSize,
+    fontFamily,
+    fillColor,
+    isWrapText,
+    underline,
+    numberFormat,
+    defineName,
+  });
 }
 
 const handleStateChange = (
@@ -65,61 +140,7 @@ const handleStateChange = (
     changeSet.has('cellStyle') ||
     changeSet.has('cellValue')
   ) {
-    const { top } = controller.getDomRect();
-    const activeCell = controller.getActiveCell();
-    const cell = controller.getCell(activeCell);
-    const cellPosition = controller.computeCellPosition(
-      activeCell.row,
-      activeCell.col,
-    );
-    cellPosition.top = top + cellPosition.top;
-    if (!cell.style) {
-      cell.style = {};
-    }
-    if (!cell.style.fontFamily) {
-      let defaultFontFamily = '';
-      const list = fontFamilyStore.getSnapshot();
-      for (const item of list) {
-        if (!item.disabled) {
-          defaultFontFamily = String(item.value);
-          break;
-        }
-      }
-      cell.style.fontFamily = defaultFontFamily;
-    }
-    const {
-      isBold = false,
-      isItalic = false,
-      isStrike = false,
-      fontSize = DEFAULT_FONT_SIZE,
-      fontColor = DEFAULT_FONT_COLOR,
-      fillColor = '',
-      isWrapText = false,
-      underline = EUnderLine.NONE,
-      fontFamily = '',
-      numberFormat = 0,
-    } = cell.style;
-    const defineName = controller.getDefineName(
-      new Range(cell.row, cell.col, 1, 1, controller.getCurrentSheetId()),
-    );
-    activeCellStore.setState({
-      ...cellPosition,
-      row: cell.row,
-      col: cell.col,
-      value: cell.value,
-      formula: cell.formula,
-      isBold,
-      isItalic,
-      isStrike,
-      fontColor,
-      fontSize,
-      fontFamily,
-      fillColor,
-      isWrapText,
-      underline,
-      numberFormat,
-      defineName,
-    });
+    updateActiveCell(controller);
   }
   if (changeSet.has('sheetList')) {
     const sheetList = controller
@@ -165,8 +186,8 @@ const handleStateChange = (
           labels: [],
           datasets: [],
         };
-        if (v.type === 'chart' && v.chartRange) {
-          const c = getChartData(v.chartRange, controller);
+        if (v.type === 'chart') {
+          const c = getChartData(v.chartRange!, controller);
           result.labels = c.labels;
           result.datasets = c.datasets;
         }

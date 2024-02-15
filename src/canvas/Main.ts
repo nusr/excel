@@ -91,6 +91,9 @@ export class MainCanvas {
   private renderActiveCell() {
     const { controller } = this;
     const cellData = controller.getCell(controller.getActiveCell());
+    if (!cellData) {
+      return;
+    }
     const activeCell = controller.computeCellPosition(
       cellData.row,
       cellData.col,

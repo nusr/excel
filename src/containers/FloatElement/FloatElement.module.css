@@ -7,6 +7,9 @@
   border: 1px solid var(--borderColor);
   background-color: var(--white);
 }
+.float-element:hover {
+  border-style: dashed;
+}
 .float-element > img {
   display: block;
 }

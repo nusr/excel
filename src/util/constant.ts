@@ -154,5 +154,6 @@ export const NUMBER_FORMAT_LIST: NumberFormatItem[] = [
 
 export const CELL_HEIGHT = 19;
 export const CELL_WIDTH = 68;
+export const HIDE_CELL = 0;
 export const XLSX_MAX_COL_COUNT = 16384; // XFD
 export const XLSX_MAX_ROW_COUNT = 1048576;

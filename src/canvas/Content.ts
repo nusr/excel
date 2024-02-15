@@ -113,6 +113,9 @@ export class Content implements ContentView {
         const cellInfo = controller.getCell(
           new Range(rowIndex, colIndex, 1, 1, currentSheetId),
         );
+        if (!cellInfo) {
+          continue;
+        }
         if (isEmpty(cellInfo.value) && isEmpty(cellInfo.style)) {
           x += controller.getColWidth(colIndex);
           continue;

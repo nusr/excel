@@ -1,5 +1,5 @@
 import React, { Fragment, memo, useMemo } from 'react';
-import { Button, info } from '../components';
+import { Button, info, toast } from '../components';
 import { IController } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
@@ -94,6 +94,10 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
         />
       ),
       onOk: () => {
+        if (value < 0) {
+          toast({ type: 'error', message: 'invalid data' });
+          return;
+        }
         if (isRow) {
           controller.setRowHeight(row, value, true);
         } else {

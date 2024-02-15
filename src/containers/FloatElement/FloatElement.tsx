@@ -13,15 +13,14 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
 ) => {
   const { controller, uuid, fromRow, fromCol, top, left } = props;
   const isMouseDown = useRef(false);
-  const latestPosition = useRef({ top: 0, left: 0 });
-  const [position, setPosition] = useState({
-    top,
-    left,
-  });
-  latestPosition.current = position;
+  const latestPosition = useRef({ top: -1, left: -1 });
   const preMovePosition = useRef({
     x: 0,
     y: 0,
+  });
+  const [position, setPosition] = useState({
+    top,
+    left,
   });
   const [contextMenuPosition, setContextMenuPosition] = useState({
     top: DEFAULT_POSITION,
@@ -40,6 +39,10 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
   }, []);
   const handleMouseUp = () => {
     isMouseDown.current = false;
+    preMovePosition.current = {
+      x: 0,
+      y: 0,
+    };
     const newRange = getHitInfo(
       controller,
       latestPosition.current.left,
@@ -55,6 +58,10 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
       controller.updateFloatElement(uuid, 'fromCol', newRange.col);
       controller.updateFloatElement(uuid, 'fromRow', newRange.row);
     });
+    latestPosition.current = {
+      top: -1,
+      left: -1,
+    };
   };
 
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -95,6 +102,8 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
       if (newLeft < minLeft) {
         newLeft = minLeft;
       }
+      latestPosition.current.top = newTop;
+      latestPosition.current.left = newLeft;
       return { top: newTop, left: newLeft };
     });
   };

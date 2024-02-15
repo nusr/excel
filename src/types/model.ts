@@ -117,11 +117,21 @@ export interface IModel extends IBaseModel {
 
 export interface IBaseModel {
   transaction: (func: () => void) => void;
-  getCell: (range: IRange) => ModelCellValue;
-  getColWidth: (col: number) => number;
-  setColWidth: (col: number, width: number, isChanged: boolean) => void;
-  getRowHeight: (row: number) => number;
-  setRowHeight: (row: number, height: number, isChanged: boolean) => void;
+  getCell: (range: IRange) => ModelCellValue | null;
+  getColWidth: (col: number, sheetId?: string) => number;
+  setColWidth: (
+    col: number,
+    width: number,
+    isChanged: boolean,
+    sheetId?: string,
+  ) => void;
+  getRowHeight: (row: number, sheetId?: string) => number;
+  setRowHeight: (
+    row: number,
+    height: number,
+    isChanged: boolean,
+    sheetId?: string,
+  ) => void;
   setCellValues: (
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,

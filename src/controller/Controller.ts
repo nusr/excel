@@ -514,6 +514,9 @@ export class Controller implements IController {
       const t: string[] = [];
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
         const a = this.model.getCell(new Range(r, c, 1, 1, currentSheetId));
+        if (!a) {
+          continue;
+        }
         const str = String(a.value || '');
         temp.push(str);
         if (a.style) {

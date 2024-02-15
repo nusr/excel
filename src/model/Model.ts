@@ -29,6 +29,7 @@ import {
   getCustomWidthOrHeightKey,
   modelLog,
   FORMULA_PREFIX,
+  HIDE_CELL,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 import * as Y from 'yjs';
@@ -325,10 +326,17 @@ export class Model implements IModel {
       }
     }
   }
-  getCell = (range: IRange): ModelCellValue => {
+  getCell = (range: IRange): ModelCellValue | null => {
     const { row, col, sheetId } = range;
+    const id = sheetId || this.currentSheetId;
+    if (
+      this.getRowHeight(row, id) === HIDE_CELL ||
+      this.getColWidth(col, id) === HIDE_CELL
+    ) {
+      return null;
+    }
     const key = coordinateToString(row, col);
-    const sheetData = this.getSheetData(sheetId);
+    const sheetData = this.getSheetData(id);
     const cellData = sheetData?.get(key) || {};
     return {
       ...cellData,
@@ -493,16 +501,23 @@ export class Model implements IModel {
       this.customWidth.set(key, data);
     }
   }
-  getColWidth(col: number): number {
-    const key = getCustomWidthOrHeightKey(this.currentSheetId, col);
+  getColWidth(col: number, sheetId?: string): number {
+    const id = sheetId || this.currentSheetId;
+    const key = getCustomWidthOrHeightKey(id, col);
     const temp = this.customWidth.get(key);
     if (!temp) {
       return CELL_WIDTH;
     }
-    return temp.isHide ? 0 : temp.widthOrHeight || CELL_WIDTH;
+    return temp.isHide ? HIDE_CELL : temp.widthOrHeight || CELL_WIDTH;
   }
-  setColWidth(col: number, width: number): void {
-    const key = getCustomWidthOrHeightKey(this.currentSheetId, col);
+  setColWidth(
+    col: number,
+    width: number,
+    _isChanged: boolean,
+    sheetId?: string,
+  ): void {
+    const id = sheetId || this.currentSheetId;
+    const key = getCustomWidthOrHeightKey(id, col);
 
     const data = this.customWidth.get(key);
     if (data && data.widthOrHeight === width) {
@@ -510,12 +525,12 @@ export class Model implements IModel {
     }
 
     const newData = data || {
-      widthOrHeight: 0,
+      widthOrHeight: HIDE_CELL,
       isHide: false,
     };
 
     newData.widthOrHeight = width;
-    if (width === 0) {
+    if (width === HIDE_CELL) {
       newData.isHide = true;
     }
     this.customWidth.set(key, newData);
@@ -539,17 +554,24 @@ export class Model implements IModel {
       this.customHeight.set(key, data);
     }
   }
-  getRowHeight(row: number): number {
-    const key = getCustomWidthOrHeightKey(this.currentSheetId, row);
+  getRowHeight(row: number, sheetId?: string): number {
+    const id = sheetId || this.currentSheetId;
+    const key = getCustomWidthOrHeightKey(id, row);
     const temp = this.customHeight.get(key);
     if (!temp) {
       return CELL_HEIGHT;
     }
 
-    return temp.isHide ? 0 : temp.widthOrHeight || CELL_HEIGHT;
+    return temp.isHide ? HIDE_CELL : temp.widthOrHeight || CELL_HEIGHT;
   }
-  setRowHeight(row: number, height: number): void {
-    const key = getCustomWidthOrHeightKey(this.currentSheetId, row);
+  setRowHeight(
+    row: number,
+    height: number,
+    _isChanged: boolean,
+    sheetId?: string,
+  ): void {
+    const id = sheetId || this.currentSheetId;
+    const key = getCustomWidthOrHeightKey(id, row);
 
     const oldData = this.customHeight.get(key);
     if (oldData && oldData.widthOrHeight === height) {
@@ -557,11 +579,11 @@ export class Model implements IModel {
     }
 
     const data = oldData || {
-      widthOrHeight: 0,
+      widthOrHeight: HIDE_CELL,
       isHide: false,
     };
     data.widthOrHeight = height;
-    if (height === 0) {
+    if (height === HIDE_CELL) {
       data.isHide = true;
     }
     this.customHeight.set(key, data);
@@ -748,7 +770,9 @@ export class Model implements IModel {
           }
           this.iterateRange(range, (r, c) => {
             const temp = this.getCell(new Range(r, c, 1, 1, sheetId));
-            result.push(temp.value);
+            if (temp) {
+              result.push(temp.value);
+            }
           });
           return result;
         },

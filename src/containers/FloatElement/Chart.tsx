@@ -152,9 +152,18 @@ export const Chart: React.FunctionComponent<FloatElementItem> = memo(
           title: {
             display: true,
             text: title,
+            padding: {
+              top: 16,
+              bottom: 16,
+            },
+            font: {
+              size: 14,
+              weight: 'normal' as const,
+            },
           },
           legend: {
             display: true,
+            position: 'bottom' as const,
           },
         },
       },
