@@ -6,7 +6,7 @@ describe('getHitInfo.test.ts', () => {
   test('basic', () => {
     const controller = new Controller(new Model());
     controller.addSheet();
-    const range = getHitInfo(controller, 102, 38);
+    const range = getHitInfo(controller, 102, 48);
     expect(range!.row).toEqual(1);
     expect(range!.col).toEqual(1);
   });

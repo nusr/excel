@@ -13,5 +13,5 @@ export * from './copy';
 export * from './lodash';
 export * from './theme';
 export * from './font';
-export { getHitInfo } from './event';
-export { saveAs } from './saveAs';
+export * from './event';
+export * from './saveAs';

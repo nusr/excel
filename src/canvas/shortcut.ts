@@ -176,6 +176,7 @@ function recalculateScroll(controller: IController) {
     activeCell.row,
     activeCell.col,
   );
+  const cellSize = controller.getCellSize(activeCell.row, activeCell.col);
   const domRect = controller.getDomRect();
   const oldScroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
@@ -183,7 +184,7 @@ function recalculateScroll(controller: IController) {
   const buff = 5;
   const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } =
     computeScrollPosition(controller, oldScroll.left, oldScroll.top);
-  if (position.left + position.width + buff > domRect.width) {
+  if (position.left + cellSize.width + buff > domRect.width) {
     if (oldScroll.col <= sheetInfo.colCount - 2) {
       const col = oldScroll.col + 1;
       const left = oldScroll.left + controller.getColWidth(oldScroll.col);
@@ -210,7 +211,7 @@ function recalculateScroll(controller: IController) {
       });
     }
   }
-  if (position.top + position.height + buff > domRect.height) {
+  if (position.top + cellSize.height + buff > domRect.height) {
     if (oldScroll.row <= sheetInfo.rowCount - 2) {
       const row = oldScroll.row + 1;
       const top = oldScroll.top + controller.getRowHeight(oldScroll.row);

@@ -151,8 +151,9 @@ export const NUMBER_FORMAT_LIST: NumberFormatItem[] = [
   { formatCode: '##0.0E+0', label: '', id: 48 },
   { formatCode: '@', label: '', id: 49 },
 ];
-
-export const CELL_HEIGHT = 19;
+export const ROW_TITLE_HEIGHT = 24;
+export const COL_TITLE_WIDTH = 34;
+export const CELL_HEIGHT = 24;
 export const CELL_WIDTH = 68;
 export const HIDE_CELL = 0;
 export const XLSX_MAX_COL_COUNT = 16384; // XFD

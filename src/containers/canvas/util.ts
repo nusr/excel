@@ -81,6 +81,7 @@ function updateActiveCell(controller: IController) {
     activeCell.row,
     activeCell.col,
   );
+  const cellSize = controller.getCellSize(activeCell.row, activeCell.col);
   cellPosition.top = top + cellPosition.top;
   if (!cell.style) {
     cell.style = {};
@@ -112,7 +113,10 @@ function updateActiveCell(controller: IController) {
     new Range(cell.row, cell.col, 1, 1, controller.getCurrentSheetId()),
   );
   activeCellStore.setState({
-    ...cellPosition,
+    top: cellPosition.top,
+    left: cellPosition.left,
+    width: cellSize.width,
+    height: cellSize.height,
     row: cell.row,
     col: cell.col,
     value: cell.value,

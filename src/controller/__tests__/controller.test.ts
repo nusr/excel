@@ -122,10 +122,7 @@ describe('controller.test.ts', () => {
       controller.addSheet();
       const headerSize = controller.getHeaderSize();
       const size = controller.computeCellPosition(0, 0);
-      expect({
-        top: size.top,
-        left: size.left,
-      }).toEqual({
+      expect(size).toEqual({
         left: headerSize.width,
         top: headerSize.height,
       });
@@ -136,7 +133,7 @@ describe('controller.test.ts', () => {
     test('get', () => {
       const controller = new Controller(new Model());
       controller.addSheet();
-      expect(controller.getRowHeight(100)).toEqual(19);
+      expect(controller.getRowHeight(100)).toEqual(24);
     });
     test('set', () => {
       const controller = new Controller(new Model());

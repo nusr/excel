@@ -15,6 +15,7 @@ import {
   ClipboardType,
   MainDom,
   FloatElement,
+  IPosition,
 } from '@/types';
 import {
   controllerLog,
@@ -25,10 +26,10 @@ import {
   generateHTML,
   convertCanvasStyleToString,
   parseStyle,
+  isSameRange,
+  ROW_TITLE_HEIGHT,
+  COL_TITLE_WIDTH,
 } from '@/util';
-
-const ROW_TITLE_HEIGHT = 19;
-const COL_TITLE_WIDTH = 34;
 
 const defaultScrollValue: ScrollValue = {
   top: 0,
@@ -101,15 +102,19 @@ export class Controller implements IController {
     };
   }
   private setSheetCell(range: IRange) {
-    this.changeSet.add('range');
     const id = range.sheetId || this.model.getCurrentSheetId();
     range.sheetId = id;
+
+    const old = this.getActiveCell();
+    if (isSameRange(old, range)) {
+      return;
+    }
     this.model.setActiveCell(range);
+    this.changeSet.add('range');
   }
   setActiveCell(range: IRange): void {
     this.transaction(() => {
       this.setSheetCell(range);
-      this.changeSet.add('range');
       this.emitChange();
     });
   }
@@ -304,7 +309,7 @@ export class Controller implements IController {
       ...this.headerSize,
     };
   }
-  computeCellPosition(row: number, col: number): CanvasOverlayPosition {
+  computeCellPosition(row: number, col: number): IPosition {
     const size = this.getHeaderSize();
     const scroll = this.getScroll();
 
@@ -336,9 +341,10 @@ export class Controller implements IController {
         r--;
       }
     }
-
-    const cellSize = this.getCellSize(row, col);
-    return { ...cellSize, top: resultY, left: resultX };
+    return {
+      top: resultY,
+      left: resultX,
+    };
   }
 
   addRow(rowIndex: number, count: number): void {

@@ -1,10 +1,10 @@
-import type { IHitInfo, IController } from '@/types';
+import type { IController, Coordinate } from '@/types';
 
 export function getHitInfo(
   controller: IController,
   x: number,
   y: number,
-): IHitInfo | null {
+): Coordinate | null {
   if (x < 0 || y < 0) {
     return null;
   }
@@ -25,6 +25,5 @@ export function getHitInfo(
   if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
     return null;
   }
-  const cellSize = controller.getCellSize(row, col);
-  return { ...cellSize, row, col, x, y };
+  return { row, col };
 }

@@ -16,15 +16,11 @@ export interface IWindowSize {
   height: number;
 }
 
-export interface EventType {
-  changeSet: Set<ChangeEventType>;
+export interface IPosition {
+  top: number;
+  left: number;
 }
 
-export interface IHitInfo {
-  width: number;
-  height: number;
-  x: number;
-  y: number;
-  row: number;
-  col: number;
+export interface EventType {
+  changeSet: Set<ChangeEventType>;
 }

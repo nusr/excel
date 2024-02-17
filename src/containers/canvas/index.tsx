@@ -60,15 +60,15 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     if (event.buttons !== 1) {
       return;
     }
+    const position = getHitInfo(controller, x, y);
+    if (!position) {
+      return;
+    }
+    const activeCell = controller.getActiveCell();
+    if (activeCell.row === position.row && activeCell.col === position.col) {
+      return;
+    }
     if (x > headerSize.width && y > headerSize.height) {
-      const position = getHitInfo(controller, x, y);
-      if (!position) {
-        return;
-      }
-      const activeCell = controller.getActiveCell();
-      if (activeCell.row === position.row && activeCell.col === position.col) {
-        return;
-      }
       const colCount = Math.abs(position.col - activeCell.col) + 1;
       const rowCount = Math.abs(position.row - activeCell.row) + 1;
       controller.setActiveCell({
@@ -78,6 +78,31 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
         colCount,
         sheetId: '',
       });
+      return;
+    }
+    // select row
+    if (headerSize.width > x && headerSize.height <= y) {
+      const rowCount = Math.abs(position.row - activeCell.row) + 1;
+      controller.setActiveCell({
+        row: Math.min(position.row, activeCell.row),
+        col: Math.min(position.col, activeCell.col),
+        rowCount,
+        colCount: 0,
+        sheetId: '',
+      });
+      return;
+    }
+    // select col
+    if (headerSize.width <= x && headerSize.height > y) {
+      const colCount = Math.abs(position.col - activeCell.col) + 1;
+      controller.setActiveCell({
+        row: Math.min(position.row, activeCell.row),
+        col: Math.min(position.col, activeCell.col),
+        rowCount: 0,
+        colCount,
+        sheetId: '',
+      });
+      return;
     }
   };
   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -90,6 +115,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     if (!position) {
       return;
     }
+    // select all
     if (headerSize.width > x && headerSize.height > y) {
       controller.setActiveCell({
         row: 0,
@@ -100,24 +126,24 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
       });
       return;
     }
+    // select row
     if (headerSize.width > x && headerSize.height <= y) {
-      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
       controller.setActiveCell({
         row: position.row,
         col: position.col,
-        rowCount: 0,
-        colCount: sheetInfo.colCount,
+        rowCount: 1,
+        colCount: 0,
         sheetId: '',
       });
       return;
     }
+    // select col
     if (headerSize.width <= x && headerSize.height > y) {
-      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
       controller.setActiveCell({
         row: position.row,
         col: position.col,
-        rowCount: sheetInfo.rowCount,
-        colCount: 0,
+        rowCount: 0,
+        colCount: 1,
         sheetId: '',
       });
       return;

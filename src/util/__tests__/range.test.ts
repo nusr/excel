@@ -4,12 +4,12 @@ describe('range.test.ts', () => {
   const mockSheetName = 'test';
   describe('isRow', () => {
     it('should get true ', () => {
-      expect(isRow(new Range(0, 0, 0, 30, mockSheetName))).toBeTruthy();
+      expect(isRow(new Range(0, 0, 30, 0, mockSheetName))).toBeTruthy();
     });
   });
   describe('isCol', () => {
     it('should get true ', () => {
-      expect(isCol(new Range(0, 0, 30, 0, mockSheetName))).toBeTruthy();
+      expect(isCol(new Range(0, 0, 0, 30, mockSheetName))).toBeTruthy();
     });
   });
   describe('isSheet', () => {
