@@ -172,4 +172,7 @@ export interface IBaseModel {
     value: FloatElement[T],
   ): void;
   deleteFloatElement: (uuid: string) => void;
+  getMergeCells: (sheetId?: string) => IRange[];
+  addMergeCell: (range: IRange) => void;
+  deleteMergeCell: (range: IRange) => void;
 }

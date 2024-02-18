@@ -121,7 +121,13 @@ describe('controller.test.ts', () => {
       const controller = new Controller(new Model());
       controller.addSheet();
       const headerSize = controller.getHeaderSize();
-      const size = controller.computeCellPosition(0, 0);
+      const size = controller.computeCellPosition({
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: '',
+      });
       expect(size).toEqual({
         left: headerSize.width,
         top: headerSize.height,

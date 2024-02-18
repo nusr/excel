@@ -857,4 +857,20 @@ export class Model implements IModel {
     }
     this.drawings.delete(i, 1);
   }
+  getMergeCells(sheetId?: string): IRange[] {
+    const id = sheetId || this.currentSheetId;
+    return this.mergeCells.toArray().filter((v) => v.sheetId === id);
+  }
+  addMergeCell(range: IRange): void {
+    range.sheetId = range.sheetId || this.currentSheetId;
+    this.mergeCells.push([range]);
+  }
+  deleteMergeCell(range: IRange): void {
+    range.sheetId = range.sheetId || this.currentSheetId;
+    const i = this.mergeCells.toArray().findIndex((v) => isSameRange(range, v));
+    if (i < 0) {
+      return;
+    }
+    this.mergeCells.delete(i, 1);
+  }
 }

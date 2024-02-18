@@ -37,12 +37,19 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
       document.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
-  const handleMouseUp = () => {
+  const handleMouseUp = (event: MouseEvent) => {
     isMouseDown.current = false;
     preMovePosition.current = {
       x: 0,
       y: 0,
     };
+    if (event.buttons !== 1) {
+      latestPosition.current = {
+        top: -1,
+        left: -1,
+      };
+      return;
+    }
     const newRange = getHitInfo(
       controller,
       latestPosition.current.left,
@@ -65,7 +72,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
   };
 
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (event.button !== 0) {
+    if (event.buttons !== 1) {
       return;
     }
     event.preventDefault();
@@ -78,6 +85,9 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = (
   };
 
   const handleMouseMove = (event: MouseEvent) => {
+    if (event.buttons !== 1) {
+      return;
+    }
     if (!isMouseDown.current) {
       return;
     }

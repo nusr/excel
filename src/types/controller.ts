@@ -31,13 +31,19 @@ export interface MainDom {
   canvas?: HTMLCanvasElement;
 }
 
+export type ActiveRange = {
+  range: IRange;
+  isMerged: boolean;
+};
+
 export interface IController extends IBaseModel {
   getViewSize: () => IWindowSize;
   getHeaderSize: () => IWindowSize;
   setHooks: (hooks: IHooks) => void;
   getActiveCell: () => IRange;
-  getCellSize: (row: number, col: number) => IWindowSize;
-  computeCellPosition: (row: number, col: number) => IPosition;
+  getActiveRange: () => ActiveRange;
+  getCellSize: (range: IRange) => IWindowSize;
+  computeCellPosition: (range: IRange) => IPosition;
   getChangeSet: () => Set<ChangeEventType>;
   paste: (event?: ClipboardEvent) => void;
   copy: (event?: ClipboardEvent) => void;
@@ -47,5 +53,5 @@ export interface IController extends IBaseModel {
   setMainDom: (dom: MainDom) => void;
   getMainDom: () => MainDom;
   setScroll: (scroll: ScrollValue) => void;
-  getScroll: () => ScrollValue;
+  getScroll: (sheetId?: string) => ScrollValue;
 }

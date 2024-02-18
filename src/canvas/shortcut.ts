@@ -47,10 +47,11 @@ function nextCol(controller: IController, start: number, prev = false): number {
 
 export function handleTabClick(controller: IController) {
   checkActiveElement(controller);
-  const activeCell = controller.getActiveCell();
+  const { range, isMerged } = controller.getActiveRange();
+  const startCol = isMerged ? range.col + range.colCount : range.col + 1;
   controller.setActiveCell({
-    row: activeCell.row,
-    col: nextCol(controller, activeCell.col + 1),
+    row: range.row,
+    col: nextCol(controller, startCol),
     rowCount: 1,
     colCount: 1,
     sheetId: '',
@@ -60,10 +61,11 @@ export function handleTabClick(controller: IController) {
 
 export function handleEnterClick(controller: IController) {
   checkActiveElement(controller);
-  const activeCell = controller.getActiveCell();
+  const { range, isMerged } = controller.getActiveRange();
+  const startRow = isMerged ? range.row + range.rowCount : range.row + 1;
   controller.setActiveCell({
-    row: nextRow(controller, activeCell.row + 1),
-    col: activeCell.col,
+    row: nextRow(controller, startRow),
+    col: range.col,
     rowCount: 1,
     colCount: 1,
     sheetId: '',
@@ -172,11 +174,15 @@ export function scrollBar(
 
 function recalculateScroll(controller: IController) {
   const activeCell = controller.getActiveCell();
-  const position = controller.computeCellPosition(
-    activeCell.row,
-    activeCell.col,
-  );
-  const cellSize = controller.getCellSize(activeCell.row, activeCell.col);
+  const temp = {
+    row: activeCell.row,
+    col: activeCell.col,
+    colCount: 1,
+    rowCount: 1,
+    sheetId: '',
+  };
+  const position = controller.computeCellPosition(temp);
+  const cellSize = controller.getCellSize(temp);
   const domRect = controller.getDomRect();
   const oldScroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
@@ -253,7 +259,7 @@ export function setActiveCellValue(controller: IController) {
   controller.setCellValues(
     [[inputDom.value]],
     [],
-    [controller.getActiveCell()],
+    [controller.getActiveRange().range],
   );
   inputDom.value = '';
   inputDom.blur();

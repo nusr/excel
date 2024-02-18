@@ -166,14 +166,15 @@ export const MOCK_MODEL: WorkBookJSON = {
       formula: '=Sheet1!A1',
     },
   },
+  // TODO:
   mergeCells: [
-    {
-      row: 7,
-      col: 0,
-      rowCount: 2,
-      colCount: 2,
-      sheetId: '1',
-    },
+    // {
+    //   row: 0,
+    //   col: 0,
+    //   rowCount: 2,
+    //   colCount: 2,
+    //   sheetId: '1',
+    // },
   ],
   customHeight: {
     '1_1': {

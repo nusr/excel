@@ -1,5 +1,5 @@
-import { isEmpty, npx, dpr, Range, canvasLog } from '@/util';
-import { renderCell, resizeCanvas } from './util';
+import { npx, dpr, canvasLog } from '@/util';
+import { resizeCanvas, renderCellData } from './util';
 import { ContentView, IController, EventType } from '@/types';
 
 export class Content implements ContentView {
@@ -51,7 +51,6 @@ export class Content implements ContentView {
     const { controller, ctx } = this;
     const { width, height } = controller.getDomRect();
     const headerSize = controller.getHeaderSize();
-    const currentSheetId = controller.getCurrentSheetId();
     const { row, col } = controller.getScroll();
 
     let x = headerSize.width;
@@ -59,60 +58,22 @@ export class Content implements ContentView {
     let y = headerSize.height;
     let r = row;
 
-    // eslint-disable-next-line no-constant-condition
-    while (1) {
-      const t = controller.getColWidth(c);
-      if (x + t < width) {
-        x += t;
-        c++;
-      } else {
-        break;
-      }
+    while (x + controller.getColWidth(c) < width) {
+      x += controller.getColWidth(c);
+      c++;
     }
 
-    // eslint-disable-next-line no-constant-condition
-    while (1) {
-      const t = controller.getRowHeight(r);
-      if (y + t < height) {
-        y += t;
-        r++;
-      } else {
-        break;
-      }
+    while (y + controller.getRowHeight(r) < height) {
+      y += controller.getRowHeight(r);
+      r++;
     }
     const endRow = r;
     const endCol = c;
     ctx.save();
-    y = headerSize.height;
     for (let rowIndex = row; rowIndex < endRow; rowIndex++) {
-      x = headerSize.width;
       for (let colIndex = col; colIndex < endCol; colIndex++) {
-        const cellInfo = controller.getCell(
-          new Range(rowIndex, colIndex, 1, 1, currentSheetId),
-        );
-        if (!cellInfo) {
-          continue;
-        }
-        if (isEmpty(cellInfo.value) && isEmpty(cellInfo.style)) {
-          x += controller.getColWidth(colIndex);
-          continue;
-        }
-        const cellSize = controller.getCellSize(rowIndex, colIndex);
-        if (cellSize.width <= 0 || cellSize.height <= 0) {
-          continue;
-        }
-        const { wrapHeight = 0 } = renderCell(ctx, {
-          ...cellInfo,
-          ...cellSize,
-          top: y,
-          left: x,
-        });
-        if (wrapHeight > cellSize.height) {
-          controller.setRowHeight(rowIndex, wrapHeight, false);
-        }
-        x += controller.getColWidth(colIndex);
+        renderCellData(controller, ctx, rowIndex, colIndex);
       }
-      y += controller.getRowHeight(rowIndex);
     }
     ctx.restore();
   }

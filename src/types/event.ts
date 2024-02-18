@@ -9,7 +9,8 @@ export type ChangeEventType =
   | 'cellValue'
   | 'cellStyle'
   | 'range'
-  | 'defineName';
+  | 'defineName'
+  | 'mergeCell';
 
 export interface IWindowSize {
   width: number;
