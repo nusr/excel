@@ -85,7 +85,6 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
     isWrapText,
     underline,
     fontFamily,
-    isMergeCell,
   } = activeCell;
   const handleFontFamilyChange = (value: string | number) => {
     const t = String(value);

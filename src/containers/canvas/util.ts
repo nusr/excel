@@ -7,7 +7,6 @@ import {
   Range,
   parseNumber,
   HIDE_CELL,
-  containRange,
 } from '@/util';
 import {
   coreStore,
