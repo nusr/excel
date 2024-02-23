@@ -139,20 +139,20 @@ describe('controller.test.ts', () => {
     test('get', () => {
       const controller = new Controller(new Model());
       controller.addSheet();
-      expect(controller.getRowHeight(100)).toEqual(24);
+      expect(controller.getRowHeight(100).len).toEqual(24);
     });
     test('set', () => {
       const controller = new Controller(new Model());
       controller.addSheet();
       controller.setRowHeight(0, 100, true);
-      expect(controller.getRowHeight(0)).toEqual(100);
+      expect(controller.getRowHeight(0).len).toEqual(100);
     });
     test('hide', () => {
       const controller = new Controller(new Model());
       controller.addSheet();
       controller.hideRow(0, 2);
-      expect(controller.getRowHeight(0)).toEqual(0);
-      expect(controller.getRowHeight(1)).toEqual(0);
+      expect(controller.getRowHeight(0).len).toEqual(0);
+      expect(controller.getRowHeight(1).len).toEqual(0);
     });
   });
 
@@ -160,20 +160,20 @@ describe('controller.test.ts', () => {
     test('get', () => {
       const controller = new Controller(new Model());
       controller.addSheet();
-      expect(controller.getColWidth(100)).toEqual(68);
+      expect(controller.getColWidth(100).len).toEqual(68);
     });
     test('set', () => {
       const controller = new Controller(new Model());
       controller.addSheet();
       controller.setColWidth(0, 100, true);
-      expect(controller.getColWidth(0)).toEqual(100);
+      expect(controller.getColWidth(0).len).toEqual(100);
     });
     test('hide', () => {
       const controller = new Controller(new Model());
       controller.addSheet();
       controller.hideCol(0, 2);
-      expect(controller.getColWidth(0)).toEqual(0);
-      expect(controller.getColWidth(1)).toEqual(0);
+      expect(controller.getColWidth(0).len).toEqual(0);
+      expect(controller.getColWidth(1).len).toEqual(0);
     });
   });
 });

@@ -131,7 +131,7 @@ export class MainCanvas {
     let x = 0;
     let maxX = 0;
     for (let i = colIndex; i < colCount; i++) {
-      maxX += controller.getColWidth(i);
+      maxX += controller.getColWidth(i).len;
       if (maxX > width) {
         break;
       }
@@ -144,7 +144,7 @@ export class MainCanvas {
       } else {
         skip = false;
       }
-      const h = controller.getRowHeight(i);
+      const h = controller.getRowHeight(i).len;
       if (h === 0) {
         skip = true;
       }
@@ -159,7 +159,7 @@ export class MainCanvas {
       } else {
         skip = false;
       }
-      const w = controller.getColWidth(i);
+      const w = controller.getColWidth(i).len;
       if (w === 0) {
         skip = true;
       }
@@ -225,7 +225,7 @@ export class MainCanvas {
     let i = rowIndex;
 
     for (; i < rowCount; i++) {
-      const rowHeight = controller.getRowHeight(i);
+      const rowHeight = controller.getRowHeight(i).len;
       let temp = y;
       if (i === rowIndex) {
         temp += thinLineWidth() / 2;
@@ -271,7 +271,7 @@ export class MainCanvas {
     let x = headerSize.width;
     let i = colIndex;
     for (; i < colCount; i++) {
-      const colWidth = controller.getColWidth(i);
+      const colWidth = controller.getColWidth(i).len;
       let temp = x;
       if (i === colIndex) {
         temp += thinLineWidth() / 2;
@@ -483,7 +483,7 @@ export class MainCanvas {
       i < endCol;
       i++
     ) {
-      strokeWidth += controller.getColWidth(i);
+      strokeWidth += controller.getColWidth(i).len;
     }
     // col header
     fillRect(this.ctx, activeCell.left, 0, strokeWidth, headerSize.height);
@@ -530,7 +530,7 @@ export class MainCanvas {
       i < endRow;
       i++
     ) {
-      strokeHeight += controller.getRowHeight(i);
+      strokeHeight += controller.getRowHeight(i).len;
     }
     // col header
     fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);

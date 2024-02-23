@@ -330,8 +330,8 @@ export class Model implements IModel {
     const { row, col, sheetId } = range;
     const id = sheetId || this.currentSheetId;
     if (
-      this.getRowHeight(row, id) === HIDE_CELL ||
-      this.getColWidth(col, id) === HIDE_CELL
+      this.getRowHeight(row, id).len === HIDE_CELL ||
+      this.getColWidth(col, id).len === HIDE_CELL
     ) {
       return null;
     }
@@ -494,21 +494,31 @@ export class Model implements IModel {
         continue;
       }
       const data = oldData || {
-        widthOrHeight: CELL_WIDTH,
+        len: CELL_WIDTH,
         isHide: true,
       };
       data.isHide = true;
       this.customWidth.set(key, data);
     }
   }
-  getColWidth(col: number, sheetId?: string): number {
+  getColWidth(col: number, sheetId?: string): CustomItem {
     const id = sheetId || this.currentSheetId;
     const key = getCustomWidthOrHeightKey(id, col);
     const temp = this.customWidth.get(key);
     if (!temp) {
-      return CELL_WIDTH;
+      return {
+        len: CELL_WIDTH,
+        isHide: false,
+      };
     }
-    return temp.isHide ? HIDE_CELL : temp.widthOrHeight || CELL_WIDTH;
+    if (temp.isHide) {
+      return {
+        isHide: true,
+        len: HIDE_CELL,
+      };
+    } else {
+      return { ...temp };
+    }
   }
   setColWidth(
     col: number,
@@ -520,19 +530,16 @@ export class Model implements IModel {
     const key = getCustomWidthOrHeightKey(id, col);
 
     const data = this.customWidth.get(key);
-    if (data && data.widthOrHeight === width) {
+    if (data && data.len === width) {
       return;
     }
 
     const newData = data || {
-      widthOrHeight: HIDE_CELL,
+      len: CELL_WIDTH,
       isHide: false,
     };
 
-    newData.widthOrHeight = width;
-    if (width === HIDE_CELL) {
-      newData.isHide = true;
-    }
+    newData.len = width;
     this.customWidth.set(key, newData);
   }
 
@@ -547,22 +554,32 @@ export class Model implements IModel {
       }
 
       const data = newData || {
-        widthOrHeight: CELL_HEIGHT,
+        len: CELL_HEIGHT,
         isHide: true,
       };
       data.isHide = true;
       this.customHeight.set(key, data);
     }
   }
-  getRowHeight(row: number, sheetId?: string): number {
+  getRowHeight(row: number, sheetId?: string): CustomItem {
     const id = sheetId || this.currentSheetId;
     const key = getCustomWidthOrHeightKey(id, row);
     const temp = this.customHeight.get(key);
     if (!temp) {
-      return CELL_HEIGHT;
+      return {
+        len: CELL_HEIGHT,
+        isHide: false,
+      };
     }
 
-    return temp.isHide ? HIDE_CELL : temp.widthOrHeight || CELL_HEIGHT;
+    if (temp.isHide) {
+      return {
+        isHide: true,
+        len: HIDE_CELL,
+      };
+    } else {
+      return { ...temp };
+    }
   }
   setRowHeight(
     row: number,
@@ -574,18 +591,15 @@ export class Model implements IModel {
     const key = getCustomWidthOrHeightKey(id, row);
 
     const oldData = this.customHeight.get(key);
-    if (oldData && oldData.widthOrHeight === height) {
+    if (oldData && oldData.len === height) {
       return;
     }
 
     const data = oldData || {
-      widthOrHeight: HIDE_CELL,
+      len: HIDE_CELL,
       isHide: false,
     };
-    data.widthOrHeight = height;
-    if (height === HIDE_CELL) {
-      data.isHide = true;
-    }
+    data.len = height;
     this.customHeight.set(key, data);
   }
   canRedo(): boolean {
@@ -638,7 +652,28 @@ export class Model implements IModel {
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
     this.model.delete(getWorkSheetKey(id));
-    this.mergeCells = this.mergeCells.toArray().filter((v) => v.sheetId !== id);
+    let indexList: number[] = [];
+    this.mergeCells.forEach((item, i) => {
+      if (item.sheetId === id) {
+        indexList.push(i);
+      }
+    });
+    indexList.sort();
+    for (let i = indexList.length - 1; i >= 0; i--) {
+      this.mergeCells.delete(indexList[i], 1);
+    }
+
+    indexList = [];
+    this.drawings.forEach((item, i) => {
+      if (item.sheetId === id) {
+        indexList.push(i);
+      }
+    });
+    indexList.sort();
+    for (let i = indexList.length - 1; i >= 0; i--) {
+      this.drawings.delete(indexList[i], 1);
+    }
+
     for (const key of this.customHeight.keys()) {
       if (key.startsWith(id)) {
         this.customHeight.delete(key);
@@ -851,11 +886,16 @@ export class Model implements IModel {
     this.drawings.get(i)[key] = value;
   }
   deleteFloatElement(uuid: string) {
-    const i = this.drawings.toArray().findIndex((v) => v.uuid === uuid);
-    if (i < 0) {
-      return;
+    const indexList: number[] = [];
+    this.drawings.forEach((v, i) => {
+      if (v.uuid === uuid) {
+        indexList.push(i);
+      }
+    });
+    indexList.sort();
+    for (let i = indexList.length - 1; i >= 0; i--) {
+      this.drawings.delete(indexList[i], 1);
     }
-    this.drawings.delete(i, 1);
   }
   getMergeCells(sheetId?: string): IRange[] {
     const id = sheetId || this.currentSheetId;
@@ -867,10 +907,15 @@ export class Model implements IModel {
   }
   deleteMergeCell(range: IRange): void {
     range.sheetId = range.sheetId || this.currentSheetId;
-    const i = this.mergeCells.toArray().findIndex((v) => isSameRange(range, v));
-    if (i < 0) {
-      return;
+    const indexList: number[] = [];
+    this.mergeCells.forEach((v, i) => {
+      if (isSameRange(range, v)) {
+        indexList.push(i);
+      }
+    });
+    indexList.sort();
+    for (let i = indexList.length - 1; i >= 0; i--) {
+      this.mergeCells.delete(indexList[i], 1);
     }
-    this.mergeCells.delete(i, 1);
   }
 }

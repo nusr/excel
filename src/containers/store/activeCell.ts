@@ -13,6 +13,9 @@ export type CellStoreType = Partial<StyleType> & {
   col: number;
   defineName: string;
   isMergeCell: boolean;
+  rowCount: number;
+  colCount: number;
+  sheetId: string;
 };
 
 const cellData: CellStoreType = {
@@ -26,6 +29,9 @@ const cellData: CellStoreType = {
   height: 0,
   defineName: '',
   isMergeCell: false,
+  rowCount: 1,
+  colCount: 1,
+  sheetId: '',
 };
 
 export const activeCellStore = new BaseStore<CellStoreType>(cellData);

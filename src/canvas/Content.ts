@@ -58,13 +58,13 @@ export class Content implements ContentView {
     let y = headerSize.height;
     let r = row;
 
-    while (x + controller.getColWidth(c) < width) {
-      x += controller.getColWidth(c);
+    while (x + controller.getColWidth(c).len < width) {
+      x += controller.getColWidth(c).len;
       c++;
     }
 
-    while (y + controller.getRowHeight(r) < height) {
-      y += controller.getRowHeight(r);
+    while (y + controller.getRowHeight(r).len < height) {
+      y += controller.getRowHeight(r).len
       r++;
     }
     const endRow = r;

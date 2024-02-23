@@ -8,7 +8,7 @@ import { Button, Icon } from '../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
 import { IController } from '@/types';
-import { sheetListStore, coreStore } from '@/containers/store';
+import { sheetListStore, activeCellStore } from '@/containers/store';
 
 interface Props {
   controller: IController;
@@ -21,9 +21,9 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
   );
   // filter hide sheet
   const realSheetList = sheetList.filter((v) => !v.disabled);
-  const { currentSheetId } = useSyncExternalStore(
-    coreStore.subscribe,
-    coreStore.getSnapshot,
+  const { sheetId: currentSheetId } = useSyncExternalStore(
+    activeCellStore.subscribe,
+    activeCellStore.getSnapshot,
   );
   const [menuPosition, setMenuPosition] = useState(DEFAULT_POSITION);
   const [editing, setEditing] = useState(false);

@@ -178,37 +178,37 @@ export const MOCK_MODEL: WorkBookJSON = {
   ],
   customHeight: {
     '1_1': {
-      widthOrHeight: 100,
+      len: 100,
       isHide: false,
     },
     '1_5': {
-      widthOrHeight: 100,
+      len: 100,
       isHide: false,
     },
   },
   customWidth: {
     '1_1': {
-      widthOrHeight: 100,
+      len: 100,
       isHide: false,
     },
     '1_6': {
-      widthOrHeight: 200,
+      len: 200,
       isHide: false,
     },
     '1_7': {
-      widthOrHeight: 200,
+      len: 200,
       isHide: false,
     },
     '1_8': {
-      widthOrHeight: 100,
+      len: 100,
       isHide: false,
     },
     '1_9': {
-      widthOrHeight: 100,
+      len: 100,
       isHide: false,
     },
     '1_10': {
-      widthOrHeight: 100,
+      len: 100,
       isHide: false,
     },
   },

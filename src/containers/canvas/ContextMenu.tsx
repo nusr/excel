@@ -1,9 +1,9 @@
-import React, { Fragment, memo, useMemo } from 'react';
+import React, { Fragment, memo, useMemo, useSyncExternalStore } from 'react';
 import { Button, info, toast } from '../components';
 import { IController } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
-import { getHitInfo } from '@/util';
+import { activeCellStore } from '@/containers/store';
 
 interface Props {
   controller: IController;
@@ -61,21 +61,26 @@ function computeMenuStyle(controller: IController, top: number, left: number) {
 }
 
 export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
-  const { controller, top, left, hideContextMenu } = props;
+  const {
+    controller,
+    top,
+    left,
+
+    hideContextMenu,
+  } = props;
+  const { row, col, colCount, rowCount } = useSyncExternalStore(
+    activeCellStore.subscribe,
+    activeCellStore.getSnapshot,
+  );
   const [ref] = useClickOutside(hideContextMenu);
-  const { style, position, row, col } = useMemo(() => {
+  const { style, position } = useMemo(() => {
     const temp = computeMenuStyle(controller, top, left);
-    const data = getHitInfo(controller, left, top);
-    return {
-      ...temp,
-      row: data?.row || 0,
-      col: data?.col || 0,
-    };
+    return temp;
   }, [top, left]);
   const handleDialog = (isRow: boolean) => {
     let value = isRow
-      ? controller.getRowHeight(row)
-      : controller.getColWidth(col);
+      ? controller.getRowHeight(row).len
+      : controller.getColWidth(col).len;
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       value = parseInt(event.currentTarget.value, 10);
       event.stopPropagation();
@@ -99,9 +104,13 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           return;
         }
         if (isRow) {
-          controller.setRowHeight(row, value, true);
+          for (let i = 0; i < rowCount; i++) {
+            controller.setRowHeight(row + i, value, true);
+          }
         } else {
-          controller.setColWidth(col, value, true);
+          for (let i = 0; i < colCount; i++) {
+            controller.setColWidth(col + i, value, true);
+          }
         }
         hideContextMenu();
       },
@@ -156,26 +165,28 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           <Button
             onClick={() => {
               hideContextMenu();
-              controller.addCol(controller.getActiveCell().col, 1);
+              controller.addCol(col, colCount);
             }}
           >
-            Insert a Column
+            {colCount > 1 ? 'Insert Columns' : 'Insert a Column'}
           </Button>
           <Button
             onClick={() => {
               hideContextMenu();
-              controller.deleteCol(controller.getActiveCell().col, 1);
+
+              controller.deleteCol(col, colCount);
             }}
           >
-            Delete a Column
+            {colCount > 1 ? 'Delete Columns' : 'Delete a Column'}
           </Button>
           <Button
             onClick={() => {
               hideContextMenu();
-              controller.hideCol(controller.getActiveCell().col, 1);
+
+              controller.hideCol(col, colCount);
             }}
           >
-            Hide a Column
+            {colCount > 1 ? 'Hide Columns' : 'Hide a Column'}
           </Button>
           <Button
             onClick={() => {
@@ -191,26 +202,28 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           <Button
             onClick={() => {
               hideContextMenu();
-              controller.addRow(controller.getActiveCell().row, 1);
+              controller.addRow(row, rowCount);
             }}
           >
-            Insert a Row
+            {rowCount > 1 ? 'Insert Rows' : 'Insert a Row'}
           </Button>
           <Button
             onClick={() => {
               hideContextMenu();
-              controller.deleteRow(controller.getActiveCell().row, 1);
+
+              controller.deleteRow(row, rowCount);
             }}
           >
-            Delete a Row
+            {rowCount > 1 ? 'Delete Rows' : 'Delete a Row'}
           </Button>
           <Button
             onClick={() => {
               hideContextMenu();
-              controller.hideRow(controller.getActiveCell().row, 1);
+
+              controller.hideRow(row, rowCount);
             }}
           >
-            Hide a Row
+            {rowCount > 1 ? 'Hide Rows' : 'Hide a Row'}
           </Button>
           <Button
             onClick={() => {

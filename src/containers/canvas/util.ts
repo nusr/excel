@@ -40,7 +40,7 @@ function getChartData(
     r < endRow;
     r++, index++
   ) {
-    const rowHeight = controller.getRowHeight(r);
+    const rowHeight = controller.getRowHeight(r).len;
     if (rowHeight === HIDE_CELL) {
       continue;
     }
@@ -62,7 +62,7 @@ function getChartData(
       result.datasets.push({ label: `Series${index}`, data: list });
     }
   }
-  if (result.datasets[0].data.length > 0) {
+  if (result.datasets[0] && result.datasets[0].data.length > 0) {
     result.labels = Array.from({ length: result.datasets[0].data.length })
       .fill('')
       .map((_value, i) => String(i + 1));
@@ -83,22 +83,10 @@ function updateActiveCell(controller: IController) {
       controller.getCurrentSheetId(),
     ),
   );
-  const cellSize = controller.getCellSize({
-    row: activeCell.row,
-    col: activeCell.col,
-    colCount: 1,
-    rowCount: 1,
-    sheetId: '',
-  });
-  const cellPosition = controller.computeCellPosition({
-    row: activeCell.row,
-    col: activeCell.col,
-    colCount: 1,
-    rowCount: 1,
-    sheetId: '',
-  });
+  const cellSize = controller.getCellSize(activeCell);
+  const cellPosition = controller.computeCellPosition(activeCell);
   cellPosition.top = top + cellPosition.top;
-  let fontFamily = cell?.style?.fontFamily || ''
+  let fontFamily = cell?.style?.fontFamily || '';
   if (!fontFamily) {
     let defaultFontFamily = '';
     const list = fontFamilyStore.getSnapshot();
@@ -129,6 +117,9 @@ function updateActiveCell(controller: IController) {
     height: cellSize.height,
     row: activeCell.row,
     col: activeCell.col,
+    rowCount: activeCell.rowCount,
+    colCount: activeCell.colCount,
+    sheetId: activeCell.sheetId || controller.getCurrentSheetId(),
     value: cell?.value,
     formula: cell?.formula,
     isBold,
@@ -163,18 +154,12 @@ const handleStateChange = (
       .map((v) => ({ value: v.sheetId, label: v.name, disabled: v.isHide }));
     sheetListStore.setState(sheetList);
   }
-  if (changeSet.has('currentSheetId')) {
-    coreStore.mergeState({
-      currentSheetId: controller.getCurrentSheetId(),
-      canRedo: controller.canRedo(),
-      canUndo: controller.canUndo(),
-    });
-  } else {
-    coreStore.mergeState({
-      canRedo: controller.canRedo(),
-      canUndo: controller.canUndo(),
-    });
-  }
+
+  coreStore.mergeState({
+    canRedo: controller.canRedo(),
+    canUndo: controller.canUndo(),
+  });
+
   if (changeSet.has('scroll')) {
     const scroll = controller.getScroll();
     scrollStore.setState({

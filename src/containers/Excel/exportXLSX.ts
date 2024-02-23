@@ -46,7 +46,7 @@ function getSheetData(
       const t = parseInt(key.slice(sheetId.length + 1), 10) + 1;
       list.push(
         `<col min="${t}" max="${t}" width="${
-          value.widthOrHeight / CUSTOM_WIdTH_RADIO
+          value.len / CUSTOM_WIdTH_RADIO
         }" customWidth="1" ${value.isHide ? 'hidden="1"' : ''}/>`,
       );
     }
@@ -401,7 +401,7 @@ export async function exportToXLSX(fileName: string, controller: IController) {
         modelJson.customHeight[getCustomWidthOrHeightKey(item.sheetId, row)];
       let ht = '';
       if (customHeight) {
-        ht = `ht="${customHeight.widthOrHeight}" customHeight="1" ${
+        ht = `ht="${customHeight.len}" customHeight="1" ${
           customHeight.isHide ? 'hidden="1"' : ''
         }`;
       }

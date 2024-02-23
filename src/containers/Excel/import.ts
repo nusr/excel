@@ -404,7 +404,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
           ) {
             result.customWidth[getCustomWidthOrHeightKey(item.sheetId, start)] =
               {
-                widthOrHeight: w,
+                len: w,
                 isHide,
               };
           }
@@ -432,7 +432,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
         const isDefault = defaultWOrH.defaultRowHeight === row.ht;
         result.customHeight[getCustomWidthOrHeightKey(item.sheetId, realRow)] =
           {
-            widthOrHeight: isDefault ? CELL_HEIGHT : parseFloat(row.ht),
+            len: isDefault ? CELL_HEIGHT : parseFloat(row.ht),
             isHide: Boolean(row.hidden),
           };
       }

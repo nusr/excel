@@ -69,7 +69,7 @@ export type ModelColType = Record<string, ModelCellType>; // key: col number
 export type ModelRowType = Record<string, ModelColType>; // key: row number
 
 export interface CustomItem {
-  widthOrHeight: number; // width or height
+  len: number; // width or height
   isHide: boolean;
 }
 export type CustomHeightOrWidthItem = {
@@ -118,14 +118,14 @@ export interface IModel extends IBaseModel {
 export interface IBaseModel {
   transaction: (func: () => void) => void;
   getCell: (range: IRange) => ModelCellValue | null;
-  getColWidth: (col: number, sheetId?: string) => number;
+  getColWidth: (col: number, sheetId?: string) => CustomItem;
   setColWidth: (
     col: number,
     width: number,
     isChanged: boolean,
     sheetId?: string,
   ) => void;
-  getRowHeight: (row: number, sheetId?: string) => number;
+  getRowHeight: (row: number, sheetId?: string) => CustomItem;
   setRowHeight: (
     row: number,
     height: number,

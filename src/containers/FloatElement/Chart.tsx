@@ -20,7 +20,7 @@ import {
   Legend,
 } from 'chart.js';
 import type { ChartType, DefaultDataPoint, ChartComponentLike } from 'chart.js';
-import { DEBUG_COLOR_LIST, parseNumber } from '@/util';
+import { DEBUG_COLOR_LIST, parseNumber, deepEqual } from '@/util';
 import { FloatElementItem } from '@/containers/store';
 import { ChartProps } from '@/types';
 import styles from './FloatElement.module.css';
@@ -66,9 +66,15 @@ function ChartComponent<
       destroyChart();
       setTimeout(renderChart);
     } else {
+      if (!deepEqual(chartRef.current.data, data)) {
+        chartRef.current.data = data;
+      }
+      if (options && !deepEqual(chartRef.current.options, options)) {
+        chartRef.current.options = options;
+      }
       chartRef.current.update(updateMode);
     }
-  }, [redraw, updateMode, data, options, plugins]);
+  }, [redraw, updateMode, data, options]);
 
   useEffect(() => {
     renderChart();
@@ -82,7 +88,7 @@ function ChartComponent<
     chartRef.current = new ChartJS(canvasRef.current, {
       type,
       data,
-      options: options && { ...options },
+      options,
       plugins,
     });
   };
@@ -145,7 +151,7 @@ export const Chart: React.FunctionComponent<FloatElementItem> = memo(
     const extra = {
       width,
       height,
-      redraw: true,
+      redraw: false,
       uuid,
       options: {
         plugins: {

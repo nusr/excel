@@ -14,12 +14,12 @@ export function getHitInfo(
   let resultX = headerSize.width;
   let resultY = headerSize.height;
   let { row, col } = scroll;
-  while (resultX + controller.getColWidth(col) <= x) {
-    resultX += controller.getColWidth(col);
+  while (resultX + controller.getColWidth(col).len <= x) {
+    resultX += controller.getColWidth(col).len;
     col++;
   }
-  while (resultY + controller.getRowHeight(row) <= y) {
-    resultY += controller.getRowHeight(row);
+  while (resultY + controller.getRowHeight(row).len <= y) {
+    resultY += controller.getRowHeight(row).len;
     row++;
   }
   if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
