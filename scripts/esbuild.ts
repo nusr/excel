@@ -106,6 +106,17 @@ function buildHtml() {
     path.join(distDir, 'index.html'),
     data.replace('process.env.NODE_ENV', JSON.stringify(nodeEnv)),
   );
+  const iconDir = path.join(__dirname, './icon');
+  const resultDir = path.join(distDir, 'icon');
+  const files = fs.readdirSync(iconDir);
+  if (!fs.existsSync(resultDir)) {
+    fs.mkdirSync(resultDir);
+  }
+  for (const item of files) {
+    const source = path.join(iconDir, item);
+    const dest = path.join(resultDir, item);
+    fs.copyFileSync(source, dest);
+  }
 }
 
 function deleteDir(dir: string) {
