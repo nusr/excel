@@ -40,7 +40,7 @@ function getChartData(
     r < endRow;
     r++, index++
   ) {
-    const rowHeight = controller.getRowHeight(r);
+    const rowHeight = controller.getRowHeight(r).len;
     if (rowHeight === HIDE_CELL) {
       continue;
     }
@@ -62,7 +62,7 @@ function getChartData(
       result.datasets.push({ label: `Series${index}`, data: list });
     }
   }
-  if (result.datasets[0].data.length > 0) {
+  if (result.datasets[0] && result.datasets[0].data.length > 0) {
     result.labels = Array.from({ length: result.datasets[0].data.length })
       .fill('')
       .map((_value, i) => String(i + 1));
@@ -72,21 +72,22 @@ function getChartData(
 
 function updateActiveCell(controller: IController) {
   const { top } = controller.getDomRect();
-  const activeCell = controller.getActiveCell();
+  const { range: activeCell, isMerged } = controller.getActiveRange();
   const cell = controller.getCell(activeCell);
-  if (!cell) {
-    return;
-  }
-  const cellPosition = controller.computeCellPosition(
-    activeCell.row,
-    activeCell.col,
+  const defineName = controller.getDefineName(
+    new Range(
+      activeCell.row,
+      activeCell.col,
+      1,
+      1,
+      controller.getCurrentSheetId(),
+    ),
   );
-  const cellSize = controller.getCellSize(activeCell.row, activeCell.col);
+  const cellSize = controller.getCellSize(activeCell);
+  const cellPosition = controller.computeCellPosition(activeCell);
   cellPosition.top = top + cellPosition.top;
-  if (!cell.style) {
-    cell.style = {};
-  }
-  if (!cell.style.fontFamily) {
+  let fontFamily = cell?.style?.fontFamily || '';
+  if (!fontFamily) {
     let defaultFontFamily = '';
     const list = fontFamilyStore.getSnapshot();
     for (const item of list) {
@@ -95,7 +96,7 @@ function updateActiveCell(controller: IController) {
         break;
       }
     }
-    cell.style.fontFamily = defaultFontFamily;
+    fontFamily = defaultFontFamily;
   }
   const {
     isBold = false,
@@ -106,21 +107,21 @@ function updateActiveCell(controller: IController) {
     fillColor = '',
     isWrapText = false,
     underline = EUnderLine.NONE,
-    fontFamily = '',
     numberFormat = 0,
-  } = cell.style;
-  const defineName = controller.getDefineName(
-    new Range(cell.row, cell.col, 1, 1, controller.getCurrentSheetId()),
-  );
+  } = cell?.style || {};
+
   activeCellStore.setState({
     top: cellPosition.top,
     left: cellPosition.left,
     width: cellSize.width,
     height: cellSize.height,
-    row: cell.row,
-    col: cell.col,
-    value: cell.value,
-    formula: cell.formula,
+    row: activeCell.row,
+    col: activeCell.col,
+    rowCount: activeCell.rowCount,
+    colCount: activeCell.colCount,
+    sheetId: activeCell.sheetId || controller.getCurrentSheetId(),
+    value: cell?.value,
+    formula: cell?.formula,
     isBold,
     isItalic,
     isStrike,
@@ -132,6 +133,7 @@ function updateActiveCell(controller: IController) {
     underline,
     numberFormat,
     defineName,
+    isMergeCell: isMerged,
   });
 }
 
@@ -152,18 +154,12 @@ const handleStateChange = (
       .map((v) => ({ value: v.sheetId, label: v.name, disabled: v.isHide }));
     sheetListStore.setState(sheetList);
   }
-  if (changeSet.has('currentSheetId')) {
-    coreStore.mergeState({
-      currentSheetId: controller.getCurrentSheetId(),
-      canRedo: controller.canRedo(),
-      canUndo: controller.canUndo(),
-    });
-  } else {
-    coreStore.mergeState({
-      canRedo: controller.canRedo(),
-      canUndo: controller.canUndo(),
-    });
-  }
+
+  coreStore.mergeState({
+    canRedo: controller.canRedo(),
+    canUndo: controller.canUndo(),
+  });
+
   if (changeSet.has('scroll')) {
     const scroll = controller.getScroll();
     scrollStore.setState({
@@ -171,6 +167,7 @@ const handleStateChange = (
       scrollTop: scroll.scrollTop,
     });
   }
+
   if (
     changeSet.has('floatElement') ||
     changeSet.has('cellValue') ||
@@ -182,7 +179,13 @@ const handleStateChange = (
     const list = controller.getFloatElementList(controller.getCurrentSheetId());
     floatElementStore.setState(
       list.map((v) => {
-        const size = controller.computeCellPosition(v.fromRow, v.fromCol);
+        const size = controller.computeCellPosition({
+          row: v.fromRow,
+          col: v.fromCol,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: '',
+        });
         const result: FloatElementItem = {
           ...v,
           top: size.top,

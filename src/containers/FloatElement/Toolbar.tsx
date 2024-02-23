@@ -15,7 +15,13 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = ({
     image.src = base64Image;
     image.onload = function () {
       const range = controller.getActiveCell();
-      const position = controller.computeCellPosition(range.row, range.col);
+      const position = controller.computeCellPosition({
+        row: range.row,
+        col: range.col,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
       const data: FloatElement = {
         width: image.width,
         height: image.height,
@@ -72,7 +78,13 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = ({
 export const InsertChart: React.FunctionComponent<Props> = ({ controller }) => {
   const handleClick = () => {
     const range = controller.getActiveCell();
-    const position = controller.computeCellPosition(range.row, range.col);
+    const position = controller.computeCellPosition({
+      row: range.row,
+      col: range.col,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
     controller.addFloatElement({
       width: 400,
       height: 300,

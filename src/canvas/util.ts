@@ -19,6 +19,7 @@ import {
   ErrorTypes,
   Point,
   EUnderLine,
+  IController,
 } from '@/types';
 
 const measureTextMap = new Map<string, number>();
@@ -128,11 +129,50 @@ function drawUnderlineData(
   }
 }
 
+export function renderCellData(
+  controller: IController,
+  ctx: CanvasRenderingContext2D,
+  row: number,
+  col: number,
+): boolean {
+  const range = {
+    row,
+    col,
+    colCount: 1,
+    rowCount: 1,
+    sheetId: '',
+  };
+  const cellInfo = controller.getCell(range);
+  if (!cellInfo) {
+    return false;
+  }
+  const cellSize = controller.getCellSize(range);
+  if (cellSize.width <= 0 || cellSize.height <= 0) {
+    return false;
+  }
+  const position = controller.computeCellPosition(range);
+  const { wrapHeight = 0 } = renderCell(ctx, {
+    ...cellInfo,
+    top: position.top,
+    left: position.left,
+    width: cellSize.width,
+    height: cellSize.height,
+  });
+  if (wrapHeight > cellSize.height) {
+    controller.setRowHeight(row, wrapHeight, false);
+  }
+  return true;
+}
+
 export function renderCell(
   ctx: CanvasRenderingContext2D,
   cellInfo: ModelCellType & CanvasOverlayPosition,
 ): IRenderCellResult {
+  const result: IRenderCellResult = {};
   const { style, value, left, top, width, height } = cellInfo;
+  if (isEmpty(cellInfo.value) && isEmpty(cellInfo.style)) {
+    return result;
+  }
   const isNum = isNumber(value);
   let font = DEFAULT_FONT_CONFIG;
   let fillStyle = DEFAULT_FONT_COLOR;
@@ -154,7 +194,7 @@ export function renderCell(
   if (ERROR_SET.has(text as ErrorTypes)) {
     fillStyle = ERROR_FORMULA_COLOR;
   }
-  const result: IRenderCellResult = {};
+
   const texts = splitToWords(text);
   if (texts.length === 0) {
     return result;

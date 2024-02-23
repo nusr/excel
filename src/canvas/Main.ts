@@ -8,6 +8,7 @@ import {
   canvasLog,
   thinLineWidth,
   intToColumnName,
+  containRange,
 } from '@/util';
 import {
   EventType,
@@ -19,7 +20,6 @@ import {
 } from '@/types';
 import {
   fillRect,
-  renderCell,
   strokeRect,
   drawLines,
   drawTriangle,
@@ -27,6 +27,7 @@ import {
   drawAntLine,
   resizeCanvas,
   fillText,
+  renderCellData,
 } from './util';
 import { HEADER_STYLE } from './constant';
 
@@ -59,11 +60,11 @@ export class MainCanvas {
     }
     this.content.render(params);
     this.clear();
+
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
 
     const { width, height } = this.controller.getDomRect();
     const headerSize = this.controller.getHeaderSize();
-
     const contentWidth = width - headerSize.width;
     const contentHeight = height - headerSize.height;
     this.renderGrid(contentWidth, contentHeight);
@@ -73,7 +74,44 @@ export class MainCanvas {
 
     const result = this.renderSelection();
     this.renderAntLine(result);
+
+    this.renderMergeCell();
   };
+
+  private renderMergeCell() {
+    const { controller } = this;
+    const range = controller.getActiveCell();
+    const mergeCells = controller.getMergeCells(controller.getCurrentSheetId());
+    if (mergeCells.length === 0) {
+      return;
+    }
+    for (const item of mergeCells) {
+      const position = controller.computeCellPosition(item);
+      const size = controller.getCellSize(item);
+      if (size.width <= 0 || size.height <= 0) {
+        continue;
+      }
+      // clear merge cell area
+      clearRect(this.ctx, position.left, position.top, size.width, size.height);
+      // render content
+      renderCellData(controller, this.ctx, item.row, item.col);
+      if (isSheet(range) || isRow(range) || isCol(range)) {
+        continue;
+      }
+      if (containRange(range.row, range.col, item)) {
+        this.ctx.strokeStyle = theme.primaryColor;
+        this.ctx.lineWidth = dpr();
+        // highlight line
+        strokeRect(
+          this.ctx,
+          position.left,
+          position.top,
+          size.width,
+          size.height,
+        );
+      }
+    }
+  }
 
   private renderGrid(width: number, height: number): void {
     const { controller } = this;
@@ -93,7 +131,7 @@ export class MainCanvas {
     let x = 0;
     let maxX = 0;
     for (let i = colIndex; i < colCount; i++) {
-      maxX += controller.getColWidth(i);
+      maxX += controller.getColWidth(i).len;
       if (maxX > width) {
         break;
       }
@@ -106,7 +144,7 @@ export class MainCanvas {
       } else {
         skip = false;
       }
-      const h = controller.getRowHeight(i);
+      const h = controller.getRowHeight(i).len;
       if (h === 0) {
         skip = true;
       }
@@ -121,7 +159,7 @@ export class MainCanvas {
       } else {
         skip = false;
       }
-      const w = controller.getColWidth(i);
+      const w = controller.getColWidth(i).len;
       if (w === 0) {
         skip = true;
       }
@@ -135,17 +173,28 @@ export class MainCanvas {
     drawLines(this.ctx, pointList);
     this.ctx.restore();
   }
-  private isHighlightRow(range: IRange, row: number): boolean {
+  private isHighlightRow(
+    mergeCells: IRange[],
+    range: IRange,
+    row: number,
+  ): boolean {
     if (isSheet(range)) {
       return true;
     }
     if (isCol(range)) {
       return true;
     }
-    return row >= range.row && row < range.row + range.rowCount;
+    if (row >= range.row && row < range.row + range.rowCount) {
+      return true;
+    }
+    return mergeCells.some((v) => row >= v.row && row < v.row + v.rowCount);
   }
 
-  private isHighlightCol(range: IRange, col: number): boolean {
+  private isHighlightCol(
+    mergeCells: IRange[],
+    range: IRange,
+    col: number,
+  ): boolean {
     if (isSheet(range)) {
       return true;
     }
@@ -153,7 +202,10 @@ export class MainCanvas {
     if (isRow(range)) {
       return true;
     }
-    return col >= range.col && col < range.col + range.colCount;
+    if (col >= range.col && col < range.col + range.colCount) {
+      return true;
+    }
+    return mergeCells.some((v) => col >= v.col && col < v.col + v.colCount);
   }
   private renderRowsHeader(height: number): void {
     const { controller } = this;
@@ -162,6 +214,7 @@ export class MainCanvas {
     const { rowCount } = controller.getSheetInfo(
       controller.getCurrentSheetId(),
     );
+    const mergeCells = controller.getMergeCells(controller.getCurrentSheetId());
     this.ctx.save();
     const range = this.controller.getActiveCell();
     this.ctx.fillStyle = theme.backgroundColor;
@@ -172,14 +225,14 @@ export class MainCanvas {
     let i = rowIndex;
 
     for (; i < rowCount; i++) {
-      const rowHeight = controller.getRowHeight(i);
+      const rowHeight = controller.getRowHeight(i).len;
       let temp = y;
       if (i === rowIndex) {
         temp += thinLineWidth() / 2;
       }
       pointList.push([0, temp], [headerSize.width, temp]);
       if (rowHeight > 0) {
-        const check = this.isHighlightRow(range, i);
+        const check = this.isHighlightRow(mergeCells, range, i);
         this.ctx.fillStyle = check ? theme.primaryColor : theme.black;
 
         fillText(
@@ -207,6 +260,7 @@ export class MainCanvas {
     const { colCount } = controller.getSheetInfo(
       controller.getCurrentSheetId(),
     );
+    const mergeCells = controller.getMergeCells(controller.getCurrentSheetId());
     const range = this.controller.getActiveCell();
     const pointList: Point[] = [];
     this.ctx.save();
@@ -217,14 +271,14 @@ export class MainCanvas {
     let x = headerSize.width;
     let i = colIndex;
     for (; i < colCount; i++) {
-      const colWidth = controller.getColWidth(i);
+      const colWidth = controller.getColWidth(i).len;
       let temp = x;
       if (i === colIndex) {
         temp += thinLineWidth() / 2;
       }
       pointList.push([temp, 0], [temp, headerSize.height]);
       if (colWidth > 0) {
-        const check = this.isHighlightCol(range, i);
+        const check = this.isHighlightCol(mergeCells, range, i);
         this.ctx.fillStyle = check ? theme.primaryColor : theme.black;
         fillText(
           this.ctx,
@@ -304,15 +358,19 @@ export class MainCanvas {
 
   private renderActiveCell() {
     const { controller } = this;
-    const cellData = controller.getCell(controller.getActiveCell());
-    if (!cellData) {
+    const range = controller.getActiveCell();
+    if (range.rowCount === range.colCount && range.rowCount === 1) {
       return;
     }
-    const activeCell = controller.computeCellPosition(
-      cellData.row,
-      cellData.col,
-    );
-    const cellSize = controller.getCellSize(cellData.row, cellData.col);
+    const temp = {
+      row: range.row,
+      col: range.col,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    };
+    const activeCell = controller.computeCellPosition(temp);
+    const cellSize = controller.getCellSize(temp);
     clearRect(
       this.ctx,
       activeCell.left,
@@ -320,18 +378,32 @@ export class MainCanvas {
       cellSize.width,
       cellSize.height,
     );
-    renderCell(this.ctx, { ...cellData, ...activeCell, ...cellSize });
+    renderCellData(controller, this.ctx, range.row, range.col);
   }
   private renderSelectRange() {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
     const range = controller.getActiveCell();
-    const activeCell = controller.computeCellPosition(range.row, range.col);
+
+    const activeCell = controller.computeCellPosition({
+      row: range.row,
+      col: range.col,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
     const endCellRow = range.row + range.rowCount - 1;
     const endCellCol = range.col + range.colCount - 1;
 
-    const endCell = controller.computeCellPosition(endCellRow, endCellCol);
-    const endCellSize = controller.getCellSize(endCellRow, endCellCol);
+    const temp = {
+      row: endCellRow,
+      col: endCellCol,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    };
+    const endCell = controller.computeCellPosition(temp);
+    const endCellSize = controller.getCellSize(temp);
     const width = endCell.left + endCellSize.width - activeCell.left;
     const height = endCell.top + endCellSize.height - activeCell.top;
 
@@ -397,7 +469,13 @@ export class MainCanvas {
     const range = controller.getActiveCell();
     const { height } = controller.getDomRect();
     this.ctx.fillStyle = theme.selectionColor;
-    const activeCell = controller.computeCellPosition(range.row, range.col);
+    const activeCell = controller.computeCellPosition({
+      row: range.row,
+      col: range.col,
+      colCount: 1,
+      rowCount: 1,
+      sheetId: '',
+    });
 
     let strokeWidth = 0;
     for (
@@ -405,7 +483,7 @@ export class MainCanvas {
       i < endCol;
       i++
     ) {
-      strokeWidth += controller.getColWidth(i);
+      strokeWidth += controller.getColWidth(i).len;
     }
     // col header
     fillRect(this.ctx, activeCell.left, 0, strokeWidth, headerSize.height);
@@ -439,14 +517,20 @@ export class MainCanvas {
     const range = controller.getActiveCell();
     const { width } = controller.getDomRect();
     this.ctx.fillStyle = theme.selectionColor;
-    const activeCell = controller.computeCellPosition(range.row, range.col);
+    const activeCell = controller.computeCellPosition({
+      row: range.row,
+      col: range.col,
+      colCount: 1,
+      rowCount: 1,
+      sheetId: '',
+    });
     let strokeHeight = 0;
     for (
       let i = range.row, endRow = range.row + range.rowCount;
       i < endRow;
       i++
     ) {
-      strokeHeight += controller.getRowHeight(i);
+      strokeHeight += controller.getRowHeight(i).len;
     }
     // col header
     fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);

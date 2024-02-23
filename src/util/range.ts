@@ -23,6 +23,15 @@ export function isSameRange(oldRange?: IRange, newRange?: IRange): boolean {
   );
 }
 
+export function containRange(row: number, col: number, range: IRange): boolean {
+  return (
+    row >= range.row &&
+    row < range.row + range.rowCount &&
+    col >= range.col &&
+    col < range.col + range.colCount
+  );
+}
+
 export class Range implements IRange {
   row = 0;
   col = 0;

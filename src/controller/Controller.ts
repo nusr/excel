@@ -29,6 +29,7 @@ import {
   isSameRange,
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
+  containRange,
 } from '@/util';
 
 const defaultScrollValue: ScrollValue = {
@@ -96,10 +97,169 @@ export class Controller implements IController {
   getActiveCell(): IRange {
     const currentSheetId = this.model.getCurrentSheetId();
     const { activeCell } = this.getSheetInfo(currentSheetId);
+
     return {
       ...activeCell,
       sheetId: activeCell.sheetId || currentSheetId,
     };
+  }
+  private getRange(range: IRange) {
+    const mergeCells = this.getMergeCells(this.getCurrentSheetId());
+    if (mergeCells.length === 0) {
+      return {
+        range,
+        isMerged: false,
+      };
+    }
+
+    for (const item of mergeCells) {
+      if (containRange(range.row, range.col, item)) {
+        const newRange = {
+          ...item,
+          sheetId: item.sheetId || this.getCurrentSheetId(),
+        };
+        return {
+          range: newRange,
+          isMerged: true,
+        };
+      }
+    }
+
+    return {
+      range,
+      isMerged: false,
+    };
+  }
+  getActiveRange() {
+    const range = this.getActiveCell();
+    return this.getRange(range);
+  }
+  setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up'): IRange {
+    const range = this.getActiveCell();
+    let startCol = range.col;
+    let startRow = range.row;
+    const sheetInfo = this.getSheetInfo(range.sheetId);
+    const mergeCells = this.getMergeCells(range.sheetId);
+    const result = {
+      ...range,
+    };
+    if (direction === 'left') {
+      startCol--;
+      // eslint-disable-next-line no-constant-condition
+      while (1) {
+        let check1 = false;
+        let check2 = false;
+        for (const item of mergeCells) {
+          if (startCol >= item.col && startCol < item.col + item.colCount) {
+            startCol = Math.min(startCol, item.col - 1);
+            check1 = true;
+            break;
+          }
+        }
+        while (startCol > 0 && this.getColWidth(startCol).len <= 0) {
+          startCol--;
+          check2 = true;
+        }
+        if (startCol <= 0) {
+          startCol = 0;
+          break;
+        }
+        if (!check2 && !check1) {
+          break;
+        }
+      }
+      result.col = startCol;
+    }
+    if (direction === 'right') {
+      startCol++;
+      // eslint-disable-next-line no-constant-condition
+      while (1) {
+        let check1 = false;
+        let check2 = false;
+        for (const item of mergeCells) {
+          if (startCol >= item.col && startCol < item.col + item.colCount) {
+            startCol = Math.max(startCol, item.col + item.colCount);
+            check1 = true;
+            break;
+          }
+        }
+        while (
+          startCol < sheetInfo.colCount &&
+          this.getColWidth(startCol).len <= 0
+        ) {
+          startCol++;
+          check2 = true;
+        }
+        if (startCol >= sheetInfo.colCount - 1) {
+          startCol = sheetInfo.colCount - 1;
+          break;
+        }
+        if (!check2 && !check1) {
+          break;
+        }
+      }
+      result.col = startCol;
+    }
+    if (direction === 'up') {
+      startRow--;
+      // eslint-disable-next-line no-constant-condition
+      while (1) {
+        let check1 = false;
+        let check2 = false;
+        for (const item of mergeCells) {
+          if (startRow >= item.row && startRow < item.row + item.rowCount) {
+            startRow = Math.min(startRow, item.row - 1);
+            check1 = true;
+            break;
+          }
+        }
+        while (startRow > 0 && this.getColWidth(startRow).len <= 0) {
+          startRow--;
+          check2 = true;
+        }
+        if (startRow <= 0) {
+          startRow = 0;
+          break;
+        }
+        if (!check2 && !check1) {
+          break;
+        }
+      }
+      result.row = startRow;
+    }
+    if (direction === 'down') {
+      startRow++;
+      // eslint-disable-next-line no-constant-condition
+      while (1) {
+        let check1 = false;
+        let check2 = false;
+        for (const item of mergeCells) {
+          if (startRow >= item.row && startRow < item.row + item.rowCount) {
+            startRow = Math.max(startRow, item.row + item.rowCount);
+            check1 = true;
+            break;
+          }
+        }
+        while (
+          startRow < sheetInfo.rowCount &&
+          this.getColWidth(startRow).len <= 0
+        ) {
+          startRow++;
+          check2 = true;
+        }
+        if (startRow >= sheetInfo.rowCount - 1) {
+          startRow = sheetInfo.rowCount - 1;
+          break;
+        }
+        if (!check2 && !check1) {
+          break;
+        }
+      }
+      result.row = startRow;
+    }
+    const temp = this.getRange(result).range;
+    this.setActiveCell(temp);
+    return temp;
   }
   private setSheetCell(range: IRange) {
     const id = range.sheetId || this.model.getCurrentSheetId();
@@ -245,6 +405,7 @@ export class Controller implements IController {
     this.changeSet.add('currentSheetId');
     this.changeSet.add('scroll');
     this.changeSet.add('floatElement');
+    this.changeSet.add('cellValue');
     this.emitChange();
   }
   redo() {
@@ -254,26 +415,37 @@ export class Controller implements IController {
     this.changeSet.add('currentSheetId');
     this.changeSet.add('scroll');
     this.changeSet.add('floatElement');
+    this.changeSet.add('cellValue');
     this.emitChange();
   }
-  getColWidth(col: number): number {
-    return this.model.getColWidth(col);
+  getColWidth(col: number, sheetId?: string) {
+    return this.model.getColWidth(col, sheetId);
   }
-  setColWidth(col: number, width: number, isChanged: boolean): void {
+  setColWidth(
+    col: number,
+    width: number,
+    isChanged: boolean,
+    sheetId?: string,
+  ): void {
     this.transaction(() => {
-      this.model.setColWidth(col, width, isChanged);
+      this.model.setColWidth(col, width, isChanged, sheetId);
       this.changeSet.add('col');
       if (isChanged) {
         this.emitChange();
       }
     });
   }
-  getRowHeight(row: number): number {
-    return this.model.getRowHeight(row);
+  getRowHeight(row: number, sheetId?: string) {
+    return this.model.getRowHeight(row, sheetId);
   }
-  setRowHeight(row: number, height: number, isChanged: boolean) {
+  setRowHeight(
+    row: number,
+    height: number,
+    isChanged: boolean,
+    sheetId?: string,
+  ) {
     this.transaction(() => {
-      this.model.setRowHeight(row, height, isChanged);
+      this.model.setRowHeight(row, height, isChanged, sheetId);
       this.changeSet.add('row');
       if (isChanged) {
         this.emitChange();
@@ -286,10 +458,10 @@ export class Controller implements IController {
     let { width } = headerSize;
     let { height } = headerSize;
     for (let i = 0; i < sheetInfo.colCount; i++) {
-      width += this.getColWidth(i);
+      width += this.getColWidth(i).len;
     }
     for (let i = 0; i < sheetInfo.rowCount; i++) {
-      height += this.getRowHeight(i);
+      height += this.getRowHeight(i).len;
     }
     this.viewSize = {
       width,
@@ -301,17 +473,49 @@ export class Controller implements IController {
       ...this.viewSize,
     };
   }
-  getCellSize(row: number, col: number): IWindowSize {
-    return { width: this.getColWidth(col), height: this.getRowHeight(row) };
+  getCellSize(range: IRange): IWindowSize {
+    // const { row, col, colCount, rowCount } = range;
+    range.sheetId = range.sheetId || this.getCurrentSheetId();
+    // if (rowCount === colCount && rowCount === 1) {
+    //   const mergeCells = this.getMergeCells(range.sheetId);
+    //   for (const item of mergeCells) {
+    //     if (containRange(row, col, item)) {
+    //       return this.getRangeSize(item);
+    //     }
+    //   }
+    // }
+    return this.getRangeSize(range);
+  }
+  private getRangeSize(range: IRange) {
+    const { row, col, colCount, rowCount } = range;
+    const sheetId = range.sheetId || this.getCurrentSheetId();
+    if (colCount === 0 || rowCount === 0) {
+      return {
+        width: this.getColWidth(col, sheetId).len,
+        height: this.getRowHeight(row, sheetId).len,
+      };
+    }
+
+    let width = 0;
+    let height = 0;
+    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+      height += this.getRowHeight(r, sheetId).len;
+    }
+    for (let c = col, endCol = col + colCount; c < endCol; c++) {
+      width += this.getColWidth(c, sheetId).len;
+    }
+    return { width, height };
   }
   getHeaderSize() {
     return {
       ...this.headerSize,
     };
   }
-  computeCellPosition(row: number, col: number): IPosition {
+  computeCellPosition(range: IRange): IPosition {
+    const { row, col } = range;
+    const sheetId = range.sheetId || this.model.getCurrentSheetId();
     const size = this.getHeaderSize();
-    const scroll = this.getScroll();
+    const scroll = this.getScroll(sheetId);
 
     let resultX = size.width;
     let resultY = size.height;
@@ -319,25 +523,25 @@ export class Controller implements IController {
     let c = scroll.col;
     if (col >= scroll.col) {
       while (c < col) {
-        resultX += this.getColWidth(c);
+        resultX += this.getColWidth(c, sheetId).len;
         c++;
       }
     } else {
       resultX = -size.width;
       while (c > col) {
-        resultX -= this.getColWidth(c);
+        resultX -= this.getColWidth(c, sheetId).len;
         c--;
       }
     }
     if (row >= scroll.row) {
       while (r < row) {
-        resultY += this.getRowHeight(r);
+        resultY += this.getRowHeight(r, sheetId).len;
         r++;
       }
     } else {
       resultY = -size.height;
       while (r > row) {
-        resultY -= this.getRowHeight(r);
+        resultY -= this.getRowHeight(r, sheetId).len;
         r--;
       }
     }
@@ -395,9 +599,9 @@ export class Controller implements IController {
     return result;
   }
 
-  getScroll(): ScrollValue {
-    const sheetId = this.model.getCurrentSheetId();
-    const result = this.scrollValue[sheetId] || defaultScrollValue;
+  getScroll(sheetId?: string): ScrollValue {
+    const id = sheetId || this.model.getCurrentSheetId();
+    const result = this.scrollValue[id] || defaultScrollValue;
     return result;
   }
   setScroll(data: ScrollValue): void {
@@ -709,6 +913,25 @@ export class Controller implements IController {
     this.transaction(() => {
       this.model.deleteFloatElement(uuid);
       this.changeSet.add('floatElement');
+      this.emitChange();
+    });
+  }
+  getMergeCells(sheetId?: string): IRange[] {
+    return this.model.getMergeCells(sheetId);
+  }
+  addMergeCell(range: IRange): void {
+    this.transaction(() => {
+      this.model.addMergeCell(range);
+      this.changeSet.add('mergeCell');
+      this.changeSet.add('cellValue');
+      this.emitChange();
+    });
+  }
+  deleteMergeCell(range: IRange): void {
+    this.transaction(() => {
+      this.model.deleteMergeCell(range);
+      this.changeSet.add('mergeCell');
+      this.changeSet.add('cellValue');
       this.emitChange();
     });
   }

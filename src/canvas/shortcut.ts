@@ -7,67 +7,15 @@ import {
 import { BOTTOM_BUFF, SCROLL_SIZE, isMac } from '@/util';
 import { coreStore } from '@/containers/store';
 
-function nextRow(controller: IController, start: number, prev = false): number {
-  let result = start;
-  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-  while (controller.getRowHeight(result) <= 0) {
-    if (prev) {
-      if (result === 0) {
-        break;
-      }
-      result--;
-    } else {
-      if (result === sheetInfo.rowCount - 1) {
-        break;
-      }
-      result++;
-    }
-  }
-  return result;
-}
-
-function nextCol(controller: IController, start: number, prev = false): number {
-  let result = start;
-  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
-  while (controller.getColWidth(result) <= 0) {
-    if (prev) {
-      if (result === 0) {
-        break;
-      }
-      result--;
-    } else {
-      if (result === sheetInfo.colCount - 1) {
-        break;
-      }
-      result++;
-    }
-  }
-  return result;
-}
-
 export function handleTabClick(controller: IController) {
   checkActiveElement(controller);
-  const activeCell = controller.getActiveCell();
-  controller.setActiveCell({
-    row: activeCell.row,
-    col: nextCol(controller, activeCell.col + 1),
-    rowCount: 1,
-    colCount: 1,
-    sheetId: '',
-  });
+  controller.setNextActiveCell('right');
   recalculateScroll(controller);
 }
 
 export function handleEnterClick(controller: IController) {
   checkActiveElement(controller);
-  const activeCell = controller.getActiveCell();
-  controller.setActiveCell({
-    row: nextRow(controller, activeCell.row + 1),
-    col: activeCell.col,
-    rowCount: 1,
-    colCount: 1,
-    sheetId: '',
-  });
+  controller.setNextActiveCell('down');
   recalculateScroll(controller);
 }
 
@@ -82,7 +30,7 @@ export function computeScrollRowAndCol(
     row = 0;
     let t = top;
     while (t > 0) {
-      const a = controller.getRowHeight(row);
+      const a = controller.getRowHeight(row).len;
       if (a > t) {
         break;
       }
@@ -94,7 +42,7 @@ export function computeScrollRowAndCol(
     col = 0;
     let t = left;
     while (t > 0) {
-      const a = controller.getColWidth(col);
+      const a = controller.getColWidth(col).len;
       if (a > t) {
         break;
       }
@@ -172,11 +120,15 @@ export function scrollBar(
 
 function recalculateScroll(controller: IController) {
   const activeCell = controller.getActiveCell();
-  const position = controller.computeCellPosition(
-    activeCell.row,
-    activeCell.col,
-  );
-  const cellSize = controller.getCellSize(activeCell.row, activeCell.col);
+  const temp = {
+    row: activeCell.row,
+    col: activeCell.col,
+    colCount: 1,
+    rowCount: 1,
+    sheetId: '',
+  };
+  const position = controller.computeCellPosition(temp);
+  const cellSize = controller.getCellSize(temp);
   const domRect = controller.getDomRect();
   const oldScroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
@@ -187,7 +139,7 @@ function recalculateScroll(controller: IController) {
   if (position.left + cellSize.width + buff > domRect.width) {
     if (oldScroll.col <= sheetInfo.colCount - 2) {
       const col = oldScroll.col + 1;
-      const left = oldScroll.left + controller.getColWidth(oldScroll.col);
+      const left = oldScroll.left + controller.getColWidth(oldScroll.col).len;
       const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
       controller.setScroll({
         ...oldScroll,
@@ -201,7 +153,7 @@ function recalculateScroll(controller: IController) {
   if (position.left - headerSize.width < domRect.left + buff) {
     if (oldScroll.col >= 1) {
       const col = oldScroll.col - 1;
-      const left = oldScroll.left - controller.getColWidth(oldScroll.col);
+      const left = oldScroll.left - controller.getColWidth(oldScroll.col).len;
       const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
       controller.setScroll({
         ...oldScroll,
@@ -214,7 +166,7 @@ function recalculateScroll(controller: IController) {
   if (position.top + cellSize.height + buff > domRect.height) {
     if (oldScroll.row <= sheetInfo.rowCount - 2) {
       const row = oldScroll.row + 1;
-      const top = oldScroll.top + controller.getRowHeight(oldScroll.row);
+      const top = oldScroll.top + controller.getRowHeight(oldScroll.row).len;
       const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
       controller.setScroll({
         ...oldScroll,
@@ -228,7 +180,7 @@ function recalculateScroll(controller: IController) {
   if (position.top - headerSize.height < domRect.top + buff) {
     if (oldScroll.row >= 1) {
       const row = oldScroll.row - 1;
-      const top = oldScroll.top - controller.getRowHeight(oldScroll.row);
+      const top = oldScroll.top - controller.getRowHeight(oldScroll.row).len;
       const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
       controller.setScroll({
         ...oldScroll,
@@ -253,7 +205,7 @@ export function setActiveCellValue(controller: IController) {
   controller.setCellValues(
     [[inputDom.value]],
     [],
-    [controller.getActiveCell()],
+    [controller.getActiveRange().range],
   );
   inputDom.value = '';
   inputDom.blur();
@@ -347,14 +299,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       checkActiveElement(controller);
-      const activeCell = controller.getActiveCell();
-      controller.setActiveCell({
-        row: nextRow(controller, activeCell.row - 1, true),
-        col: activeCell.col,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: '',
-      });
+      controller.setNextActiveCell('up');
       recalculateScroll(controller);
     },
   },
@@ -376,14 +321,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       checkActiveElement(controller);
-      const activeCell = controller.getActiveCell();
-      controller.setActiveCell({
-        row: activeCell.row,
-        col: nextCol(controller, activeCell.col - 1, true),
-        rowCount: 1,
-        colCount: 1,
-        sheetId: '',
-      });
+      controller.setNextActiveCell('left');
       recalculateScroll(controller);
     },
   },

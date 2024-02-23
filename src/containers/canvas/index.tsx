@@ -52,14 +52,15 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     });
   };
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (event.buttons !== 1) {
+      return;
+    }
     const headerSize = controller.getHeaderSize();
     const rect = controller.getDomRect();
     const { clientX, clientY } = event;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
-    if (event.buttons !== 1) {
-      return;
-    }
+
     const position = getHitInfo(controller, x, y);
     if (!position) {
       return;
@@ -106,6 +107,9 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     }
   };
   const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (event.buttons !== 1) {
+      return;
+    }
     const headerSize = controller.getHeaderSize();
     const canvasRect = controller.getDomRect();
     const { timeStamp, clientX, clientY } = event;

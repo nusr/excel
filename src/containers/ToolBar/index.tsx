@@ -203,6 +203,24 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
       </Button>
       <InsertFloatingPicture controller={controller} />
       <InsertChart controller={controller} />
+      {/* <Button
+        active={isMergeCell}
+        onClick={() => {
+          const { range, isMerged } = controller.getActiveRange();
+          console.log(range, isMerged);
+          if (isMerged) {
+            controller.deleteMergeCell(range);
+          } else {
+            if (range.colCount > 1 || range.rowCount > 1) {
+              controller.addMergeCell(range);
+            }
+          }
+        }}
+        testId="toolbar-merge-cells"
+        style={{ minWidth: 80 }}
+      >
+        Merge Cells
+      </Button> */}
       <Github />
     </div>
   );

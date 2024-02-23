@@ -17,11 +17,8 @@ interface State {
 
 function scrollBar(controller: IController, scrollX: number, scrollY: number) {
   const oldScroll = controller.getScroll();
-  const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } = computeScrollPosition(
-    controller,
-    oldScroll.left,
-    oldScroll.top,
-  );
+  const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } =
+    computeScrollPosition(controller, oldScroll.left, oldScroll.top);
 
   let scrollTop = oldScroll.scrollTop + Math.ceil(scrollY);
   let scrollLeft = oldScroll.scrollLeft + Math.ceil(scrollX);
@@ -55,8 +52,14 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
     scrollStatus: ScrollStatus.NONE,
   });
   const headerSize = controller.getHeaderSize();
-  const { scrollLeft, scrollTop } = useSyncExternalStore(scrollStore.subscribe, scrollStore.getSnapshot);
+  const { scrollLeft, scrollTop } = useSyncExternalStore(
+    scrollStore.subscribe,
+    scrollStore.getSnapshot,
+  );
   function handleDrag(event: MouseEvent) {
+    if (event.buttons !== 1) {
+      return;
+    }
     event.stopPropagation();
     if (state.current.scrollStatus === ScrollStatus.VERTICAL) {
       if (state.current.prevPageY) {
@@ -74,13 +77,20 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
     state.current.scrollStatus = ScrollStatus.NONE;
     state.current.prevPageY = 0;
     state.current.prevPageX = 0;
-    tearDown();
-  }
-  function tearDown() {
     document.removeEventListener('mousemove', handleDrag);
     document.removeEventListener('mouseup', handleDragEnd);
   }
-  function register() {
+  function register(
+    event: React.MouseEvent<HTMLDivElement>,
+    status: ScrollStatus,
+  ) {
+    if (event.buttons !== 1) {
+      return;
+    }
+    if (state.current.scrollStatus) {
+      return;
+    }
+    state.current.scrollStatus = status;
     document.addEventListener('mousemove', handleDrag);
     document.addEventListener('mouseup', handleDragEnd);
   }
@@ -91,12 +101,8 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
         data-testid="vertical-scroll-bar"
         style={{ top: headerSize.height }}
         onMouseLeave={handleDragEnd}
-        onMouseDown={() => {
-          if (state.current.scrollStatus) {
-            return;
-          }
-          state.current.scrollStatus = ScrollStatus.VERTICAL;
-          register();
+        onMouseDown={(event) => {
+          register(event, ScrollStatus.VERTICAL);
         }}
       >
         <div
@@ -112,12 +118,8 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
         data-testid="horizontal-scroll-bar"
         style={{ left: headerSize.width }}
         onMouseLeave={handleDragEnd}
-        onMouseDown={() => {
-          if (state.current.scrollStatus) {
-            return;
-          }
-          state.current.scrollStatus = ScrollStatus.HORIZONTAL;
-          register();
+        onMouseDown={(event) => {
+          register(event, ScrollStatus.HORIZONTAL);
         }}
       >
         <div
