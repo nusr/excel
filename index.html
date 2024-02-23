@@ -16,7 +16,6 @@
           // esbuild hot reload
           const eventSource = new EventSource('/esbuild');
           eventSource.addEventListener('change', function () {
-            console.log('reload');
             location.reload();
           });
           eventSource.onerror = function () {
