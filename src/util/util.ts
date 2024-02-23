@@ -54,6 +54,10 @@ export function getDefaultSheetInfo(
 
 export function splitToWords(str: string): string[] {
   // unicode
+  if (!Intl || !Intl.Segmenter) {
+    // fixfox
+    return [...str];
+  }
   // graphemer
   const list = new Intl.Segmenter().segment(str);
   return [...list].map((x) => x.segment);
