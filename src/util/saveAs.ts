@@ -1,5 +1,5 @@
 export function saveAs(blob: Blob | string, fileName: string): void {
-  const link = document.createElement('a');
+  let link: HTMLAnchorElement | null = document.createElement('a');
   link.download = fileName || 'download';
   link.rel = 'noopener';
   link.target = '_blank';
@@ -9,4 +9,5 @@ export function saveAs(blob: Blob | string, fileName: string): void {
     link.href = URL.createObjectURL(blob);
   }
   link.dispatchEvent(new MouseEvent('click'));
+  link = null;
 }

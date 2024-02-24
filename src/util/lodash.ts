@@ -17,18 +17,20 @@ export function get<T>(
     obj == null
       ? undefined
       : path
-        .replace(/\[/g, '.')
-        .replace(/\]/g, '')
-        .split('.')
-        .reduce((res, key) => {
-          return res == null ? res : res[key];
-        }, obj);
+          .replace(/\[/g, '.')
+          .replace(/\]/g, '')
+          .split('.')
+          .reduce((res, key) => {
+            return res == null ? res : res[key];
+          }, obj);
   return (result === undefined ? defaultValue : result) as T;
 }
 
 export function isEmpty(value: unknown): boolean {
   const temp: any = value || {};
-  return [Object, Array].includes(temp.constructor) && !Object.entries(temp).length;
+  return (
+    [Object, Array].includes(temp.constructor) && !Object.entries(temp).length
+  );
 }
 
 export function setWith<ValueType>(
@@ -58,7 +60,12 @@ export function deepEqual(x: any, y: any) {
   if (x === y) {
     return true;
   }
-  if (typeof x === 'object' && x != null && typeof y === 'object' && y != null) {
+  if (
+    typeof x === 'object' &&
+    x != null &&
+    typeof y === 'object' &&
+    y != null
+  ) {
     if (Object.keys(x).length !== Object.keys(y).length) return false;
 
     for (const key in x) {
@@ -73,4 +80,11 @@ export function deepEqual(x: any, y: any) {
     return true;
   }
   return false;
+}
+
+export function camelCase(str: string) {
+  const a = str
+    .toLowerCase()
+    .replace(/[-_\s.]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''));
+  return a.substring(0, 1).toLowerCase() + a.substring(1);
 }

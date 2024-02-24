@@ -55,7 +55,7 @@ export const DEFAULT_FONT_CONFIG = makeFont(
   npx(DEFAULT_FONT_SIZE),
 );
 
-export function convertCanvasStyleToString(style: Partial<StyleType>): string {
+export function convertToCssString(style: Partial<StyleType>): string {
   let result = '';
   if (style.fontColor) {
     result += `color:${style.fontColor};`;
@@ -92,9 +92,8 @@ export function convertCanvasStyleToString(style: Partial<StyleType>): string {
   return result;
 }
 
-function convertCSSStyleToCanvasStyle(
+function pickCSSStyle(
   style: Partial<CSSStyleDeclaration>,
-  selectorCSSText: string,
 ): Partial<StyleType> {
   const {
     color,
@@ -144,10 +143,7 @@ function convertCSSStyleToCanvasStyle(
   }
   if (textDecorationLine?.includes('underline')) {
     result.underline = EUnderLine.SINGLE;
-    if (
-      selectorCSSText.includes('text-underline-style:double') ||
-      textDecorationStyle === 'double'
-    ) {
+    if (textDecorationStyle === 'double') {
       result.underline = EUnderLine.DOUBLE;
     }
   }
@@ -158,23 +154,24 @@ function convertCSSStyleToCanvasStyle(
 }
 
 export function parseStyle(
-  styleList: NodeListOf<HTMLStyleElement>,
+  styleMap: Record<string, CSSStyleDeclaration>,
   style: CSSStyleDeclaration,
-  selector: string,
+  className: string,
   tagName: string,
 ): Partial<StyleType> {
   let result: Partial<StyleType> = {};
-  const cssStyle = styleList[0];
-  if (cssStyle && cssStyle.sheet?.cssRules) {
-    for (const rule of cssStyle.sheet.cssRules) {
-      if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
-        result = convertCSSStyleToCanvasStyle(rule.style, rule.cssText);
-        break;
-      }
-    }
+  const t = styleMap[tagName] || styleMap[tagName.toLowerCase()];
+  if (t) {
+    result = pickCSSStyle(t);
+  }
+  if (styleMap[className]) {
+    result = Object.assign(
+      result,
+      pickCSSStyle(styleMap[className]),
+    );
   }
 
-  result = Object.assign(result, convertCSSStyleToCanvasStyle(style, ''));
+  result = Object.assign(result, pickCSSStyle(style));
 
   if (tagName === 's' || tagName === 'strike') {
     result.isStrike = true;
@@ -186,4 +183,70 @@ export function parseStyle(
     result.underline = EUnderLine.SINGLE;
   }
   return result;
+}
+
+function convertToCssStyleDeclaration(cssStr: string) {
+  const str = cssStr.replace(/\s+/g, '').replace('<!--', '');
+  const regex = /([^{}]+)\s*\{([^}]*)\}/g;
+  const matches: Record<string, CSSStyleDeclaration> = {};
+  let match;
+  while ((match = regex.exec(str)) !== null) {
+    let div: HTMLDivElement | null = document.createElement('div');
+    div.style.cssText = match[2];
+    matches[match[1].trim()] = div.style;
+    div = null;
+  }
+  return matches;
+}
+
+export function parseHTML(html: string) {
+  let template: HTMLTemplateElement | null = document.createElement('template');
+  template.innerHTML = html;
+  const doc = template.content;
+  const styleMap: Record<string, CSSStyleDeclaration> = {};
+  for (const item of doc.querySelectorAll('style')) {
+    const temp = convertToCssStyleDeclaration(item.textContent || '');
+    for (const [key, value] of Object.entries(temp)) {
+      styleMap[key] = Object.assign(styleMap[key] || {}, value);
+    }
+  }
+  const textList: string[][] = [];
+  const styleList: Array<Array<Partial<StyleType>>> = [];
+  // TODO col width and row height
+  // const colList = doc.querySelectorAll('col');
+  const trList = doc.querySelectorAll('tr');
+  for (const tr of trList) {
+    const texts: string[] = [];
+    const list: Array<Partial<StyleType>> = [];
+    for (const td of tr.children) {
+      if (td.tagName !== 'TD') {
+        continue;
+      }
+      let temp = td as HTMLElement;
+      let itemStyle: Partial<StyleType> = {};
+      while (temp.nodeType !== Node.TEXT_NODE) {
+        const style = parseStyle(
+          styleMap,
+          temp.style,
+          temp.className ? `.${temp.className}` : '',
+          temp.tagName,
+        );
+        itemStyle = Object.assign(itemStyle, style);
+        if (temp.firstChild) {
+          temp = temp.firstChild as HTMLElement;
+        } else {
+          break;
+        }
+      }
+      list.push(itemStyle);
+      texts.push(temp.textContent || '');
+    }
+    textList.push(texts);
+    styleList.push(list);
+  }
+  template = null;
+  return {
+    textList,
+    styleList,
+  };
 }

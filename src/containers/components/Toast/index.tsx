@@ -28,15 +28,19 @@ const Toast: React.FunctionComponent<Pick<Props, 'message' | 'type'>> = ({
 
 export function toast(props: Props) {
   const { duration = 3, ...rest } = props;
-  const container = document.createElement('div');
+  let container: HTMLDivElement | null = document.createElement('div');
   container.className = styles['container'];
   document.body.appendChild(container);
   const root = createRoot(container);
   root.render(<Toast {...rest} />);
 
   function close() {
+    if (!container) {
+      return;
+    }
     root.unmount();
-    document.body.removeChild(container);
+    document.body.removeChild(container!);
+    container = null;
   }
 
   setTimeout(close, duration * 1000);

@@ -23,11 +23,12 @@ import {
   PLAIN_FORMAT,
   HTML_FORMAT,
   generateHTML,
-  convertCanvasStyleToString,
+  convertToCssString,
   parseStyle,
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
   containRange,
+  parseHTML,
 } from '@/util';
 
 const defaultScrollValue: ScrollValue = {
@@ -645,48 +646,13 @@ export class Controller implements IController {
     };
   }
   private parseHTML(htmlString: string) {
-    const parser = new DOMParser();
-    const text = htmlString
-      .replace('<style>\r\n<!--table', '<style>')
-      .replace('-->\r\n</style>', '</style>');
-    const doc = parser.parseFromString(text, 'text/html');
-    const trList = doc.querySelectorAll('tr');
-    const styleList = doc.querySelectorAll('style');
-    const result: string[][] = [];
-    const resultStyle: Array<Array<Partial<StyleType>>> = [];
-    const rowCount = trList.length;
-    let colCount = 0;
-    for (const item of trList) {
-      const tdList = item.querySelectorAll('td');
-      const textList: string[] = [];
-      const list: Array<Partial<StyleType>> = [];
-      for (const td of tdList) {
-        let temp: HTMLElement = td;
-        let itemStyle: Partial<StyleType> = {};
-        while (temp.nodeType !== Node.TEXT_NODE) {
-          const tagName = temp.tagName.toLowerCase();
-          const sel = temp.className ? `.${temp.className}` : tagName;
-          const style = parseStyle(styleList, temp.style, sel, tagName);
-          itemStyle = Object.assign(itemStyle, style);
-          if (temp.firstChild) {
-            temp = temp.firstChild as HTMLElement;
-          } else {
-            break;
-          }
-        }
-        list.push(itemStyle);
-        textList.push(temp.textContent || '');
-      }
-      result.push(textList);
-      resultStyle.push(list);
-      if (textList.length > colCount) {
-        colCount = textList.length;
-      }
-    }
+    const { textList, styleList } = parseHTML(htmlString);
+    const rowCount = textList.length;
     const activeCell = this.getActiveCell();
+    const colCount = Math.max(...textList.map((v) => v.length));
     return {
-      value: result,
-      style: resultStyle,
+      value: textList,
+      style: styleList,
       range: {
         ...activeCell,
         rowCount,
@@ -713,7 +679,7 @@ export class Controller implements IController {
         const str = String(a.value || '');
         temp.push(str);
         if (a.style) {
-          let text = convertCanvasStyleToString(a.style);
+          let text = convertToCssString(a.style);
           if (!str) {
             // copy background-color
             text += 'mso-pattern:black none;';

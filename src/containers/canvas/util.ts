@@ -204,9 +204,10 @@ const handleStateChange = (
   }
 };
 export function initCanvas(controller: IController): () => void {
+  let contentCanvas: HTMLCanvasElement | null = createCanvas();
   const mainCanvas = new MainCanvas(
     controller,
-    new Content(controller, createCanvas()),
+    new Content(controller, contentCanvas),
   );
   const render = (changeSet: Set<ChangeEventType>) => {
     mainCanvas.render({ changeSet });
@@ -239,5 +240,8 @@ export function initCanvas(controller: IController): () => void {
   handleStateChange(changeSet, controller);
   resize(changeSet);
 
-  return removeEvent;
+  return () => {
+    removeEvent();
+    contentCanvas = null;
+  };
 }
