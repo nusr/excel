@@ -12,6 +12,7 @@ import {
   QUERY_ALL_LOCAL_FONT,
   LOCAL_FONT_KEY,
   isSupportFontFamily,
+  isMobile,
 } from '@/util';
 import { StyleType, EUnderLine, OptionItem, IController } from '@/types';
 import styles from './index.module.css';
@@ -59,7 +60,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
     fontFamilyStore.subscribe,
     fontFamilyStore.getSnapshot,
   );
-  const getItemStyle = (value: string | number): any => {
+  const getItemStyle = (value: string | number): React.CSSProperties => {
     return {
       fontFamily: String(value),
       fontSize: '16px',
@@ -88,21 +89,31 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
   } = activeCell;
   const handleFontFamilyChange = (value: string | number) => {
     const t = String(value);
-    if (t === QUERY_ALL_LOCAL_FONT) {
-      (window as any).queryLocalFonts().then((list: any[]) => {
-        let fontList = list.map((v) => v.fullName);
-        fontList = Array.from(new Set(fontList)).filter((v) =>
-          isSupportFontFamily(v),
-        );
-        fontList.sort((a, b) => a.localeCompare(b));
-        localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(fontList));
-        const l = fontList.map((v) => ({
-          label: v,
-          value: v,
-          disabled: false,
-        }));
-        fontFamilyStore.setState(l);
-      });
+    const queryLocalFonts = (window as any).queryLocalFonts;
+    if (t === QUERY_ALL_LOCAL_FONT && typeof queryLocalFonts === 'function') {
+      queryLocalFonts().then(
+        (
+          list: Array<{
+            fullName: string;
+            family: string;
+            postscriptName: string;
+            style: string;
+          }>,
+        ) => {
+          let fontList = list.map((v) => v.fullName);
+          fontList = Array.from(new Set(fontList)).filter((v) =>
+            isSupportFontFamily(v),
+          );
+          fontList.sort((a, b) => a.localeCompare(b));
+          localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(fontList));
+          const l = fontList.map((v) => ({
+            label: v,
+            value: v,
+            disabled: false,
+          }));
+          fontFamilyStore.setState(l);
+        },
+      );
     } else {
       setCellStyle({ fontFamily: String(value) });
     }
@@ -134,6 +145,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
       <Button onClick={() => controller.paste()} testId="toolbar-paste">
         Paste
       </Button>
+
       <Select
         data={fontFamilyList}
         value={fontFamily}
@@ -202,7 +214,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         Wrap Text
       </Button>
       <InsertFloatingPicture controller={controller} />
-      <InsertChart controller={controller} />
+      {isMobile() ? null : <InsertChart controller={controller} />}
       {/* <Button
         active={isMergeCell}
         onClick={() => {
@@ -211,9 +223,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
           if (isMerged) {
             controller.deleteMergeCell(range);
           } else {
-            if (range.colCount > 1 || range.rowCount > 1) {
-              controller.addMergeCell(range);
-            }
+            controller.addMergeCell(range);
           }
         }}
         testId="toolbar-merge-cells"

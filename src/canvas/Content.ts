@@ -30,7 +30,7 @@ export class Content implements ContentView {
       changeSet.has('row') ||
       changeSet.has('col') ||
       changeSet.has('sheetList') ||
-      changeSet.has('currentSheetId') ||
+      changeSet.has('sheetId') ||
       changeSet.has('cellStyle') ||
       changeSet.has('cellValue') ||
       changeSet.has('scroll');

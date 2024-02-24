@@ -1,10 +1,12 @@
 .toolbar-wrapper {
-  padding: var(--mediumPadding) var(--largePadding);
+  padding: var(--mediumPadding) var(--largePadding) 0 var(--largePadding);
   box-sizing: border-box;
   border-bottom: 1px solid var(--gridStrokeColor);
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 .toolbar-wrapper > * {
   margin-right: 8px;
+  margin-bottom: var(--mediumPadding);
 }

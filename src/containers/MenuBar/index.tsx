@@ -33,7 +33,11 @@ export const MenuBarContainer: React.FunctionComponent<Props> = ({
   };
   return (
     <div className={styles.menubar} data-testid="menubar">
-      <Menu menuButton={<Button>Menu</Button>} style={menuStyle}>
+      <Menu
+        menuButton={<Button>Menu</Button>}
+        style={menuStyle}
+        testId="menubar-excel"
+      >
         <MenuItem testId="menubar-import-xlsx">
           <input
             type="file"

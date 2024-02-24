@@ -17,16 +17,6 @@ function select(element: HTMLTextAreaElement) {
   return element.value;
 }
 
-export function isSupported(action = ['copy', 'cut']): boolean {
-  const actions = typeof action === 'string' ? [action] : action;
-  let support = !!document.queryCommandSupported;
-  for (const v of actions) {
-    support = support && !!document.queryCommandSupported(v);
-  }
-
-  return support;
-}
-
 function createFakeElement(value: string) {
   const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
   const fakeElement = document.createElement('textarea');
@@ -56,7 +46,7 @@ function writeDataToClipboard(textData: ClipboardData) {
     result[key] = new Blob([textData[key]], { type: key });
   }
   const data = [new ClipboardItem(result)];
-  return navigator.clipboard.write(data);
+  return navigator?.clipboard?.write(data);
 }
 
 async function readDataFromClipboard(): Promise<ClipboardData> {
@@ -64,7 +54,7 @@ async function readDataFromClipboard(): Promise<ClipboardData> {
     [HTML_FORMAT]: '',
     [PLAIN_FORMAT]: '',
   };
-  const list = await navigator.clipboard.read();
+  const list = (await navigator?.clipboard?.read()) || [];
   for (const item of list) {
     if (item.types.includes(PLAIN_FORMAT)) {
       const buf = await item.getType(PLAIN_FORMAT);
@@ -78,7 +68,11 @@ async function readDataFromClipboard(): Promise<ClipboardData> {
   return result;
 }
 
-const fakeCopyAction = (value: string, container: HTMLElement, type: 'copy' | 'cut') => {
+const fakeCopyAction = (
+  value: string,
+  container: HTMLElement,
+  type: 'copy' | 'cut',
+) => {
   const fakeElement = createFakeElement(value);
   container.appendChild(fakeElement);
   const selectedText = select(fakeElement);
@@ -88,7 +82,10 @@ const fakeCopyAction = (value: string, container: HTMLElement, type: 'copy' | 'c
   return selectedText;
 };
 
-export async function copyOrCut(textData: ClipboardData, type: 'cut' | 'copy'): Promise<string> {
+export async function copyOrCut(
+  textData: ClipboardData,
+  type: 'cut' | 'copy',
+): Promise<string> {
   try {
     await writeDataToClipboard(textData);
     return textData[PLAIN_FORMAT];
@@ -103,7 +100,7 @@ export async function paste(): Promise<ClipboardData> {
     return readDataFromClipboard();
   } catch (error) {
     console.error(error);
-    const result = await navigator.clipboard.readText();
+    const result = (await navigator?.clipboard?.readText()) || '';
     return {
       [HTML_FORMAT]: '',
       [PLAIN_FORMAT]: result,

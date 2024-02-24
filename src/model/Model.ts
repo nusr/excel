@@ -30,6 +30,7 @@ import {
   modelLog,
   FORMULA_PREFIX,
   HIDE_CELL,
+  isEmpty,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 import * as Y from 'yjs';
@@ -135,10 +136,9 @@ export class Model implements IModel {
   }
   setActiveCell(range: IRange): void {
     const list = this.getSheetList();
-    const index = list.findIndex((v) => v.sheetId === range.sheetId);
-    if (index < 0) {
-      return;
-    }
+    const sheetId = range.sheetId || this.currentSheetId;
+    const index = list.findIndex((v) => v.sheetId === sheetId);
+    assert(index >= 0, 'can not find sheet');
     const { row, col } = range;
     const sheet = list[index];
     if (row < 0 || col < 0 || row >= sheet.rowCount || col >= sheet.colCount) {
@@ -166,12 +166,15 @@ export class Model implements IModel {
         sheetId: item.sheetId,
       },
     };
-    const index = list.findIndex((v) => v.sheetId === this.currentSheetId);
-    if (index < 0) {
-      this.workbook.push([sheet]);
-    } else {
-      this.workbook.insert(index + 1, [sheet]);
-    }
+    let check = false;
+    this.workbook.forEach((v) => {
+      if (v.sheetId === sheet.sheetId) {
+        check = true;
+        return;
+      }
+    });
+    assert(!check, 'The sheet id is duplicate');
+    this.workbook.push([sheet]);
     this.currentSheetId = sheet.sheetId;
     this.setSheetData(sheet.sheetId, {});
   }
@@ -219,24 +222,27 @@ export class Model implements IModel {
       }
       assert(false, 'Cannot rename a sheet to the same name as another sheet');
     }
-    const index = sheetList.findIndex(
-      (v) => v.sheetId === (sheetId || this.currentSheetId),
-    );
+    const id = sheetId || this.currentSheetId;
+    const index = sheetList.findIndex((v) => v.sheetId === id);
     const sheetInfo = this.workbook.get(index);
+    if (sheetInfo.name === sheetName) {
+      return;
+    }
     sheetInfo.name = sheetName;
   }
   getSheetInfo(id?: string): WorksheetType {
     const list = this.getSheetList();
     const sheetId = id || this.currentSheetId;
     const item = list.find((v) => v.sheetId === sheetId);
-    assert(item !== undefined);
+    assert(!!item);
+    item.sheetId = sheetId;
     return item;
   }
   setCurrentSheetId(id: string): void {
     this.currentSheetId = id;
   }
   getCurrentSheetId(): string {
-    return this.model.get('currentSheetId') || '';
+    return this.currentSheetId;
   }
   private get currentSheetId() {
     return this.model.get('currentSheetId') || '';
@@ -256,7 +262,7 @@ export class Model implements IModel {
       drawings = [],
     } = json;
     this.workbook = workbook;
-    this.currentSheetId = currentSheetId || this.getSheetId();
+
     this.mergeCells = mergeCells;
     this.customWidth = customWidth;
     this.customHeight = customHeight;
@@ -267,7 +273,7 @@ export class Model implements IModel {
         this.model.set(key, new Y.Map<ModelCellType>(Object.entries(value)));
       }
     }
-
+    this.currentSheetId = currentSheetId || this.getSheetId();
     this.undoManager.clear(true, true);
   };
   toJSON = (): WorkBookJSON => {
@@ -295,6 +301,9 @@ export class Model implements IModel {
     style: Array<Array<Partial<StyleType>>>,
     ranges: IRange[],
   ): void {
+    if (isEmpty(value)) {
+      return;
+    }
     const [range] = ranges;
     const { row, col } = range;
     for (let r = 0; r < value.length; r++) {
@@ -318,6 +327,9 @@ export class Model implements IModel {
   }
 
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
+    if (isEmpty(style)) {
+      return;
+    }
     const [range] = ranges;
     const { row, col, rowCount, colCount } = range;
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {
@@ -645,6 +657,7 @@ export class Model implements IModel {
       if (isCut) {
         fromSheetData.delete(oldPath);
       }
+      return false;
     });
 
     return realRange;
@@ -709,7 +722,8 @@ export class Model implements IModel {
       this.definedNames.delete(oldName);
     }
     const result: IRange = {
-      ...range,
+      row: range.row,
+      col: range.col,
       sheetId: this.currentSheetId,
       colCount: 1,
       rowCount: 1,
@@ -765,16 +779,23 @@ export class Model implements IModel {
       }
     }
   }
-  private iterateRange(range: IRange, fn: (row: number, col: number) => void) {
+  private iterateRange(
+    range: IRange,
+    fn: (row: number, col: number) => boolean,
+  ) {
     const { row, col, rowCount, colCount, sheetId } = range;
     const sheetInfo = this.getSheetInfo(sheetId);
     if (colCount === 0 && rowCount > 0) {
       for (let r = row, endRow = row + sheetInfo.rowCount; r < endRow; r++) {
-        fn(r, col);
+        if (fn(r, col)) {
+          break;
+        }
       }
     } else if (rowCount === 0 && colCount > 0) {
       for (let c = col, endCol = col + sheetInfo.colCount; c < endCol; c++) {
-        fn(row, c);
+        if (fn(row, c)) {
+          break;
+        }
       }
     } else {
       for (
@@ -787,7 +808,9 @@ export class Model implements IModel {
           c < endCol;
           c++
         ) {
-          fn(r, c);
+          if (fn(r, c)) {
+            return;
+          }
         }
       }
     }
@@ -808,6 +831,7 @@ export class Model implements IModel {
             if (temp) {
               result.push(temp.value);
             }
+            return false;
           });
           return result;
         },
@@ -836,10 +860,15 @@ export class Model implements IModel {
     const list = this.getSheetList();
     const index = list.findIndex((item) => item.sheetId === id);
     assert(index >= 0);
-    let lastIndex = (index + 1) % list.length;
+    const isLast = index === list.length - 1;
+    let lastIndex = isLast
+      ? (index - 1 + list.length) % list.length
+      : (index + 1) % list.length;
     while (lastIndex !== index) {
       if (list[lastIndex].isHide) {
-        lastIndex = (lastIndex + 1) % list.length;
+        lastIndex = isLast
+          ? (lastIndex - 1 + list.length) % list.length
+          : (lastIndex + 1) % list.length;
       } else {
         break;
       }
@@ -872,6 +901,36 @@ export class Model implements IModel {
     return this.drawings.toArray().filter((v) => v.sheetId === id);
   }
   addFloatElement(data: FloatElement) {
+    let checkUuid = false;
+    this.drawings.forEach((item) => {
+      if (item.uuid === data.uuid) {
+        checkUuid = true;
+        return;
+      }
+    });
+    assert(!checkUuid, 'The uuid is duplicate');
+    if (data.type === 'chart') {
+      const range = data.chartRange!;
+      let check = false;
+      this.iterateRange(range, (row: number, col: number) => {
+        const data = this.getCell({
+          row,
+          col,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: '',
+        });
+        if (data?.value) {
+          check = true;
+          return true;
+        } else {
+          return false;
+        }
+      });
+      assert(check, 'The cells must contain the data');
+    } else if (data.type === 'floating-picture') {
+      assert(!!data.imageSrc, 'Image is empty');
+    }
     this.drawings.push([data]);
   }
   updateFloatElement<T extends keyof FloatElement>(
@@ -880,9 +939,7 @@ export class Model implements IModel {
     value: FloatElement[T],
   ) {
     const i = this.drawings.toArray().findIndex((v) => v.uuid === uuid);
-    if (i < 0) {
-      return;
-    }
+    assert(i >= 0, 'can not find float element');
     this.drawings.get(i)[key] = value;
   }
   deleteFloatElement(uuid: string) {
@@ -902,8 +959,18 @@ export class Model implements IModel {
     return this.mergeCells.toArray().filter((v) => v.sheetId === id);
   }
   addMergeCell(range: IRange): void {
-    range.sheetId = range.sheetId || this.currentSheetId;
-    this.mergeCells.push([range]);
+    if (range.colCount > 1 || range.rowCount > 1) {
+      range.sheetId = range.sheetId || this.currentSheetId;
+      let check = false;
+      this.mergeCells.forEach((v) => {
+        if (isSameRange(v, range)) {
+          check = true;
+          return;
+        }
+      });
+      assert(!check, 'The merging cell is duplicate');
+      this.mergeCells.push([range]);
+    }
   }
   deleteMergeCell(range: IRange): void {
     range.sheetId = range.sheetId || this.currentSheetId;

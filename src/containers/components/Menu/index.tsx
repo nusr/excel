@@ -15,6 +15,7 @@ type SubMenuProps = {
 type MenuProps = {
   menuButton: React.ReactElement;
   style?: React.CSSProperties;
+  testId?: string;
 };
 export const MenuItem: FunctionComponent<
   React.PropsWithChildren<MenuItemProps>
@@ -53,6 +54,7 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = ({
   menuButton,
   children,
   style,
+  testId,
 }) => {
   const [open, setOpen] = useState(false);
   const handleClick = () => {
@@ -60,11 +62,10 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = ({
   };
   const [ref] = useClickOutside(() => setOpen(false));
   return (
-    <div
-      className={styles.container}
-      ref={ref}
-    >
-      <div onClick={handleClick}>{menuButton}</div>
+    <div className={styles.container} ref={ref}>
+      <div onClick={handleClick} data-testid={testId}>
+        {menuButton}
+      </div>
       {open && (
         <div
           className={classnames(styles.menuContainer, styles.portal)}

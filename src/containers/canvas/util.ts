@@ -173,7 +173,7 @@ const handleStateChange = (
     changeSet.has('cellValue') ||
     changeSet.has('row') ||
     changeSet.has('col') ||
-    changeSet.has('currentSheetId') ||
+    changeSet.has('sheetId') ||
     changeSet.has('scroll')
   ) {
     const list = controller.getFloatElementList(controller.getCurrentSheetId());
@@ -230,7 +230,7 @@ export function initCanvas(controller: IController): () => void {
   });
 
   const changeSet = new Set<ChangeEventType>([
-    'currentSheetId',
+    'sheetId',
     'scroll',
     'range',
     'sheetList',

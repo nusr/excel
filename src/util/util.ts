@@ -121,3 +121,17 @@ export function generateUUID() {
 
   return uuid;
 }
+
+export function isMobile() {
+  const matchList = [
+    /Android/i,
+    /webOS/i,
+    /iPhone/i,
+    /iPad/i,
+    /iPod/i,
+    /BlackBerry/i,
+    /Windows Phone/i,
+  ];
+  const ua = navigator.userAgent;
+  return matchList.some((v) => ua.match(v));
+}

@@ -11,7 +11,7 @@ type FloatElementProps = FloatElementItem & { controller: IController };
 export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
   (props) => {
     const { controller, uuid, fromRow, fromCol, top, left } = props;
-    const isMouseDown = useRef(false);
+    const isPointerDown = useRef(false);
     const latestPosition = useRef({ top: -1, left: -1 });
     const preMovePosition = useRef({
       x: 0,
@@ -29,15 +29,15 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
       setPosition({ top, left });
     }, [top, left]);
     useEffect(() => {
-      document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('pointerup', handlePointerUp);
+      document.addEventListener('pointermove', handlePointerMove);
       return () => {
-        document.removeEventListener('mouseup', handleMouseUp);
-        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('pointerup', handlePointerUp);
+        document.removeEventListener('pointermove', handlePointerMove);
       };
     }, []);
-    const handleMouseUp = (event: MouseEvent) => {
-      isMouseDown.current = false;
+    const handlePointerUp = (event: PointerEvent) => {
+      isPointerDown.current = false;
       preMovePosition.current = {
         x: 0,
         y: 0,
@@ -70,24 +70,24 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
       };
     };
 
-    const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
       if (event.buttons !== 1) {
         return;
       }
       event.preventDefault();
       event.stopPropagation();
-      isMouseDown.current = true;
+      isPointerDown.current = true;
       preMovePosition.current = {
         x: event.clientX,
         y: event.clientY,
       };
     };
 
-    const handleMouseMove = (event: MouseEvent) => {
+    const handlePointerMove = (event: PointerEvent) => {
       if (event.buttons !== 1) {
         return;
       }
-      if (!isMouseDown.current) {
+      if (!isPointerDown.current) {
         return;
       }
       const diffX = event.clientX - preMovePosition.current.x;
@@ -145,7 +145,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
     return (
       <React.Fragment>
         <div
-          onMouseDown={handleMouseDown}
+          onPointerDown={handlePointerDown}
           onContextMenu={handleContextMenu}
           className={styles['float-element']}
           style={{

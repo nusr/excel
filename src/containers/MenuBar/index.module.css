@@ -1,4 +1,12 @@
 .menubar {
   border-bottom: 1px solid var(--borderColor);
-  padding: var(--mediumPadding) var(--largePadding);
+  padding: var(--mediumPadding) var(--largePadding) 0 var(--largePadding);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.menubar > * {
+  margin-right: 8px;
+  margin-bottom: var(--mediumPadding);
 }

@@ -12,6 +12,7 @@
   align-items: center;
   height: 30px;
   line-height: 30px;
+  overflow: auto;
 }
 
 .sheet-bar-item {

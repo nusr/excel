@@ -56,7 +56,7 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
     scrollStore.subscribe,
     scrollStore.getSnapshot,
   );
-  function handleDrag(event: MouseEvent) {
+  function handleDrag(event: PointerEvent) {
     if (event.buttons !== 1) {
       return;
     }
@@ -77,11 +77,11 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
     state.current.scrollStatus = ScrollStatus.NONE;
     state.current.prevPageY = 0;
     state.current.prevPageX = 0;
-    document.removeEventListener('mousemove', handleDrag);
-    document.removeEventListener('mouseup', handleDragEnd);
+    document.removeEventListener('pointermove', handleDrag);
+    document.removeEventListener('pointerup', handleDragEnd);
   }
   function register(
-    event: React.MouseEvent<HTMLDivElement>,
+    event: React.PointerEvent<HTMLDivElement>,
     status: ScrollStatus,
   ) {
     if (event.buttons !== 1) {
@@ -91,8 +91,8 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
       return;
     }
     state.current.scrollStatus = status;
-    document.addEventListener('mousemove', handleDrag);
-    document.addEventListener('mouseup', handleDragEnd);
+    document.addEventListener('pointermove', handleDrag);
+    document.addEventListener('pointerup', handleDragEnd);
   }
   return (
     <Fragment>
@@ -100,8 +100,8 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
         className={styles['vertical-scroll-bar']}
         data-testid="vertical-scroll-bar"
         style={{ top: headerSize.height }}
-        onMouseLeave={handleDragEnd}
-        onMouseDown={(event) => {
+        onPointerLeave={handleDragEnd}
+        onPointerDown={(event) => {
           register(event, ScrollStatus.VERTICAL);
         }}
       >
@@ -117,8 +117,8 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
         className={styles['horizontal-scroll-bar']}
         data-testid="horizontal-scroll-bar"
         style={{ left: headerSize.width }}
-        onMouseLeave={handleDragEnd}
-        onMouseDown={(event) => {
+        onPointerLeave={handleDragEnd}
+        onPointerDown={(event) => {
           register(event, ScrollStatus.HORIZONTAL);
         }}
       >

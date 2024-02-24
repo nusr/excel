@@ -1,8 +1,13 @@
 import { WorkBookJSON, EUnderLine } from '@/types';
-import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT, generateUUID } from '@/util';
+import {
+  DEFAULT_ROW_COUNT,
+  DEFAULT_COL_COUNT,
+  generateUUID,
+  isMobile,
+} from '@/util';
 import { mockImage } from './mockData';
 
-export const MOCK_MODEL: WorkBookJSON = {
+const MOCK_MODEL: WorkBookJSON = {
   currentSheetId: '',
   workbook: [
     {
@@ -221,7 +226,11 @@ export const MOCK_MODEL: WorkBookJSON = {
       sheetId: '1',
     },
   },
-  drawings: [
+  drawings: [],
+};
+
+if (!isMobile()) {
+  MOCK_MODEL.drawings.push(
     {
       title: 'lyf',
       type: 'floating-picture',
@@ -230,8 +239,8 @@ export const MOCK_MODEL: WorkBookJSON = {
       width: 200,
       height: 266,
       sheetId: '1',
-      fromCol: 1,
-      fromRow: 1,
+      fromCol: 3,
+      fromRow: 2,
       top: -1,
       left: -1,
     },
@@ -244,8 +253,8 @@ export const MOCK_MODEL: WorkBookJSON = {
       top: -1,
       left: -1,
       sheetId: '1',
-      fromCol: 4,
-      fromRow: 4,
+      fromCol: 6,
+      fromRow: 3,
       chartType: 'bar',
       chartRange: {
         row: 6,
@@ -255,5 +264,7 @@ export const MOCK_MODEL: WorkBookJSON = {
         sheetId: '1',
       },
     },
-  ],
-};
+  );
+}
+
+export { MOCK_MODEL };

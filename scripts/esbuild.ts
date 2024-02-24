@@ -1,8 +1,9 @@
 import { build, BuildOptions, context } from 'esbuild';
 import packageJson from '../package.json';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 import { parseArgs } from 'util';
+import { networkInterfaces } from 'os';
 
 const { values: envConfig } = parseArgs({
   options: {
@@ -151,6 +152,21 @@ async function buildProd() {
   return list;
 }
 
+function getIp() {
+  const localIPs = networkInterfaces();
+  for (const key of Object.keys(localIPs)) {
+    if (!localIPs || !localIPs[key]) {
+      continue;
+    }
+    for (const iface of localIPs[key]!) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return '';
+}
+
 async function buildDev() {
   const options = buildESM('');
   const ctx = await context({
@@ -165,9 +181,9 @@ async function buildDev() {
     servedir: distDir,
   });
   fs.writeFileSync(path.join(process.cwd(), 'port.txt'), String(port), 'utf-8');
-  const url = `http://localhost:${port}`;
 
-  console.log(url);
+  console.log(`http://localhost:${port}`);
+  console.log(`http://${getIp()}:${port}`);
 }
 
 async function init() {

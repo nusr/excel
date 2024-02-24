@@ -6,6 +6,7 @@
   left: 0;
   border: 1px solid var(--borderColor);
   background-color: var(--white);
+  z-index: var(--lowZIndex);
 }
 .float-element:hover {
   border-style: dashed;
@@ -19,7 +20,7 @@
   background-color: var(--white);
   border-radius: var(--borderRadius);
   width: 150px;
-  z-index: var(--lowZIndex);
+  z-index: var(--middleZIndex);
 }
 
 .context-menu > button {

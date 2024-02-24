@@ -10,17 +10,17 @@ describe('menubar.test', () => {
   });
 
   test(`test menubar click`, async () => {
-    await clickDom('menubar');
-    await checkExist('menubar-import-xlsx');
+    await clickDom('menubar-excel');
     await checkExist('menubar-export');
+    await checkExist('menubar-import-xlsx');
   });
 
   test(`test menubar submenu`, async () => {
-    await clickDom('menubar');
+    await clickDom('menubar-excel');
 
     await clickDom('menubar-export');
 
-    await checkExist('menubar-import-xlsx');
+    await checkExist('menubar-export-xlsx');
     await checkExist('menubar-export-csv');
   });
 });

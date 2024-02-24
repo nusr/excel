@@ -2,36 +2,52 @@ import { MUST_FONT_FAMILY } from './style';
 import { OptionItem } from '@/types';
 import { FONT_FAMILY_LIST, LOCAL_FONT_KEY, QUERY_ALL_LOCAL_FONT } from './font';
 
-function SupportFontFamilyFactory(body = document.body) {
-  const monoFont = 'monospace';
-  const serifFont = 'serif';
-  const container = document.createElement('span');
-  container.innerHTML = '测试a11';
-  container.style.cssText = ['position:absolute', 'width:auto', 'font-size:128px', 'left:-99999px'].join(
-    ' !important;',
-  );
+export function SupportFontFamilyFactory() {
+  // a font will be compared against all the three default fonts.
+  // and if it doesn't match all 3 then that font is not available.
+  const baseFonts = ['monospace', MUST_FONT_FAMILY, 'serif'];
 
-  const getWidth = function (fontFamily: string) {
-    container.style.fontFamily = fontFamily;
-    body.appendChild(container);
-    const width = container.clientWidth;
-    body.removeChild(container);
-    return width;
-  };
+  //we use m or w because these two characters take up the maximum width.
+  // And we use a LLi so that the same matching fonts can get separated
+  const testString = 'mmmmmmmmmmlli';
 
-  const monoWidth = getWidth(monoFont);
-  const serifWidth = getWidth(serifFont);
-  const sansWidth = getWidth(MUST_FONT_FAMILY);
+  //we test using 72px font size, we may use any size. I guess larger the better.
+  const testSize = '72px';
 
-  const isSupportFontFamily = function (fontFamily: string) {
-    return (
-      monoWidth !== getWidth(`${fontFamily},${monoFont}`) ||
-      sansWidth !== getWidth(`${fontFamily},${MUST_FONT_FAMILY}`) ||
-      serifWidth !== getWidth(`${fontFamily},${serifFont}`)
-    );
-  };
-  return isSupportFontFamily;
+  const h = document.getElementsByTagName('body')[0];
+
+  // create a SPAN in the document to get the width of the text we use to test
+  const s = document.createElement('span');
+  s.style.fontSize = testSize;
+  s.innerHTML = testString;
+  const defaultWidth: Record<string, number> = {};
+  const defaultHeight: Record<string, number> = {};
+  for (const item of baseFonts) {
+    //get the default width for the three base fonts
+    s.style.fontFamily = item;
+    h.appendChild(s);
+    defaultWidth[item] = s.offsetWidth; //width for the default font
+    defaultHeight[item] = s.offsetHeight; //height for the defualt font
+    h.removeChild(s);
+  }
+
+  function detect(font: string) {
+    let detected = false;
+    for (const item of baseFonts) {
+      s.style.fontFamily = font + ',' + item; // name of the font along with the base font for fallback.
+      h.appendChild(s);
+      const matched =
+        s.offsetWidth != defaultWidth[item] ||
+        s.offsetHeight != defaultHeight[item];
+      h.removeChild(s);
+      detected = detected || matched;
+    }
+    return detected;
+  }
+
+  return detect;
 }
+
 const isSupportFontFamily = SupportFontFamilyFactory();
 export { isSupportFontFamily };
 

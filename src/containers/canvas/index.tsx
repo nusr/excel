@@ -51,7 +51,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
       left: DEFAULT_POSITION,
     });
   };
-  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
     if (event.buttons !== 1) {
       return;
     }
@@ -106,7 +106,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
       return;
     }
   };
-  const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
     if (event.buttons !== 1) {
       return;
     }
@@ -187,8 +187,8 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
         <canvas
           className={styles['canvas-content']}
           onContextMenu={handleContextMenu}
-          onMouseMove={handleMouseMove}
-          onMouseDown={handleMouseDown}
+          onPointerMove={handlePointerMove}
+          onPointerDown={handlePointerDown}
           ref={ref}
           data-testid="canvas-main"
         />

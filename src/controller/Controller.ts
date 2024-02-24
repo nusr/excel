@@ -20,13 +20,11 @@ import {
 import {
   controllerLog,
   Range,
-  isEmpty,
   PLAIN_FORMAT,
   HTML_FORMAT,
   generateHTML,
   convertCanvasStyleToString,
   parseStyle,
-  isSameRange,
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
   containRange,
@@ -264,11 +262,6 @@ export class Controller implements IController {
   private setSheetCell(range: IRange) {
     const id = range.sheetId || this.model.getCurrentSheetId();
     range.sheetId = id;
-
-    const old = this.getActiveCell();
-    if (isSameRange(old, range)) {
-      return;
-    }
     this.model.setActiveCell(range);
     this.changeSet.add('range');
   }
@@ -284,7 +277,7 @@ export class Controller implements IController {
     }
     this.model.transaction(() => {
       this.model.setCurrentSheetId(id);
-      this.changeSet.add('currentSheetId');
+      this.changeSet.add('sheetId');
       this.changeSet.add('cellValue');
 
       const pos = this.getActiveCell();
@@ -295,16 +288,8 @@ export class Controller implements IController {
   addSheet = (): void => {
     this.transaction(() => {
       this.changeSet.add('sheetList');
-      this.changeSet.add('currentSheetId');
+      this.changeSet.add('range');
       this.model.addSheet();
-      this.setSheetCell({
-        row: 0,
-        col: 0,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: '',
-      });
-
       this.setScroll({
         top: 0,
         left: 0,
@@ -319,7 +304,7 @@ export class Controller implements IController {
     this.transaction(() => {
       this.model.deleteSheet(sheetId);
       this.changeSet.add('sheetList');
-      this.changeSet.add('currentSheetId');
+      this.changeSet.add('sheetId');
       this.changeSet.add('range');
       this.emitChange();
     });
@@ -328,7 +313,7 @@ export class Controller implements IController {
     this.transaction(() => {
       this.model.hideSheet(sheetId);
       this.changeSet.add('sheetList');
-      this.changeSet.add('currentSheetId');
+      this.changeSet.add('sheetId');
       this.changeSet.add('range');
       this.emitChange();
     });
@@ -337,7 +322,7 @@ export class Controller implements IController {
     this.transaction(() => {
       this.model.unhideSheet(sheetId);
       this.changeSet.add('sheetList');
-      this.changeSet.add('currentSheetId');
+      this.changeSet.add('sheetId');
       this.changeSet.add('range');
       this.emitChange();
     });
@@ -355,9 +340,10 @@ export class Controller implements IController {
       this.model.fromJSON(json);
       const activeCell = this.getActiveCell();
       this.changeSet.add('sheetList');
-      this.changeSet.add('currentSheetId');
+      this.changeSet.add('sheetId');
       this.changeSet.add('range');
       this.changeSet.add('floatElement');
+      this.changeSet.add('cellValue');
       this.setSheetCell(activeCell);
 
       this.emitChange();
@@ -379,9 +365,6 @@ export class Controller implements IController {
     });
   }
   setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
-    if (isEmpty(style)) {
-      return;
-    }
     this.transaction(() => {
       this.model.setCellStyle(style, ranges);
       this.changeSet.add('cellStyle');
@@ -402,7 +385,7 @@ export class Controller implements IController {
     this.model.undo();
     this.changeSet.add('range');
     this.changeSet.add('sheetList');
-    this.changeSet.add('currentSheetId');
+    this.changeSet.add('sheetId');
     this.changeSet.add('scroll');
     this.changeSet.add('floatElement');
     this.changeSet.add('cellValue');
@@ -412,7 +395,7 @@ export class Controller implements IController {
     this.model.redo();
     this.changeSet.add('range');
     this.changeSet.add('sheetList');
-    this.changeSet.add('currentSheetId');
+    this.changeSet.add('sheetId');
     this.changeSet.add('scroll');
     this.changeSet.add('floatElement');
     this.changeSet.add('cellValue');

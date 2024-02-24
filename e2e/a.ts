@@ -59,7 +59,7 @@ export function getTestIdSelector(testId: string): string {
 
 export async function clickDom(selector: string): Promise<void> {
   await browserPage.click(getTestIdSelector(selector));
-  await sleep(200);
+  await sleep(100);
 }
 
 async function isVisible(testId: string) {

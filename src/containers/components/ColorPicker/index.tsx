@@ -70,7 +70,7 @@ export const ColorPicker: FunctionComponent<
         className={classnames(styles['color-picker-wrapper'], {
           [styles['show']]: visible,
         })}
-        onMouseLeave={() => setVisible(false)}
+        onPointerLeave={() => setVisible(false)}
       >
         <div className={styles['color-picker-list']}>
           {COLOR_LIST.map((item) => {

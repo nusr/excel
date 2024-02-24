@@ -1,7 +1,6 @@
 export type ChangeEventType =
   | 'antLine'
   | 'sheetList'
-  | 'currentSheetId'
   | 'scroll'
   | 'floatElement'
   | 'row'
@@ -10,7 +9,8 @@ export type ChangeEventType =
   | 'cellStyle'
   | 'range'
   | 'defineName'
-  | 'mergeCell';
+  | 'mergeCell'
+  | 'sheetId';
 
 export interface IWindowSize {
   width: number;

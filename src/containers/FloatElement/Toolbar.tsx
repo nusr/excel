@@ -100,5 +100,6 @@ export const InsertChart: React.FunctionComponent<Props> = ({ controller }) => {
       left: position.left,
     });
   };
+
   return <Button onClick={handleClick}>Chart</Button>;
 };

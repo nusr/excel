@@ -41,7 +41,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
           data={hideSheetList}
           onChange={(v) => (value = String(v))}
           style={{ width: 300 }}
-          value={value}
+          defaultValue={value}
         />
       ),
       onCancel: hideMenu,
