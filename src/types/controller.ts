@@ -41,7 +41,6 @@ export interface IController extends IBaseModel {
   getHeaderSize: () => IWindowSize;
   setHooks: (hooks: IHooks) => void;
   setNextActiveCell: (direction: 'left' | 'right' | 'down' | 'up') => IRange;
-  getActiveCell: () => IRange;
   getActiveRange: () => ActiveRange;
   getCellSize: (range: IRange) => IWindowSize;
   computeCellPosition: (range: IRange) => IPosition;

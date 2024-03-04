@@ -1,12 +1,39 @@
-export const debounce = (fn: (...params: any[]) => void) => {
-  let timer: ReturnType<typeof requestAnimationFrame>;
-  return (...rest: any[]) => {
-    cancelAnimationFrame(timer);
-    timer = requestAnimationFrame(() => {
-      fn(...rest);
-    });
+type Params = any[];
+export const debounce = (fn: (...params: Params) => void, wait: number) => {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  return function (...rest: Params) {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      fn.apply(this, rest);
+      timer = null;
+    }, wait);
   };
 };
+export function throttle(fn: (...params: Params) => void, wait: number) {
+  let check = false;
+  let lastArgs: Params | null = null;
+  return function (...args: Params) {
+    if (check) {
+      lastArgs = args;
+    } else {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      fn.apply(this, args);
+      setTimeout(() => {
+        if (lastArgs) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          fn.apply(this, lastArgs);
+        }
+        check = false;
+      }, wait);
+    }
+  };
+}
 
 export function get<T>(
   obj: Record<string, any> | null | undefined,

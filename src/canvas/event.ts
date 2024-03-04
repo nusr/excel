@@ -4,7 +4,7 @@ import {
   ChangeEventType,
   EditorStatus,
 } from '@/types';
-import { debounce } from '@/util';
+import { throttle } from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';
 
@@ -49,12 +49,12 @@ export function registerGlobalEvent(
     controller.getMainDom().input?.focus();
   }
 
-  const handleWheel = debounce((event: WheelEvent) => {
+  const handleWheel = throttle((event: WheelEvent) => {
     if (event.target !== controller.getMainDom().canvas!) {
       return;
     }
     scrollBar(controller, event.deltaX, event.deltaY);
-  });
+  }, 1000 / 60);
 
   function handlePaste(event: ClipboardEvent) {
     if (isInputEvent(event)) {

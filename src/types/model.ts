@@ -49,7 +49,6 @@ export interface WorksheetType {
   sheetId: string;
   name: string;
   isHide: boolean;
-  activeCell: IRange;
   rowCount: number;
   colCount: number;
 }
@@ -108,6 +107,7 @@ export type WorkBookJSON = {
   definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
   currentSheetId: string;
   drawings: FloatElement[]; //  chart floatImage
+  rangeMap: Record<string, IRange>; // key: sheetId
 };
 
 export interface IModel extends IBaseModel {
@@ -138,6 +138,7 @@ export interface IBaseModel {
     ranges: IRange[],
   ) => void;
   setActiveCell: (range: IRange) => void;
+  getActiveCell: () => IRange;
   setCurrentSheetId: (id: string) => void;
   getCurrentSheetId: () => string;
   addSheet: () => void;

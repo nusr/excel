@@ -124,6 +124,16 @@ export class Model implements IModel {
     this.model.set('drawings', list);
   }
 
+  private get rangeMap(): Y.Map<IRange> {
+    if (!this.model.get('rangeMap')) {
+      this.rangeMap = {};
+    }
+    return this.model.get('rangeMap');
+  }
+  private set rangeMap(obj: WorkBookJSON['rangeMap']) {
+    this.model.set('rangeMap', new Y.Map(Object.entries(obj)));
+  }
+
   private getSheetData(sheetId?: string): Y.Map<ModelCellType> | undefined {
     return this.model.get(getWorkSheetKey(sheetId || this.currentSheetId));
   }
@@ -134,21 +144,37 @@ export class Model implements IModel {
   getSheetList(): WorkBookJSON['workbook'] {
     return this.workbook.toArray();
   }
+  getActiveCell(): IRange {
+    const id = this.getCurrentSheetId();
+    const range = this.rangeMap.get(id);
+    if (range) {
+      return {
+        ...range,
+      };
+    }
+    return {
+      row: 0,
+      col: 0,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: id,
+    };
+  }
   setActiveCell(range: IRange): void {
     const list = this.getSheetList();
-    const sheetId = range.sheetId || this.currentSheetId;
-    const index = list.findIndex((v) => v.sheetId === sheetId);
+    range.sheetId = range.sheetId || this.currentSheetId;
+    const index = list.findIndex((v) => v.sheetId === range.sheetId);
     assert(index >= 0, 'can not find sheet');
     const { row, col } = range;
     const sheet = list[index];
     if (row < 0 || col < 0 || row >= sheet.rowCount || col >= sheet.colCount) {
       return;
     }
-    const oldValue = sheet.activeCell;
-    if (isSameRange(oldValue, range)) {
+    const oldValue = this.rangeMap.get(range.sheetId);
+    if (oldValue && isSameRange(oldValue, range)) {
       return;
     }
-    this.workbook.get(index).activeCell = range;
+    this.rangeMap.set(range.sheetId, range);
   }
   addSheet(): void {
     const list = this.getSheetList();
@@ -158,13 +184,6 @@ export class Model implements IModel {
       isHide: false,
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
-      activeCell: {
-        row: 0,
-        col: 0,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: item.sheetId,
-      },
     };
     let check = false;
     this.workbook.forEach((v) => {
@@ -176,6 +195,13 @@ export class Model implements IModel {
     assert(!check, 'The sheet id is duplicate');
     this.workbook.push([sheet]);
     this.currentSheetId = sheet.sheetId;
+    this.rangeMap.set(item.sheetId, {
+      row: 0,
+      col: 0,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: item.sheetId,
+    });
     this.setSheetData(sheet.sheetId, {});
   }
 
@@ -260,6 +286,7 @@ export class Model implements IModel {
       definedNames = {},
       currentSheetId = '',
       drawings = [],
+      rangeMap = {},
     } = json;
     this.workbook = workbook;
 
@@ -268,6 +295,7 @@ export class Model implements IModel {
     this.customHeight = customHeight;
     this.definedNames = definedNames;
     this.drawings = drawings;
+    this.rangeMap = rangeMap;
     for (const [key, value] of Object.entries(json)) {
       if (key.startsWith(WORK_SHEETS_PREFIX)) {
         this.model.set(key, new Y.Map<ModelCellType>(Object.entries(value)));
@@ -285,6 +313,7 @@ export class Model implements IModel {
       definedNames: this.definedNames.toJSON(),
       currentSheetId: this.currentSheetId,
       drawings: this.drawings.toJSON(),
+      rangeMap: this.rangeMap.toJSON(),
     };
     for (const [key, value] of this.model.entries()) {
       if (key.startsWith(WORK_SHEETS_PREFIX)) {
@@ -629,7 +658,7 @@ export class Model implements IModel {
 
   pasteRange(fromRange: IRange, isCut: boolean): IRange {
     const { currentSheetId } = this;
-    const { activeCell } = this.getSheetInfo(currentSheetId);
+    const activeCell = this.getActiveCell();
 
     const { row, col, rowCount, colCount, sheetId } = fromRange;
     const fromSheetData = this.getSheetData(sheetId);

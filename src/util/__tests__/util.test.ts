@@ -31,13 +31,6 @@ describe('util.test.ts', () => {
             rowCount: 30,
             colCount: 20,
             isHide: false,
-            activeCell: {
-              row: 0,
-              col: 0,
-              rowCount: 1,
-              colCount: 1,
-              sheetId: '',
-            },
           },
         ]),
       ).toMatchObject({

@@ -355,7 +355,7 @@ export async function exportToXLSX(fileName: string, controller: IController) {
 
   const worksheets = xl.folder('worksheets')!;
   for (const item of sheetList) {
-    const { activeCell } = item;
+    const activeCell = modelJson.rangeMap[item.sheetId];
     const t = sheetRelMap[item.sheetId];
     const cellData = modelJson[getWorkSheetKey(item.sheetId)];
     const isActiveSheet = item.sheetId === currentSheetId;

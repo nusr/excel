@@ -33,14 +33,6 @@ export const MenuBarContainer: React.FunctionComponent<Props> = ({
   };
   return (
     <div className={styles.menubar} data-testid="menubar">
-      <div
-        onClick={() => {
-          const list = new Array(1000).fill(0);
-          list.map(() => controller.paste());
-        }}
-      >
-        test
-      </div>
       <Menu
         menuButton={<Button>Menu</Button>}
         style={menuStyle}

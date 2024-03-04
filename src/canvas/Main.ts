@@ -36,6 +36,7 @@ export class MainCanvas {
   private content: ContentView;
   private canvas: HTMLCanvasElement;
   private controller: IController;
+  private isRendering = false;
   constructor(controller: IController, content: ContentView) {
     const canvas = controller.getMainDom().canvas!;
     this.canvas = canvas;
@@ -58,6 +59,11 @@ export class MainCanvas {
     if (params.changeSet.size === 0) {
       return;
     }
+    if (this.isRendering) {
+      console.log('is rendering');
+      return;
+    }
+    this.isRendering = true;
     this.content.render(params);
     this.clear();
 
@@ -76,6 +82,8 @@ export class MainCanvas {
     this.renderAntLine(result);
 
     this.renderMergeCell();
+
+    this.isRendering = false;
   };
 
   private renderMergeCell() {

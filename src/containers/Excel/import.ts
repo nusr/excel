@@ -320,6 +320,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     definedNames: {},
     currentSheetId: '',
     drawings: [],
+    rangeMap: {}
   };
   const sheetPathMap: Record<string, string> = {};
   const sheetMap: Record<string, string> = {};
@@ -364,10 +365,10 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
       sheetId: item.sheetId,
       name: item.name,
       isHide: item.state === 'hidden',
-      activeCell: range,
       rowCount: 200,
       colCount: 200,
     });
+    result.rangeMap[item.sheetId] = range;
   }
   for (const item of result.workbook) {
     const sheetPath = sheetPathMap[item.sheetId];

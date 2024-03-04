@@ -40,23 +40,18 @@ describe('model.test.ts', () => {
       definedNames: {},
       currentSheetId: '',
       drawings: [],
+      rangeMap: {},
     });
   });
   test('fromJSON', () => {
     const model = new Model();
     const json: WorkBookJSON = {
       currentSheetId: '',
+      rangeMap: {},
       workbook: [
         {
           sheetId: '1',
           isHide: false,
-          activeCell: {
-            row: 0,
-            col: 1,
-            rowCount: 1,
-            colCount: 1,
-            sheetId: '',
-          },
           rowCount: 200,
           colCount: 200,
           name: 'test',
@@ -87,13 +82,6 @@ describe('model.test.ts', () => {
       workbook: [
         {
           sheetId: '1',
-          activeCell: {
-            row: 0,
-            col: 1,
-            rowCount: 1,
-            colCount: 1,
-            sheetId: '',
-          },
           isHide: false,
           rowCount: 200,
           colCount: 200,
@@ -118,6 +106,7 @@ describe('model.test.ts', () => {
         },
       },
       drawings: [],
+      rangeMap: {},
     });
   });
 });

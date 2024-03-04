@@ -9,18 +9,34 @@ import { mockImage } from './mockData';
 
 const MOCK_MODEL: WorkBookJSON = {
   currentSheetId: '',
+  rangeMap: {
+    '1': {
+      row: 2,
+      col: 2,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '1',
+    },
+    '2': {
+      row: 4,
+      col: 4,
+      rowCount: 2,
+      colCount: 2,
+      sheetId: '2',
+    },
+    '3': {
+      row: 4,
+      col: 4,
+      rowCount: 2,
+      colCount: 2,
+      sheetId: '3',
+    },
+  },
   workbook: [
     {
       sheetId: '1',
       name: 'Sheet1',
       isHide: false,
-      activeCell: {
-        row: 2,
-        col: 2,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: '',
-      },
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
     },
@@ -30,13 +46,6 @@ const MOCK_MODEL: WorkBookJSON = {
       isHide: false,
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
-      activeCell: {
-        row: 4,
-        col: 4,
-        rowCount: 2,
-        colCount: 2,
-        sheetId: '',
-      },
     },
     {
       sheetId: '3',
@@ -44,13 +53,6 @@ const MOCK_MODEL: WorkBookJSON = {
       isHide: true,
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
-      activeCell: {
-        row: 4,
-        col: 4,
-        rowCount: 2,
-        colCount: 2,
-        sheetId: '',
-      },
     },
   ],
   worksheets_1: {
@@ -232,12 +234,12 @@ const MOCK_MODEL: WorkBookJSON = {
 if (!isMobile()) {
   MOCK_MODEL.drawings.push(
     {
-      title: 'lyf',
+      title: 'icon',
       type: 'floating-picture',
       uuid: generateUUID(),
       imageSrc: mockImage,
-      width: 200,
-      height: 266,
+      width: 96,
+      height: 96,
       sheetId: '1',
       fromCol: 3,
       fromRow: 2,

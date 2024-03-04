@@ -153,6 +153,12 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
           }}
         >
           {children}
+          <div className={styles['scale-container']}>
+            <div className={styles['scale-dot']}></div>
+          </div>
+          <div className={styles['scale-container-rect']}>
+            <div className={styles['scale-rect']}></div>
+          </div>
         </div>
         {contextMenuPosition.top >= 0 && contextMenuPosition.left >= 0 && (
           <FloatElementContextMenu

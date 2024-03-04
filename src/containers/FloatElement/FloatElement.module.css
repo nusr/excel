@@ -40,3 +40,44 @@
 .chart {
   background-color: var(--white);
 }
+
+.scale-container {
+  top: -16px;
+  right: -16px;
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.scale-container-rect {
+  width: 100%;
+  height: 16px;
+  top: -8px;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  clip-path: inset(0 8px);
+}
+.scale-dot {
+  border-radius: 50%;
+  pointer-events: auto;
+  background: white;
+  width: 12px;
+  height: 12px;
+
+  box-shadow: 0 0 4px 1px rgba(57, 76, 96, 0.15),
+    0 0 0 1px rgba(43, 59, 74, 0.3);
+}
+.scale-rect {
+  pointer-events: auto;
+  background: white;
+  width: 18px;
+  height: 6px;
+  border-radius: 3px;
+  box-shadow: 0 0 4px 1px rgba(57, 76, 96, 0.15),
+    0 0 0 1px rgba(43, 59, 74, 0.3);
+}

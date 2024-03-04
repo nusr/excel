@@ -24,7 +24,6 @@ import {
   HTML_FORMAT,
   generateHTML,
   convertToCssString,
-  parseStyle,
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
   containRange,
@@ -94,13 +93,8 @@ export class Controller implements IController {
     this.hooks.modelChange(result);
   }
   getActiveCell(): IRange {
-    const currentSheetId = this.model.getCurrentSheetId();
-    const { activeCell } = this.getSheetInfo(currentSheetId);
-
-    return {
-      ...activeCell,
-      sheetId: activeCell.sheetId || currentSheetId,
-    };
+    const range = this.model.getActiveCell();
+    return range;
   }
   private getRange(range: IRange) {
     const mergeCells = this.getMergeCells(this.getCurrentSheetId());
