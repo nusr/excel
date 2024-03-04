@@ -135,7 +135,6 @@ async function buildProd() {
     splitting: true,
     minify: true,
   };
-  console.log(distOptions);
   const list = await Promise.all(
     [
       distOptions,
