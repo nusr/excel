@@ -129,14 +129,16 @@ function deleteDir(dir: string) {
 
 async function buildProd() {
   const options = buildESM('');
+  const distOptions: BuildOptions = {
+    ...options,
+    outdir: distDir,
+    splitting: true,
+    minify: true,
+  };
+  console.log(distOptions);
   const list = await Promise.all(
     [
-      {
-        ...options,
-        outdir: distDir,
-        splitting: true,
-        minify: true,
-      },
+      distOptions,
       buildESM(packageJson.module),
       buildUMD(packageJson.main),
       buildESM(packageJson.module.replace('.js', '.min.js')),
