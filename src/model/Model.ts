@@ -40,6 +40,9 @@ const modelName = 'model';
 export class Model implements IModel {
   private doc: Y.Doc;
   private undoManager: Y.UndoManager;
+  private rangeMap: WorkBookJSON['rangeMap'] = {};
+  private workbook: WorksheetType[] = [];
+  private currentSheetId = '';
   constructor() {
     const doc = new Y.Doc();
     const model = doc.getMap(modelName);
@@ -52,19 +55,6 @@ export class Model implements IModel {
   }
   private get model(): Y.Map<any> {
     return this.doc.getMap(modelName);
-  }
-  private get workbook(): Y.Array<WorksheetType> {
-    if (!this.model.get('workbook')) {
-      this.workbook = [];
-    }
-    return this.model.get('workbook');
-  }
-  private set workbook(arr: WorksheetType[]) {
-    const list = new Y.Array<WorksheetType>();
-    if (arr.length > 0) {
-      list.push(arr);
-    }
-    this.model.set('workbook', list);
   }
   private get mergeCells(): Y.Array<IRange> {
     if (!this.model.get('mergeCells')) {
@@ -124,16 +114,6 @@ export class Model implements IModel {
     this.model.set('drawings', list);
   }
 
-  private get rangeMap(): Y.Map<IRange> {
-    if (!this.model.get('rangeMap')) {
-      this.rangeMap = {};
-    }
-    return this.model.get('rangeMap');
-  }
-  private set rangeMap(obj: WorkBookJSON['rangeMap']) {
-    this.model.set('rangeMap', new Y.Map(Object.entries(obj)));
-  }
-
   private getSheetData(sheetId?: string): Y.Map<ModelCellType> | undefined {
     return this.model.get(getWorkSheetKey(sheetId || this.currentSheetId));
   }
@@ -142,11 +122,11 @@ export class Model implements IModel {
     this.model.set(getWorkSheetKey(sheetId || this.currentSheetId), result);
   }
   getSheetList(): WorkBookJSON['workbook'] {
-    return this.workbook.toArray();
+    return this.workbook;
   }
   getActiveCell(): IRange {
-    const id = this.getCurrentSheetId();
-    const range = this.rangeMap.get(id);
+    const id = this.currentSheetId;
+    const range = this.rangeMap[id];
     if (range) {
       return {
         ...range,
@@ -164,17 +144,19 @@ export class Model implements IModel {
     const list = this.getSheetList();
     range.sheetId = range.sheetId || this.currentSheetId;
     const index = list.findIndex((v) => v.sheetId === range.sheetId);
-    assert(index >= 0, 'can not find sheet');
+    if (index < 0) {
+      return;
+    }
     const { row, col } = range;
     const sheet = list[index];
     if (row < 0 || col < 0 || row >= sheet.rowCount || col >= sheet.colCount) {
       return;
     }
-    const oldValue = this.rangeMap.get(range.sheetId);
+    const oldValue = this.rangeMap[range.sheetId];
     if (oldValue && isSameRange(oldValue, range)) {
       return;
     }
-    this.rangeMap.set(range.sheetId, range);
+    this.rangeMap[range.sheetId] = range;
   }
   addSheet(): void {
     const list = this.getSheetList();
@@ -193,15 +175,15 @@ export class Model implements IModel {
       }
     });
     assert(!check, 'The sheet id is duplicate');
-    this.workbook.push([sheet]);
+    this.workbook.push(sheet);
     this.currentSheetId = sheet.sheetId;
-    this.rangeMap.set(item.sheetId, {
+    this.rangeMap[item.sheetId] = {
       row: 0,
       col: 0,
       rowCount: 1,
       colCount: 1,
       sheetId: item.sheetId,
-    });
+    };
     this.setSheetData(sheet.sheetId, {});
   }
 
@@ -215,7 +197,7 @@ export class Model implements IModel {
     );
     const { index, lastIndex } = this.getSheetIndex(id);
     this.currentSheetId = sheetList[lastIndex].sheetId;
-    this.workbook.delete(index);
+    this.workbook.splice(index, 1);
     this.model.delete(getWorkSheetKey(id));
   }
   hideSheet(sheetId?: string | undefined): void {
@@ -226,7 +208,7 @@ export class Model implements IModel {
       'A workbook must contains at least on visible worksheet',
     );
     const { index, lastIndex } = this.getSheetIndex(sheetId);
-    this.workbook.get(index).isHide = true;
+    this.workbook[index].isHide = true;
     this.currentSheetId = sheetList[lastIndex].sheetId;
   }
   unhideSheet(sheetId?: string | undefined): void {
@@ -234,7 +216,7 @@ export class Model implements IModel {
     const index = list.findIndex(
       (v) => v.sheetId === (sheetId || this.currentSheetId),
     );
-    const item = this.workbook.get(index);
+    const item = this.workbook[index];
     item.isHide = false;
     this.currentSheetId = item.sheetId;
   }
@@ -250,7 +232,7 @@ export class Model implements IModel {
     }
     const id = sheetId || this.currentSheetId;
     const index = sheetList.findIndex((v) => v.sheetId === id);
-    const sheetInfo = this.workbook.get(index);
+    const sheetInfo = this.workbook[index];
     if (sheetInfo.name === sheetName) {
       return;
     }
@@ -269,13 +251,6 @@ export class Model implements IModel {
   }
   getCurrentSheetId(): string {
     return this.currentSheetId;
-  }
-  private get currentSheetId() {
-    return this.model.get('currentSheetId') || '';
-  }
-
-  private set currentSheetId(id: string) {
-    this.model.set('currentSheetId', id || '');
   }
   fromJSON = (json: WorkBookJSON): void => {
     const {
@@ -306,14 +281,14 @@ export class Model implements IModel {
   };
   toJSON = (): WorkBookJSON => {
     const json = {
-      workbook: this.workbook.toArray(),
+      workbook: [...this.workbook],
       mergeCells: this.mergeCells.toArray(),
       customHeight: this.customHeight.toJSON(),
       customWidth: this.customWidth.toJSON(),
       definedNames: this.definedNames.toJSON(),
       currentSheetId: this.currentSheetId,
       drawings: this.drawings.toJSON(),
-      rangeMap: this.rangeMap.toJSON(),
+      rangeMap: { ...this.rangeMap },
     };
     for (const [key, value] of this.model.entries()) {
       if (key.startsWith(WORK_SHEETS_PREFIX)) {

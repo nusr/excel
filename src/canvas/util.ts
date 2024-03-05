@@ -5,7 +5,6 @@ import {
   DEFAULT_FONT_SIZE,
   DEFAULT_FONT_COLOR,
   makeFont,
-  assert,
   ERROR_SET,
   ERROR_FORMULA_COLOR,
   dpr,
@@ -124,9 +123,7 @@ function drawUnderlineData(
     }
     list = list.concat(getPointList(pointList, false));
   }
-  if (list.length > 0) {
-    drawLines(ctx, list);
-  }
+  drawLines(ctx, list);
 }
 
 export function renderCellData(
@@ -266,7 +263,9 @@ export function drawLines(
   ctx: CanvasRenderingContext2D,
   pointList: Point[],
 ): void {
-  assert(pointList.length > 0);
+  if (pointList.length === 0) {
+    return;
+  }
   ctx.beginPath();
   for (let i = 0; i < pointList.length; i += 2) {
     const first = pointList[i];
