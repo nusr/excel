@@ -942,9 +942,14 @@ export class Model implements IModel {
     key: T,
     value: FloatElement[T],
   ) {
-    const i = this.drawings.toArray().findIndex((v) => v.uuid === uuid);
-    assert(i >= 0, 'can not find float element');
-    this.drawings.get(i)[key] = value;
+    this.drawings.forEach((item) => {
+      if (item.uuid === uuid) {
+        if (item[key] !== value) {
+          item[key] = value;
+        }
+        return;
+      }
+    });
   }
   deleteFloatElement(uuid: string) {
     const indexList: number[] = [];

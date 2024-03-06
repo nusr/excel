@@ -89,6 +89,7 @@ export class Controller implements IController {
       this.model.computeAllCell();
     }
     this.changeSet = new Set<ChangeEventType>();
+    controllerLog(result);
     this.hooks.modelChange(result);
   }
   getActiveCell(): IRange {

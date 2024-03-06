@@ -60,7 +60,6 @@ export class MainCanvas {
       return;
     }
     if (this.isRendering) {
-      console.log('is rendering');
       return;
     }
     this.isRendering = true;

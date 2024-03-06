@@ -176,31 +176,45 @@ const handleStateChange = (
     changeSet.has('sheetId') ||
     changeSet.has('scroll')
   ) {
+    const scroll = controller.getScroll();
+    const canvasSize = controller.getDomRect();
+    const minX = scroll.left;
+    const minY = scroll.top;
+    const maxX = canvasSize.width + minX;
+    const maxY = canvasSize.height + minY;
     const list = controller.getFloatElementList(controller.getCurrentSheetId());
-    floatElementStore.setState(
-      list.map((v) => {
-        const size = controller.computeCellPosition({
-          row: v.fromRow,
-          col: v.fromCol,
-          colCount: 1,
-          rowCount: 1,
-          sheetId: '',
-        });
-        const result: FloatElementItem = {
+    const result: FloatElementItem[] = [];
+    for (const v of list) {
+      const p = controller.computeCellPosition({
+        row: v.fromRow,
+        col: v.fromCol,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: '',
+      });
+      // the start point in the box or the end point in the box
+      const check =
+        (p.top > minY && p.top < maxY) ||
+        (p.left > minX && p.left < maxX) ||
+        (p.top + v.height > minY && p.top + v.height < maxY) ||
+        (p.left + v.width > minX && p.left + v.width < maxX);
+      if (check) {
+        const t: FloatElementItem = {
           ...v,
-          top: size.top,
-          left: size.left,
+          top: p.top,
+          left: p.left,
           labels: [],
           datasets: [],
         };
         if (v.type === 'chart') {
           const c = getChartData(v.chartRange!, controller);
-          result.labels = c.labels;
-          result.datasets = c.datasets;
+          t.labels = c.labels;
+          t.datasets = c.datasets;
         }
-        return result;
-      }),
-    );
+        result.push(t);
+      }
+    }
+    floatElementStore.setState(result);
   }
 };
 export function initCanvas(controller: IController): () => void {

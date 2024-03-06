@@ -11,3 +11,4 @@ scripts/*.js
 lib
 output
 port.txt
+*.html

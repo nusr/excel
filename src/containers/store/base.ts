@@ -11,9 +11,9 @@ export class BaseStore<T> {
   }
   // set array number boolean or plain object
   setState = (data: T): void => {
-    if (deepEqual(data, this.state)) {
-      return;
-    }
+    // if (deepEqual(data, this.state)) {
+    //   return;
+    // }
     this.state = data;
     this.emitChange();
   };
