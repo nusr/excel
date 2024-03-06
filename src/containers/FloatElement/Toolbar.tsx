@@ -32,8 +32,8 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = ({
         sheetId: range.sheetId,
         fromRow: range.row,
         fromCol: range.col,
-        top: position.top,
-        left: position.left,
+        marginX: 0,
+        marginY: 0,
       };
       controller.addFloatElement(data);
     };
@@ -96,8 +96,8 @@ export const InsertChart: React.FunctionComponent<Props> = ({ controller }) => {
       fromCol: range.col,
       chartRange: range,
       chartType: 'line',
-      top: position.top,
-      left: position.left,
+      marginX: 0,
+      marginY: 0,
     });
   };
 

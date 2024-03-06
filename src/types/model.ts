@@ -88,8 +88,8 @@ export type FloatElement = {
   fromCol: number; // insert col
   fromRow: number; // insert row
   sheetId: string; // insert sheetId
-  top: number;
-  left: number;
+  marginX: number; // the x distance of (fromCol, fromRow)
+  marginY: number; // the Y distance of (fromCol, fromRow)
   imageSrc?: string; // floating-picture src
   chartType?: ChartType;
   chartRange?: IRange; // chart reference range

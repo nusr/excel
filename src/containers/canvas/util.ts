@@ -192,17 +192,19 @@ const handleStateChange = (
         rowCount: 1,
         sheetId: '',
       });
+      const top = p.top + v.marginY;
+      const left = p.left + v.marginX;
       // the start point in the box or the end point in the box
       const check =
-        (p.top > minY && p.top < maxY) ||
-        (p.left > minX && p.left < maxX) ||
-        (p.top + v.height > minY && p.top + v.height < maxY) ||
-        (p.left + v.width > minX && p.left + v.width < maxX);
+        (top > minY && top < maxY) ||
+        (left > minX && left < maxX) ||
+        (top + v.height > minY && top + v.height < maxY) ||
+        (left + v.width > minX && left + v.width < maxX);
       if (check) {
         const t: FloatElementItem = {
           ...v,
-          top: p.top,
-          left: p.left,
+          top,
+          left,
           labels: [],
           datasets: [],
         };
