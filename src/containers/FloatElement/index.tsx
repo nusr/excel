@@ -27,8 +27,8 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
         />
         {floatElementList.map((v) => (
           <FloatElement
-            {...v}
             key={v.uuid}
+            {...v}
             active={v.uuid === activeUuid}
             controller={controller}
             setActiveUuid={setActiveUuid}

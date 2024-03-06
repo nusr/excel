@@ -4,12 +4,7 @@ import styles from './FloatElement.module.css';
 import { FloatElementItem } from '@/containers/store';
 import { Chart } from './Chart';
 import { FloatElementContextMenu } from './ContextMenu';
-import {
-  DEFAULT_POSITION,
-  getHitInfo,
-  classnames,
-  stopPropagation,
-} from '@/util';
+import { DEFAULT_POSITION, getHitInfo, classnames } from '@/util';
 import {
   State,
   computeElementSize,
@@ -73,7 +68,8 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
         state.current = { ...INITIAL_STATE };
         return;
       }
-      stopPropagation(event);
+      event.stopPropagation();
+      event.preventDefault();
       if (state.current.resizePosition) {
         controller.transaction(() => {
           controller.updateFloatElement(uuid, 'height', state.current.height);
@@ -99,7 +95,8 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
     };
 
     const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-      stopPropagation(event);
+      event.stopPropagation();
+      event.preventDefault();
       if (event.buttons !== 1) {
         return;
       }
@@ -112,7 +109,8 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
     const handleResizePointerDown = (
       event: React.PointerEvent<HTMLDivElement>,
     ) => {
-      stopPropagation(event);
+      event.stopPropagation();
+      event.preventDefault();
       if (event.buttons !== 1) {
         return;
       }
@@ -131,7 +129,8 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
       if (!state.current.active) {
         return;
       }
-      stopPropagation(event);
+      event.stopPropagation();
+      event.preventDefault();
       if (state.current.resizePosition) {
         const newSize = computeElementSize(
           event.clientX,
