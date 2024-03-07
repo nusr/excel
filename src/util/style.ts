@@ -92,9 +92,7 @@ export function convertToCssString(style: Partial<StyleType>): string {
   return result;
 }
 
-function pickCSSStyle(
-  style: Partial<CSSStyleDeclaration>,
-): Partial<StyleType> {
+function pickCSSStyle(style: Partial<CSSStyleDeclaration>): Partial<StyleType> {
   const {
     color,
     backgroundColor,
@@ -153,7 +151,7 @@ function pickCSSStyle(
   return result;
 }
 
-export function parseStyle(
+function parseStyle(
   styleMap: Record<string, CSSStyleDeclaration>,
   style: CSSStyleDeclaration,
   className: string,
@@ -165,10 +163,7 @@ export function parseStyle(
     result = pickCSSStyle(t);
   }
   if (styleMap[className]) {
-    result = Object.assign(
-      result,
-      pickCSSStyle(styleMap[className]),
-    );
+    result = Object.assign(result, pickCSSStyle(styleMap[className]));
   }
 
   result = Object.assign(result, pickCSSStyle(style));
@@ -188,12 +183,13 @@ export function parseStyle(
 function convertToCssStyleDeclaration(cssStr: string) {
   const str = cssStr.replace(/\s+/g, '').replace('<!--', '');
   const regex = /([^{}]+)\s*\{([^}]*)\}/g;
-  const matches: Record<string, CSSStyleDeclaration> = {};
+  const matches: Record<string, Partial<CSSStyleDeclaration>> = {};
   let match;
   while ((match = regex.exec(str)) !== null) {
     let div: HTMLDivElement | null = document.createElement('div');
     div.style.cssText = match[2];
-    matches[match[1].trim()] = div.style;
+    const key = match[1].trim();
+    matches[key] = div.style;
     div = null;
   }
   return matches;
@@ -245,6 +241,7 @@ export function parseHTML(html: string) {
     styleList.push(list);
   }
   template = null;
+  console.log(styleList);
   return {
     textList,
     styleList,

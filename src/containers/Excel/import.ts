@@ -220,11 +220,11 @@ function getCellStyle(
   xml: XMLFile,
   styleId: number,
   themeData: ThemeData,
-): Partial<StyleType> | undefined {
+): Partial<StyleType> {
   const result: Partial<StyleType> = {};
   const xfList = get<XfItem[]>(xml, 'styleSheet.cellXfs.xf', []);
   if (!styleId || xfList.length === 0 || !xfList[styleId]) {
-    return undefined;
+    return result;
   }
   const xf = xfList[styleId];
   if (xf.applyAlignment && xf.alignment) {
@@ -251,13 +251,13 @@ function getCellStyle(
   if (xf.applyFont && xf.fontId) {
     const fontList = get<FontItem[]>(xml, 'styleSheet.fonts.font', []);
     const fontId = parseInt(xf.fontId, 10);
-    if (fontList.length > 0 && fontList[fontId]) {
+    if (!isNaN(fontId) && fontList.length > 0 && fontList[fontId]) {
       const font = fontList[fontId];
       const fz = font?.sz?.val ? parseInt(font?.sz?.val, 10) : undefined;
       result.fontSize = fz ? fz : undefined;
-      result.isBold = Boolean(font.b);
-      result.isItalic = Boolean(font.i);
-      result.isStrike = Boolean(font.strike);
+      result.isBold = Boolean(font?.b);
+      result.isItalic = Boolean(font?.i);
+      result.isStrike = Boolean(font?.strike);
       result.underline = font.u ? EUnderLine.SINGLE : EUnderLine.NONE;
       result.fontFamily = font?.name?.val;
       const color = convertColor(themeData, font.color);
@@ -295,7 +295,9 @@ function getCellStyle(
   return result;
 }
 
-function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
+export function convertXMLDataToModel(
+  xmlData: Record<string, XMLFile>,
+): WorkBookJSON {
   const workbook = xmlData[WORKBOOK_PATH];
 
   let sharedStrings: SharedStringItem[] = get(
@@ -320,7 +322,7 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     definedNames: {},
     currentSheetId: '',
     drawings: [],
-    rangeMap: {}
+    rangeMap: {},
   };
   const sheetPathMap: Record<string, string> = {};
   const sheetMap: Record<string, string> = {};
@@ -359,8 +361,6 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
     if (tabSelected === '1') {
       result.currentSheetId = item.sheetId;
     }
-
-    range.sheetId = item.sheetId;
     result.workbook.push({
       sheetId: item.sheetId,
       name: item.name,
@@ -368,7 +368,13 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
       rowCount: 200,
       colCount: 200,
     });
-    result.rangeMap[item.sheetId] = range;
+    if (range) {
+      result.rangeMap[item.sheetId] = range;
+      range.sheetId = item.sheetId;
+    }
+  }
+  if (!result.currentSheetId) {
+    result.currentSheetId = result.workbook[0].sheetId;
   }
   for (const item of result.workbook) {
     const sheetPath = sheetPathMap[item.sheetId];
@@ -443,6 +449,9 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
           continue;
         }
         const range = parseReference(col.r)!;
+        if (!range) {
+          continue;
+        }
         colCount = Math.max(colCount, range.col + 1);
         if (colCount > XLSX_MAX_COL_COUNT) {
           continue;
@@ -450,10 +459,9 @@ function convertXMLDataToModel(xmlData: Record<string, XMLFile>): WorkBookJSON {
         let val = col?.v?.[textKey] || '';
         const styleId = parseInt(col.s, 10);
         const style = getCellStyle(xmlData[STYLE_PATH], styleId, themeData);
-        const t: ModelCellType = {};
-        if (style) {
-          t.style = style;
-        }
+        const t: ModelCellType = {
+          style,
+        };
         if (col.t === 's') {
           const i = parseInt(val, 10);
           if (!isNaN(i)) {
