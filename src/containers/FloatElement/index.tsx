@@ -21,7 +21,9 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
           className={classnames(styles['float-element-mask'], {
             [styles['active']]: !!activeUuid,
           })}
-          onPointerDown={() => {
+          onPointerDown={(event) => {
+            event.stopPropagation();
+            event.preventDefault();
             setActiveUuid('');
           }}
         />

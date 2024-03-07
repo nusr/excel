@@ -1,5 +1,8 @@
 type Params = any[];
-export const debounce = (fn: (...params: Params) => void, wait: number) => {
+export const debounce = (
+  fn: (...params: Params) => void,
+  wait: number = 500,
+) => {
   let timer: ReturnType<typeof setTimeout> | null = null;
   return function (...rest: Params) {
     if (timer) {
@@ -13,7 +16,7 @@ export const debounce = (fn: (...params: Params) => void, wait: number) => {
     }, wait);
   };
 };
-export function throttle(fn: (...params: Params) => void, wait: number) {
+export function throttle(fn: (...params: Params) => void, wait: number = 500) {
   let check = false;
   let lastArgs: Params | null = null;
   return function (...args: Params) {

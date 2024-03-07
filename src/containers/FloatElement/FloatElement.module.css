@@ -123,3 +123,9 @@
   margin-top: -10px;
   cursor: ew-resize;
 }
+.rotate {
+  top: -48px;
+  left: 50%;
+  margin-left: -10px;
+  cursor: ns-resize;
+}

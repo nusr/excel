@@ -9,32 +9,34 @@ export enum ResizePosition {
   bottomRight = 'bottom-right',
   left = 'left',
   right = 'right',
+  rotate = 'rotate',
 }
+export type FloatElementPosition = {
+  width: number;
+  top: number;
+  left: number;
+  height: number;
+  angle: number;
+};
 export type State = {
   active: boolean;
   moveStartX: number;
   moveStartY: number;
-  top: number;
-  left: number;
   resizeStartX: number;
   resizeStartY: number;
   resizePosition: string;
-  width: number;
-  height: number;
+  position: FloatElementPosition;
 };
 
 export function computeElementSize(
-  clientX: number,
-  clientY: number,
-  state: State,
+  deltaX: number,
+  deltaY: number,
+  p: ResizePosition,
 ): CanvasOverlayPosition {
-  const deltaX = clientX - state.resizeStartX;
-  const deltaY = clientY - state.resizeStartY;
-  const p = state.resizePosition as ResizePosition;
-  let height = state.height;
-  let width = state.width;
-  const top = state.top;
-  const left = state.left;
+  let height = 0;
+  let width = 0;
+  let top = 0;
+  let left = 0;
   if (
     [
       ResizePosition.topRight,
@@ -43,7 +45,7 @@ export function computeElementSize(
     ].includes(p)
   ) {
     height -= deltaY;
-    // top = clientY - state.top;
+    top += deltaY;
   } else if (
     [
       ResizePosition.bottomRight,
@@ -62,7 +64,7 @@ export function computeElementSize(
     ].includes(p)
   ) {
     width -= deltaX;
-    // left = clientX - state.left;
+    left += deltaX;
   } else if (
     [
       ResizePosition.topRight,
@@ -74,10 +76,10 @@ export function computeElementSize(
   }
 
   return {
-    width: Math.floor(width),
-    height: Math.floor(height),
-    left: Math.floor(left),
-    top: Math.floor(top),
+    width,
+    height,
+    left,
+    top,
   };
 }
 
@@ -88,8 +90,11 @@ export const INITIAL_STATE: State = {
   resizePosition: '',
   moveStartX: 0,
   moveStartY: 0,
-  top: -1,
-  left: -1,
-  width: 0,
-  height: 0,
+  position: {
+    top: -1,
+    left: -1,
+    width: -1,
+    height: -1,
+    angle: 0,
+  },
 };
