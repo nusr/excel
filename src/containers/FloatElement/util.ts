@@ -1,4 +1,4 @@
-import { CanvasOverlayPosition } from '@/types';
+import { CanvasOverlayPosition, IController } from '@/types';
 
 export enum ResizePosition {
   top = 'top',
@@ -16,16 +16,14 @@ export type FloatElementPosition = {
   top: number;
   left: number;
   height: number;
-  angle: number;
+  imageAngle: number;
 };
 export type State = {
-  active: boolean;
   moveStartX: number;
   moveStartY: number;
-  resizeStartX: number;
-  resizeStartY: number;
   resizePosition: string;
   position: FloatElementPosition;
+  uuid: string;
 };
 
 export function computeElementSize(
@@ -84,9 +82,6 @@ export function computeElementSize(
 }
 
 export const INITIAL_STATE: State = {
-  active: false,
-  resizeStartX: 0,
-  resizeStartY: 0,
   resizePosition: '',
   moveStartX: 0,
   moveStartY: 0,
@@ -95,6 +90,27 @@ export const INITIAL_STATE: State = {
     left: -1,
     width: -1,
     height: -1,
-    angle: 0,
+    imageAngle: 0,
   },
+  uuid: '',
 };
+
+export function roundPosition(
+  top: number,
+  left: number,
+  controller: IController,
+) {
+  const size = controller.getHeaderSize();
+  const minTop = size.height;
+  const minLeft = size.width;
+  if (top < minTop) {
+    top = minTop;
+  }
+  if (left < minLeft) {
+    left = minLeft;
+  }
+  return {
+    top,
+    left,
+  };
+}

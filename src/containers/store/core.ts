@@ -4,10 +4,12 @@ export interface CoreStore {
   editorStatus: EditorStatus;
   canRedo: boolean;
   canUndo: boolean;
+  activeUuid: string;
 }
 
 export const coreStore = new BaseStore<CoreStore>({
   editorStatus: EditorStatus.NONE,
   canRedo: false,
   canUndo: false,
+  activeUuid: '',
 });

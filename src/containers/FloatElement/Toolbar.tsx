@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { IController, FloatElement } from '@/types';
+import { IController } from '@/types';
 import { Button } from '../components';
 import { generateUUID } from '@/util';
 
@@ -15,9 +15,11 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = ({
     image.src = base64Image;
     image.onload = function () {
       const range = controller.getActiveCell();
-      const data: FloatElement = {
+      controller.addFloatElement({
         width: image.width,
         height: image.height,
+        originHeight: image.height,
+        originWidth: image.width,
         title: fileName,
         type: 'floating-picture',
         uuid: generateUUID(),
@@ -27,8 +29,7 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = ({
         fromCol: range.col,
         marginX: 0,
         marginY: 0,
-      };
-      controller.addFloatElement(data);
+      });
     };
   };
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,6 +75,8 @@ export const InsertChart: React.FunctionComponent<Props> = ({ controller }) => {
     controller.addFloatElement({
       width: 400,
       height: 300,
+      originHeight: 300,
+      originWidth: 400,
       title: 'Chart Title',
       type: 'chart',
       uuid: generateUUID(),

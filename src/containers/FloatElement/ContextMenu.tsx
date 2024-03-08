@@ -11,11 +11,13 @@ import {
   isSameRange,
 } from '@/util';
 import { FloatElementItem } from '@/containers/store';
+import { IWindowSize } from '@/types';
 
 type Props = FloatElementItem & {
   controller: IController;
   menuLeft: number;
   menuTop: number;
+  resetResize: (size: IWindowSize) => void;
   hideContextMenu: () => void;
 };
 
@@ -67,7 +69,12 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       type,
       chartType,
       title,
+      resetResize,
       hideContextMenu,
+      originHeight,
+      originWidth,
+      width,
+      height,
     } = props;
     const [ref] = useClickOutside(hideContextMenu);
     const selectData = () => {
@@ -220,6 +227,19 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           </React.Fragment>
         ) : null}
         <Button onClick={saveAsPicture}>Save as Picture</Button>
+        <Button
+          disabled={width === originWidth && height === originHeight}
+          onClick={() => {
+            hideContextMenu();
+            controller.transaction(() => {
+              controller.updateFloatElement(uuid, 'height', originHeight);
+              controller.updateFloatElement(uuid, 'width', originWidth);
+            });
+            resetResize({ width: originWidth, height: originHeight });
+          }}
+        >
+          Reset Size
+        </Button>
       </div>
     );
   },

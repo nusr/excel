@@ -9,7 +9,7 @@
 }
 
 .float-element.active {
-  border: 1px dashed var(--primaryColor);
+  border-style: dashed;
   border-style: dashed;
   cursor: move;
   z-index: var(--middleZIndex);
@@ -72,23 +72,33 @@
 }
 .scale-dot {
   border-radius: 50%;
-  background-color: var(--primaryColor);
+  background-color: var(--white);
   width: 10px;
   height: 10px;
-  border: 2px solid var(--white);
+  border: 1px solid var(--borderColor);
   box-sizing: content-box;
+}
+.rotate-icon {
+  color: var(--white);
+  background-color: var(--borderColor);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .top {
   top: -16px;
   left: 50%;
-  margin-left: -10px;
+  margin-left: -16px;
   cursor: ns-resize;
 }
 .bottom {
   bottom: -16px;
   left: 50%;
-  margin-left: -10px;
+  margin-left: -16px;
   cursor: ns-resize;
 }
 .top-right {
@@ -120,12 +130,20 @@
 .left {
   left: -16px;
   top: 50%;
-  margin-top: -10px;
+  margin-top: -16px;
   cursor: ew-resize;
 }
 .rotate {
   top: -48px;
   left: 50%;
-  margin-left: -10px;
-  cursor: ns-resize;
+  margin-left: -16px;
+  cursor: grabbing;
+}
+.rotate::after {
+  position: absolute;
+  content: '';
+  top: 14px;
+  height: 28px;
+  width: 1px;
+  background-color: var(--borderColor);
 }

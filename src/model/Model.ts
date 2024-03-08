@@ -934,6 +934,9 @@ export class Model implements IModel {
       assert(check, 'The cells must contain the data');
     } else if (data.type === 'floating-picture') {
       assert(!!data.imageSrc, 'Image is empty');
+      if (typeof data.imageAngle !== 'number') {
+        data.imageAngle = 0;
+      }
     }
     this.drawings.push([data]);
   }

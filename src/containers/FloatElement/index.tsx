@@ -1,9 +1,23 @@
-import React, { useSyncExternalStore, Fragment, memo, useState } from 'react';
-import { IController } from '@/types';
-import { floatElementStore } from '@/containers/store';
+import React, {
+  useSyncExternalStore,
+  Fragment,
+  memo,
+  useState,
+  useEffect,
+  useRef,
+} from 'react';
+import { IController, IWindowSize } from '@/types';
+import { floatElementStore, coreStore } from '@/containers/store';
 import { FloatElement } from './FloatElement';
-import { classnames } from '@/util';
 import styles from './FloatElement.module.css';
+import { getHitInfo, classnames } from '@/util';
+import {
+  State,
+  ResizePosition,
+  FloatElementPosition,
+  INITIAL_STATE,
+  roundPosition,
+} from './util';
 
 interface Props {
   controller: IController;
@@ -14,7 +28,200 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
       floatElementStore.subscribe,
       floatElementStore.getSnapshot,
     );
-    const [activeUuid, setActiveUuid] = useState('');
+    const { activeUuid } = useSyncExternalStore(
+      coreStore.subscribe,
+      coreStore.getSnapshot,
+    );
+    const state = useRef<State>({ ...INITIAL_STATE });
+    const [position, setPosition] = useState<FloatElementPosition>({
+      ...INITIAL_STATE.position,
+    });
+
+    state.current.position = position;
+    state.current.uuid = activeUuid;
+
+    const handleResizePointerDown = (
+      event: React.PointerEvent<HTMLDivElement>,
+    ) => {
+      event.stopPropagation();
+      event.preventDefault();
+      if (!state.current.uuid) {
+        return;
+      }
+      if (event.buttons !== 1) {
+        return;
+      }
+
+      const p = event.currentTarget.dataset.position || '';
+      if (!p) {
+        return;
+      }
+      state.current.resizePosition = p;
+      state.current.moveStartX = event.clientX;
+      state.current.moveStartY = event.clientY;
+    };
+    const handlePointerUp = (event: PointerEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
+      const uuidData = state.current.uuid;
+      if (state.current.resizePosition) {
+        if (state.current.resizePosition === ResizePosition.rotate) {
+          controller.updateFloatElement(
+            uuidData,
+            'imageAngle',
+            state.current.position.imageAngle,
+          );
+        } else if (
+          state.current.position.height > 0 &&
+          state.current.position.width > 0
+        ) {
+          controller.transaction(() => {
+            controller.updateFloatElement(
+              uuidData,
+              'height',
+              state.current.position.height,
+            );
+            controller.updateFloatElement(
+              uuidData,
+              'width',
+              state.current.position.width,
+            );
+          });
+        }
+      }
+      if (state.current.position.left >= 0 && state.current.position.top >= 0) {
+        const newRange = getHitInfo(
+          controller,
+          state.current.position.left,
+          state.current.position.top,
+        );
+        if (newRange) {
+          controller.transaction(() => {
+            controller.updateFloatElement(uuidData, 'fromCol', newRange.col);
+            controller.updateFloatElement(uuidData, 'fromRow', newRange.row);
+            controller.updateFloatElement(
+              uuidData,
+              'marginX',
+              newRange.marginX,
+            );
+            controller.updateFloatElement(
+              uuidData,
+              'marginY',
+              newRange.marginY,
+            );
+          });
+        }
+      }
+      state.current = { ...INITIAL_STATE };
+    };
+
+    const updateSize = (e: PointerEvent) => {
+      const deltaX = Math.round(e.clientX - state.current.moveStartX);
+      const deltaY = Math.round(e.clientY - state.current.moveStartY);
+      setPosition((old) => {
+        const p = state.current.resizePosition as ResizePosition;
+        let { top, left, width, height } = old;
+        if (
+          [
+            ResizePosition.topRight,
+            ResizePosition.topLeft,
+            ResizePosition.top,
+          ].includes(p)
+        ) {
+          height -= deltaY;
+          top += deltaY;
+        } else if (
+          [
+            ResizePosition.bottomRight,
+            ResizePosition.bottom,
+            ResizePosition.bottomLeft,
+          ].includes(p)
+        ) {
+          height += deltaY;
+        }
+
+        if (
+          [
+            ResizePosition.topLeft,
+            ResizePosition.bottomLeft,
+            ResizePosition.left,
+          ].includes(p)
+        ) {
+          width -= deltaX;
+          left += deltaX;
+        } else if (
+          [
+            ResizePosition.topRight,
+            ResizePosition.bottomRight,
+            ResizePosition.right,
+          ].includes(p)
+        ) {
+          width += deltaX;
+        }
+
+        return {
+          ...roundPosition(top, left, controller),
+          imageAngle: old.imageAngle,
+          width,
+          height,
+        };
+      });
+    };
+    const updateRotate = (event: PointerEvent) => {
+      const deltaX = event.clientX - state.current.moveStartX;
+      const deltaY = event.clientY - state.current.moveStartY;
+      const imageAngle = (Math.atan2(deltaY, deltaX) * 180) / Math.PI;
+      setPosition((old) => {
+        return {
+          ...old,
+          imageAngle,
+        };
+      });
+    };
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!state.current.uuid) {
+        return;
+      }
+      if (event.buttons !== 1) {
+        return;
+      }
+
+      event.stopPropagation();
+      event.preventDefault();
+      if (state.current.resizePosition) {
+        if (state.current.resizePosition === ResizePosition.rotate) {
+          updateRotate(event);
+        } else {
+          updateSize(event);
+        }
+        state.current.moveStartX = event.clientX;
+        state.current.moveStartY = event.clientY;
+        return;
+      }
+      const deltaX = Math.round(event.clientX - state.current.moveStartX);
+      const deltaY = Math.round(event.clientY - state.current.moveStartY);
+      setPosition((old) => {
+        const newTop = old.top + deltaY;
+        const newLeft = old.left + deltaX;
+        return {
+          ...roundPosition(newTop, newLeft, controller),
+          imageAngle: old.imageAngle,
+          width: old.width,
+          height: old.height,
+        };
+      });
+      state.current.moveStartX = event.clientX;
+      state.current.moveStartY = event.clientY;
+    };
+
+    useEffect(() => {
+      document.addEventListener('pointerup', handlePointerUp);
+      document.addEventListener('pointermove', handlePointerMove);
+      return () => {
+        document.removeEventListener('pointerup', handlePointerUp);
+        document.removeEventListener('pointermove', handlePointerMove);
+      };
+    }, []);
     return (
       <Fragment>
         <div
@@ -24,18 +231,46 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
           onPointerDown={(event) => {
             event.stopPropagation();
             event.preventDefault();
-            setActiveUuid('');
+            state.current = { ...INITIAL_STATE };
+            coreStore.mergeState({ activeUuid: '' });
           }}
         />
-        {floatElementList.map((v) => (
-          <FloatElement
-            key={v.uuid}
-            {...v}
-            active={v.uuid === activeUuid}
-            controller={controller}
-            setActiveUuid={setActiveUuid}
-          />
-        ))}
+        {floatElementList.map((v) => {
+          const isActive = v.uuid === activeUuid;
+          const props = {
+            ...v,
+            ...(isActive ? position : {}),
+          };
+          return (
+            <FloatElement
+              key={v.uuid}
+              {...props}
+              active={isActive}
+              controller={controller}
+              resetResize={(size: IWindowSize) =>
+                setPosition((old) => ({ ...old, ...size }))
+              }
+              pointerDown={(event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                if (event.buttons !== 1) {
+                  return;
+                }
+                state.current.moveStartX = event.clientX;
+                state.current.moveStartY = event.clientY;
+                coreStore.mergeState({ activeUuid: v.uuid });
+                setPosition({
+                  top: v.top,
+                  left: v.left,
+                  width: v.width,
+                  height: v.height,
+                  imageAngle: v.imageAngle || 0,
+                });
+              }}
+              resizeDown={handleResizePointerDown}
+            />
+          );
+        })}
       </Fragment>
     );
   },
