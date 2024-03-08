@@ -53,14 +53,18 @@ export function getDefaultSheetInfo(
 }
 
 export function splitToWords(str: string): string[] {
+  if (!str) {
+    return [];
+  }
   // unicode
   if (!Intl || !Intl.Segmenter) {
-    // fixfox
+    // firefox
     return [...str];
   }
   // graphemer
-  const list = new Intl.Segmenter().segment(str);
-  return [...list].map((x) => x.segment);
+  const list = new Intl.Segmenter([], { granularity: 'word' }).segment(str);
+  const arr = [...list];
+  return arr.map((x) => x.segment);
 }
 
 export function convertResultTypeToString(value: ResultType): string {

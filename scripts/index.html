@@ -4,10 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Meta Description -->
-    <meta
-      name="description"
-      content="online spreadsheet"
-    />
+    <meta name="description" content="online spreadsheet" />
     <!-- Standard favicon -->
 
     <link
@@ -91,7 +88,11 @@
     <!-- Has no effect unless you have the previous meta tag -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
-    <link rel="alternate" href="https://github.com/nusr/excel" hreflang="x-default" />
+    <link
+      rel="alternate"
+      href="https://github.com/nusr/excel"
+      hreflang="x-default"
+    />
 
     <title>Web Excel</title>
     <link rel="stylesheet" href="./index.css" />
@@ -108,7 +109,8 @@
           eventSource.addEventListener('change', function () {
             location.reload();
           });
-          eventSource.onerror = function () {
+          eventSource.onerror = function (error) {
+            console.log(error);
             eventSource.close();
           };
         }

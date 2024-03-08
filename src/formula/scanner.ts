@@ -1,7 +1,7 @@
 import { TokenType } from '@/types';
 import { Token } from './token';
 import { CustomError } from './formula';
-import { splitToWords, FORMULA_PREFIX } from '@/util';
+import { FORMULA_PREFIX } from '@/util';
 
 const emptyData = '';
 const identifierMap = new Map<string, TokenType>([
@@ -15,7 +15,7 @@ export class Scanner {
   private start = 0;
   private readonly tokens: Token[] = [];
   constructor(source: string) {
-    this.list = splitToWords(source);
+    this.list = [...source];
   }
   scan(): Token[] {
     while (!this.isAtEnd()) {

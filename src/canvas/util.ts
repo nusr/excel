@@ -31,7 +31,9 @@ export function measureText(
   if (measureTextMap.has(mapKey)) {
     return measureTextMap.get(mapKey)!;
   }
-  const { width } = ctx.measureText(char);
+  const t = ctx.measureText(char);
+  // console.log(t, char);
+  const { width } = t;
   const result = Math.ceil(width / dpr());
   measureTextMap.set(mapKey, result);
   return result;

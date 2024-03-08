@@ -57,26 +57,29 @@ const MOCK_MODEL: WorkBookJSON = {
   ],
   worksheets_1: {
     '0_0': {
-      value: '1abcd',
+      value: '1a',
       style: {
         fontColor: '#ff0000',
       },
     },
     '0_1': {
-      value: '',
+      value: 'Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞',
+      style: {
+        fontSize: 26,
+      },
     },
     '0_2': {
       value: '',
       formula: '=foo',
     },
     '0_3': {
-      value: '超大字',
+      value: 'large text',
       style: {
         fontSize: 36,
       },
     },
     '0_4': {
-      value: '这是一段非常长的文案，需要换行展示',
+      value: 'This is a very long text that needs to be wrapped',
       style: {
         isWrapText: true,
         isStrike: true,
@@ -94,18 +97,12 @@ const MOCK_MODEL: WorkBookJSON = {
       },
     },
     '0_7': {
-      value: 'Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞',
-      style: {
-        fontSize: 36,
-      },
-    },
-    '0_8': {
       value: '뎌쉐',
       style: {
         fontSize: 36,
       },
     },
-    '0_9': {
+    '0_8': {
       value: 'Ĺo͂řȩm̅',
       style: {
         fontSize: 36,
@@ -194,6 +191,10 @@ const MOCK_MODEL: WorkBookJSON = {
     },
   },
   customWidth: {
+    '1_3': {
+      len: 180,
+      isHide: false,
+    },
     '1_1': {
       len: 100,
       isHide: false,

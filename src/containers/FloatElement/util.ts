@@ -23,7 +23,6 @@ export type State = {
   moveStartY: number;
   resizePosition: string;
   position: FloatElementPosition;
-  uuid: string;
 };
 
 export function computeElementSize(
@@ -86,13 +85,12 @@ export const INITIAL_STATE: State = {
   moveStartX: 0,
   moveStartY: 0,
   position: {
-    top: -1,
-    left: -1,
     width: -1,
     height: -1,
     imageAngle: 0,
+    top: -1,
+    left: -1,
   },
-  uuid: '',
 };
 
 export function roundPosition(
@@ -101,13 +99,20 @@ export function roundPosition(
   controller: IController,
 ) {
   const size = controller.getHeaderSize();
+  const canvasSize = controller.getDomRect();
   const minTop = size.height;
   const minLeft = size.width;
   if (top < minTop) {
     top = minTop;
   }
+  if (top > canvasSize.height) {
+    top = canvasSize.height;
+  }
   if (left < minLeft) {
     left = minLeft;
+  }
+  if (left > canvasSize.width) {
+    left = canvasSize.width;
   }
   return {
     top,
