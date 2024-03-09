@@ -34,7 +34,7 @@ export const DefineName: React.FunctionComponent<Props> = ({
         return;
       }
       const r = parseReference(t);
-      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
       if (r && r.col < sheetInfo.colCount && r.row < sheetInfo.rowCount) {
         setValue(displayName);
         controller.setActiveCell(r);

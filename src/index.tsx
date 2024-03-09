@@ -1,11 +1,15 @@
 import { App } from './containers';
 import './global.css';
 import ReactDOM from 'react-dom/client';
-import React from 'react';
+import React, { StrictMode } from 'react';
 import { initController } from '@/controller';
 import { theme } from './util';
 import { MOCK_MODEL } from '@/model';
-import * as Sentry from '@sentry/react';
+import {
+  init,
+  browserTracingIntegration,
+  replayIntegration,
+} from '@sentry/react';
 
 function initTheme(dom: HTMLElement) {
   const keyList = Object.keys(theme) as Array<keyof typeof theme>;
@@ -15,11 +19,11 @@ function initTheme(dom: HTMLElement) {
 }
 
 if (location.hostname !== 'localhost') {
-  Sentry.init({
+  init({
     dsn: 'https://b292d91ba509038c141ecfc7d10e7bb7@o4506851168092160.ingest.sentry.io/4506851171041280',
     integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({
+      browserTracingIntegration(),
+      replayIntegration({
         maskAllText: false,
         blockAllMedia: false,
       }),
@@ -41,7 +45,7 @@ controller.fromJSON(MOCK_MODEL);
 const root = ReactDOM.createRoot(domNode);
 
 root.render(
-  <React.StrictMode>
+  <StrictMode>
     <App controller={controller} />
-  </React.StrictMode>,
+  </StrictMode>,
 );

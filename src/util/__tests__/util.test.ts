@@ -31,6 +31,7 @@ describe('util.test.ts', () => {
             rowCount: 30,
             colCount: 20,
             isHide: false,
+            sort: 0,
           },
         ]),
       ).toMatchObject({

@@ -13,7 +13,6 @@ import {
   NUMBER_FORMAT_LIST,
   saveAs,
   stringToCoordinate,
-  getWorkSheetKey,
   getCustomWidthOrHeightKey,
   convertResultTypeToString,
 } from '@/util';
@@ -205,7 +204,7 @@ export async function exportToXLSX(fileName: string, controller: IController) {
 
   const modelJson = controller.toJSON();
   const currentSheetId = controller.getCurrentSheetId();
-  const sheetList = modelJson.workbook;
+  const sheetList = Object.values(modelJson.workbook);
 
   const sheetRelMap: Record<string, { rid: string; target: string }> = {};
   for (let i = 0; i < sheetList.length; i++) {
@@ -357,7 +356,7 @@ export async function exportToXLSX(fileName: string, controller: IController) {
   for (const item of sheetList) {
     const activeCell = modelJson.rangeMap[item.sheetId];
     const t = sheetRelMap[item.sheetId];
-    const cellData = modelJson[getWorkSheetKey(item.sheetId)];
+    const cellData = modelJson.worksheets[item.sheetId];
     const isActiveSheet = item.sheetId === currentSheetId;
     if (!cellData) {
       worksheets.file(

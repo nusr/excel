@@ -127,7 +127,6 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
       const handlePointerUp = (event: PointerEvent) => {
         event.stopPropagation();
         event.preventDefault();
-        console.log(state.current);
         if (!activeUuid) {
           state.current = { ...INITIAL_STATE };
           return;
@@ -240,7 +239,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
           className={classnames(styles['float-element-mask'], {
             [styles['active']]: !!activeUuid,
           })}
-          onClick={() => {
+          onPointerDown={() => {
             state.current = { ...INITIAL_STATE };
             coreStore.mergeState({ activeUuid: '' });
           }}
@@ -269,6 +268,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
                 state.current.moveStartX = event.clientX;
                 state.current.moveStartY = event.clientY;
                 state.current.position = { ...INITIAL_STATE.position };
+                controller.setFloatElementUuid(v.uuid);
                 coreStore.mergeState({ activeUuid: v.uuid });
                 setPosition({
                   top: v.top,

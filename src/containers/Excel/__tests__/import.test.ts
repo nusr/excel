@@ -141,23 +141,25 @@ describe('import.test.ts', () => {
         },
       };
       const result: WorkBookJSON = {
-        workbook: [
-          {
+        workbook: {
+          '1': {
             sheetId: '1',
             name: 'Sheet1',
             isHide: false,
             rowCount: 200,
             colCount: 200,
+            sort: 0,
           },
-          {
+          '2': {
             sheetId: '2',
             name: 'Sheet2',
             isHide: false,
             rowCount: 200,
             colCount: 200,
+            sort: 1,
           },
-        ],
-        mergeCells: [],
+        },
+        mergeCells: {},
         customHeight: { '1_0': { isHide: false, len: 200 } },
         customWidth: {},
         definedNames: {
@@ -165,22 +167,24 @@ describe('import.test.ts', () => {
           boo: { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '2' },
         },
         currentSheetId: '1',
-        drawings: [],
+        drawings: {},
         rangeMap: {},
-        worksheets_1: {
-          '0_0': {
-            style: {
-              fontFamily: undefined,
-              fontSize: 16,
-              horizontalAlign: 0,
-              isBold: false,
-              isItalic: false,
-              isStrike: false,
-              isWrapText: true,
-              underline: 0,
-              verticalAlign: 0,
+        worksheets: {
+          '1': {
+            '0_0': {
+              style: {
+                fontFamily: undefined,
+                fontSize: 16,
+                horizontalAlign: 0,
+                isBold: false,
+                isItalic: false,
+                isStrike: false,
+                isWrapText: true,
+                underline: 0,
+                verticalAlign: 0,
+              },
+              value: '1',
             },
-            value: '1',
           },
         },
       };

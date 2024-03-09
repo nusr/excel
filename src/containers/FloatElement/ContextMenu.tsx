@@ -82,7 +82,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         props.chartRange!,
         'absolute',
         (sheetId: string) => {
-          return controller.getSheetInfo(sheetId).name;
+          return controller.getSheetInfo(sheetId)?.name || '';
         },
       );
       const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

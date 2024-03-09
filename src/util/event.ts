@@ -20,8 +20,11 @@ export function getHitInfo(
   if (x < 0 || y < 0) {
     return null;
   }
-  const scroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+  if (!sheetInfo) {
+    return null;
+  }
+  const scroll = controller.getScroll();
   const headerSize = controller.getHeaderSize();
   let resultX = headerSize.width;
   let resultY = headerSize.height;

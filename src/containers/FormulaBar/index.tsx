@@ -32,9 +32,6 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
     );
   }, [activeCell]);
   const editorValue = activeCell.formula || String(activeCell.value || '');
-  // const style = useMemo(() => {
-  //   return getEditorStyle(activeCell, editorStatus);
-  // }, [activeCell, editorStatus]);
   const handleClick = () => {
     coreStore.mergeState({
       editorStatus: EditorStatus.EDIT_FORMULA_BAR,

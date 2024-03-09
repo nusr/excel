@@ -54,4 +54,5 @@ export interface IController extends IBaseModel {
   getMainDom: () => MainDom;
   setScroll: (scroll: ScrollValue) => void;
   getScroll: (sheetId?: string) => ScrollValue;
+  setFloatElementUuid: (uuid: string) => void;
 }

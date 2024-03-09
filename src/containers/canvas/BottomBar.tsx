@@ -24,7 +24,7 @@ export const BottomBar: React.FunctionComponent<Props> = ({ controller }) => {
   };
   const handleClick = () => {
     controller.transaction(() => {
-      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
       controller.addRow(sheetInfo.rowCount - 1, value);
       const viewSize = controller.getViewSize();
       scrollBar(controller, 0, viewSize.height);

@@ -131,7 +131,7 @@ function recalculateScroll(controller: IController) {
   const cellSize = controller.getCellSize(temp);
   const domRect = controller.getDomRect();
   const oldScroll = controller.getScroll();
-  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
   const headerSize = controller.getHeaderSize();
   const buff = 5;
   const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } =
@@ -394,6 +394,20 @@ export const keyboardEventList: KeyboardEventItem[] = [
         style.underline = EUnderLine.NONE;
       }
       controller.setCellStyle(style, [controller.getActiveCell()]);
+    },
+  },
+  {
+    key: 'z',
+    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    handler: (controller) => {
+      controller.undo();
+    },
+  },
+  {
+    key: 'y',
+    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    handler: (controller) => {
+      controller.redo();
     },
   },
 ];

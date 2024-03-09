@@ -28,6 +28,7 @@ import {
   COL_TITLE_WIDTH,
   containRange,
   parseHTML,
+  generateUUID,
 } from '@/util';
 
 const defaultScrollValue: ScrollValue = {
@@ -45,6 +46,7 @@ export class Controller implements IController {
   private changeSet = new Set<ChangeEventType>();
   private copyRanges: IRange[] = []; // cut or copy ranges
   private isCut = false; // cut or copy
+  private floatElementUuid = '';
   private hooks: IHooks = {
     modelChange() {},
     async copyOrCut() {
@@ -73,10 +75,10 @@ export class Controller implements IController {
   getCurrentSheetId(): string {
     return this.model.getCurrentSheetId();
   }
-  getSheetList(): WorkBookJSON['workbook'] {
+  getSheetList(): WorksheetType[] {
     return this.model.getSheetList();
   }
-  getSheetInfo(sheetId: string): WorksheetType {
+  getSheetInfo(sheetId: string) {
     return this.model.getSheetInfo(sheetId);
   }
   setHooks(hooks: IHooks): void {
@@ -85,11 +87,9 @@ export class Controller implements IController {
   private emitChange(): void {
     this.computeViewSize();
     const result = this.changeSet;
-    if (this.changeSet.has('cellValue')) {
-      this.model.computeAllCell();
-    }
     this.changeSet = new Set<ChangeEventType>();
     controllerLog(result);
+    this.model.emitChange(result);
     this.hooks.modelChange(result);
   }
   getActiveCell(): IRange {
@@ -131,7 +131,7 @@ export class Controller implements IController {
     const range = this.getActiveCell();
     let startCol = range.col;
     let startRow = range.row;
-    const sheetInfo = this.getSheetInfo(range.sheetId);
+    const sheetInfo = this.getSheetInfo(range.sheetId)!;
     const mergeCells = this.getMergeCells(range.sheetId);
     const result = {
       ...range,
@@ -333,13 +333,12 @@ export class Controller implements IController {
     controllerLog('loadJSON', json);
     this.model.transaction(() => {
       this.model.fromJSON(json);
-      const activeCell = this.getActiveCell();
       this.changeSet.add('sheetList');
       this.changeSet.add('sheetId');
       this.changeSet.add('range');
       this.changeSet.add('floatElement');
       this.changeSet.add('cellValue');
-      this.setSheetCell(activeCell);
+      this.setSheetCell(this.getActiveCell());
 
       this.emitChange();
     });
@@ -377,6 +376,9 @@ export class Controller implements IController {
     return this.model.canUndo();
   }
   undo() {
+    if (!this.canUndo()) {
+      return;
+    }
     this.model.undo();
     this.changeSet.add('range');
     this.changeSet.add('sheetList');
@@ -387,6 +389,9 @@ export class Controller implements IController {
     this.emitChange();
   }
   redo() {
+    if (!this.canRedo()) {
+      return;
+    }
     this.model.redo();
     this.changeSet.add('range');
     this.changeSet.add('sheetList');
@@ -433,6 +438,9 @@ export class Controller implements IController {
   private computeViewSize() {
     const headerSize = this.getHeaderSize();
     const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
+    if (!sheetInfo) {
+      return;
+    }
     let { width } = headerSize;
     let { height } = headerSize;
     for (let i = 0; i < sheetInfo.colCount; i++) {
@@ -699,9 +707,34 @@ export class Controller implements IController {
     };
   }
   paste(event?: ClipboardEvent) {
-    this.transaction(() => {
-      this.basePaste(event);
-    });
+    if (this.floatElementUuid) {
+      if (this.isCut) {
+        const uuid = this.floatElementUuid;
+        const range = this.getActiveCell();
+        this.model.updateFloatElement(uuid, 'fromCol', range.col);
+        this.model.updateFloatElement(uuid, 'fromRow', range.row);
+        this.model.updateFloatElement(uuid, 'marginX', 0);
+        this.model.updateFloatElement(uuid, 'marginY', 0);
+        this.changeSet.add('floatElement');
+        this.copyRanges = [];
+        this.isCut = false;
+        this.floatElementUuid = '';
+        this.emitChange();
+      } else {
+        const list = this.getFloatElementList(this.getCurrentSheetId());
+        const item = list.find((v) => v.uuid === this.floatElementUuid);
+        if (item) {
+          this.addFloatElement({
+            ...item,
+            uuid: generateUUID(),
+            marginX: item.marginX + 10,
+            marginY: item.marginY + 10,
+          });
+        }
+      }
+      return;
+    }
+    this.basePaste(event);
   }
   private async basePaste(event?: ClipboardEvent) {
     let html = '';
@@ -757,9 +790,11 @@ export class Controller implements IController {
   copy(event?: ClipboardEvent): void {
     this.copyRanges = [this.getActiveCell()];
     this.isCut = false;
+    this.floatElementUuid = '';
     this.baseCopy('copy', event);
   }
   cut(event?: ClipboardEvent) {
+    this.floatElementUuid = '';
     this.copyRanges = [this.getActiveCell()];
     this.isCut = true;
     this.baseCopy('cut', event);
@@ -877,5 +912,8 @@ export class Controller implements IController {
       this.changeSet.add('cellValue');
       this.emitChange();
     });
+  }
+  setFloatElementUuid(uuid: string) {
+    this.floatElementUuid = uuid;
   }
 }

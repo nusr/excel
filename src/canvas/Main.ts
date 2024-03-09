@@ -126,7 +126,7 @@ export class MainCanvas {
     const { row: rowIndex, col: colIndex } = controller.getScroll();
     const { rowCount, colCount } = this.controller.getSheetInfo(
       this.controller.getCurrentSheetId(),
-    );
+    )!;
     const lineWidth = thinLineWidth();
     this.ctx.save();
     this.ctx.fillStyle = theme.white;
@@ -220,7 +220,7 @@ export class MainCanvas {
     const headerSize = controller.getHeaderSize();
     const { rowCount } = controller.getSheetInfo(
       controller.getCurrentSheetId(),
-    );
+    )!;
     const mergeCells = controller.getMergeCells(controller.getCurrentSheetId());
     this.ctx.save();
     const range = this.controller.getActiveCell();
@@ -266,7 +266,7 @@ export class MainCanvas {
     const headerSize = controller.getHeaderSize();
     const { colCount } = controller.getSheetInfo(
       controller.getCurrentSheetId(),
-    );
+    )!;
     const mergeCells = controller.getMergeCells(controller.getCurrentSheetId());
     const range = this.controller.getActiveCell();
     const pointList: Point[] = [];

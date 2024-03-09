@@ -33,13 +33,14 @@ describe('model.test.ts', () => {
   test('toJSON', () => {
     const model = new Model();
     expect(model.toJSON()).toEqual({
-      workbook: [],
-      mergeCells: [],
+      workbook: {},
+      mergeCells: {},
+      worksheets: {},
       customHeight: {},
       customWidth: {},
       definedNames: {},
       currentSheetId: '',
-      drawings: [],
+      drawings: {},
       rangeMap: {},
     });
   });
@@ -48,64 +49,54 @@ describe('model.test.ts', () => {
     const json: WorkBookJSON = {
       currentSheetId: '',
       rangeMap: {},
-      workbook: [
-        {
+      workbook: {
+        '1': {
           sheetId: '1',
           isHide: false,
           rowCount: 200,
           colCount: 200,
           name: 'test',
+          sort: 0,
         },
-      ],
-      mergeCells: [
-        {
-          row: 1,
-          col: 1,
-          colCount: 3,
-          rowCount: 3,
-          sheetId: '1',
-        },
-      ],
+      },
+      mergeCells: {},
       customHeight: {},
       customWidth: {},
       definedNames: {},
-      worksheets_2: {
-        '0_0': {
-          formula: '=Sheet1!A1',
+      worksheets: {
+        '2': {
+          '0_0': {
+            formula: '=Sheet1!A1',
+          },
         },
       },
-      drawings: [],
+      drawings: {},
     };
     model.fromJSON(json);
     expect(model.toJSON()).toEqual({
       currentSheetId: '1',
-      workbook: [
-        {
+      workbook: {
+        '1': {
           sheetId: '1',
           isHide: false,
           rowCount: 200,
           colCount: 200,
           name: 'test',
+          sort: 0,
         },
-      ],
-      mergeCells: [
-        {
-          row: 1,
-          col: 1,
-          colCount: 3,
-          rowCount: 3,
-          sheetId: '1',
-        },
-      ],
+      },
+      mergeCells: {},
       customHeight: {},
       customWidth: {},
       definedNames: {},
-      worksheets_2: {
-        '0_0': {
-          formula: '=Sheet1!A1',
+      worksheets: {
+        '2': {
+          '0_0': {
+            formula: '=Sheet1!A1',
+          },
         },
       },
-      drawings: [],
+      drawings: {},
       rangeMap: {},
     });
   });

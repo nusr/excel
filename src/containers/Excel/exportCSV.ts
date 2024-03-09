@@ -1,12 +1,9 @@
 import { IController, ResultType } from '@/types';
-import {
-  saveAs, coordinateToString,
-  getWorkSheetKey
-} from '@/util';
+import { saveAs, coordinateToString } from '@/util';
 
 function processRow(row: ResultType[]) {
   let finalVal = '';
-  for (let j = 0;j < row.length;j++) {
+  for (let j = 0; j < row.length; j++) {
     const t = row[j] ?? '';
     let innerValue = '';
     if (t === 0) {
@@ -27,13 +24,14 @@ function processRow(row: ResultType[]) {
   return `${finalVal}\n`;
 }
 export function exportToCsv(fileName: string, controller: IController) {
-  const sheetData = controller.toJSON()[getWorkSheetKey(controller.getCurrentSheetId())];
+  const sheetData =
+    controller.toJSON().worksheets[controller.getCurrentSheetId()];
   let csvFile = '';
-  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
   if (sheetData) {
-    for (let row = 0;row < sheetInfo.rowCount;row++) {
+    for (let row = 0; row < sheetInfo.rowCount; row++) {
       const list: ResultType[] = [];
-      for (let col = 0;col < sheetInfo.colCount;col++) {
+      for (let col = 0; col < sheetInfo.colCount; col++) {
         const key = coordinateToString(row, col);
         const value = sheetData[key];
         if (!value) {

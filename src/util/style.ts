@@ -241,7 +241,6 @@ export function parseHTML(html: string) {
     styleList.push(list);
   }
   template = null;
-  console.log(styleList);
   return {
     textList,
     styleList,

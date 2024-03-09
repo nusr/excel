@@ -1,6 +1,7 @@
 import { ResultType } from './parser';
 import { IRange } from './range';
 import type { ChartType } from 'chart.js';
+import { ChangeEventType } from './event';
 
 export enum EVerticalAlign {
   TOP,
@@ -51,6 +52,7 @@ export interface WorksheetType {
   isHide: boolean;
   rowCount: number;
   colCount: number;
+  sort: number; // sort
 }
 
 export interface ModelCellType {
@@ -71,9 +73,8 @@ export interface CustomItem {
   len: number; // width or height
   isHide: boolean;
 }
-export type CustomHeightOrWidthItem = {
-  [key: `${string}_${number}`]: CustomItem;
-}; // key: sheetId + '_' + row number or col number value: height or width
+export type CustomHeightOrWidthItem = Record<string, CustomItem>; // key: sheetId + '_' + row number or col number value: height or width
+
 export interface MergeCellItem {
   start: Coordinate;
   end: Coordinate;
@@ -97,25 +98,23 @@ export type FloatElement = {
   chartType?: ChartType;
   chartRange?: IRange; // chart reference range
 };
+export type WorksheetData = Record<string, ModelCellType>; // key: row + col worksheets_*.xml_worksheet_sheetData
 
 export type WorkBookJSON = {
-  [key: `worksheets_${string}`]: {
-    // key: worksheets_ + sheetId
-    [key: `${number}_${number}`]: ModelCellType; // key: row + col worksheets_*.xml_worksheet_sheetData
-  };
-  workbook: WorksheetType[]; // workbook.xml_workbook_sheets
-  mergeCells: IRange[]; // worksheets_*.xml_worksheet_mergeCells
+  worksheets: Record<string, WorksheetData>; // key: sheetId
+  workbook: Record<string, WorksheetType>; // key: sheetId, workbook.xml_workbook_sheets
+  mergeCells: Record<string, IRange>; // key: ref, worksheets_*.xml_worksheet_mergeCells
   customHeight: CustomHeightOrWidthItem; // key: sheetId_row worksheets_*.xml_worksheet_sheetData_customHeight
   customWidth: CustomHeightOrWidthItem; // key: sheetId_col worksheets_*.xml_worksheet_sheetData_customHeight
   definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
   currentSheetId: string;
-  drawings: FloatElement[]; //  chart floatImage
+  drawings: Record<string, FloatElement>; // key: uuid,  chart floatImage
   rangeMap: Record<string, IRange>; // key: sheetId
 };
 
 export interface IModel extends IBaseModel {
   pasteRange: (range: IRange, isCut: boolean) => IRange;
-  computeAllCell(): void;
+  emitChange: (dataset: Set<ChangeEventType>) => void;
 }
 
 export interface IBaseModel {
@@ -152,8 +151,8 @@ export interface IBaseModel {
   toJSON: () => WorkBookJSON;
   fromJSON: (json: WorkBookJSON) => void;
   setCellStyle: (style: Partial<StyleType>, ranges: IRange[]) => void;
-  getSheetInfo: (sheetId: string) => WorksheetType;
-  getSheetList: () => WorkBookJSON['workbook'];
+  getSheetInfo: (sheetId: string) => WorksheetType | undefined;
+  getSheetList: () => WorksheetType[];
   addRow: (rowIndex: number, count: number) => void;
   addCol: (colIndex: number, count: number) => void;
   deleteCol: (colIndex: number, count: number) => void;

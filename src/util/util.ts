@@ -1,4 +1,4 @@
-import { SHEET_NAME_PREFIX, SPLITTER, WORK_SHEETS_PREFIX } from './constant';
+import { SHEET_NAME_PREFIX, SPLITTER } from './constant';
 import type { WorksheetType, ResultType, Coordinate } from '@/types';
 
 export function isNumber(value: any): boolean {
@@ -95,9 +95,6 @@ export function stringToCoordinate(key: string): Coordinate {
     row: isNaN(r) ? 0 : r,
     col: isNaN(c) ? 0 : c,
   };
-}
-export function getWorkSheetKey(sheetId: string): `worksheets_${string}` {
-  return `${WORK_SHEETS_PREFIX}${sheetId}`;
 }
 
 export function getCustomWidthOrHeightKey(

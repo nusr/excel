@@ -17,7 +17,6 @@ import {
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
   coordinateToString,
-  getWorkSheetKey,
   getCustomWidthOrHeightKey,
 } from '@/util';
 
@@ -275,7 +274,7 @@ function getCellStyle(
   if (xf.applyFill && xf.fillId) {
     const list = get<FillItem[]>(xml, 'styleSheet.fills.fill', []);
     const i = parseInt(xf.fillId, 10);
-    if (list.length > 0 && list[i]) {
+    if (list.length > 0 && !isNaN(i) && list[i]) {
       const g = list[i].gradientFill;
       const p = list[i].patternFill;
       if (g && g.stop[0]) {
@@ -315,14 +314,15 @@ export function convertXMLDataToModel(
   );
 
   const result: WorkBookJSON = {
-    workbook: [],
-    mergeCells: [],
+    workbook: {},
+    mergeCells: {},
     customHeight: {},
     customWidth: {},
     definedNames: {},
     currentSheetId: '',
-    drawings: [],
+    drawings: {},
     rangeMap: {},
+    worksheets: {},
   };
   const sheetPathMap: Record<string, string> = {};
   const sheetMap: Record<string, string> = {};
@@ -340,6 +340,7 @@ export function convertXMLDataToModel(
   if (!Array.isArray(sheetList)) {
     sheetList = [sheetList];
   }
+  let sort = 0;
   for (const item of sheetList) {
     if (!item) {
       continue;
@@ -361,22 +362,25 @@ export function convertXMLDataToModel(
     if (tabSelected === '1') {
       result.currentSheetId = item.sheetId;
     }
-    result.workbook.push({
+    const sheetData = {
       sheetId: item.sheetId,
       name: item.name,
       isHide: item.state === 'hidden',
       rowCount: 200,
       colCount: 200,
-    });
+      sort: sort++,
+    };
+    result.workbook[sheetData.sheetId] = sheetData;
     if (range) {
       result.rangeMap[item.sheetId] = range;
       range.sheetId = item.sheetId;
     }
   }
-  if (!result.currentSheetId) {
-    result.currentSheetId = result.workbook[0].sheetId;
-  }
-  for (const item of result.workbook) {
+  const sheets = Object.values(result.workbook);
+  sheets.sort((a, b) => a.sort - b.sort);
+  result.currentSheetId = result.currentSheetId || sheets[0].sheetId;
+
+  for (const item of sheets) {
     const sheetPath = sheetPathMap[item.sheetId];
     let sheetData: SheetDataRowItem[] = get(
       xmlData[sheetPath],
@@ -422,7 +426,6 @@ export function convertXMLDataToModel(
     if (sheetData.length === 0) {
       continue;
     }
-    const workSheetKey = getWorkSheetKey(item.sheetId);
 
     let { colCount } = item;
     let { rowCount } = item;
@@ -478,10 +481,10 @@ export function convertXMLDataToModel(
           t.value = val;
         }
 
-        if (!result[workSheetKey]) {
-          result[workSheetKey] = {};
-        }
-        result[workSheetKey][coordinateToString(realRow, range.col)] = t;
+        result.worksheets[item.sheetId] = result.worksheets[item.sheetId] || {};
+        result.worksheets[item.sheetId][
+          coordinateToString(realRow, range.col)
+        ] = t;
         colCount = Math.max(colCount, range.col + 1);
       }
     }
@@ -496,7 +499,8 @@ export function convertXMLDataToModel(
   );
   definedNames = Array.isArray(definedNames) ? definedNames : [definedNames];
   const convertSheetName = (sheetName: string) => {
-    return result.workbook.find((v) => v.name === sheetName)?.sheetId || '';
+    const list = Object.values(result.workbook);
+    return list.find((v) => v.name === sheetName)?.sheetId || '';
   };
   for (const item of definedNames) {
     const range = parseReference(item[textKey], convertSheetName);
