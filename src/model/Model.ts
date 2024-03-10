@@ -1008,15 +1008,16 @@ export class Model implements IModel {
     sheetData[key] = sheetData[key] || {};
     const cellData = sheetData[key];
 
-    const oldStyle = { ...(cellData.style || {}) };
-    const newStyle = { ...(style || {}) };
-    sheetData[key].style = newStyle;
+    const styleData = cellData.style || {};
+
+    const oldStyle = { ...styleData };
+    sheetData[key].style = style;
     this.history.push({
       undo: () => {
         sheetData[key].style = oldStyle;
       },
       redo: () => {
-        sheetData[key].style = newStyle;
+        sheetData[key].style = style;
       },
     });
   }
