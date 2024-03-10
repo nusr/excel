@@ -376,9 +376,6 @@ export class Controller implements IController {
     return this.model.canUndo();
   }
   undo() {
-    if (!this.canUndo()) {
-      return;
-    }
     this.model.undo();
     this.changeSet.add('range');
     this.changeSet.add('sheetList');
@@ -386,12 +383,10 @@ export class Controller implements IController {
     this.changeSet.add('scroll');
     this.changeSet.add('floatElement');
     this.changeSet.add('cellValue');
+    this.changeSet.add('undoRedo');
     this.emitChange();
   }
   redo() {
-    if (!this.canRedo()) {
-      return;
-    }
     this.model.redo();
     this.changeSet.add('range');
     this.changeSet.add('sheetList');
@@ -399,6 +394,7 @@ export class Controller implements IController {
     this.changeSet.add('scroll');
     this.changeSet.add('floatElement');
     this.changeSet.add('cellValue');
+    this.changeSet.add('undoRedo');
     this.emitChange();
   }
   getColWidth(col: number, sheetId?: string) {

@@ -30,6 +30,7 @@ import {
   HIDE_CELL,
   isEmpty,
   convertToReference,
+  setWith,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 import { History } from './History';
@@ -285,7 +286,7 @@ export class Model implements IModel {
     this.rangeMap = rangeMap;
     this.worksheets = worksheets;
     this.currentSheetId = currentSheetId || this.getSheetId();
-    this.history.clear();
+    this.history.clear(true);
   };
   toJSON = (): WorkBookJSON => {
     return {
@@ -561,6 +562,10 @@ export class Model implements IModel {
     };
 
     newData.len = width;
+    if (!_isChanged) {
+      this.customWidth[key] = newData;
+      return;
+    }
     this.history.push(
       new BaseCommand(
         this,
@@ -633,7 +638,10 @@ export class Model implements IModel {
       isHide: false,
     };
     data.len = height;
-
+    if (!_isChanged) {
+      this.customHeight[key] = data;
+      return;
+    }
     this.history.push(
       new BaseCommand(
         this,
@@ -833,47 +841,58 @@ export class Model implements IModel {
     const key = coordinateToString(row, col);
     sheetData[key] = sheetData[key] || {};
     const oldData = sheetData[key];
-
-    let newValue: ResultType = '';
-    let newFormula = formula;
-
-    if (formula) {
-      const result = this.parseFormula(formula);
-      if (result.error) {
-        newValue = result.error;
-      } else {
-        newFormula = FORMULA_PREFIX + result.expressionStr;
-        newValue = result.result;
-      }
-    }
-
-    const oldValue = oldData.value;
-    sheetData[key].value = newValue;
     const oldFormula = oldData.formula;
-    sheetData[key].formula = newFormula;
+    if (oldFormula === formula) {
+      return;
+    }
+    sheetData[key].formula = formula;
     this.history.push({
       undo: () => {
-        sheetData[key].value = oldValue;
         sheetData[key].formula = oldFormula;
       },
       redo: () => {
-        sheetData[key].value = newValue;
-        sheetData[key].formula = newFormula;
+        sheetData[key].formula = formula;
       },
     });
   }
   private computeAllCell() {
-    for (const sheetData of Object.values(this.worksheets)) {
+    const dataList: Array<{
+      path: string;
+      oldValue: ResultType;
+      newValue: ResultType;
+    }> = [];
+    for (const [key, sheetData] of Object.entries(this.worksheets)) {
       if (!sheetData) {
         continue;
       }
-      for (const data of Object.values(sheetData)) {
+      for (const [k, data] of Object.entries(sheetData)) {
         if (data?.formula) {
           const result = this.parseFormula(data.formula);
-          data.value = result.error ? result.error : result.result;
+          const newValue = result.error ? result.error : result.result;
+          const oldValue = data.value;
+          if (newValue !== oldValue) {
+            data.value = newValue;
+            dataList.push({ newValue, oldValue, path: `${key}.${k}.value` });
+          }
         }
       }
     }
+    if (dataList.length === 0) {
+      return;
+    }
+
+    this.history.push({
+      undo: () => {
+        for (const item of dataList) {
+          setWith(this.worksheets, item.path, item.oldValue);
+        }
+      },
+      redo: () => {
+        for (const item of dataList) {
+          setWith(this.worksheets, item.path, item.newValue);
+        }
+      },
+    });
   }
   private iterateRange(
     range: IRange,
@@ -989,14 +1008,15 @@ export class Model implements IModel {
     sheetData[key] = sheetData[key] || {};
     const cellData = sheetData[key];
 
-    const oldStyle = cellData.style;
-    sheetData[key].style = style;
+    const oldStyle = { ...(cellData.style || {}) };
+    const newStyle = { ...(style || {}) };
+    sheetData[key].style = newStyle;
     this.history.push({
       undo: () => {
         sheetData[key].style = oldStyle;
       },
       redo: () => {
-        sheetData[key].style = style;
+        sheetData[key].style = newStyle;
       },
     });
   }
@@ -1124,7 +1144,10 @@ export class Model implements IModel {
     if (dataset.has('cellValue')) {
       this.computeAllCell();
     }
-    this.history.execute();
+    if (!dataset.has('undoRedo')) {
+      this.history.commit();
+    }
+    this.history.clear(false);
   }
   private convertSheetIdToName = (sheetId: string) => {
     const data = this.workbook[sheetId];

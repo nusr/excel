@@ -1,11 +1,13 @@
 export interface IHistory {
-  clear(): void;
-  push(command: ICommand): void;
-  execute(): void;
-  canRedo(): boolean;
-  canUndo(): boolean;
+  get(): ICommand[];
+  push(...commands: ICommand[]): void;
+  commit(): void;
   undo(): void;
   redo(): void;
+  canRedo(): boolean;
+  canUndo(): boolean;
+  getLength(): number;
+  clear(clearAll?: boolean): void;
 }
 
 export interface ICommand {

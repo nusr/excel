@@ -10,7 +10,8 @@ export type ChangeEventType =
   | 'range'
   | 'defineName'
   | 'mergeCell'
-  | 'sheetId';
+  | 'sheetId'
+  | 'undoRedo';
 
 export interface IWindowSize {
   width: number;
