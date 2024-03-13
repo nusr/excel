@@ -23,12 +23,10 @@ export const BottomBar: React.FunctionComponent<Props> = ({ controller }) => {
     event.stopPropagation();
   };
   const handleClick = () => {
-    controller.transaction(() => {
-      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
-      controller.addRow(sheetInfo.rowCount - 1, value);
-      const viewSize = controller.getViewSize();
-      scrollBar(controller, 0, viewSize.height);
-    });
+    const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
+    controller.addRow(sheetInfo.rowCount - 1, value);
+    const viewSize = controller.getViewSize();
+    scrollBar(controller, 0, viewSize.height);
   };
   return (
     <div

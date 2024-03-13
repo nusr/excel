@@ -8,7 +8,7 @@ export class History implements IHistory {
     change,
     maxLength,
   }: {
-    change?: () => void;
+    change?: (list: ICommand[]) => void;
     maxLength?: number;
   }) {
     this.clear(true);
@@ -40,7 +40,7 @@ export class History implements IHistory {
     if (this.position >= this.maxLength) {
       this.commandList[this.position - this.maxLength] = [];
     }
-    this.change();
+    this.change(this.commands);
     this.commands = [];
   }
   redo(): void {
@@ -54,7 +54,7 @@ export class History implements IHistory {
         item.redo();
       }
     }
-    this.change();
+    this.change(list);
   }
   undo(): void {
     if (!this.canUndo()) {
@@ -67,7 +67,7 @@ export class History implements IHistory {
       }
     }
     this.position--;
-    this.change();
+    this.change(list);
   }
   canRedo(): boolean {
     if (this.position >= this.commandList.length - 1) {
@@ -93,7 +93,10 @@ export class History implements IHistory {
     }
     this.commands = [];
   }
-  private change() {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private change(_list: ICommand[]) {
+    // console.log(this.commandList);
+  }
   get(): ICommand[] {
     if (this.position >= 0 && this.position < this.commandList.length) {
       return this.commandList[this.position];

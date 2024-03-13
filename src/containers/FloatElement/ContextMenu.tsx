@@ -118,7 +118,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             toast({ type: 'error', message: 'reference is not valid' });
             return;
           }
-          controller.updateFloatElement(uuid, 'chartRange', range);
+          controller.updateFloatElement(uuid, { chartRange: range });
           hideContextMenu();
         },
         onCancel: () => {
@@ -149,7 +149,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             toast({ type: 'error', message: 'empty title' });
             return;
           }
-          controller.updateFloatElement(uuid, 'title', realValue);
+          controller.updateFloatElement(uuid, { title: realValue });
           hideContextMenu();
         },
         onCancel: () => {
@@ -174,7 +174,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           hideContextMenu();
         },
         onOk() {
-          controller.updateFloatElement(uuid, 'chartType', newChartType);
+          controller.updateFloatElement(uuid, { chartType: newChartType });
           hideContextMenu();
         },
       });
@@ -231,9 +231,9 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           disabled={width === originWidth && height === originHeight}
           onClick={() => {
             hideContextMenu();
-            controller.transaction(() => {
-              controller.updateFloatElement(uuid, 'height', originHeight);
-              controller.updateFloatElement(uuid, 'width', originWidth);
+            controller.updateFloatElement(uuid, {
+              height: originHeight,
+              width: originWidth,
             });
             resetResize({ width: originWidth, height: originHeight });
           }}

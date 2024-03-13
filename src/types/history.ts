@@ -15,3 +15,9 @@ export interface ICommand {
   redo(): void;
   undo(): void;
 }
+
+export type ICommandItem = {
+  path: string; // eg. worksheets.1.6_4.value, workbook.1.name
+  oldValue: any; // undo
+  newValue: any; // redo
+};

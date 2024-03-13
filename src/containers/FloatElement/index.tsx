@@ -133,26 +133,16 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
         }
         if (state.current.resizePosition) {
           if (state.current.resizePosition === ResizePosition.rotate) {
-            controller.updateFloatElement(
-              activeUuid,
-              'imageAngle',
-              state.current.position.imageAngle,
-            );
+            controller.updateFloatElement(activeUuid, {
+              imageAngle: state.current.position.imageAngle,
+            });
           } else if (
             state.current.position.height > 0 &&
             state.current.position.width > 0
           ) {
-            controller.transaction(() => {
-              controller.updateFloatElement(
-                activeUuid,
-                'height',
-                state.current.position.height,
-              );
-              controller.updateFloatElement(
-                activeUuid,
-                'width',
-                state.current.position.width,
-              );
+            controller.updateFloatElement(activeUuid, {
+              height: state.current.position.height,
+              width: state.current.position.width,
             });
           }
         }
@@ -161,27 +151,11 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
         if (left >= 0 && top >= 0 && left < rect.width && top < rect.height) {
           const newRange = getHitInfo(controller, left, top);
           if (newRange) {
-            controller.transaction(() => {
-              controller.updateFloatElement(
-                activeUuid,
-                'fromCol',
-                newRange.col,
-              );
-              controller.updateFloatElement(
-                activeUuid,
-                'fromRow',
-                newRange.row,
-              );
-              controller.updateFloatElement(
-                activeUuid,
-                'marginX',
-                newRange.marginX,
-              );
-              controller.updateFloatElement(
-                activeUuid,
-                'marginY',
-                newRange.marginY,
-              );
+            controller.updateFloatElement(activeUuid, {
+              fromCol: newRange.col,
+              fromRow: newRange.row,
+              marginX: newRange.marginX,
+              marginY: newRange.marginY,
             });
           }
         }

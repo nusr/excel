@@ -91,15 +91,16 @@ export class Model implements IModel {
       return;
     }
     this.rangeMap[newRange.sheetId] = newRange;
-    // this.history.push(
-    //   new BaseCommand(
-    //     'rangeMap',
-    //     { [newRange.sheetId]: newRange },
-    //     oldValue
-    //       ? { [newRange.sheetId]: oldValue }
-    //       : { [newRange.sheetId]: DELETE_FLAG },
-    //   ),
-    // );
+    this.history.push(
+      new BaseCommand(
+        this,
+        'rangeMap',
+        { [newRange.sheetId]: newRange },
+        oldValue
+          ? { [newRange.sheetId]: oldValue }
+          : { [newRange.sheetId]: DELETE_FLAG },
+      ),
+    );
   }
   addSheet(): void {
     const list = this.getSheetList();
@@ -185,25 +186,29 @@ export class Model implements IModel {
       'A workbook must contains at least on visible worksheet',
     );
     const newSheetId = this.getNextSheetId(sheetId);
-    const oldData: WorksheetType = this.workbook[id];
-    const newData: WorksheetType = { ...oldData, isHide: true };
-    this.history.push(
-      new BaseCommand(this, 'workbook', { [id]: newData }, { [id]: oldData }),
-    );
+    this.workbook[id].isHide = true;
+    this.history.push({
+      undo: () => {
+        this.workbook[id].isHide = false;
+      },
+      redo: () => {
+        this.workbook[id].isHide = true;
+      },
+    });
     this.setCurrentSheetId(newSheetId);
   }
   unhideSheet(sheetId?: string | undefined): void {
     const id = sheetId || this.currentSheetId;
-    const oldData = this.workbook[id];
-    this.history.push(
-      new BaseCommand(
-        this,
-        'workbook',
-        { [id]: { ...oldData, isHide: false } },
-        { [id]: oldData },
-      ),
-    );
-    this.setCurrentSheetId(oldData.sheetId);
+    this.workbook[id].isHide = false;
+    this.history.push({
+      undo: () => {
+        this.workbook[id].isHide = true;
+      },
+      redo: () => {
+        this.workbook[id].isHide = false;
+      },
+    });
+    this.setCurrentSheetId(id);
   }
   renameSheet(sheetName: string, sheetId?: string | undefined): void {
     assert(!!sheetName, 'You typed a invalid name for a sheet.');
@@ -787,7 +792,7 @@ export class Model implements IModel {
   }
   setDefineName(range: IRange, name: string): void {
     const oldName = this.getDefineName(range);
-    if (oldName in this.definedNames) {
+    if (Object.prototype.hasOwnProperty.call(this.definedNames, oldName)) {
       delete this.definedNames[oldName];
     }
     const result: IRange = {
@@ -1021,9 +1026,6 @@ export class Model implements IModel {
       },
     });
   }
-  transaction(func: () => void): void {
-    func();
-  }
   getFloatElementList(sheetId: string): FloatElement[] {
     const id = sheetId || this.currentSheetId;
     const list = Object.values(this.drawings).filter((v) => v.sheetId === id);
@@ -1066,27 +1068,37 @@ export class Model implements IModel {
       ),
     );
   }
-  updateFloatElement<T extends keyof FloatElement>(
-    uuid: string,
-    key: T,
-    newValue: FloatElement[T],
-  ) {
+  updateFloatElement(uuid: string, value: Partial<FloatElement>) {
     const item = this.drawings[uuid];
     if (!item) {
       return;
     }
-    const oldValue = item[key];
-    if (oldValue !== newValue) {
-      item[key] = newValue;
-      this.history.push({
-        undo: () => {
-          item[key] = oldValue;
-        },
-        redo: () => {
-          item[key] = newValue;
-        },
-      });
+    const oldValue: Partial<FloatElement> = {};
+    const newValue: Partial<FloatElement> = {};
+    const keyList = Object.keys(value) as Array<keyof FloatElement>;
+    for (const key of keyList) {
+      if (item[key] !== value[key]) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        oldValue[key] = item[key];
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        newValue[key] = value[key];
+      }
     }
+    if (Object.keys(oldValue).length === 0) {
+      return;
+    }
+    this.drawings[uuid] = Object.assign(this.drawings[uuid], newValue);
+
+    this.history.push({
+      undo: () => {
+        this.drawings[uuid] = Object.assign(this.drawings[uuid], oldValue);
+      },
+      redo: () => {
+        this.drawings[uuid] = Object.assign(this.drawings[uuid], newValue);
+      },
+    });
   }
   deleteFloatElement(uuid: string) {
     const oldData = this.drawings[uuid];

@@ -219,7 +219,6 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         active={isMergeCell}
         onClick={() => {
           const { range, isMerged } = controller.getActiveRange();
-          console.log(range, isMerged);
           if (isMerged) {
             controller.deleteMergeCell(range);
           } else {

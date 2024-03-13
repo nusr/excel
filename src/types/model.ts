@@ -118,7 +118,6 @@ export interface IModel extends IBaseModel {
 }
 
 export interface IBaseModel {
-  transaction: (func: () => void) => void;
   getCell: (range: IRange) => ModelCellValue | null;
   getColWidth: (col: number, sheetId?: string) => CustomItem;
   setColWidth: (
@@ -169,11 +168,7 @@ export interface IBaseModel {
   checkDefineName: (name: string) => IRange | undefined;
   getFloatElementList: (sheetId: string) => FloatElement[];
   addFloatElement: (data: FloatElement) => void;
-  updateFloatElement<T extends keyof FloatElement>(
-    uuid: string,
-    key: T,
-    value: FloatElement[T],
-  ): void;
+  updateFloatElement(uuid: string, value: Partial<FloatElement>): void;
   deleteFloatElement: (uuid: string) => void;
   getMergeCells: (sheetId?: string) => IRange[];
   addMergeCell: (range: IRange) => void;
