@@ -1,13 +1,14 @@
 import { History } from '../History';
-import { ICommand } from '@/types';
+import { ICommandItem } from '@/types';
 
 describe('History.test.ts', () => {
   test('init History', () => {
     const history = new History({});
-    const command: ICommand = {
-      execute: () => {},
-      undo: () => {},
-      redo: () => {},
+    const command: ICommandItem = {
+      type: 'currentSheetId',
+      path: '',
+      newValue: '1',
+      oldValue: '2',
     };
     history.push(command);
     history.commit();
@@ -22,10 +23,11 @@ describe('History.test.ts', () => {
 
     expect(value).toEqual('1');
 
-    const command: ICommand = {
-      execute: () => {},
-      undo: () => {},
-      redo: () => {},
+    const command: ICommandItem = {
+      type: 'currentSheetId',
+      path: '',
+      newValue: '1',
+      oldValue: '2',
     };
     history.push(command);
     history.commit();
@@ -36,10 +38,11 @@ describe('History.test.ts', () => {
     const history = new History({ maxLength: 1 });
 
     expect(history.getLength()).toEqual(0);
-    const command: ICommand = {
-      execute: () => {},
-      undo: () => {},
-      redo: () => {},
+    const command: ICommandItem = {
+      type: 'currentSheetId',
+      path: '',
+      newValue: '1',
+      oldValue: '2',
     };
     history.push(command);
     history.commit();
@@ -54,10 +57,11 @@ describe('History.test.ts', () => {
     expect(history.canRedo()).toBeFalsy();
     expect(history.canUndo()).toBeFalsy();
 
-    const command: ICommand = {
-      execute: () => {},
-      undo: () => {},
-      redo: () => {},
+    const command: ICommandItem = {
+      type: 'currentSheetId',
+      path: '',
+      newValue: '1',
+      oldValue: '2',
     };
     history.push(command);
     history.commit();
@@ -83,16 +87,11 @@ describe('History.test.ts', () => {
     const target = {
       name: oldName,
     };
-    const command: ICommand = {
-      execute: () => {
-        target.name = newName;
-      },
-      undo: () => {
-        target.name = oldName;
-      },
-      redo: () => {
-        target.name = newName;
-      },
+    const command: ICommandItem = {
+      type: 'currentSheetId',
+      path: '',
+      newValue: '1',
+      oldValue: '2',
     };
     history.push(command);
     history.commit();

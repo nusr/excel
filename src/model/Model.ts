@@ -11,6 +11,7 @@ import {
   FloatElement,
   IHistory,
   ChangeEventType,
+  ICommandItem,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -30,11 +31,34 @@ import {
   HIDE_CELL,
   isEmpty,
   convertToReference,
-  setWith,
+  modelLog,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 import { History } from './History';
-import { BaseCommand, DELETE_FLAG } from './Command';
+const DELETE_FLAG = Symbol('delete');
+
+const getKey = (item: ICommandItem) => {
+  return item.type + (item.path ? '.' + item.path : '');
+};
+
+function setData(obj: Record<string, any>, key: string, value: any) {
+  if (!obj || typeof obj !== 'object') {
+    return;
+  }
+  const keyList = key.split('.');
+  keyList.reduce((res, key, index, arr) => {
+    if (index === arr.length - 1) {
+      if (value === DELETE_FLAG) {
+        delete res[key];
+      } else {
+        res[key] = value;
+      }
+    } else if (res[key] === null || res[key] === undefined) {
+      res[key] = {};
+    }
+    return res[key];
+  }, obj);
+}
 
 export class Model implements IModel {
   private history: IHistory;
@@ -48,7 +72,41 @@ export class Model implements IModel {
   private customHeight: WorkBookJSON['customHeight'] = {};
   private drawings: WorkBookJSON['drawings'] = {};
   constructor() {
-    this.history = new History({});
+    this.history = new History({
+      undo: (item: ICommandItem) => {
+        if (item.type === 'currentSheetId') {
+          if (
+            !this.workbook[item.oldValue] ||
+            this.workbook[item.oldValue].isHide
+          ) {
+            this.currentSheetId = this.getSheetId();
+          } else {
+            this.currentSheetId = item.oldValue;
+          }
+          return;
+        }
+        const key = getKey(item);
+        setData(this, key, item.oldValue);
+      },
+      redo: (item: ICommandItem) => {
+        if (item.type === 'currentSheetId') {
+          if (
+            !this.workbook[item.newValue] ||
+            this.workbook[item.newValue].isHide
+          ) {
+            this.currentSheetId = this.getSheetId();
+          } else {
+            this.currentSheetId = item.newValue;
+          }
+          return;
+        }
+        const key = getKey(item);
+        setData(this, key, item.newValue);
+      },
+      change: (list) => {
+        modelLog(list);
+      },
+    });
   }
 
   private getSheetData(sheetId?: string) {
@@ -91,16 +149,13 @@ export class Model implements IModel {
       return;
     }
     this.rangeMap[newRange.sheetId] = newRange;
-    this.history.push(
-      new BaseCommand(
-        this,
-        'rangeMap',
-        { [newRange.sheetId]: newRange },
-        oldValue
-          ? { [newRange.sheetId]: oldValue }
-          : { [newRange.sheetId]: DELETE_FLAG },
-      ),
-    );
+
+    this.history.push({
+      type: 'rangeMap',
+      path: newRange.sheetId,
+      newValue: newRange,
+      oldValue: oldValue ? oldValue : DELETE_FLAG,
+    });
   }
   addSheet(): void {
     const list = this.getSheetList();
@@ -115,38 +170,23 @@ export class Model implements IModel {
     const check = this.workbook[sheet.sheetId];
     assert(!check, 'The sheet id is duplicate');
     this.worksheets[sheet.sheetId] = this.worksheets[sheet.sheetId] || {};
-    this.history.push(
-      new BaseCommand(
-        this,
-        'workbook',
-        { [sheet.sheetId]: sheet },
-        { [sheet.sheetId]: DELETE_FLAG },
-      ),
-    );
-    this.history.push(
-      new BaseCommand(
-        this,
-        'currentSheetId',
-        sheet.sheetId,
-        this.currentSheetId,
-      ),
-    );
-    this.history.push(
-      new BaseCommand(
-        this,
-        'rangeMap',
-        {
-          [sheet.sheetId]: {
-            row: 0,
-            col: 0,
-            rowCount: 1,
-            colCount: 1,
-            sheetId: sheet.sheetId,
-          },
-        },
-        { [sheet.sheetId]: DELETE_FLAG },
-      ),
-    );
+    this.workbook[sheet.sheetId] = sheet;
+
+    this.history.push({
+      type: 'workbook',
+      path: sheet.sheetId,
+      newValue: sheet,
+      oldValue: DELETE_FLAG,
+    });
+    this.setCurrentSheetId(sheet.sheetId);
+
+    this.setActiveCell({
+      row: 0,
+      col: 0,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: sheet.sheetId,
+    });
   }
 
   deleteSheet(sheetId?: string): void {
@@ -158,23 +198,25 @@ export class Model implements IModel {
       'A workbook must contains at least on visible worksheet',
     );
     const newSheetId = this.getNextSheetId(id);
+    const oldSheet = this.workbook[id];
+    delete this.workbook[id];
+    const oldData = this.worksheets[id];
+    delete this.worksheets[id];
 
-    this.history.push(
-      new BaseCommand(
-        this,
-        'workbook',
-        { [id]: DELETE_FLAG },
-        { [id]: this.workbook[id] },
-      ),
-    );
-    this.history.push(
-      new BaseCommand(
-        this,
-        'worksheets',
-        { [id]: DELETE_FLAG },
-        { [id]: this.worksheets[id] },
-      ),
-    );
+    this.history.push({
+      type: 'workbook',
+      path: id,
+      newValue: DELETE_FLAG,
+      oldValue: oldSheet,
+    });
+
+    this.history.push({
+      type: 'worksheets',
+      path: id,
+      newValue: DELETE_FLAG,
+      oldValue: oldData,
+    });
+
     this.setCurrentSheetId(newSheetId);
   }
   hideSheet(sheetId?: string | undefined): void {
@@ -187,26 +229,24 @@ export class Model implements IModel {
     );
     const newSheetId = this.getNextSheetId(sheetId);
     this.workbook[id].isHide = true;
+
     this.history.push({
-      undo: () => {
-        this.workbook[id].isHide = false;
-      },
-      redo: () => {
-        this.workbook[id].isHide = true;
-      },
+      type: 'workbook',
+      path: `${id}.isHide`,
+      newValue: true,
+      oldValue: false,
     });
     this.setCurrentSheetId(newSheetId);
   }
   unhideSheet(sheetId?: string | undefined): void {
     const id = sheetId || this.currentSheetId;
     this.workbook[id].isHide = false;
+
     this.history.push({
-      undo: () => {
-        this.workbook[id].isHide = true;
-      },
-      redo: () => {
-        this.workbook[id].isHide = false;
-      },
+      type: 'workbook',
+      path: `${id}.isHide`,
+      newValue: false,
+      oldValue: true,
     });
     this.setCurrentSheetId(id);
   }
@@ -227,13 +267,12 @@ export class Model implements IModel {
       return;
     }
     sheetInfo.name = sheetName;
+
     this.history.push({
-      undo: () => {
-        sheetInfo.name = oldName;
-      },
-      redo: () => {
-        sheetInfo.name = sheetName;
-      },
+      type: 'workbook',
+      path: `${id}.name`,
+      newValue: sheetName,
+      oldValue: oldName,
     });
   }
   getSheetInfo(id?: string): WorksheetType | undefined {
@@ -249,20 +288,10 @@ export class Model implements IModel {
       const oldSheetId = this.currentSheetId;
       this.currentSheetId = newSheetId;
       this.history.push({
-        undo: () => {
-          if (!this.workbook[oldSheetId] || this.workbook[oldSheetId].isHide) {
-            this.currentSheetId = this.getSheetId();
-            return;
-          }
-          this.currentSheetId = oldSheetId;
-        },
-        redo: () => {
-          if (!this.workbook[newSheetId] || this.workbook[oldSheetId].isHide) {
-            this.currentSheetId = this.getSheetId();
-            return;
-          }
-          this.currentSheetId = newSheetId;
-        },
+        type: 'currentSheetId',
+        path: '',
+        newValue: newSheetId,
+        oldValue: oldSheetId,
       });
     }
   }
@@ -282,7 +311,6 @@ export class Model implements IModel {
       worksheets = {},
     } = json;
     this.workbook = workbook;
-
     this.mergeCells = mergeCells;
     this.customWidth = customWidth;
     this.customHeight = customHeight;
@@ -509,8 +537,6 @@ export class Model implements IModel {
   }
 
   hideCol(colIndex: number, count: number): void {
-    const newData: WorkBookJSON['customWidth'] = {};
-    const oldData: WorkBookJSON['customWidth'] = {};
     for (let i = 0; i < count; i++) {
       const c = colIndex + i;
       const key = getCustomWidthOrHeightKey(this.currentSheetId, c);
@@ -518,15 +544,20 @@ export class Model implements IModel {
       if (old && old.isHide) {
         continue;
       }
-      oldData[key] = old;
-      newData[key] = old
+      const newData = old
         ? { ...old, isHide: true }
         : {
             len: CELL_WIDTH,
             isHide: true,
           };
+      this.customWidth[key] = newData;
+      this.history.push({
+        type: 'customWidth',
+        path: key,
+        newValue: newData,
+        oldValue: old,
+      });
     }
-    this.history.push(new BaseCommand(this, 'customWidth', newData, oldData));
   }
   getColWidth(col: number, sheetId?: string): CustomItem {
     const id = sheetId || this.currentSheetId;
@@ -571,21 +602,16 @@ export class Model implements IModel {
       this.customWidth[key] = newData;
       return;
     }
-    this.history.push(
-      new BaseCommand(
-        this,
-        'customWidth',
-        { [key]: newData },
-        this.customWidth[key]
-          ? { [key]: this.customWidth[key] }
-          : { [key]: DELETE_FLAG },
-      ),
-    );
+    this.customWidth[key] = newData;
+    this.history.push({
+      type: 'customWidth',
+      path: key,
+      newValue: newData,
+      oldValue: this.customWidth[key] ? this.customWidth[key] : DELETE_FLAG,
+    });
   }
 
   hideRow(rowIndex: number, count: number): void {
-    const newData: WorkBookJSON['customHeight'] = {};
-    const oldData: WorkBookJSON['customHeight'] = {};
     for (let i = 0; i < count; i++) {
       const r = rowIndex + i;
       const key = getCustomWidthOrHeightKey(this.currentSheetId, r);
@@ -594,15 +620,20 @@ export class Model implements IModel {
       if (old && old.isHide) {
         continue;
       }
-      oldData[key] = old;
-      newData[key] = old
+      const newData = old
         ? { ...old, isHide: true }
         : {
             len: CELL_HEIGHT,
             isHide: true,
           };
+      this.customHeight[key] = newData;
+      this.history.push({
+        type: 'customHeight',
+        path: key,
+        newValue: newData,
+        oldValue: old,
+      });
     }
-    this.history.push(new BaseCommand(this, 'customHeight', newData, oldData));
   }
   getRowHeight(row: number, sheetId?: string): CustomItem {
     const id = sheetId || this.currentSheetId;
@@ -647,18 +678,13 @@ export class Model implements IModel {
       this.customHeight[key] = data;
       return;
     }
-    this.history.push(
-      new BaseCommand(
-        this,
-        'customHeight',
-        { [key]: data },
-        this.customHeight[key]
-          ? {
-              [key]: this.customHeight[key],
-            }
-          : { [key]: DELETE_FLAG },
-      ),
-    );
+    this.customHeight[key] = data;
+    this.history.push({
+      type: 'customHeight',
+      path: key,
+      newValue: data,
+      oldValue: this.customHeight[key] ? this.customHeight[key] : DELETE_FLAG,
+    });
   }
   canRedo(): boolean {
     return this.history.canRedo();
@@ -708,75 +734,75 @@ export class Model implements IModel {
   }
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
+    const oldSheetData = this.worksheets[id];
+    delete this.worksheets[id];
 
-    this.history.push(
-      new BaseCommand(
-        this,
-        'worksheets',
-        { [id]: DELETE_FLAG },
-        { [id]: this.worksheets[id] },
-      ),
-    );
+    this.history.push({
+      type: 'worksheets',
+      path: id,
+      newValue: DELETE_FLAG,
+      oldValue: oldSheetData,
+    });
 
-    const oldMergeCells: WorkBookJSON['mergeCells'] = {};
-    const newMergeCells: Record<string, symbol> = {};
     for (const [key, value] of Object.entries(this.mergeCells)) {
       if (value.sheetId === id) {
-        oldMergeCells[key] = value;
-        newMergeCells[key] = DELETE_FLAG;
+        delete this.mergeCells[key];
+        this.history.push({
+          type: 'mergeCells',
+          path: key,
+          newValue: DELETE_FLAG,
+          oldValue: value,
+        });
       }
     }
-    this.history.push(
-      new BaseCommand(this, 'mergeCells', newMergeCells, oldMergeCells),
-    );
 
-    const oldDrawings: WorkBookJSON['drawings'] = {};
-    const newDrawings: Record<string, symbol> = {};
     for (const [key, value] of Object.entries(this.drawings)) {
       if (value.sheetId === id) {
-        oldDrawings[key] = value;
-        newDrawings[key] = DELETE_FLAG;
+        delete this.drawings[key];
+        this.history.push({
+          type: 'drawings',
+          path: key,
+          newValue: DELETE_FLAG,
+          oldValue: value,
+        });
       }
     }
-    this.history.push(
-      new BaseCommand(this, 'drawings', newDrawings, oldDrawings),
-    );
 
-    const oldCustomHeight: WorkBookJSON['customHeight'] = {};
-    const newCustomHeight: Record<string, symbol> = {};
     for (const [key, value] of Object.entries(this.customHeight)) {
       if (key.startsWith(id)) {
-        oldCustomHeight[key] = value;
-        newCustomHeight[key] = DELETE_FLAG;
+        delete this.customHeight[key];
+        this.history.push({
+          type: 'customHeight',
+          path: key,
+          newValue: DELETE_FLAG,
+          oldValue: value,
+        });
       }
     }
-    this.history.push(
-      new BaseCommand(this, 'customHeight', newCustomHeight, oldCustomHeight),
-    );
 
-    const oldCustomWidth: WorkBookJSON['customWidth'] = {};
-    const newCustomWidth: Record<string, symbol> = {};
     for (const [key, value] of Object.entries(this.customWidth)) {
       if (key.startsWith(id)) {
-        oldCustomWidth[key] = value;
-        newCustomWidth[key] = DELETE_FLAG;
+        delete this.customWidth[key];
+        this.history.push({
+          type: 'customWidth',
+          path: key,
+          newValue: DELETE_FLAG,
+          oldValue: value,
+        });
       }
     }
-    this.history.push(
-      new BaseCommand(this, 'customWidth', newCustomWidth, oldCustomWidth),
-    );
 
-    const oldDefinedNames: WorkBookJSON['definedNames'] = {};
-    const newDefinedNames: Record<string, symbol> = {};
     for (const [key, value] of Object.entries(this.definedNames)) {
       if (key.startsWith(id)) {
-        oldDefinedNames[key] = value;
-        newDefinedNames[key] = DELETE_FLAG;
+        delete this.definedNames[key];
+        this.history.push({
+          type: 'definedNames',
+          path: key,
+          newValue: DELETE_FLAG,
+          oldValue: value,
+        });
       }
     }
-    this.history.push(
-      new BaseCommand(this, 'definedNames', newDefinedNames, oldDefinedNames),
-    );
   }
   getDefineName(range: IRange): string {
     const sheetId = range.sheetId || this.currentSheetId;
@@ -792,7 +818,10 @@ export class Model implements IModel {
   }
   setDefineName(range: IRange, name: string): void {
     const oldName = this.getDefineName(range);
-    if (Object.prototype.hasOwnProperty.call(this.definedNames, oldName)) {
+    if (
+      oldName &&
+      Object.prototype.hasOwnProperty.call(this.definedNames, oldName)
+    ) {
       delete this.definedNames[oldName];
     }
     const result: IRange = {
@@ -802,14 +831,30 @@ export class Model implements IModel {
       colCount: 1,
       rowCount: 1,
     };
-    this.history.push(
-      new BaseCommand(
-        this,
-        'definedNames',
-        { [name]: result },
-        oldName ? { [oldName]: result } : { [name]: DELETE_FLAG },
-      ),
-    );
+    this.definedNames[name] = result;
+
+    if (oldName) {
+      this.history.push({
+        type: 'definedNames',
+        path: name,
+        newValue: result,
+        oldValue: DELETE_FLAG,
+      });
+
+      this.history.push({
+        type: 'definedNames',
+        path: oldName,
+        newValue: DELETE_FLAG,
+        oldValue: result,
+      });
+    } else {
+      this.history.push({
+        type: 'definedNames',
+        path: name,
+        newValue: result,
+        oldValue: DELETE_FLAG,
+      });
+    }
   }
   checkDefineName(name: string): IRange | undefined {
     return this.definedNames[name];
@@ -829,13 +874,12 @@ export class Model implements IModel {
     const oldValue = oldData.value ?? '';
     const newValue = value ?? '';
     sheetData[key].value = newValue;
+
     this.history.push({
-      undo: () => {
-        sheetData[key].value = oldValue;
-      },
-      redo: () => {
-        sheetData[key].value = newValue;
-      },
+      type: 'worksheets',
+      path: `${id}.${key}.value`,
+      newValue: newValue,
+      oldValue: oldValue,
     });
   }
   private setCellFormula(formula: string, range: Coordinate): void {
@@ -851,21 +895,15 @@ export class Model implements IModel {
       return;
     }
     sheetData[key].formula = formula;
+
     this.history.push({
-      undo: () => {
-        sheetData[key].formula = oldFormula;
-      },
-      redo: () => {
-        sheetData[key].formula = formula;
-      },
+      type: 'worksheets',
+      path: `${id}.${key}.formula`,
+      newValue: formula,
+      oldValue: oldFormula,
     });
   }
   private computeAllCell() {
-    const dataList: Array<{
-      path: string;
-      oldValue: ResultType;
-      newValue: ResultType;
-    }> = [];
     for (const [key, sheetData] of Object.entries(this.worksheets)) {
       if (!sheetData) {
         continue;
@@ -877,27 +915,16 @@ export class Model implements IModel {
           const oldValue = data.value;
           if (newValue !== oldValue) {
             data.value = newValue;
-            dataList.push({ newValue, oldValue, path: `${key}.${k}.value` });
+            this.history.push({
+              type: 'worksheets',
+              path: `${key}.${k}.value`,
+              newValue,
+              oldValue,
+            });
           }
         }
       }
     }
-    if (dataList.length === 0) {
-      return;
-    }
-
-    this.history.push({
-      undo: () => {
-        for (const item of dataList) {
-          setWith(this.worksheets, item.path, item.oldValue);
-        }
-      },
-      redo: () => {
-        for (const item of dataList) {
-          setWith(this.worksheets, item.path, item.newValue);
-        }
-      },
-    });
   }
   private iterateRange(
     range: IRange,
@@ -1017,13 +1044,12 @@ export class Model implements IModel {
 
     const oldStyle = { ...styleData };
     sheetData[key].style = style;
+
     this.history.push({
-      undo: () => {
-        sheetData[key].style = oldStyle;
-      },
-      redo: () => {
-        sheetData[key].style = style;
-      },
+      type: 'worksheets',
+      path: `${id}.${key}.style`,
+      newValue: style,
+      oldValue: oldStyle,
     });
   }
   getFloatElementList(sheetId: string): FloatElement[] {
@@ -1059,60 +1085,47 @@ export class Model implements IModel {
         data.imageAngle = 0;
       }
     }
-    this.history.push(
-      new BaseCommand(
-        this,
-        'drawings',
-        { [data.uuid]: data },
-        { [data.uuid]: DELETE_FLAG },
-      ),
-    );
+    this.drawings[data.uuid] = data;
+    this.history.push({
+      type: 'drawings',
+      path: data.uuid,
+      newValue: data,
+      oldValue: DELETE_FLAG,
+    });
   }
   updateFloatElement(uuid: string, value: Partial<FloatElement>) {
     const item = this.drawings[uuid];
     if (!item) {
       return;
     }
-    const oldValue: Partial<FloatElement> = {};
-    const newValue: Partial<FloatElement> = {};
     const keyList = Object.keys(value) as Array<keyof FloatElement>;
     for (const key of keyList) {
       if (item[key] !== value[key]) {
+        const oldValue = item[key];
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        oldValue[key] = item[key];
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        newValue[key] = value[key];
+        item[key] = value[key];
+        this.history.push({
+          type: 'drawings',
+          path: `${uuid}.${key}`,
+          newValue: item[key],
+          oldValue: oldValue,
+        });
       }
     }
-    if (Object.keys(oldValue).length === 0) {
-      return;
-    }
-    this.drawings[uuid] = Object.assign(this.drawings[uuid], newValue);
-
-    this.history.push({
-      undo: () => {
-        this.drawings[uuid] = Object.assign(this.drawings[uuid], oldValue);
-      },
-      redo: () => {
-        this.drawings[uuid] = Object.assign(this.drawings[uuid], newValue);
-      },
-    });
   }
   deleteFloatElement(uuid: string) {
     const oldData = this.drawings[uuid];
     if (!oldData) {
       return;
     }
-    this.history.push(
-      new BaseCommand(
-        this,
-        'drawings',
-        { [uuid]: DELETE_FLAG },
-        { [uuid]: oldData },
-      ),
-    );
+    delete this.drawings[uuid];
+    this.history.push({
+      type: 'drawings',
+      path: uuid,
+      newValue: DELETE_FLAG,
+      oldValue: oldData,
+    });
   }
   getMergeCells(sheetId?: string): IRange[] {
     const id = sheetId || this.currentSheetId;
@@ -1127,14 +1140,13 @@ export class Model implements IModel {
         this.convertSheetIdToName,
       );
       assert(!this.mergeCells[ref], 'The merging cell is duplicate');
-      this.history.push(
-        new BaseCommand(
-          this,
-          'mergeCells',
-          { [ref]: range },
-          { [ref]: DELETE_FLAG },
-        ),
-      );
+      this.mergeCells[ref] = range;
+      this.history.push({
+        type: 'mergeCells',
+        path: ref,
+        newValue: range,
+        oldValue: DELETE_FLAG,
+      });
     }
   }
   deleteMergeCell(range: IRange): void {
@@ -1144,14 +1156,18 @@ export class Model implements IModel {
       'absolute',
       this.convertSheetIdToName,
     );
-    this.history.push(
-      new BaseCommand(
-        this,
-        'mergeCells',
-        { [ref]: DELETE_FLAG },
-        { [ref]: range },
-      ),
-    );
+    if (!this.mergeCells[ref]) {
+      return;
+    }
+    const oldRange = this.mergeCells[ref];
+    delete this.mergeCells[ref];
+
+    this.history.push({
+      type: 'mergeCells',
+      path: ref,
+      newValue: DELETE_FLAG,
+      oldValue: oldRange,
+    });
   }
   emitChange(dataset: Set<ChangeEventType>) {
     if (dataset.has('cellValue')) {

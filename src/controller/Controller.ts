@@ -743,11 +743,9 @@ export class Controller implements IController {
   copy(event?: ClipboardEvent): void {
     this.copyRanges = [this.getActiveCell()];
     this.isCut = false;
-    this.floatElementUuid = '';
     this.baseCopy('copy', event);
   }
   cut(event?: ClipboardEvent) {
-    this.floatElementUuid = '';
     this.copyRanges = [this.getActiveCell()];
     this.isCut = true;
     this.baseCopy('cut', event);

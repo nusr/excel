@@ -1,7 +1,6 @@
 import { Model } from '..';
 import { Range } from '@/util';
 import { WorkBookJSON } from '@/types';
-import { BaseCommand } from '../Command';
 
 describe('model.test.ts', () => {
   test('normal', () => {
@@ -100,26 +99,5 @@ describe('model.test.ts', () => {
       drawings: {},
       rangeMap: {},
     });
-  });
-
-  test('BaseCommand', () => {
-    const model = new Model();
-    const oldSheetId = '1';
-    const newSheetId = '2';
-    const command = new BaseCommand(
-      model,
-      'currentSheetId',
-      newSheetId,
-      oldSheetId,
-    );
-    expect(model.getCurrentSheetId()).toEqual('');
-    command.execute();
-    expect(model.getCurrentSheetId()).toEqual(newSheetId);
-
-    command.undo();
-    expect(model.getCurrentSheetId()).toEqual(oldSheetId);
-
-    command.redo();
-    expect(model.getCurrentSheetId()).toEqual(newSheetId);
   });
 });

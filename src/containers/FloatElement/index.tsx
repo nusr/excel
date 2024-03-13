@@ -216,6 +216,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
           onPointerDown={() => {
             state.current = { ...INITIAL_STATE };
             coreStore.mergeState({ activeUuid: '' });
+            controller.setFloatElementUuid('');
           }}
         />
         {floatElementList.map((v) => {

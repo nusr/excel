@@ -78,7 +78,7 @@ export function setWith<ValueType>(
     .reduce((res, key, index, arr) => {
       if (index === arr.length - 1) {
         res[key] = value;
-      } else if (res[key] == null) {
+      } else if (res[key] === null || res[key] === undefined) {
         res[key] = {};
       }
       return res[key];

@@ -1,30 +1,39 @@
-import { IHistory, ICommand } from '@/types';
+import { IHistory, ICommandItem } from '@/types';
+
+type Options = {
+  change: (list: ICommandItem[]) => void;
+  maxLength: number;
+  redo: (item: ICommandItem) => void;
+  undo: (item: ICommandItem) => void;
+};
+
+const noop = () => {};
 export class History implements IHistory {
   private position = -1;
-  private commandList: ICommand[][] = [];
-  private commands: ICommand[] = [];
-  private maxLength = 100;
-  constructor({
-    change,
-    maxLength,
-  }: {
-    change?: (list: ICommand[]) => void;
-    maxLength?: number;
-  }) {
+  private commandList: ICommandItem[][] = [];
+  private commands: ICommandItem[] = [];
+  private options: Options = {
+    change: noop,
+    maxLength: 100,
+    redo: noop,
+    undo: noop,
+  };
+  constructor(options: Partial<Options>) {
     this.clear(true);
-    if (change && typeof change === 'function') {
-      this.change = change;
+    this.options.maxLength = options.maxLength || this.options.maxLength;
+    if (typeof options.change === 'function') {
+      this.options.change = options.change;
     }
-    this.maxLength = maxLength || this.maxLength;
+    if (typeof options.redo === 'function') {
+      this.options.redo = options.redo;
+    }
+    if (typeof options.undo === 'function') {
+      this.options.undo = options.undo;
+    }
   }
-  push(...commands: ICommand[]) {
+  push(...commands: ICommandItem[]) {
     if (commands.length === 0) {
       return;
-    }
-    for (const item of commands) {
-      if (item.execute && typeof item.execute === 'function') {
-        item.execute();
-      }
     }
     this.commands = this.commands.concat(commands);
   }
@@ -37,8 +46,8 @@ export class History implements IHistory {
     for (let i = this.position + 1; i < this.commandList.length; i++) {
       this.commandList[i] = [];
     }
-    if (this.position >= this.maxLength) {
-      this.commandList[this.position - this.maxLength] = [];
+    if (this.position >= this.options.maxLength) {
+      this.commandList[this.position - this.options.maxLength] = [];
     }
     this.change(this.commands);
     this.commands = [];
@@ -51,7 +60,7 @@ export class History implements IHistory {
     const list = this.commandList[this.position];
     if (list.length > 0) {
       for (const item of list) {
-        item.redo();
+        this.options.redo(item as ICommandItem);
       }
     }
     this.change(list);
@@ -63,7 +72,7 @@ export class History implements IHistory {
     const list = this.commandList[this.position];
     if (list.length > 0) {
       for (const item of list) {
-        item.undo();
+        this.options.undo(item as ICommandItem);
       }
     }
     this.position--;
@@ -83,7 +92,7 @@ export class History implements IHistory {
     return hasRecord;
   }
   canUndo(): boolean {
-    const lower = Math.max(this.commandList.length - this.maxLength, 0);
+    const lower = Math.max(this.commandList.length - this.options.maxLength, 0);
     return this.position > lower;
   }
   clear(clearAll: boolean = false): void {
@@ -93,17 +102,16 @@ export class History implements IHistory {
     }
     this.commands = [];
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private change(_list: ICommand[]) {
-    // console.log(this.commandList);
+  private change(_list: ICommandItem[]) {
+    this.options.change(_list);
   }
-  get(): ICommand[] {
+  get(): ICommandItem[] {
     if (this.position >= 0 && this.position < this.commandList.length) {
       return this.commandList[this.position];
     }
     return [];
   }
   getLength(): number {
-    return Math.min(this.commandList.length, this.maxLength);
+    return Math.min(this.commandList.length, this.options.maxLength);
   }
 }
