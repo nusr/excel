@@ -109,10 +109,6 @@ export class Model implements IModel {
     });
   }
 
-  private getSheetData(sheetId?: string) {
-    const id = sheetId || this.currentSheetId;
-    return this.worksheets[id];
-  }
   getSheetList(): WorksheetType[] {
     const list = Object.values(this.workbook);
     list.sort((a, b) => a.sort - b.sort);
@@ -175,7 +171,7 @@ export class Model implements IModel {
     this.history.push({
       type: 'workbook',
       path: sheet.sheetId,
-      newValue: sheet,
+      newValue: { ...sheet },
       oldValue: DELETE_FLAG,
     });
     this.setCurrentSheetId(sheet.sheetId);
@@ -365,7 +361,7 @@ export class Model implements IModel {
     }
   }
 
-  setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
+  updateCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
     if (isEmpty(style)) {
       return;
     }
@@ -373,7 +369,7 @@ export class Model implements IModel {
     const { row, col, rowCount, colCount } = range;
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
-        this.setStyle(style, { row: r, col: c });
+        this.updateStyle(style, { row: r, col: c });
       }
     }
   }
@@ -403,7 +399,8 @@ export class Model implements IModel {
       return;
     }
     sheetInfo.rowCount += count;
-    const sheetData = this.getSheetData();
+    const id = this.currentSheetId;
+    const sheetData = this.worksheets[id];
     if (!sheetData) {
       return;
     }
@@ -419,8 +416,25 @@ export class Model implements IModel {
       const key = coordinateToString(item.row, item.col);
       const newKey = coordinateToString(item.row + count, item.col);
       const value = sheetData[key];
-      sheetData[newKey] = { ...value };
+      const newValue = value ? { ...value } : {};
+      const oldData = sheetData[newKey] ? { ...sheetData[newKey] } : {};
+
+      sheetData[newKey] = { ...newValue };
       delete sheetData[key];
+
+      this.history.push({
+        type: 'worksheets',
+        path: `${id}.${key}`,
+        newValue: DELETE_FLAG,
+        oldValue: newValue,
+      });
+
+      this.history.push({
+        type: 'worksheets',
+        path: `${id}.${newKey}`,
+        newValue: newValue,
+        oldValue: oldData,
+      });
     }
   }
   addCol(colIndex: number, count: number): void {
@@ -429,7 +443,8 @@ export class Model implements IModel {
       return;
     }
     sheetInfo.colCount += count;
-    const sheetData = this.getSheetData();
+    const id = this.currentSheetId;
+    const sheetData = this.worksheets[id];
     if (!sheetData) {
       return;
     }
@@ -445,30 +460,73 @@ export class Model implements IModel {
       const key = coordinateToString(item.row, item.col);
       const newKey = coordinateToString(item.row, item.col + count);
       const value = sheetData[key];
-      sheetData[newKey] = { ...value };
+      const newValue = value ? { ...value } : {};
+      const oldValue = sheetData[newKey] ? { ...sheetData[newKey] } : {};
+
+      sheetData[newKey] = { ...newValue };
       delete sheetData[key];
+
+      this.history.push({
+        type: 'worksheets',
+        path: `${id}.${key}`,
+        newValue: DELETE_FLAG,
+        oldValue: newValue,
+      });
+
+      this.history.push({
+        type: 'worksheets',
+        path: `${id}.${newKey}`,
+        newValue: newValue,
+        oldValue: oldValue,
+      });
     }
   }
   deleteCol(colIndex: number, count: number): void {
     const sheetInfo = this.getSheetInfo()!;
     sheetInfo.colCount -= count;
-    const sheetData = this.getSheetData();
-    for (const item of Object.values(this.drawings)) {
+    const id = this.currentSheetId;
+    const sheetData = this.worksheets[id];
+    for (const [uuid, item] of Object.entries(this.drawings)) {
       if (item.fromCol >= colIndex) {
-        item.fromCol -= count;
-        if (item.fromCol < 0) {
+        const oldValue = item.fromCol;
+        if (item.fromCol >= count) {
+          item.fromCol -= count;
+        } else {
           item.fromCol = 0;
         }
+        this.history.push({
+          type: 'drawings',
+          path: `${uuid}.fromCol`,
+          newValue: item.fromCol,
+          oldValue,
+        });
       }
       if (item.type === 'chart' && item.chartRange!.col >= colIndex) {
-        item.chartRange!.col -= count;
-        if (item.chartRange!.col < 0) {
-          item.chartRange!.colCount += item.chartRange!.col;
+        const oldCol = item.chartRange!.col;
+        const oldColCount = item.chartRange!.colCount;
+        if (item.chartRange!.col >= count) {
+          item.chartRange!.col -= count;
+        } else {
+          const t = count - item.chartRange!.col;
           item.chartRange!.col = 0;
-          if (item.chartRange!.colCount < 0) {
+          if (item.chartRange!.colCount >= t) {
+            item.chartRange!.colCount -= t;
+          } else {
             item.chartRange!.colCount = 1;
           }
+          this.history.push({
+            type: 'drawings',
+            path: `${uuid}.chartRange.colCount`,
+            newValue: item.chartRange!.col,
+            oldValue: oldColCount,
+          });
         }
+        this.history.push({
+          type: 'drawings',
+          path: `${uuid}.chartRange.col`,
+          newValue: item.chartRange!.col,
+          oldValue: oldCol,
+        });
       }
     }
 
@@ -485,33 +543,74 @@ export class Model implements IModel {
         continue;
       }
       const key = coordinateToString(item.row, item.col);
+      const newValue = sheetData[key] ? { ...sheetData[key] } : {};
       if (item.col >= colIndex + count) {
         const newKey = coordinateToString(item.row, item.col - count);
-        sheetData[newKey] = { ...sheetData[key] };
+        const oldValue = sheetData[newKey] ? { ...sheetData[newKey] } : {};
+
+        sheetData[newKey] = { ...newValue };
+        this.history.push({
+          type: 'worksheets',
+          path: `${id}.${newKey}`,
+          newValue: newValue,
+          oldValue: oldValue,
+        });
       }
       delete sheetData[key];
+      this.history.push({
+        type: 'worksheets',
+        path: `${id}.${key}`,
+        newValue: DELETE_FLAG,
+        oldValue: newValue,
+      });
     }
   }
   deleteRow(rowIndex: number, count: number): void {
     const sheetInfo = this.getSheetInfo()!;
     sheetInfo.rowCount -= count;
-    const sheetData = this.getSheetData();
-    for (const item of Object.values(this.drawings)) {
+    const id = this.currentSheetId;
+    const sheetData = this.worksheets[id];
+    for (const [uuid, item] of Object.entries(this.drawings)) {
       if (item.fromRow >= rowIndex) {
-        item.fromRow -= count;
-        if (item.fromRow < 0) {
+        const oldValue = item.fromRow;
+        if (item.fromRow >= count) {
+          item.fromRow -= count;
+        } else {
           item.fromRow = 0;
         }
+        this.history.push({
+          type: 'drawings',
+          path: `${uuid}.fromRow`,
+          newValue: item.fromRow,
+          oldValue,
+        });
       }
       if (item.type === 'chart' && item.chartRange!.row >= rowIndex) {
-        item.chartRange!.row -= count;
-        if (item.chartRange!.row < 0) {
-          item.chartRange!.rowCount += item.chartRange!.row;
+        const oldRow = item.chartRange!.row;
+        const oldRowCount = item.chartRange!.rowCount;
+        if (item.chartRange!.row >= count) {
+          item.chartRange!.row -= count;
+        } else {
+          const t = count - item.chartRange!.row;
           item.chartRange!.row = 0;
-          if (item.chartRange!.rowCount < 0) {
+          if (item.chartRange!.rowCount >= t) {
+            item.chartRange!.rowCount -= t;
+          } else {
             item.chartRange!.rowCount = 1;
           }
+          this.history.push({
+            type: 'drawings',
+            path: `${uuid}.chartRange.rowCount`,
+            newValue: item.chartRange!.row,
+            oldValue: oldRowCount,
+          });
         }
+        this.history.push({
+          type: 'drawings',
+          path: `${uuid}.chartRange.row`,
+          newValue: item.chartRange!.row,
+          oldValue: oldRow,
+        });
       }
     }
 
@@ -528,11 +627,25 @@ export class Model implements IModel {
         continue;
       }
       const key = coordinateToString(item.row, item.col);
+      const newValue = sheetData[key] ? { ...sheetData[key] } : {};
       if (item.row >= rowIndex + count) {
         const newKey = coordinateToString(item.row - count, item.col);
-        sheetData[newKey] = { ...sheetData[key] };
+        const oldValue = sheetData[newKey] ? { ...sheetData[newKey] } : {};
+        sheetData[newKey] = { ...newValue };
+        this.history.push({
+          type: 'worksheets',
+          path: `${id}.${newKey}`,
+          newValue: newValue,
+          oldValue: oldValue,
+        });
       }
       delete sheetData[key];
+      this.history.push({
+        type: 'worksheets',
+        path: `${id}.${key}`,
+        newValue: DELETE_FLAG,
+        oldValue: newValue,
+      });
     }
   }
 
@@ -554,8 +667,8 @@ export class Model implements IModel {
       this.history.push({
         type: 'customWidth',
         path: key,
-        newValue: newData,
-        oldValue: old,
+        newValue: { ...newData },
+        oldValue: { ...old },
       });
     }
   }
@@ -700,11 +813,12 @@ export class Model implements IModel {
   }
 
   pasteRange(fromRange: IRange, isCut: boolean): IRange {
-    const { currentSheetId } = this;
+    const id = this.currentSheetId;
     const activeCell = this.getActiveCell();
 
     const { row, col, rowCount, colCount, sheetId } = fromRange;
-    const fromSheetData = this.getSheetData(sheetId);
+    const realSheetId = sheetId || id;
+    const fromSheetData = this.worksheets[realSheetId];
 
     const realRange: IRange = {
       ...activeCell,
@@ -715,17 +829,35 @@ export class Model implements IModel {
     if (!fromSheetData) {
       return realRange;
     }
-    this.worksheets[currentSheetId] = this.worksheets[currentSheetId] || {};
-    const currentSheetData = this.getSheetData(currentSheetId)!;
+    this.worksheets[id] = this.worksheets[id] || {};
+    const currentSheetData = this.worksheets[id];
     this.iterateRange(fromRange, (r, c) => {
       const oldPath = coordinateToString(r, c);
-      const temp = fromSheetData[oldPath] || {};
+      const newValue = fromSheetData[oldPath]
+        ? { ...fromSheetData[oldPath] }
+        : {};
       const realRow = activeCell.row + (r - row);
       const realCol = activeCell.col + (c - col);
       const path = coordinateToString(realRow, realCol);
-      currentSheetData[path] = { ...temp };
+      const oldValue = currentSheetData[path]
+        ? { ...currentSheetData[path] }
+        : {};
+      currentSheetData[path] = { ...newValue };
+      this.history.push({
+        type: 'worksheets',
+        path: `${id}.${path}`,
+        newValue: newValue,
+        oldValue: oldValue,
+      });
+
       if (isCut) {
         delete fromSheetData[oldPath];
+        this.history.push({
+          type: 'worksheets',
+          path: `${realSheetId}.${oldPath}`,
+          newValue: DELETE_FLAG,
+          oldValue: newValue,
+        });
       }
       return false;
     });
@@ -734,7 +866,7 @@ export class Model implements IModel {
   }
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
-    const oldSheetData = this.worksheets[id];
+    const oldSheetData = this.worksheets[id] ? { ...this.worksheets[id] } : {};
     delete this.worksheets[id];
 
     this.history.push({
@@ -972,7 +1104,7 @@ export class Model implements IModel {
         get: (range: IRange) => {
           const { row, col, sheetId } = range;
           const result: ResultType[] = [];
-          const sheetInfo = this.getSheetInfo(sheetId || this.currentSheetId);
+          const sheetInfo = this.getSheetInfo(sheetId);
           if (
             !sheetInfo ||
             row >= sheetInfo.rowCount ||
@@ -1032,6 +1164,36 @@ export class Model implements IModel {
     const result = list.filter((v) => !v.isHide);
     return result[0].sheetId;
   }
+  private updateStyle(style: Partial<StyleType>, range: Coordinate) {
+    if (isEmpty(style)) {
+      return;
+    }
+    const key = coordinateToString(range.row, range.col);
+    const id = this.currentSheetId;
+    this.worksheets[id] = this.worksheets[id] || {};
+    const sheetData = this.worksheets[id];
+    sheetData[key] = sheetData[key] || {};
+    sheetData[key].style = sheetData[key].style || {};
+    const keyList = Object.keys(style) as Array<keyof Partial<StyleType>>;
+    for (const k of keyList) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const oldValue = sheetData[key].style[k];
+
+      const newValue = style[k];
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      sheetData[key].style[k] = newValue;
+
+      this.history.push({
+        type: 'worksheets',
+        path: `${id}.${key}.style.${k}`,
+        newValue: newValue,
+        oldValue: oldValue === undefined ? DELETE_FLAG : oldValue,
+      });
+    }
+  }
+
   private setStyle(style: Partial<StyleType>, range: Coordinate) {
     const key = coordinateToString(range.row, range.col);
     const id = this.currentSheetId;

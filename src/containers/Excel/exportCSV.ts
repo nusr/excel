@@ -1,6 +1,9 @@
 import { IController, ResultType } from '@/types';
 import { saveAs, coordinateToString, assert } from '@/util';
 
+const DELIMITER = ',';
+const RECORD_DELIMITER = '\n';
+
 function processItem(value: any) {
   const type = typeof value;
   if (type === 'string') {
@@ -20,14 +23,12 @@ function processItem(value: any) {
   }
 }
 
-function processRow(row: any[]) {
-  const delimiter = ',';
+function processRow(row: ResultType[]) {
   const quote = '"';
   const escape_formulas = false;
   const quoted_string = false;
   const escape = '"';
   const quoted = false;
-  const record_delimiter = '\n';
 
   let csvRecord = '';
   for (let j = 0; j < row.length; j++) {
@@ -42,11 +43,11 @@ function processRow(row: any[]) {
           value,
         )}`,
       );
-      const containsdelimiter =
-        delimiter.length && value.indexOf(delimiter) >= 0;
+      const containDelimiter =
+        DELIMITER.length && value.indexOf(DELIMITER) >= 0;
       const containsQuote = value.indexOf(quote) >= 0;
       const containsEscape = value.indexOf(escape) >= 0 && escape !== quote;
-      const containsRecordDelimiter = value.indexOf(record_delimiter) >= 0;
+      const containsRecordDelimiter = value.indexOf(RECORD_DELIMITER) >= 0;
       const quotedString = quoted_string && typeof field === 'string';
       if (escape_formulas) {
         switch (value[0]) {
@@ -66,16 +67,12 @@ function processRow(row: any[]) {
       }
       const shouldQuote =
         containsQuote === true ||
-        containsdelimiter ||
+        containDelimiter ||
         containsRecordDelimiter ||
         quoted ||
         quotedString;
       if (shouldQuote === true && containsEscape === true) {
-        const regexp =
-          escape === '\\'
-            ? // @ts-ignore
-              new RegExp(escape + escape, 'g')
-            : new RegExp(escape, 'g');
+        const regexp = new RegExp(escape, 'g');
         value = value.replace(regexp, escape + escape);
       }
       if (containsQuote === true) {
@@ -88,7 +85,7 @@ function processRow(row: any[]) {
       csvRecord += value;
     }
     if (j !== row.length - 1) {
-      csvRecord += delimiter;
+      csvRecord += DELIMITER;
     }
   }
   return csvRecord;
@@ -103,18 +100,21 @@ export function exportToCsv(fileName: string, controller: IController) {
       const list: ResultType[] = [];
       for (let col = 0; col < sheetInfo.colCount; col++) {
         const key = coordinateToString(row, col);
-        const value = sheetData[key];
-        if (!value) {
-          list.push('');
-          continue;
-        }
-        const t = value.formula || value.value;
-        list.push(t);
+        list.push(sheetData[key]?.value);
       }
       csvList.push(processRow(list));
     }
   }
-  const blob = new Blob([csvList.join('\n')], {
+  const base = new Array(sheetInfo.colCount).fill('').join(DELIMITER);
+  // delete empty row
+  while (csvList.length > 0) {
+    if (csvList[csvList.length - 1] === base) {
+      csvList.pop();
+    } else {
+      break;
+    }
+  }
+  const blob = new Blob([csvList.join(RECORD_DELIMITER)], {
     type: 'text/csv;charset=utf-8;',
   });
   saveAs(blob, fileName);

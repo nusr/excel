@@ -11,7 +11,6 @@ import {
   get,
   parseReference,
   NUMBER_FORMAT_LIST,
-  reactLog,
   CELL_HEIGHT,
   CELL_WIDTH,
   XLSX_MAX_ROW_COUNT,
@@ -537,8 +536,6 @@ export async function importXLSX(file: File) {
       result[key] = convertXMLToJSON(t);
     }
   }
-  reactLog('xml data', result);
   const model = convertXMLDataToModel(result);
-  reactLog('model data', model);
   return model;
 }

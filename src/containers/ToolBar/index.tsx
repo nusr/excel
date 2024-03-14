@@ -67,14 +67,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
     };
   };
   const setCellStyle = (value: Partial<StyleType>) => {
-    const cellData = controller.getCell(controller.getActiveCell());
-    if (!cellData) {
-      return;
-    }
-    const styleData = cellData.style || {};
-    controller.setCellStyle(Object.assign(styleData, value), [
-      controller.getActiveCell(),
-    ]);
+    controller.updateCellStyle(value, [controller.getActiveCell()]);
   };
   const {
     isBold,

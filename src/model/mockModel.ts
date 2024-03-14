@@ -178,43 +178,14 @@ const MOCK_MODEL: WorkBookJSON = {
 
   // TODO:
   mergeCells: {},
-  customHeight: {
-    '1_1': {
-      len: 100,
-      isHide: false,
-    },
-    '1_5': {
-      len: 100,
-      isHide: false,
-    },
-  },
+  customHeight: {},
   customWidth: {
-    '1_3': {
+    '1_1': {
       len: 180,
       isHide: false,
     },
-    '1_1': {
-      len: 100,
-      isHide: false,
-    },
-    '1_6': {
-      len: 200,
-      isHide: false,
-    },
-    '1_7': {
-      len: 200,
-      isHide: false,
-    },
-    '1_8': {
-      len: 100,
-      isHide: false,
-    },
-    '1_9': {
-      len: 100,
-      isHide: false,
-    },
-    '1_10': {
-      len: 100,
+    '1_3': {
+      len: 180,
       isHide: false,
     },
   },

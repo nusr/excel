@@ -339,8 +339,8 @@ export class Controller implements IController {
     this.changeSet.add('cellValue');
     this.emitChange();
   }
-  setCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
-    this.model.setCellStyle(style, ranges);
+  updateCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
+    this.model.updateCellStyle(style, ranges);
     this.changeSet.add('cellStyle');
     this.emitChange();
   }
@@ -677,11 +677,30 @@ export class Controller implements IController {
         const list = this.getFloatElementList(this.getCurrentSheetId());
         const item = list.find((v) => v.uuid === this.floatElementUuid);
         if (item) {
+          const size = this.getCellSize({
+            row: item.fromRow,
+            col: item.fromCol,
+            rowCount: 1,
+            colCount: 1,
+            sheetId: item.sheetId,
+          });
+          let { marginX, marginY } = item;
+          const offset = 14;
+          if (marginX + offset < size.width) {
+            marginX += offset;
+          } else if (marginX - offset >= 0) {
+            marginX -= offset;
+          }
+          if (marginY + offset < size.width) {
+            marginY += offset;
+          } else if (marginY - offset >= 0) {
+            marginY -= offset;
+          }
           this.addFloatElement({
             ...item,
             uuid: generateUUID(),
-            marginX: item.marginX + 10,
-            marginY: item.marginY + 10,
+            marginX,
+            marginY,
           });
         }
       }
@@ -765,6 +784,9 @@ export class Controller implements IController {
     this.emitChange();
   }
   getCopyRanges() {
+    if (this.floatElementUuid) {
+      return [];
+    }
     return this.copyRanges.slice();
   }
   getDomRect(): CanvasOverlayPosition {
@@ -842,6 +864,9 @@ export class Controller implements IController {
     this.emitChange();
   }
   setFloatElementUuid(uuid: string) {
+    if (this.floatElementUuid && !uuid) {
+      this.copyRanges = [];
+    }
     this.floatElementUuid = uuid;
   }
 }

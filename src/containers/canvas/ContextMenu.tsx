@@ -129,6 +129,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       <Button
         onClick={() => {
           hideContextMenu();
+          controller.setFloatElementUuid('');
           controller.copy();
         }}
       >
@@ -137,6 +138,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       <Button
         onClick={() => {
           hideContextMenu();
+          controller.setFloatElementUuid('');
           controller.cut();
         }}
       >

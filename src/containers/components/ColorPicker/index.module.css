@@ -7,6 +7,7 @@
   top: 22px;
   left: 0;
   display: none;
+  z-index: var(--highestZIndex);
 }
 .color-picker-wrapper.show {
   display: block;

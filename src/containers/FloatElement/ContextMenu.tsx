@@ -214,10 +214,29 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         <Button
           onClick={() => {
             hideContextMenu();
-            controller.deleteFloatElement(uuid);
+            controller.setFloatElementUuid(uuid);
+            controller.copy();
           }}
         >
-          Delete
+          Copy
+        </Button>
+
+        <Button
+          onClick={() => {
+            hideContextMenu();
+            controller.setFloatElementUuid(uuid);
+            controller.cut();
+          }}
+        >
+          Cut
+        </Button>
+        <Button
+          onClick={() => {
+            hideContextMenu();
+            controller.paste();
+          }}
+        >
+          Paste
         </Button>
         {type === 'chart' ? (
           <React.Fragment>
@@ -239,6 +258,14 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           }}
         >
           Reset Size
+        </Button>
+        <Button
+          onClick={() => {
+            hideContextMenu();
+            controller.deleteFloatElement(uuid);
+          }}
+        >
+          Delete
         </Button>
       </div>
     );

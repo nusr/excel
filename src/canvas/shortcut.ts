@@ -333,12 +333,9 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       const cellData = controller.getCell(controller.getActiveCell());
-      if (!cellData) {
-        return;
-      }
-      const style = cellData.style || {};
-      style.isBold = !style.isBold;
-      controller.setCellStyle(style, [controller.getActiveCell()]);
+      controller.updateCellStyle({ isBold: !cellData?.style?.isBold }, [
+        controller.getActiveCell(),
+      ]);
     },
   },
   {
@@ -348,13 +345,11 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus(controller)) {
         return;
       }
+
       const cellData = controller.getCell(controller.getActiveCell());
-      if (!cellData) {
-        return;
-      }
-      const style = cellData.style || {};
-      style.isItalic = !style.isItalic;
-      controller.setCellStyle(style, [controller.getActiveCell()]);
+      controller.updateCellStyle({ isItalic: !cellData?.style?.isItalic }, [
+        controller.getActiveCell(),
+      ]);
     },
   },
   {
@@ -365,12 +360,9 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       const cellData = controller.getCell(controller.getActiveCell());
-      if (!cellData) {
-        return;
-      }
-      const style = cellData.style || {};
-      style.isStrike = !style.isStrike;
-      controller.setCellStyle(style, [controller.getActiveCell()]);
+      controller.updateCellStyle({ isStrike: !cellData?.style?.isStrike }, [
+        controller.getActiveCell(),
+      ]);
     },
   },
   {
@@ -381,19 +373,16 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       const cellData = controller.getCell(controller.getActiveCell());
-      if (!cellData) {
-        return;
-      }
-      const style = cellData.style || {};
-      if (
-        style.underline === undefined ||
-        style.underline === EUnderLine.NONE
-      ) {
-        style.underline = EUnderLine.SINGLE;
+      const underline = cellData?.style?.underline;
+      let newUnderline = EUnderLine.NONE;
+      if (underline === undefined || underline === EUnderLine.NONE) {
+        newUnderline = EUnderLine.SINGLE;
       } else {
-        style.underline = EUnderLine.NONE;
+        newUnderline = EUnderLine.NONE;
       }
-      controller.setCellStyle(style, [controller.getActiveCell()]);
+      controller.updateCellStyle({ underline: newUnderline }, [
+        controller.getActiveCell(),
+      ]);
     },
   },
   {

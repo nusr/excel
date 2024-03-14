@@ -149,7 +149,7 @@ export interface IBaseModel {
   renameSheet: (sheetName: string, sheetId?: string) => void;
   toJSON: () => WorkBookJSON;
   fromJSON: (json: WorkBookJSON) => void;
-  setCellStyle: (style: Partial<StyleType>, ranges: IRange[]) => void;
+  updateCellStyle: (style: Partial<StyleType>, ranges: IRange[]) => void;
   getSheetInfo: (sheetId: string) => WorksheetType | undefined;
   getSheetList: () => WorksheetType[];
   addRow: (rowIndex: number, count: number) => void;
