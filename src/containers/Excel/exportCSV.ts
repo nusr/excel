@@ -1,32 +1,102 @@
 import { IController, ResultType } from '@/types';
-import { saveAs, coordinateToString } from '@/util';
+import { saveAs, coordinateToString, assert } from '@/util';
 
-function processRow(row: ResultType[]) {
-  let finalVal = '';
-  for (let j = 0; j < row.length; j++) {
-    const t = row[j] ?? '';
-    let innerValue = '';
-    if (t === 0) {
-      innerValue = t.toString();
-    }
-    if (t) {
-      innerValue = t.toString();
-    }
-    let result = innerValue.replace(/"/g, '""');
-    if (result.search(/("|,|\n)/g) >= 0) {
-      result = `"${result}"`;
-    }
-    if (j > 0) {
-      finalVal += ',';
-    }
-    finalVal += result;
+function processItem(value: any) {
+  const type = typeof value;
+  if (type === 'string') {
+    return value;
+  } else if (type === 'bigint') {
+    return '' + value;
+  } else if (type === 'number') {
+    return '' + value;
+  } else if (type === 'boolean') {
+    return value ? 'TRUE' : 'FALSE';
+  } else if (value instanceof Date) {
+    return '' + value.getTime();
+  } else if (type === 'object' && value !== null) {
+    return JSON.stringify(value);
+  } else {
+    return '';
   }
-  return `${finalVal}\n`;
+}
+
+function processRow(row: any[]) {
+  const delimiter = ',';
+  const quote = '"';
+  const escape_formulas = false;
+  const quoted_string = false;
+  const escape = '"';
+  const quoted = false;
+  const record_delimiter = '\n';
+
+  let csvRecord = '';
+  for (let j = 0; j < row.length; j++) {
+    const field = row[j];
+    let value = processItem(field);
+    if ('' === value) {
+      csvRecord += value;
+    } else if (value) {
+      assert(
+        typeof value === 'string',
+        `Formatter must return a string, null or undefined, got ${JSON.stringify(
+          value,
+        )}`,
+      );
+      const containsdelimiter =
+        delimiter.length && value.indexOf(delimiter) >= 0;
+      const containsQuote = value.indexOf(quote) >= 0;
+      const containsEscape = value.indexOf(escape) >= 0 && escape !== quote;
+      const containsRecordDelimiter = value.indexOf(record_delimiter) >= 0;
+      const quotedString = quoted_string && typeof field === 'string';
+      if (escape_formulas) {
+        switch (value[0]) {
+          case '=':
+          case '+':
+          case '-':
+          case '@':
+          case '\t':
+          case '\r':
+          case '\uFF1D': // Unicode '='
+          case '\uFF0B': // Unicode '+'
+          case '\uFF0D': // Unicode '-'
+          case '\uFF20': // Unicode '@'
+            value = `'${value}`;
+            break;
+        }
+      }
+      const shouldQuote =
+        containsQuote === true ||
+        containsdelimiter ||
+        containsRecordDelimiter ||
+        quoted ||
+        quotedString;
+      if (shouldQuote === true && containsEscape === true) {
+        const regexp =
+          escape === '\\'
+            ? // @ts-ignore
+              new RegExp(escape + escape, 'g')
+            : new RegExp(escape, 'g');
+        value = value.replace(regexp, escape + escape);
+      }
+      if (containsQuote === true) {
+        const regexp = new RegExp(quote, 'g');
+        value = value.replace(regexp, escape + quote);
+      }
+      if (shouldQuote === true) {
+        value = quote + value + quote;
+      }
+      csvRecord += value;
+    }
+    if (j !== row.length - 1) {
+      csvRecord += delimiter;
+    }
+  }
+  return csvRecord;
 }
 export function exportToCsv(fileName: string, controller: IController) {
   const sheetData =
     controller.toJSON().worksheets[controller.getCurrentSheetId()];
-  let csvFile = '';
+  const csvList: string[] = [];
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
   if (sheetData) {
     for (let row = 0; row < sheetInfo.rowCount; row++) {
@@ -38,12 +108,14 @@ export function exportToCsv(fileName: string, controller: IController) {
           list.push('');
           continue;
         }
-        const t = value.formula ?? value.value;
+        const t = value.formula || value.value;
         list.push(t);
       }
-      csvFile += processRow(list);
+      csvList.push(processRow(list));
     }
   }
-  const blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob([csvList.join('\n')], {
+    type: 'text/csv;charset=utf-8;',
+  });
   saveAs(blob, fileName);
 }
