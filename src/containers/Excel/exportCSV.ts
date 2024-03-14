@@ -105,7 +105,9 @@ export function exportToCsv(fileName: string, controller: IController) {
       csvList.push(processRow(list));
     }
   }
-  const base = new Array(sheetInfo.colCount).fill('').join(DELIMITER);
+  const base = Array.from({ length: sheetInfo.colCount })
+    .fill('')
+    .join(DELIMITER);
   // delete empty row
   while (csvList.length > 0) {
     if (csvList[csvList.length - 1] === base) {
