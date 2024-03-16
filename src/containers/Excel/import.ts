@@ -6,6 +6,7 @@ import {
   EHorizontalAlign,
   EVerticalAlign,
   EUnderLine,
+  FloatElement,
 } from '@/types';
 import {
   get,
@@ -17,6 +18,7 @@ import {
   XLSX_MAX_COL_COUNT,
   coordinateToString,
   getCustomWidthOrHeightKey,
+  generateUUID,
 } from '@/util';
 
 const COMMON_PREFIX = 'xl';
@@ -24,9 +26,37 @@ const STYLE_PATH = 'xl/styles.xml';
 const WORKBOOK_PATH = 'xl/workbook.xml';
 const WORKBOOK_RELATION_PATH = 'xl/_rels/workbook.xml.rels';
 const THEME_PATH = 'xl/theme/theme1.xml';
-const SHEET_PATH_PREFIX = 'xl/worksheets/';
 const SHARED_STRINGS = 'xl/sharedStrings.xml';
 const textKey = '#text';
+const DRAWING_PREFIX_KEY = 'xl/drawings/';
+const DRAWING_FLAG = '../drawings/';
+
+const imageTypeMap = {
+  'image/apng': ['.apng'],
+  'image/bmp': ['.bmp'],
+  'image/x-icon': ['.ico', '.cur'],
+  // 'image/tiff': ['.tif', '.tiff'], // only Safari
+  'image/png': ['.png'],
+  'image/webp': ['.webp'],
+  'image/svg+xml': ['.svg'],
+  'image/avif': ['.avif'],
+  'image/gif': ['.gif'],
+  'image/jpeg': ['.jpeg', '.jpg', '.jfif', '.pjpeg', '.pjp'],
+} as const;
+
+const chartTypeList = [
+  // 'area',
+  'bar',
+  // 'bubble',
+  // 'doughnut',
+  'line',
+  'pie',
+  // 'ofPie',
+  // 'radar',
+  // 'scatter',
+  // 'surface',
+] as const;
+
 export const CUSTOM_WIdTH_RADIO = 8;
 
 type SharedStringItem = {
@@ -48,9 +78,9 @@ type SheetItem = Pick<WorksheetType, 'name' | 'sheetId'> & {
 interface RelationItem {
   Id: string;
   Target: string;
+  Type?: string;
 }
 
-type XMLFile = Record<string, any>;
 interface ColItem {
   r: string;
   s: string;
@@ -74,6 +104,49 @@ interface CustomColItem {
   customWidth: string;
   hidden?: string;
 }
+
+type ChartData = {
+  'xdr:from': {
+    'xdr:col': {
+      [textKey]: string;
+    };
+    'xdr:row': {
+      [textKey]: string;
+    };
+  };
+  'xdr:graphicFrame'?: {
+    'xdr:nvGraphicFramePr': {
+      'xdr:cNvPr': {
+        id: string;
+        name: string;
+        descr?: string;
+        title?: string;
+      };
+    };
+    'a:graphic': {
+      'a:graphicData': {
+        'c:chart': {
+          'r:id': string;
+        };
+      };
+    };
+  };
+  'xdr:pic'?: {
+    'xdr:nvPicPr': {
+      'xdr:cNvPr': {
+        id: string;
+        name: string;
+        descr?: string;
+        title?: string;
+      };
+    };
+    'xdr:blipFill': {
+      'a:blip': {
+        'r:embed': string;
+      };
+    };
+  };
+};
 
 export interface XfItem {
   fontId: string;
@@ -129,7 +202,7 @@ interface DefineNameItem {
 
 function xmlToJson(xml: any) {
   // Create the return object
-  let obj: XMLFile = {};
+  let obj: ObjectItem = {};
 
   if (xml.nodeType === Node.ELEMENT_NODE) {
     // element
@@ -215,7 +288,7 @@ function convertColor(themeData: ThemeData, color?: ColorItem) {
 }
 
 function getCellStyle(
-  xml: XMLFile,
+  xml: ObjectItem,
   styleId: number,
   themeData: ThemeData,
 ): Partial<StyleType> {
@@ -293,9 +366,7 @@ function getCellStyle(
   return result;
 }
 
-export function convertXMLDataToModel(
-  xmlData: Record<string, XMLFile>,
-): WorkBookJSON {
+export function convertXMLDataToModel(xmlData: ObjectItem): WorkBookJSON {
   const workbook = xmlData[WORKBOOK_PATH];
 
   let sharedStrings: SharedStringItem[] = get(
@@ -323,28 +394,48 @@ export function convertXMLDataToModel(
     rangeMap: {},
     worksheets: {},
   };
-  const sheetPathMap: Record<string, string> = {};
-  const sheetMap: Record<string, string> = {};
-  for (const item of get<RelationItem[]>(
+  const relationList = get<RelationItem[]>(
     xmlData[WORKBOOK_RELATION_PATH],
     'Relationships.Relationship',
     [],
-  )) {
-    if (!item) {
-      continue;
-    }
-    sheetMap[item.Id] = item.Target;
-  }
+  );
+  const sheetPathMap: Record<string, string> = {};
+  const drawingMap: Record<string, string[]> = {};
+  let drawingCount = 0;
   let sheetList: SheetItem[] = get(workbook, 'workbook.sheets.sheet', []);
   if (!Array.isArray(sheetList)) {
     sheetList = [sheetList];
   }
-  let sort = 0;
+  let sheetSort = 0;
   for (const item of sheetList) {
     if (!item) {
       continue;
     }
-    const sheetPath = `${COMMON_PREFIX}/${sheetMap[item['r:id']]}`;
+    const sheetTarget =
+      relationList.find((v) => v.Id === item['r:id'])?.Target || '';
+    const worksheetPrefix = 'worksheets/';
+    const baseSheet = sheetTarget.slice(worksheetPrefix.length);
+    const refPath = `${COMMON_PREFIX}/${worksheetPrefix}_rels/${baseSheet}.rels`;
+    if (xmlData[refPath]) {
+      let list: RelationItem[] = get(
+        xmlData[refPath],
+        'Relationships.Relationship',
+        [],
+      );
+      if (!Array.isArray(list)) {
+        list = [list];
+      }
+      for (const v of list) {
+        if (!drawingMap[item.sheetId]) {
+          drawingMap[item.sheetId] = [];
+        }
+        drawingMap[item.sheetId].push(v.Target);
+        if (v.Target.startsWith(DRAWING_FLAG)) {
+          drawingCount++;
+        }
+      }
+    }
+    const sheetPath = `${COMMON_PREFIX}/${sheetTarget}`;
     sheetPathMap[item.sheetId] = sheetPath;
     const range = parseReference(
       get<string>(
@@ -367,7 +458,7 @@ export function convertXMLDataToModel(
       isHide: item.state === 'hidden',
       rowCount: 200,
       colCount: 200,
-      sort: sort++,
+      sort: sheetSort++,
     };
     result.workbook[sheetData.sheetId] = sheetData;
     if (range) {
@@ -507,6 +598,118 @@ export function convertXMLDataToModel(
       result.definedNames[item.name.toLowerCase()] = range.toIRange();
     }
   }
+  for (let drawingId = 1; drawingId <= drawingCount; drawingId++) {
+    const basePath = `drawing${drawingId}.xml`;
+    const key = `${DRAWING_PREFIX_KEY}${basePath}`;
+    const ref = `${DRAWING_PREFIX_KEY}_rels/${basePath}.rels`;
+    if (!xmlData[key] || !xmlData[ref]) {
+      break;
+    }
+
+    let relations: RelationItem[] = get(
+      xmlData[ref],
+      'Relationships.Relationship',
+      [],
+    );
+    if (!Array.isArray(relations)) {
+      relations = [relations];
+    }
+    let sheetId = '';
+    for (const [id, list] of Object.entries(drawingMap)) {
+      if (list.some((v) => v === DRAWING_FLAG + basePath)) {
+        sheetId = id;
+        break;
+      }
+    }
+
+    let floatElementList: ChartData[] = get(
+      xmlData[key],
+      'xdr:wsDr.xdr:twoCellAnchor',
+      [],
+    );
+    if (!Array.isArray(floatElementList)) {
+      floatElementList = [floatElementList];
+    }
+    for (const float of floatElementList) {
+      const chartId = get(
+        float,
+        'xdr:graphicFrame.a:graphic.a:graphicData.c:chart.r:id',
+        '',
+      );
+      const imageId = get(float, 'xdr:pic.xdr:blipFill.a:blip.r:embed', '');
+      const isImage = !!imageId;
+      const rid = isImage ? imageId : chartId;
+      const target = relations.find((v) => v.Id === rid)?.Target || '';
+      if (!target) {
+        continue;
+      }
+      const filePath = COMMON_PREFIX + target.slice(2);
+      const fromRow = float['xdr:from']['xdr:col'][textKey];
+      const fromCol = float['xdr:from']['xdr:row'][textKey];
+      if (!fromRow || !fromCol) {
+        continue;
+      }
+      const uuid = generateUUID();
+      const floatElementData: FloatElement = {
+        title: '',
+        type: isImage ? 'floating-picture' : 'chart',
+        uuid,
+        width: 200,
+        height: 200,
+        originHeight: 200,
+        originWidth: 200,
+        fromCol: parseInt(fromCol, 10),
+        fromRow: parseInt(fromRow, 10),
+        sheetId,
+        marginX: 0,
+        marginY: 0,
+      };
+
+      if (isImage) {
+        const name = get(float, 'xdr:pic.xdr:nvPicPr.xdr:cNvPr.name', '');
+        const title = get(float, 'xdr:pic.xdr:nvPicPr.xdr:cNvPr.title', '');
+        floatElementData.title = title || name;
+        floatElementData.imageAngle = 0;
+        floatElementData.imageSrc = xmlData[filePath];
+      } else {
+        floatElementData.title = get(
+          xmlData[filePath],
+          'c:chartSpace.c:chart.c:title.c:tx.c:rich.a:p.0.a:r.a:t.' + textKey,
+          '',
+        );
+        let ref = '';
+        for (const chartType of chartTypeList) {
+          const t = get(
+            xmlData[filePath],
+            `c:chartSpace.c:chart.c:plotArea.c:${chartType}Chart.c:ser.0.c:val.c:numRef.c:f.${textKey}`,
+            '',
+          );
+          if (t) {
+            ref = t;
+            floatElementData.chartType = chartType;
+            break;
+          }
+        }
+
+        if (!ref) {
+          continue;
+        }
+        const range = parseReference(ref, (sheetName: string) => {
+          const data = Object.values(result.workbook).find(
+            (v) => v.name === sheetName,
+          );
+          return data?.sheetId || '';
+        });
+        if (!range) {
+          continue;
+        }
+        floatElementData.chartRange = range;
+      }
+
+      result.drawings[uuid] = floatElementData;
+    }
+  }
+
   return result;
 }
 
@@ -514,26 +717,31 @@ export async function importXLSX(file: File) {
   const jszip = await import('jszip');
   const zip = await jszip.default.loadAsync(file);
   const { files } = zip;
-  const result: Record<string, XMLFile> = {};
+  const result: ObjectItem = {};
   for (const key of Object.keys(files)) {
     if (files[key].dir) {
       continue;
     }
-    const check =
-      [
-        STYLE_PATH,
-        WORKBOOK_PATH,
-        WORKBOOK_RELATION_PATH,
-        THEME_PATH,
-        SHARED_STRINGS,
-      ].includes(key) || key.startsWith(SHEET_PATH_PREFIX);
-    if (!check) {
-      continue;
-    }
-
-    const t = await files[key].async('string');
-    if (t) {
-      result[key] = convertXMLToJSON(t);
+    if (key.includes('.xml')) {
+      const data = await files[key].async('string');
+      if (data) {
+        result[key] = convertXMLToJSON(data);
+      }
+    } else {
+      let imageType = '';
+      for (const [type, list] of Object.entries(imageTypeMap)) {
+        if (list.some((v) => key.endsWith(v))) {
+          imageType = type;
+          break;
+        }
+      }
+      if (!imageType) {
+        continue;
+      }
+      const data = await files[key].async('base64');
+      if (data) {
+        result[key] = `data:${imageType};base64,${data}`;
+      }
     }
   }
   const model = convertXMLDataToModel(result);

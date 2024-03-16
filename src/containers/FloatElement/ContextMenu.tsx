@@ -238,6 +238,17 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         >
           Paste
         </Button>
+        <Button
+          onClick={() => {
+            hideContextMenu();
+            controller.setFloatElementUuid(uuid);
+            controller.copy();
+            controller.paste();
+            controller.setFloatElementUuid('');
+          }}
+        >
+          Duplicate
+        </Button>
         {type === 'chart' ? (
           <React.Fragment>
             <Button onClick={selectData}>Select Data</Button>

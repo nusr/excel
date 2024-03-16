@@ -47,6 +47,8 @@ npm run start
 - [x] Export XLSX
 - [x] Floating Picture
 - [x] Chart
+- [x] Undo
+- [x] Redo
 
 ## Supported Formulas
 

@@ -2,6 +2,8 @@
 
 - import CSV
 - optimize importing XLSX
-- float element import and export
-- Exporting CSV support unicode
+- export float element
+- exporting CSV support unicode
 - add unit test cases
+- remove Chart.js dep
+- color picker
