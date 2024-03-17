@@ -1,4 +1,4 @@
-import { npx, dpr, canvasLog } from '@/util';
+import { npx, dpr, canvasLog, CELL_HEIGHT, CELL_WIDTH } from '@/util';
 import { resizeCanvas, renderCellData } from './util';
 import { ContentView, IController, EventType } from '@/types';
 
@@ -62,17 +62,42 @@ export class Content implements ContentView {
     }
 
     while (y + controller.getRowHeight(r).len < height) {
-      y += controller.getRowHeight(r).len
+      y += controller.getRowHeight(r).len;
       r++;
     }
     const endRow = r;
     const endCol = c;
     ctx.save();
+
+    const rowMap = new Map<number, number>();
+    const colMap = new Map<number, number>();
+
     for (let rowIndex = row; rowIndex < endRow; rowIndex++) {
       for (let colIndex = col; colIndex < endCol; colIndex++) {
-        renderCellData(controller, ctx, rowIndex, colIndex);
+        const size = renderCellData(controller, ctx, rowIndex, colIndex);
+        rowMap.set(
+          rowIndex,
+          Math.max(rowMap.get(rowIndex) || CELL_HEIGHT, size.height),
+        );
+        colMap.set(
+          colIndex,
+          Math.max(colMap.get(colIndex) || CELL_WIDTH, size.width),
+        );
       }
     }
+    for (const [r, h] of rowMap.entries()) {
+      if (h <= 0) {
+        continue;
+      }
+      controller.setRowHeight(r, h, false);
+    }
+    for (const [c, w] of colMap.entries()) {
+      if (w <= 0) {
+        continue;
+      }
+      controller.setColWidth(c, w, false);
+    }
+
     ctx.restore();
   }
 }

@@ -53,5 +53,5 @@ export const controllerLog = new Debug('controller').init();
 export const canvasLog = new Debug('canvas').init();
 export const modelLog = new Debug('model').init();
 
-Debug.disable('controller');
+// Debug.disable('controller');
 Debug.disable('canvas');

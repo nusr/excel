@@ -139,7 +139,7 @@ const MOCK_MODEL: WorkBookJSON = {
     },
     '2': {
       '0_0': {
-        formula: '=Sheet1!A1',
+        formula: '=basic!A1',
       },
     },
     '4': {

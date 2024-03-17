@@ -12,8 +12,6 @@ import {
   splitToWords,
   convertResultTypeToString,
   theme,
-  CELL_HEIGHT,
-  CELL_WIDTH,
 } from '@/util';
 import {
   ModelCellType,
@@ -86,9 +84,8 @@ export function fillText(
   text: string,
   x: number,
   y: number,
-  maxWidth: number = 0,
 ) {
-  ctx.fillText(text, npx(x), npx(y), maxWidth ? npx(maxWidth) : undefined);
+  ctx.fillText(text, npx(x), npx(y));
 }
 
 interface IRenderCellResult {
@@ -110,7 +107,7 @@ function drawUnderlineData(
   if (style?.underline) {
     let pointList: Point[] = [];
     const isDouble = style?.underline === EUnderLine.DOUBLE;
-    const t = Math.floor(y + textHeight * (isDouble ? 0.7 : 0.6));
+    const t = Math.floor(y + textHeight * (isDouble ? 0.9 : 0.8));
     if (isNum) {
       pointList = [
         [x - textWidth, t],
@@ -148,7 +145,7 @@ export function renderCellData(
   ctx: CanvasRenderingContext2D,
   row: number,
   col: number,
-): boolean {
+): IWindowSize {
   const range = {
     row,
     col,
@@ -157,12 +154,16 @@ export function renderCellData(
     sheetId: '',
   };
   const cellInfo = controller.getCell(range);
+  const result: IWindowSize = {
+    width: 0,
+    height: 0,
+  };
   if (!cellInfo) {
-    return false;
+    return result;
   }
   const cellSize = controller.getCellSize(range);
   if (cellSize.width <= 0 || cellSize.height <= 0) {
-    return false;
+    return result;
   }
   const position = controller.computeCellPosition(range);
   const newSize = renderCell(ctx, {
@@ -172,19 +173,9 @@ export function renderCellData(
     width: cellSize.width,
     height: cellSize.height,
   });
-  const height = Math.ceil(newSize.height);
-  const width = Math.ceil(newSize.width);
-  if (height > cellSize.height) {
-    controller.setRowHeight(row, height, false);
-  } else if (height > 0) {
-    controller.setRowHeight(row, Math.max(CELL_HEIGHT, height), false);
-  }
-  if (width > cellSize.width) {
-    controller.setColWidth(col, width, false);
-  } else if (width > 0) {
-    controller.setColWidth(col, Math.max(CELL_WIDTH, width), false);
-  }
-  return true;
+  result.height = Math.ceil(newSize.height);
+  result.width = Math.ceil(newSize.width);
+  return result;
 }
 
 export function renderCell(
@@ -234,13 +225,15 @@ export function renderCell(
     ctx.strokeStyle = fillStyle;
   }
 
-  let textHeight = Math.ceil(fontSize * theme.lineHeight);
-
+  const textHeight = Math.ceil(fontSize * theme.lineHeight);
+  result.height = textHeight;
   if (style?.isWrapText) {
-    let y = top + Math.ceil(textHeight / 2);
-    result.height = 0;
+    const gap = Math.ceil(textHeight / 2);
+    let y = top + gap;
+    result.height = gap;
     let line = '';
     let textWidth = 0;
+    let h = 0;
     for (let i = 0; i < texts.length; i++) {
       const testLine = line + texts[i];
       const size = measureText(ctx, testLine);
@@ -248,11 +241,12 @@ export function renderCell(
         result.height += textHeight;
         result.width = Math.max(textWidth, result.width);
         fillText(ctx, line, x, y);
-        drawUnderlineData(ctx, isNum, style, textHeight, x, y, textWidth);
+        drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
         y += textHeight;
         line = texts[i];
       } else {
         textWidth = size.width;
+        h = size.height;
         line = testLine;
       }
     }
@@ -260,7 +254,7 @@ export function renderCell(
       result.height += textHeight;
       result.width = Math.max(textWidth, result.width);
       fillText(ctx, line, x, y);
-      drawUnderlineData(ctx, isNum, style, textHeight, x, y, width);
+      drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
     }
   } else {
     let textWidth = 0;
@@ -274,10 +268,11 @@ export function renderCell(
         textWidth += size.width;
       }
     }
-    result.height = Math.max(result.height, textHeight, height);
-    const y = Math.floor(top + result.height / 2);
-    fillText(ctx, textData.join(''), x, y, width);
-    drawUnderlineData(ctx, isNum, style, textHeight, x, y, textWidth);
+
+    const h = Math.max(textHeight, height);
+    const y = top + h / 2;
+    fillText(ctx, textData.join(''), x, y);
+    drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
     result.width = textWidth;
   }
 
