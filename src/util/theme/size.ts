@@ -3,7 +3,7 @@ const size = {
   font: '12px',
   largeFont: '14px',
   padding: '12px',
-  lineHeight: '1.5',
+  lineHeight: 1.2,
   mediumPadding: '8px',
   largePadding: '20px',
   borderRadius: '4px',

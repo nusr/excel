@@ -11,6 +11,9 @@ import {
   isEmpty,
   splitToWords,
   convertResultTypeToString,
+  theme,
+  CELL_HEIGHT,
+  CELL_WIDTH,
 } from '@/util';
 import {
   ModelCellType,
@@ -77,7 +80,8 @@ export function fillText(
 }
 
 interface IRenderCellResult {
-  wrapHeight?: number;
+  height: number;
+  width: number;
   fontSizeHeight?: number;
 }
 
@@ -149,15 +153,28 @@ export function renderCellData(
     return false;
   }
   const position = controller.computeCellPosition(range);
-  const { wrapHeight = 0 } = renderCell(ctx, {
+  const newSize = renderCell(ctx, {
     ...cellInfo,
     top: position.top,
     left: position.left,
     width: cellSize.width,
     height: cellSize.height,
   });
-  if (wrapHeight > cellSize.height) {
-    controller.setRowHeight(row, wrapHeight, false);
+  const maxHeight = CELL_HEIGHT * 3;
+  const maxWidth = CELL_WIDTH * 3;
+  const height = Math.ceil(newSize.height);
+  const width = Math.ceil(newSize.width);
+  if (height > CELL_HEIGHT && height < maxHeight) {
+    controller.setRowHeight(row, height, false);
+  }
+  if (height > 0 && height < CELL_HEIGHT) {
+    controller.setRowHeight(row, CELL_HEIGHT, false);
+  }
+  if (width > CELL_WIDTH && width < maxWidth) {
+    controller.setColWidth(col, width, false);
+  }
+  if (width > 0 && width < CELL_WIDTH) {
+    controller.setColWidth(col, CELL_WIDTH, false);
   }
   return true;
 }
@@ -166,8 +183,8 @@ export function renderCell(
   ctx: CanvasRenderingContext2D,
   cellInfo: ModelCellType & CanvasOverlayPosition,
 ): IRenderCellResult {
-  const result: IRenderCellResult = {};
   const { style, value, left, top, width, height } = cellInfo;
+  const result: IRenderCellResult = { height: 0, width: 0 };
   if (isEmpty(cellInfo.value) && isEmpty(cellInfo.style)) {
     return result;
   }
@@ -208,10 +225,12 @@ export function renderCell(
   if (style?.underline) {
     ctx.strokeStyle = fillStyle;
   }
-  const textHeight = fontSize + 2;
+  const offset = 2;
+  const textHeight = Math.ceil(fontSize * theme.lineHeight);
+
   if (style?.isWrapText) {
     let y = top;
-    const offset = 2;
+    let countWrap = 0;
     for (let i = 0; i < texts.length; ) {
       let t = width;
       const lastIndex = i;
@@ -233,12 +252,14 @@ export function renderCell(
         y = y + Math.floor(textHeight / 2) + offset;
         const b = textData.join('');
         fillText(ctx, b, x, y);
+        countWrap++;
         drawUnderlineData(ctx, isNum, style, textHeight, x, y, width);
         y += Math.floor(textHeight / 2);
       }
     }
     y += offset;
-    result.wrapHeight = y - top;
+    result.height = countWrap * textHeight;
+    result.width = x - left;
   } else {
     const offset = Math.max(0, Math.floor(height - textHeight) / 2);
     const y = Math.floor(top + textHeight / 2 + offset);
@@ -247,16 +268,19 @@ export function renderCell(
     let t = width;
     for (let i = 0; i < texts.length; i++) {
       const w = measureText(ctx, texts[i]);
-      if (w < t) {
+      if (w < t || i <= 2) {
         t -= w;
         textData.push(texts[i]);
         textWidth += w;
       }
     }
+    result.width = textWidth;
 
     fillText(ctx, textData.join(''), x, y);
     drawUnderlineData(ctx, isNum, style, textHeight, x, y, textWidth);
+    result.height = textHeight;
   }
+
   return result;
 }
 

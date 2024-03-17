@@ -188,7 +188,7 @@ describe('import.test.ts', () => {
           },
         },
       };
-      expect(convertXMLDataToModel(xml)).toEqual(result);
+      expect(convertXMLDataToModel(xml, {})).toEqual(result);
     });
   });
 });

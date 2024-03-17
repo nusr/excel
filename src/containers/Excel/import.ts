@@ -7,6 +7,7 @@ import {
   EVerticalAlign,
   EUnderLine,
   FloatElement,
+  IWindowSize,
 } from '@/types';
 import {
   get,
@@ -20,6 +21,24 @@ import {
   getCustomWidthOrHeightKey,
   generateUUID,
 } from '@/util';
+
+function getImageSize(base64: string): Promise<IWindowSize> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      // 获取图像的宽度和高度
+      const width = image.width;
+      const height = image.height;
+
+      resolve({ width, height });
+    };
+    image.onerror = (error) => {
+      reject(error);
+    };
+    // 设置图像的源为 Blob 对象
+    image.src = base64;
+  });
+}
 
 const COMMON_PREFIX = 'xl';
 const STYLE_PATH = 'xl/styles.xml';
@@ -366,7 +385,10 @@ function getCellStyle(
   return result;
 }
 
-export function convertXMLDataToModel(xmlData: ObjectItem): WorkBookJSON {
+export function convertXMLDataToModel(
+  xmlData: ObjectItem,
+  imageSizeMap: Record<string, IWindowSize>,
+): WorkBookJSON {
   const workbook = xmlData[WORKBOOK_PATH];
 
   let sharedStrings: SharedStringItem[] = get(
@@ -654,10 +676,10 @@ export function convertXMLDataToModel(xmlData: ObjectItem): WorkBookJSON {
         title: '',
         type: isImage ? 'floating-picture' : 'chart',
         uuid,
-        width: 200,
-        height: 200,
-        originHeight: 200,
-        originWidth: 200,
+        width: 300,
+        height: 300,
+        originHeight: 300,
+        originWidth: 300,
         fromCol: parseInt(fromCol, 10),
         fromRow: parseInt(fromRow, 10),
         sheetId,
@@ -666,11 +688,21 @@ export function convertXMLDataToModel(xmlData: ObjectItem): WorkBookJSON {
       };
 
       if (isImage) {
+        if (!xmlData[filePath]) {
+          continue;
+        }
         const name = get(float, 'xdr:pic.xdr:nvPicPr.xdr:cNvPr.name', '');
         const title = get(float, 'xdr:pic.xdr:nvPicPr.xdr:cNvPr.title', '');
         floatElementData.title = title || name;
         floatElementData.imageAngle = 0;
-        floatElementData.imageSrc = xmlData[filePath];
+        floatElementData.imageSrc = xmlData[filePath] || '';
+        const size = imageSizeMap[filePath];
+        if (size && size.width > 0 && size.height > 0) {
+          floatElementData.width = size.width;
+          floatElementData.height = size.height;
+          floatElementData.originWidth = size.width;
+          floatElementData.originHeight = size.height;
+        }
       } else {
         floatElementData.title = get(
           xmlData[filePath],
@@ -718,6 +750,7 @@ export async function importXLSX(file: File) {
   const zip = await jszip.default.loadAsync(file);
   const { files } = zip;
   const result: ObjectItem = {};
+  const imageSizeMap: Record<string, IWindowSize> = {};
   for (const key of Object.keys(files)) {
     if (files[key].dir) {
       continue;
@@ -741,9 +774,11 @@ export async function importXLSX(file: File) {
       const data = await files[key].async('base64');
       if (data) {
         result[key] = `data:${imageType};base64,${data}`;
+        imageSizeMap[key] = await getImageSize(result[key]);
       }
     }
   }
-  const model = convertXMLDataToModel(result);
+
+  const model = convertXMLDataToModel(result, imageSizeMap);
   return model;
 }
