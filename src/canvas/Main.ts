@@ -58,6 +58,7 @@ export class MainCanvas {
       return;
     }
     if (this.isRendering) {
+      canvasLog('It is rendering');
       return;
     }
     this.isRendering = true;

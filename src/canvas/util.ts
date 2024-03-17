@@ -230,7 +230,7 @@ export function renderCell(
   if (style?.isWrapText) {
     const gap = Math.ceil(textHeight / 2);
     let y = top + gap;
-    result.height = gap;
+    result.height = 0;
     let line = '';
     let textWidth = 0;
     let h = 0;
