@@ -3,23 +3,21 @@ import { resizeCanvas, renderCellData } from './util';
 import { ContentView, IController, EventType } from '@/types';
 
 export class Content implements ContentView {
-  private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private controller: IController;
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
-    this.canvas = canvas;
-    const ctx = this.canvas.getContext('2d')!;
+    const ctx = canvas.getContext('2d')!;
     this.ctx = ctx;
     const size = dpr();
     this.ctx.scale(size, size);
   }
   getCanvas() {
-    return this.canvas;
+    return this.ctx.canvas;
   }
   resize() {
     const { width, height } = this.controller.getDomRect();
-    resizeCanvas(this.canvas, width, height);
+    resizeCanvas(this.ctx.canvas, width, height);
   }
   render({ changeSet }: EventType) {
     if (changeSet.size === 0) {

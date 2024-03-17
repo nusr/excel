@@ -34,12 +34,10 @@ import { HEADER_STYLE } from './constant';
 export class MainCanvas {
   private ctx: CanvasRenderingContext2D;
   private content: ContentView;
-  private canvas: HTMLCanvasElement;
   private controller: IController;
   private isRendering = false;
   constructor(controller: IController, content: ContentView) {
     const canvas = controller.getMainDom().canvas!;
-    this.canvas = canvas;
     this.controller = controller;
     this.ctx = canvas.getContext('2d')!;
     this.content = content;
@@ -48,7 +46,7 @@ export class MainCanvas {
   }
   resize() {
     const { width, height } = this.controller.getDomRect();
-    resizeCanvas(this.canvas, width, height);
+    resizeCanvas(this.ctx.canvas, width, height);
     this.content.resize();
   }
   private clear() {

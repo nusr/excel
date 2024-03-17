@@ -22,21 +22,32 @@ import {
   Point,
   EUnderLine,
   IController,
+  IWindowSize,
 } from '@/types';
 
-const measureTextMap = new Map<string, number>();
+const measureTextMap = new Map<string, IWindowSize>();
 
 export function measureText(
   ctx: CanvasRenderingContext2D,
   char: string,
-): number {
+): IWindowSize {
   const mapKey = `${char}__${ctx.font}`;
   if (measureTextMap.has(mapKey)) {
     return measureTextMap.get(mapKey)!;
   }
-  const t = ctx.measureText(char);
-  const { width } = t;
-  const result = Math.ceil(width / dpr());
+  const text = ctx.measureText(char);
+  const {
+    actualBoundingBoxLeft,
+    actualBoundingBoxRight,
+    actualBoundingBoxAscent,
+    actualBoundingBoxDescent,
+  } = text;
+  const other = actualBoundingBoxLeft + actualBoundingBoxRight;
+  const h = actualBoundingBoxAscent + actualBoundingBoxDescent;
+  const w = Math.max(other, text.width);
+  const width = Math.ceil(w / dpr());
+  const height = Math.ceil(h / dpr());
+  const result = { width, height };
   measureTextMap.set(mapKey, result);
   return result;
 }
@@ -75,8 +86,9 @@ export function fillText(
   text: string,
   x: number,
   y: number,
+  maxWidth: number = 0,
 ) {
-  ctx.fillText(text, npx(x), npx(y));
+  ctx.fillText(text, npx(x), npx(y), maxWidth ? npx(maxWidth) : undefined);
 }
 
 interface IRenderCellResult {
@@ -160,21 +172,17 @@ export function renderCellData(
     width: cellSize.width,
     height: cellSize.height,
   });
-  const maxHeight = CELL_HEIGHT * 3;
-  const maxWidth = CELL_WIDTH * 3;
   const height = Math.ceil(newSize.height);
   const width = Math.ceil(newSize.width);
-  if (height > CELL_HEIGHT && height < maxHeight) {
+  if (height > cellSize.height) {
     controller.setRowHeight(row, height, false);
+  } else if (height > 0) {
+    controller.setRowHeight(row, Math.max(CELL_HEIGHT, height), false);
   }
-  if (height > 0 && height < CELL_HEIGHT) {
-    controller.setRowHeight(row, CELL_HEIGHT, false);
-  }
-  if (width > CELL_WIDTH && width < maxWidth) {
+  if (width > cellSize.width) {
     controller.setColWidth(col, width, false);
-  }
-  if (width > 0 && width < CELL_WIDTH) {
-    controller.setColWidth(col, CELL_WIDTH, false);
+  } else if (width > 0) {
+    controller.setColWidth(col, Math.max(CELL_WIDTH, width), false);
   }
   return true;
 }
@@ -225,60 +233,52 @@ export function renderCell(
   if (style?.underline) {
     ctx.strokeStyle = fillStyle;
   }
-  const offset = 2;
-  const textHeight = Math.ceil(fontSize * theme.lineHeight);
+
+  let textHeight = Math.ceil(fontSize * theme.lineHeight);
 
   if (style?.isWrapText) {
-    let y = top;
-    let countWrap = 0;
-    for (let i = 0; i < texts.length; ) {
-      let t = width;
-      const lastIndex = i;
-      while (i < texts.length) {
-        const w = measureText(ctx, texts[i]);
-        if (w < t) {
-          t -= w;
-          i++;
-        } else {
-          break;
-        }
-      }
-      if (lastIndex !== i) {
-        const textData: string[] = [];
-        for (let k = lastIndex; k < i; k++) {
-          textData.push(texts[k]);
-        }
-
-        y = y + Math.floor(textHeight / 2) + offset;
-        const b = textData.join('');
-        fillText(ctx, b, x, y);
-        countWrap++;
-        drawUnderlineData(ctx, isNum, style, textHeight, x, y, width);
-        y += Math.floor(textHeight / 2);
+    let y = top + Math.ceil(textHeight / 2);
+    result.height = 0;
+    let line = '';
+    let textWidth = 0;
+    for (let i = 0; i < texts.length; i++) {
+      const testLine = line + texts[i];
+      const size = measureText(ctx, testLine);
+      if (size.width > width && i > 0) {
+        result.height += textHeight;
+        result.width = Math.max(textWidth, result.width);
+        fillText(ctx, line, x, y);
+        drawUnderlineData(ctx, isNum, style, textHeight, x, y, textWidth);
+        y += textHeight;
+        line = texts[i];
+      } else {
+        textWidth = size.width;
+        line = testLine;
       }
     }
-    y += offset;
-    result.height = countWrap * textHeight;
-    result.width = x - left;
+    if (line) {
+      result.height += textHeight;
+      result.width = Math.max(textWidth, result.width);
+      fillText(ctx, line, x, y);
+      drawUnderlineData(ctx, isNum, style, textHeight, x, y, width);
+    }
   } else {
-    const offset = Math.max(0, Math.floor(height - textHeight) / 2);
-    const y = Math.floor(top + textHeight / 2 + offset);
     let textWidth = 0;
     const textData: string[] = [];
     let t = width;
     for (let i = 0; i < texts.length; i++) {
-      const w = measureText(ctx, texts[i]);
-      if (w < t || i <= 2) {
-        t -= w;
+      const size = measureText(ctx, texts[i]);
+      if (size.width < t || i <= 0) {
+        t -= size.width;
         textData.push(texts[i]);
-        textWidth += w;
+        textWidth += size.width;
       }
     }
-    result.width = textWidth;
-
-    fillText(ctx, textData.join(''), x, y);
+    result.height = Math.max(result.height, textHeight, height);
+    const y = Math.floor(top + result.height / 2);
+    fillText(ctx, textData.join(''), x, y, width);
     drawUnderlineData(ctx, isNum, style, textHeight, x, y, textWidth);
-    result.height = textHeight;
+    result.width = textWidth;
   }
 
   return result;

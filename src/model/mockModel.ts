@@ -35,47 +35,62 @@ const MOCK_MODEL: WorkBookJSON = {
   workbook: {
     '1': {
       sheetId: '1',
-      name: 'Sheet1',
-      isHide: false,
-      colCount: DEFAULT_COL_COUNT,
-      rowCount: DEFAULT_ROW_COUNT,
-      sort: 0,
-    },
-    '2': {
-      sheetId: '2',
-      name: 'test',
+      name: 'basic',
       isHide: false,
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       sort: 1,
     },
-    '3': {
-      sheetId: '3',
-      name: 'test3',
-      isHide: true,
+    '2': {
+      sheetId: '2',
+      name: 'floating-picture',
+      isHide: false,
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       sort: 2,
+    },
+    '3': {
+      sheetId: '3',
+      name: 'hide',
+      isHide: true,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      sort: 3,
+    },
+    '4': {
+      sheetId: '4',
+      name: 'chart',
+      isHide: false,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      sort: 4,
+    },
+    '5': {
+      sheetId: '5',
+      name: 'defined name',
+      isHide: false,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      sort: 5,
+    },
+    '6': {
+      sheetId: '6',
+      name: 'unicode',
+      isHide: false,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      sort: 6,
     },
   },
   worksheets: {
     '1': {
       '0_0': {
-        value: '1a',
+        value: '1',
         style: {
           fontColor: '#ff0000',
         },
       },
-      '0_1': {
-        value: 'Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞',
-        style: {
-          fontSize: 26,
-        },
-      },
-      '0_2': {
-        value: '',
-        formula: '=foo',
-      },
+
       '0_3': {
         value: 'large text',
         style: {
@@ -94,27 +109,7 @@ const MOCK_MODEL: WorkBookJSON = {
       '0_5': {
         value: '10',
       },
-      '0_6': {
-        formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
-        style: {
-          fontSize: 36,
-        },
-      },
-      '0_7': {
-        value: '뎌쉐',
-        style: {
-          fontSize: 36,
-        },
-      },
-      '0_8': {
-        value: 'Ĺo͂řȩm̅',
-        style: {
-          fontSize: 36,
-        },
-      },
-      '0_10': {
-        value: '🌷🎁💩😜👍🏳️‍🌈',
-      },
+
       '1_0': {
         formula: '=SUM(F:F)',
       },
@@ -141,6 +136,13 @@ const MOCK_MODEL: WorkBookJSON = {
           fillColor: 'red',
         },
       },
+    },
+    '2': {
+      '0_0': {
+        formula: '=Sheet1!A1',
+      },
+    },
+    '4': {
       '6_6': {
         value: 3,
       },
@@ -169,9 +171,42 @@ const MOCK_MODEL: WorkBookJSON = {
         value: 15,
       },
     },
-    '2': {
+    '5': {
       '0_0': {
-        formula: '=Sheet1!A1',
+        value: '1',
+      },
+      '0_2': {
+        value: '',
+        formula: '=foo',
+      },
+    },
+    '6': {
+      '0_1': {
+        value: 'Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞',
+        style: {
+          fontSize: 26,
+        },
+      },
+      '0_6': {
+        formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
+        style: {
+          fontSize: 36,
+        },
+      },
+      '0_7': {
+        value: '뎌쉐',
+        style: {
+          fontSize: 36,
+        },
+      },
+      '0_8': {
+        value: 'Ĺo͂řȩm̅',
+        style: {
+          fontSize: 36,
+        },
+      },
+      '0_10': {
+        value: '🌷🎁💩😜👍🏳️‍🌈',
       },
     },
   },
@@ -179,23 +214,14 @@ const MOCK_MODEL: WorkBookJSON = {
   // TODO:
   mergeCells: {},
   customHeight: {},
-  customWidth: {
-    '1_1': {
-      len: 180,
-      isHide: false,
-    },
-    '1_3': {
-      len: 180,
-      isHide: false,
-    },
-  },
+  customWidth: {},
   definedNames: {
     foo: {
       row: 0,
       col: 0,
       rowCount: 1,
       colCount: 1,
-      sheetId: '1',
+      sheetId: '5',
     },
   },
   drawings: {},
@@ -212,7 +238,7 @@ if (!isMobile()) {
     height: 356,
     originHeight: 356,
     originWidth: 200,
-    sheetId: '1',
+    sheetId: '2',
     fromCol: 1,
     fromRow: 1,
     marginX: 0,
@@ -229,7 +255,7 @@ if (!isMobile()) {
     originWidth: 400,
     marginX: 0,
     marginY: 0,
-    sheetId: '1',
+    sheetId: '4',
     fromCol: 4,
     fromRow: 4,
     chartType: 'bar',
@@ -238,7 +264,7 @@ if (!isMobile()) {
       col: 6,
       colCount: 3,
       rowCount: 3,
-      sheetId: '1',
+      sheetId: '4',
     },
   };
 }
