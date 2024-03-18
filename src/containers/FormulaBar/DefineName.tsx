@@ -55,6 +55,7 @@ export const DefineName: React.FunctionComponent<Props> = ({
       <input
         value={value}
         ref={ref}
+        spellCheck
         type="text"
         onChange={handleChange}
         className={styles['formula-bar-name-editor']}

@@ -58,7 +58,7 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = ({
     <Button>
       <input
         type="file"
-        style={{ display: 'none' }}
+        hidden
         onChange={handleImport}
         accept="image/*"
         ref={ref}

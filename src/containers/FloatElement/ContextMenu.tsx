@@ -95,6 +95,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         children: (
           <input
             type="text"
+            spellCheck
             style={{ width: '400px' }}
             defaultValue={value}
             onChange={handleChange}
@@ -138,6 +139,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         children: (
           <input
             type="text"
+            spellCheck
             style={{ width: '200px' }}
             defaultValue={value}
             onChange={handleChange}

@@ -38,7 +38,9 @@ function padZero(a: string) {
 }
 function RGBAToHex(r: number, g: number, b: number, a: number) {
   const list = [r, g, b, a * 255];
-  return `#${list.map((item) => padZero(Math.round(item).toString(16))).join('')}`;
+  return `#${list
+    .map((item) => padZero(Math.round(item).toString(16)))
+    .join('')}`;
 }
 function RGBtoHEX(r: string, g: string, b: string, a: string): string {
   let alpha = 1;
@@ -48,7 +50,18 @@ function RGBtoHEX(r: string, g: string, b: string, a: string): string {
   const red = parseFloat(r);
   const green = parseFloat(g);
   const blue = parseFloat(b);
-  if (!(red <= 255 && red >= 0 && green <= 255 && green >= 0 && blue <= 255 && blue >= 0 && alpha <= 1 && alpha >= 0)) {
+  if (
+    !(
+      red <= 255 &&
+      red >= 0 &&
+      green <= 255 &&
+      green >= 0 &&
+      blue <= 255 &&
+      blue >= 0 &&
+      alpha <= 1 &&
+      alpha >= 0
+    )
+  ) {
     return '';
   }
   return RGBAToHex(red, green, blue, alpha);
@@ -71,7 +84,16 @@ function HSLAtoHEX(x: string, y: string, z: string, a: string) {
   const h = parseFloat(x) / 360;
   const s = parseFloat(y) / 360;
   const l = parseFloat(z) / 360;
-  if (h > 1 || h < 0 || s > 1 || s < 0 || l > 1 || l < 0 || alpha > 1 || alpha < 0) {
+  if (
+    h > 1 ||
+    h < 0 ||
+    s > 1 ||
+    s < 0 ||
+    l > 1 ||
+    l < 0 ||
+    alpha > 1 ||
+    alpha < 0
+  ) {
     return '';
   }
   let r: number;

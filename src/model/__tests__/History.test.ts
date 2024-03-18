@@ -5,10 +5,10 @@ describe('History.test.ts', () => {
   test('init History', () => {
     const history = new History({});
     const command: ICommandItem = {
-      type: 'currentSheetId',
-      path: '',
-      newValue: '1',
-      oldValue: '2',
+      t: 'currentSheetId',
+      k: '',
+      n: '1',
+      o: '2',
     };
     history.push(command);
     history.commit();
@@ -24,10 +24,10 @@ describe('History.test.ts', () => {
     expect(value).toEqual('1');
 
     const command: ICommandItem = {
-      type: 'currentSheetId',
-      path: '',
-      newValue: '1',
-      oldValue: '2',
+      t: 'currentSheetId',
+      k: '',
+      n: '1',
+      o: '2',
     };
     history.push(command);
     history.commit();
@@ -39,10 +39,10 @@ describe('History.test.ts', () => {
 
     expect(history.getLength()).toEqual(0);
     const command: ICommandItem = {
-      type: 'currentSheetId',
-      path: '',
-      newValue: '1',
-      oldValue: '2',
+      t: 'currentSheetId',
+      k: '',
+      n: '1',
+      o: '2',
     };
     history.push(command);
     history.commit();
@@ -58,10 +58,10 @@ describe('History.test.ts', () => {
     expect(history.canUndo()).toBeFalsy();
 
     const command: ICommandItem = {
-      type: 'currentSheetId',
-      path: '',
-      newValue: '1',
-      oldValue: '2',
+      t: 'currentSheetId',
+      k: '',
+      n: '1',
+      o: '2',
     };
     history.push(command);
     history.commit();
@@ -88,10 +88,10 @@ describe('History.test.ts', () => {
       name: oldName,
     };
     const command: ICommandItem = {
-      type: 'currentSheetId',
-      path: '',
-      newValue: '1',
-      oldValue: '2',
+      t: 'currentSheetId',
+      k: '',
+      n: '1',
+      o: '2',
     };
     history.push(command);
     history.commit();

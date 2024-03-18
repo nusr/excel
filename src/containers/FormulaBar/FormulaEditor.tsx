@@ -94,6 +94,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = ({
     <input
       className={styles['base-editor']}
       ref={ref}
+      spellCheck
       defaultValue={initValue}
       onKeyDown={handleKeyDown}
       type="text"

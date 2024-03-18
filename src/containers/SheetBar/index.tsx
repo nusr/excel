@@ -73,6 +73,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
                   defaultValue={item.label}
                   onKeyDown={handleKeyDown}
                   type="text"
+                  spellCheck
                 />
               ) : (
                 <span className={styles['sheet-bar-item-text']}>

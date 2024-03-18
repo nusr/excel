@@ -15,9 +15,9 @@ import {
   stringToCoordinate,
   getCustomWidthOrHeightKey,
   convertResultTypeToString,
+  convertColorToHex,
 } from '@/util';
 import { XfItem, CUSTOM_WIdTH_RADIO } from './import';
-import { convertColorToHex } from './color';
 import {
   THEME1_XML,
   getContentTypeXml,

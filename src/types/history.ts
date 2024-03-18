@@ -1,10 +1,22 @@
 import { WorkBookJSON } from './model';
 
 export type ICommandItem = {
-  type: keyof WorkBookJSON;
-  path: string; // eg. worksheets.1.6_4.value, workbook.1.name
-  oldValue: any; // undo
-  newValue: any; // redo
+  /**
+   * type, eg. worksheets workbook
+   */
+  t: keyof WorkBookJSON;
+  /**
+   * key eg. 1.6_4.value, 1.name
+   */
+  k: string;
+  /**
+   * oldValue, undo
+   */
+  o: any;
+  /**
+   * newValue redo
+   */
+  n: any;
 };
 
 export type CommandType = ICommandItem;

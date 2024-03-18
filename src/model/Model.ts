@@ -38,7 +38,7 @@ import { History } from './History';
 const DELETE_FLAG = Symbol('delete');
 
 const getKey = (item: ICommandItem) => {
-  return item.type + (item.path ? '.' + item.path : '');
+  return item.t + (item.k ? '.' + item.k : '');
 };
 
 function setData(obj: Record<string, any>, key: string, value: any) {
@@ -74,34 +74,34 @@ export class Model implements IModel {
   constructor() {
     this.history = new History({
       undo: (item: ICommandItem) => {
-        if (item.type === 'currentSheetId') {
+        if (item.t === 'currentSheetId') {
           if (
-            !this.workbook[item.oldValue] ||
-            this.workbook[item.oldValue].isHide
+            !this.workbook[item.o] ||
+            this.workbook[item.o].isHide
           ) {
             this.currentSheetId = this.getSheetId();
           } else {
-            this.currentSheetId = item.oldValue;
+            this.currentSheetId = item.o;
           }
           return;
         }
         const key = getKey(item);
-        setData(this, key, item.oldValue);
+        setData(this, key, item.o);
       },
       redo: (item: ICommandItem) => {
-        if (item.type === 'currentSheetId') {
+        if (item.t === 'currentSheetId') {
           if (
-            !this.workbook[item.newValue] ||
-            this.workbook[item.newValue].isHide
+            !this.workbook[item.n] ||
+            this.workbook[item.n].isHide
           ) {
             this.currentSheetId = this.getSheetId();
           } else {
-            this.currentSheetId = item.newValue;
+            this.currentSheetId = item.n;
           }
           return;
         }
         const key = getKey(item);
-        setData(this, key, item.newValue);
+        setData(this, key, item.n);
       },
       change: (list) => {
         modelLog(list);
@@ -147,10 +147,10 @@ export class Model implements IModel {
     this.rangeMap[newRange.sheetId] = newRange;
 
     this.history.push({
-      type: 'rangeMap',
-      path: newRange.sheetId,
-      newValue: newRange,
-      oldValue: oldValue ? oldValue : DELETE_FLAG,
+      t: 'rangeMap',
+      k: newRange.sheetId,
+      n: newRange,
+      o: oldValue ? oldValue : DELETE_FLAG,
     });
   }
   addSheet(): void {
@@ -169,10 +169,10 @@ export class Model implements IModel {
     this.workbook[sheet.sheetId] = sheet;
 
     this.history.push({
-      type: 'workbook',
-      path: sheet.sheetId,
-      newValue: { ...sheet },
-      oldValue: DELETE_FLAG,
+      t: 'workbook',
+      k: sheet.sheetId,
+      n: { ...sheet },
+      o: DELETE_FLAG,
     });
     this.setCurrentSheetId(sheet.sheetId);
 
@@ -200,17 +200,17 @@ export class Model implements IModel {
     delete this.worksheets[id];
 
     this.history.push({
-      type: 'workbook',
-      path: id,
-      newValue: DELETE_FLAG,
-      oldValue: oldSheet,
+      t: 'workbook',
+      k: id,
+      n: DELETE_FLAG,
+      o: oldSheet,
     });
 
     this.history.push({
-      type: 'worksheets',
-      path: id,
-      newValue: DELETE_FLAG,
-      oldValue: oldData,
+      t: 'worksheets',
+      k: id,
+      n: DELETE_FLAG,
+      o: oldData,
     });
 
     this.setCurrentSheetId(newSheetId);
@@ -227,10 +227,10 @@ export class Model implements IModel {
     this.workbook[id].isHide = true;
 
     this.history.push({
-      type: 'workbook',
-      path: `${id}.isHide`,
-      newValue: true,
-      oldValue: false,
+      t: 'workbook',
+      k: `${id}.isHide`,
+      n: true,
+      o: false,
     });
     this.setCurrentSheetId(newSheetId);
   }
@@ -239,10 +239,10 @@ export class Model implements IModel {
     this.workbook[id].isHide = false;
 
     this.history.push({
-      type: 'workbook',
-      path: `${id}.isHide`,
-      newValue: false,
-      oldValue: true,
+      t: 'workbook',
+      k: `${id}.isHide`,
+      n: false,
+      o: true,
     });
     this.setCurrentSheetId(id);
   }
@@ -265,10 +265,10 @@ export class Model implements IModel {
     sheetInfo.name = sheetName;
 
     this.history.push({
-      type: 'workbook',
-      path: `${id}.name`,
-      newValue: sheetName,
-      oldValue: oldName,
+      t: 'workbook',
+      k: `${id}.name`,
+      n: sheetName,
+      o: oldName,
     });
   }
   getSheetInfo(id?: string): WorksheetType | undefined {
@@ -284,10 +284,10 @@ export class Model implements IModel {
       const oldSheetId = this.currentSheetId;
       this.currentSheetId = newSheetId;
       this.history.push({
-        type: 'currentSheetId',
-        path: '',
-        newValue: newSheetId,
-        oldValue: oldSheetId,
+        t: 'currentSheetId',
+        k: '',
+        n: newSheetId,
+        o: oldSheetId,
       });
     }
   }
@@ -423,17 +423,17 @@ export class Model implements IModel {
       delete sheetData[key];
 
       this.history.push({
-        type: 'worksheets',
-        path: `${id}.${key}`,
-        newValue: DELETE_FLAG,
-        oldValue: newValue,
+        t: 'worksheets',
+        k: `${id}.${key}`,
+        n: DELETE_FLAG,
+        o: newValue,
       });
 
       this.history.push({
-        type: 'worksheets',
-        path: `${id}.${newKey}`,
-        newValue: newValue,
-        oldValue: oldData,
+        t: 'worksheets',
+        k: `${id}.${newKey}`,
+        n: newValue,
+        o: oldData,
       });
     }
   }
@@ -467,17 +467,17 @@ export class Model implements IModel {
       delete sheetData[key];
 
       this.history.push({
-        type: 'worksheets',
-        path: `${id}.${key}`,
-        newValue: DELETE_FLAG,
-        oldValue: newValue,
+        t: 'worksheets',
+        k: `${id}.${key}`,
+        n: DELETE_FLAG,
+        o: newValue,
       });
 
       this.history.push({
-        type: 'worksheets',
-        path: `${id}.${newKey}`,
-        newValue: newValue,
-        oldValue: oldValue,
+        t: 'worksheets',
+        k: `${id}.${newKey}`,
+        n: newValue,
+        o: oldValue,
       });
     }
   }
@@ -495,10 +495,10 @@ export class Model implements IModel {
           item.fromCol = 0;
         }
         this.history.push({
-          type: 'drawings',
-          path: `${uuid}.fromCol`,
-          newValue: item.fromCol,
-          oldValue,
+          t: 'drawings',
+          k: `${uuid}.fromCol`,
+          n: item.fromCol,
+          o: oldValue,
         });
       }
       if (item.type === 'chart' && item.chartRange!.col >= colIndex) {
@@ -515,17 +515,17 @@ export class Model implements IModel {
             item.chartRange!.colCount = 1;
           }
           this.history.push({
-            type: 'drawings',
-            path: `${uuid}.chartRange.colCount`,
-            newValue: item.chartRange!.col,
-            oldValue: oldColCount,
+            t: 'drawings',
+            k: `${uuid}.chartRange.colCount`,
+            n: item.chartRange!.col,
+            o: oldColCount,
           });
         }
         this.history.push({
-          type: 'drawings',
-          path: `${uuid}.chartRange.col`,
-          newValue: item.chartRange!.col,
-          oldValue: oldCol,
+          t: 'drawings',
+          k: `${uuid}.chartRange.col`,
+          n: item.chartRange!.col,
+          o: oldCol,
         });
       }
     }
@@ -550,18 +550,18 @@ export class Model implements IModel {
 
         sheetData[newKey] = { ...newValue };
         this.history.push({
-          type: 'worksheets',
-          path: `${id}.${newKey}`,
-          newValue: newValue,
-          oldValue: oldValue,
+          t: 'worksheets',
+          k: `${id}.${newKey}`,
+          n: newValue,
+          o: oldValue,
         });
       }
       delete sheetData[key];
       this.history.push({
-        type: 'worksheets',
-        path: `${id}.${key}`,
-        newValue: DELETE_FLAG,
-        oldValue: newValue,
+        t: 'worksheets',
+        k: `${id}.${key}`,
+        n: DELETE_FLAG,
+        o: newValue,
       });
     }
   }
@@ -579,10 +579,10 @@ export class Model implements IModel {
           item.fromRow = 0;
         }
         this.history.push({
-          type: 'drawings',
-          path: `${uuid}.fromRow`,
-          newValue: item.fromRow,
-          oldValue,
+          t: 'drawings',
+          k: `${uuid}.fromRow`,
+          n: item.fromRow,
+          o: oldValue,
         });
       }
       if (item.type === 'chart' && item.chartRange!.row >= rowIndex) {
@@ -599,17 +599,17 @@ export class Model implements IModel {
             item.chartRange!.rowCount = 1;
           }
           this.history.push({
-            type: 'drawings',
-            path: `${uuid}.chartRange.rowCount`,
-            newValue: item.chartRange!.row,
-            oldValue: oldRowCount,
+            t: 'drawings',
+            k: `${uuid}.chartRange.rowCount`,
+            n: item.chartRange!.row,
+            o: oldRowCount,
           });
         }
         this.history.push({
-          type: 'drawings',
-          path: `${uuid}.chartRange.row`,
-          newValue: item.chartRange!.row,
-          oldValue: oldRow,
+          t: 'drawings',
+          k: `${uuid}.chartRange.row`,
+          n: item.chartRange!.row,
+          o: oldRow,
         });
       }
     }
@@ -633,18 +633,18 @@ export class Model implements IModel {
         const oldValue = sheetData[newKey] ? { ...sheetData[newKey] } : {};
         sheetData[newKey] = { ...newValue };
         this.history.push({
-          type: 'worksheets',
-          path: `${id}.${newKey}`,
-          newValue: newValue,
-          oldValue: oldValue,
+          t: 'worksheets',
+          k: `${id}.${newKey}`,
+          n: newValue,
+          o: oldValue,
         });
       }
       delete sheetData[key];
       this.history.push({
-        type: 'worksheets',
-        path: `${id}.${key}`,
-        newValue: DELETE_FLAG,
-        oldValue: newValue,
+        t: 'worksheets',
+        k: `${id}.${key}`,
+        n: DELETE_FLAG,
+        o: newValue,
       });
     }
   }
@@ -665,10 +665,10 @@ export class Model implements IModel {
           };
       this.customWidth[key] = newData;
       this.history.push({
-        type: 'customWidth',
-        path: key,
-        newValue: { ...newData },
-        oldValue: { ...old },
+        t: 'customWidth',
+        k: key,
+        n: { ...newData },
+        o: { ...old },
       });
     }
   }
@@ -713,10 +713,10 @@ export class Model implements IModel {
       return;
     }
     this.history.push({
-      type: 'customWidth',
-      path: key,
-      newValue: newData,
-      oldValue: this.customWidth[key] ? this.customWidth[key] : DELETE_FLAG,
+      t: 'customWidth',
+      k: key,
+      n: newData,
+      o: this.customWidth[key] ? this.customWidth[key] : DELETE_FLAG,
     });
   }
 
@@ -737,10 +737,10 @@ export class Model implements IModel {
           };
       this.customHeight[key] = newData;
       this.history.push({
-        type: 'customHeight',
-        path: key,
-        newValue: newData,
-        oldValue: old,
+        t: 'customHeight',
+        k: key,
+        n: newData,
+        o: old,
       });
     }
   }
@@ -785,10 +785,10 @@ export class Model implements IModel {
       return;
     }
     this.history.push({
-      type: 'customHeight',
-      path: key,
-      newValue: newData,
-      oldValue: this.customHeight[key] ? this.customHeight[key] : DELETE_FLAG,
+      t: 'customHeight',
+      k: key,
+      n: newData,
+      o: this.customHeight[key] ? this.customHeight[key] : DELETE_FLAG,
     });
   }
   canRedo(): boolean {
@@ -836,19 +836,19 @@ export class Model implements IModel {
         : {};
       currentSheetData[path] = { ...newValue };
       this.history.push({
-        type: 'worksheets',
-        path: `${id}.${path}`,
-        newValue: newValue,
-        oldValue: oldValue,
+        t: 'worksheets',
+        k: `${id}.${path}`,
+        n: newValue,
+        o: oldValue,
       });
 
       if (isCut) {
         delete fromSheetData[oldPath];
         this.history.push({
-          type: 'worksheets',
-          path: `${realSheetId}.${oldPath}`,
-          newValue: DELETE_FLAG,
-          oldValue: newValue,
+          t: 'worksheets',
+          k: `${realSheetId}.${oldPath}`,
+          n: DELETE_FLAG,
+          o: newValue,
         });
       }
       return false;
@@ -862,20 +862,20 @@ export class Model implements IModel {
     delete this.worksheets[id];
 
     this.history.push({
-      type: 'worksheets',
-      path: id,
-      newValue: DELETE_FLAG,
-      oldValue: oldSheetData,
+      t: 'worksheets',
+      k: id,
+      n: DELETE_FLAG,
+      o: oldSheetData,
     });
 
     for (const [key, value] of Object.entries(this.mergeCells)) {
       if (value.sheetId === id) {
         delete this.mergeCells[key];
         this.history.push({
-          type: 'mergeCells',
-          path: key,
-          newValue: DELETE_FLAG,
-          oldValue: value,
+          t: 'mergeCells',
+          k: key,
+          n: DELETE_FLAG,
+          o: value,
         });
       }
     }
@@ -884,10 +884,10 @@ export class Model implements IModel {
       if (value.sheetId === id) {
         delete this.drawings[key];
         this.history.push({
-          type: 'drawings',
-          path: key,
-          newValue: DELETE_FLAG,
-          oldValue: value,
+          t: 'drawings',
+          k: key,
+          n: DELETE_FLAG,
+          o: value,
         });
       }
     }
@@ -896,10 +896,10 @@ export class Model implements IModel {
       if (key.startsWith(id)) {
         delete this.customHeight[key];
         this.history.push({
-          type: 'customHeight',
-          path: key,
-          newValue: DELETE_FLAG,
-          oldValue: value,
+          t: 'customHeight',
+          k: key,
+          n: DELETE_FLAG,
+          o: value,
         });
       }
     }
@@ -908,10 +908,10 @@ export class Model implements IModel {
       if (key.startsWith(id)) {
         delete this.customWidth[key];
         this.history.push({
-          type: 'customWidth',
-          path: key,
-          newValue: DELETE_FLAG,
-          oldValue: value,
+          t: 'customWidth',
+          k: key,
+          n: DELETE_FLAG,
+          o: value,
         });
       }
     }
@@ -920,10 +920,10 @@ export class Model implements IModel {
       if (key.startsWith(id)) {
         delete this.definedNames[key];
         this.history.push({
-          type: 'definedNames',
-          path: key,
-          newValue: DELETE_FLAG,
-          oldValue: value,
+          t: 'definedNames',
+          k: key,
+          n: DELETE_FLAG,
+          o: value,
         });
       }
     }
@@ -959,24 +959,24 @@ export class Model implements IModel {
 
     if (oldName) {
       this.history.push({
-        type: 'definedNames',
-        path: name,
-        newValue: result,
-        oldValue: DELETE_FLAG,
+        t: 'definedNames',
+        k: name,
+        n: result,
+        o: DELETE_FLAG,
       });
 
       this.history.push({
-        type: 'definedNames',
-        path: oldName,
-        newValue: DELETE_FLAG,
-        oldValue: result,
+        t: 'definedNames',
+        k: oldName,
+        n: DELETE_FLAG,
+        o: result,
       });
     } else {
       this.history.push({
-        type: 'definedNames',
-        path: name,
-        newValue: result,
-        oldValue: DELETE_FLAG,
+        t: 'definedNames',
+        k: name,
+        n: result,
+        o: DELETE_FLAG,
       });
     }
   }
@@ -1000,10 +1000,10 @@ export class Model implements IModel {
     sheetData[key].value = newValue;
 
     this.history.push({
-      type: 'worksheets',
-      path: `${id}.${key}.value`,
-      newValue: newValue,
-      oldValue: oldValue,
+      t: 'worksheets',
+      k: `${id}.${key}.value`,
+      n: newValue,
+      o: oldValue,
     });
   }
   private setCellFormula(formula: string, range: Coordinate): void {
@@ -1021,10 +1021,10 @@ export class Model implements IModel {
     sheetData[key].formula = formula;
 
     this.history.push({
-      type: 'worksheets',
-      path: `${id}.${key}.formula`,
-      newValue: formula,
-      oldValue: oldFormula,
+      t: 'worksheets',
+      k: `${id}.${key}.formula`,
+      n: formula,
+      o: oldFormula,
     });
   }
   private computeAllCell() {
@@ -1040,10 +1040,10 @@ export class Model implements IModel {
           if (newValue !== oldValue) {
             data.value = newValue;
             this.history.push({
-              type: 'worksheets',
-              path: `${key}.${k}.value`,
-              newValue,
-              oldValue,
+              t: 'worksheets',
+              k: `${key}.${k}.value`,
+              n: newValue,
+              o: oldValue,
             });
           }
         }
@@ -1178,10 +1178,10 @@ export class Model implements IModel {
       sheetData[key].style[k] = newValue;
 
       this.history.push({
-        type: 'worksheets',
-        path: `${id}.${key}.style.${k}`,
-        newValue: newValue,
-        oldValue: oldValue === undefined ? DELETE_FLAG : oldValue,
+        t: 'worksheets',
+        k: `${id}.${key}.style.${k}`,
+        n: newValue,
+        o: oldValue === undefined ? DELETE_FLAG : oldValue,
       });
     }
   }
@@ -1200,10 +1200,10 @@ export class Model implements IModel {
     sheetData[key].style = style;
 
     this.history.push({
-      type: 'worksheets',
-      path: `${id}.${key}.style`,
-      newValue: style,
-      oldValue: oldStyle,
+      t: 'worksheets',
+      k: `${id}.${key}.style`,
+      n: style,
+      o: oldStyle,
     });
   }
   getFloatElementList(sheetId: string): FloatElement[] {
@@ -1241,10 +1241,10 @@ export class Model implements IModel {
     }
     this.drawings[data.uuid] = data;
     this.history.push({
-      type: 'drawings',
-      path: data.uuid,
-      newValue: data,
-      oldValue: DELETE_FLAG,
+      t: 'drawings',
+      k: data.uuid,
+      n: data,
+      o: DELETE_FLAG,
     });
   }
   updateFloatElement(uuid: string, value: Partial<FloatElement>) {
@@ -1260,10 +1260,10 @@ export class Model implements IModel {
         // @ts-ignore
         item[key] = value[key];
         this.history.push({
-          type: 'drawings',
-          path: `${uuid}.${key}`,
-          newValue: item[key],
-          oldValue: oldValue,
+          t: 'drawings',
+          k: `${uuid}.${key}`,
+          n: item[key],
+          o: oldValue,
         });
       }
     }
@@ -1275,10 +1275,10 @@ export class Model implements IModel {
     }
     delete this.drawings[uuid];
     this.history.push({
-      type: 'drawings',
-      path: uuid,
-      newValue: DELETE_FLAG,
-      oldValue: oldData,
+      t: 'drawings',
+      k: uuid,
+      n: DELETE_FLAG,
+      o: oldData,
     });
   }
   getMergeCells(sheetId?: string): IRange[] {
@@ -1296,10 +1296,10 @@ export class Model implements IModel {
       assert(!this.mergeCells[ref], 'The merging cell is duplicate');
       this.mergeCells[ref] = range;
       this.history.push({
-        type: 'mergeCells',
-        path: ref,
-        newValue: range,
-        oldValue: DELETE_FLAG,
+        t: 'mergeCells',
+        k: ref,
+        n: range,
+        o: DELETE_FLAG,
       });
     }
   }
@@ -1317,10 +1317,10 @@ export class Model implements IModel {
     delete this.mergeCells[ref];
 
     this.history.push({
-      type: 'mergeCells',
-      path: ref,
-      newValue: DELETE_FLAG,
-      oldValue: oldRange,
+      t: 'mergeCells',
+      k: ref,
+      n: DELETE_FLAG,
+      o: oldRange,
     });
   }
   emitChange(dataset: Set<ChangeEventType>) {

@@ -15,3 +15,4 @@ export * from './theme';
 export * from './font';
 export * from './event';
 export * from './saveAs';
+export * from './color';

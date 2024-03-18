@@ -41,7 +41,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = ({
         <MenuItem testId="menubar-import-xlsx">
           <input
             type="file"
-            style={{ display: 'none' }}
+            hidden
             onChange={handleImport}
             accept=".xlsx"
             ref={ref}
