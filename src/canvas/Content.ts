@@ -77,11 +77,11 @@ export class Content implements ContentView {
         const size = renderCellData(controller, ctx, rowIndex, colIndex);
         rowMap.set(
           rowIndex,
-          Math.max(rowMap.get(rowIndex) || CELL_HEIGHT, size.height),
+          Math.max(rowMap.get(rowIndex) || 0, CELL_HEIGHT, size.height),
         );
         colMap.set(
           colIndex,
-          Math.max(colMap.get(colIndex) || CELL_WIDTH, size.width),
+          Math.max(colMap.get(colIndex) || 0, CELL_WIDTH, size.width),
         );
       }
     }

@@ -700,22 +700,18 @@ export class Model implements IModel {
     const id = sheetId || this.currentSheetId;
     const key = getCustomWidthOrHeightKey(id, col);
 
-    const data = this.customWidth[key];
-    if (data && data.len === width) {
+    const oldData = this.getColWidth(col, sheetId);
+    if (oldData.len === width) {
       return;
     }
 
-    const newData = data || {
-      len: CELL_WIDTH,
-      isHide: false,
-    };
+    const newData = { ...oldData };
 
     newData.len = width;
+    this.customWidth[key] = newData;
     if (!_isChanged) {
-      this.customWidth[key] = newData;
       return;
     }
-    this.customWidth[key] = newData;
     this.history.push({
       type: 'customWidth',
       path: key,
@@ -777,25 +773,21 @@ export class Model implements IModel {
     const id = sheetId || this.currentSheetId;
     const key = getCustomWidthOrHeightKey(id, row);
 
-    const oldData = this.customHeight[key];
-    if (oldData && oldData.len === height) {
+    const oldData = this.getRowHeight(row, sheetId);
+    if (oldData.len === height) {
       return;
     }
 
-    const data = oldData || {
-      len: HIDE_CELL,
-      isHide: false,
-    };
-    data.len = height;
+    const newData = { ...oldData };
+    newData.len = height;
+    this.customHeight[key] = newData;
     if (!_isChanged) {
-      this.customHeight[key] = data;
       return;
     }
-    this.customHeight[key] = data;
     this.history.push({
       type: 'customHeight',
       path: key,
-      newValue: data,
+      newValue: newData,
       oldValue: this.customHeight[key] ? this.customHeight[key] : DELETE_FLAG,
     });
   }

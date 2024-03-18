@@ -34,15 +34,9 @@ export function measureText(
     return measureTextMap.get(mapKey)!;
   }
   const text = ctx.measureText(char);
-  const {
-    actualBoundingBoxLeft,
-    actualBoundingBoxRight,
-    actualBoundingBoxAscent,
-    actualBoundingBoxDescent,
-  } = text;
-  const other = actualBoundingBoxLeft + actualBoundingBoxRight;
+  const { actualBoundingBoxAscent, actualBoundingBoxDescent } = text;
   const h = actualBoundingBoxAscent + actualBoundingBoxDescent;
-  const w = Math.max(other, text.width);
+  const w = text.width;
   const width = Math.ceil(w / dpr());
   const height = Math.ceil(h / dpr());
   const result = { width, height };
@@ -107,7 +101,7 @@ function drawUnderlineData(
   if (style?.underline) {
     let pointList: Point[] = [];
     const isDouble = style?.underline === EUnderLine.DOUBLE;
-    const t = Math.floor(y + textHeight * (isDouble ? 0.9 : 0.8));
+    const t = Math.floor(y + textHeight);
     if (isNum) {
       pointList = [
         [x - textWidth, t],
@@ -220,30 +214,39 @@ export function renderCell(
   if (texts.length === 0) {
     return result;
   }
-  const x = left + (isNum ? width : 0);
+
   if (style?.underline) {
     ctx.strokeStyle = fillStyle;
   }
 
   const textHeight = Math.ceil(fontSize * theme.lineHeight);
+  const lineGap = Math.ceil((fontSize * (theme.lineHeight - 1)) / 2);
+  const x = left + (isNum ? width - lineGap : lineGap);
   result.height = textHeight;
   if (style?.isWrapText) {
-    const gap = Math.ceil(textHeight / 2);
-    let y = top + gap;
-    result.height = 0;
+    result.height = lineGap * 2;
+    let y = top + result.height;
     let line = '';
     let textWidth = 0;
     let h = 0;
     for (let i = 0; i < texts.length; i++) {
       const testLine = line + texts[i];
       const size = measureText(ctx, testLine);
-      if (size.width > width && i > 0) {
-        result.height += textHeight;
-        result.width = Math.max(textWidth, result.width);
-        fillText(ctx, line, x, y);
+      if (size.width > width) {
+        y += lineGap;
+        if (i === 0) {
+          textWidth = size.width;
+          h = size.height;
+          fillText(ctx, texts[i], x, y);
+          line = '';
+        } else {
+          fillText(ctx, line, x, y);
+          line = texts[i];
+        }
         drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
-        y += textHeight;
-        line = texts[i];
+        y += h + lineGap;
+        result.height += h + lineGap * 2;
+        result.width = Math.max(textWidth, result.width);
       } else {
         textWidth = size.width;
         h = size.height;
@@ -251,29 +254,39 @@ export function renderCell(
       }
     }
     if (line) {
-      result.height += textHeight;
+      result.height += h + lineGap;
       result.width = Math.max(textWidth, result.width);
       fillText(ctx, line, x, y);
       drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
     }
+    result.width += lineGap * 2;
   } else {
+    let line = '';
     let textWidth = 0;
-    const textData: string[] = [];
-    let t = width;
+    let h = 0;
+
     for (let i = 0; i < texts.length; i++) {
-      const size = measureText(ctx, texts[i]);
-      if (size.width < t || i <= 0) {
-        t -= size.width;
-        textData.push(texts[i]);
-        textWidth += size.width;
+      const testLine = line + texts[i];
+      const size = measureText(ctx, testLine);
+      if (size.width > width) {
+        if (i === 0) {
+          textWidth = size.width;
+          h = size.height;
+          line = testLine;
+        }
+        break;
+      } else {
+        textWidth = size.width;
+        h = size.height;
+        line = testLine;
       }
     }
-
-    const h = Math.max(textHeight, height);
-    const y = top + h / 2;
-    fillText(ctx, textData.join(''), x, y);
+    const t = h > height ? h : height;
+    const y = top + t / 2;
+    result.height = h;
+    fillText(ctx, line, x, y);
     drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
-    result.width = textWidth;
+    result.width = textWidth + lineGap * 2;
   }
 
   return result;
