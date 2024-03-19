@@ -13,7 +13,7 @@
     "type-check": "npx tsc",
     "postinstall": "node ./post-install.js",
     "prebuild": "npm run postinstall",
-    "e2e": "jest --config ./scripts/e2e-jest.config.js --forceExit --detectOpenHandles",
+    "e2e": "npx playwright test",
     "lint": "npx oxlint@latest && eslint --fix --quiet --ext  .ts,.tsx ./",
     "update-md": "node ./scripts/update-md.js",
     "prepare": "husky"
@@ -27,8 +27,10 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
+    "@playwright/test": "1.42.1",
     "@testing-library/react": "14.2.1",
     "@types/jest": "29.5.12",
+    "@types/node": "20.11.29",
     "@types/react": "18.2.65",
     "@types/react-dom": "18.2.22",
     "@typescript-eslint/eslint-plugin": "7.2.0",

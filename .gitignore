@@ -12,3 +12,7 @@ lib
 output
 port.txt
 *.html
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

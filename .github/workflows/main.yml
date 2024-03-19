@@ -7,12 +7,13 @@ on:
   - pull_request
 jobs:
   build:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: lts/*
       - name: Test
         run: |
           npm install
@@ -21,6 +22,8 @@ jobs:
           npm run coverage
       - name: Upload coverage
         uses: codecov/codecov-action@v3
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
       - name: E2E
         run: npm run e2e
       - name: Build

@@ -8,6 +8,7 @@ interface Props {
   controller: IController;
   initValue: string;
   style: CSSProperties | undefined;
+  testId?: string;
 }
 export function getDisplayStyle(
   style: CellStoreType,
@@ -74,6 +75,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = ({
   controller,
   initValue,
   style,
+  testId,
 }) => {
   const ref = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -99,6 +101,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = ({
       onKeyDown={handleKeyDown}
       type="text"
       style={style}
+      data-testid={testId}
     />
   );
 };

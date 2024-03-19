@@ -47,6 +47,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
             controller={controller}
             initValue={editorValue}
             style={getEditorStyle(activeCell, editorStatus)}
+            testId="formula-editor"
           />
         ) : null}
         <div
