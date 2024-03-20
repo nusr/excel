@@ -81,6 +81,14 @@ const MOCK_MODEL: WorkBookJSON = {
       rowCount: DEFAULT_ROW_COUNT,
       sort: 6,
     },
+    '7': {
+      sheetId: '7',
+      name: 'formula',
+      isHide: false,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      sort: 7,
+    },
   },
   worksheets: {
     '1': {
@@ -207,6 +215,29 @@ const MOCK_MODEL: WorkBookJSON = {
       },
       '0_10': {
         value: '🌷🎁💩😜👍🏳️‍🌈',
+      },
+    },
+    '7': {
+      '0_0': {
+        formula: '=SUM(1,2)',
+      },
+      '0_1': {
+        value: 'test',
+      },
+      '0_2': {
+        formula: '=CONCATENATE(A1,B1)',
+      },
+      '0_3': {
+        formula: '=UNICODE("测试")',
+      },
+      '1_0': {
+        formula: '=PI()',
+      },
+      '2_0': {
+        formula: '=E()',
+      },
+      '3_0': {
+        formula: '=E()*PI()',
       },
     },
   },

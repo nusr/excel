@@ -259,6 +259,7 @@ export function initCanvas(controller: IController): () => void {
     'range',
     'sheetList',
     'floatElement',
+    'cellValue',
   ]);
   handleStateChange(changeSet, controller);
   resize(changeSet);

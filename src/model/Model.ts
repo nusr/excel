@@ -75,10 +75,7 @@ export class Model implements IModel {
     this.history = new History({
       undo: (item: ICommandItem) => {
         if (item.t === 'currentSheetId') {
-          if (
-            !this.workbook[item.o] ||
-            this.workbook[item.o].isHide
-          ) {
+          if (!this.workbook[item.o] || this.workbook[item.o].isHide) {
             this.currentSheetId = this.getSheetId();
           } else {
             this.currentSheetId = item.o;
@@ -90,10 +87,7 @@ export class Model implements IModel {
       },
       redo: (item: ICommandItem) => {
         if (item.t === 'currentSheetId') {
-          if (
-            !this.workbook[item.n] ||
-            this.workbook[item.n].isHide
-          ) {
+          if (!this.workbook[item.n] || this.workbook[item.n].isHide) {
             this.currentSheetId = this.getSheetId();
           } else {
             this.currentSheetId = item.n;
@@ -314,7 +308,11 @@ export class Model implements IModel {
     this.drawings = drawings;
     this.rangeMap = rangeMap;
     this.worksheets = worksheets;
-    this.currentSheetId = currentSheetId || this.getSheetId();
+    if (workbook[currentSheetId] && !workbook[currentSheetId].isHide) {
+      this.currentSheetId = currentSheetId;
+    } else {
+      this.currentSheetId = this.getSheetId();
+    }
     this.history.clear(true);
   };
   toJSON = (): WorkBookJSON => {
