@@ -260,6 +260,13 @@ export function initCanvas(controller: IController): () => void {
     'sheetList',
     'floatElement',
     'cellValue',
+    'row',
+    'col',
+    'cellStyle',
+    'defineName',
+    'mergeCell',
+    'undoRedo',
+    'antLine',
   ]);
   handleStateChange(changeSet, controller);
   resize(changeSet);

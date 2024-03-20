@@ -7,11 +7,11 @@ function getPort(): number {
   const check = fs.existsSync(filePath);
   if (check) {
     const portData = fs.readFileSync(filePath, 'utf-8');
+    fs.unlinkSync(filePath);
     const t = parseInt(portData, 10);
     if (!isNaN(t)) {
       return t;
     }
-    fs.unlinkSync(filePath);
   }
   return 8000;
 }
