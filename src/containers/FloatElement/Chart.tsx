@@ -138,102 +138,102 @@ const radarOptions = {
 };
 const radarPlugins = [Filler];
 
-export const Chart: React.FunctionComponent<FloatElementItem> = memo(
-  (props) => {
-    const { chartType, width, height, labels, datasets, uuid, title } = props;
-    const commonData = {
-      labels,
-      datasets: datasets.map((v, i) => ({
-        ...v,
-        backgroundColor: DEBUG_COLOR_LIST[i + 6],
-      })),
-    };
-    const extra = {
-      width,
-      height,
-      redraw: false,
-      uuid,
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: title,
-            padding: {
-              top: 16,
-              bottom: 16,
-            },
-            font: {
-              size: 14,
-              weight: 'normal' as const,
-            },
+const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
+  const { chartType, width, height, labels, datasets, uuid, title } = props;
+  const commonData = {
+    labels,
+    datasets: datasets.map((v, i) => ({
+      ...v,
+      backgroundColor: DEBUG_COLOR_LIST[i + 6],
+    })),
+  };
+  const extra = {
+    width,
+    height,
+    redraw: false,
+    uuid,
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: title,
+          padding: {
+            top: 16,
+            bottom: 16,
           },
-          legend: {
-            display: true,
-            position: 'bottom' as const,
+          font: {
+            size: 14,
+            weight: 'normal' as const,
           },
         },
+        legend: {
+          display: true,
+          position: 'bottom' as const,
+        },
       },
+    },
+  };
+  let node = null;
+  if (chartType === 'line') {
+    node = <Line {...extra} data={commonData} />;
+  } else if (chartType === 'bar') {
+    node = <Bar {...extra} data={commonData} />;
+  } else if (chartType === 'pie') {
+    node = <Pie {...extra} data={commonData} />;
+  } else if (chartType === 'radar') {
+    const data = {
+      labels,
+      datasets: datasets.map((v, i) => {
+        const c = DEBUG_COLOR_LIST[i];
+        return {
+          ...v,
+          fill: true,
+          borderColor: c,
+          pointBackgroundColor: c,
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: c,
+          backgroundColor: DEBUG_COLOR_LIST[i + 6],
+        };
+      }),
     };
-    let node = null;
-    if (chartType === 'line') {
-      node = <Line {...extra} data={commonData} />;
-    } else if (chartType === 'bar') {
-      node = <Bar {...extra} data={commonData} />;
-    } else if (chartType === 'pie') {
-      node = <Pie {...extra} data={commonData} />;
-    } else if (chartType === 'radar') {
-      const data = {
-        labels,
-        datasets: datasets.map((v, i) => {
-          const c = DEBUG_COLOR_LIST[i];
-          return {
-            ...v,
-            fill: true,
-            borderColor: c,
-            pointBackgroundColor: c,
-            pointBorderColor: '#fff',
-            pointHoverBackgroundColor: '#fff',
-            pointHoverBorderColor: c,
-            backgroundColor: DEBUG_COLOR_LIST[i + 6],
-          };
-        }),
-      };
-      node = (
-        <Radar
-          {...extra}
-          options={radarOptions}
-          plugins={radarPlugins}
-          data={data}
-        />
-      );
-    } else if (chartType === 'scatter') {
-      const data = {
-        datasets: datasets.map((v, i) => {
-          return {
-            label: v.label,
-            data: v.data.map((t, i) => ({ y: t, x: parseNumber(labels[i]) })),
-            backgroundColor: DEBUG_COLOR_LIST[i + 6],
-          };
-        }),
-      };
-      node = <Scatter {...extra} data={data} />;
-    } else if (chartType === 'polarArea') {
-      const data = {
-        labels,
-        datasets: datasets.map((v) => {
-          const list = Array.from({ length: v.data.length })
-            .fill('')
-            .map((_, i) => DEBUG_COLOR_LIST[i + 6]);
-          return {
-            ...v,
-            backgroundColor: list,
-          };
-        }),
-      };
-      node = <PolarArea {...extra} data={data} />;
-    } else {
-      console.error('not support chart type', chartType);
-    }
-    return node;
-  },
-);
+    node = (
+      <Radar
+        {...extra}
+        options={radarOptions}
+        plugins={radarPlugins}
+        data={data}
+      />
+    );
+  } else if (chartType === 'scatter') {
+    const data = {
+      datasets: datasets.map((v, i) => {
+        return {
+          label: v.label,
+          data: v.data.map((t, i) => ({ y: t, x: parseNumber(labels[i]) })),
+          backgroundColor: DEBUG_COLOR_LIST[i + 6],
+        };
+      }),
+    };
+    node = <Scatter {...extra} data={data} />;
+  } else if (chartType === 'polarArea') {
+    const data = {
+      labels,
+      datasets: datasets.map((v) => {
+        const list = Array.from({ length: v.data.length })
+          .fill('')
+          .map((_, i) => DEBUG_COLOR_LIST[i + 6]);
+        return {
+          ...v,
+          backgroundColor: list,
+        };
+      }),
+    };
+    node = <PolarArea {...extra} data={data} />;
+  } else {
+    console.error('not support chart type', chartType);
+  }
+  return node;
+});
+Chart.displayName = 'Chart';
+export default Chart;

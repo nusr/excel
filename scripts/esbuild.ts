@@ -22,6 +22,7 @@ const { values: envConfig } = parseArgs({
 });
 
 const nodeEnv = envConfig.nodeEnv || 'production';
+const isDev = nodeEnv === 'development';
 
 const licenseText = fs.readFileSync(
   path.join(process.cwd(), 'LICENSE'),
@@ -76,6 +77,11 @@ function buildUMD(filePath: string): BuildOptions {
 
 function buildBrowserConfig(options: BuildOptions): BuildOptions {
   const minify = !!options.outfile?.includes('.min.');
+  const namespace = 'external-package';
+  const externals: Record<string, string> = {
+    react: 'window.React',
+    'react-dom': 'window.ReactDOM',
+  };
   const realOptions: BuildOptions = {
     bundle: true,
     entryPoints: ['src/index.tsx'],
@@ -92,6 +98,37 @@ function buildBrowserConfig(options: BuildOptions): BuildOptions {
     minify,
     metafile: minify,
     logLevel: 'error',
+    plugins: [
+      {
+        name: namespace,
+        setup(build) {
+          build.onResolve(
+            {
+              filter: new RegExp(
+                '^(' + Object.keys(externals).join('|') + ')$',
+              ),
+            },
+            (args) => ({
+              path: args.path,
+              namespace: namespace,
+            }),
+          );
+
+          build.onLoad(
+            {
+              filter: /.*/,
+              namespace,
+            },
+            (args) => {
+              const contents = `module.exports = ${externals[args.path]}`;
+              return {
+                contents,
+              };
+            },
+          );
+        },
+      },
+    ],
   };
   Object.assign(realOptions, options);
 
@@ -106,6 +143,19 @@ function buildHtml() {
   fs.writeFileSync(
     path.join(distDir, 'index.html'),
     data.replace('process.env.NODE_ENV', JSON.stringify(nodeEnv)),
+  );
+  const version = isDev ? 'development' : 'production.min';
+  fs.copyFileSync(
+    path.join(__dirname, '..', `node_modules/react/umd/react.${version}.js`),
+    path.join(distDir, 'react.js'),
+  );
+  fs.copyFileSync(
+    path.join(
+      __dirname,
+      '..',
+      `node_modules/react-dom/umd/react-dom.${version}.js`,
+    ),
+    path.join(distDir, 'react-dom.js'),
   );
   const iconDir = path.join(__dirname, './icon');
   const resultDir = path.join(distDir, 'icon');
@@ -144,9 +194,6 @@ async function buildProd() {
       buildUMD(packageJson.main.replace('.js', '.min.js')),
     ].map(async (item) => {
       const result = await build(item);
-      // if (result.metafile) {
-      //   console.log(await analyzeMetafile(result.metafile));
-      // }
       return result;
     }),
   );
@@ -190,7 +237,7 @@ async function buildDev() {
 async function init() {
   deleteDir('lib');
   deleteDir('dist');
-  if (nodeEnv === 'development') {
+  if (isDev) {
     await buildDev();
   } else {
     await buildProd();

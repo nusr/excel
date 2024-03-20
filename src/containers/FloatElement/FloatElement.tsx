@@ -1,12 +1,12 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, lazy, Suspense } from 'react';
 import styles from './FloatElement.module.css';
 import { FloatElementItem } from '@/containers/store';
-import { Chart } from './Chart';
 import { FloatElementContextMenu } from './ContextMenu';
 import { DEFAULT_POSITION, classnames } from '@/util';
 import { ResizePosition } from './util';
 import { Icon } from '../components';
 import { IController, IWindowSize } from '@/types';
+import { Loading } from '../components';
 
 type FloatElementProps = FloatElementItem & {
   controller: IController;
@@ -15,6 +15,8 @@ type FloatElementProps = FloatElementItem & {
   pointerDown: (event: React.PointerEvent<HTMLDivElement>) => void;
   resizeDown: (event: React.PointerEvent<HTMLDivElement>) => void;
 };
+
+const Chart = lazy(() => import('./Chart'));
 
 export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
   (props) => {
@@ -59,7 +61,11 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
         />
       );
     } else if (type === 'chart') {
-      children = <Chart {...props} />;
+      children = (
+        <Suspense fallback={<Loading/>}>
+          <Chart {...props} />;
+        </Suspense>
+      );
     }
     if (!children) {
       return null;
