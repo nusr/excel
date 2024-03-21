@@ -223,7 +223,7 @@ export class MainCanvas {
     const mergeCells = controller.getMergeCells(controller.getCurrentSheetId());
     this.ctx.save();
     const range = this.controller.getActiveCell();
-    this.ctx.fillStyle = theme.backgroundColor;
+    this.ctx.fillStyle = theme.white;
     fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
     Object.assign(this.ctx, HEADER_STYLE);
     const pointList: Point[] = [];
@@ -270,7 +270,7 @@ export class MainCanvas {
     const range = this.controller.getActiveCell();
     const pointList: Point[] = [];
     this.ctx.save();
-    this.ctx.fillStyle = theme.backgroundColor;
+    this.ctx.fillStyle = theme.white;
     fillRect(this.ctx, headerSize.width, 0, width, headerSize.height);
     Object.assign(this.ctx, HEADER_STYLE);
 
@@ -306,7 +306,7 @@ export class MainCanvas {
   private renderTriangle(): void {
     const headerSize = this.controller.getHeaderSize();
     this.ctx.save();
-    this.ctx.fillStyle = theme.backgroundColor;
+    this.ctx.fillStyle = theme.white;
 
     fillRect(this.ctx, 0, 0, headerSize.width, headerSize.height);
     this.ctx.fillStyle = theme.triangleFillColor;

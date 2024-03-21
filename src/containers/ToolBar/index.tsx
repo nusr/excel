@@ -1,11 +1,11 @@
-import React, { useSyncExternalStore } from 'react';
+import React, { useSyncExternalStore, lazy, Suspense } from 'react';
 import {
   Icon,
   Button,
-  ColorPicker,
   Github,
   Select,
   FillColorIcon,
+  Loading,
 } from '../components';
 import {
   FONT_SIZE_LIST,
@@ -23,6 +23,7 @@ import {
 } from '@/containers/store';
 import { InsertFloatingPicture, InsertChart } from '../FloatElement';
 
+const ColorPicker = lazy(() => import('../components/ColorPicker'));
 interface Props {
   controller: IController;
 }
@@ -184,20 +185,24 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         title="Underline"
         onChange={(value) => setCellStyle({ underline: Number(value) })}
       />
-      <ColorPicker
-        key="fill-color"
-        color={fillColor}
-        onChange={(value) => setCellStyle({ fillColor: value })}
-      >
-        <FillColorIcon />
-      </ColorPicker>
-      <ColorPicker
-        key="font-color"
-        color={fontColor}
-        onChange={(value) => setCellStyle({ fontColor: value })}
-      >
-        <Icon name="fontColor" />
-      </ColorPicker>
+      <Suspense fallback={<Loading />}>
+        <ColorPicker
+          key="fill-color"
+          color={fillColor}
+          onChange={(value) => setCellStyle({ fillColor: value })}
+        >
+          <FillColorIcon />
+        </ColorPicker>
+      </Suspense>
+      <Suspense>
+        <ColorPicker
+          key="font-color"
+          color={fontColor}
+          onChange={(value) => setCellStyle({ fontColor: value })}
+        >
+          <Icon name="fontColor" />
+        </ColorPicker>
+      </Suspense>
       <Button
         active={isWrapText}
         onClick={() => setCellStyle({ isWrapText: !isWrapText })}

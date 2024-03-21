@@ -1,4 +1,4 @@
-import { ColorPicker } from '../ColorPicker';
+import ColorPicker from '../ColorPicker';
 import { cleanup, render } from '@testing-library/react';
 import React from 'react';
 

@@ -1,6 +1,11 @@
-export function classnames(...rest: Array<string | Record<string, unknown>>): string {
+export function classnames(
+  ...rest: Array<string | Record<string, unknown> | undefined>
+): string {
   let result = '';
   for (const temp of rest) {
+    if (temp === undefined) {
+      continue;
+    }
     if (typeof temp === 'string' && temp) {
       result += `${temp} `;
     }

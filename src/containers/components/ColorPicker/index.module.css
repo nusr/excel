@@ -2,32 +2,33 @@
   position: relative;
 }
 .color-picker-wrapper {
-  width: 228px;
+  width: 260px;
   position: absolute;
   top: 22px;
   left: 0;
   display: none;
   z-index: var(--highestZIndex);
+  padding: var(--padding);
+  background-color: var(--white);
+  border-radius: var(--borderRadius);
+  border: 1px solid var(--borderColor);
 }
 .color-picker-wrapper.show {
   display: block;
 }
 
 .color-picker-list {
-  display: flex;
-  flex-wrap: wrap;
-  border: 1px solid #ccc;
-  padding-top: 4px;
-  padding-left: 4px;
-  background-color: #fff;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: 4px;
 }
 .color-picker-item {
-  width: 16px;
-  height: 16px;
-  margin-bottom: 4px;
-  margin-right: 4px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  border: 1px solid #ddd;
+  border-radius: var(--borderRadius);
+  border: 1px solid var(--borderColor);
 }
 .no-fill.color-picker-item {
   width: auto;
@@ -47,4 +48,10 @@
 .color-picker-trigger.active {
   background-color: var(--buttonActiveColor);
   border-color: var(--activeBorderColor);
+}
+
+.reset {
+  width: 100%;
+  margin-top: var(--padding);
+  background-color: var(--white);
 }
