@@ -20,8 +20,6 @@ export class BaseStore<T> {
   // set plain object
   mergeState = (data: Partial<T>): void => {
     const newState: T = {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       ...this.state,
       ...data,
     };

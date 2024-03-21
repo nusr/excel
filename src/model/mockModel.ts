@@ -239,6 +239,9 @@ const MOCK_MODEL: WorkBookJSON = {
       '3_0': {
         formula: '=E()*PI()',
       },
+      '4_0': {
+        formula: '=SUM(1, SIN(PI()/2),3)',
+      },
     },
   },
 

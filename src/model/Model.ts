@@ -1166,9 +1166,7 @@ export class Model implements IModel {
     sheetData[key].style = sheetData[key].style || {};
     const keyList = Object.keys(style) as Array<keyof Partial<StyleType>>;
     for (const k of keyList) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const oldValue = sheetData[key].style[k];
+      const oldValue = sheetData[key]?.style?.[k];
 
       const newValue = style[k];
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
