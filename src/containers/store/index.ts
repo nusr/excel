@@ -6,3 +6,4 @@ export { scrollStore } from './scroll';
 export type { CellStoreType } from './activeCell';
 export { floatElementStore } from './floatElement';
 export type { FloatElementItem } from './floatElement';
+export type { SheetItem } from './sheetList';

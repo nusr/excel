@@ -10,11 +10,21 @@ interface PathItem {
 export interface BaseIconProps {
   className?: string;
   paths: PathItem[];
+  fill?: string;
 }
 
-export const BaseIcon: FunctionComponent<BaseIconProps> = ({ className = '', paths = [] }) => {
+export const BaseIcon: FunctionComponent<BaseIconProps> = ({
+  className = '',
+  paths = [],
+  fill = 'currentcolor',
+}) => {
   return (
-    <svg className={classnames(styles.baseIcon, className)} viewBox="0 0 1137 1024" aria-hidden>
+    <svg
+      fill={fill}
+      className={classnames(styles.baseIcon, className)}
+      viewBox="0 0 1137 1024"
+      aria-hidden
+    >
       {paths.map((item, i) => (
         <path d={item.d} key={i} fillOpacity={item['fill-opacity']} />
       ))}

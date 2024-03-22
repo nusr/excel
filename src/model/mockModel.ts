@@ -48,6 +48,7 @@ const MOCK_MODEL: WorkBookJSON = {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       sort: 2,
+      tabColor: '#FE4B4B',
     },
     '3': {
       sheetId: '3',
@@ -64,6 +65,7 @@ const MOCK_MODEL: WorkBookJSON = {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       sort: 4,
+      tabColor: '#CEF273',
     },
     '5': {
       sheetId: '5',
@@ -72,6 +74,7 @@ const MOCK_MODEL: WorkBookJSON = {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       sort: 5,
+      tabColor: '#76EFEF',
     },
     '6': {
       sheetId: '6',
@@ -80,6 +83,7 @@ const MOCK_MODEL: WorkBookJSON = {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       sort: 6,
+      tabColor: '#9E6DE3',
     },
     '7': {
       sheetId: '7',
@@ -88,6 +92,7 @@ const MOCK_MODEL: WorkBookJSON = {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       sort: 7,
+      tabColor: '#E7258F',
     },
   },
   worksheets: {

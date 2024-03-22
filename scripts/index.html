@@ -1,122 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Meta Description -->
-    <meta name="description" content="online spreadsheet" />
-    <!-- Standard favicon -->
 
-    <link
-      rel="apple-touch-icon"
-      sizes="57x57"
-      href="./icon/apple-icon-57x57.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="60x60"
-      href="./icon/apple-icon-60x60.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="72x72"
-      href="./icon/apple-icon-72x72.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="76x76"
-      href="./icon/apple-icon-76x76.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="114x114"
-      href="./icon/apple-icon-114x114.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="120x120"
-      href="./icon/apple-icon-120x120.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="144x144"
-      href="./icon/apple-icon-144x144.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="152x152"
-      href="./icon/apple-icon-152x152.png"
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="./icon/apple-icon-180x180.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="192x192"
-      href="./icon/android-icon-192x192.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="./icon/favicon-32x32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="96x96"
-      href="./icon/favicon-96x96.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="./icon/favicon-16x16.png"
-    />
-    <link rel="manifest" href="./icon/manifest.json" />
-    <meta name="msapplication-TileColor" content="#ffffff" />
-    <meta name="msapplication-TileImage" content="./icon/ms-icon-144x144.png" />
-    <meta name="theme-color" content="#ffffff" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Meta Description -->
+  <meta name="description" content="online spreadsheet" />
+  <!-- Standard favicon -->
 
-    <!-- To run the web application in full-screen -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="apple-touch-icon" sizes="57x57" href="./icon/apple-icon-57x57.png" />
+  <link rel="apple-touch-icon" sizes="60x60" href="./icon/apple-icon-60x60.png" />
+  <link rel="apple-touch-icon" sizes="72x72" href="./icon/apple-icon-72x72.png" />
+  <link rel="apple-touch-icon" sizes="76x76" href="./icon/apple-icon-76x76.png" />
+  <link rel="apple-touch-icon" sizes="114x114" href="./icon/apple-icon-114x114.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="./icon/apple-icon-120x120.png" />
+  <link rel="apple-touch-icon" sizes="144x144" href="./icon/apple-icon-144x144.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="./icon/apple-icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./icon/apple-icon-180x180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon/android-icon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./icon/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="./icon/favicon-96x96.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./icon/favicon-16x16.png" />
+  <link rel="manifest" href="./icon/manifest.json" />
+  <meta name="msapplication-TileColor" content="#ffffff" />
+  <meta name="msapplication-TileImage" content="./icon/ms-icon-144x144.png" />
+  <meta name="theme-color" content="#ffffff" />
 
-    <!-- Status Bar Style (see Supported Meta Tags below for available values) -->
-    <!-- Has no effect unless you have the previous meta tag -->
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <!-- To run the web application in full-screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
 
-    <link
-      rel="alternate"
-      href="https://github.com/nusr/excel"
-      hreflang="x-default"
-    />
+  <!-- Status Bar Style (see Supported Meta Tags below for available values) -->
+  <!-- Has no effect unless you have the previous meta tag -->
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
-    <title>Web Excel</title>
-    <link rel="stylesheet" href="./index.css" />
-  </head>
+  <link rel="alternate" href="https://github.com/nusr/excel" hreflang="x-default" />
 
-  <body>
-    <div id="root" class="root-container"></div>
-    <script src="./react.js" defer></script>
-    <script src="./react-dom.js" defer></script>
-    <script src="./index.js" type="module"></script>
-    <script>
-      window.onload = function () {
-        if (process.env.NODE_ENV === 'development') {
-          // esbuild hot reload
-          const eventSource = new EventSource('/esbuild');
-          eventSource.addEventListener('change', function () {
-            location.reload();
-          });
-          eventSource.onerror = function (error) {
-            console.log(error);
-            eventSource.close();
-          };
-        }
-      };
-    </script>
-  </body>
+  <title>Web Excel</title>
+  <link rel="stylesheet" href="./index.css" />
+</head>
+
+<body>
+  <div id="root" class="root-container"></div>
+  <script src="./react.js" defer></script>
+  <script src="./react-dom.js" defer></script>
+  <script src="./index.js" type="module" defer></script>
+  <script type="module">
+    import excel from './index.js';
+    const controller = excel.initExcel('root');
+    controller.fromJSON(excel.defaultModel)
+    excel.initSentry()
+  </script>
+  <script>
+    window.onload = function () {
+      if (process.env.NODE_ENV === 'development') {
+        // esbuild hot reload
+        const eventSource = new EventSource('/esbuild');
+        eventSource.addEventListener('change', function () {
+          location.reload();
+        });
+        eventSource.onerror = function (error) {
+          console.log(error);
+          eventSource.close();
+        };
+      }
+    };
+  </script>
+</body>
+
 </html>

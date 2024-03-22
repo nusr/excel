@@ -16,6 +16,7 @@ export type CellStoreType = Partial<StyleType> & {
   rowCount: number;
   colCount: number;
   sheetId: string;
+  tabColor: string;
 };
 
 const cellData: CellStoreType = {
@@ -31,6 +32,7 @@ const cellData: CellStoreType = {
   isMergeCell: false,
   rowCount: 1,
   colCount: 1,
+  tabColor: '',
   sheetId: '',
 };
 

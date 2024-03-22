@@ -20,7 +20,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
     sheetListStore.getSnapshot,
   );
   // filter hide sheet
-  const realSheetList = sheetList.filter((v) => !v.disabled);
+  const realSheetList = sheetList.filter((v) => !v.isHide);
   const { sheetId: currentSheetId } = useSyncExternalStore(
     activeCellStore.subscribe,
     activeCellStore.getSnapshot,
@@ -52,33 +52,47 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
     <div className={styles['sheet-bar-wrapper']}>
       <div className={styles['sheet-bar-list']} data-testid="sheet-bar-list">
         {realSheetList.map((item) => {
-          const isActive = currentSheetId === item.value;
+          const isActive = currentSheetId === item.sheetId;
           const showInput = isActive && editing;
+          const tabColor = item.tabColor || '';
           const cls = classnames(styles['sheet-bar-item'], {
             [styles['active']]: isActive,
           });
+          let style = undefined;
+          if (!isActive && !editing && tabColor) {
+            style = { backgroundColor: tabColor };
+          }
           return (
             <div
-              key={item.value}
+              key={item.sheetId}
               className={cls}
+              style={style}
               onContextMenu={handleContextMenu}
               onClick={() => {
                 setEditing(false);
-                controller.setCurrentSheetId(String(item.value));
+                controller.setCurrentSheetId(item.sheetId);
               }}
             >
               {showInput ? (
                 <input
                   className={styles['sheet-bar-input']}
-                  defaultValue={item.label}
+                  defaultValue={item.name}
                   onKeyDown={handleKeyDown}
                   type="text"
                   spellCheck
                 />
               ) : (
-                <span className={styles['sheet-bar-item-text']}>
-                  {item.label}
-                </span>
+                <React.Fragment>
+                  {isActive && tabColor && (
+                    <span
+                      className={styles['sheet-bar-item-color']}
+                      style={{ backgroundColor: tabColor }}
+                    />
+                  )}
+                  <span className={styles['sheet-bar-item-text']}>
+                    {item.name}
+                  </span>
+                </React.Fragment>
               )}
             </div>
           );
@@ -98,6 +112,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
           controller={controller}
           position={menuPosition}
           sheetList={sheetList}
+          currentSheetId={currentSheetId}
           hideMenu={() => setMenuPosition(DEFAULT_POSITION)}
           editSheetName={() => setEditing(true)}
         />

@@ -1,7 +1,8 @@
 import { BaseIcon } from './BaseIcon';
 
-export const FillColorIcon = () => {
+export const FillColorIcon = ({ fill }: { fill?: string }) => {
   return BaseIcon({
+    fill,
     paths: [
       {
         d: 'M0 0h1024v1024H0z',

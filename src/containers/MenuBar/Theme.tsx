@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
-import { Button } from '../components';
+import { Button, Icon } from '../components';
 import styles from './index.module.css';
 import { sizeConfig, darkColor, lightColor, setTheme, getTheme } from '@/util';
 import { ThemeType } from '@/types';
@@ -23,6 +23,8 @@ function updateCssVariable(value: ThemeType) {
   } else {
     setCssVariable(lightColor);
   }
+  document.documentElement.setAttribute("data-theme", value);
+
 }
 
 export const Theme: React.FunctionComponent<Props> = memo(({ toggleTheme }) => {
@@ -61,7 +63,7 @@ export const Theme: React.FunctionComponent<Props> = memo(({ toggleTheme }) => {
         onClick={() => handleClick(themeData)}
         className={styles['theme-button']}
       >
-        {themeData === 'light' ? 'Dark' : 'Light'}
+        <Icon name={themeData === 'light' ? 'moon' : 'sun'} />
       </Button>
     </div>
   );

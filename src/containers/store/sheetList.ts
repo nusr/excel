@@ -1,4 +1,9 @@
-import type { OptionItem } from '@/types';
+import type { WorksheetType } from '@/types';
 import { BaseStore } from './base';
 
-export const sheetListStore = new BaseStore<OptionItem[]>([]);
+export type SheetItem = Pick<
+  WorksheetType,
+  'sheetId' | 'isHide' | 'name' | 'tabColor'
+>;
+
+export const sheetListStore = new BaseStore<SheetItem[]>([]);

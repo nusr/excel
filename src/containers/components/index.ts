@@ -6,3 +6,4 @@ export * from './Dialog';
 export * from './Menu';
 export * from './Toast';
 export * from './Loading';
+export * from './ColorPicker';

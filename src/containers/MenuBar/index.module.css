@@ -11,5 +11,8 @@
   flex: 1;
 }
 .theme-button {
-  margin-right: 40px;
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

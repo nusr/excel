@@ -10,18 +10,26 @@ export interface ColorPickerProps {
   color: string;
   style?: CSSProperties;
   onChange: (value: string) => void;
+  position?: 'top' | 'bottom';
 }
 
-const ColorPicker: FunctionComponent<
+export const ColorPicker: FunctionComponent<
   React.PropsWithChildren<ColorPickerProps>
 > = (props) => {
-  const { style = {}, onChange, children, color } = props;
+  const { style = {}, onChange, children, color, position = 'bottom' } = props;
   const [visible, setVisible] = useState(false);
   const [ref] = useClickOutside(() => {
     setVisible(false);
   });
   return (
-    <div className={styles['color-picker']} style={style} ref={ref}>
+    <div
+      className={classnames(
+        styles['color-picker'],
+        position === 'top' ? styles['top'] : '',
+      )}
+      style={style}
+      ref={ref}
+    >
       <div
         className={styles['color-picker-trigger']}
         style={{ color }}
@@ -72,5 +80,3 @@ const ColorPicker: FunctionComponent<
   );
 };
 ColorPicker.displayName = 'ColorPicker';
-
-export default ColorPicker;

@@ -73,15 +73,11 @@ function getChartData(
 function updateActiveCell(controller: IController) {
   const { top } = controller.getDomRect();
   const { range: activeCell, isMerged } = controller.getActiveRange();
+  const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
+  const tabColor = controller.getSheetInfo(sheetId)?.tabColor || '';
   const cell = controller.getCell(activeCell);
   const defineName = controller.getDefineName(
-    new Range(
-      activeCell.row,
-      activeCell.col,
-      1,
-      1,
-      controller.getCurrentSheetId(),
-    ),
+    new Range(activeCell.row, activeCell.col, 1, 1, sheetId),
   );
   const cellSize = controller.getCellSize(activeCell);
   const cellPosition = controller.computeCellPosition(activeCell);
@@ -119,7 +115,7 @@ function updateActiveCell(controller: IController) {
     col: activeCell.col,
     rowCount: activeCell.rowCount,
     colCount: activeCell.colCount,
-    sheetId: activeCell.sheetId || controller.getCurrentSheetId(),
+    sheetId,
     value: cell?.value,
     formula: cell?.formula,
     isBold,
@@ -134,6 +130,7 @@ function updateActiveCell(controller: IController) {
     numberFormat,
     defineName,
     isMergeCell: isMerged,
+    tabColor,
   });
 }
 
@@ -151,7 +148,12 @@ const handleStateChange = (
   if (changeSet.has('sheetList')) {
     const sheetList = controller
       .getSheetList()
-      .map((v) => ({ value: v.sheetId, label: v.name, disabled: v.isHide }));
+      .map((v) => ({
+        sheetId: v.sheetId,
+        name: v.name,
+        isHide: v.isHide,
+        tabColor: v.tabColor,
+      }));
     sheetListStore.setState(sheetList);
   }
 

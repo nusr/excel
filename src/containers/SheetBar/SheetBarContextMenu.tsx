@@ -1,13 +1,15 @@
 import React, { useMemo } from 'react';
-import { Button, Select, info } from '../components';
+import { Button, Select, info, ColorPicker } from '../components';
 import { IController, OptionItem } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
+import { SheetItem } from '../store';
 
 interface Props {
   controller: IController;
   position: number;
-  sheetList: OptionItem[];
+  sheetList: SheetItem[];
+  currentSheetId: string;
   hideMenu: () => void;
   editSheetName: () => void;
 }
@@ -16,18 +18,22 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
   controller,
   position,
   sheetList,
+  currentSheetId,
   hideMenu,
   editSheetName,
 }) => {
   const [ref] = useClickOutside(() => {
     hideMenu();
   });
+  const tabColor = useMemo(() => {
+    return sheetList.find((v) => v.sheetId === currentSheetId)?.tabColor || '';
+  }, [sheetList, currentSheetId]);
   const hideSheetList: OptionItem[] = useMemo(() => {
     return sheetList
-      .filter((v) => v.disabled)
+      .filter((v) => v.isHide)
       .map((item) => ({
-        value: String(item.value),
-        label: item.label,
+        value: String(item.sheetId),
+        label: item.name,
         disabled: false,
       }));
   }, [sheetList]);
@@ -50,6 +56,10 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
         hideMenu();
       },
     });
+  };
+  const handleTabColorChange = (color: string) => {
+    controller.setTabColor(color);
+    hideMenu();
   };
   return (
     <div
@@ -91,13 +101,19 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
         Hide
       </Button>
       <Button
-        dataType="unhideSheet"
         className={styles['sheet-bar-unhide']}
         disabled={hideSheetList.length === 0}
         onClick={handleUnhide}
       >
         Unhide
       </Button>
+      <ColorPicker
+        color={tabColor}
+        onChange={handleTabColorChange}
+        position="top"
+      >
+        <Button className={styles['sheet-bar-unhide']}>Tab Color</Button>
+      </ColorPicker>
     </div>
   );
 };

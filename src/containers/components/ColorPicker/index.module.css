@@ -1,6 +1,7 @@
 .color-picker {
   position: relative;
 }
+
 .color-picker-wrapper {
   width: 260px;
   position: absolute;
@@ -12,6 +13,10 @@
   background-color: var(--white);
   border-radius: var(--borderRadius);
   border: 1px solid var(--borderColor);
+}
+.color-picker.top .color-picker-wrapper {
+  transform: translate(0, -100%);
+  left: 100%;
 }
 .color-picker-wrapper.show {
   display: block;
@@ -37,19 +42,6 @@
 .color-picker-item:hover {
   border-color: var(--primaryColor);
 }
-.color-picker-trigger {
-  border: 1px solid var(--borderColor);
-  padding: 0 8px;
-  height: 20px;
-  line-height: 20px;
-  border-radius: var(--borderRadius);
-}
-.color-picker-trigger:hover,
-.color-picker-trigger.active {
-  background-color: var(--buttonActiveColor);
-  border-color: var(--activeBorderColor);
-}
-
 .reset {
   width: 100%;
   margin-top: var(--padding);

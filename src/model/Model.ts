@@ -181,6 +181,9 @@ export class Model implements IModel {
 
   deleteSheet(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
+    if (!this.workbook[id]) {
+      return;
+    }
     const sheetList = this.getSheetList();
     const list = sheetList.filter((v) => !v.isHide);
     assert(
@@ -209,8 +212,32 @@ export class Model implements IModel {
 
     this.setCurrentSheetId(newSheetId);
   }
+  setTabColor(color: string, sheetId?: string): void {
+    const id = sheetId || this.currentSheetId;
+    if (!this.workbook[id]) {
+      return;
+    }
+    if (this.workbook[id].tabColor === color) {
+      return;
+    }
+    const old = this.workbook[id].tabColor;
+    this.workbook[id].tabColor = color;
+
+    this.history.push({
+      t: 'workbook',
+      k: `${id}.tabColor`,
+      n: color,
+      o: old,
+    });
+  }
   hideSheet(sheetId?: string | undefined): void {
     const id = sheetId || this.currentSheetId;
+    if (!this.workbook[id]) {
+      return;
+    }
+    if (this.workbook[id].isHide) {
+      return;
+    }
     const sheetList = this.getSheetList();
     const list = sheetList.filter((v) => !v.isHide);
     assert(
@@ -230,6 +257,12 @@ export class Model implements IModel {
   }
   unhideSheet(sheetId?: string | undefined): void {
     const id = sheetId || this.currentSheetId;
+    if (!this.workbook[id]) {
+      return;
+    }
+    if (!this.workbook[id].isHide) {
+      return;
+    }
     this.workbook[id].isHide = false;
 
     this.history.push({

@@ -53,6 +53,7 @@ export interface WorksheetType {
   rowCount: number;
   colCount: number;
   sort: number; // sort
+  tabColor?: string;
 }
 
 export interface ModelCellType {
@@ -143,6 +144,7 @@ export interface IBaseModel {
   setCurrentSheetId: (id: string) => void;
   getCurrentSheetId: () => string;
   addSheet: () => void;
+  setTabColor: (color: string, sheetId?: string) => void;
   deleteSheet: (sheetId?: string) => void;
   hideSheet: (sheetId?: string) => void;
   unhideSheet: (sheetId?: string) => void;

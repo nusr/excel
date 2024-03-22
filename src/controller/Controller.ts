@@ -24,13 +24,14 @@ import {
   HTML_FORMAT,
   generateHTML,
   convertToCssString,
-  ROW_TITLE_HEIGHT,
-  COL_TITLE_WIDTH,
   containRange,
   parseHTML,
   generateUUID,
   sizeConfig,
 } from '@/util';
+
+const ROW_TITLE_HEIGHT = 24;
+const COL_TITLE_WIDTH = 34;
 
 const defaultScrollValue: ScrollValue = {
   top: 0,
@@ -301,6 +302,11 @@ export class Controller implements IController {
     this.changeSet.add('range');
     this.emitChange();
   };
+  setTabColor(color: string, sheetId?: string) {
+    this.model.setTabColor(color, sheetId);
+    this.changeSet.add('sheetList');
+    this.emitChange();
+  }
   hideSheet(sheetId?: string | undefined): void {
     this.model.hideSheet(sheetId);
     this.changeSet.add('sheetList');
@@ -544,8 +550,8 @@ export class Controller implements IController {
   }
   getScroll(sheetId?: string): ScrollValue {
     const id = sheetId || this.model.getCurrentSheetId();
-    const result = this.scrollValue[id] || defaultScrollValue;
-    return result;
+    const result = this.scrollValue[id] || { ...defaultScrollValue };
+    return { ...result };
   }
   setScroll(data: ScrollValue): void {
     const sheetId = this.model.getCurrentSheetId();

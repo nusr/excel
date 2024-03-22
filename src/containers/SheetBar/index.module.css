@@ -20,11 +20,21 @@
   padding: 0 10px;
   border-left: 1px solid var(--borderColor);
   user-select: none;
+  position: relative;
 }
 
 .sheet-bar-item.active {
   background-color: var(--white);
   color: var(--primaryColor);
+}
+
+.sheet-bar-item-color {
+  width: 100%;
+  height: 3px;
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
 }
 
 .sheet-bar-context-menu {
@@ -34,6 +44,7 @@
   background-color: var(--white);
   border-radius: var(--borderRadius);
   width: 100px;
+  z-index: var(--lowZIndex);
 }
 
 .sheet-bar-context-menu > button {

@@ -6,11 +6,16 @@ import { BaseIcon, BaseIconProps } from './BaseIcon';
 export interface IconProps {
   name: BaseIconName;
   className?: string;
+  fill?: string;
 }
 
-export const Icon: FunctionComponent<IconProps> = ({ name, className = '' }) => {
+export const Icon: FunctionComponent<IconProps> = ({
+  name,
+  className = '',
+  fill,
+}) => {
   const paths = iconConfig[name].map((item) => ({ d: item }));
-  return BaseIcon({ className, paths });
+  return BaseIcon({ className, paths, fill });
 };
 Icon.displayName = 'Icon';
 
