@@ -3,20 +3,12 @@ import './global.css';
 import { createRoot } from 'react-dom/client';
 import React, { StrictMode } from 'react';
 import { initController } from '@/controller';
-import { theme } from './util';
 import { MOCK_MODEL } from '@/model';
 import {
   init,
   browserTracingIntegration,
   replayIntegration,
 } from '@sentry/react';
-
-function initTheme(dom: HTMLElement) {
-  const keyList = Object.keys(theme) as Array<keyof typeof theme>;
-  for (const key of keyList) {
-    dom.style.setProperty(`--${key}`, String(theme[key] || ''));
-  }
-}
 
 if (location.hostname !== 'localhost') {
   init({
@@ -39,7 +31,6 @@ if (location.hostname !== 'localhost') {
 }
 
 const domNode = document.getElementById('root')!;
-initTheme(document.documentElement);
 const controller = initController();
 controller.fromJSON(MOCK_MODEL);
 const root = createRoot(domNode);

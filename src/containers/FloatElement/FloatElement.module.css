@@ -54,9 +54,6 @@
   height: 100%;
   display: block;
 }
-.chart {
-  background-color: var(--white);
-}
 .resize-handler {
   position: absolute;
   display: flex;

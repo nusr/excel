@@ -49,6 +49,7 @@ npm run start
 - [x] Chart
 - [x] Undo
 - [x] Redo
+- [x] Dark Mode
 
 ## Supported Formulas
 

@@ -13,7 +13,7 @@ interface Props {
 
 export const App: React.FunctionComponent<Props> = ({ controller }) => {
   return (
-    <div className={styles['app-container']}>
+    <div className={styles['app-container']} data-testid="app-container">
       <MenuBarContainer controller={controller} />
       <ToolbarContainer controller={controller} />
       <FormulaBarContainer controller={controller} />

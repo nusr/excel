@@ -1,9 +1,37 @@
+import { ThemeType } from '@/types';
 import size from './size';
-import color from './color';
 import zIndex from './zIndex';
 
-export const theme = {
+import { lightColor, darkColor } from './color';
+export const sizeConfig = {
   ...size,
-  ...color,
   ...zIndex,
 };
+
+export { darkColor, lightColor };
+const themeKey = 'data-theme' as const;
+
+export function setTheme(value: ThemeType) {
+  localStorage.setItem(themeKey, value);
+  document.documentElement.setAttribute(themeKey, value);
+}
+export function getTheme(): ThemeType {
+  const l = localStorage.getItem(themeKey);
+  if (l) {
+    return l as ThemeType;
+  }
+  if (window.matchMedia && typeof window.matchMedia === 'function') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+  }
+  return 'light';
+}
+
+export function getThemeColor(key: keyof typeof lightColor) {
+  if (getTheme() === 'dark') {
+    return darkColor[key];
+  } else {
+    return lightColor[key];
+  }
+}

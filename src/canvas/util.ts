@@ -3,15 +3,14 @@ import {
   DEFAULT_FONT_CONFIG,
   isNumber,
   DEFAULT_FONT_SIZE,
-  DEFAULT_FONT_COLOR,
   makeFont,
   ERROR_SET,
-  ERROR_FORMULA_COLOR,
   dpr,
   isEmpty,
   splitToWords,
   convertResultTypeToString,
-  theme,
+  sizeConfig,
+  getThemeColor,
 } from '@/util';
 import {
   ModelCellType,
@@ -183,7 +182,7 @@ export function renderCell(
   }
   const isNum = isNumber(value);
   let font = DEFAULT_FONT_CONFIG;
-  let fillStyle = DEFAULT_FONT_COLOR;
+  let fillStyle: string = getThemeColor('contentColor');
   const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
   if (!isEmpty(style)) {
     font = makeFont(
@@ -192,7 +191,7 @@ export function renderCell(
       npx(fontSize),
       style?.fontFamily,
     );
-    fillStyle = style?.fontColor || DEFAULT_FONT_COLOR;
+    fillStyle = style?.fontColor || getThemeColor('contentColor');
     if (style?.fillColor) {
       ctx.fillStyle = style?.fillColor;
       fillRect(ctx, left, top, width, height);
@@ -200,7 +199,7 @@ export function renderCell(
   }
   const text = convertResultTypeToString(value);
   if (ERROR_SET.has(text as ErrorTypes)) {
-    fillStyle = ERROR_FORMULA_COLOR;
+    fillStyle = getThemeColor('errorFormulaColor');
   }
 
   const texts = splitToWords(text);
@@ -219,8 +218,8 @@ export function renderCell(
     ctx.strokeStyle = fillStyle;
   }
 
-  const textHeight = Math.ceil(fontSize * theme.lineHeight);
-  const lineGap = Math.ceil((fontSize * (theme.lineHeight - 1)) / 2);
+  const textHeight = Math.ceil(fontSize * sizeConfig.lineHeight);
+  const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
   const x = left + (isNum ? width - lineGap : lineGap);
   result.height = textHeight;
   if (style?.isWrapText) {

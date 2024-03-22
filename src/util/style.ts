@@ -11,9 +11,6 @@ import { npx } from './dpr';
 import { EUnderLine, StyleType } from '@/types';
 
 export const DEFAULT_FONT_SIZE = 11;
-export const DEFAULT_FONT_COLOR = '#333333';
-export const ERROR_FORMULA_COLOR = '#ff0000';
-export const DEFAULT_FILL_COLOR = 'transparent';
 export const MUST_FONT_FAMILY = 'sans-serif';
 
 export const FONT_SIZE_LIST = [

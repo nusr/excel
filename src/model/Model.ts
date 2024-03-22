@@ -140,12 +140,12 @@ export class Model implements IModel {
     }
     this.rangeMap[newRange.sheetId] = newRange;
 
-    this.history.push({
-      t: 'rangeMap',
-      k: newRange.sheetId,
-      n: newRange,
-      o: oldValue ? oldValue : DELETE_FLAG,
-    });
+    // this.history.push({
+    //   t: 'rangeMap',
+    //   k: newRange.sheetId,
+    //   n: newRange,
+    //   o: oldValue ? oldValue : DELETE_FLAG,
+    // });
   }
   addSheet(): void {
     const list = this.getSheetList();

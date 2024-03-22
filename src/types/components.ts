@@ -61,3 +61,5 @@ export interface ChartProps<
   redraw?: boolean;
   updateMode?: UpdateMode;
 }
+
+export type ThemeType = 'dark' | 'light';

@@ -35,7 +35,7 @@
   padding: 0 2px;
 }
 .color-picker-item:hover {
-  border-color: #ccc;
+  border-color: var(--primaryColor);
 }
 .color-picker-trigger {
   border: 1px solid var(--borderColor);

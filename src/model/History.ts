@@ -49,6 +49,18 @@ export class History implements IHistory {
     if (this.position >= this.options.maxLength) {
       this.commandList[this.position - this.options.maxLength] = [];
     }
+    // Prevent this.commandList array from becoming extraordinarily large
+    for (
+      let i = 0;
+      this.commandList.length > this.options.maxLength && i < this.position;
+      i++
+    ) {
+      if (this.commandList[0].length === 0) {
+        this.commandList.shift();
+        this.position--;
+      }
+    }
+
     this.change(this.commands);
     this.commands = [];
   }

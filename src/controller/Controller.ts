@@ -29,6 +29,7 @@ import {
   containRange,
   parseHTML,
   generateUUID,
+  sizeConfig,
 } from '@/util';
 
 const defaultScrollValue: ScrollValue = {
@@ -85,6 +86,9 @@ export class Controller implements IController {
     this.hooks = hooks;
   }
   private emitChange(): void {
+    if (this.changeSet.size === 0) {
+      return;
+    }
     this.computeViewSize();
     const result = this.changeSet;
     this.changeSet = new Set<ChangeEventType>();
@@ -534,7 +538,10 @@ export class Controller implements IController {
     this.changeSet = new Set<ChangeEventType>();
     return result;
   }
-
+  setChangeSet(data: Set<ChangeEventType>) {
+    this.changeSet = data;
+    this.emitChange();
+  }
   getScroll(sheetId?: string): ScrollValue {
     const id = sheetId || this.model.getCurrentSheetId();
     const result = this.scrollValue[id] || defaultScrollValue;
@@ -799,12 +806,14 @@ export class Controller implements IController {
         height: 0,
       };
     }
-    const size = canvas.parentElement!.getBoundingClientRect();
+    const dom = canvas.parentElement!;
+    const scrollbarSize = parseInt(sizeConfig.scrollBarSize, 10);
+    const size = dom.getBoundingClientRect();
     return {
       top: size.top,
       left: size.left,
-      width: size.width,
-      height: size.height,
+      width: dom.clientWidth - scrollbarSize,
+      height: dom.clientHeight - scrollbarSize,
     };
   }
   setMainDom(dom: MainDom): void {

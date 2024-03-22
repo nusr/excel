@@ -62,15 +62,12 @@ export function computeScrollPosition(
   left: number,
   top: number,
 ) {
-  const headerSize = controller.getHeaderSize();
   const canvasRect = controller.getDomRect();
   const viewSize = controller.getViewSize();
   const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
   const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-  const maxScrollHeight =
-    canvasRect.height - headerSize.height - SCROLL_SIZE * 1.5;
-  const maxScrollWidth =
-    canvasRect.width - headerSize.width - SCROLL_SIZE * 1.5;
+  const maxScrollHeight = canvasRect.height - SCROLL_SIZE * 1;
+  const maxScrollWidth = canvasRect.width - SCROLL_SIZE * 1;
 
   const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
   const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);

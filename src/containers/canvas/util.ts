@@ -1,12 +1,12 @@
 import { IController, ChangeEventType, EUnderLine, IRange } from '@/types';
 import {
   DEFAULT_FONT_SIZE,
-  DEFAULT_FONT_COLOR,
   copyOrCut,
   paste,
   Range,
   parseNumber,
   HIDE_CELL,
+  getThemeColor,
 } from '@/util';
 import {
   coreStore,
@@ -103,7 +103,7 @@ function updateActiveCell(controller: IController) {
     isItalic = false,
     isStrike = false,
     fontSize = DEFAULT_FONT_SIZE,
-    fontColor = DEFAULT_FONT_COLOR,
+    fontColor = getThemeColor('contentColor'),
     fillColor = '',
     isWrapText = false,
     underline = EUnderLine.NONE,

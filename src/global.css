@@ -11,6 +11,7 @@ html {
 body {
   font-family: 'Microsoft Yahei UI', 'PingFang SC', 'Arial', sans-serif;
   background-color: var(--white);
+  color: var(--black);
 }
 .root-container {
   height: 100vh;
@@ -20,4 +21,8 @@ body {
 div,
 span {
   box-sizing: border-box;
+}
+input {
+  background-color: var(--white);
+  color: var(--black);
 }

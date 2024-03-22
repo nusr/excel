@@ -11,11 +11,13 @@ type SubMenuProps = {
   label: string;
   style?: React.CSSProperties;
   testId?: string;
+  className?: string;
 };
 type MenuProps = {
   menuButton: React.ReactElement;
   style?: React.CSSProperties;
   testId?: string;
+  className?: string;
 };
 export const MenuItem: FunctionComponent<
   React.PropsWithChildren<MenuItemProps>
@@ -29,14 +31,18 @@ export const MenuItem: FunctionComponent<
 
 export const SubMenu: FunctionComponent<
   React.PropsWithChildren<SubMenuProps>
-> = ({ label, children, style, testId }) => {
+> = ({ label, children, style, testId, className }) => {
   const [open, setOpen] = useState(false);
   const handleClick = () => {
     setOpen((v) => !v);
   };
 
   return (
-    <li className={styles.menuItem} onClick={handleClick} data-testid={testId}>
+    <li
+      className={classnames(styles.menuItem, className)}
+      onClick={handleClick}
+      data-testid={testId}
+    >
       <div>{label}</div>
       {open && (
         <div
@@ -55,6 +61,7 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = ({
   children,
   style,
   testId,
+  className,
 }) => {
   const [open, setOpen] = useState(false);
   const handleClick = () => {
@@ -62,7 +69,7 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = ({
   };
   const [ref] = useClickOutside(() => setOpen(false));
   return (
-    <div className={styles.container} ref={ref}>
+    <div className={classnames(styles.container, className)} ref={ref}>
       <div onClick={handleClick} data-testid={testId}>
         {menuButton}
       </div>

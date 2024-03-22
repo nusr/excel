@@ -1,12 +1,15 @@
-.menubar {
+.menubar-container {
   border-bottom: 1px solid var(--borderColor);
-  padding: var(--mediumPadding) var(--largePadding) 0 var(--largePadding);
+  padding: var(--mediumPadding) var(--largePadding);
   box-sizing: border-box;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
 }
-.menubar > * {
-  margin-right: 8px;
-  margin-bottom: var(--mediumPadding);
+
+.menubar-menu {
+  flex: 1;
+}
+.theme-button {
+  margin-right: 40px;
 }

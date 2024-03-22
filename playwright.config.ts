@@ -22,7 +22,7 @@ const baseURL = `http://127.0.0.1:${getPort()}`;
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './e2e-tests',
+  testDir: './e2e',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -84,7 +84,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run start',
     url: baseURL,
-    reuseExistingServer: false,
+    reuseExistingServer: !process.env.CI,
   },
   expect: {
     // Maximum time expect() should wait for the condition to be met.

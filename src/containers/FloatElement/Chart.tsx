@@ -20,10 +20,15 @@ import {
   Legend,
 } from 'chart.js';
 import type { ChartType, DefaultDataPoint, ChartComponentLike } from 'chart.js';
-import { DEBUG_COLOR_LIST, parseNumber, deepEqual } from '@/util';
+import {
+  DEBUG_COLOR_LIST,
+  parseNumber,
+  deepEqual,
+  getThemeColor,
+} from '@/util';
 import { FloatElementItem } from '@/containers/store';
 import { ChartProps } from '@/types';
-import styles from './FloatElement.module.css';
+import styles from './chart.module.css';
 
 ChartJS.register(
   CategoryScale,
@@ -105,7 +110,6 @@ function ChartComponent<
       height={height}
       width={width}
       data-uuid={uuid}
-      style={{ backgroundColor: 'white' }}
       className={styles['chart']}
     />
   );
@@ -190,8 +194,8 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
           fill: true,
           borderColor: c,
           pointBackgroundColor: c,
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
+          pointBorderColor: getThemeColor('white'),
+          pointHoverBackgroundColor: getThemeColor('white'),
           pointHoverBorderColor: c,
           backgroundColor: DEBUG_COLOR_LIST[i + 6],
         };

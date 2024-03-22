@@ -18,7 +18,7 @@
 
 .sheet-bar-item {
   padding: 0 10px;
-  border-left: 1px solid var(--gridStrokeColor);
+  border-left: 1px solid var(--borderColor);
   user-select: none;
 }
 
@@ -63,4 +63,10 @@
 .sheet-bar-unhide {
   width: 100%;
   background-color: var(--white);
+}
+.add-button {
+  background-color: var(--buttonActiveColor);
+  display: flex;
+  align-items: center;
+  justify-self: center;
 }

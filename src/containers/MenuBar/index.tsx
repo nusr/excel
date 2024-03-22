@@ -5,15 +5,18 @@ import { importXLSX } from '../Excel/import';
 import { exportToXLSX } from '../Excel/exportXLSX';
 import { exportToCsv } from '../Excel/exportCSV';
 import styles from './index.module.css';
+import { Theme } from './Theme';
 
 interface Props {
   controller: IController;
 }
-const menuStyle = { width: 150 };
+const menuStyle = { width: 150, flex: 1 };
+
 export const MenuBarContainer: React.FunctionComponent<Props> = ({
   controller,
 }) => {
   const ref = useRef<HTMLInputElement>(null);
+
   const handleExportXLSX = () => {
     exportToXLSX(`excel_${Date.now()}.xlsx`, controller);
   };
@@ -31,33 +34,39 @@ export const MenuBarContainer: React.FunctionComponent<Props> = ({
     ref.current!.value = '';
     ref.current!.blur();
   };
+
   return (
-    <div className={styles.menubar} data-testid="menubar">
-      <Menu
-        menuButton={<Button>Menu</Button>}
-        style={menuStyle}
-        testId="menubar-excel"
-      >
-        <MenuItem testId="menubar-import-xlsx">
-          <input
-            type="file"
-            hidden
-            onChange={handleImport}
-            accept=".xlsx"
-            ref={ref}
-            id="import_xlsx"
-          />
-          <label htmlFor="import_xlsx">import XLSX</label>
-        </MenuItem>
-        <SubMenu label="Export" style={menuStyle} testId="menubar-export">
-          <MenuItem onClick={handleExportXLSX} testId="menubar-export-xlsx">
-            Export XLSX
+    <div className={styles['menubar-container']} data-testid="menubar">
+      <div className={styles['menubar-menu']}>
+        <Menu
+          menuButton={<Button>Menu</Button>}
+          style={menuStyle}
+          testId="menubar-excel"
+        >
+          <MenuItem testId="menubar-import-xlsx">
+            <input
+              type="file"
+              hidden
+              onChange={handleImport}
+              accept=".xlsx"
+              ref={ref}
+              id="import_xlsx"
+            />
+            <label htmlFor="import_xlsx">import XLSX</label>
           </MenuItem>
-          <MenuItem testId="menubar-export-csv" onClick={handleExportCSV}>
-            Export CSV
-          </MenuItem>
-        </SubMenu>
-      </Menu>
+          <SubMenu label="Export" style={menuStyle} testId="menubar-export">
+            <MenuItem onClick={handleExportXLSX} testId="menubar-export-xlsx">
+              Export XLSX
+            </MenuItem>
+            <MenuItem testId="menubar-export-csv" onClick={handleExportCSV}>
+              Export CSV
+            </MenuItem>
+          </SubMenu>
+        </Menu>
+      </div>
+      <Theme
+        toggleTheme={() => controller.setChangeSet(new Set(['cellStyle']))}
+      />
     </div>
   );
 };

@@ -1,26 +1,21 @@
 .canvas-container {
   flex: 1;
-  /* height: 0; */
   position: relative;
   overflow: hidden;
-}
-
-.canvas-content {
-  background-color: var(--white);
-  width: 100%;
   height: 100%;
+  width: 100%;
 }
 
 .vertical-scroll-bar {
   position: absolute;
-  width: 6px;
+  width: var(--scrollBarSize);
   right: 0;
   bottom: 0;
   top: 0;
   background-color: var(--white);
-  box-sizing: content-box;
+  box-sizing: border-box;
   padding: 0 5px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--borderColor);
   border-top-color: var(--white);
 }
 
@@ -28,18 +23,18 @@
   position: relative;
   cursor: pointer;
   border-radius: var(--borderRadius);
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--scrollbarColor);
 }
 
 .horizontal-scroll-bar {
   position: absolute;
-  height: 6px;
+  height: var(--scrollBarSize);
   right: 0;
   left: 0;
   bottom: 0;
-  box-sizing: content-box;
+  box-sizing: border-box;
   padding: 5px 0;
-  border: 1px solid #ccc;
+  border: 1px solid var(--borderColor);
   border-left-color: var(--white);
   background-color: var(--white);
 }
@@ -48,13 +43,13 @@
   position: relative;
   cursor: pointer;
   border-radius: var(--borderRadius);
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--scrollbarColor);
   height: 100%;
 }
 
 .horizontal-scroll-bar-content:hover,
 .vertical-scroll-bar-content:hover {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--scrollbarHoveColor);
 }
 
 .context-menu {
@@ -74,11 +69,10 @@
   position: absolute;
   display: none;
   align-items: center;
-  background-color: var(--backgroundColor);
   padding: var(--tinyPadding) var(--mediumPadding);
   padding-top: 50px;
   right: 18px;
-  bottom: 18px;
+  bottom: 36px;
 }
 
 .bottom-bar-text {

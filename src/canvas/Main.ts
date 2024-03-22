@@ -4,11 +4,11 @@ import {
   isCol,
   isRow,
   isSheet,
-  theme,
   canvasLog,
   thinLineWidth,
   intToColumnName,
   containRange,
+  getThemeColor,
 } from '@/util';
 import {
   EventType,
@@ -29,7 +29,7 @@ import {
   fillText,
   renderCellData,
 } from './util';
-import { HEADER_STYLE } from './constant';
+import { getHeaderStyle } from './constant';
 
 export class MainCanvas {
   private ctx: CanvasRenderingContext2D;
@@ -45,7 +45,8 @@ export class MainCanvas {
     this.ctx.scale(size, size);
   }
   resize() {
-    const { width, height } = this.controller.getDomRect();
+    const size = this.controller.getDomRect();
+    const { width, height } = size;
     resizeCanvas(this.ctx.canvas, width, height);
     this.content.resize();
   }
@@ -105,7 +106,7 @@ export class MainCanvas {
         continue;
       }
       if (containRange(range.row, range.col, item)) {
-        this.ctx.strokeStyle = theme.primaryColor;
+        this.ctx.strokeStyle = getThemeColor('primaryColor');
         this.ctx.lineWidth = dpr();
         // highlight line
         strokeRect(
@@ -128,9 +129,9 @@ export class MainCanvas {
     )!;
     const lineWidth = thinLineWidth();
     this.ctx.save();
-    this.ctx.fillStyle = theme.white;
+    this.ctx.fillStyle = getThemeColor('white');
     this.ctx.lineWidth = lineWidth;
-    this.ctx.strokeStyle = theme.gridStrokeColor;
+    this.ctx.strokeStyle = getThemeColor('borderColor');
     this.ctx.translate(npx(headerSize.width), npx(headerSize.height));
     const pointList: Point[] = [];
     let y = 0;
@@ -223,9 +224,9 @@ export class MainCanvas {
     const mergeCells = controller.getMergeCells(controller.getCurrentSheetId());
     this.ctx.save();
     const range = this.controller.getActiveCell();
-    this.ctx.fillStyle = theme.white;
+    this.ctx.fillStyle = getThemeColor('white');
     fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
-    Object.assign(this.ctx, HEADER_STYLE);
+    Object.assign(this.ctx, getHeaderStyle());
     const pointList: Point[] = [];
     let y = headerSize.height;
     let i = rowIndex;
@@ -239,7 +240,9 @@ export class MainCanvas {
       pointList.push([0, temp], [headerSize.width, temp]);
       if (rowHeight > 0) {
         const check = this.isHighlightRow(mergeCells, range, i);
-        this.ctx.fillStyle = check ? theme.primaryColor : theme.black;
+        this.ctx.fillStyle = check
+          ? getThemeColor('primaryColor')
+          : getThemeColor('black');
 
         fillText(
           this.ctx,
@@ -270,9 +273,9 @@ export class MainCanvas {
     const range = this.controller.getActiveCell();
     const pointList: Point[] = [];
     this.ctx.save();
-    this.ctx.fillStyle = theme.white;
+    this.ctx.fillStyle = getThemeColor('white');
     fillRect(this.ctx, headerSize.width, 0, width, headerSize.height);
-    Object.assign(this.ctx, HEADER_STYLE);
+    Object.assign(this.ctx, getHeaderStyle());
 
     let x = headerSize.width;
     let i = colIndex;
@@ -285,7 +288,9 @@ export class MainCanvas {
       pointList.push([temp, 0], [temp, headerSize.height]);
       if (colWidth > 0) {
         const check = this.isHighlightCol(mergeCells, range, i);
-        this.ctx.fillStyle = check ? theme.primaryColor : theme.black;
+        this.ctx.fillStyle = check
+          ? getThemeColor('primaryColor')
+          : getThemeColor('black');
         fillText(
           this.ctx,
           intToColumnName(i),
@@ -306,10 +311,10 @@ export class MainCanvas {
   private renderTriangle(): void {
     const headerSize = this.controller.getHeaderSize();
     this.ctx.save();
-    this.ctx.fillStyle = theme.white;
+    this.ctx.fillStyle = getThemeColor('white');
 
     fillRect(this.ctx, 0, 0, headerSize.width, headerSize.height);
-    this.ctx.fillStyle = theme.triangleFillColor;
+    this.ctx.fillStyle = getThemeColor('triangleFillColor');
 
     const offset = 2;
     const minY = Math.floor(offset);
@@ -332,7 +337,7 @@ export class MainCanvas {
       return;
     }
     canvasLog('render canvas ant line');
-    this.ctx.strokeStyle = theme.primaryColor;
+    this.ctx.strokeStyle = getThemeColor('primaryColor');
     this.ctx.lineWidth = dpr();
     drawAntLine(
       this.ctx,
@@ -413,7 +418,7 @@ export class MainCanvas {
     const width = endCell.left + endCellSize.width - activeCell.left;
     const height = endCell.top + endCellSize.height - activeCell.top;
 
-    this.ctx.fillStyle = theme.selectionColor;
+    this.ctx.fillStyle = getThemeColor('selectionColor');
 
     // col header
     fillRect(this.ctx, activeCell.left, 0, width, headerSize.height);
@@ -425,7 +430,7 @@ export class MainCanvas {
       fillRect(this.ctx, activeCell.left, activeCell.top, width, height);
     }
 
-    this.ctx.strokeStyle = theme.primaryColor;
+    this.ctx.strokeStyle = getThemeColor('primaryColor');
     this.ctx.lineWidth = dpr();
 
     const list: Point[] = [
@@ -452,12 +457,12 @@ export class MainCanvas {
   private renderSelectAll(): CanvasOverlayPosition {
     const { controller } = this;
     const { width, height } = this.controller.getDomRect();
-    this.ctx.fillStyle = theme.selectionColor;
+    this.ctx.fillStyle = getThemeColor('selectionColor');
     // main
     fillRect(this.ctx, 0, 0, width, height);
 
     const headerSize = controller.getHeaderSize();
-    this.ctx.strokeStyle = theme.primaryColor;
+    this.ctx.strokeStyle = getThemeColor('primaryColor');
     this.ctx.lineWidth = dpr();
     this.renderActiveCell();
     // highlight line
@@ -474,7 +479,7 @@ export class MainCanvas {
     const headerSize = controller.getHeaderSize();
     const range = controller.getActiveCell();
     const { height } = controller.getDomRect();
-    this.ctx.fillStyle = theme.selectionColor;
+    this.ctx.fillStyle = getThemeColor('selectionColor');
     const activeCell = controller.computeCellPosition({
       row: range.row,
       col: range.col,
@@ -500,7 +505,7 @@ export class MainCanvas {
     // main
     fillRect(this.ctx, activeCell.left, activeCell.top, strokeWidth, height);
 
-    this.ctx.strokeStyle = theme.primaryColor;
+    this.ctx.strokeStyle = getThemeColor('primaryColor');
     this.ctx.lineWidth = dpr();
     const list: Point[] = [
       [headerSize.width, headerSize.height],
@@ -522,7 +527,7 @@ export class MainCanvas {
     const headerSize = controller.getHeaderSize();
     const range = controller.getActiveCell();
     const { width } = controller.getDomRect();
-    this.ctx.fillStyle = theme.selectionColor;
+    this.ctx.fillStyle = getThemeColor('selectionColor');
     const activeCell = controller.computeCellPosition({
       row: range.row,
       col: range.col,
@@ -546,7 +551,7 @@ export class MainCanvas {
     // main
     fillRect(this.ctx, activeCell.left, activeCell.top, width, strokeHeight);
 
-    this.ctx.strokeStyle = theme.primaryColor;
+    this.ctx.strokeStyle = getThemeColor('primaryColor');
     this.ctx.lineWidth = dpr();
     const list: Point[] = [
       [activeCell.left, headerSize.height],

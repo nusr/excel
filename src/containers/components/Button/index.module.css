@@ -9,6 +9,8 @@
   border-radius: var(--borderRadius);
   border: 1px solid var(--activeBorderColor);
   display: block;
+  background-color: var(--white);
+  color: var(--black);
 }
 
 .buttonWrapper.circle {

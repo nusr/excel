@@ -1,5 +1,5 @@
 .githubWrapper {
-  color: rgb(255, 255, 255);
+  color: var(--white);
   position: absolute;
   top: 0;
   border: 0;

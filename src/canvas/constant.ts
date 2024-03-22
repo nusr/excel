@@ -1,13 +1,20 @@
-import { thinLineWidth, DEFAULT_FONT_CONFIG, theme } from '@/util';
+import { thinLineWidth, DEFAULT_FONT_CONFIG, getThemeColor } from '@/util';
 
-export const HEADER_STYLE: Pick<
-CanvasRenderingContext2D,
-'textAlign' | 'textBaseline' | 'font' | 'fillStyle' | 'lineWidth' | 'strokeStyle'
-> = {
-  textAlign: 'center',
-  textBaseline: 'middle',
-  font: DEFAULT_FONT_CONFIG,
-  fillStyle: theme.black,
-  lineWidth: thinLineWidth(),
-  strokeStyle: theme.gridStrokeColor,
-};
+export function getHeaderStyle(): Pick<
+  CanvasRenderingContext2D,
+  | 'textAlign'
+  | 'textBaseline'
+  | 'font'
+  | 'fillStyle'
+  | 'lineWidth'
+  | 'strokeStyle'
+> {
+  return {
+    textAlign: 'center',
+    textBaseline: 'middle',
+    font: DEFAULT_FONT_CONFIG,
+    fillStyle: getThemeColor('black'),
+    lineWidth: thinLineWidth(),
+    strokeStyle: getThemeColor('borderColor'),
+  };
+}

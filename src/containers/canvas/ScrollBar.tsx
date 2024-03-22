@@ -51,7 +51,6 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
     prevPageY: 0,
     scrollStatus: ScrollStatus.NONE,
   });
-  const headerSize = controller.getHeaderSize();
   const { scrollLeft, scrollTop } = useSyncExternalStore(
     scrollStore.subscribe,
     scrollStore.getSnapshot,
@@ -99,7 +98,6 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
       <div
         className={styles['vertical-scroll-bar']}
         data-testid="vertical-scroll-bar"
-        style={{ top: headerSize.height }}
         onPointerLeave={handleDragEnd}
         onPointerDown={(event) => {
           register(event, ScrollStatus.VERTICAL);
@@ -116,7 +114,6 @@ export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
       <div
         className={styles['horizontal-scroll-bar']}
         data-testid="horizontal-scroll-bar"
-        style={{ left: headerSize.width }}
         onPointerLeave={handleDragEnd}
         onPointerDown={(event) => {
           register(event, ScrollStatus.HORIZONTAL);

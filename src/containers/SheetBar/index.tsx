@@ -3,7 +3,7 @@ import React, {
   useSyncExternalStore,
   useState,
 } from 'react';
-import { classnames, theme, DEFAULT_POSITION } from '@/util';
+import { classnames, DEFAULT_POSITION } from '@/util';
 import { Button, Icon } from '../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
@@ -88,7 +88,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
         <Button
           onClick={() => controller.addSheet()}
           type="circle"
-          style={{ backgroundColor: theme.buttonActiveColor }}
+          className={styles['add-button']}
         >
           <Icon name="plus" />
         </Button>

@@ -45,6 +45,7 @@ export interface IController extends IBaseModel {
   getCellSize: (range: IRange) => IWindowSize;
   computeCellPosition: (range: IRange) => IPosition;
   getChangeSet: () => Set<ChangeEventType>;
+  setChangeSet: (data: Set<ChangeEventType>) => void;
   paste: (event?: ClipboardEvent) => void;
   copy: (event?: ClipboardEvent) => void;
   cut: (event?: ClipboardEvent) => void;

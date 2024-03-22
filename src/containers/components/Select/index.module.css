@@ -1,4 +1,5 @@
 .selectList {
+  background-color: var(--white);
   color: var(--black);
 }
 .selectItem {
@@ -8,7 +9,7 @@
 .selectItem.disabled {
   background-color: var(--white);
   cursor: not-allowed;
-  color: var(--disabledColor);
+  color: var(--borderColor);
 }
 .selectItem.disabled:hover {
   background-color: var(--white);

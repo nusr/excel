@@ -10,7 +10,7 @@
 }
 
 .formula-bar-name {
-  border: 1px solid var(--gridStrokeColor);
+  border: 1px solid var(--borderColor);
   width: 100px;
   height: 100%;
   margin-right: 10px;
@@ -33,7 +33,7 @@
 }
 
 .formula-bar-editor-wrapper {
-  border: 1px solid var(--gridStrokeColor);
+  border: 1px solid var(--borderColor);
   flex: 1;
   height: 100%;
   border-radius: 2px;
