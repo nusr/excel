@@ -93,6 +93,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       info({
         visible: true,
         title: $('edit-data-source'),
+        testId: 'dialog-select-data',
         children: (
           <input
             type="text"
@@ -137,6 +138,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       info({
         visible: true,
         title: $('change-chart-title'),
+        testId: 'dialog-change-chart-title',
         children: (
           <input
             type="text"
@@ -163,7 +165,8 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
     const changeChartType = () => {
       let newChartType: ChartType = chartType!;
       info({
-        title: $('change-chart-title'),
+        title: $('change-chart-type'),
+        testId: 'dialog-change-chart-type',
         visible: true,
         children: (
           <Select
@@ -254,11 +257,21 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         </Button>
         {type === 'chart' ? (
           <React.Fragment>
-            <Button onClick={selectData}>{$('select-data')}</Button>
-            <Button onClick={changeChartTitle}>
+            <Button onClick={selectData} testId="float-element-context-menu-select-data">
+              {$('select-data')}
+            </Button>
+            <Button
+              onClick={changeChartTitle}
+              testId="float-element-context-menu-change-chart-title"
+            >
               {$('change-chart-title')}
             </Button>
-            <Button onClick={changeChartType}>{$('change-chart-type')}</Button>
+            <Button
+              onClick={changeChartType}
+              testId="float-element-context-menu-change-chart-type"
+            >
+              {$('change-chart-type')}
+            </Button>
           </React.Fragment>
         ) : null}
         <Button onClick={saveAsPicture}>{$('save-as-picture')}</Button>

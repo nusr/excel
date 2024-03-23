@@ -11,6 +11,7 @@ interface DialogProps {
   dialogStyle?: CSSProperties;
   visible: boolean;
   children?: React.ReactNode;
+  testId?: string;
   getContainer?: () => HTMLElement;
   onOk?: React.MouseEventHandler<HTMLButtonElement>;
   onCancel?: React.MouseEventHandler<HTMLButtonElement>;
@@ -25,21 +26,25 @@ export const Dialog: FunctionComponent<DialogProps> = (props) => {
     onOk,
     visible,
     getContainer = () => document.body,
+    testId,
   } = props;
   if (!visible) {
     return null;
   }
   return createPortal(
-    <div className={classnames(styles['dialog-modal'])}>
+    <div className={classnames(styles['dialog-modal'])} data-testid={testId}>
       <div className={styles['dialog-container']} style={dialogStyle}>
         <div className={styles['dialog-title']}>{title}</div>
         <div className={styles['dialog-content']}>{children}</div>
         <div className={styles['dialog-button']}>
-          <Button onClick={onCancel}>{$('cancel')}</Button>
+          <Button onClick={onCancel} data-testid="dialog-cancel-button">
+            {$('cancel')}
+          </Button>
           <Button
             onClick={onOk}
             className={styles['dialog-cancel']}
             type="primary"
+            data-testid="dialog-confirm-button"
           >
             {$('confirm')}
           </Button>
@@ -80,6 +85,7 @@ export function info(props: DialogProps) {
           }
           close();
         }}
+        testId={modalProps.testId}
       >
         {modalProps.children}
       </Dialog>,

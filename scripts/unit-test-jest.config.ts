@@ -13,14 +13,19 @@ const config: Config = {
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
-    '!src/canvas/*.{ts,tsx}',
+    'src/*.{ts,tsx}',
     '!src/types/*.{ts,tsx}',
-    '!src/react/hooks.ts',
-    '!src/react/vNode.ts',
-    '!src/react/modules/module.ts',
   ],
 
-  coverageReporters: ['json', 'lcov', 'text', 'clover', 'html', 'json-summary', 'html-spa'],
+  coverageReporters: [
+    'json',
+    'lcov',
+    'text',
+    'clover',
+    'html',
+    'json-summary',
+    'html-spa',
+  ],
 
   moduleNameMapper: {
     '@/(.*)': '<rootDir>/src/$1',

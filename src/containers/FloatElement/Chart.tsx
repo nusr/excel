@@ -111,6 +111,7 @@ function ChartComponent<
       width={width}
       data-uuid={uuid}
       className={styles['chart']}
+      data-testid="float-element-chart"
     />
   );
 }

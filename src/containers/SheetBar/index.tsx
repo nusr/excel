@@ -69,6 +69,9 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
               style={style}
               onContextMenu={handleContextMenu}
               onClick={() => {
+                if (currentSheetId === item.sheetId) {
+                  return;
+                }
                 setEditing(false);
                 controller.setCurrentSheetId(item.sheetId);
               }}
