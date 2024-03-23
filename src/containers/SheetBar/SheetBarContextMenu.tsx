@@ -4,6 +4,7 @@ import { IController, OptionItem } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
 import { SheetItem } from '../store';
+import { $ } from '@/i18n';
 
 interface Props {
   controller: IController;
@@ -41,7 +42,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
     let value = String(hideSheetList[0]?.value) || '';
     info({
       visible: true,
-      title: 'Unhide sheet:',
+      title: $('unhide-sheet'),
       children: (
         <Select
           data={hideSheetList}
@@ -74,7 +75,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
           controller.addSheet();
         }}
       >
-        Insert
+        {$('insert')}
       </Button>
       <Button
         onClick={() => {
@@ -82,7 +83,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
           controller.deleteSheet();
         }}
       >
-        Delete
+        {$('delete')}
       </Button>
       <Button
         onClick={() => {
@@ -90,7 +91,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
           editSheetName();
         }}
       >
-        Rename
+        {$('rename')}
       </Button>
       <Button
         onClick={() => {
@@ -98,21 +99,21 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = ({
           controller.hideSheet();
         }}
       >
-        Hide
+        {$('hide')}
       </Button>
       <Button
         className={styles['sheet-bar-unhide']}
         disabled={hideSheetList.length === 0}
         onClick={handleUnhide}
       >
-        Unhide
+        {$('unhide')}
       </Button>
       <ColorPicker
         color={tabColor}
         onChange={handleTabColorChange}
         position="top"
       >
-        <Button className={styles['sheet-bar-unhide']}>Tab Color</Button>
+        <Button className={styles['sheet-bar-unhide']}>{$('tab-color')}</Button>
       </ColorPicker>
     </div>
   );

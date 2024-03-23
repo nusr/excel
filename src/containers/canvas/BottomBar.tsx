@@ -4,6 +4,7 @@ import { IController } from '@/types';
 import styles from './index.module.css';
 import { scrollStore } from '../store';
 import { scrollBar } from '@/canvas';
+import { $ } from '@/i18n';
 
 interface Props {
   controller: IController;
@@ -37,7 +38,7 @@ export const BottomBar: React.FunctionComponent<Props> = ({ controller }) => {
         display: scrollTop / rect.height >= 0.856 ? 'flex' : 'none',
       }}
     >
-      <div className={styles['bottom-bar-text']}>在底部添加</div>
+      <div className={styles['bottom-bar-text']}>{$('add-at-the-bottom')}</div>
       <input
         value={value}
         onChange={handleChange}
@@ -45,8 +46,10 @@ export const BottomBar: React.FunctionComponent<Props> = ({ controller }) => {
         min={1}
         max={200}
       />
-      <div className={styles['bottom-bar-text']}>行</div>
-      <Button onClick={handleClick}>添加</Button>
+      <div className={styles['bottom-bar-text']}>{$('rows')}</div>
+      <Button className={styles['add-button']} onClick={handleClick}>
+        {$('add')}
+      </Button>
     </div>
   );
 };

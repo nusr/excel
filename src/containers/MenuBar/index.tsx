@@ -6,6 +6,8 @@ import { exportToXLSX } from '../Excel/exportXLSX';
 import { exportToCsv } from '../Excel/exportCSV';
 import styles from './index.module.css';
 import { Theme } from './Theme';
+import { $ } from '@/i18n';
+import { I18N } from './I18N';
 
 interface Props {
   controller: IController;
@@ -39,7 +41,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = ({
     <div className={styles['menubar-container']} data-testid="menubar">
       <div className={styles['menubar-menu']}>
         <Menu
-          menuButton={<Button>Menu</Button>}
+          menuButton={<Button>{$('menu')}</Button>}
           style={menuStyle}
           testId="menubar-excel"
         >
@@ -52,18 +54,19 @@ export const MenuBarContainer: React.FunctionComponent<Props> = ({
               ref={ref}
               id="import_xlsx"
             />
-            <label htmlFor="import_xlsx">import XLSX</label>
+            <label htmlFor="import_xlsx">{$('import-xlsx')}</label>
           </MenuItem>
           <SubMenu label="Export" style={menuStyle} testId="menubar-export">
             <MenuItem onClick={handleExportXLSX} testId="menubar-export-xlsx">
-              Export XLSX
+              {$('export-xlsx')}
             </MenuItem>
             <MenuItem testId="menubar-export-csv" onClick={handleExportCSV}>
-              Export CSV
+              {$('export-csv')}
             </MenuItem>
           </SubMenu>
         </Menu>
       </div>
+      <I18N />
       <Theme
         toggleTheme={() => controller.setChangeSet(new Set(['cellStyle']))}
       />

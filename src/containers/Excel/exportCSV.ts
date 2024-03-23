@@ -1,5 +1,5 @@
 import { IController, ResultType } from '@/types';
-import { saveAs, coordinateToString, assert } from '@/util';
+import { saveAs, coordinateToString } from '@/util';
 
 const DELIMITER = ',';
 const RECORD_DELIMITER = '\n';
@@ -37,12 +37,6 @@ function processRow(row: ResultType[]) {
     if ('' === value) {
       csvRecord += value;
     } else if (value) {
-      assert(
-        typeof value === 'string',
-        `Formatter must return a string, null or undefined, got ${JSON.stringify(
-          value,
-        )}`,
-      );
       const containDelimiter =
         DELIMITER.length && value.indexOf(DELIMITER) >= 0;
       const containsQuote = value.indexOf(quote) >= 0;

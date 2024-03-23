@@ -78,3 +78,9 @@
 .bottom-bar-text {
   margin: 0 var(--tinyPadding);
 }
+
+.add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

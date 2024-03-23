@@ -4,6 +4,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { Button } from '../Button';
 import styles from './index.module.css';
 import { classnames } from '@/util';
+import { $ } from '@/i18n';
 
 interface DialogProps {
   title: string;
@@ -34,13 +35,13 @@ export const Dialog: FunctionComponent<DialogProps> = (props) => {
         <div className={styles['dialog-title']}>{title}</div>
         <div className={styles['dialog-content']}>{children}</div>
         <div className={styles['dialog-button']}>
-          <Button onClick={onCancel}>Cancel</Button>
+          <Button onClick={onCancel}>{$('cancel')}</Button>
           <Button
             onClick={onOk}
             className={styles['dialog-cancel']}
             type="primary"
           >
-            Confirm
+            {$('confirm')}
           </Button>
         </div>
       </div>

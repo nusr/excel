@@ -74,7 +74,6 @@ function updateActiveCell(controller: IController) {
   const { top } = controller.getDomRect();
   const { range: activeCell, isMerged } = controller.getActiveRange();
   const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
-  const tabColor = controller.getSheetInfo(sheetId)?.tabColor || '';
   const cell = controller.getCell(activeCell);
   const defineName = controller.getDefineName(
     new Range(activeCell.row, activeCell.col, 1, 1, sheetId),
@@ -130,7 +129,6 @@ function updateActiveCell(controller: IController) {
     numberFormat,
     defineName,
     isMergeCell: isMerged,
-    tabColor,
   });
 }
 
@@ -146,14 +144,12 @@ const handleStateChange = (
     updateActiveCell(controller);
   }
   if (changeSet.has('sheetList')) {
-    const sheetList = controller
-      .getSheetList()
-      .map((v) => ({
-        sheetId: v.sheetId,
-        name: v.name,
-        isHide: v.isHide,
-        tabColor: v.tabColor,
-      }));
+    const sheetList = controller.getSheetList().map((v) => ({
+      sheetId: v.sheetId,
+      name: v.name,
+      isHide: v.isHide,
+      tabColor: v.tabColor,
+    }));
     sheetListStore.setState(sheetList);
   }
 
@@ -272,6 +268,9 @@ export function initCanvas(controller: IController): () => void {
   ]);
   handleStateChange(changeSet, controller);
   resize(changeSet);
+  setTimeout(() => {
+    resize(changeSet);
+  }, 10);
 
   return () => {
     removeEvent();

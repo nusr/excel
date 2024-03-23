@@ -5,6 +5,7 @@ import { ColorPickerPanel } from './ColorPickerPanel';
 import { COLOR_LIST } from './color';
 import { Button } from '../Button';
 import { useClickOutside } from '../../hooks';
+import { $ } from '@/i18n';
 
 export interface ColorPickerProps {
   color: string;
@@ -72,7 +73,7 @@ export const ColorPicker: FunctionComponent<
               onChange('');
             }}
           >
-            Reset
+            {$('reset')}
           </Button>
         </div>
       </div>

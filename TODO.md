@@ -4,7 +4,7 @@
 - import CSV
 - optimize importing XLSX
 - exporting CSV support unicode
-- add unit test cases
+- add test cases
 - remove Chart.js dep
-- color picker
 - number format
+- i18n

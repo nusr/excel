@@ -1,5 +1,6 @@
-import { ErrorTypes, NumberFormatItem } from '@/types';
+import { ErrorTypes, NumberFormatItem, LanguageType } from '@/types';
 
+export const LANGUAGE_LIST: LanguageType[] = ['en', 'zh'];
 export const SHEET_NAME_PREFIX = 'Sheet';
 export const DEFAULT_ROW_COUNT = 200;
 export const DEFAULT_COL_COUNT = 30;

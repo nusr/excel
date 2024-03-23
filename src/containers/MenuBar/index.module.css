@@ -16,3 +16,6 @@
   align-items: center;
   justify-content: center;
 }
+.i18n {
+  margin: 0 var(--mediumPadding);
+}

@@ -22,6 +22,7 @@ import {
   coreStore,
 } from '@/containers/store';
 import { InsertFloatingPicture, InsertChart } from '../FloatElement';
+import { $ } from '@/i18n';
 
 interface Props {
   controller: IController;
@@ -130,13 +131,13 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         <Icon name="redo" />
       </Button>
       <Button onClick={() => controller.copy()} testId="toolbar-copy">
-        Copy
+        {$('copy')}
       </Button>
       <Button onClick={() => controller.cut()} testId="toolbar-cut">
-        Cut
+        {$('cut')}
       </Button>
       <Button onClick={() => controller.paste()} testId="toolbar-paste">
-        Paste
+        {$('paste')}
       </Button>
 
       <Select
@@ -209,7 +210,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = ({
         testId="toolbar-wrap-text"
         style={{ minWidth: 80 }}
       >
-        Wrap Text
+        {$('wrap-text')}
       </Button>
       <InsertFloatingPicture controller={controller} />
       {isMobile() ? null : <InsertChart controller={controller} />}

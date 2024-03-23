@@ -4,6 +4,7 @@ import { IController } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
 import { activeCellStore } from '@/containers/store';
+import { $ } from '@/i18n';
 
 interface Props {
   controller: IController;
@@ -87,7 +88,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
     };
     info({
       visible: true,
-      title: isRow ? 'Row Height' : 'Column Width',
+      title: isRow ? $('row-height') : $('column-width'),
       children: (
         <input
           type="number"
@@ -100,7 +101,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       ),
       onOk: () => {
         if (value < 0) {
-          toast({ type: 'error', message: 'invalid data' });
+          toast({ type: 'error', message: $('greater-than-zero') });
           return;
         }
         if (isRow) {
@@ -133,7 +134,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           controller.copy();
         }}
       >
-        Copy
+        {$('copy')}
       </Button>
       <Button
         onClick={() => {
@@ -142,7 +143,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           controller.cut();
         }}
       >
-        Cut
+        {$('cut')}
       </Button>
       <Button
         onClick={() => {
@@ -150,7 +151,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           controller.paste();
         }}
       >
-        Paste
+        {$('paste')}
       </Button>
       {position === ClickPosition.TRIANGLE && (
         <Button
@@ -159,7 +160,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
             controller.deleteAll(controller.getCurrentSheetId());
           }}
         >
-          Delete
+          {$('delete')}
         </Button>
       )}
       {position === ClickPosition.COLUMN_HEADER && (
@@ -170,7 +171,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.addCol(col, colCount);
             }}
           >
-            {colCount > 1 ? 'Insert Columns' : 'Insert a Column'}
+            {$('insert-columns')}
           </Button>
           <Button
             onClick={() => {
@@ -179,7 +180,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.deleteCol(col, colCount);
             }}
           >
-            {colCount > 1 ? 'Delete Columns' : 'Delete a Column'}
+            {$('delete-columns')}
           </Button>
           <Button
             onClick={() => {
@@ -188,14 +189,14 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.hideCol(col, colCount);
             }}
           >
-            {colCount > 1 ? 'Hide Columns' : 'Hide a Column'}
+            {$('hide-columns')}
           </Button>
           <Button
             onClick={() => {
               handleDialog(false);
             }}
           >
-            Column Width
+            {$('column-width')}
           </Button>
         </Fragment>
       )}
@@ -207,7 +208,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.addRow(row, rowCount);
             }}
           >
-            {rowCount > 1 ? 'Insert Rows' : 'Insert a Row'}
+            {$('insert-rows')}
           </Button>
           <Button
             onClick={() => {
@@ -216,7 +217,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.deleteRow(row, rowCount);
             }}
           >
-            {rowCount > 1 ? 'Delete Rows' : 'Delete a Row'}
+            {$('delete-rows')}
           </Button>
           <Button
             onClick={() => {
@@ -225,14 +226,14 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.hideRow(row, rowCount);
             }}
           >
-            {rowCount > 1 ? 'Hide Rows' : 'Hide a Row'}
+            {$('hide-rows')}
           </Button>
           <Button
             onClick={() => {
               handleDialog(true);
             }}
           >
-            Row Height
+            {$('row-height')}
           </Button>
         </Fragment>
       )}

@@ -35,6 +35,8 @@ import {
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 import { History } from './History';
+import { $ } from '@/i18n';
+
 const DELETE_FLAG = Symbol('delete');
 
 const getKey = (item: ICommandItem) => {
@@ -158,7 +160,7 @@ export class Model implements IModel {
       sort: list.length,
     };
     const check = this.workbook[sheet.sheetId];
-    assert(!check, 'The sheet id is duplicate');
+    assert(!check, $('sheet-id-is-duplicate'));
     this.worksheets[sheet.sheetId] = this.worksheets[sheet.sheetId] || {};
     this.workbook[sheet.sheetId] = sheet;
 
@@ -188,7 +190,7 @@ export class Model implements IModel {
     const list = sheetList.filter((v) => !v.isHide);
     assert(
       list.length >= 2,
-      'A workbook must contains at least on visible worksheet',
+      $('a-workbook-must-contains-at-least-one-visible-worksheet')
     );
     const newSheetId = this.getNextSheetId(id);
     const oldSheet = this.workbook[id];
@@ -242,7 +244,7 @@ export class Model implements IModel {
     const list = sheetList.filter((v) => !v.isHide);
     assert(
       list.length >= 2,
-      'A workbook must contains at least on visible worksheet',
+      $('a-workbook-must-contains-at-least-one-visible-worksheet')
     );
     const newSheetId = this.getNextSheetId(sheetId);
     this.workbook[id].isHide = true;
@@ -274,7 +276,7 @@ export class Model implements IModel {
     this.setCurrentSheetId(id);
   }
   renameSheet(sheetName: string, sheetId?: string | undefined): void {
-    assert(!!sheetName, 'You typed a invalid name for a sheet.');
+    assert(!!sheetName, $('the-value-cannot-be-empty'));
     const id = sheetId || this.currentSheetId;
     const sheetList = this.getSheetList();
     const item = sheetList.find((v) => v.name === sheetName);
@@ -282,7 +284,7 @@ export class Model implements IModel {
       if (item.sheetId === sheetId) {
         return;
       }
-      assert(false, 'Cannot rename a sheet to the same name as another sheet');
+      assert(false, $('sheet-name-is-duplicate'));
     }
     const sheetInfo = this.workbook[id];
     const oldName = sheetInfo.name;
@@ -1242,7 +1244,7 @@ export class Model implements IModel {
   }
   addFloatElement(data: FloatElement) {
     const oldData = this.drawings[data.uuid];
-    assert(!oldData, 'The uuid is duplicate');
+    assert(!oldData, $('uuid-is-duplicate'));
     if (data.type === 'chart') {
       const range = data.chartRange!;
       let check = false;
@@ -1261,9 +1263,9 @@ export class Model implements IModel {
           return false;
         }
       });
-      assert(check, 'The cells must contain the data');
+      assert(check, $('cells-must-contain-data'));
     } else if (data.type === 'floating-picture') {
-      assert(!!data.imageSrc, 'Image is empty');
+      assert(!!data.imageSrc, $('image-source-is-empty'));
       if (typeof data.imageAngle !== 'number') {
         data.imageAngle = 0;
       }
@@ -1322,7 +1324,7 @@ export class Model implements IModel {
         'absolute',
         this.convertSheetIdToName,
       );
-      assert(!this.mergeCells[ref], 'The merging cell is duplicate');
+      assert(!this.mergeCells[ref], $('merging-cell-is-duplicate'));
       this.mergeCells[ref] = range;
       this.history.push({
         t: 'mergeCells',

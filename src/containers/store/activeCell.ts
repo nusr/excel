@@ -1,23 +1,19 @@
-import type { StyleType, ResultType } from '@/types';
+import type {
+  StyleType,
+  IRange,
+  CanvasOverlayPosition,
+  ModelCellType,
+} from '@/types';
 import { DEFAULT_POSITION } from '@/util';
 import { BaseStore } from './base';
 
-export type CellStoreType = Partial<StyleType> & {
-  value: ResultType;
-  formula?: string;
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-  row: number;
-  col: number;
-  defineName: string;
-  isMergeCell: boolean;
-  rowCount: number;
-  colCount: number;
-  sheetId: string;
-  tabColor: string;
-};
+export type CellStoreType = Partial<StyleType> &
+  CanvasOverlayPosition &
+  IRange &
+  Pick<ModelCellType, 'value' | 'formula'> & {
+    defineName: string;
+    isMergeCell: boolean;
+  };
 
 const cellData: CellStoreType = {
   value: '',
@@ -32,7 +28,6 @@ const cellData: CellStoreType = {
   isMergeCell: false,
   rowCount: 1,
   colCount: 1,
-  tabColor: '',
   sheetId: '',
 };
 

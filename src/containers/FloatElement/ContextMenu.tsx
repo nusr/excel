@@ -12,6 +12,7 @@ import {
 } from '@/util';
 import { FloatElementItem } from '@/containers/store';
 import { IWindowSize } from '@/types';
+import { $ } from '@/i18n';
 
 type Props = FloatElementItem & {
   controller: IController;
@@ -35,27 +36,27 @@ function extractTypeFromBase64(base64: string) {
 const chartList: Array<{ value: ChartType; label: string }> = [
   {
     value: 'line',
-    label: 'Line Chart',
+    label: $('line-chart'),
   },
   {
     value: 'bar',
-    label: 'Bar Chart',
+    label: $('bar-chart'),
   },
   {
     value: 'pie',
-    label: 'Pie Chart',
+    label: $('pie-chart'),
   },
   {
     value: 'scatter',
-    label: 'Scatter Chart',
+    label: $('scatter-chart'),
   },
   {
     value: 'radar',
-    label: 'Radar Chart',
+    label: $('radar-chart'),
   },
   {
     value: 'polarArea',
-    label: 'PolarArea Chart',
+    label: $('polar-area-chart'),
   },
 ];
 
@@ -91,7 +92,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       };
       info({
         visible: true,
-        title: 'Edit Data Source',
+        title: $('edit-data-source'),
         children: (
           <input
             type="text"
@@ -104,7 +105,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         onOk: () => {
           const realValue = value.trim();
           if (!realValue) {
-            toast({ type: 'error', message: 'empty reference' });
+            toast({ type: 'error', message: $('reference-is-empty') });
             return;
           }
           const sheetList = controller.getSheetList();
@@ -116,7 +117,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             !range.isValid() ||
             isSameRange(range, props.chartRange!)
           ) {
-            toast({ type: 'error', message: 'reference is not valid' });
+            toast({ type: 'error', message: $('reference-is-not-valid') });
             return;
           }
           controller.updateFloatElement(uuid, { chartRange: range });
@@ -135,7 +136,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       };
       info({
         visible: true,
-        title: 'Change Chart Title',
+        title: $('change-chart-title'),
         children: (
           <input
             type="text"
@@ -148,7 +149,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         onOk: () => {
           const realValue = value.trim();
           if (!realValue) {
-            toast({ type: 'error', message: 'empty title' });
+            toast({ type: 'error', message: $('the-value-cannot-be-empty') });
             return;
           }
           controller.updateFloatElement(uuid, { title: realValue });
@@ -162,7 +163,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
     const changeChartType = () => {
       let newChartType: ChartType = chartType!;
       info({
-        title: 'Change Chart Type',
+        title: $('change-chart-title'),
         visible: true,
         children: (
           <Select
@@ -220,7 +221,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             controller.copy();
           }}
         >
-          Copy
+          {$('copy')}
         </Button>
 
         <Button
@@ -230,7 +231,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             controller.cut();
           }}
         >
-          Cut
+          {$('cut')}
         </Button>
         <Button
           onClick={() => {
@@ -238,7 +239,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             controller.paste();
           }}
         >
-          Paste
+          {$('paste')}
         </Button>
         <Button
           onClick={() => {
@@ -249,16 +250,18 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             controller.setFloatElementUuid('');
           }}
         >
-          Duplicate
+          {$('duplicate')}
         </Button>
         {type === 'chart' ? (
           <React.Fragment>
-            <Button onClick={selectData}>Select Data</Button>
-            <Button onClick={changeChartTitle}>Change Chart Title</Button>
-            <Button onClick={changeChartType}>Change Chart Type</Button>
+            <Button onClick={selectData}>{$('select-data')}</Button>
+            <Button onClick={changeChartTitle}>
+              {$('change-chart-title')}
+            </Button>
+            <Button onClick={changeChartType}>{$('change-chart-type')}</Button>
           </React.Fragment>
         ) : null}
-        <Button onClick={saveAsPicture}>Save as Picture</Button>
+        <Button onClick={saveAsPicture}>{$('save-as-picture')}</Button>
         <Button
           disabled={width === originWidth && height === originHeight}
           onClick={() => {
@@ -270,7 +273,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             resetResize({ width: originWidth, height: originHeight });
           }}
         >
-          Reset Size
+          {$('reset-size')}
         </Button>
         <Button
           onClick={() => {
@@ -278,7 +281,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             controller.deleteFloatElement(uuid);
           }}
         >
-          Delete
+          {$('delete')}
         </Button>
       </div>
     );

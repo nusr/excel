@@ -63,3 +63,5 @@ export interface ChartProps<
 }
 
 export type ThemeType = 'dark' | 'light';
+
+export type LanguageType = 'en' | 'zh';

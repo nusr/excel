@@ -23,8 +23,7 @@ function updateCssVariable(value: ThemeType) {
   } else {
     setCssVariable(lightColor);
   }
-  document.documentElement.setAttribute("data-theme", value);
-
+  document.documentElement.setAttribute('data-theme', value);
 }
 
 export const Theme: React.FunctionComponent<Props> = memo(({ toggleTheme }) => {
@@ -63,7 +62,7 @@ export const Theme: React.FunctionComponent<Props> = memo(({ toggleTheme }) => {
         onClick={() => handleClick(themeData)}
         className={styles['theme-button']}
       >
-        <Icon name={themeData === 'light' ? 'moon' : 'sun'} />
+        <Icon name={themeData === 'dark' ? 'sun' : 'moon'} />
       </Button>
     </div>
   );

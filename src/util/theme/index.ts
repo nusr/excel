@@ -12,12 +12,12 @@ export { darkColor, lightColor };
 const themeKey = 'data-theme' as const;
 
 export function setTheme(value: ThemeType) {
-  localStorage.setItem(themeKey, value);
+  sessionStorage.setItem(themeKey, value);
   document.documentElement.setAttribute(themeKey, value);
 }
 export function getTheme(): ThemeType {
-  const l = localStorage.getItem(themeKey);
-  if (l) {
+  const l = sessionStorage.getItem(themeKey);
+  if (l && (l === 'dark' || l === 'light')) {
     return l as ThemeType;
   }
   if (window.matchMedia && typeof window.matchMedia === 'function') {

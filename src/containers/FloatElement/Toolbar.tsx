@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { IController } from '@/types';
 import { Button } from '../components';
 import { generateUUID } from '@/util';
+import { $ } from '@/i18n';
 
 interface Props {
   controller: IController;
@@ -64,7 +65,7 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = ({
         ref={ref}
         id="upload_float_image"
       />
-      <label htmlFor="upload_float_image">Floating Picture</label>
+      <label htmlFor="upload_float_image">{$('floating-picture')}</label>
     </Button>
   );
 };
@@ -90,5 +91,5 @@ export const InsertChart: React.FunctionComponent<Props> = ({ controller }) => {
     });
   };
 
-  return <Button onClick={handleClick}>Chart</Button>;
+  return <Button onClick={handleClick}>{$('chart')}</Button>;
 };
