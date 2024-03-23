@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const FORMULA_DIR = path.join(process.cwd(), 'dist/src/formula/formula');
-const PREFIX_TEXT = 'const formulas = {';
-const END_TEXT = '}';
+const FORMULA_DIR = path.join(process.cwd(), './src/formula/formula');
+const PREFIX_TEXT = 'const formulas:';
 const FORMULA_TAG = '## Supported Formulas';
 const MD_PATH = path.join(process.cwd(), 'README.md');
 const ENCODE = 'utf-8';
@@ -22,17 +21,20 @@ function updateMarkdown() {
       continue;
     }
     const text = fs.readFileSync(filePath, ENCODE);
-    const start = text.indexOf(PREFIX_TEXT);
+    let start = text.indexOf(PREFIX_TEXT);
     if (start <= 0) {
       continue;
+    }
+    while (start < text.length && text[start] !== '{') {
+      start++;
     }
     const fileName = path.basename(item, path.extname(item)).toLowerCase();
 
     let end = start;
-    while (end < text.length && text[end] !== END_TEXT) {
+    while (end < text.length && text[end] !== '}') {
       end++;
     }
-    const temp = text.slice(start + PREFIX_TEXT.length, end);
+    const temp = text.slice(start + 1, end);
     const keyList = temp
       .trim()
       .split('\n')

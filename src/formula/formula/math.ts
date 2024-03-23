@@ -127,6 +127,12 @@ export const SUM = (...rest: ResultType[]): number => {
   return list.reduce((sum, cur) => sum + cur, 0);
 };
 
+export const AVERAGE = (...rest: ResultType[]): number => {
+  const list = parseNumberArray(rest);
+  assert(list.length <= MAX_PARAMS_COUNT && list.length >= 1);
+  return list.reduce((sum, cur) => sum + cur, 0) / list.length;
+};
+
 const formulas: MathFormulaType = {
   ABS,
   ACOS,
@@ -138,6 +144,7 @@ const formulas: MathFormulaType = {
   ATAN,
   ATAN2,
   ATANH,
+  AVERAGE,
   COT,
   COS,
   EXP,

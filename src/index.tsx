@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import React, { StrictMode } from 'react';
 import { initController } from '@/controller';
 import { MOCK_MODEL } from '@/model';
+import { allFormulas } from './formula';
 
 function initSentry() {
   if (location.hostname === 'localhost') {
@@ -42,4 +43,4 @@ function initExcel(rootId = 'root') {
   return controller;
 }
 
-export default { initExcel, defaultModel: MOCK_MODEL, initSentry };
+export default { initExcel, defaultModel: MOCK_MODEL, initSentry, allFormulas };

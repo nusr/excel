@@ -7,4 +7,3 @@
 - add test cases
 - remove Chart.js dep
 - number format
-- i18n

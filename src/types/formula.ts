@@ -36,7 +36,8 @@ export type MathFormulaKeys =
   | 'PI'
   | 'E'
   | 'SIN'
-  | 'SUM';
+  | 'SUM'
+  | 'AVERAGE';
 
 export type FormulaKeys = TextFormulaKeys | MathFormulaKeys;
 

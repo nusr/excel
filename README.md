@@ -65,6 +65,7 @@ npm run start
 - [x] ATAN
 - [x] ATAN2
 - [x] ATANH
+- [x] AVERAGE
 - [x] COS
 - [x] COT
 - [x] E

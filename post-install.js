@@ -16,6 +16,7 @@ function init() {
       buildSync({
         entryPoints: [filePath],
         outfile: temp,
+        tsconfig: 'tsconfig.json',
         format: 'cjs',
         target: 'es2020',
       });
