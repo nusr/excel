@@ -78,7 +78,7 @@ export const InsertChart: React.FunctionComponent<Props> = ({ controller }) => {
       height: 300,
       originHeight: 300,
       originWidth: 400,
-      title: 'Chart Title',
+      title: $('chart-title'),
       type: 'chart',
       uuid: generateUUID(),
       sheetId: range.sheetId,

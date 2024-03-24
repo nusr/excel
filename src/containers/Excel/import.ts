@@ -296,10 +296,10 @@ function convertColor(themeData: ThemeData, color?: ColorItem) {
     ];
     const i = parseInt(color.theme, 10);
     if (i >= 0 && i <= 1) {
-      return convertRGB(themeData[themeIndex[i]]['a:sysClr'].lastClr);
+      return convertRGB(themeData[themeIndex[i]]?.['a:sysClr']?.lastClr);
     }
     if (i > 1 && i < themeIndex.length) {
-      return convertRGB(themeData[themeIndex[i]]['a:srgbClr'].val);
+      return convertRGB(themeData[themeIndex[i]]?.['a:srgbClr']?.val);
     }
   }
 

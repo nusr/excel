@@ -27,6 +27,7 @@
   "export-csv": "导出 CSV",
   "floating-picture": "浮动图片",
   "chart": "图表",
+  "chart-title": "图表标题",
   "duplicate": "复制",
   "select-data": "选择数据",
   "change-chart-title": "更改图表标题",

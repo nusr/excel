@@ -50,6 +50,7 @@ npm run start
 - [x] Undo
 - [x] Redo
 - [x] Dark Mode
+- [x] I18N
 
 ## Supported Formulas
 
