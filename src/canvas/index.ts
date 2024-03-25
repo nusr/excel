@@ -7,5 +7,6 @@ export {
   setActiveCellValue,
   scrollBar,
   scrollToView,
+  scrollSheetToView,
 } from './shortcut';
 export { Content } from './Content';

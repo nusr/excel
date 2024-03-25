@@ -21,13 +21,17 @@
   border-radius: var(--borderRadius);
   border: 1px solid var(--borderColor);
   display: none;
-  text-align: center;
   top: 100%;
   left: 0;
   right: 0;
   z-index: var(--lowZIndex);
-  max-width: 200px;
+  max-height: 200px;
   overflow: auto;
+  white-space: nowrap;
+}
+.popup-container.top {
+  transform: translate(0, -100%);
+  top: 0;
 }
 .popup-container.active {
   display: block;
@@ -36,7 +40,17 @@
 .popup-item {
   padding: var(--tinyPadding);
   border-bottom: 1px solid var(--borderColor);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .popup-item:hover {
   background-color: var(--buttonActiveColor);
+}
+.popup-item-icon {
+  color: var(--primaryColor);
+}
+.popup-item-content {
+  flex: 1;
+  text-align: left;
 }

@@ -9,6 +9,7 @@ import {
   convertToReference,
   parseReference,
   isSameRange,
+  MAX_NAME_LENGTH,
 } from '@/util';
 import { FloatElementItem } from '@/containers/store';
 import { IWindowSize } from '@/types';
@@ -101,6 +102,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             style={{ width: '400px' }}
             defaultValue={value}
             onChange={handleChange}
+            maxLength={MAX_NAME_LENGTH * 2}
           />
         ),
         onOk: () => {
@@ -146,6 +148,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             style={{ width: '200px' }}
             defaultValue={value}
             onChange={handleChange}
+            maxLength={MAX_NAME_LENGTH}
           />
         ),
         onOk: () => {
@@ -257,7 +260,10 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         </Button>
         {type === 'chart' ? (
           <React.Fragment>
-            <Button onClick={selectData} testId="float-element-context-menu-select-data">
+            <Button
+              onClick={selectData}
+              testId="float-element-context-menu-select-data"
+            >
               {$('select-data')}
             </Button>
             <Button

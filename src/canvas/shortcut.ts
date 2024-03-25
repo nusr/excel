@@ -5,7 +5,12 @@ import {
   EditorStatus,
   IRange,
 } from '@/types';
-import { BOTTOM_BUFF, SCROLL_SIZE, isMac } from '@/util';
+import {
+  BOTTOM_BUFF,
+  SCROLL_SIZE,
+  isMac,
+  SHEET_ITEM_TEST_ID_PREFIX,
+} from '@/util';
 import { coreStore } from '@/containers/store';
 
 export function handleTabClick(controller: IController) {
@@ -81,10 +86,20 @@ export function computeScrollPosition(
     scrollLeft,
   };
 }
+
+export function scrollSheetToView(sheetId: string) {
+  const selector = `div[data-testid="${SHEET_ITEM_TEST_ID_PREFIX}${sheetId}"]`;
+  const dom = document.querySelector(selector);
+  if (dom && typeof dom.scrollIntoView === 'function') {
+    dom.scrollIntoView();
+  }
+}
+
 export function scrollToView(controller: IController, range: IRange) {
   const sheetId = range.sheetId || controller.getCurrentSheetId();
   if (sheetId !== controller.getCurrentSheetId()) {
     controller.setCurrentSheetId(sheetId);
+    scrollSheetToView(sheetId);
   }
   const sheetInfo = controller.getSheetInfo(sheetId);
   if (!sheetInfo) {

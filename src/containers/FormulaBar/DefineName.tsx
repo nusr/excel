@@ -3,10 +3,11 @@ import React, {
   useState,
   useRef,
   useSyncExternalStore,
+  useMemo,
 } from 'react';
 import { IController } from '@/types';
 import styles from './index.module.css';
-import { classnames, parseReference } from '@/util';
+import { classnames, parseReference, MAX_NAME_LENGTH } from '@/util';
 import { scrollToView } from '@/canvas';
 import { Button, Icon, SelectPopup } from '../components';
 import { defineNameStore } from '../store';
@@ -30,6 +31,9 @@ export const DefineName: React.FunctionComponent<Props> = ({
     defineNameStore.subscribe,
     defineNameStore.getSnapshot,
   );
+  const popupList = useMemo(() => {
+    return defineNameList.map((v) => ({ disabled: false, value: v, label: v }));
+  }, [defineNameList]);
   useEffect(() => {
     setValue(displayName);
   }, [displayName]);
@@ -76,8 +80,8 @@ export const DefineName: React.FunctionComponent<Props> = ({
     setActive((v) => !v);
   };
   const handleSelect = (value: string) => {
-    setActive(false)
-    if (value === defineName || !value) {
+    setActive(false);
+    if (!value) {
       return;
     }
     const range = controller.checkDefineName(value);
@@ -101,6 +105,7 @@ export const DefineName: React.FunctionComponent<Props> = ({
         onChange={handleChange}
         className={styles['formula-bar-name-editor']}
         onKeyDown={handleKeyDown}
+        maxLength={MAX_NAME_LENGTH * 8}
       />
       <Button
         className={styles['formula-bar-name-select']}
@@ -109,8 +114,9 @@ export const DefineName: React.FunctionComponent<Props> = ({
         <Icon name="down"></Icon>
       </Button>
       <SelectPopup
-        data={defineNameList}
         active={active}
+        value={defineName}
+        data={popupList}
         onChange={handleSelect}
       />
     </div>

@@ -2,6 +2,7 @@ import React, { CSSProperties, FunctionComponent } from 'react';
 import { classnames } from '@/util';
 import { OptionItem } from '@/types';
 import styles from './index.module.css';
+import { Icon } from '../BaseIcon';
 import { useClickOutside } from '../../hooks';
 
 export interface SelectProps {
@@ -67,31 +68,44 @@ Select.displayName = 'Select';
 
 export interface SelectPopupProps {
   active: boolean;
-  data: Array<string>;
+  value: string;
+  data: Array<OptionItem>;
   onChange: (value: string) => void;
   className?: string;
+  position?: 'top' | 'bottom';
+  style?: React.CSSProperties;
 }
 
 export const SelectPopup: FunctionComponent<SelectPopupProps> = (props) => {
-  const [ref] = useClickOutside(()=> props.onChange(''));
+  const [ref] = useClickOutside(() => props.onChange(''));
   const handleSelect = (event: React.MouseEvent<HTMLDivElement>) => {
-    const value = (event.target as any).dataset?.value;
-    if (!value) {
+    const v = (event.target as any).dataset?.value;
+    if (!v || v === props.value) {
       return;
     }
-    props.onChange(value);
+    props.onChange(v);
   };
   return (
     <div
-      className={classnames(styles['popup-container'], {
-        [styles.active]: props.active,
-      })}
+      className={classnames(
+        styles['popup-container'],
+        props.position === 'top' ? styles.top : '',
+        {
+          [styles.active]: props.active,
+        },
+      )}
       onClick={handleSelect}
       ref={ref}
+      style={props.style}
     >
       {props.data.map((v) => (
-        <div key={v} data-value={v} className={styles['popup-item']}>
-          {v}
+        <div key={v.value} className={styles['popup-item']}>
+          <span className={styles['popup-item-content']} data-value={v.value}>
+            {v.label}
+          </span>
+          <span className={styles['popup-item-icon']}>
+            {v.value === props.value && <Icon name="confirm" />}
+          </span>
         </div>
       ))}
     </div>

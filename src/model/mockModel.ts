@@ -315,4 +315,16 @@ if (!isMobile()) {
   };
 }
 
+for (let i = 9; i < 20; i++) {
+  const id = String(i);
+  MOCK_MODEL.workbook[id] = {
+    sheetId: id,
+    name: `Sheet${id}`,
+    isHide: false,
+    colCount: DEFAULT_COL_COUNT,
+    rowCount: DEFAULT_ROW_COUNT,
+    sort: i,
+  };
+}
+
 export { MOCK_MODEL };

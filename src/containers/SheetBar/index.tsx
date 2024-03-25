@@ -2,25 +2,43 @@ import React, {
   FunctionComponent,
   useSyncExternalStore,
   useState,
+  useMemo,
 } from 'react';
-import { classnames, DEFAULT_POSITION } from '@/util';
-import { Button, Icon } from '../components';
+import {
+  classnames,
+  DEFAULT_POSITION,
+  MAX_NAME_LENGTH,
+  sizeConfig,
+  SHEET_ITEM_TEST_ID_PREFIX,
+} from '@/util';
+import { Button, Icon, SelectPopup } from '../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
 import { IController } from '@/types';
 import { sheetListStore, activeCellStore } from '@/containers/store';
+import { scrollSheetToView } from '@/canvas';
 
 interface Props {
   controller: IController;
 }
+
+const menuStyle = { width: 200, left: sizeConfig.largePadding };
 
 export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
   const sheetList = useSyncExternalStore(
     sheetListStore.subscribe,
     sheetListStore.getSnapshot,
   );
-  // filter hide sheet
-  const realSheetList = sheetList.filter((v) => !v.isHide);
+  const realSheetList = useMemo(() => {
+    return sheetList.filter((v) => !v.isHide);
+  }, [sheetList]);
+  const popupList = useMemo(() => {
+    return sheetList
+      .filter((v) => !v.isHide)
+      .map((v) => ({ value: v.sheetId, label: v.name, disabled: false }));
+  }, [sheetList]);
+
+  const [popupActive, setPopupActive] = useState(false);
   const { sheetId: currentSheetId } = useSyncExternalStore(
     activeCellStore.subscribe,
     activeCellStore.getSnapshot,
@@ -48,8 +66,34 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
       setSheetName(t);
     }
   };
+  const handleChange = (value: string) => {
+    setPopupActive(false);
+    if (!value) {
+      return;
+    }
+    controller.setCurrentSheetId(value);
+    scrollSheetToView(value);
+  };
   return (
     <div className={styles['sheet-bar-wrapper']}>
+      <div>
+        <Button
+          onClick={() => setPopupActive((v) => !v)}
+          className={styles['menu-button']}
+        >
+          <Icon name="menu" />
+        </Button>
+        {popupActive && (
+          <SelectPopup
+            data={popupList}
+            onChange={handleChange}
+            active
+            position="top"
+            style={menuStyle}
+            value={currentSheetId}
+          />
+        )}
+      </div>
       <div className={styles['sheet-bar-list']} data-testid="sheet-bar-list">
         {realSheetList.map((item) => {
           const isActive = currentSheetId === item.sheetId;
@@ -64,6 +108,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
           }
           return (
             <div
+              data-testid={`${SHEET_ITEM_TEST_ID_PREFIX}${item.sheetId}`}
               key={item.sheetId}
               className={cls}
               style={style}
@@ -83,6 +128,7 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
                   onKeyDown={handleKeyDown}
                   type="text"
                   spellCheck
+                  maxLength={MAX_NAME_LENGTH}
                 />
               ) : (
                 <React.Fragment>
@@ -101,15 +147,13 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
           );
         })}
       </div>
-      <div className={styles['sheet-bar-add']}>
-        <Button
-          onClick={() => controller.addSheet()}
-          type="circle"
-          className={styles['add-button']}
-        >
-          <Icon name="plus" />
-        </Button>
-      </div>
+      <Button
+        onClick={() => controller.addSheet()}
+        type="circle"
+        className={styles['add-button']}
+      >
+        <Icon name="plus" />
+      </Button>
       {menuPosition >= 0 && (
         <SheetBarContextMenu
           controller={controller}
