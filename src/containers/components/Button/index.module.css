@@ -1,8 +1,6 @@
 .buttonWrapper {
-  padding: 0 4px;
+  padding: 0 var(--tinyPadding);
   min-width: 20px;
-  height: 20px;
-  line-height: 20px;
   text-align: center;
   box-sizing: border-box;
   cursor: pointer;
@@ -11,6 +9,7 @@
   display: block;
   background-color: var(--white);
   color: var(--black);
+  height: 20px;
 }
 
 .buttonWrapper.circle {

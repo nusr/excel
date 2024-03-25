@@ -117,6 +117,7 @@ export interface IModel extends IBaseModel {
   pasteRange: (range: IRange, isCut: boolean) => IRange;
   emitChange: (dataset: Set<ChangeEventType>) => void;
 }
+export type DefinedNameItem = { range: IRange; name: string };
 
 export interface IBaseModel {
   getCell: (range: IRange) => ModelCellValue | null;
@@ -168,6 +169,7 @@ export interface IBaseModel {
   getDefineName: (range: IRange) => string;
   setDefineName: (range: IRange, name: string) => void;
   checkDefineName: (name: string) => IRange | undefined;
+  getDefineNameList: () => DefinedNameItem[];
   getFloatElementList: (sheetId: string) => FloatElement[];
   addFloatElement: (data: FloatElement) => void;
   updateFloatElement(uuid: string, value: Partial<FloatElement>): void;

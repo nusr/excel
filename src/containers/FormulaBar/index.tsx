@@ -40,7 +40,11 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
   };
   return (
     <div className={styles['formula-bar-wrapper']} data-testid="formula-bar">
-      <DefineName controller={controller} displayName={displayName} />
+      <DefineName
+        controller={controller}
+        displayName={displayName}
+        defineName={activeCell.defineName}
+      />
       <div className={styles['formula-bar-editor-wrapper']}>
         {editorStatus !== EditorStatus.NONE ? (
           <FormulaEditor

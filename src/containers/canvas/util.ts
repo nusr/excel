@@ -16,6 +16,7 @@ import {
   scrollStore,
   floatElementStore,
   FloatElementItem,
+  defineNameStore,
 } from '@/containers/store';
 import { MainCanvas, registerGlobalEvent, Content } from '@/canvas';
 
@@ -172,6 +173,10 @@ const handleStateChange = (
       scrollLeft: scroll.scrollLeft,
       scrollTop: scroll.scrollTop,
     });
+  }
+  if (changeSet.has('defineName')) {
+    const list = controller.getDefineNameList().map((v) => v.name);
+    defineNameStore.setState(list);
   }
 
   if (

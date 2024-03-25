@@ -3,6 +3,7 @@ import {
   IController,
   EUnderLine,
   EditorStatus,
+  IRange,
 } from '@/types';
 import { BOTTOM_BUFF, SCROLL_SIZE, isMac } from '@/util';
 import { coreStore } from '@/containers/store';
@@ -79,6 +80,49 @@ export function computeScrollPosition(
     scrollTop,
     scrollLeft,
   };
+}
+export function scrollToView(controller: IController, range: IRange) {
+  const sheetId = range.sheetId || controller.getCurrentSheetId();
+  if (sheetId !== controller.getCurrentSheetId()) {
+    controller.setCurrentSheetId(sheetId);
+  }
+  const sheetInfo = controller.getSheetInfo(sheetId);
+  if (!sheetInfo) {
+    return;
+  }
+  if (
+    range.row < 0 ||
+    range.col < 0 ||
+    range.row >= sheetInfo.rowCount ||
+    range.col >= sheetInfo.colCount
+  ) {
+    return;
+  }
+  const scroll = controller.getScroll(sheetId);
+  const old = controller.computeCellPosition({
+    row: scroll.row,
+    col: scroll.col,
+    colCount: 1,
+    rowCount: 1,
+    sheetId: sheetId,
+  });
+  const size = controller.getDomRect();
+  const headerSize = controller.getHeaderSize();
+  const { top, left } = controller.computeCellPosition(range);
+  const minTop = old.top;
+  const minLeft = old.left;
+  const maxTop = old.top + size.height - headerSize.height;
+  const maxLeft = old.left + size.width - headerSize.width;
+  if (top >= minTop && top < maxTop && left >= minLeft && left <= maxLeft) {
+    controller.setActiveCell(range);
+    return;
+  }
+  const oldPosition = controller.computeCellPosition(
+    controller.getActiveCell(),
+  );
+
+  scrollBar(controller, left - oldPosition.left, top - oldPosition.top);
+  controller.setActiveCell(range);
 }
 
 export function scrollBar(

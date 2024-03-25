@@ -72,12 +72,13 @@ export class MainCanvas {
     const headerSize = this.controller.getHeaderSize();
     const contentWidth = width - headerSize.width;
     const contentHeight = height - headerSize.height;
-    this.renderGrid(contentWidth, contentHeight);
-    this.renderRowsHeader(contentHeight);
-    this.renderColsHeader(contentWidth);
+    const realContentHeight = this.renderRowsHeader(contentHeight);
+    const realContentWidth = this.renderColsHeader(contentWidth);
+    this.renderGrid(contentWidth, realContentHeight);
+
     this.renderTriangle();
 
-    const result = this.renderSelection();
+    const result = this.renderSelection(realContentWidth, realContentHeight);
     this.renderAntLine(result);
 
     this.renderMergeCell();
@@ -214,7 +215,7 @@ export class MainCanvas {
     }
     return mergeCells.some((v) => col >= v.col && col < v.col + v.colCount);
   }
-  private renderRowsHeader(height: number): void {
+  private renderRowsHeader(height: number) {
     const { controller } = this;
     const { row: rowIndex } = controller.getScroll();
     const headerSize = controller.getHeaderSize();
@@ -231,8 +232,11 @@ export class MainCanvas {
     let y = headerSize.height;
     let i = rowIndex;
 
+    let realHeight = 0;
+
     for (; i < rowCount; i++) {
       const rowHeight = controller.getRowHeight(i).len;
+      realHeight += rowHeight;
       let temp = y;
       if (i === rowIndex) {
         temp += thinLineWidth() / 2;
@@ -260,8 +264,9 @@ export class MainCanvas {
     pointList.push([0, 0], [0, y]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
+    return realHeight;
   }
-  private renderColsHeader(width: number): void {
+  private renderColsHeader(width: number) {
     const { controller } = this;
 
     const { col: colIndex } = controller.getScroll();
@@ -279,8 +284,10 @@ export class MainCanvas {
 
     let x = headerSize.width;
     let i = colIndex;
+    let realWidth = 0;
     for (; i < colCount; i++) {
       const colWidth = controller.getColWidth(i).len;
+      realWidth += colWidth;
       let temp = x;
       if (i === colIndex) {
         temp += thinLineWidth() / 2;
@@ -307,6 +314,7 @@ export class MainCanvas {
     pointList.push([0, 0], [x, 0]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
+    return realWidth;
   }
   private renderTriangle(): void {
     const headerSize = this.controller.getHeaderSize();
@@ -348,20 +356,23 @@ export class MainCanvas {
     );
   }
 
-  private renderSelection(): CanvasOverlayPosition {
+  private renderSelection(
+    contentWith: number,
+    contentHeight: number,
+  ): CanvasOverlayPosition {
     const { controller } = this;
     const range = controller.getActiveCell();
     canvasLog('render canvas selection');
     if (isSheet(range)) {
-      const result = this.renderSelectAll();
+      const result = this.renderSelectAll(contentWith, contentHeight);
       return result;
     }
     if (isCol(range)) {
-      const result = this.renderSelectCol();
+      const result = this.renderSelectCol(contentHeight);
       return result;
     }
     if (isRow(range)) {
-      const result = this.renderSelectRow();
+      const result = this.renderSelectRow(contentWith);
       return result;
     }
     return this.renderSelectRange();
@@ -454,31 +465,44 @@ export class MainCanvas {
       height,
     };
   }
-  private renderSelectAll(): CanvasOverlayPosition {
+  private renderSelectAll(
+    contentWith: number,
+    contentHeight: number,
+  ): CanvasOverlayPosition {
     const { controller } = this;
-    const { width, height } = this.controller.getDomRect();
     this.ctx.fillStyle = getThemeColor('selectionColor');
-    // main
-    fillRect(this.ctx, 0, 0, width, height);
-
     const headerSize = controller.getHeaderSize();
+    // main
+    fillRect(
+      this.ctx,
+      0,
+      0,
+      contentWith + headerSize.width,
+      contentHeight + headerSize.height,
+    );
+
     this.ctx.strokeStyle = getThemeColor('primaryColor');
     this.ctx.lineWidth = dpr();
     this.renderActiveCell();
     // highlight line
-    strokeRect(this.ctx, headerSize.width, headerSize.height, width, height);
+    strokeRect(
+      this.ctx,
+      headerSize.width,
+      headerSize.height,
+      contentWith,
+      contentHeight,
+    );
     return {
       left: headerSize.width,
       top: headerSize.height,
-      width: width,
-      height: height,
+      width: contentWith,
+      height: contentHeight,
     };
   }
-  private renderSelectCol() {
+  private renderSelectCol(height: number) {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
     const range = controller.getActiveCell();
-    const { height } = controller.getDomRect();
     this.ctx.fillStyle = getThemeColor('selectionColor');
     const activeCell = controller.computeCellPosition({
       row: range.row,
@@ -522,11 +546,10 @@ export class MainCanvas {
       height,
     };
   }
-  private renderSelectRow() {
+  private renderSelectRow(width: number) {
     const { controller } = this;
     const headerSize = controller.getHeaderSize();
     const range = controller.getActiveCell();
-    const { width } = controller.getDomRect();
     this.ctx.fillStyle = getThemeColor('selectionColor');
     const activeCell = controller.computeCellPosition({
       row: range.row,

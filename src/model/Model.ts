@@ -12,6 +12,7 @@ import {
   IHistory,
   ChangeEventType,
   ICommandItem,
+  DefinedNameItem,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -190,7 +191,7 @@ export class Model implements IModel {
     const list = sheetList.filter((v) => !v.isHide);
     assert(
       list.length >= 2,
-      $('a-workbook-must-contains-at-least-one-visible-worksheet')
+      $('a-workbook-must-contains-at-least-one-visible-worksheet'),
     );
     const newSheetId = this.getNextSheetId(id);
     const oldSheet = this.workbook[id];
@@ -244,7 +245,7 @@ export class Model implements IModel {
     const list = sheetList.filter((v) => !v.isHide);
     assert(
       list.length >= 2,
-      $('a-workbook-must-contains-at-least-one-visible-worksheet')
+      $('a-workbook-must-contains-at-least-one-visible-worksheet'),
     );
     const newSheetId = this.getNextSheetId(sheetId);
     this.workbook[id].isHide = true;
@@ -960,6 +961,12 @@ export class Model implements IModel {
         });
       }
     }
+  }
+  getDefineNameList(): DefinedNameItem[] {
+    return Object.entries(this.definedNames).map((v) => ({
+      name: v[0],
+      range: v[1],
+    }));
   }
   getDefineName(range: IRange): string {
     const sheetId = range.sheetId || this.currentSheetId;

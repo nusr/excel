@@ -7,3 +7,4 @@ export type { CellStoreType } from './activeCell';
 export { floatElementStore } from './floatElement';
 export type { FloatElementItem } from './floatElement';
 export type { SheetItem } from './sheetList';
+export { defineNameStore } from './defineName';

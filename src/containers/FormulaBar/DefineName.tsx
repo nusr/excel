@@ -1,20 +1,35 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
 import { IController } from '@/types';
 import styles from './index.module.css';
-import { parseReference } from '@/util';
+import { classnames, parseReference } from '@/util';
+import { scrollToView } from '@/canvas';
+import { Button, Icon, SelectPopup } from '../components';
+import { defineNameStore } from '../store';
 
 interface Props {
   controller: IController;
   displayName: string;
+  defineName: string;
 }
 
 export const DefineName: React.FunctionComponent<Props> = ({
   controller,
   displayName,
+  defineName,
 }) => {
   const ref = useRef<HTMLInputElement>(null);
 
   const [value, setValue] = useState(displayName);
+  const [active, setActive] = useState(false);
+  const defineNameList = useSyncExternalStore(
+    defineNameStore.subscribe,
+    defineNameStore.getSnapshot,
+  );
   useEffect(() => {
     setValue(displayName);
   }, [displayName]);
@@ -30,14 +45,21 @@ export const DefineName: React.FunctionComponent<Props> = ({
       const range = controller.checkDefineName(t);
       if (range) {
         setValue(displayName);
-        controller.setActiveCell(range);
+        scrollToView(controller, range);
         return;
       }
-      const r = parseReference(t);
-      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
+      const r = parseReference(t, (sheetName: string) => {
+        const list = controller.getSheetList();
+        const item = list.find((v) => v.name === sheetName);
+        return item?.sheetId || '';
+      });
+      const sheetInfo = controller.getSheetInfo(
+        r?.sheetId || controller.getCurrentSheetId(),
+      )!;
       if (r && r.col < sheetInfo.colCount && r.row < sheetInfo.rowCount) {
+        r.sheetId = r.sheetId || controller.getCurrentSheetId();
         setValue(displayName);
-        controller.setActiveCell(r);
+        scrollToView(controller, r);
         return;
       }
       if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(t) && t.length <= 255) {
@@ -50,8 +72,27 @@ export const DefineName: React.FunctionComponent<Props> = ({
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(event.currentTarget.value);
   };
+  const handleClick = () => {
+    setActive((v) => !v);
+  };
+  const handleSelect = (value: string) => {
+    setActive(false)
+    if (value === defineName || !value) {
+      return;
+    }
+    const range = controller.checkDefineName(value);
+    if (!range) {
+      return;
+    }
+    scrollToView(controller, range);
+  };
   return (
-    <div className={styles['formula-bar-name']} data-testid="formula-bar-name">
+    <div
+      className={classnames(styles['formula-bar-name'], {
+        [styles.active]: active,
+      })}
+      data-testid="formula-bar-name"
+    >
       <input
         value={value}
         ref={ref}
@@ -60,6 +101,17 @@ export const DefineName: React.FunctionComponent<Props> = ({
         onChange={handleChange}
         className={styles['formula-bar-name-editor']}
         onKeyDown={handleKeyDown}
+      />
+      <Button
+        className={styles['formula-bar-name-select']}
+        onClick={handleClick}
+      >
+        <Icon name="down"></Icon>
+      </Button>
+      <SelectPopup
+        data={defineNameList}
+        active={active}
+        onChange={handleSelect}
       />
     </div>
   );

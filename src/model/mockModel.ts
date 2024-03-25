@@ -262,6 +262,13 @@ const MOCK_MODEL: WorkBookJSON = {
       colCount: 1,
       sheetId: '5',
     },
+    doo: {
+      row: 3,
+      col: 3,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '5',
+    },
   },
   drawings: {},
 };

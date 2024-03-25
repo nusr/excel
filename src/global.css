@@ -22,7 +22,11 @@ div,
 span {
   box-sizing: border-box;
 }
+
 input {
   background-color: var(--white);
   color: var(--black);
+}
+input[type='number'] {
+  border: 1px solid var(--borderColor);
 }

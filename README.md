@@ -17,6 +17,25 @@ npm install
 npm run start
 ```
 
+## directory description
+
+```bash
+src
+├── canvas
+├── containers
+│   ├── Excel      # Excel export and import
+│   ├── components # basic components
+│   ├── hooks      # common React hooks
+│   └── store      # React store by useSyncExternalStore
+├── controller     # spreadsheet controller
+├── formula        # Recursive descent parser parsing Excel formulas
+├── i18n           # i18n
+├── model          # spreadsheet model
+├── types          # TypeScript types
+└── util           # common methods
+    └── theme      # dark mode
+```
+
 ## Supported Features
 
 - [x] Font

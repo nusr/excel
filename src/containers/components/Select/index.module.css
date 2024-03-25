@@ -14,3 +14,29 @@
 .selectItem.disabled:hover {
   background-color: var(--white);
 }
+
+.popup-container {
+  position: absolute;
+  background-color: var(--white);
+  border-radius: var(--borderRadius);
+  border: 1px solid var(--borderColor);
+  display: none;
+  text-align: center;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: var(--lowZIndex);
+  max-width: 200px;
+  overflow: auto;
+}
+.popup-container.active {
+  display: block;
+}
+
+.popup-item {
+  padding: var(--tinyPadding);
+  border-bottom: 1px solid var(--borderColor);
+}
+.popup-item:hover {
+  background-color: var(--buttonActiveColor);
+}

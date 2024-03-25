@@ -16,6 +16,7 @@ import {
   MainDom,
   FloatElement,
   IPosition,
+  DefinedNameItem,
 } from '@/types';
 import {
   controllerLog,
@@ -835,6 +836,9 @@ export class Controller implements IController {
   }
   getDefineName(range: IRange): string {
     return this.model.getDefineName(range);
+  }
+  getDefineNameList(): DefinedNameItem[] {
+    return this.model.getDefineNameList()
   }
   setDefineName(range: IRange, name: string): void {
     this.model.setDefineName(range, name);
