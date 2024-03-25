@@ -19,12 +19,13 @@ export const I18N: React.FunctionComponent = () => {
     window.location.reload();
   };
   return (
-    <div className={styles.i18n}>
+    <div className={styles.i18n} data-testid="menubar-i18n">
       <Select
         data={dataList}
         defaultValue={defaultValue}
         onChange={handleChange}
-      ></Select>
+        testId="menubar-i18n-select"
+      />
     </div>
   );
 };

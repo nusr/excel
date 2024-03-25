@@ -14,6 +14,7 @@ export interface SelectProps {
   onChange: (value: string | number) => void;
   title?: string;
   className?: string;
+  testId?: string;
 }
 
 export const Select: FunctionComponent<SelectProps> = (props) => {
@@ -26,6 +27,7 @@ export const Select: FunctionComponent<SelectProps> = (props) => {
     getItemStyle = () => ({}),
     title,
     defaultValue,
+    testId,
   } = props;
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onChange(event.currentTarget.value);
@@ -40,6 +42,7 @@ export const Select: FunctionComponent<SelectProps> = (props) => {
       name="select"
       className={classnames(styles.selectList, className)}
       title={title}
+      data-testid={testId}
     >
       {data.map((item) => {
         const value = typeof item === 'object' ? item.value : item;

@@ -57,10 +57,11 @@ export const Theme: React.FunctionComponent<Props> = memo(({ toggleTheme }) => {
     toggleTheme();
   };
   return (
-    <div>
+    <div data-testid="menubar-theme" className={styles.theme}>
       <Button
         onClick={() => handleClick(themeData)}
         className={styles['theme-button']}
+        testId="menubar-theme-toggle"
       >
         <Icon name={themeData === 'dark' ? 'sun' : 'moon'} />
       </Button>

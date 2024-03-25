@@ -16,7 +16,6 @@ import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
 import { IController } from '@/types';
 import { sheetListStore, activeCellStore } from '@/containers/store';
-import { scrollSheetToView } from '@/canvas';
 
 interface Props {
   controller: IController;
@@ -72,7 +71,6 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
       return;
     }
     controller.setCurrentSheetId(value);
-    scrollSheetToView(value);
   };
   return (
     <div className={styles['sheet-bar-wrapper']}>

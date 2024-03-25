@@ -8,6 +8,7 @@ import styles from './index.module.css';
 import { Theme } from './Theme';
 import { $ } from '@/i18n';
 import { I18N } from './I18N';
+import { FPS } from './FPS';
 
 interface Props {
   controller: IController;
@@ -70,6 +71,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = ({
       <Theme
         toggleTheme={() => controller.setChangeSet(new Set(['cellStyle']))}
       />
+      <FPS />
     </div>
   );
 };

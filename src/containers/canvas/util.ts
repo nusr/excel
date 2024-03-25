@@ -18,7 +18,12 @@ import {
   FloatElementItem,
   defineNameStore,
 } from '@/containers/store';
-import { MainCanvas, registerGlobalEvent, Content } from '@/canvas';
+import {
+  MainCanvas,
+  registerGlobalEvent,
+  Content,
+  scrollSheetToView,
+} from '@/canvas';
 
 function createCanvas() {
   const canvas = document.createElement('canvas');
@@ -137,6 +142,9 @@ const handleStateChange = (
   changeSet: Set<ChangeEventType>,
   controller: IController,
 ) => {
+  if (changeSet.has('sheetId')) {
+    scrollSheetToView(controller.getCurrentSheetId());
+  }
   if (
     changeSet.has('range') ||
     changeSet.has('cellStyle') ||
@@ -273,9 +281,9 @@ export function initCanvas(controller: IController): () => void {
   ]);
   handleStateChange(changeSet, controller);
   resize(changeSet);
-  setTimeout(() => {
+  requestAnimationFrame(() => {
     resize(changeSet);
-  }, 10);
+  });
 
   return () => {
     removeEvent();

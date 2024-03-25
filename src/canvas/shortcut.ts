@@ -99,7 +99,6 @@ export function scrollToView(controller: IController, range: IRange) {
   const sheetId = range.sheetId || controller.getCurrentSheetId();
   if (sheetId !== controller.getCurrentSheetId()) {
     controller.setCurrentSheetId(sheetId);
-    scrollSheetToView(sheetId);
   }
   const sheetInfo = controller.getSheetInfo(sheetId);
   if (!sheetInfo) {

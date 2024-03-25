@@ -77,6 +77,7 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = ({
         <div
           className={classnames(styles.menuContainer, styles.portal)}
           style={style}
+          data-testid={`${testId}-portal`}
         >
           <ul className={styles.menu}>{children}</ul>
         </div>
