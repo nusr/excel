@@ -1,27 +1,8 @@
 import { IController, ResultType } from '@/types';
-import { saveAs, coordinateToString } from '@/util';
+import { coordinateToString, convertResultTypeToString } from '@/util';
 
 const DELIMITER = ',';
 const RECORD_DELIMITER = '\n';
-
-function processItem(value: any) {
-  const type = typeof value;
-  if (type === 'string') {
-    return value;
-  } else if (type === 'bigint') {
-    return '' + value;
-  } else if (type === 'number') {
-    return '' + value;
-  } else if (type === 'boolean') {
-    return value ? 'TRUE' : 'FALSE';
-  } else if (value instanceof Date) {
-    return '' + value.getTime();
-  } else if (type === 'object' && value !== null) {
-    return JSON.stringify(value);
-  } else {
-    return '';
-  }
-}
 
 function processRow(row: ResultType[]) {
   const quote = '"';
@@ -33,7 +14,7 @@ function processRow(row: ResultType[]) {
   let csvRecord = '';
   for (let j = 0; j < row.length; j++) {
     const field = row[j];
-    let value = processItem(field);
+    let value = convertResultTypeToString(field);
     if ('' === value) {
       csvRecord += value;
     } else if (value) {
@@ -84,7 +65,7 @@ function processRow(row: ResultType[]) {
   }
   return csvRecord;
 }
-export function exportToCsv(fileName: string, controller: IController) {
+export function exportToCsv(controller: IController) {
   const sheetData =
     controller.toJSON().worksheets[controller.getCurrentSheetId()];
   const csvList: string[] = [];
@@ -110,8 +91,5 @@ export function exportToCsv(fileName: string, controller: IController) {
       break;
     }
   }
-  const blob = new Blob([csvList.join(RECORD_DELIMITER)], {
-    type: 'text/csv;charset=utf-8;',
-  });
-  saveAs(blob, fileName);
+  return csvList.join(RECORD_DELIMITER);
 }

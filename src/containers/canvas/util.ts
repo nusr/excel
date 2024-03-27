@@ -7,6 +7,7 @@ import {
   parseNumber,
   HIDE_CELL,
   getThemeColor,
+  convertResultTypeToString,
 } from '@/util';
 import {
   coreStore,
@@ -121,7 +122,7 @@ function updateActiveCell(controller: IController) {
     rowCount: activeCell.rowCount,
     colCount: activeCell.colCount,
     sheetId,
-    value: cell?.value,
+    value: convertResultTypeToString(cell?.value),
     formula: cell?.formula,
     isBold,
     isItalic,

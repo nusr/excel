@@ -9,6 +9,7 @@ import { Theme } from './Theme';
 import { $ } from '@/i18n';
 import { I18N } from './I18N';
 import { FPS } from './FPS';
+import { saveAs } from '@/util';
 
 interface Props {
   controller: IController;
@@ -24,7 +25,11 @@ export const MenuBarContainer: React.FunctionComponent<Props> = ({
     exportToXLSX(`excel_${Date.now()}.xlsx`, controller);
   };
   const handleExportCSV = () => {
-    exportToCsv(`excel_${Date.now()}.csv`, controller);
+    const text = exportToCsv(controller);
+    const blob = new Blob([text], {
+      type: 'text/csv;charset=utf-8;',
+    });
+    saveAs(blob, `excel_${Date.now()}.csv`);
   };
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     event.stopPropagation();

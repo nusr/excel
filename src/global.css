@@ -24,8 +24,10 @@ span {
 }
 
 input {
-  background-color: var(--white);
   color: var(--black);
+}
+html[data-theme='dark'] input{
+  background-color: var(--white);
 }
 input[type='number'] {
   border: 1px solid var(--borderColor);

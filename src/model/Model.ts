@@ -740,6 +740,7 @@ export class Model implements IModel {
     }
 
     const newData = { ...oldData };
+    const old = this.customWidth[key];
 
     newData.len = width;
     this.customWidth[key] = newData;
@@ -750,7 +751,7 @@ export class Model implements IModel {
       t: 'customWidth',
       k: key,
       n: newData,
-      o: this.customWidth[key] ? this.customWidth[key] : DELETE_FLAG,
+      o: old ? old : DELETE_FLAG,
     });
   }
 
@@ -813,6 +814,7 @@ export class Model implements IModel {
     }
 
     const newData = { ...oldData };
+    const old = this.customHeight[key];
     newData.len = height;
     this.customHeight[key] = newData;
     if (!_isChanged) {
@@ -822,7 +824,7 @@ export class Model implements IModel {
       t: 'customHeight',
       k: key,
       n: newData,
-      o: this.customHeight[key] ? this.customHeight[key] : DELETE_FLAG,
+      o: old ? old : DELETE_FLAG,
     });
   }
   canRedo(): boolean {
@@ -899,7 +901,7 @@ export class Model implements IModel {
       t: 'worksheets',
       k: id,
       n: DELETE_FLAG,
-      o: oldSheetData,
+      o: { ...oldSheetData },
     });
 
     for (const [key, value] of Object.entries(this.mergeCells)) {
@@ -921,7 +923,7 @@ export class Model implements IModel {
           t: 'drawings',
           k: key,
           n: DELETE_FLAG,
-          o: value,
+          o: { ...value },
         });
       }
     }
@@ -951,7 +953,7 @@ export class Model implements IModel {
     }
 
     for (const [key, value] of Object.entries(this.definedNames)) {
-      if (key.startsWith(id)) {
+      if (value.sheetId === id) {
         delete this.definedNames[key];
         this.history.push({
           t: 'definedNames',
@@ -963,7 +965,11 @@ export class Model implements IModel {
     }
   }
   getDefineNameList(): DefinedNameItem[] {
-    return Object.entries(this.definedNames).map((v) => ({
+    const list = Object.entries(this.definedNames);
+    if (list.length === 0) {
+      return [];
+    }
+    return list.map((v) => ({
       name: v[0],
       range: v[1],
     }));
@@ -982,20 +988,21 @@ export class Model implements IModel {
   }
   setDefineName(range: IRange, name: string): void {
     const oldName = this.getDefineName(range);
-    if (
-      oldName &&
-      Object.prototype.hasOwnProperty.call(this.definedNames, oldName)
-    ) {
-      delete this.definedNames[oldName];
+    if (oldName === name) {
+      return;
     }
+
     const result: IRange = {
       row: range.row,
       col: range.col,
-      sheetId: this.currentSheetId,
+      sheetId: range.sheetId || this.currentSheetId,
       colCount: 1,
       rowCount: 1,
     };
     this.definedNames[name] = result;
+    if (oldName) {
+      delete this.definedNames[oldName];
+    }
 
     if (oldName) {
       this.history.push({
@@ -1035,8 +1042,15 @@ export class Model implements IModel {
     if (oldData.value === value) {
       return;
     }
-    const oldValue = oldData.value ?? '';
-    const newValue = value ?? '';
+    const oldValue = oldData.value;
+    let newValue = value;
+    if (
+      typeof value === 'string' &&
+      ['TRUE', 'FALSE'].includes(value.toUpperCase())
+    ) {
+      newValue = value.toUpperCase() === 'TRUE' ? true : false;
+    }
+
     sheetData[key].value = newValue;
 
     this.history.push({

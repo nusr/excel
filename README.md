@@ -21,8 +21,8 @@ npm run start
 
 ```bash
 src
-├── canvas
-├── containers
+├── canvas         # two layer canvas
+├── containers     # spreadsheet view
 │   ├── Excel      # Excel export and import
 │   ├── components # basic components
 │   ├── hooks      # common React hooks

@@ -34,7 +34,11 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
     );
     const state = useRef<State>({ ...INITIAL_STATE });
     const [position, setPosition] = useState<FloatElementPosition>({
-      ...INITIAL_STATE.position,
+      width: -1,
+      height: -1,
+      imageAngle: 0,
+      top: -1,
+      left: -1,
     });
 
     const handleResizePointerDown = (
@@ -105,7 +109,6 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
           width,
           height,
         };
-        state.current.position = newData;
         return newData;
       });
     };
@@ -118,7 +121,6 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
           ...old,
           imageAngle,
         };
-        state.current.position = newData;
         return newData;
       });
     };
@@ -134,20 +136,20 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
         if (state.current.resizePosition) {
           if (state.current.resizePosition === ResizePosition.rotate) {
             controller.updateFloatElement(activeUuid, {
-              imageAngle: state.current.position.imageAngle,
+              imageAngle: position.imageAngle,
             });
           } else if (
-            state.current.position.height > 0 &&
-            state.current.position.width > 0
+            position.height > 0 &&
+            position.width > 0
           ) {
             controller.updateFloatElement(activeUuid, {
-              height: state.current.position.height,
-              width: state.current.position.width,
+              height: position.height,
+              width: position.width,
             });
           }
         }
         const rect = controller.getDomRect();
-        const { left, top } = state.current.position;
+        const { left, top } = position;
         if (left >= 0 && top >= 0 && left < rect.width && top < rect.height) {
           const newRange = getHitInfo(controller, left, top);
           if (newRange) {
@@ -194,7 +196,6 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
             width: old.width,
             height: old.height,
           };
-          state.current.position = newData;
           return newData;
         });
         state.current.moveStartX = event.clientX;
@@ -206,7 +207,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
         document.removeEventListener('pointerup', handlePointerUp);
         document.removeEventListener('pointermove', handlePointerMove);
       };
-    }, [activeUuid]);
+    }, [activeUuid, position]);
     return (
       <Fragment>
         <div
@@ -242,7 +243,6 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
                 }
                 state.current.moveStartX = event.clientX;
                 state.current.moveStartY = event.clientY;
-                state.current.position = { ...INITIAL_STATE.position };
                 controller.setFloatElementUuid(v.uuid);
                 coreStore.mergeState({ activeUuid: v.uuid });
                 setPosition({

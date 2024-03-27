@@ -1,7 +1,7 @@
 .sheet-bar-wrapper {
   width: 100%;
   box-sizing: border-box;
-  padding: 0 var(--largePadding);
+  padding: 0 var(--mediumPadding);
   display: flex;
   align-items: center;
   position: relative;

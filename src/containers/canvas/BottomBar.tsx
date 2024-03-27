@@ -35,7 +35,7 @@ export const BottomBar: React.FunctionComponent<Props> = ({ controller }) => {
       data-testid="canvas-bottom-bar"
       style={{
         left: headerSize.width,
-        display: scrollTop / rect.height >= 0.856 ? 'flex' : 'none',
+        display: scrollTop / rect.height >= 0.904 ? 'flex' : 'none',
       }}
     >
       <div className={styles['bottom-bar-text']}>{$('add-at-the-bottom')}</div>

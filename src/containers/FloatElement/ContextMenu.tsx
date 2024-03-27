@@ -221,6 +221,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         style={{ top: menuTop, left: menuLeft }}
       >
         <Button
+          testId="float-element-context-menu-copy"
           onClick={() => {
             hideContextMenu();
             controller.setFloatElementUuid(uuid);
@@ -231,6 +232,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         </Button>
 
         <Button
+          testId="float-element-context-menu-cut"
           onClick={() => {
             hideContextMenu();
             controller.setFloatElementUuid(uuid);
@@ -240,6 +242,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           {$('cut')}
         </Button>
         <Button
+          testId="float-element-context-menu-paste"
           onClick={() => {
             hideContextMenu();
             controller.paste();
@@ -248,6 +251,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           {$('paste')}
         </Button>
         <Button
+          testId="float-element-context-menu-duplicate"
           onClick={() => {
             hideContextMenu();
             controller.setFloatElementUuid(uuid);
@@ -280,9 +284,10 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             </Button>
           </React.Fragment>
         ) : null}
-        <Button onClick={saveAsPicture}>{$('save-as-picture')}</Button>
+        <Button testId="float-element-context-menu-save-as-picture" onClick={saveAsPicture}>{$('save-as-picture')}</Button>
         <Button
           disabled={width === originWidth && height === originHeight}
+          testId="float-element-context-reset-size"
           onClick={() => {
             hideContextMenu();
             controller.updateFloatElement(uuid, {
@@ -295,6 +300,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           {$('reset-size')}
         </Button>
         <Button
+          testId="float-element-context-menu-delete"
           onClick={() => {
             hideContextMenu();
             controller.deleteFloatElement(uuid);

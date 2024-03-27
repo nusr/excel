@@ -832,13 +832,19 @@ export class Controller implements IController {
   deleteAll(sheetId?: string): void {
     this.model.deleteAll(sheetId);
     this.changeSet.add('cellValue');
+    this.changeSet.add('floatElement');
+    this.changeSet.add('cellStyle');
+    this.changeSet.add('mergeCell');
+    this.changeSet.add('defineName');
+    this.changeSet.add('row');
+    this.changeSet.add('col');
     this.emitChange();
   }
   getDefineName(range: IRange): string {
     return this.model.getDefineName(range);
   }
   getDefineNameList(): DefinedNameItem[] {
-    return this.model.getDefineNameList()
+    return this.model.getDefineNameList();
   }
   setDefineName(range: IRange, name: string): void {
     this.model.setDefineName(range, name);

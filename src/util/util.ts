@@ -67,17 +67,30 @@ export function splitToWords(str: string): string[] {
   return arr.map((x) => x.segment);
 }
 
-export function convertResultTypeToString(value: ResultType): string {
-  let text = String(value);
-  if (
-    typeof value === 'boolean' ||
-    ['TRUE', 'FALSE'].includes(text.toUpperCase())
-  ) {
-    text = text.toUpperCase();
-  } else if (value === undefined || value === null) {
-    text = '';
+export function convertResultTypeToString(value: any): string {
+  if (typeof value === 'string') {
+    if (['TRUE', 'FALSE'].includes(value.toUpperCase())) {
+      return value.toUpperCase();
+    }
+    return value;
   }
-  return text;
+  if (typeof value === 'bigint') {
+    return '' + value;
+  }
+  if (typeof value === 'number') {
+    return '' + value;
+  }
+  if (typeof value === 'boolean') {
+    return value ? 'TRUE' : 'FALSE';
+  }
+  if (value instanceof Date) {
+    return '' + value.getTime();
+  }
+  if (typeof value === 'object' && value !== null) {
+    return JSON.stringify(value);
+  }
+
+  return '';
 }
 
 export function coordinateToString(

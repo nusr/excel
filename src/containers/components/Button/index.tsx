@@ -43,6 +43,7 @@ export const Button: FunctionComponent<React.PropsWithChildren<ButtonProps>> = (
       onClick={onClick}
       style={style}
       title={title}
+      disabled={disabled}
       className={cls}
       data-testid={testId}
       data-type={dataType}
