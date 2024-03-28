@@ -56,7 +56,7 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = ({
     reader.readAsDataURL(file);
   };
   return (
-    <Button>
+    <Button testId='toolbar-floating-picture'>
       <input
         type="file"
         hidden
@@ -91,5 +91,5 @@ export const InsertChart: React.FunctionComponent<Props> = ({ controller }) => {
     });
   };
 
-  return <Button onClick={handleClick}>{$('chart')}</Button>;
+  return <Button testId='toolbar-chart' onClick={handleClick}>{$('chart')}</Button>;
 };

@@ -60,6 +60,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
           })}
           style={getDisplayStyle(activeCell)}
           onClick={handleClick}
+          data-testid="formula-editor-trigger"
         >
           {editorValue}
         </div>

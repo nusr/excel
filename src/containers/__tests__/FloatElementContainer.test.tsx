@@ -4,20 +4,6 @@ import React from 'react';
 import { initController } from '@/controller';
 import { floatElementStore, FloatElementItem } from '../store';
 
-beforeAll(() => {
-  global.ResizeObserver = class ResizeObserver {
-    observe() {
-      // do nothing
-    }
-    unobserve() {
-      // do nothing
-    }
-    disconnect() {
-      // do nothing
-    }
-  };
-});
-
 const mockData: FloatElementItem[] = [
   {
     title: 'Chart Title',
@@ -69,6 +55,13 @@ const mockData: FloatElementItem[] = [
   },
 ];
 describe('FloatElementContainer.test.ts', () => {
+  beforeAll(() => {
+    global.ResizeObserver = class ResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+  });
   afterEach(cleanup);
   test('normal', () => {
     floatElementStore.setState(mockData);

@@ -1,9 +1,7 @@
 import React, { useRef } from 'react';
 import { IController } from '@/types';
 import { Menu, MenuItem, SubMenu, Button } from '../components';
-import { importXLSX } from '../Excel/import';
-import { exportToXLSX } from '../Excel/exportXLSX';
-import { exportToCsv } from '../Excel/exportCSV';
+import { importXLSX, exportToXLSX, exportToCsv } from '../Excel';
 import styles from './index.module.css';
 import { Theme } from './Theme';
 import { $ } from '@/i18n';

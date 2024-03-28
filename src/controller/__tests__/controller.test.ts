@@ -23,6 +23,16 @@ describe('controller.test.ts', () => {
         colCount: 1,
         sheetId: '1',
       });
+      expect(controller.getActiveRange()).toEqual({
+        range: {
+          row: 0,
+          col: 0,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: '1',
+        },
+        isMerged: false,
+      });
     });
     test('set', () => {
       controller.setActiveCell({
@@ -81,6 +91,8 @@ describe('controller.test.ts', () => {
         scrollTop: 0,
       });
       expect(controller.getSheetList()).toHaveLength(1);
+      controller.addSheet();
+      expect(controller.getSheetList()).toHaveLength(2);
     });
 
     test('deleteSheet', () => {
@@ -100,7 +112,7 @@ describe('controller.test.ts', () => {
       expect(controller.getSheetList()).toHaveLength(2);
     });
 
-    test('hideSheet', () => {
+    test('unhideSheet', () => {
       controller.addSheet();
       const sheetId = controller.getCurrentSheetId();
       controller.hideSheet(sheetId);
@@ -191,6 +203,88 @@ describe('controller.test.ts', () => {
         left: headerSize.width,
         top: headerSize.height,
       });
+    });
+  });
+  describe('row', () => {
+    test('add', () => {
+      const old = controller.getSheetInfo(
+        controller.getCurrentSheetId(),
+      )!.rowCount;
+      controller.addRow(20, 10);
+      expect(
+        controller.getSheetInfo(controller.getCurrentSheetId())!.rowCount,
+      ).toEqual(old + 10);
+
+      controller.addRow(20, 0);
+      expect(
+        controller.getSheetInfo(controller.getCurrentSheetId())!.rowCount,
+      ).toEqual(old + 10);
+    });
+    test('delete', () => {
+      const old = controller.getSheetInfo(controller.getCurrentSheetId())!;
+      controller.deleteRow(20, 10);
+      expect(
+        controller.getSheetInfo(controller.getCurrentSheetId())!.rowCount,
+      ).toEqual(old.rowCount - 10);
+
+      controller.deleteRow(20, -1);
+      expect(
+        controller.getSheetInfo(controller.getCurrentSheetId())!.rowCount,
+      ).toEqual(old.rowCount - 10);
+    });
+    test('hide', () => {
+      controller.hideRow(20, 1);
+      expect(controller.getRowHeight(20).len).toEqual(0);
+    });
+    test('undo redo', () => {
+      const old = controller.getRowHeight(20).len;
+      controller.hideRow(20, 1);
+      expect(controller.getRowHeight(20).len).toEqual(0);
+      controller.undo();
+      expect(controller.getRowHeight(20).len).toEqual(old);
+      controller.redo();
+      expect(controller.getRowHeight(20).len).toEqual(0);
+    });
+  });
+  describe('col', () => {
+    test('add', () => {
+      const old = controller.getSheetInfo(
+        controller.getCurrentSheetId(),
+      )!.colCount;
+      controller.addCol(20, 10);
+      expect(
+        controller.getSheetInfo(controller.getCurrentSheetId())!.colCount,
+      ).toEqual(old + 10);
+
+      controller.addCol(20, 0);
+      expect(
+        controller.getSheetInfo(controller.getCurrentSheetId())!.colCount,
+      ).toEqual(old + 10);
+    });
+    test('delete', () => {
+      const old = controller.getSheetInfo(controller.getCurrentSheetId())!;
+      controller.deleteCol(20, 10);
+      expect(
+        controller.getSheetInfo(controller.getCurrentSheetId())!.colCount,
+      ).toEqual(old.colCount - 10);
+
+      controller.deleteCol(20, -1);
+      expect(
+        controller.getSheetInfo(controller.getCurrentSheetId())!.colCount,
+      ).toEqual(old.colCount - 10);
+    });
+    test('hide', () => {
+      controller.hideCol(20, 1);
+      expect(controller.getColWidth(20).len).toEqual(0);
+    });
+    test('undo redo', () => {
+      const old = controller.getColWidth(20).len;
+      controller.hideCol(20, 1);
+      expect(controller.getColWidth(20).len).toEqual(0);
+      controller.undo();
+      expect(controller.getColWidth(20).len).toEqual(old);
+      controller.redo();
+      expect(controller.getColWidth(20).len).toEqual(0);
     });
   });
 
@@ -340,5 +434,257 @@ describe('controller.test.ts', () => {
       ).toEqual('line');
     });
   });
+  describe('DomRect', () => {
+    test('get', () => {
+      const size = controller.getDomRect();
+      expect(size).toEqual({ left: 0, top: 0, width: 0, height: 0 });
+    });
+  });
+  describe('define name', () => {
+    test('get', () => {
+      const list = controller.getDefineNameList();
+      expect(list).toHaveLength(0);
+    });
+    test('set', () => {
+      controller.setDefineName(
+        {
+          row: 0,
+          col: 0,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        },
+        'foo',
+      );
+      const list = controller.getDefineNameList();
+      expect(list).toHaveLength(1);
+      expect(controller.checkDefineName('foo')).toEqual({
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+    });
+    test('undo redo', () => {
+      controller.setDefineName(
+        {
+          row: 0,
+          col: 0,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        },
+        'foo',
+      );
+      expect(controller.getDefineNameList()).toHaveLength(1);
 
+      controller.undo();
+      expect(controller.getDefineNameList()).toHaveLength(0);
+      controller.redo();
+      expect(controller.getDefineNameList()).toHaveLength(1);
+    });
+  });
+  describe('sheetId', () => {
+    test('get', () => {
+      expect(!!controller.getCurrentSheetId()).toBeTruthy();
+    });
+    test('set', () => {
+      const old = controller.getCurrentSheetId();
+      controller.setCurrentSheetId('333');
+      expect(controller.getCurrentSheetId()).toEqual(old);
+      controller.setCurrentSheetId(old);
+      expect(controller.getCurrentSheetId()).toEqual(old);
+
+      controller.addSheet();
+      expect(controller.getCurrentSheetId()).not.toEqual(old);
+    });
+  });
+  describe('cell value', () => {
+    test('getCell', () => {
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toBeNull();
+    });
+    test('set value', () => {
+      controller.setCellValues(
+        [[1]],
+        [],
+        [
+          {
+            row: 0,
+            col: 0,
+            colCount: 1,
+            rowCount: 1,
+            sheetId: controller.getCurrentSheetId(),
+          },
+        ],
+      );
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ value: 1, row: 0, col: 0 });
+    });
+    test('set formula', () => {
+      controller.setCellValues(
+        [['=SUM(1,2)']],
+        [],
+        [
+          {
+            row: 0,
+            col: 0,
+            colCount: 1,
+            rowCount: 1,
+            sheetId: controller.getCurrentSheetId(),
+          },
+        ],
+      );
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ formula: '=SUM(1,2)', row: 0, col: 0, value: 3 });
+    });
+    test('undo redo', () => {
+      controller.setCellValues(
+        [[1]],
+        [],
+        [
+          {
+            row: 0,
+            col: 0,
+            colCount: 1,
+            rowCount: 1,
+            sheetId: controller.getCurrentSheetId(),
+          },
+        ],
+      );
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ value: 1, row: 0, col: 0 });
+      controller.undo();
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toBeNull();
+      controller.redo();
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ value: 1, row: 0, col: 0 });
+    });
+  });
+  describe('cell style', () => {
+    test('get', () => {
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toBeNull();
+    });
+    test('set', () => {
+      controller.setCellValues(
+        [[1]],
+        [[{ isBold: true }]],
+        [
+          {
+            row: 0,
+            col: 0,
+            colCount: 1,
+            rowCount: 1,
+            sheetId: controller.getCurrentSheetId(),
+          },
+        ],
+      );
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ value: 1, row: 0, col: 0, style: { isBold: true } });
+    });
+    test('undo redo', () => {
+      controller.setCellValues(
+        [[1]],
+        [[{ isBold: true }]],
+        [
+          {
+            row: 0,
+            col: 0,
+            colCount: 1,
+            rowCount: 1,
+            sheetId: controller.getCurrentSheetId(),
+          },
+        ],
+      );
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ value: 1, row: 0, col: 0, style: { isBold: true } });
+
+      controller.undo();
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toBeNull();
+      controller.redo();
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ value: 1, row: 0, col: 0, style: { isBold: true } });
+    });
+  });
 });

@@ -1,6 +1,6 @@
-import { convertXMLToJSON, convertXMLDataToModel } from '../import';
+import { convertXMLToJSON, convertXMLDataToModel } from '../importXLSX';
 import { WorkBookJSON } from '@/types';
-describe('import.test.ts', () => {
+describe('importXLSX.test.ts', () => {
   describe('convertColorToHex', () => {
     it('normal', () => {
       expect(
@@ -189,6 +189,48 @@ describe('import.test.ts', () => {
         },
       };
       expect(convertXMLDataToModel(xml, {})).toEqual(result);
+    });
+  });
+  test('convertXMLToJSON', () => {
+    const mockXML = `<worksheet>
+      <sheetData>
+        <row r="1" spans="1:1">
+          <c r="A1" s="1">
+            <v>123</v>
+          </c>
+        </row>
+        <row r="2" spans="1:1">
+          <c r="A2" s="2"/>
+        </row>
+      </sheetData>
+    </worksheet>`;
+    const result = convertXMLToJSON(mockXML);
+    expect(result).toEqual({
+      worksheet: {
+        sheetData: {
+          row: [
+            {
+              r: '1',
+              spans: '1:1',
+              c: {
+                r: 'A1',
+                s: '1',
+                v: {
+                  '#text': '123',
+                },
+              },
+            },
+            {
+              r: '2',
+              spans: '1:1',
+              c: {
+                r: 'A2',
+                s: '2',
+              },
+            },
+          ],
+        },
+      },
     });
   });
 });
