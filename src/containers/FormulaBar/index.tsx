@@ -7,7 +7,7 @@ import {
 import { classnames, intToColumnName } from '@/util';
 import styles from './index.module.css';
 import { IController, EditorStatus } from '@/types';
-import { activeCellStore, coreStore } from '@/containers/store';
+import { activeCellStore, coreStore, styleStore } from '@/containers/store';
 import { DefineName } from './DefineName';
 
 interface Props {
@@ -21,6 +21,10 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
     activeCellStore.subscribe,
     activeCellStore.getSnapshot,
   );
+  const cellStyle = useSyncExternalStore(
+    styleStore.subscribe,
+    styleStore.getSnapshot,
+  );
   const { editorStatus } = useSyncExternalStore(
     coreStore.subscribe,
     coreStore.getSnapshot,
@@ -31,6 +35,9 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
       `${intToColumnName(activeCell.col)}${activeCell.row + 1}`
     );
   }, [activeCell]);
+  const style = useMemo(() => {
+    return getDisplayStyle(cellStyle);
+  }, [cellStyle]);
   const editorValue = activeCell.formula || String(activeCell.value || '');
   const handleClick = () => {
     coreStore.mergeState({
@@ -50,7 +57,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
           <FormulaEditor
             controller={controller}
             initValue={editorValue}
-            style={getEditorStyle(activeCell, editorStatus)}
+            style={getEditorStyle(activeCell, editorStatus, cellStyle)}
             testId="formula-editor"
           />
         ) : null}
@@ -58,7 +65,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = ({
           className={classnames(styles['formula-bar-value'], {
             [styles['show']]: editorStatus !== EditorStatus.EDIT_FORMULA_BAR,
           })}
-          style={getDisplayStyle(activeCell)}
+          style={style}
           onClick={handleClick}
           data-testid="formula-editor-trigger"
         >

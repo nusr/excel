@@ -105,17 +105,13 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           return;
         }
         if (isRow) {
-          controller.batchUpdate(() => {
-            for (let i = 0; i < rowCount; i++) {
-              controller.setRowHeight(row + i, value);
-            }
-          });
+          for (let i = 0; i < rowCount; i++) {
+            controller.setRowHeight(row + i, value);
+          }
         } else {
-          controller.batchUpdate(() => {
-            for (let i = 0; i < colCount; i++) {
-              controller.setColWidth(col + i, value);
-            }
-          });
+          for (let i = 0; i < colCount; i++) {
+            controller.setColWidth(col + i, value);
+          }
         }
         hideContextMenu();
       },

@@ -23,6 +23,3 @@ export interface IPosition {
   left: number;
 }
 
-export interface EventType {
-  changeSet: Set<ChangeEventType>;
-}

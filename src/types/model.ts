@@ -1,7 +1,6 @@
 import { ResultType } from './parser';
 import { IRange } from './range';
 import type { ChartType } from 'chart.js';
-import { ChangeEventType } from './event';
 
 export enum EVerticalAlign {
   TOP,
@@ -101,6 +100,19 @@ export type FloatElement = {
 };
 export type WorksheetData = Record<string, ModelCellType>; // key: row + col worksheets_*.xml_worksheet_sheetData
 
+export type ModelChangeEventType =
+  | keyof WorkBookJSON
+  | 'antLine'
+  | 'scroll'
+  | 'cellValue'
+  | 'cellStyle'
+  | 'undo'
+  | 'redo';
+
+export interface EventType {
+  changeSet: Set<ModelChangeEventType>;
+}
+
 export type WorkBookJSON = {
   worksheets: Record<string, WorksheetData>; // key: sheetId
   workbook: Record<string, WorksheetType>; // key: sheetId, workbook.xml_workbook_sheets
@@ -115,24 +127,16 @@ export type WorkBookJSON = {
 
 export interface IModel extends IBaseModel {
   pasteRange: (range: IRange, isCut: boolean) => IRange;
-  emitChange: (dataset: Set<ChangeEventType>) => void;
+  commit: () => void;
 }
 export type DefinedNameItem = { range: IRange; name: string };
 
 export interface IBaseModel {
   getCell: (range: IRange) => ModelCellValue | null;
   getColWidth: (col: number, sheetId?: string) => CustomItem;
-  setColWidth: (
-    col: number,
-    width: number,
-    sheetId?: string,
-  ) => void;
+  setColWidth: (col: number, width: number, sheetId?: string) => void;
   getRowHeight: (row: number, sheetId?: string) => CustomItem;
-  setRowHeight: (
-    row: number,
-    height: number,
-    sheetId?: string,
-  ) => void;
+  setRowHeight: (row: number, height: number, sheetId?: string) => void;
   setCellValues: (
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,

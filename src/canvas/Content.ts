@@ -25,10 +25,10 @@ export class Content implements ContentView {
     }
 
     const check =
-      changeSet.has('row') ||
-      changeSet.has('col') ||
-      changeSet.has('sheetList') ||
-      changeSet.has('sheetId') ||
+      changeSet.has('customHeight') ||
+      changeSet.has('customWidth') ||
+      changeSet.has('workbook') ||
+      changeSet.has('currentSheetId') ||
       changeSet.has('cellStyle') ||
       changeSet.has('cellValue') ||
       changeSet.has('scroll');
@@ -85,20 +85,19 @@ export class Content implements ContentView {
         );
       }
     }
-    controller.batchUpdate(() => {
-      for (const [r, h] of rowMap.entries()) {
-        if (h <= 0 || controller.getRowHeight(r).len === h) {
-          continue;
-        }
-        controller.setRowHeight(r, h);
+
+    for (const [r, h] of rowMap.entries()) {
+      if (h <= 0 || controller.getRowHeight(r).len === h) {
+        continue;
       }
-      for (const [c, w] of colMap.entries()) {
-        if (w <= 0 || controller.getColWidth(c).len === w) {
-          continue;
-        }
-        controller.setColWidth(c, w);
+      controller.setRowHeight(r, h);
+    }
+    for (const [c, w] of colMap.entries()) {
+      if (w <= 0 || controller.getColWidth(c).len === w) {
+        continue;
       }
-    });
+      controller.setColWidth(c, w);
+    }
 
     ctx.restore();
   }

@@ -15,7 +15,7 @@ import { Button, Icon, SelectPopup } from '../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
 import { IController } from '@/types';
-import { sheetListStore, activeCellStore } from '@/containers/store';
+import { sheetListStore, coreStore } from '@/containers/store';
 
 interface Props {
   controller: IController;
@@ -38,9 +38,9 @@ export const SheetBarContainer: FunctionComponent<Props> = ({ controller }) => {
   }, [sheetList]);
 
   const [popupActive, setPopupActive] = useState(false);
-  const { sheetId: currentSheetId } = useSyncExternalStore(
-    activeCellStore.subscribe,
-    activeCellStore.getSnapshot,
+  const { currentSheetId } = useSyncExternalStore(
+    coreStore.subscribe,
+    coreStore.getSnapshot,
   );
   const [menuPosition, setMenuPosition] = useState(DEFAULT_POSITION);
   const [editing, setEditing] = useState(false);

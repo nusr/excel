@@ -1,4 +1,5 @@
-import { ICommandItem } from '@/types';
+import { ICommandItem, ModelChangeEventType } from '@/types';
+import { rmSync } from 'fs';
 
 export class EventEmitter<
   EventType extends Record<string, unknown> = Record<string, unknown>,
@@ -80,7 +81,24 @@ export class EventEmitter<
 }
 
 type EventEmitterType = {
-  modelChange: ICommandItem[];
+  modelChange: { changeSet: Set<ModelChangeEventType> };
 };
 
+export function modelToChangeSet(
+  list: ICommandItem[],
+): Set<ModelChangeEventType> {
+  const result = new Set<ModelChangeEventType>();
+  for (const item of list) {
+    result.add(item.t);
+    if (item.t === 'worksheets') {
+      if (item.k.includes('value') || item.k.includes('formula')) {
+        result.add('cellValue');
+      }
+      if (item.k.includes('style')) {
+        result.add('cellStyle');
+      }
+    }
+  }
+  return result;
+}
 export const eventEmitter = new EventEmitter<EventEmitterType>();

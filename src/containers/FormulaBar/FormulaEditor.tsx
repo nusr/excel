@@ -1,5 +1,5 @@
 import React, { CSSProperties, useRef, useEffect } from 'react';
-import { CanvasOverlayPosition, IController, EditorStatus } from '@/types';
+import { CanvasOverlayPosition, IController, EditorStatus, StyleType } from '@/types';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
 import { handleTabClick, handleEnterClick } from '../../canvas/shortcut';
@@ -11,7 +11,7 @@ interface Props {
   testId?: string;
 }
 export function getDisplayStyle(
-  style: CellStoreType,
+  style: StyleType,
   isFormulaBar = true,
 ): CSSProperties {
   const result: CSSProperties = {};
@@ -48,13 +48,14 @@ export function getDisplayStyle(
 export function getEditorStyle(
   style: CellStoreType,
   editorStatus: EditorStatus,
+  cellStyle: StyleType,
 ): CSSProperties | undefined {
   if (editorStatus === EditorStatus.NONE) {
     return undefined;
   }
   const isFormulaBar = editorStatus === EditorStatus.EDIT_FORMULA_BAR;
 
-  const editorStyle = getDisplayStyle(style, isFormulaBar);
+  const editorStyle = getDisplayStyle(cellStyle, isFormulaBar);
   if (isFormulaBar) {
     return editorStyle;
   }

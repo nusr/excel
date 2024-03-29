@@ -18,16 +18,17 @@ export class BaseStore<T> {
     this.emitChange();
   };
   // set plain object
-  mergeState = (data: Partial<T>): void => {
+  mergeState = (data: Partial<T>): boolean => {
     const newState: T = {
       ...this.state,
       ...data,
     };
     if (deepEqual(newState, this.state)) {
-      return;
+      return false;
     }
     this.state = newState;
     this.emitChange();
+    return true;
   };
   subscribe = (listener: StoreListener): StoreListener => {
     this.listeners = [...this.listeners, listener];

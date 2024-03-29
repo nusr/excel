@@ -8,3 +8,4 @@ export { floatElementStore } from './floatElement';
 export type { FloatElementItem } from './floatElement';
 export type { SheetItem } from './sheetList';
 export { defineNameStore } from './defineName';
+export { styleStore } from './style';

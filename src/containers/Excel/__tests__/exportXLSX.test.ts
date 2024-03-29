@@ -48,8 +48,9 @@ describe('exportXLSX.test.ts', () => {
       controller.setColWidth(1, 80);
       controller.hideCol(1, 1);
       const result = convertToXMLData(controller);
-      expect(trimData(result['xl/worksheets/sheet1.xml'])).toEqual(
-        trimData(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      setTimeout(() => {
+        expect(trimData(result['xl/worksheets/sheet1.xml'])).toEqual(
+          trimData(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
           xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="x14ac xr xr2 xr3"
@@ -84,7 +85,8 @@ describe('exportXLSX.test.ts', () => {
           <phoneticPr fontId="0" type="noConversion"/>
           <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
         </worksheet>`),
-      );
+        );
+      }, 10);
     });
   });
 });

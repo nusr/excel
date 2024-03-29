@@ -1,4 +1,11 @@
-import { IController, ChangeEventType, EUnderLine, IRange } from '@/types';
+import {
+  IController,
+  EUnderLine,
+  IRange,
+  ModelChangeEventType,
+  EVerticalAlign,
+  EHorizontalAlign,
+} from '@/types';
 import {
   DEFAULT_FONT_SIZE,
   copyOrCut,
@@ -8,6 +15,7 @@ import {
   HIDE_CELL,
   getThemeColor,
   convertResultTypeToString,
+  eventEmitter,
 } from '@/util';
 import {
   coreStore,
@@ -18,6 +26,7 @@ import {
   floatElementStore,
   FloatElementItem,
   defineNameStore,
+  styleStore,
 } from '@/containers/store';
 import {
   MainCanvas,
@@ -121,9 +130,11 @@ function updateActiveCell(controller: IController) {
     col: activeCell.col,
     rowCount: activeCell.rowCount,
     colCount: activeCell.colCount,
-    sheetId,
     value: convertResultTypeToString(cell?.value),
     formula: cell?.formula,
+    defineName,
+  });
+  styleStore.mergeState({
     isBold,
     isItalic,
     isStrike,
@@ -134,26 +145,22 @@ function updateActiveCell(controller: IController) {
     isWrapText,
     underline,
     numberFormat,
-    defineName,
     isMergeCell: isMerged,
   });
 }
 
 const handleStateChange = (
-  changeSet: Set<ChangeEventType>,
+  changeSet: Set<ModelChangeEventType>,
   controller: IController,
 ) => {
-  if (changeSet.has('sheetId')) {
-    scrollSheetToView(controller.getCurrentSheetId());
-  }
   if (
-    changeSet.has('range') ||
+    changeSet.has('rangeMap') ||
     changeSet.has('cellStyle') ||
     changeSet.has('cellValue')
   ) {
     updateActiveCell(controller);
   }
-  if (changeSet.has('sheetList')) {
+  if (changeSet.has('workbook')) {
     const sheetList = controller.getSheetList().map((v) => ({
       sheetId: v.sheetId,
       name: v.name,
@@ -163,11 +170,15 @@ const handleStateChange = (
     sheetListStore.setState(sheetList);
   }
 
-  if (changeSet.has('sheetId')) {
+  if (changeSet.has('currentSheetId')) {
+    queueMicrotask(() => {
+      scrollSheetToView(controller.getCurrentSheetId());
+    });
     coreStore.mergeState({
       canRedo: controller.canRedo(),
       canUndo: controller.canUndo(),
       activeUuid: '',
+      currentSheetId: controller.getCurrentSheetId(),
     });
   } else {
     coreStore.mergeState({
@@ -183,17 +194,17 @@ const handleStateChange = (
       scrollTop: scroll.scrollTop,
     });
   }
-  if (changeSet.has('defineName')) {
+  if (changeSet.has('definedNames')) {
     const list = controller.getDefineNameList().map((v) => v.name);
     defineNameStore.setState(list);
   }
 
   if (
-    changeSet.has('floatElement') ||
+    changeSet.has('drawings') ||
     changeSet.has('cellValue') ||
-    changeSet.has('row') ||
-    changeSet.has('col') ||
-    changeSet.has('sheetId') ||
+    changeSet.has('customHeight') ||
+    changeSet.has('customWidth') ||
+    changeSet.has('currentSheetId') ||
     changeSet.has('scroll')
   ) {
     const scroll = controller.getScroll();
@@ -244,46 +255,46 @@ export function initCanvas(controller: IController): () => void {
     controller,
     new Content(controller, createCanvas()),
   );
-  const render = (changeSet: Set<ChangeEventType>) => {
+  const render = (changeSet: Set<ModelChangeEventType>) => {
+    handleStateChange(changeSet, controller);
     mainCanvas.render({ changeSet });
-    mainCanvas.render({
-      changeSet: controller.getChangeSet(),
-    });
   };
-  const resize = (changeSet: Set<ChangeEventType>) => {
+  const resize = () => {
     mainCanvas.resize();
-    render(changeSet);
+    render(new Set<ModelChangeEventType>(['customHeight']));
   };
 
   const removeEvent = registerGlobalEvent(controller, resize);
   controller.setHooks({
     copyOrCut,
     paste,
-    modelChange: (changeSet: Set<ChangeEventType>) => {
-      handleStateChange(changeSet, controller);
-      render(changeSet);
-    },
   });
 
-  const changeSet = new Set<ChangeEventType>([
-    'sheetId',
+  eventEmitter.on('modelChange', ({ changeSet }) => {
+    render(changeSet);
+  });
+
+  const changeSet = new Set<ModelChangeEventType>([
+    'currentSheetId',
+    'rangeMap',
     'scroll',
-    'range',
-    'sheetList',
-    'floatElement',
+    'workbook',
+    'drawings',
     'cellValue',
-    'row',
-    'col',
+    'customHeight',
+    'customWidth',
     'cellStyle',
-    'defineName',
-    'mergeCell',
-    'undoRedo',
+    'definedNames',
+    'mergeCells',
+    'undo',
+    'redo',
     'antLine',
   ]);
-  handleStateChange(changeSet, controller);
-  resize(changeSet);
+  mainCanvas.resize();
+  render(changeSet);
   requestAnimationFrame(() => {
-    resize(changeSet);
+    mainCanvas.resize();
+    render(changeSet);
   });
 
   return () => {

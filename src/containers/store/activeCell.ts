@@ -1,5 +1,4 @@
 import type {
-  StyleType,
   IRange,
   CanvasOverlayPosition,
   ModelCellType,
@@ -7,12 +6,10 @@ import type {
 import { DEFAULT_POSITION } from '@/util';
 import { BaseStore } from './base';
 
-export type CellStoreType = Partial<StyleType> &
-  CanvasOverlayPosition &
-  IRange &
+export type CellStoreType = CanvasOverlayPosition &
+  Omit<IRange, 'sheetId'> &
   Pick<ModelCellType, 'value' | 'formula'> & {
     defineName: string;
-    isMergeCell: boolean;
   };
 
 const cellData: CellStoreType = {
@@ -25,10 +22,8 @@ const cellData: CellStoreType = {
   width: 0,
   height: 0,
   defineName: '',
-  isMergeCell: false,
   rowCount: 1,
   colCount: 1,
-  sheetId: '',
 };
 
 export const activeCellStore = new BaseStore<CellStoreType>(cellData);

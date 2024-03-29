@@ -3,7 +3,7 @@ import { FormulaBarContainer } from './FormulaBar';
 import { ToolbarContainer } from './ToolBar';
 import { SheetBarContainer } from './SheetBar';
 import styles from './index.module.css';
-import React from 'react';
+import React, { memo } from 'react';
 import type { IController } from '@/types';
 import { MenuBarContainer } from './MenuBar';
 
@@ -11,7 +11,7 @@ interface Props {
   controller: IController;
 }
 
-export const App: React.FunctionComponent<Props> = ({ controller }) => {
+export const App: React.FunctionComponent<Props> = memo(({ controller }) => {
   return (
     <div className={styles['app-container']} data-testid="app-container">
       <MenuBarContainer controller={controller} />
@@ -21,5 +21,5 @@ export const App: React.FunctionComponent<Props> = ({ controller }) => {
       <SheetBarContainer controller={controller} />
     </div>
   );
-};
+});
 App.displayName = 'App';

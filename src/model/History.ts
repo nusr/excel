@@ -1,24 +1,22 @@
-import { IHistory, ICommandItem } from '@/types';
-
-type Options = {
-  change: (list: ICommandItem[]) => void;
-  maxLength: number;
-  redo: (item: ICommandItem) => void;
-  undo: (item: ICommandItem) => void;
-};
+import {
+  IHistory,
+  ICommandItem,
+  HistoryOptions,
+  HistoryChangeType,
+} from '@/types';
 
 const noop = () => {};
 export class History implements IHistory {
   private position = -1;
   private commandList: ICommandItem[][] = [];
   private commands: ICommandItem[] = [];
-  private options: Options = {
+  private options: HistoryOptions = {
     change: noop,
     maxLength: 100,
     redo: noop,
     undo: noop,
   };
-  constructor(options: Partial<Options>) {
+  constructor(options: Partial<HistoryOptions>) {
     this.clear(true);
     this.options.maxLength = options.maxLength || this.options.maxLength;
     if (typeof options.change === 'function') {
@@ -61,7 +59,7 @@ export class History implements IHistory {
       }
     }
 
-    this.change(this.commands);
+    this.change(this.commands, 'commit');
     this.commands = [];
   }
   redo(): void {
@@ -75,7 +73,7 @@ export class History implements IHistory {
         this.options.redo(item as ICommandItem);
       }
     }
-    this.change(list);
+    this.change(list, 'redo');
   }
   undo(): void {
     if (!this.canUndo()) {
@@ -88,7 +86,7 @@ export class History implements IHistory {
       }
     }
     this.position--;
-    this.change(list);
+    this.change(list, 'undo');
   }
   canRedo(): boolean {
     if (this.position >= this.commandList.length - 1) {
@@ -114,8 +112,8 @@ export class History implements IHistory {
     }
     this.commands = [];
   }
-  private change(_list: ICommandItem[]) {
-    this.options.change(_list);
+  private change(_list: ICommandItem[], type: HistoryChangeType) {
+    this.options.change(_list, type);
   }
   get(): ICommandItem[] {
     if (this.position >= 0 && this.position < this.commandList.length) {

@@ -1,7 +1,7 @@
-import { IBaseModel } from './model';
+import { IBaseModel, ModelChangeEventType } from './model';
 import { CanvasOverlayPosition, ScrollValue } from './components';
 import { IRange } from './range';
-import { ChangeEventType, IWindowSize, IPosition } from './event';
+import { IWindowSize, IPosition } from './event';
 
 export enum EBorderLineType {
   MEDIUM,
@@ -19,7 +19,7 @@ export type CanvasSize = {
 export type ClipboardData = Record<ClipboardType, string>;
 
 export interface IHooks {
-  modelChange: (val: Set<ChangeEventType>) => void;
+  // modelChange: (val: Set<ChangeEventType>) => void;
   copyOrCut: (textData: ClipboardData, type: 'cut' | 'copy') => Promise<string>;
   paste: () => Promise<ClipboardData>;
 }
@@ -44,8 +44,6 @@ export interface IController extends IBaseModel {
   getActiveRange: () => ActiveRange;
   getCellSize: (range: IRange) => IWindowSize;
   computeCellPosition: (range: IRange) => IPosition;
-  getChangeSet: () => Set<ChangeEventType>;
-  setChangeSet: (data: Set<ChangeEventType>) => void;
   paste: (event?: ClipboardEvent) => void;
   copy: (event?: ClipboardEvent) => void;
   cut: (event?: ClipboardEvent) => void;
@@ -56,5 +54,4 @@ export interface IController extends IBaseModel {
   setScroll: (scroll: ScrollValue) => void;
   getScroll: (sheetId?: string) => ScrollValue;
   setFloatElementUuid: (uuid: string) => void;
-  batchUpdate: (fn: ()=> void) => void;
 }

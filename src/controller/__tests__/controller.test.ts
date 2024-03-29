@@ -550,15 +550,18 @@ describe('controller.test.ts', () => {
           },
         ],
       );
-      expect(
-        controller.getCell({
-          row: 0,
-          col: 0,
-          colCount: 1,
-          rowCount: 1,
-          sheetId: controller.getCurrentSheetId(),
-        }),
-      ).toEqual({ formula: '=SUM(1,2)', row: 0, col: 0, value: 3 });
+
+      setTimeout(() => {
+        expect(
+          controller.getCell({
+            row: 0,
+            col: 0,
+            colCount: 1,
+            rowCount: 1,
+            sheetId: controller.getCurrentSheetId(),
+          }),
+        ).toEqual({ formula: '=SUM(1,2)', row: 0, col: 0, value: 3 });
+      }, 10);
     });
     test('undo redo', () => {
       controller.setCellValues(

@@ -32,3 +32,10 @@ export interface IHistory {
   getLength(): number;
   clear(clearAll?: boolean): void;
 }
+export type HistoryChangeType = 'commit' | 'redo' | 'undo' | 'batch';
+export type HistoryOptions = {
+  change: (list: ICommandItem[], type: HistoryChangeType) => void;
+  maxLength: number;
+  redo: (item: ICommandItem) => void;
+  undo: (item: ICommandItem) => void;
+};

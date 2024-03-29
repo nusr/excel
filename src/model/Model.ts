@@ -10,9 +10,10 @@ import {
   CustomItem,
   FloatElement,
   IHistory,
-  ChangeEventType,
   ICommandItem,
   DefinedNameItem,
+  HistoryChangeType,
+  ModelChangeEventType,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -33,6 +34,8 @@ import {
   isEmpty,
   convertToReference,
   modelLog,
+  modelToChangeSet,
+  eventEmitter,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 import { History } from './History';
@@ -74,6 +77,8 @@ export class Model implements IModel {
   private customWidth: WorkBookJSON['customWidth'] = {};
   private customHeight: WorkBookJSON['customHeight'] = {};
   private drawings: WorkBookJSON['drawings'] = {};
+  private isNoChange = false;
+  private changeSet = new Set<ModelChangeEventType>();
   constructor() {
     this.history = new History({
       undo: (item: ICommandItem) => {
@@ -100,12 +105,36 @@ export class Model implements IModel {
         const key = getKey(item);
         setData(this, key, item.n);
       },
-      change: (list) => {
+      change: (list, type) => {
         modelLog(list);
+        const changeSet = modelToChangeSet(list);
+        if (type === 'undo' || type === 'redo') {
+          changeSet.add(type);
+        }
+        for (const value of changeSet) {
+          this.changeSet.add(value);
+        }
       },
     });
   }
-
+  commit() {
+    this.history.commit();
+    if (this.isNoChange) {
+      return;
+    }
+    this.isNoChange = true;
+    queueMicrotask(() => {
+      if (
+        this.changeSet.has('cellValue') ||
+        this.changeSet.has('currentSheetId')
+      ) {
+        this.computeAllCell();
+      }
+      eventEmitter.emit('modelChange', { changeSet: this.changeSet });
+      this.changeSet = new Set<ModelChangeEventType>();
+      this.isNoChange = false;
+    });
+  }
   getSheetList(): WorksheetType[] {
     const list = Object.values(this.workbook);
     list.sort((a, b) => a.sort - b.sort);
@@ -143,12 +172,12 @@ export class Model implements IModel {
     }
     this.rangeMap[newRange.sheetId] = newRange;
 
-    // this.history.push({
-    //   t: 'rangeMap',
-    //   k: newRange.sheetId,
-    //   n: newRange,
-    //   o: oldValue ? oldValue : DELETE_FLAG,
-    // });
+    this.history.push({
+      t: 'rangeMap',
+      k: newRange.sheetId,
+      n: newRange,
+      o: oldValue ? oldValue : DELETE_FLAG,
+    });
   }
   addSheet(): void {
     const list = this.getSheetList();
@@ -780,11 +809,7 @@ export class Model implements IModel {
       return { ...temp };
     }
   }
-  setColWidth(
-    col: number,
-    width: number,
-    sheetId?: string,
-  ): void {
+  setColWidth(col: number, width: number, sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
     const key = getCustomWidthOrHeightKey(id, col);
 
@@ -846,11 +871,7 @@ export class Model implements IModel {
       return { ...temp };
     }
   }
-  setRowHeight(
-    row: number,
-    height: number,
-    sheetId?: string,
-  ): void {
+  setRowHeight(row: number, height: number, sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
     const key = getCustomWidthOrHeightKey(id, row);
 
@@ -1422,15 +1443,7 @@ export class Model implements IModel {
       o: oldRange,
     });
   }
-  emitChange(dataset: Set<ChangeEventType>) {
-    if (dataset.has('cellValue')) {
-      this.computeAllCell();
-    }
-    if (!dataset.has('undoRedo')) {
-      this.history.commit();
-    }
-    this.history.clear(false);
-  }
+
   private convertSheetIdToName = (sheetId: string) => {
     const data = this.workbook[sheetId];
     return data?.name || '';
