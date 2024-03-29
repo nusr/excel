@@ -50,8 +50,8 @@ export const CONFIG = {
     </Relationships>`,
   'xl/charts/_rels/chart1.xml.rels': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-      <Relationship Id="rId2" Type="http://schemas.microsoft.com/office/2011/relationships/chartColorStyle" Target="colors1.xml"/>
-      <Relationship Id="rId1" Type="http://schemas.microsoft.com/office/2011/relationships/chartStyle" Target="style1.xml"/>
+      <Relationship Id="rId2" Type="http://schemas.microsoft.com/office/2011/relationships/chartColorStyle" Target="colors{children}.xml"/>
+      <Relationship Id="rId1" Type="http://schemas.microsoft.com/office/2011/relationships/chartStyle" Target="style{children}.xml"/>
     </Relationships>`,
   'xl/charts/chart1.xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"
@@ -92,7 +92,7 @@ export const CONFIG = {
                 </a:pPr>
                 <a:r>
                   <a:rPr lang="en-US" altLang="zh-CN"/>
-                  <a:t>test</a:t>
+                  <a:t>{size}</a:t>
                 </a:r>
               </a:p>
               <a:p>
@@ -135,74 +135,11 @@ export const CONFIG = {
         <c:autoTitleDeleted val="0"/>
         <c:plotArea>
           <c:layout/>
-          <c:barChart>
+          <c:{large}Chart>
             <c:barDir val="col"/>
             <c:grouping val="clustered"/>
             <c:varyColors val="0"/>
-            <c:ser>
-              <c:idx val="0"/>
-              <c:order val="0"/>
-              <c:spPr>
-                <a:solidFill>
-                  <a:schemeClr val="accent1"/>
-                </a:solidFill>
-                <a:ln>
-                  <a:noFill/>
-                </a:ln>
-                <a:effectLst/>
-              </c:spPr>
-              <c:invertIfNegative val="0"/>
-              <c:val>
-                <c:numRef>
-                  <c:f>Sheet4!$E$4:$E$7</c:f>
-                  <c:numCache>
-                    <c:formatCode>General</c:formatCode>
-                    <c:ptCount val="4"/>
-                    <c:pt idx="0">
-                      <c:v>22</c:v>
-                    </c:pt>
-                    <c:pt idx="3">
-                      <c:v>33</c:v>
-                    </c:pt>
-                  </c:numCache>
-                </c:numRef>
-              </c:val>
-              <c:extLst>
-                <c:ext uri="{C3380CC4-5D6E-409C-BE32-E72D297353CC}"
-                  xmlns:c16="http://schemas.microsoft.com/office/drawing/2014/chart">
-                  <c16:uniqueId val="{00000000-F341-4959-B5F2-8AFDC73AE116}"/>
-                </c:ext>
-              </c:extLst>
-            </c:ser>
-            <c:ser>
-              <c:idx val="1"/>
-              <c:order val="1"/>
-              <c:spPr>
-                <a:solidFill>
-                  <a:schemeClr val="accent2"/>
-                </a:solidFill>
-                <a:ln>
-                  <a:noFill/>
-                </a:ln>
-                <a:effectLst/>
-              </c:spPr>
-              <c:invertIfNegative val="0"/>
-              <c:val>
-                <c:numRef>
-                  <c:f>Sheet4!$F$4:$F$7</c:f>
-                  <c:numCache>
-                    <c:formatCode>General</c:formatCode>
-                    <c:ptCount val="4"/>
-                  </c:numCache>
-                </c:numRef>
-              </c:val>
-              <c:extLst>
-                <c:ext uri="{C3380CC4-5D6E-409C-BE32-E72D297353CC}"
-                  xmlns:c16="http://schemas.microsoft.com/office/drawing/2014/chart">
-                  <c16:uniqueId val="{00000001-F341-4959-B5F2-8AFDC73AE116}"/>
-                </c:ext>
-              </c:extLst>
-            </c:ser>
+            {children}
             <c:dLbls>
               <c:showLegendKey val="0"/>
               <c:showVal val="0"/>
@@ -945,62 +882,13 @@ xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" meth="cycle" id=
   </cs:chartStyle>`,
   'xl/drawings/_rels/drawing1.xml.rels': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-      <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image1.jpeg"/>
+      {children}
     </Relationships>`,
 
   'xl/drawings/drawing1.xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing"
       xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
-      <xdr:twoCellAnchor editAs="oneCell">
-        <xdr:from>
-          <xdr:col>2</xdr:col>
-          <xdr:colOff>276225</xdr:colOff>
-          <xdr:row>2</xdr:row>
-          <xdr:rowOff>152399</xdr:rowOff>
-        </xdr:from>
-        <xdr:to>
-          <xdr:col>5</xdr:col>
-          <xdr:colOff>447675</xdr:colOff>
-          <xdr:row>22</xdr:row>
-          <xdr:rowOff>130174</xdr:rowOff>
-        </xdr:to>
-        <xdr:pic>
-          <xdr:nvPicPr>
-            <xdr:cNvPr id="3" name="图片 2">
-              <a:extLst>
-                <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
-                  <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{25C6107E-7B40-77BB-5A2D-7E3AC9E08275}"/>
-                </a:ext>
-              </a:extLst>
-            </xdr:cNvPr>
-            <xdr:cNvPicPr>
-              <a:picLocks noChangeAspect="1"/>
-            </xdr:cNvPicPr>
-          </xdr:nvPicPr>
-          <xdr:blipFill>
-            <a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rId1">
-              <a:extLst>
-                <a:ext uri="{28A0092B-C50C-407E-A947-70E740481C1C}">
-                  <a14:useLocalDpi xmlns:a14="http://schemas.microsoft.com/office/drawing/2010/main" val="0"/>
-                </a:ext>
-              </a:extLst>
-            </a:blip>
-            <a:stretch>
-              <a:fillRect/>
-            </a:stretch>
-          </xdr:blipFill>
-          <xdr:spPr>
-            <a:xfrm rot="561265">
-              <a:off x="1571625" y="504824"/>
-              <a:ext cx="2114550" cy="3502025"/>
-            </a:xfrm>
-            <a:prstGeom prst="rect">
-              <a:avLst/>
-            </a:prstGeom>
-          </xdr:spPr>
-        </xdr:pic>
-        <xdr:clientData/>
-      </xdr:twoCellAnchor>
+      {children}
     </xdr:wsDr>`,
   'xl/media/image1.jpeg': '',
   'xl/theme/theme1.xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -1299,7 +1187,7 @@ xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" meth="cycle" id=
 
   'xl/worksheets/_rels/sheet1.xml.rels': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-      <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/>
+      <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/{children}"/>
     </Relationships>`,
   'xl/worksheets/sheet1.xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
@@ -1402,11 +1290,10 @@ xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" meth="cycle" id=
 
   '[Content_Types].xml': `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-      <Default Extension="jpeg" ContentType="image/jpeg"/>
       <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
       <Default Extension="xml" ContentType="application/xml"/>
-      <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
       {children}
+      <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
       <Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>
       <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
       <Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>

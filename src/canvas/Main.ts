@@ -59,6 +59,7 @@ export class MainCanvas {
       return;
     }
     if (this.isRendering) {
+      console.log('rendering');
       canvasLog('It is rendering');
       return;
     }
@@ -80,7 +81,6 @@ export class MainCanvas {
     this.renderAntLine(result);
 
     this.renderMergeCell();
-
     this.isRendering = false;
   };
 

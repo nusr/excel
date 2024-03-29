@@ -125,14 +125,12 @@ export interface IBaseModel {
   setColWidth: (
     col: number,
     width: number,
-    isChanged: boolean,
     sheetId?: string,
   ) => void;
   getRowHeight: (row: number, sheetId?: string) => CustomItem;
   setRowHeight: (
     row: number,
     height: number,
-    isChanged: boolean,
     sheetId?: string,
   ) => void;
   setCellValues: (

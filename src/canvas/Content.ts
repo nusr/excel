@@ -85,18 +85,20 @@ export class Content implements ContentView {
         );
       }
     }
-    for (const [r, h] of rowMap.entries()) {
-      if (h <= 0) {
-        continue;
+    controller.batchUpdate(() => {
+      for (const [r, h] of rowMap.entries()) {
+        if (h <= 0 || controller.getRowHeight(r).len === h) {
+          continue;
+        }
+        controller.setRowHeight(r, h);
       }
-      controller.setRowHeight(r, h, false);
-    }
-    for (const [c, w] of colMap.entries()) {
-      if (w <= 0) {
-        continue;
+      for (const [c, w] of colMap.entries()) {
+        if (w <= 0 || controller.getColWidth(c).len === w) {
+          continue;
+        }
+        controller.setColWidth(c, w);
       }
-      controller.setColWidth(c, w, false);
-    }
+    });
 
     ctx.restore();
   }

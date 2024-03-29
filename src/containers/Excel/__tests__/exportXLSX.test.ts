@@ -45,7 +45,7 @@ describe('exportXLSX.test.ts', () => {
         [],
         [{ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }],
       );
-      controller.setColWidth(1, 80, true);
+      controller.setColWidth(1, 80);
       controller.hideCol(1, 1);
       const result = convertToXMLData(controller);
       expect(trimData(result['xl/worksheets/sheet1.xml'])).toEqual(

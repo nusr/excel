@@ -17,7 +17,12 @@ import {
   getCustomWidthOrHeightKey,
   NUMBER_FORMAT_LIST,
 } from '@/util';
-import { CUSTOM_WIdTH_RADIO, XfItem } from './importXLSX';
+import {
+  CUSTOM_WIdTH_RADIO,
+  XfItem,
+  imageTypeMap,
+  chartTypeList,
+} from './importXLSX';
 interface StyleData {
   cellXfs: string[];
   numFmts: string[];
@@ -157,6 +162,10 @@ function compileTemplate(template: string, target: Partial<CommonData> = {}) {
   return result;
 }
 
+function convertSheetName(name: string) {
+  return name.includes(' ') ? `'${name}'` : name;
+}
+
 function formatDate() {
   const d = new Date();
 
@@ -208,10 +217,31 @@ function buildStyle(style: StyleData) {
   return list.join('\n');
 }
 
+function extractImageType(src: string): {
+  ext: string;
+  type: string;
+  base64: string;
+} {
+  if (!src) {
+    return { ext: '', base64: '', type: '' };
+  }
+  const base64Prefix = ';base64,';
+  const i = src.indexOf(base64Prefix);
+  const prefix = 'data:';
+  const type = src.slice(prefix.length, i);
+  // @ts-ignore
+  const list = imageTypeMap[type] || [];
+  if (list.length > 0) {
+    return { ext: list[0], type, base64: src.slice(i + base64Prefix.length) };
+  }
+  return { ext: '', base64: '', type: '' };
+}
+
 export function convertToXMLData(controller: IController) {
   const model = controller.toJSON();
   const sheetList = Object.values(model.workbook);
 
+  const contentTypeList: string[] = [];
   const sheetRelMap: Record<
     string,
     { rid: string; target: string; name: string }
@@ -224,12 +254,15 @@ export function convertToXMLData(controller: IController) {
       target: `sheet${a}.xml`,
       name: t.name,
     };
+    contentTypeList.push(
+      `<Override PartName="/xl/worksheets/sheet${a}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`,
+    );
   }
 
   const convertSheetIdToSheetName = (sheetId: string) => {
     const id = sheetId || model.currentSheetId;
     const name = sheetList.find((v) => v.sheetId === id)?.name || '';
-    return name.includes(' ') ? `'${name}'` : name;
+    return convertSheetName(name);
   };
   const defineNames: string[] = [];
   for (const [name, range] of Object.entries(model.definedNames)) {
@@ -273,15 +306,209 @@ export function convertToXMLData(controller: IController) {
       )}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"/>`,
     },
   );
-  // TODO
-  // if (Object.keys(model.drawings).length > 0) {
-  //   result['xl/drawings/_rels/drawing1.xml.rels'] = compileTemplate(
-  //     CONFIG['xl/drawings/_rels/drawing1.xml.rels'],
-  //   );
-  //  result['xl/worksheets/_rels/sheet1.xml.rels'] =
-  // CONFIG['xl/worksheets/_rels/sheet1.xml.rels'];
-  // }
-  // result['xl/sharedStrings.xml'] = CONFIG['xl/sharedStrings.xml'];
+  if (Object.keys(model.drawings).length > 0) {
+    const drawings = Object.values(model.drawings);
+    let index = 1;
+    for (const item of sheetList) {
+      const list = drawings.filter((v) => v.sheetId === item.sheetId);
+      if (list.length === 0) {
+        continue;
+      }
+      const sheetInfo = sheetRelMap[item.sheetId];
+      const fileName = `drawing${index}.xml`;
+      result[`xl/worksheets/_rels/${sheetInfo.target}.rels`] = compileTemplate(
+        CONFIG['xl/worksheets/_rels/sheet1.xml.rels'],
+        { children: fileName },
+      );
+      let rid = 1;
+      let chartIndex = 1;
+      let imageIndex = 1;
+      const relationList: string[] = [];
+      const drawingData: string[] = [];
+      for (const drawing of list) {
+        let endCol = drawing.fromCol;
+        let endRow = drawing.fromRow;
+        for (let i = 0; i < drawing.width; i++) {
+          i += controller.getColWidth(endCol++).len;
+        }
+        for (let i = 0; i < drawing.height; i++) {
+          i += controller.getRowHeight(endRow++).len;
+        }
+        const position = `<xdr:from>
+        <xdr:col>${drawing.fromCol}</xdr:col>
+        <xdr:colOff>304800</xdr:colOff>
+        <xdr:row>${drawing.fromRow}</xdr:row>
+        <xdr:rowOff>165100</xdr:rowOff>
+      </xdr:from>
+      <xdr:to>
+        <xdr:col>${endCol}</xdr:col>
+        <xdr:colOff>457200</xdr:colOff>
+        <xdr:row>${endRow}</xdr:row>
+        <xdr:rowOff>63500</xdr:rowOff>
+      </xdr:to>`;
+        if (drawing.type === 'chart') {
+          relationList.push(
+            `<Relationship Id="rId${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart${chartIndex}.xml"/>`,
+          );
+          result[`xl/charts/_rels/chart${chartIndex}.xml.rels`] =
+            compileTemplate(CONFIG['xl/charts/_rels/chart1.xml.rels'], {
+              children: String(chartIndex),
+            });
+          result[`xl/charts/colors${chartIndex}.xml`] =
+            CONFIG['xl/charts/colors1.xml'];
+          result[`xl/charts/style${chartIndex}.xml`] =
+            CONFIG['xl/charts/style1.xml'];
+          contentTypeList.push(
+            `<Override PartName="/xl/charts/chart${chartIndex}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>`,
+          );
+          contentTypeList.push(
+            `<Override PartName="/xl/charts/colors${chartIndex}.xml" ContentType="application/vnd.ms-office.chartcolorstyle+xml"/>`,
+          );
+          contentTypeList.push(
+            `<Override PartName="/xl/charts/style${chartIndex}.xml" ContentType="application/vnd.ms-office.chartstyle+xml"/>`,
+          );
+          const children: string[] = [];
+          const range = drawing.chartRange!;
+          for (let i = 0; i < range.colCount; i++) {
+            const start = convertToReference(
+              {
+                row: range.row,
+                col: range.col + i,
+                rowCount: 1,
+                colCount: 1,
+                sheetId: '',
+              },
+              'absolute',
+            );
+            const end = convertToReference(
+              {
+                row: range.row + range.rowCount - 1,
+                col: range.col + i,
+                rowCount: 1,
+                colCount: 1,
+                sheetId: '',
+              },
+              'absolute',
+            );
+            children.push(` <c:ser>
+            <c:idx val="${chartIndex}"/>
+            <c:order val="${chartIndex}"/>
+            <c:spPr>
+              <a:solidFill>
+                <a:schemeClr val="accent${chartIndex}"/>
+              </a:solidFill>
+              <a:ln>
+                <a:noFill/>
+              </a:ln>
+              <a:effectLst/>
+            </c:spPr>
+            <c:invertIfNegative val="0"/>
+            <c:dLbls>
+              <c:delete val="1"/>
+            </c:dLbls>
+            <c:val>
+              <c:numRef>
+                <c:f>${convertSheetIdToSheetName(
+                  range.sheetId,
+                )}!${start}:${end}</c:f>
+                <c:numCache>
+                  <c:formatCode>General</c:formatCode>
+                  <c:ptCount val="${range.rowCount}"/>
+                </c:numCache>
+              </c:numRef>
+            </c:val>
+          </c:ser>`);
+          }
+          result[`xl/charts/chart${chartIndex}.xml`] = compileTemplate(
+            CONFIG['xl/charts/chart1.xml'],
+            {
+              size: drawing.title,
+              children: children.join('\n'),
+              large: chartTypeList.some((v) => v === drawing.chartType!)
+                ? drawing.chartType
+                : 'bar',
+            },
+          );
+
+          drawingData.push(`<xdr:twoCellAnchor>
+          ${position}
+          <xdr:graphicFrame>
+            <xdr:nvGraphicFramePr>
+              <xdr:cNvPr id="${drawing.uuid}" name="Chart ${rid}"/>
+              <xdr:cNvGraphicFramePr/>
+            </xdr:nvGraphicFramePr>
+            <xdr:xfrm>
+              <a:off x="8256270" y="1445260"/>
+              <a:ext cx="4541520" cy="2885440"/>
+            </xdr:xfrm>
+            <a:graphic>
+              <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart">
+                <c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"
+                  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="rId${rid}"/>
+              </a:graphicData>
+            </a:graphic>
+          </xdr:graphicFrame>
+          <xdr:clientData/>
+        </xdr:twoCellAnchor>`);
+        } else if (drawing.type === 'floating-picture') {
+          const data = extractImageType(drawing.imageSrc!);
+          contentTypeList.unshift(
+            `<Default Extension="${data.ext.slice(1)}" ContentType="${
+              data.type
+            }"/>`,
+          );
+          const imageName = `image${imageIndex}${data.ext}`;
+
+          relationList.push(
+            `<Relationship Id="rId${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/${imageName}"/>`,
+          );
+          result[`xl/media/${imageName}`] = data.base64;
+          drawingData.push(`<xdr:twoCellAnchor editAs="oneCell">
+          ${position}
+          <xdr:pic>
+            <xdr:nvPicPr>
+              <xdr:cNvPr id="${drawing.uuid}" name="Picture ${rid}" descr="face"/>
+              <xdr:cNvPicPr>
+                <a:picLocks noChangeAspect="1"/>
+              </xdr:cNvPicPr>
+            </xdr:nvPicPr>
+            <xdr:blipFill>
+              <a:blip r:embed="rId${rid}"/>
+              <a:stretch>
+                <a:fillRect/>
+              </a:stretch>
+            </xdr:blipFill>
+            <xdr:spPr>
+              <a:xfrm>
+                <a:off x="744220" y="4693920"/>
+                <a:ext cx="4770120" cy="5057140"/>
+              </a:xfrm>
+              <a:prstGeom prst="rect">
+                <a:avLst/>
+              </a:prstGeom>
+            </xdr:spPr>
+          </xdr:pic>
+          <xdr:clientData/>
+        </xdr:twoCellAnchor>`);
+        }
+        rid++;
+        imageIndex++;
+        chartIndex++;
+      }
+      result[`xl/drawings/${fileName}`] = compileTemplate(
+        CONFIG['xl/drawings/drawing1.xml'],
+        { children: drawingData.join('\n') },
+      );
+      contentTypeList.push(
+        `<Override PartName="/xl/drawings/${fileName}" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>`,
+      );
+      result[`xl/drawings/_rels/${fileName}.rels`] = compileTemplate(
+        CONFIG['xl/drawings/_rels/drawing1.xml.rels'],
+        { children: relationList.join('\n') },
+      );
+      index++;
+    }
+  }
   result['xl/theme/theme1.xml'] = CONFIG['xl/theme/theme1.xml'];
 
   result['xl/workbook.xml'] = compileTemplate(CONFIG['xl/workbook.xml'], {
@@ -300,12 +527,7 @@ export function convertToXMLData(controller: IController) {
   result['[Content_Types].xml'] = compileTemplate(
     CONFIG['[Content_Types].xml'],
     {
-      children: sheetList
-        .map((v) => {
-          const item = sheetRelMap[v.sheetId];
-          return `<Override PartName="/xl/worksheets/${item.target}" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`;
-        })
-        .join(''),
+      children: contentTypeList.join('\n'),
     },
   );
   const styles: StyleData = {
@@ -389,7 +611,9 @@ export function convertToXMLData(controller: IController) {
       }
       const cols = rowMap.get(row)!;
       rowList.push(
-        `<row r="${row + 1}" ${ht} x14ac:dyDescent="0.4">\n${cols.join('\n')}\n</row>`,
+        `<row r="${row + 1}" ${ht} x14ac:dyDescent="0.4">\n${cols.join(
+          '\n',
+        )}\n</row>`,
       );
     }
     if (rowList.length > 0) {
@@ -437,19 +661,23 @@ export async function exportXLSX(fileName: string, controller: IController) {
       .filter((v) => v);
     const fileName = list.pop()!;
     generateFolder(list);
-    const realValue = value
-      .split('/n')
-      .map((v) => v.trim())
-      .filter((v) => v)
-      .join('');
-    if (list.length === 0) {
-      zip.file(fileName, realValue);
+
+    let folder = zip;
+    if (list.length > 0) {
+      folder = folderMap.get(list.join(SPLITTER))!;
+    }
+    if (key.startsWith('xl/media')) {
+      folder.file(fileName, value, { base64: true });
     } else {
-      const f = folderMap.get(list.join(SPLITTER));
-      f!.file(fileName, realValue);
+      const realValue = value
+        .trim()
+        .split('/n')
+        .map((v) => v.trim())
+        .filter((v) => v)
+        .join('');
+      folder.file(fileName, realValue);
     }
   }
-
   const blob = await zip.generateAsync({ type: 'blob' });
   saveAs(blob, fileName);
 }

@@ -783,7 +783,6 @@ export class Model implements IModel {
   setColWidth(
     col: number,
     width: number,
-    _isChanged: boolean,
     sheetId?: string,
   ): void {
     const id = sheetId || this.currentSheetId;
@@ -799,9 +798,6 @@ export class Model implements IModel {
 
     newData.len = width;
     this.customWidth[key] = newData;
-    if (!_isChanged) {
-      return;
-    }
     this.history.push({
       t: 'customWidth',
       k: key,
@@ -853,7 +849,6 @@ export class Model implements IModel {
   setRowHeight(
     row: number,
     height: number,
-    _isChanged: boolean,
     sheetId?: string,
   ): void {
     const id = sheetId || this.currentSheetId;
@@ -868,9 +863,6 @@ export class Model implements IModel {
     const old = this.customHeight[key];
     newData.len = height;
     this.customHeight[key] = newData;
-    if (!_isChanged) {
-      return;
-    }
     this.history.push({
       t: 'customHeight',
       k: key,

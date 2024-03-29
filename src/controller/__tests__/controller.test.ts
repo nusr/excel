@@ -293,7 +293,7 @@ describe('controller.test.ts', () => {
       expect(controller.getRowHeight(100).len).toEqual(24);
     });
     test('set', () => {
-      controller.setRowHeight(0, 100, true);
+      controller.setRowHeight(0, 100);
       expect(controller.getRowHeight(0).len).toEqual(100);
     });
     test('hide', () => {
@@ -303,7 +303,7 @@ describe('controller.test.ts', () => {
     });
     test('undo redo', () => {
       const old = controller.getRowHeight(0).len;
-      controller.setRowHeight(0, 300, true);
+      controller.setRowHeight(0, 300);
       expect(controller.getRowHeight(0).len).toEqual(300);
 
       controller.undo();
@@ -319,7 +319,7 @@ describe('controller.test.ts', () => {
       expect(controller.getColWidth(100).len).toEqual(68);
     });
     test('set', () => {
-      controller.setColWidth(0, 100, true);
+      controller.setColWidth(0, 100);
       expect(controller.getColWidth(0).len).toEqual(100);
     });
     test('hide', () => {
@@ -330,7 +330,7 @@ describe('controller.test.ts', () => {
 
     test('undo redo', () => {
       const old = controller.getColWidth(0).len;
-      controller.setColWidth(0, 300, true);
+      controller.setColWidth(0, 300);
       expect(controller.getColWidth(0).len).toEqual(300);
 
       controller.undo();

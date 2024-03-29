@@ -50,7 +50,7 @@ const textKey = '#text';
 const DRAWING_PREFIX_KEY = 'xl/drawings/';
 const DRAWING_FLAG = '../drawings/';
 
-const imageTypeMap = {
+export const imageTypeMap = {
   'image/apng': ['.apng'],
   'image/bmp': ['.bmp'],
   'image/x-icon': ['.ico', '.cur'],
@@ -63,7 +63,7 @@ const imageTypeMap = {
   'image/jpeg': ['.jpeg', '.jpg', '.jfif', '.pjpeg', '.pjp'],
 } as const;
 
-const chartTypeList = [
+export const chartTypeList = [
   // 'area',
   'bar',
   // 'bubble',
@@ -312,11 +312,19 @@ function getCellStyle(
   themeData: ThemeData,
 ): Partial<StyleType> {
   const result: Partial<StyleType> = {};
-  const xfList = get<XfItem[]>(xml, 'styleSheet.cellXfs.xf', []);
-  if (!styleId || xfList.length === 0 || !xfList[styleId]) {
+  let xfList: XfItem[] = get(xml, 'styleSheet.cellXfs.xf', []);
+  if (!Array.isArray(xfList)) {
+    xfList = [xfList];
+  }
+  let cellStyles: XfItem[] = get(xml, 'styleSheet.cellStyles.xf', []);
+  if (!Array.isArray(cellStyles)) {
+    cellStyles = [cellStyles];
+  }
+  const list = xfList.length > 0 ? xfList : cellStyles;
+  if (!styleId || list.length === 0 || !list[styleId]) {
     return result;
   }
-  const xf = xfList[styleId];
+  const xf = list[styleId];
   if (xf.applyAlignment && xf.alignment) {
     if (xf.alignment.horizontal) {
       const alignMap = {

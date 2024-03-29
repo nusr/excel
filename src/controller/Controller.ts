@@ -50,6 +50,7 @@ export class Controller implements IController {
   private copyRanges: IRange[] = []; // cut or copy ranges
   private isCut = false; // cut or copy
   private floatElementUuid = '';
+  private isNoChange = false;
   private hooks: IHooks = {
     modelChange() {},
     async copyOrCut() {
@@ -87,7 +88,16 @@ export class Controller implements IController {
   setHooks(hooks: IHooks): void {
     this.hooks = hooks;
   }
+  batchUpdate(fn: () => void): void {
+    this.isNoChange = true;
+    fn();
+    this.isNoChange = false;
+    this.emitChange();
+  }
   private emitChange(): void {
+    if (this.isNoChange) {
+      return;
+    }
     if (this.changeSet.size === 0) {
       return;
     }
@@ -393,14 +403,11 @@ export class Controller implements IController {
   setColWidth(
     col: number,
     width: number,
-    isChanged: boolean,
     sheetId?: string,
   ): void {
-    this.model.setColWidth(col, width, isChanged, sheetId);
+    this.model.setColWidth(col, width, sheetId);
     this.changeSet.add('col');
-    if (isChanged) {
-      this.emitChange();
-    }
+    this.emitChange();
   }
   getRowHeight(row: number, sheetId?: string) {
     return this.model.getRowHeight(row, sheetId);
@@ -408,14 +415,11 @@ export class Controller implements IController {
   setRowHeight(
     row: number,
     height: number,
-    isChanged: boolean,
     sheetId?: string,
   ) {
-    this.model.setRowHeight(row, height, isChanged, sheetId);
+    this.model.setRowHeight(row, height, sheetId);
     this.changeSet.add('row');
-    if (isChanged) {
-      this.emitChange();
-    }
+    this.emitChange();
   }
   private computeViewSize() {
     const headerSize = this.getHeaderSize();
