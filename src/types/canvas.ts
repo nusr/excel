@@ -1,4 +1,4 @@
-import type { EventType } from './event';
+import type { EventType } from './model';
 import { IController } from './controller';
 
 export type ModifierKeyType = 'alt' | 'shift' | 'ctrl' | 'meta';

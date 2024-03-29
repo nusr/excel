@@ -48,6 +48,7 @@ function processRow(row: ResultType[]) {
         quotedString;
       if (shouldQuote === true && containsEscape === true) {
         const regexp = new RegExp(escape, 'g');
+        // @ts-ignore
         value = value.replace(regexp, escape + escape);
       }
       if (containsQuote === true) {

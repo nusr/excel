@@ -1,5 +1,4 @@
 import { ICommandItem, ModelChangeEventType } from '@/types';
-import { rmSync } from 'fs';
 
 export class EventEmitter<
   EventType extends Record<string, unknown> = Record<string, unknown>,

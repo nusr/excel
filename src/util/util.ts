@@ -1,5 +1,5 @@
 import { SHEET_NAME_PREFIX, SPLITTER } from './constant';
-import type { WorksheetType, ResultType, Coordinate } from '@/types';
+import type { WorksheetType, Coordinate } from '@/types';
 
 export function isNumber(value: any): boolean {
   if (typeof value === 'number' && !window.isNaN(value)) {
@@ -149,3 +149,17 @@ export function isMobile() {
   const ua = navigator.userAgent;
   return matchList.some((v) => ua.match(v));
 }
+
+export function isTestEnv() {
+  return process.env.NODE_ENV === 'test';
+}
+
+export const asyncExec = (fn: () => void) => {
+  if (isTestEnv()) {
+    fn();
+    return;
+  }
+  queueMicrotask(() => {
+    fn();
+  });
+};

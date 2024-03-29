@@ -1,4 +1,4 @@
-import { IBaseModel, ModelChangeEventType } from './model';
+import { IBaseModel } from './model';
 import { CanvasOverlayPosition, ScrollValue } from './components';
 import { IRange } from './range';
 import { IWindowSize, IPosition } from './event';

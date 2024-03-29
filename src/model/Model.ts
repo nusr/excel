@@ -12,7 +12,6 @@ import {
   IHistory,
   ICommandItem,
   DefinedNameItem,
-  HistoryChangeType,
   ModelChangeEventType,
 } from '@/types';
 import {
@@ -36,6 +35,7 @@ import {
   modelLog,
   modelToChangeSet,
   eventEmitter,
+  asyncExec,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 import { History } from './History';
@@ -123,7 +123,7 @@ export class Model implements IModel {
       return;
     }
     this.isNoChange = true;
-    queueMicrotask(() => {
+    asyncExec(() => {
       if (
         this.changeSet.has('cellValue') ||
         this.changeSet.has('currentSheetId')

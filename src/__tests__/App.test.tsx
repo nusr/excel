@@ -13,11 +13,15 @@ describe('App.test.ts', () => {
   afterEach(cleanup);
   describe('menubar', () => {
     test('normal', () => {
-      render(<App controller={initController()} />);
+      act(() => {
+        render(<App controller={initController()} />);
+      });
       expect(screen.getByTestId('menubar')!.childNodes.length).toEqual(4);
     });
     test('menu', () => {
-      render(<App controller={initController()} />);
+      act(() => {
+        render(<App controller={initController()} />);
+      });
       fireEvent.click(screen.getByTestId('menubar-excel'));
       expect(
         screen.getByTestId('menubar-excel-portal')!.querySelectorAll('li')
@@ -38,7 +42,9 @@ describe('App.test.ts', () => {
       }, 1000);
     });
     test('dark mode', () => {
-      render(<App controller={initController()} />);
+      act(() => {
+        render(<App controller={initController()} />);
+      });
       const before = document.documentElement.getAttribute('data-theme');
       fireEvent.click(screen.getByTestId('menubar-theme-toggle'));
       const after = document.documentElement.getAttribute('data-theme');
@@ -46,7 +52,9 @@ describe('App.test.ts', () => {
       expect(new Set([after, before])).toEqual(new Set(['light', 'dark']));
     });
     test('i18n', () => {
-      render(<App controller={initController()} />);
+      act(() => {
+        render(<App controller={initController()} />);
+      });
       expect(
         screen.getByTestId('menubar-i18n')!.querySelector('select')!.value,
       ).toEqual('en');
@@ -55,7 +63,9 @@ describe('App.test.ts', () => {
   });
   describe('toolbar', () => {
     test('normal', () => {
-      render(<App controller={initController()} />);
+      act(() => {
+        render(<App controller={initController()} />);
+      });
       expect(
         screen.getByTestId('toolbar')!.childNodes.length,
       ).toBeGreaterThanOrEqual(3);
@@ -63,7 +73,9 @@ describe('App.test.ts', () => {
   });
   describe('formula bar', () => {
     test('normal', () => {
-      render(<App controller={initController()} />);
+      act(() => {
+        render(<App controller={initController()} />);
+      });
       expect(
         screen.getByTestId('formula-bar-name')!.querySelector('input')!.value,
       ).toEqual('A1');
@@ -72,7 +84,9 @@ describe('App.test.ts', () => {
   });
   describe('canvas', () => {
     test('normal', () => {
-      render(<App controller={initController()} />);
+      act(() => {
+        render(<App controller={initController()} />);
+      });
       expect(screen.getByTestId('canvas-container')!.childNodes).toHaveLength(
         5,
       );
@@ -81,7 +95,9 @@ describe('App.test.ts', () => {
       ).toEqual('CANVAS');
     });
     test('context menu', () => {
-      render(<App controller={initController()} />);
+      act(() => {
+        render(<App controller={initController()} />);
+      });
       fireEvent.contextMenu(screen.getByTestId('canvas-main'), {
         clientY: 200,
         clientX: 200,
@@ -91,11 +107,15 @@ describe('App.test.ts', () => {
   });
   describe('sheet bar', () => {
     test('normal', () => {
-      render(<App controller={initController()} />);
+      act(() => {
+        render(<App controller={initController()} />);
+      });
       expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(1);
     });
     test('context menu', () => {
-      render(<App controller={initController()} />);
+      act(() => {
+        render(<App controller={initController()} />);
+      });
       fireEvent.contextMenu(
         screen.getByTestId('sheet-bar-list')!.childNodes[0],
         {

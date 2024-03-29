@@ -3,8 +3,6 @@ import {
   EUnderLine,
   IRange,
   ModelChangeEventType,
-  EVerticalAlign,
-  EHorizontalAlign,
 } from '@/types';
 import {
   DEFAULT_FONT_SIZE,
@@ -16,6 +14,7 @@ import {
   getThemeColor,
   convertResultTypeToString,
   eventEmitter,
+  asyncExec,
 } from '@/util';
 import {
   coreStore,
@@ -171,7 +170,7 @@ const handleStateChange = (
   }
 
   if (changeSet.has('currentSheetId')) {
-    queueMicrotask(() => {
+    asyncExec(() => {
       scrollSheetToView(controller.getCurrentSheetId());
     });
     coreStore.mergeState({
