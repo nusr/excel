@@ -1314,13 +1314,9 @@ xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" meth="cycle" id=
         {large}
       </sheetViews>
       <sheetFormatPr defaultRowHeight="13.9" x14ac:dyDescent="0.4"/>
-      <cols>
-        {size}
-      </cols>
-      <sheetData>
-        {children}
-      </sheetData>
-      <phoneticPr fontId="2" type="noConversion"/>
+      {size}
+      {children}
+      <phoneticPr fontId="0" type="noConversion"/>
       <pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/>
     </worksheet>`,
 
@@ -1339,7 +1335,7 @@ xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" meth="cycle" id=
       xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac"
       xmlns:x16r2="http://schemas.microsoft.com/office/spreadsheetml/2015/02/main"
       xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision">
-      {size}
+      {children}
       <borders count="1">
         <border>
           <left/>
@@ -1350,11 +1346,10 @@ xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" meth="cycle" id=
         </border>
       </borders>
       <cellStyleXfs count="1">
-        <xf numFmtId="0" fontId="0" fillId="0" borderId="0">
+        <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0">
           <alignment vertical="center"/>
         </xf>
       </cellStyleXfs>
-      {children}
       <cellStyles count="1">
         <cellStyle name="常规" xfId="0" builtinId="0"/>
       </cellStyles>

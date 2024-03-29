@@ -147,13 +147,12 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
   styles.cellXfs.push(t);
 }
 function compileTemplate(template: string, target: Partial<CommonData> = {}) {
-  const result = template.replace(/{([a-z]+)}/g, function (_, key) {
-    const t = key.trim();
-    if (t in target) {
+  const result = template.replace(/{([a-z]+)}/gi, function (_, key) {
+    if (key in target) {
       // @ts-ignore
-      return target[t];
+      return target[key];
     }
-    throw new Error(`not found key: ${key}`);
+    throw new Error(`compileTemplate not found key: "${key}"`);
   });
   return result;
 }
@@ -192,7 +191,21 @@ function getCustomWidth(
   if (list.length === 0) {
     return '';
   }
-  return list.join('');
+  return `<cols>${list.join('')}</cols>`;
+}
+
+function buildStyle(style: StyleData) {
+  const list: string[] = [];
+  const result: Array<[string, string[]]> = Object.entries(style);
+  result.sort((a, b) => (a[0] > b[0] ? -1 : 1));
+  for (const [key, value] of result) {
+    if (value.length > 0) {
+      list.push(
+        `<${key} count="${value.length}">\n${value.join('\n')}\n</${key}>`,
+      );
+    }
+  }
+  return list.join('\n');
 }
 
 export function convertToXMLData(controller: IController) {
@@ -215,7 +228,8 @@ export function convertToXMLData(controller: IController) {
 
   const convertSheetIdToSheetName = (sheetId: string) => {
     const id = sheetId || model.currentSheetId;
-    return sheetList.find((v) => v.sheetId === id)?.name || '';
+    const name = sheetList.find((v) => v.sheetId === id)?.name || '';
+    return name.includes(' ') ? `'${name}'` : name;
   };
   const defineNames: string[] = [];
   for (const [name, range] of Object.entries(model.definedNames)) {
@@ -264,12 +278,11 @@ export function convertToXMLData(controller: IController) {
   //   result['xl/drawings/_rels/drawing1.xml.rels'] = compileTemplate(
   //     CONFIG['xl/drawings/_rels/drawing1.xml.rels'],
   //   );
+  //  result['xl/worksheets/_rels/sheet1.xml.rels'] =
+  // CONFIG['xl/worksheets/_rels/sheet1.xml.rels'];
   // }
+  // result['xl/sharedStrings.xml'] = CONFIG['xl/sharedStrings.xml'];
   result['xl/theme/theme1.xml'] = CONFIG['xl/theme/theme1.xml'];
-  result['xl/worksheets/_rels/sheet1.xml.rels'] =
-    CONFIG['xl/worksheets/_rels/sheet1.xml.rels'];
-  result['xl/sharedStrings.xml'] = CONFIG['xl/sharedStrings.xml'];
-  result['xl/styles.xml'] = CONFIG['xl/styles.xml'];
 
   result['xl/workbook.xml'] = compileTemplate(CONFIG['xl/workbook.xml'], {
     size: activeIndex >= 0 ? ` activeTab="${activeIndex}" ` : '',
@@ -327,9 +340,9 @@ export function convertToXMLData(controller: IController) {
       sheetId: '',
     };
     range.sheetId = '';
-    const cellData = model.worksheets[item.sheetId];
+    const cellData = model.worksheets[item.sheetId] || {};
     const targetData: Partial<CommonData> = {
-      children: '',
+      children: '<sheetData/>',
       size: getCustomWidth(model.customWidth, item.sheetId),
       large: `<sheetView ${
         item.sheetId === model.currentSheetId ? 'tabSelected="1"' : ''
@@ -341,13 +354,6 @@ export function convertToXMLData(controller: IController) {
     })}" sqref="${convertToReference(range)}"/>
   </sheetView>`,
     };
-    if (isEmpty(cellData)) {
-      result[`xl/worksheets/${v.target}`] = compileTemplate(
-        CONFIG['xl/worksheets/sheet1.xml'],
-        targetData,
-      );
-      continue;
-    }
     const rowMap = new Map<number, string[]>();
     const rowList: string[] = [];
     for (const [key, v] of Object.entries(cellData)) {
@@ -359,7 +365,7 @@ export function convertToXMLData(controller: IController) {
         sheetId: '',
       });
       const list = rowMap.get(range.row) || [];
-      const f = v.formula ? `<f>=${v.formula.slice(1)}</f>` : '';
+      const f = v.formula ? `<f>${v.formula.slice(1)}</f>` : '';
       const val = `<v>${convertResultTypeToString(v.value)}</v>`;
       let s = '';
       if (v.style && !isEmpty(v.style)) {
@@ -381,29 +387,22 @@ export function convertToXMLData(controller: IController) {
           customHeight.isHide ? 'hidden="1"' : ''
         }`;
       }
+      const cols = rowMap.get(row)!;
       rowList.push(
-        `<row r="${row + 1}" ${ht}>\n${rowMap.get(row)!.join('\n')}\n</row>`,
+        `<row r="${row + 1}" ${ht} x14ac:dyDescent="0.4">\n${cols.join('\n')}\n</row>`,
       );
     }
-    targetData.children = rowList.join('\n');
+    if (rowList.length > 0) {
+      targetData.children = `<sheetData>\n${rowList.join('\n')}\n</sheetData>`;
+    }
+
     result[`xl/worksheets/${v.target}`] = compileTemplate(
       CONFIG['xl/worksheets/sheet1.xml'],
       targetData,
     );
   }
   result['xl/styles.xml'] = compileTemplate(CONFIG['xl/styles.xml'], {
-    children: `<cellXfs count="${styles.cellXfs.length}">
-    ${styles.cellXfs.join('')}
-    </cellXfs>`,
-    size: `<numFmts count="${styles.numFmts.length}">
-  ${styles.numFmts.join('\n')}
-  </numFmts>
-  <fonts count="${styles.fonts.length}">
-  ${styles.fonts.join('\n')}
-  </fonts>
-  <fills count="${styles.fills.length}">
-  ${styles.fills.join('\n')}
-  </fills>`,
+    children: buildStyle(styles),
   });
   return result;
 }
@@ -438,11 +437,16 @@ export async function exportXLSX(fileName: string, controller: IController) {
       .filter((v) => v);
     const fileName = list.pop()!;
     generateFolder(list);
+    const realValue = value
+      .split('/n')
+      .map((v) => v.trim())
+      .filter((v) => v)
+      .join('');
     if (list.length === 0) {
-      zip.file(fileName, value);
+      zip.file(fileName, realValue);
     } else {
       const f = folderMap.get(list.join(SPLITTER));
-      f!.file(fileName, value);
+      f!.file(fileName, realValue);
     }
   }
 
