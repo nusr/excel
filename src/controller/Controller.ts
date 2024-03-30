@@ -19,7 +19,6 @@ import {
   DefinedNameItem,
 } from '@/types';
 import {
-  controllerLog,
   Range,
   PLAIN_FORMAT,
   HTML_FORMAT,
@@ -29,10 +28,10 @@ import {
   parseHTML,
   generateUUID,
   sizeConfig,
+  headerSizeSet,
+  ROW_TITLE_HEIGHT,
+  COL_TITLE_WIDTH,
 } from '@/util';
-
-const ROW_TITLE_HEIGHT = 24;
-const COL_TITLE_WIDTH = 34;
 
 const defaultScrollValue: ScrollValue = {
   top: 0,
@@ -52,15 +51,6 @@ export class Controller implements IController {
   private floatElementUuid = '';
   private isNoChange = false;
   private hooks: IHooks;
-  // sheet size
-  private viewSize = {
-    width: 0,
-    height: 0,
-  };
-  private headerSize = {
-    width: COL_TITLE_WIDTH,
-    height: ROW_TITLE_HEIGHT,
-  };
   private mainDom: MainDom = {};
   constructor(model: IModel, hooks: IHooks) {
     this.model = model;
@@ -85,13 +75,6 @@ export class Controller implements IController {
     if (this.isNoChange) {
       return;
     }
-    if (this.changeSet.size === 0) {
-      return;
-    }
-    if (this.changeSet.has('row') || this.changeSet.has('col')) {
-      this.computeViewSize();
-    }
-    controllerLog(this.changeSet);
     this.model.emitChange(this.changeSet);
     this.changeSet = new Set<ChangeEventType>();
   }
@@ -254,35 +237,19 @@ export class Controller implements IController {
       result.row = startRow;
     }
     const temp = this.getRange(result).range;
-    this.setActiveCell(temp);
+    this.model.setActiveCell(temp);
     return temp;
   }
-  private setSheetCell(range: IRange) {
-    const id = range.sheetId || this.model.getCurrentSheetId();
-    range.sheetId = id;
-    this.model.setActiveCell(range);
-    this.changeSet.add('range');
-  }
   setActiveCell(range: IRange): void {
-    this.setSheetCell(range);
+    this.model.setActiveCell(range);
     this.emitChange();
   }
   setCurrentSheetId(id: string): void {
-    if (id === this.getCurrentSheetId()) {
-      return;
-    }
-
     this.model.setCurrentSheetId(id);
-    this.changeSet.add('sheetId');
-    this.changeSet.add('cellValue');
 
-    const pos = this.getActiveCell();
-    this.setSheetCell(pos);
     this.setScroll(this.getScroll());
   }
   addSheet = (): void => {
-    this.changeSet.add('sheetList');
-    this.changeSet.add('range');
     this.model.addSheet();
     this.setScroll({
       top: 0,
@@ -295,43 +262,26 @@ export class Controller implements IController {
   };
   deleteSheet = (sheetId?: string): void => {
     this.model.deleteSheet(sheetId);
-    this.changeSet.add('sheetList');
-    this.changeSet.add('sheetId');
-    this.changeSet.add('range');
     this.emitChange();
   };
   setTabColor(color: string, sheetId?: string) {
     this.model.setTabColor(color, sheetId);
-    this.changeSet.add('sheetList');
     this.emitChange();
   }
   hideSheet(sheetId?: string | undefined): void {
     this.model.hideSheet(sheetId);
-    this.changeSet.add('sheetList');
-    this.changeSet.add('sheetId');
-    this.changeSet.add('range');
     this.emitChange();
   }
   unhideSheet(sheetId?: string | undefined): void {
     this.model.unhideSheet(sheetId);
-    this.changeSet.add('sheetList');
-    this.changeSet.add('sheetId');
-    this.changeSet.add('range');
     this.emitChange();
   }
   renameSheet(sheetName: string, sheetId?: string | undefined): void {
     this.model.renameSheet(sheetName, sheetId);
-    this.changeSet.add('sheetList');
     this.emitChange();
   }
   fromJSON(json: WorkBookJSON): void {
     this.model.fromJSON(json);
-    this.changeSet.add('sheetList');
-    this.changeSet.add('sheetId');
-    this.changeSet.add('range');
-    this.changeSet.add('floatElement');
-    this.changeSet.add('cellValue');
-    this.setSheetCell(this.getActiveCell());
     this.emitChange();
   }
   toJSON(): WorkBookJSON {
@@ -344,12 +294,11 @@ export class Controller implements IController {
     ranges: IRange[],
   ): void {
     this.model.setCellValues(value, style, ranges);
-    this.changeSet.add('cellValue');
     this.emitChange();
   }
   updateCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
     this.model.updateCellStyle(style, ranges);
-    this.changeSet.add('cellStyle');
+
     this.emitChange();
   }
   getCell = (range: IRange) => {
@@ -364,23 +313,13 @@ export class Controller implements IController {
   }
   undo() {
     this.model.undo();
-    this.changeSet.add('range');
-    this.changeSet.add('sheetList');
-    this.changeSet.add('sheetId');
     this.changeSet.add('scroll');
-    this.changeSet.add('floatElement');
-    this.changeSet.add('cellValue');
     this.changeSet.add('undoRedo');
     this.emitChange();
   }
   redo() {
     this.model.redo();
-    this.changeSet.add('range');
-    this.changeSet.add('sheetList');
-    this.changeSet.add('sheetId');
     this.changeSet.add('scroll');
-    this.changeSet.add('floatElement');
-    this.changeSet.add('cellValue');
     this.changeSet.add('undoRedo');
     this.emitChange();
   }
@@ -389,7 +328,6 @@ export class Controller implements IController {
   }
   setColWidth(col: number, width: number, sheetId?: string): void {
     this.model.setColWidth(col, width, sheetId);
-    this.changeSet.add('col');
     this.emitChange();
   }
   getRowHeight(row: number, sheetId?: string) {
@@ -397,32 +335,7 @@ export class Controller implements IController {
   }
   setRowHeight(row: number, height: number, sheetId?: string) {
     this.model.setRowHeight(row, height, sheetId);
-    this.changeSet.add('row');
     this.emitChange();
-  }
-  private computeViewSize() {
-    const headerSize = this.getHeaderSize();
-    const sheetInfo = this.model.getSheetInfo(this.model.getCurrentSheetId());
-    if (!sheetInfo) {
-      return;
-    }
-    let { width } = headerSize;
-    let { height } = headerSize;
-    for (let i = 0; i < sheetInfo.colCount; i++) {
-      width += this.getColWidth(i).len;
-    }
-    for (let i = 0; i < sheetInfo.rowCount; i++) {
-      height += this.getRowHeight(i).len;
-    }
-    this.viewSize = {
-      width,
-      height,
-    };
-  }
-  getViewSize() {
-    return {
-      ...this.viewSize,
-    };
   }
   getCellSize(range: IRange): IWindowSize {
     range.sheetId = range.sheetId || this.getCurrentSheetId();
@@ -448,15 +361,10 @@ export class Controller implements IController {
     }
     return { width, height };
   }
-  getHeaderSize() {
-    return {
-      ...this.headerSize,
-    };
-  }
   computeCellPosition(range: IRange): IPosition {
     const { row, col } = range;
     const sheetId = range.sheetId || this.model.getCurrentSheetId();
-    const size = this.getHeaderSize();
+    const size = headerSizeSet.get();
     const scroll = this.getScroll(sheetId);
 
     let resultX = size.width;
@@ -495,32 +403,32 @@ export class Controller implements IController {
 
   addRow(rowIndex: number, count: number): void {
     this.model.addRow(rowIndex, count);
-    this.changeSet.add('row');
+
     this.emitChange();
   }
   addCol(colIndex: number, count: number): void {
     this.model.addCol(colIndex, count);
-    this.changeSet.add('col');
+
     this.emitChange();
   }
   deleteCol(colIndex: number, count: number): void {
     this.model.deleteCol(colIndex, count);
-    this.changeSet.add('col');
+
     this.emitChange();
   }
   deleteRow(rowIndex: number, count: number): void {
     this.model.deleteRow(rowIndex, count);
-    this.changeSet.add('row');
+
     this.emitChange();
   }
   hideCol(colIndex: number, count: number): void {
     this.model.hideCol(colIndex, count);
-    this.changeSet.add('col');
+
     this.emitChange();
   }
   hideRow(rowIndex: number, count: number): void {
     this.model.hideRow(rowIndex, count);
-    this.changeSet.add('row');
+
     this.emitChange();
   }
   getScroll(sheetId?: string): ScrollValue {
@@ -534,15 +442,15 @@ export class Controller implements IController {
       ...data,
     };
     if (data.row > 9999) {
-      this.headerSize = {
+      headerSizeSet.set({
         width: Math.floor(COL_TITLE_WIDTH * 2),
         height: ROW_TITLE_HEIGHT,
-      };
+      });
     } else {
-      this.headerSize = {
+      headerSizeSet.set({
         width: COL_TITLE_WIDTH,
         height: ROW_TITLE_HEIGHT,
-      };
+      });
     }
     this.changeSet.add('scroll');
     this.emitChange();
@@ -656,7 +564,7 @@ export class Controller implements IController {
           marginX: 0,
           marginY: 0,
         });
-        this.changeSet.add('floatElement');
+
         this.copyRanges = [];
         this.isCut = false;
         this.floatElementUuid = '';
@@ -710,13 +618,13 @@ export class Controller implements IController {
     html = html.trim();
     text = text.trim();
     let activeCell = this.getActiveCell();
-    this.changeSet.add('cellValue');
+
     let check = false;
     if (html) {
       const result = this.parseHTML(html);
       if (result.value.length > 0) {
         activeCell = result.range;
-        this.changeSet.add('cellStyle');
+
         this.model.setCellValues(result.value, result.style, [result.range]);
         check = true;
       }
@@ -731,7 +639,7 @@ export class Controller implements IController {
     }
     if (!check && this.copyRanges.length > 0) {
       const [range] = this.copyRanges.slice();
-      this.changeSet.add('cellStyle');
+
       activeCell = this.model.pasteRange(range, this.isCut);
     }
     if (this.isCut) {
@@ -805,13 +713,7 @@ export class Controller implements IController {
   }
   deleteAll(sheetId?: string): void {
     this.model.deleteAll(sheetId);
-    this.changeSet.add('cellValue');
-    this.changeSet.add('floatElement');
-    this.changeSet.add('cellStyle');
-    this.changeSet.add('mergeCell');
-    this.changeSet.add('defineName');
-    this.changeSet.add('row');
-    this.changeSet.add('col');
+
     this.emitChange();
   }
   getDefineName(range: IRange): string {
@@ -822,8 +724,7 @@ export class Controller implements IController {
   }
   setDefineName(range: IRange, name: string): void {
     this.model.setDefineName(range, name);
-    this.changeSet.add('defineName');
-    this.changeSet.add('cellValue');
+
     this.emitChange();
   }
   checkDefineName(name: string): IRange | undefined {
@@ -834,17 +735,17 @@ export class Controller implements IController {
   }
   addFloatElement(data: FloatElement) {
     this.model.addFloatElement(data);
-    this.changeSet.add('floatElement');
+
     this.emitChange();
   }
   updateFloatElement(uuid: string, value: Partial<FloatElement>) {
     this.model.updateFloatElement(uuid, value);
-    this.changeSet.add('floatElement');
+
     this.emitChange();
   }
   deleteFloatElement(uuid: string) {
     this.model.deleteFloatElement(uuid);
-    this.changeSet.add('floatElement');
+
     this.emitChange();
   }
   getMergeCells(sheetId?: string): IRange[] {
@@ -852,14 +753,12 @@ export class Controller implements IController {
   }
   addMergeCell(range: IRange): void {
     this.model.addMergeCell(range);
-    this.changeSet.add('mergeCell');
-    this.changeSet.add('cellValue');
+
     this.emitChange();
   }
   deleteMergeCell(range: IRange): void {
     this.model.deleteMergeCell(range);
-    this.changeSet.add('mergeCell');
-    this.changeSet.add('cellValue');
+
     this.emitChange();
   }
   setFloatElementUuid(uuid: string) {

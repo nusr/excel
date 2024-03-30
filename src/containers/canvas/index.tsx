@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, Fragment, useState } from 'react';
 import { IController, EditorStatus } from '@/types';
-import { getHitInfo, DEFAULT_POSITION } from '@/util';
+import { getHitInfo, DEFAULT_POSITION, headerSizeSet } from '@/util';
 import styles from './index.module.css';
 import { coreStore } from '@/containers/store';
 import { ScrollBar } from './ScrollBar';
@@ -55,7 +55,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     if (event.buttons !== 1) {
       return;
     }
-    const headerSize = controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     const rect = controller.getDomRect();
     const { clientX, clientY } = event;
     const x = clientX - rect.left;
@@ -110,7 +110,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
     if (event.buttons !== 1) {
       return;
     }
-    const headerSize = controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     const canvasRect = controller.getDomRect();
     const { timeStamp, clientX, clientY } = event;
     const x = clientX - canvasRect.left;

@@ -5,6 +5,7 @@ import styles from './index.module.css';
 import { scrollStore } from '../store';
 import { scrollBar } from '@/canvas';
 import { $ } from '@/i18n';
+import { sheetViewSizeSet } from '@/util';
 
 interface Props {
   controller: IController;
@@ -15,7 +16,6 @@ export const BottomBar: React.FunctionComponent<Props> = ({ controller }) => {
     scrollStore.subscribe,
     scrollStore.getSnapshot,
   );
-  const headerSize = controller.getHeaderSize();
   const rect = controller.getDomRect();
   const [value, setValue] = useState(10);
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +26,7 @@ export const BottomBar: React.FunctionComponent<Props> = ({ controller }) => {
   const handleClick = () => {
     const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
     controller.addRow(sheetInfo.rowCount - 1, value);
-    const viewSize = controller.getViewSize();
+    const viewSize = sheetViewSizeSet.get();
     scrollBar(controller, 0, viewSize.height);
   };
   return (
@@ -34,7 +34,6 @@ export const BottomBar: React.FunctionComponent<Props> = ({ controller }) => {
       className={styles['bottom-bar']}
       data-testid="canvas-bottom-bar"
       style={{
-        left: headerSize.width,
         display: scrollTop / rect.height >= 0.904 ? 'flex' : 'none',
       }}
     >

@@ -157,21 +157,9 @@ export function isMobile() {
 
 export function modelToChangeSet(list: ICommandItem[]) {
   const result = new Set<ChangeEventType>();
-  const map: Record<ICommandItem['t'], ChangeEventType> = {
-    worksheets: 'cellStyle',
-    workbook: 'sheetList',
-    currentSheetId: 'sheetId',
-    drawings: 'floatElement',
-    customHeight: 'row',
-    customWidth: 'col',
-    rangeMap: 'range',
-    definedNames: 'defineName',
-    mergeCells: 'mergeCell',
-    scroll: 'scroll',
-    antLine: 'antLine',
-  };
   for (const item of list) {
     const type = item.t;
+    result.add(type);
     if (type === 'worksheets') {
       if (item.k.includes('value') || item.k.includes('formula')) {
         result.add('cellValue');
@@ -179,16 +167,17 @@ export function modelToChangeSet(list: ICommandItem[]) {
       if (item.k.includes('style')) {
         result.add('cellStyle');
       }
-    } else {
-      result.add(map[type]);
-    }
-    if (type === 'workbook') {
+    } else if (type === 'workbook') {
       if (item.k.includes('rowCount')) {
         result.add('row');
       }
       if (item.k.includes('colCount')) {
         result.add('col');
       }
+    } else if (type === 'customHeight') {
+      result.add('row');
+    } else if (type === 'customWidth') {
+      result.add('col');
     }
   }
   return result;

@@ -1,7 +1,6 @@
 import {
   IController,
   KeyboardEventItem,
-  ChangeEventType,
   EditorStatus,
 } from '@/types';
 import { throttle } from '@/util';

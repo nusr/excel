@@ -9,6 +9,7 @@ import {
   intToColumnName,
   containRange,
   getThemeColor,
+  headerSizeSet,
 } from '@/util';
 import {
   EventType,
@@ -69,7 +70,7 @@ export class MainCanvas {
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
 
     const { width, height } = this.controller.getDomRect();
-    const headerSize = this.controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     const realContentHeight = this.renderRowsHeader(height);
     const realContentWidth = this.renderColsHeader(width);
     this.renderGrid(width - headerSize.width, height - headerSize.height);
@@ -120,7 +121,7 @@ export class MainCanvas {
 
   private renderGrid(width: number, height: number): void {
     const { controller } = this;
-    const headerSize = controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     const { row: rowIndex, col: colIndex } = controller.getScroll();
     const { rowCount, colCount } = this.controller.getSheetInfo(
       this.controller.getCurrentSheetId(),
@@ -215,7 +216,7 @@ export class MainCanvas {
   private renderRowsHeader(height: number) {
     const { controller } = this;
     const { row: rowIndex } = controller.getScroll();
-    const headerSize = controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     const { rowCount } = controller.getSheetInfo(
       controller.getCurrentSheetId(),
     )!;
@@ -261,7 +262,7 @@ export class MainCanvas {
     const { controller } = this;
 
     const { col: colIndex } = controller.getScroll();
-    const headerSize = controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     const { colCount } = controller.getSheetInfo(
       controller.getCurrentSheetId(),
     )!;
@@ -303,7 +304,7 @@ export class MainCanvas {
     return i >= colCount ? x : width;
   }
   private renderTriangle(): void {
-    const headerSize = this.controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     this.ctx.save();
     this.ctx.fillStyle = getThemeColor('white');
 
@@ -390,7 +391,7 @@ export class MainCanvas {
   }
   private renderSelectRange() {
     const { controller } = this;
-    const headerSize = controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     const range = controller.getActiveCell();
 
     const activeCell = controller.computeCellPosition({
@@ -455,9 +456,8 @@ export class MainCanvas {
     contentWith: number,
     contentHeight: number,
   ): CanvasOverlayPosition {
-    const { controller } = this;
     this.ctx.fillStyle = getThemeColor('selectionColor');
-    const headerSize = controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     // main
     fillRect(this.ctx, 0, 0, contentWith, contentHeight);
 
@@ -477,7 +477,7 @@ export class MainCanvas {
   }
   private renderSelectCol(height: number) {
     const { controller } = this;
-    const headerSize = controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     const range = controller.getActiveCell();
     this.ctx.fillStyle = getThemeColor('selectionColor');
     const activeCell = controller.computeCellPosition({
@@ -539,7 +539,7 @@ export class MainCanvas {
   }
   private renderSelectRow(width: number) {
     const { controller } = this;
-    const headerSize = controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     const range = controller.getActiveCell();
     this.ctx.fillStyle = getThemeColor('selectionColor');
     const activeCell = controller.computeCellPosition({

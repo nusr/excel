@@ -35,6 +35,8 @@ import {
   modelLog,
   modelToChangeSet,
   eventEmitter,
+  sheetViewSizeSet,
+  headerSizeSet,
 } from '@/util';
 import { parseFormula, CustomError } from '@/formula';
 import { History } from './History';
@@ -108,6 +110,9 @@ export class Model implements IModel {
           changeSet.add(type);
         }
         modelLog(changeSet);
+        if (changeSet.has('row') || changeSet.has('col')) {
+          this.computeViewSize();
+        }
         eventEmitter.emit('modelChange', { changeSet });
       },
     });
@@ -116,8 +121,8 @@ export class Model implements IModel {
     const changeSet = modelToChangeSet(this.history.get());
     if (
       changeSet.has('cellValue') ||
-      changeSet.has('defineName') ||
-      changeSet.has('sheetId')
+      changeSet.has('definedNames') ||
+      changeSet.has('currentSheetId')
     ) {
       this.computeAllCell();
     }
@@ -129,8 +134,25 @@ export class Model implements IModel {
     }
     if (!set.has('undoRedo')) {
       this.history.commit();
+    } else {
+      this.history.clear(false);
     }
-    this.history.clear(false);
+  }
+  private computeViewSize() {
+    const headerSize = headerSizeSet.get();
+    const sheetInfo = this.getSheetInfo();
+    if (!sheetInfo) {
+      return;
+    }
+    let { width } = headerSize;
+    let { height } = headerSize;
+    for (let i = 0; i < sheetInfo.colCount; i++) {
+      width += this.getColWidth(i).len;
+    }
+    for (let i = 0; i < sheetInfo.rowCount; i++) {
+      height += this.getRowHeight(i).len;
+    }
+    sheetViewSizeSet.set({ width, height });
   }
   getSheetList(): WorksheetType[] {
     const list = Object.values(this.workbook);
@@ -168,7 +190,6 @@ export class Model implements IModel {
       return;
     }
     this.rangeMap[newRange.sheetId] = newRange;
-
     this.history.push({
       t: 'rangeMap',
       k: newRange.sheetId,

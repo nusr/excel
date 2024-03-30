@@ -1,4 +1,5 @@
 import { CanvasOverlayPosition, IController } from '@/types';
+import { headerSizeSet } from '@/util';
 
 export enum ResizePosition {
   top = 'top',
@@ -90,7 +91,7 @@ export function roundPosition(
   left: number,
   controller: IController,
 ) {
-  const size = controller.getHeaderSize();
+  const size = headerSizeSet.get();
   const canvasSize = controller.getDomRect();
   const minTop = size.height;
   const minLeft = size.width;

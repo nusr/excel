@@ -1,7 +1,7 @@
 import { IBaseModel } from './model';
 import { CanvasOverlayPosition, ScrollValue } from './components';
 import { IRange } from './range';
-import { ChangeEventType, IWindowSize, IPosition } from './event';
+import { IWindowSize, IPosition } from './event';
 
 export enum EBorderLineType {
   MEDIUM,
@@ -36,8 +36,6 @@ export type ActiveRange = {
 };
 
 export interface IController extends IBaseModel {
-  getViewSize: () => IWindowSize;
-  getHeaderSize: () => IWindowSize;
   setNextActiveCell: (direction: 'left' | 'right' | 'down' | 'up') => IRange;
   getActiveRange: () => ActiveRange;
   getCellSize: (range: IRange) => IWindowSize;

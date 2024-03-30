@@ -1,4 +1,9 @@
-import { npx, dpr, canvasLog, CELL_HEIGHT, CELL_WIDTH } from '@/util';
+import {
+  npx,
+  dpr,
+  canvasLog,
+  headerSizeSet,
+} from '@/util';
 import { resizeCanvas, renderCellData } from './util';
 import { ContentView, IController, EventType } from '@/types';
 
@@ -27,8 +32,8 @@ export class Content implements ContentView {
     const check =
       changeSet.has('row') ||
       changeSet.has('col') ||
-      changeSet.has('sheetList') ||
-      changeSet.has('sheetId') ||
+      changeSet.has('workbook') ||
+      changeSet.has('currentSheetId') ||
       changeSet.has('cellStyle') ||
       changeSet.has('cellValue') ||
       changeSet.has('scroll');
@@ -48,7 +53,7 @@ export class Content implements ContentView {
   private renderContent(): void {
     const { controller, ctx } = this;
     const { width, height } = controller.getDomRect();
-    const headerSize = controller.getHeaderSize();
+    const headerSize = headerSizeSet.get();
     const { row, col } = controller.getScroll();
 
     let x = headerSize.width;
@@ -77,11 +82,19 @@ export class Content implements ContentView {
         const size = renderCellData(controller, ctx, rowIndex, colIndex);
         rowMap.set(
           rowIndex,
-          Math.max(rowMap.get(rowIndex) || 0, CELL_HEIGHT, size.height),
+          Math.max(
+            rowMap.get(rowIndex) || 0,
+            controller.getRowHeight(rowIndex).len,
+            size.height,
+          ),
         );
         colMap.set(
           colIndex,
-          Math.max(colMap.get(colIndex) || 0, CELL_WIDTH, size.width),
+          Math.max(
+            colMap.get(colIndex) || 0,
+            controller.getColWidth(colIndex).len,
+            size.width,
+          ),
         );
       }
     }

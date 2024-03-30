@@ -10,6 +10,8 @@ import {
   SCROLL_SIZE,
   isMac,
   SHEET_ITEM_TEST_ID_PREFIX,
+  sheetViewSizeSet,
+  headerSizeSet,
 } from '@/util';
 import { coreStore } from '@/containers/store';
 
@@ -69,7 +71,7 @@ export function computeScrollPosition(
   top: number,
 ) {
   const canvasRect = controller.getDomRect();
-  const viewSize = controller.getViewSize();
+  const viewSize = sheetViewSizeSet.get();
   const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
   const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
   const maxScrollHeight = canvasRect.height - SCROLL_SIZE * 1;
@@ -121,7 +123,7 @@ export function scrollToView(controller: IController, range: IRange) {
     sheetId: sheetId,
   });
   const size = controller.getDomRect();
-  const headerSize = controller.getHeaderSize();
+  const headerSize = headerSizeSet.get();
   const { top, left } = controller.computeCellPosition(range);
   const minTop = old.top;
   const minLeft = old.left;
@@ -187,7 +189,7 @@ function recalculateScroll(controller: IController) {
   const domRect = controller.getDomRect();
   const oldScroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
-  const headerSize = controller.getHeaderSize();
+  const headerSize = headerSizeSet.get();
   const buff = 5;
   const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } =
     computeScrollPosition(controller, oldScroll.left, oldScroll.top);
@@ -296,7 +298,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       checkActiveElement(controller);
-      const viewSize = controller.getViewSize();
+      const viewSize = sheetViewSizeSet.get();
       scrollBar(controller, 0, viewSize.height);
     },
   },
@@ -308,7 +310,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       checkActiveElement(controller);
-      const viewSize = controller.getViewSize();
+      const viewSize = sheetViewSizeSet.get();
       scrollBar(controller, 0, -viewSize.height);
     },
   },
@@ -320,7 +322,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       checkActiveElement(controller);
-      const viewSize = controller.getViewSize();
+      const viewSize = sheetViewSizeSet.get();
       scrollBar(controller, viewSize.width, 0);
     },
   },
@@ -332,7 +334,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       checkActiveElement(controller);
-      const viewSize = controller.getViewSize();
+      const viewSize = sheetViewSizeSet.get();
       scrollBar(controller, -viewSize.width, 0);
     },
   },

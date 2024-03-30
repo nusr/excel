@@ -17,3 +17,4 @@ export * from './event';
 export * from './saveAs';
 export * from './color';
 export * from './EventEmitter';
+export * from './set';

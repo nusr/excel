@@ -1,6 +1,6 @@
 import { Controller } from '..';
 import { Model } from '@/model';
-import { HTML_FORMAT, PLAIN_FORMAT } from '@/util';
+import { HTML_FORMAT, PLAIN_FORMAT,headerSizeSet } from '@/util';
 
 describe('controller.test.ts', () => {
   let controller: Controller;
@@ -168,7 +168,7 @@ describe('controller.test.ts', () => {
       });
     });
     test('set', () => {
-      const headerSize = controller.getHeaderSize();
+      const headerSize = headerSizeSet.get();
       controller.setScroll({
         top: 1000,
         left: 0,
@@ -185,7 +185,7 @@ describe('controller.test.ts', () => {
         scrollLeft: 0,
         scrollTop: 80800,
       });
-      expect(controller.getHeaderSize()).toEqual({
+      expect(headerSizeSet.get()).toEqual({
         width: headerSize.width * 2,
         height: headerSize.height,
       });
@@ -212,7 +212,7 @@ describe('controller.test.ts', () => {
 
   describe('computeCellPosition', () => {
     test('normal', () => {
-      const headerSize = controller.getHeaderSize();
+      const headerSize = headerSizeSet.get();
       const size = controller.computeCellPosition({
         row: 0,
         col: 0,

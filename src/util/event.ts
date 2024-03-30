@@ -1,4 +1,5 @@
 import type { IController } from '@/types';
+import { headerSizeSet } from './set'
 
 type HitInfoResult = {
   row: number;
@@ -25,7 +26,7 @@ export function getHitInfo(
     return null;
   }
   const scroll = controller.getScroll();
-  const headerSize = controller.getHeaderSize();
+  const headerSize = headerSizeSet.get()
   let resultX = headerSize.width;
   let resultY = headerSize.height;
   let marginX = x - headerSize.width;

@@ -142,13 +142,13 @@ const handleStateChange = (
   controller: IController,
 ) => {
   if (
-    changeSet.has('range') ||
+    changeSet.has('rangeMap') ||
     changeSet.has('cellStyle') ||
     changeSet.has('cellValue')
   ) {
     updateActiveCell(controller);
   }
-  if (changeSet.has('sheetList')) {
+  if (changeSet.has('workbook')) {
     const sheetList = controller.getSheetList().map((v) => ({
       sheetId: v.sheetId,
       name: v.name,
@@ -158,7 +158,7 @@ const handleStateChange = (
     sheetListStore.setState(sheetList);
   }
 
-  if (changeSet.has('sheetId')) {
+  if (changeSet.has('currentSheetId')) {
     coreStore.mergeState({
       canRedo: controller.canRedo(),
       canUndo: controller.canUndo(),
@@ -179,17 +179,17 @@ const handleStateChange = (
       scrollTop: scroll.scrollTop,
     });
   }
-  if (changeSet.has('defineName')) {
+  if (changeSet.has('definedNames')) {
     const list = controller.getDefineNameList().map((v) => v.name);
     defineNameStore.setState(list);
   }
 
   if (
-    changeSet.has('floatElement') ||
+    changeSet.has('drawings') ||
     changeSet.has('cellValue') ||
     changeSet.has('row') ||
     changeSet.has('col') ||
-    changeSet.has('sheetId') ||
+    changeSet.has('currentSheetId') ||
     changeSet.has('scroll')
   ) {
     const scroll = controller.getScroll();
@@ -235,7 +235,7 @@ const handleStateChange = (
     floatElementStore.setState(result);
   }
 
-  if (changeSet.has('sheetId')) {
+  if (changeSet.has('currentSheetId')) {
     setTimeout(() => {
       scrollSheetToView(controller.getCurrentSheetId());
     }, 0);
@@ -254,17 +254,18 @@ export function initCanvas(controller: IController): () => void {
   const removeEvent = registerGlobalEvent(controller, resize);
 
   const changeSet = new Set<ChangeEventType>([
-    'sheetId',
+    'currentSheetId',
+    'rangeMap',
+    'workbook',
+    'worksheets',
+    'drawings',
+    'definedNames',
+    'mergeCells',
     'scroll',
-    'range',
-    'sheetList',
-    'floatElement',
     'cellValue',
     'row',
     'col',
     'cellStyle',
-    'defineName',
-    'mergeCell',
     'undoRedo',
     'antLine',
   ]);

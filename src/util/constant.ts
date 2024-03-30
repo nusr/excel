@@ -8,6 +8,8 @@ export const TEST_ID_KEY = 'data-testid';
 export const SCROLL_SIZE = 30;
 export const BOTTOM_BUFF = 200;
 export const DEFAULT_POSITION = -999;
+export const ROW_TITLE_HEIGHT = 24;
+export const COL_TITLE_WIDTH = 34;
 export const SHEET_ITEM_TEST_ID_PREFIX = '__sheet_item_';
 export const FORMULA_PREFIX = '=';
 export const SPLITTER = '_';
