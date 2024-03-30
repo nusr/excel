@@ -19,7 +19,6 @@ export type CanvasSize = {
 export type ClipboardData = Record<ClipboardType, string>;
 
 export interface IHooks {
-  modelChange: (val: Set<ChangeEventType>) => void;
   copyOrCut: (textData: ClipboardData, type: 'cut' | 'copy') => Promise<string>;
   paste: () => Promise<ClipboardData>;
 }
@@ -39,13 +38,10 @@ export type ActiveRange = {
 export interface IController extends IBaseModel {
   getViewSize: () => IWindowSize;
   getHeaderSize: () => IWindowSize;
-  setHooks: (hooks: IHooks) => void;
   setNextActiveCell: (direction: 'left' | 'right' | 'down' | 'up') => IRange;
   getActiveRange: () => ActiveRange;
   getCellSize: (range: IRange) => IWindowSize;
   computeCellPosition: (range: IRange) => IPosition;
-  getChangeSet: () => Set<ChangeEventType>;
-  setChangeSet: (data: Set<ChangeEventType>) => void;
   paste: (event?: ClipboardEvent) => void;
   copy: (event?: ClipboardEvent) => void;
   cut: (event?: ClipboardEvent) => void;

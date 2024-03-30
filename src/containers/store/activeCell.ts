@@ -9,7 +9,7 @@ import { BaseStore } from './base';
 
 export type CellStoreType = Partial<StyleType> &
   CanvasOverlayPosition &
-  IRange &
+  Omit<IRange, 'sheetId'> &
   Pick<ModelCellType, 'value' | 'formula'> & {
     defineName: string;
     isMergeCell: boolean;
@@ -28,7 +28,6 @@ const cellData: CellStoreType = {
   isMergeCell: false,
   rowCount: 1,
   colCount: 1,
-  sheetId: '',
 };
 
 export const activeCellStore = new BaseStore<CellStoreType>(cellData);

@@ -7,7 +7,7 @@ import { Theme } from './Theme';
 import { $ } from '@/i18n';
 import { I18N } from './I18N';
 import { FPS } from './FPS';
-import { saveAs } from '@/util';
+import { saveAs, eventEmitter } from '@/util';
 
 interface Props {
   controller: IController;
@@ -72,7 +72,11 @@ export const MenuBarContainer: React.FunctionComponent<Props> = ({
       </div>
       <I18N />
       <Theme
-        toggleTheme={() => controller.setChangeSet(new Set(['cellStyle']))}
+        toggleTheme={() =>
+          eventEmitter.emit('modelChange', {
+            changeSet: new Set(['cellStyle']),
+          })
+        }
       />
       <FPS />
     </div>

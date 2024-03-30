@@ -51,18 +51,7 @@ export class Controller implements IController {
   private isCut = false; // cut or copy
   private floatElementUuid = '';
   private isNoChange = false;
-  private hooks: IHooks = {
-    modelChange() {},
-    async copyOrCut() {
-      return '';
-    },
-    async paste() {
-      return {
-        [HTML_FORMAT]: '',
-        [PLAIN_FORMAT]: '',
-      };
-    },
-  };
+  private hooks: IHooks;
   // sheet size
   private viewSize = {
     width: 0,
@@ -73,8 +62,9 @@ export class Controller implements IController {
     height: ROW_TITLE_HEIGHT,
   };
   private mainDom: MainDom = {};
-  constructor(model: IModel) {
+  constructor(model: IModel, hooks: IHooks) {
     this.model = model;
+    this.hooks = hooks;
   }
   getCurrentSheetId(): string {
     return this.model.getCurrentSheetId();
@@ -84,9 +74,6 @@ export class Controller implements IController {
   }
   getSheetInfo(sheetId: string) {
     return this.model.getSheetInfo(sheetId);
-  }
-  setHooks(hooks: IHooks): void {
-    this.hooks = hooks;
   }
   batchUpdate(fn: () => void): void {
     this.isNoChange = true;
@@ -101,12 +88,12 @@ export class Controller implements IController {
     if (this.changeSet.size === 0) {
       return;
     }
-    this.computeViewSize();
-    const result = this.changeSet;
+    if (this.changeSet.has('row') || this.changeSet.has('col')) {
+      this.computeViewSize();
+    }
+    controllerLog(this.changeSet);
+    this.model.emitChange(this.changeSet);
     this.changeSet = new Set<ChangeEventType>();
-    controllerLog(result);
-    this.model.emitChange(result);
-    this.hooks.modelChange(result);
   }
   getActiveCell(): IRange {
     const range = this.model.getActiveCell();
@@ -400,11 +387,7 @@ export class Controller implements IController {
   getColWidth(col: number, sheetId?: string) {
     return this.model.getColWidth(col, sheetId);
   }
-  setColWidth(
-    col: number,
-    width: number,
-    sheetId?: string,
-  ): void {
+  setColWidth(col: number, width: number, sheetId?: string): void {
     this.model.setColWidth(col, width, sheetId);
     this.changeSet.add('col');
     this.emitChange();
@@ -412,11 +395,7 @@ export class Controller implements IController {
   getRowHeight(row: number, sheetId?: string) {
     return this.model.getRowHeight(row, sheetId);
   }
-  setRowHeight(
-    row: number,
-    height: number,
-    sheetId?: string,
-  ) {
+  setRowHeight(row: number, height: number, sheetId?: string) {
     this.model.setRowHeight(row, height, sheetId);
     this.changeSet.add('row');
     this.emitChange();
@@ -542,15 +521,6 @@ export class Controller implements IController {
   hideRow(rowIndex: number, count: number): void {
     this.model.hideRow(rowIndex, count);
     this.changeSet.add('row');
-    this.emitChange();
-  }
-  getChangeSet(): Set<ChangeEventType> {
-    const result = this.changeSet;
-    this.changeSet = new Set<ChangeEventType>();
-    return result;
-  }
-  setChangeSet(data: Set<ChangeEventType>) {
-    this.changeSet = data;
     this.emitChange();
   }
   getScroll(sheetId?: string): ScrollValue {

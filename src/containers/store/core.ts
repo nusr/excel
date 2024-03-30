@@ -5,6 +5,7 @@ export interface CoreStore {
   canRedo: boolean;
   canUndo: boolean;
   activeUuid: string;
+  currentSheetId: string;
 }
 
 export const coreStore = new BaseStore<CoreStore>({
@@ -12,4 +13,5 @@ export const coreStore = new BaseStore<CoreStore>({
   canRedo: false,
   canUndo: false,
   activeUuid: '',
+  currentSheetId: ''
 });

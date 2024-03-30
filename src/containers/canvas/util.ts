@@ -1,13 +1,12 @@
 import { IController, ChangeEventType, EUnderLine, IRange } from '@/types';
 import {
   DEFAULT_FONT_SIZE,
-  copyOrCut,
-  paste,
   Range,
   parseNumber,
   HIDE_CELL,
   getThemeColor,
   convertResultTypeToString,
+  eventEmitter,
 } from '@/util';
 import {
   coreStore,
@@ -121,7 +120,6 @@ function updateActiveCell(controller: IController) {
     col: activeCell.col,
     rowCount: activeCell.rowCount,
     colCount: activeCell.colCount,
-    sheetId,
     value: convertResultTypeToString(cell?.value),
     formula: cell?.formula,
     isBold,
@@ -143,9 +141,6 @@ const handleStateChange = (
   changeSet: Set<ChangeEventType>,
   controller: IController,
 ) => {
-  if (changeSet.has('sheetId')) {
-    scrollSheetToView(controller.getCurrentSheetId());
-  }
   if (
     changeSet.has('range') ||
     changeSet.has('cellStyle') ||
@@ -168,6 +163,7 @@ const handleStateChange = (
       canRedo: controller.canRedo(),
       canUndo: controller.canUndo(),
       activeUuid: '',
+      currentSheetId: controller.getCurrentSheetId(),
     });
   } else {
     coreStore.mergeState({
@@ -238,32 +234,24 @@ const handleStateChange = (
     }
     floatElementStore.setState(result);
   }
+
+  if (changeSet.has('sheetId')) {
+    setTimeout(() => {
+      scrollSheetToView(controller.getCurrentSheetId());
+    }, 0);
+  }
 };
 export function initCanvas(controller: IController): () => void {
   const mainCanvas = new MainCanvas(
     controller,
     new Content(controller, createCanvas()),
   );
-  const render = (changeSet: Set<ChangeEventType>) => {
-    mainCanvas.render({ changeSet });
-    mainCanvas.render({
-      changeSet: controller.getChangeSet(),
-    });
-  };
-  const resize = (changeSet: Set<ChangeEventType>) => {
+  const resize = () => {
     mainCanvas.resize();
-    render(changeSet);
+    mainCanvas.render({ changeSet: new Set<ChangeEventType>(['row']) });
   };
 
   const removeEvent = registerGlobalEvent(controller, resize);
-  controller.setHooks({
-    copyOrCut,
-    paste,
-    modelChange: (changeSet: Set<ChangeEventType>) => {
-      handleStateChange(changeSet, controller);
-      render(changeSet);
-    },
-  });
 
   const changeSet = new Set<ChangeEventType>([
     'sheetId',
@@ -281,12 +269,18 @@ export function initCanvas(controller: IController): () => void {
     'antLine',
   ]);
   handleStateChange(changeSet, controller);
-  resize(changeSet);
   requestAnimationFrame(() => {
-    resize(changeSet);
+    mainCanvas.resize();
+    mainCanvas.render({ changeSet });
+  });
+
+  eventEmitter.on('modelChange', ({ changeSet }) => {
+    handleStateChange(changeSet, controller);
+    mainCanvas.render({ changeSet });
   });
 
   return () => {
     removeEvent();
+    eventEmitter.offAll();
   };
 }

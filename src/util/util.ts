@@ -1,5 +1,10 @@
 import { SHEET_NAME_PREFIX, SPLITTER } from './constant';
-import type { WorksheetType, ResultType, Coordinate } from '@/types';
+import type {
+  WorksheetType,
+  ChangeEventType,
+  Coordinate,
+  ICommandItem,
+} from '@/types';
 
 export function isNumber(value: any): boolean {
   if (typeof value === 'number' && !window.isNaN(value)) {
@@ -148,4 +153,43 @@ export function isMobile() {
   ];
   const ua = navigator.userAgent;
   return matchList.some((v) => ua.match(v));
+}
+
+export function modelToChangeSet(list: ICommandItem[]) {
+  const result = new Set<ChangeEventType>();
+  const map: Record<ICommandItem['t'], ChangeEventType> = {
+    worksheets: 'cellStyle',
+    workbook: 'sheetList',
+    currentSheetId: 'sheetId',
+    drawings: 'floatElement',
+    customHeight: 'row',
+    customWidth: 'col',
+    rangeMap: 'range',
+    definedNames: 'defineName',
+    mergeCells: 'mergeCell',
+    scroll: 'scroll',
+    antLine: 'antLine',
+  };
+  for (const item of list) {
+    const type = item.t;
+    if (type === 'worksheets') {
+      if (item.k.includes('value') || item.k.includes('formula')) {
+        result.add('cellValue');
+      }
+      if (item.k.includes('style')) {
+        result.add('cellStyle');
+      }
+    } else {
+      result.add(map[type]);
+    }
+    if (type === 'workbook') {
+      if (item.k.includes('rowCount')) {
+        result.add('row');
+      }
+      if (item.k.includes('colCount')) {
+        result.add('col');
+      }
+    }
+  }
+  return result;
 }

@@ -1,4 +1,4 @@
-import { ICommandItem } from '@/types';
+import { ChangeEventType } from '@/types';
 
 export class EventEmitter<
   EventType extends Record<string, unknown> = Record<string, unknown>,
@@ -80,7 +80,7 @@ export class EventEmitter<
 }
 
 type EventEmitterType = {
-  modelChange: ICommandItem[];
+  modelChange: { changeSet: Set<ChangeEventType> };
 };
 
 export const eventEmitter = new EventEmitter<EventEmitterType>();

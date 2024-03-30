@@ -1,7 +1,9 @@
 import { IHistory, ICommandItem } from '@/types';
 
+type ChangeType = 'undoRedo' | 'commit';
+
 type Options = {
-  change: (list: ICommandItem[]) => void;
+  change: (list: ICommandItem[], type: ChangeType) => void;
   maxLength: number;
   redo: (item: ICommandItem) => void;
   undo: (item: ICommandItem) => void;
@@ -12,6 +14,7 @@ export class History implements IHistory {
   private position = -1;
   private commandList: ICommandItem[][] = [];
   private commands: ICommandItem[] = [];
+  private isNoChange = false;
   private options: Options = {
     change: noop,
     maxLength: 100,
@@ -38,11 +41,21 @@ export class History implements IHistory {
     this.commands = this.commands.concat(commands);
   }
   commit() {
-    if (this.commands.length === 0) {
+    if (this.isNoChange || this.commands.length === 0) {
       return;
     }
+    const list = this.commands.filter(
+      (v) => v.t !== 'scroll' && v.t !== 'antLine' && v.t !== 'rangeMap',
+    );
+    if (list.length === 0) {
+      this.change(this.commands, 'commit');
+      this.commands = [];
+      return;
+    }
+
     this.position++;
-    this.commandList[this.position] = [...this.commands];
+
+    this.commandList[this.position] = list;
     for (let i = this.position + 1; i < this.commandList.length; i++) {
       this.commandList[i] = [];
     }
@@ -61,7 +74,7 @@ export class History implements IHistory {
       }
     }
 
-    this.change(this.commands);
+    this.change(this.commands, 'commit');
     this.commands = [];
   }
   redo(): void {
@@ -75,7 +88,7 @@ export class History implements IHistory {
         this.options.redo(item as ICommandItem);
       }
     }
-    this.change(list);
+    this.change(list, 'undoRedo');
   }
   undo(): void {
     if (!this.canUndo()) {
@@ -88,7 +101,7 @@ export class History implements IHistory {
       }
     }
     this.position--;
-    this.change(list);
+    this.change(list, 'undoRedo');
   }
   canRedo(): boolean {
     if (this.position >= this.commandList.length - 1) {
@@ -114,8 +127,8 @@ export class History implements IHistory {
     }
     this.commands = [];
   }
-  private change(_list: ICommandItem[]) {
-    this.options.change(_list);
+  private change(_list: ICommandItem[], type: ChangeType) {
+    this.options.change(_list, type);
   }
   get(): ICommandItem[] {
     if (this.position >= 0 && this.position < this.commandList.length) {

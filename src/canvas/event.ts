@@ -15,7 +15,7 @@ function isInputEvent(event: any): boolean {
 
 export function registerGlobalEvent(
   controller: IController,
-  resizeWindow: (changeSet: Set<ChangeEventType>) => void,
+  resizeWindow: () => void,
 ) {
   function handleKeydown(event: KeyboardEvent) {
     if (isInputEvent(event)) {
@@ -81,11 +81,7 @@ export function registerGlobalEvent(
     controller.cut(event);
   }
 
-  function handleResize() {
-    resizeWindow(new Set<ChangeEventType>(['row']));
-  }
-
-  window.addEventListener('resize', handleResize);
+  window.addEventListener('resize', resizeWindow);
   document.body.addEventListener('keydown', handleKeydown);
   document.body.addEventListener('wheel', handleWheel);
   document.body.addEventListener('paste', handlePaste);
@@ -93,7 +89,7 @@ export function registerGlobalEvent(
   document.body.addEventListener('cut', handleCut);
 
   return () => {
-    window.removeEventListener('resize', handleResize);
+    window.removeEventListener('resize', resizeWindow);
     document.body.removeEventListener('keydown', handleKeydown);
     document.body.removeEventListener('wheel', handleWheel);
     document.body.removeEventListener('paste', handlePaste);
