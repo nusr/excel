@@ -55,7 +55,7 @@ export class MainCanvas {
     const { width, height } = this.controller.getDomRect();
     this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
-  render = (params: EventType) => {
+  render = (params: EventType): void => {
     if (params.changeSet.size === 0) {
       return;
     }
@@ -64,7 +64,7 @@ export class MainCanvas {
       return;
     }
     this.isRendering = true;
-    this.content.render(params);
+    const check = this.content.render(params);
     this.clear();
 
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
@@ -82,7 +82,10 @@ export class MainCanvas {
 
     this.renderMergeCell();
     this.isRendering = false;
-    
+    if (check) {
+      canvasLog('render again');
+      this.render({ changeSet: new Set(['row']) });
+    }
   };
 
   private renderMergeCell() {

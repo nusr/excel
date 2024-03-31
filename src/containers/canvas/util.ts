@@ -242,6 +242,7 @@ const handleStateChange = (
   }
 
   if (changeSet.has('currentSheetId')) {
+    // async update
     setTimeout(() => {
       scrollSheetToView(controller.getCurrentSheetId());
     }, 0);
@@ -283,12 +284,6 @@ export function initCanvas(controller: IController): () => void {
   handleStateChange(changeSet, controller);
   mainCanvas.resize();
   mainCanvas.render({ changeSet });
-  setTimeout(() => {
-    mainCanvas.resize();
-    mainCanvas.render({ changeSet });
-  }, 1000);
-
-
 
   return () => {
     removeEvent();

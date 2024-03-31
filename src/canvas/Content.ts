@@ -21,7 +21,7 @@ export class Content implements ContentView {
   }
   render({ changeSet }: EventType) {
     if (changeSet.size === 0) {
-      return;
+      return false;
     }
 
     const check =
@@ -34,11 +34,11 @@ export class Content implements ContentView {
       changeSet.has('scroll');
 
     if (!check) {
-      return;
+      return false;
     }
     canvasLog('render canvas content');
     this.clear();
-    this.renderContent();
+    return this.renderContent();
   }
 
   private clear() {
@@ -46,7 +46,8 @@ export class Content implements ContentView {
     this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
 
-  private renderContent(): void {
+  private renderContent() {
+    let check = false;
     const { controller, ctx } = this;
     const { width, height } = controller.getDomRect();
     const headerSize = headerSizeSet.get();
@@ -99,15 +100,18 @@ export class Content implements ContentView {
         if (h <= 0 || controller.getRowHeight(r).len === h) {
           continue;
         }
+        check = true;
         controller.setRowHeight(r, h);
       }
       for (const [c, w] of colMap.entries()) {
         if (w <= 0 || controller.getColWidth(c).len === w) {
           continue;
         }
+        check = true;
         controller.setColWidth(c, w);
       }
     });
     ctx.restore();
+    return check;
   }
 }
