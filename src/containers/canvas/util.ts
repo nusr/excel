@@ -177,9 +177,12 @@ const handleStateChange = (
 
   if (changeSet.has('scroll')) {
     const scroll = controller.getScroll();
-    scrollStore.setState({
+    const canvasSize = controller.getDomRect();
+    const showBottomBar = scroll.scrollTop / canvasSize.height >= 0.91;
+    scrollStore.mergeState({
       scrollLeft: scroll.scrollLeft,
       scrollTop: scroll.scrollTop,
+      showBottomBar,
     });
   }
   if (changeSet.has('definedNames')) {
@@ -253,6 +256,10 @@ export function initCanvas(controller: IController): () => void {
     mainCanvas.resize();
     mainCanvas.render({ changeSet: new Set<ChangeEventType>(['row']) });
   };
+  eventEmitter.on('modelChange', ({ changeSet }) => {
+    handleStateChange(changeSet, controller);
+    mainCanvas.render({ changeSet });
+  });
 
   const removeEvent = registerGlobalEvent(controller, resize);
 
@@ -274,15 +281,15 @@ export function initCanvas(controller: IController): () => void {
   ]);
 
   handleStateChange(changeSet, controller);
-  requestAnimationFrame(() => {
+  mainCanvas.resize();
+  mainCanvas.render({ changeSet });
+  setTimeout(() => {
+    handleStateChange(changeSet, controller);
     mainCanvas.resize();
     mainCanvas.render({ changeSet });
-  });
+  }, 0);
 
-  eventEmitter.on('modelChange', ({ changeSet }) => {
-    handleStateChange(changeSet, controller);
-    mainCanvas.render({ changeSet });
-  });
+
 
   return () => {
     removeEvent();

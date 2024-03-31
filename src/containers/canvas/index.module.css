@@ -24,6 +24,7 @@
   cursor: pointer;
   border-radius: var(--borderRadius);
   background-color: var(--scrollbarColor);
+  height: var(--scrollBarContent);
 }
 
 .horizontal-scroll-bar {
@@ -45,6 +46,7 @@
   border-radius: var(--borderRadius);
   background-color: var(--scrollbarColor);
   height: 100%;
+  width: var(--scrollBarContent);
 }
 
 .horizontal-scroll-bar-content:hover,
@@ -74,6 +76,9 @@
   right: 18px;
   bottom: 36px;
   left: 68px;
+}
+.bottom-bar.active {
+  display: flex;
 }
 
 .bottom-bar-text {

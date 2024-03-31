@@ -92,13 +92,16 @@ export interface SelectPopupProps {
 export const SelectPopup: FunctionComponent<SelectPopupProps> = memo(
   (props) => {
     const [ref] = useClickOutside(() => props.onChange(''));
-    const handleSelect = (event: React.MouseEvent<HTMLDivElement>) => {
-      const v = (event.target as any).dataset?.value;
-      if (!v || v === props.value) {
-        return;
-      }
-      props.onChange(v);
-    };
+    const handleSelect = useCallback(
+      (event: React.MouseEvent<HTMLDivElement>) => {
+        const v = (event.target as any).dataset?.value;
+        if (!v || v === props.value) {
+          return;
+        }
+        props.onChange(v);
+      },
+      [],
+    );
     return (
       <div
         className={classnames(

@@ -82,6 +82,7 @@ export class MainCanvas {
 
     this.renderMergeCell();
     this.isRendering = false;
+    
   };
 
   private renderMergeCell() {

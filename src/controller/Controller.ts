@@ -31,6 +31,7 @@ import {
   headerSizeSet,
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
+  controllerLog,
 } from '@/util';
 
 const defaultScrollValue: ScrollValue = {
@@ -75,6 +76,7 @@ export class Controller implements IController {
     if (this.isNoChange) {
       return;
     }
+    controllerLog(this.changeSet);
     this.model.emitChange(this.changeSet);
     this.changeSet = new Set<ChangeEventType>();
   }

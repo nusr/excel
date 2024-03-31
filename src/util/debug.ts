@@ -1,4 +1,4 @@
-import { DEBUG_COLOR_LIST } from './constant';
+import { COLOR_PICKER_COLOR_LIST } from './constant';
 
 type NameSpaceType = 'react' | 'controller' | 'canvas' | 'model';
 
@@ -30,8 +30,8 @@ class Debug {
     console.log(...result);
   };
   getRandomColor = (): string => {
-    const index = Math.floor(Math.random() * DEBUG_COLOR_LIST.length);
-    return DEBUG_COLOR_LIST[index];
+    const index = Math.floor(Math.random() * COLOR_PICKER_COLOR_LIST.length);
+    return COLOR_PICKER_COLOR_LIST[index];
   };
   enable() {
     return this.checkEnable() && Debug.enableMap.get(this.namespace) !== false;

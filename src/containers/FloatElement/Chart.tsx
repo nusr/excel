@@ -21,7 +21,7 @@ import {
 } from 'chart.js';
 import type { ChartType, DefaultDataPoint, ChartComponentLike } from 'chart.js';
 import {
-  DEBUG_COLOR_LIST,
+  COLOR_PICKER_COLOR_LIST,
   parseNumber,
   deepEqual,
   getThemeColor,
@@ -143,13 +143,20 @@ const radarOptions = {
 };
 const radarPlugins = [Filler];
 
+const colorOffset = 5;
+
+function getColor(i: number): string {
+  const index = Math.floor(i) % COLOR_PICKER_COLOR_LIST.length;
+  return COLOR_PICKER_COLOR_LIST[index];
+}
+
 const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
   const { chartType, width, height, labels, datasets, uuid, title } = props;
   const commonData = {
     labels,
     datasets: datasets.map((v, i) => ({
       ...v,
-      backgroundColor: DEBUG_COLOR_LIST[i + 6],
+      backgroundColor: getColor(i * colorOffset),
     })),
   };
   const extra = {
@@ -189,7 +196,7 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
     const data = {
       labels,
       datasets: datasets.map((v, i) => {
-        const c = DEBUG_COLOR_LIST[i];
+        const c = getColor(i * colorOffset + 4);
         return {
           ...v,
           fill: true,
@@ -198,7 +205,7 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
           pointBorderColor: getThemeColor('white'),
           pointHoverBackgroundColor: getThemeColor('white'),
           pointHoverBorderColor: c,
-          backgroundColor: DEBUG_COLOR_LIST[i + 6],
+          backgroundColor: getColor(i * colorOffset),
         };
       }),
     };
@@ -216,7 +223,7 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
         return {
           label: v.label,
           data: v.data.map((t, i) => ({ y: t, x: parseNumber(labels[i]) })),
-          backgroundColor: DEBUG_COLOR_LIST[i + 6],
+          backgroundColor: getColor(i * colorOffset),
         };
       }),
     };
@@ -227,7 +234,7 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
       datasets: datasets.map((v) => {
         const list = Array.from({ length: v.data.length })
           .fill('')
-          .map((_, i) => DEBUG_COLOR_LIST[i + 6]);
+          .map((_, i) => getColor(i * colorOffset));
         return {
           ...v,
           backgroundColor: list,

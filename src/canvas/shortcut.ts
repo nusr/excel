@@ -6,14 +6,14 @@ import {
   IRange,
 } from '@/types';
 import {
-  BOTTOM_BUFF,
-  SCROLL_SIZE,
   isMac,
   SHEET_ITEM_TEST_ID_PREFIX,
   sheetViewSizeSet,
   headerSizeSet,
+  sizeConfig,
 } from '@/util';
 import { coreStore } from '@/containers/store';
+export const BOTTOM_BUFF = 200;
 
 export function handleTabClick(controller: IController) {
   checkActiveElement(controller);
@@ -70,12 +70,13 @@ export function computeScrollPosition(
   left: number,
   top: number,
 ) {
+  const contentSize = parseInt(sizeConfig.scrollBarContent, 10);
   const canvasRect = controller.getDomRect();
   const viewSize = sheetViewSizeSet.get();
   const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
   const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-  const maxScrollHeight = canvasRect.height - SCROLL_SIZE * 1;
-  const maxScrollWidth = canvasRect.width - SCROLL_SIZE * 1;
+  const maxScrollHeight = canvasRect.height - contentSize;
+  const maxScrollWidth = canvasRect.width - contentSize;
 
   const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
   const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);

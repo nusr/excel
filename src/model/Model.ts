@@ -109,10 +109,10 @@ export class Model implements IModel {
         if (type === 'undoRedo') {
           changeSet.add(type);
         }
-        modelLog(changeSet);
         if (changeSet.has('row') || changeSet.has('col')) {
           this.computeViewSize();
         }
+        modelLog(changeSet);
         eventEmitter.emit('modelChange', { changeSet });
       },
     });
@@ -519,20 +519,17 @@ export class Model implements IModel {
       }
       const key = coordinateToString(item.row, item.col);
       const newKey = coordinateToString(item.row + count, item.col);
-      const value = sheetData[key];
-      const newValue = value ? { ...value } : {};
+
+      const newValue = sheetData[key] ? { ...sheetData[key] } : {};
       const oldData = sheetData[newKey] ? { ...sheetData[newKey] } : {};
-
-      sheetData[newKey] = { ...newValue };
       delete sheetData[key];
-
       this.history.push({
         t: 'worksheets',
         k: `${id}.${key}`,
         n: DELETE_FLAG,
         o: newValue,
       });
-
+      sheetData[newKey] = { ...newValue };
       this.history.push({
         t: 'worksheets',
         k: `${id}.${newKey}`,
@@ -564,6 +561,44 @@ export class Model implements IModel {
     if (!sheetData) {
       return;
     }
+    for (let i = newCount - 1; i >= colIndex + count; i--) {
+      const oldKey = getCustomWidthOrHeightKey(id, i - count);
+      const newKey = getCustomWidthOrHeightKey(id, i);
+      const oldValue = this.customWidth[oldKey]
+        ? { ...this.customWidth[oldKey] }
+        : undefined;
+      const newValue = this.customWidth[newKey]
+        ? { ...this.customWidth[newKey] }
+        : undefined;
+      if (oldValue) {
+        delete this.customWidth[oldKey];
+        this.history.push({
+          t: 'customWidth',
+          k: oldKey,
+          n: DELETE_FLAG,
+          o: oldValue,
+        });
+      }
+      if (newValue) {
+        if (oldValue) {
+          this.customWidth[newKey] = oldValue;
+          this.history.push({
+            t: 'customWidth',
+            k: newKey,
+            n: oldValue,
+            o: newValue,
+          });
+        } else {
+          delete this.customWidth[newKey];
+          this.history.push({
+            t: 'customWidth',
+            k: newKey,
+            n: DELETE_FLAG,
+            o: newValue,
+          });
+        }
+      }
+    }
     const list = Array.from(Object.keys(sheetData)).map((key) =>
       stringToCoordinate(key),
     );
@@ -573,15 +608,15 @@ export class Model implements IModel {
       if (item.col <= colIndex) {
         break;
       }
+
       const key = coordinateToString(item.row, item.col);
       const newKey = coordinateToString(item.row, item.col + count);
-      const value = sheetData[key];
-      const newValue = value ? { ...value } : {};
+      if (!sheetData[key]) {
+        continue;
+      }
+      const newValue = sheetData[key] ? { ...sheetData[key] } : {};
       const oldValue = sheetData[newKey] ? { ...sheetData[newKey] } : {};
-
-      sheetData[newKey] = { ...newValue };
       delete sheetData[key];
-
       this.history.push({
         t: 'worksheets',
         k: `${id}.${key}`,
@@ -589,6 +624,7 @@ export class Model implements IModel {
         o: newValue,
       });
 
+      sheetData[newKey] = { ...newValue };
       this.history.push({
         t: 'worksheets',
         k: `${id}.${newKey}`,
@@ -684,6 +720,7 @@ export class Model implements IModel {
           o: oldValue,
         });
       }
+
       delete sheetData[key];
       this.history.push({
         t: 'worksheets',
@@ -758,6 +795,7 @@ export class Model implements IModel {
     if (!sheetData) {
       return;
     }
+
     const list = Array.from(Object.keys(sheetData)).map((key) =>
       stringToCoordinate(key),
     );
@@ -772,6 +810,7 @@ export class Model implements IModel {
       if (item.row >= rowIndex + count) {
         const newKey = coordinateToString(item.row - count, item.col);
         const oldValue = sheetData[newKey] ? { ...sheetData[newKey] } : {};
+
         sheetData[newKey] = { ...newValue };
         this.history.push({
           t: 'worksheets',
@@ -780,6 +819,7 @@ export class Model implements IModel {
           o: oldValue,
         });
       }
+
       delete sheetData[key];
       this.history.push({
         t: 'worksheets',

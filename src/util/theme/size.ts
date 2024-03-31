@@ -10,5 +10,6 @@ const size = {
   borderLargeRadius: '8px',
   tinyPadding: '4px',
   scrollBarSize: '18px',
+  scrollBarContent: '30px',
 };
 export default size;

@@ -1,6 +1,5 @@
 import React, { useRef, Fragment, useSyncExternalStore, memo } from 'react';
 import { IController, ScrollStatus, ScrollValue } from '@/types';
-import { SCROLL_SIZE } from '@/util';
 import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
 import styles from './index.module.css';
 import { scrollStore } from '../store';
@@ -107,7 +106,6 @@ export const ScrollBar: React.FunctionComponent<Props> = memo(
           <div
             className={styles['vertical-scroll-bar-content']}
             style={{
-              height: SCROLL_SIZE,
               transform: `translateY(${scrollTop}px)`,
             }}
           />
@@ -123,7 +121,6 @@ export const ScrollBar: React.FunctionComponent<Props> = memo(
           <div
             className={styles['horizontal-scroll-bar-content']}
             style={{
-              width: SCROLL_SIZE,
               transform: `translateX(${scrollLeft}px)`,
             }}
           />

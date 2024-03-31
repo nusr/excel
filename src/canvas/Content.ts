@@ -1,9 +1,4 @@
-import {
-  npx,
-  dpr,
-  canvasLog,
-  headerSizeSet,
-} from '@/util';
+import { npx, dpr, canvasLog, headerSizeSet } from '@/util';
 import { resizeCanvas, renderCellData } from './util';
 import { ContentView, IController, EventType } from '@/types';
 
@@ -45,6 +40,7 @@ export class Content implements ContentView {
     this.clear();
     this.renderContent();
   }
+
   private clear() {
     const { width, height } = this.controller.getDomRect();
     this.ctx.clearRect(0, 0, npx(width), npx(height));
@@ -112,7 +108,6 @@ export class Content implements ContentView {
         controller.setColWidth(c, w);
       }
     });
-
     ctx.restore();
   }
 }

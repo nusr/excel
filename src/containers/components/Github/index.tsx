@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, memo } from 'react';
 
 import styles from './index.module.css';
 
@@ -6,7 +6,7 @@ const pathStyle = {
   transformOrigin: '130px 106px',
 };
 
-export const Github: FunctionComponent = () => {
+export const Github: FunctionComponent = memo(() => {
   return (
     <a
       href="https://github.com/nusr/excel"
@@ -30,5 +30,5 @@ export const Github: FunctionComponent = () => {
       </svg>
     </a>
   );
-};
+});
 Github.displayName = 'Github';
