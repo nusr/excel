@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, Fragment, useState } from 'react';
+import React, { useRef, useEffect, Fragment, useState, memo } from 'react';
 import { IController, EditorStatus } from '@/types';
 import { getHitInfo, DEFAULT_POSITION, headerSizeSet } from '@/util';
 import styles from './index.module.css';
@@ -19,7 +19,7 @@ type State = {
   timeStamp: number;
 };
 
-export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
+export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
   const { controller } = props;
   const state = useRef<State>({
     timeStamp: 0,
@@ -205,5 +205,5 @@ export const CanvasContainer: React.FunctionComponent<Props> = (props) => {
       )}
     </Fragment>
   );
-};
+});
 CanvasContainer.displayName = 'CanvasContainer';

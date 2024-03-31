@@ -18,6 +18,7 @@ jobs:
         run: |
           npm install
           npm run lint
+          npx tsc
           npm run coverage
       - name: Upload coverage
         uses: codecov/codecov-action@v3

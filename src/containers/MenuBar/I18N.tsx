@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Select } from '../components';
 import { OptionItem, LanguageType } from '@/types';
 import { LANGUAGE_LIST } from '@/util';
@@ -12,7 +12,7 @@ const dataList: OptionItem[] = LANGUAGE_LIST.map((v) => ({
 }));
 const defaultValue = getLanguage();
 
-export const I18N: React.FunctionComponent = () => {
+export const I18N: React.FunctionComponent = memo(() => {
   const handleChange = (c: string | number) => {
     const l = String(c) as LanguageType;
     setLanguage(l);
@@ -28,4 +28,5 @@ export const I18N: React.FunctionComponent = () => {
       />
     </div>
   );
-};
+});
+I18N.displayName = 'I18N';

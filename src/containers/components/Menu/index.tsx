@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, memo } from 'react';
 import styles from './index.module.css';
 import { classnames } from '@/util';
 import { useClickOutside } from '../../hooks';
@@ -56,32 +56,30 @@ export const SubMenu: FunctionComponent<
   );
 };
 
-export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = ({
-  menuButton,
-  children,
-  style,
-  testId,
-  className,
-}) => {
-  const [open, setOpen] = useState(false);
-  const handleClick = () => {
-    setOpen((v) => !v);
-  };
-  const [ref] = useClickOutside(() => setOpen(false));
-  return (
-    <div className={classnames(styles.container, className)} ref={ref}>
-      <div onClick={handleClick} data-testid={testId}>
-        {menuButton}
-      </div>
-      {open && (
-        <div
-          className={classnames(styles.menuContainer, styles.portal)}
-          style={style}
-          data-testid={`${testId}-portal`}
-        >
-          <ul className={styles.menu}>{children}</ul>
+export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = memo(
+  ({ menuButton, children, style, testId, className }) => {
+    const [open, setOpen] = useState(false);
+    const handleClick = () => {
+      setOpen((v) => !v);
+    };
+    const [ref] = useClickOutside(() => setOpen(false));
+    return (
+      <div className={classnames(styles.container, className)} ref={ref}>
+        <div onClick={handleClick} data-testid={testId}>
+          {menuButton}
         </div>
-      )}
-    </div>
-  );
-};
+        {open && (
+          <div
+            className={classnames(styles.menuContainer, styles.portal)}
+            style={style}
+            data-testid={`${testId}-portal`}
+          >
+            <ul className={styles.menu}>{children}</ul>
+          </div>
+        )}
+      </div>
+    );
+  },
+);
+
+Menu.displayName = 'Menu';

@@ -1,4 +1,4 @@
-import React, { FunctionComponent, CSSProperties } from 'react';
+import React, { FunctionComponent, CSSProperties, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { createRoot, Root } from 'react-dom/client';
 import { Button } from '../Button';
@@ -17,7 +17,7 @@ interface DialogProps {
   onCancel?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
-export const Dialog: FunctionComponent<DialogProps> = (props) => {
+export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
   const {
     children,
     title,
@@ -53,7 +53,7 @@ export const Dialog: FunctionComponent<DialogProps> = (props) => {
     </div>,
     getContainer(),
   );
-};
+});
 Dialog.displayName = 'Dialog';
 
 export function info(props: DialogProps) {

@@ -138,10 +138,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
             controller.updateFloatElement(activeUuid, {
               imageAngle: position.imageAngle,
             });
-          } else if (
-            position.height > 0 &&
-            position.width > 0
-          ) {
+          } else if (position.height > 0 && position.width > 0) {
             controller.updateFloatElement(activeUuid, {
               height: position.height,
               width: position.width,
@@ -261,5 +258,6 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
     );
   },
 );
+FloatElementContainer.displayName = 'FloatElementContainer';
 
 export { InsertFloatingPicture, InsertChart } from './Toolbar';

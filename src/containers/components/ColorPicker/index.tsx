@@ -1,4 +1,4 @@
-import React, { FunctionComponent, CSSProperties, useState } from 'react';
+import React, { FunctionComponent, CSSProperties, useState, memo } from 'react';
 import { classnames } from '@/util';
 import styles from './index.module.css';
 import { ColorPickerPanel } from './ColorPickerPanel';
@@ -16,8 +16,8 @@ export interface ColorPickerProps {
 
 export const ColorPicker: FunctionComponent<
   React.PropsWithChildren<ColorPickerProps>
-> = (props) => {
-  const { style = {}, onChange, children, color, position = 'bottom' } = props;
+> = memo((props) => {
+  const { style, onChange, children, color, position = 'bottom' } = props;
   const [visible, setVisible] = useState(false);
   const [ref] = useClickOutside(() => {
     setVisible(false);
@@ -79,5 +79,5 @@ export const ColorPicker: FunctionComponent<
       </div>
     </div>
   );
-};
+});
 ColorPicker.displayName = 'ColorPicker';

@@ -10,3 +10,12 @@
   margin-right: 8px;
   margin-bottom: var(--mediumPadding);
 }
+.bold {
+  font-weight: bold;
+}
+.italic {
+  font-style: italic;
+}
+.strike {
+  text-decoration-line: line-through;
+}

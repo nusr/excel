@@ -1,5 +1,16 @@
-import React, { CSSProperties, useRef, useEffect } from 'react';
-import { CanvasOverlayPosition, IController, EditorStatus } from '@/types';
+import React, {
+  CSSProperties,
+  useRef,
+  useEffect,
+  memo,
+  useCallback,
+} from 'react';
+import {
+  CanvasOverlayPosition,
+  IController,
+  EditorStatus,
+  StyleType,
+} from '@/types';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
 import { handleTabClick, handleEnterClick } from '../../canvas/shortcut';
@@ -11,7 +22,7 @@ interface Props {
   testId?: string;
 }
 export function getDisplayStyle(
-  style: CellStoreType,
+  style: StyleType,
   isFormulaBar = true,
 ): CSSProperties {
   const result: CSSProperties = {};
@@ -48,13 +59,14 @@ export function getDisplayStyle(
 export function getEditorStyle(
   style: CellStoreType,
   editorStatus: EditorStatus,
+  cellStyle: StyleType,
 ): CSSProperties | undefined {
   if (editorStatus === EditorStatus.NONE) {
     return undefined;
   }
   const isFormulaBar = editorStatus === EditorStatus.EDIT_FORMULA_BAR;
 
-  const editorStyle = getDisplayStyle(style, isFormulaBar);
+  const editorStyle = getDisplayStyle(cellStyle, isFormulaBar);
   if (isFormulaBar) {
     return editorStyle;
   }
@@ -71,39 +83,39 @@ export function getEditorStyle(
   };
 }
 
-export const FormulaEditor: React.FunctionComponent<Props> = ({
-  controller,
-  initValue,
-  style,
-  testId,
-}) => {
-  const ref = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (!ref.current) {
-      return;
-    }
-    controller.setMainDom({ input: ref.current });
-  }, []);
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    event.stopPropagation();
-    if (event.key === 'Enter') {
-      handleEnterClick(controller);
-    } else if (event.key === 'Tab') {
-      handleTabClick(controller);
-    }
-  };
-  return (
-    <input
-      className={styles['base-editor']}
-      ref={ref}
-      spellCheck
-      defaultValue={initValue}
-      onKeyDown={handleKeyDown}
-      type="text"
-      style={style}
-      data-testid={testId}
-    />
-  );
-};
+export const FormulaEditor: React.FunctionComponent<Props> = memo(
+  ({ controller, initValue, style, testId }) => {
+    const ref = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+      if (!ref.current) {
+        return;
+      }
+      controller.setMainDom({ input: ref.current });
+    }, []);
+    const handleKeyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLInputElement>) => {
+        event.stopPropagation();
+        if (event.key === 'Enter') {
+          handleEnterClick(controller);
+        } else if (event.key === 'Tab') {
+          handleTabClick(controller);
+        }
+      },
+      [],
+    );
+    return (
+      <input
+        className={styles['base-editor']}
+        ref={ref}
+        spellCheck
+        defaultValue={initValue}
+        onKeyDown={handleKeyDown}
+        type="text"
+        style={style}
+        data-testid={testId}
+      />
+    );
+  },
+);
 
 FormulaEditor.displayName = 'FormulaEditor';

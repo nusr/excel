@@ -1,4 +1,4 @@
-import React, { useRef, Fragment, useSyncExternalStore } from 'react';
+import React, { useRef, Fragment, useSyncExternalStore, memo } from 'react';
 import { IController, ScrollStatus, ScrollValue } from '@/types';
 import { SCROLL_SIZE } from '@/util';
 import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
@@ -45,89 +45,91 @@ function scrollBar(controller: IController, scrollX: number, scrollY: number) {
   };
   controller.setScroll(data);
 }
-export const ScrollBar: React.FunctionComponent<Props> = ({ controller }) => {
-  const state = useRef<State>({
-    prevPageX: 0,
-    prevPageY: 0,
-    scrollStatus: ScrollStatus.NONE,
-  });
-  const { scrollLeft, scrollTop } = useSyncExternalStore(
-    scrollStore.subscribe,
-    scrollStore.getSnapshot,
-  );
-  function handleDrag(event: PointerEvent) {
-    if (event.buttons !== 1) {
-      return;
-    }
-    event.stopPropagation();
-    if (state.current.scrollStatus === ScrollStatus.VERTICAL) {
-      if (state.current.prevPageY) {
-        scrollBar(controller, 0, event.pageY - state.current.prevPageY);
+export const ScrollBar: React.FunctionComponent<Props> = memo(
+  ({ controller }) => {
+    const state = useRef<State>({
+      prevPageX: 0,
+      prevPageY: 0,
+      scrollStatus: ScrollStatus.NONE,
+    });
+    const { scrollLeft, scrollTop } = useSyncExternalStore(
+      scrollStore.subscribe,
+      scrollStore.getSnapshot,
+    );
+    function handleDrag(event: PointerEvent) {
+      if (event.buttons !== 1) {
+        return;
       }
-      state.current.prevPageY = event.pageY;
-    } else if (state.current.scrollStatus === ScrollStatus.HORIZONTAL) {
-      if (state.current.prevPageX) {
-        scrollBar(controller, event.pageX - state.current.prevPageX, 0);
+      event.stopPropagation();
+      if (state.current.scrollStatus === ScrollStatus.VERTICAL) {
+        if (state.current.prevPageY) {
+          scrollBar(controller, 0, event.pageY - state.current.prevPageY);
+        }
+        state.current.prevPageY = event.pageY;
+      } else if (state.current.scrollStatus === ScrollStatus.HORIZONTAL) {
+        if (state.current.prevPageX) {
+          scrollBar(controller, event.pageX - state.current.prevPageX, 0);
+        }
+        state.current.prevPageX = event.pageX;
       }
-      state.current.prevPageX = event.pageX;
     }
-  }
-  function handleDragEnd() {
-    state.current.scrollStatus = ScrollStatus.NONE;
-    state.current.prevPageY = 0;
-    state.current.prevPageX = 0;
-    document.removeEventListener('pointermove', handleDrag);
-    document.removeEventListener('pointerup', handleDragEnd);
-  }
-  function register(
-    event: React.PointerEvent<HTMLDivElement>,
-    status: ScrollStatus,
-  ) {
-    if (event.buttons !== 1) {
-      return;
+    function handleDragEnd() {
+      state.current.scrollStatus = ScrollStatus.NONE;
+      state.current.prevPageY = 0;
+      state.current.prevPageX = 0;
+      document.removeEventListener('pointermove', handleDrag);
+      document.removeEventListener('pointerup', handleDragEnd);
     }
-    if (state.current.scrollStatus) {
-      return;
+    function register(
+      event: React.PointerEvent<HTMLDivElement>,
+      status: ScrollStatus,
+    ) {
+      if (event.buttons !== 1) {
+        return;
+      }
+      if (state.current.scrollStatus) {
+        return;
+      }
+      state.current.scrollStatus = status;
+      document.addEventListener('pointermove', handleDrag);
+      document.addEventListener('pointerup', handleDragEnd);
     }
-    state.current.scrollStatus = status;
-    document.addEventListener('pointermove', handleDrag);
-    document.addEventListener('pointerup', handleDragEnd);
-  }
-  return (
-    <Fragment>
-      <div
-        className={styles['vertical-scroll-bar']}
-        data-testid="vertical-scroll-bar"
-        onPointerLeave={handleDragEnd}
-        onPointerDown={(event) => {
-          register(event, ScrollStatus.VERTICAL);
-        }}
-      >
+    return (
+      <Fragment>
         <div
-          className={styles['vertical-scroll-bar-content']}
-          style={{
-            height: SCROLL_SIZE,
-            transform: `translateY(${scrollTop}px)`,
+          className={styles['vertical-scroll-bar']}
+          data-testid="vertical-scroll-bar"
+          onPointerLeave={handleDragEnd}
+          onPointerDown={(event) => {
+            register(event, ScrollStatus.VERTICAL);
           }}
-        />
-      </div>
-      <div
-        className={styles['horizontal-scroll-bar']}
-        data-testid="horizontal-scroll-bar"
-        onPointerLeave={handleDragEnd}
-        onPointerDown={(event) => {
-          register(event, ScrollStatus.HORIZONTAL);
-        }}
-      >
+        >
+          <div
+            className={styles['vertical-scroll-bar-content']}
+            style={{
+              height: SCROLL_SIZE,
+              transform: `translateY(${scrollTop}px)`,
+            }}
+          />
+        </div>
         <div
-          className={styles['horizontal-scroll-bar-content']}
-          style={{
-            width: SCROLL_SIZE,
-            transform: `translateX(${scrollLeft}px)`,
+          className={styles['horizontal-scroll-bar']}
+          data-testid="horizontal-scroll-bar"
+          onPointerLeave={handleDragEnd}
+          onPointerDown={(event) => {
+            register(event, ScrollStatus.HORIZONTAL);
           }}
-        />
-      </div>
-    </Fragment>
-  );
-};
+        >
+          <div
+            className={styles['horizontal-scroll-bar-content']}
+            style={{
+              width: SCROLL_SIZE,
+              transform: `translateX(${scrollLeft}px)`,
+            }}
+          />
+        </div>
+      </Fragment>
+    );
+  },
+);
 ScrollBar.displayName = 'ScrollBar';

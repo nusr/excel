@@ -1,5 +1,5 @@
-import React, { FunctionComponent, CSSProperties } from 'react';
-import { classnames } from '@/util';
+import React, { FunctionComponent, CSSProperties, memo } from 'react';
+import { classnames, noop } from '@/util';
 import styles from './index.module.css';
 
 export interface ButtonProps {
@@ -15,42 +15,41 @@ export interface ButtonProps {
   buttonType?: React.ButtonHTMLAttributes<string>['type'];
 }
 
-export const Button: FunctionComponent<React.PropsWithChildren<ButtonProps>> = (
-  props,
-) => {
-  const {
-    className = '',
-    onClick = () => {},
-    disabled = false,
-    active = false,
-    type = 'normal',
-    style = {},
-    testId = undefined,
-    title,
-    dataType,
-    buttonType,
-    children,
-  } = props;
-  const cls = classnames(styles.buttonWrapper, className, {
-    [styles['disabled']]: disabled,
-    [styles['active']]: active,
-    [styles['circle']]: type === 'circle',
-    [styles['plain']]: type === 'plain',
-    [styles['primary']]: type === 'primary',
+export const Button: FunctionComponent<React.PropsWithChildren<ButtonProps>> =
+  memo((props) => {
+    const {
+      className = '',
+      onClick = noop,
+      disabled = false,
+      active = false,
+      type = 'normal',
+      style,
+      testId,
+      title,
+      dataType,
+      buttonType,
+      children,
+    } = props;
+    const cls = classnames(styles.buttonWrapper, className, {
+      [styles['disabled']]: disabled,
+      [styles['active']]: active,
+      [styles['circle']]: type === 'circle',
+      [styles['plain']]: type === 'plain',
+      [styles['primary']]: type === 'primary',
+    });
+    return (
+      <button
+        onClick={onClick}
+        style={style}
+        title={title}
+        disabled={disabled}
+        className={cls}
+        data-testid={testId}
+        data-type={dataType}
+        type={buttonType}
+      >
+        {children}
+      </button>
+    );
   });
-  return (
-    <button
-      onClick={onClick}
-      style={style}
-      title={title}
-      disabled={disabled}
-      className={cls}
-      data-testid={testId}
-      data-type={dataType}
-      type={buttonType}
-    >
-      {children}
-    </button>
-  );
-};
 Button.displayName = 'Button';

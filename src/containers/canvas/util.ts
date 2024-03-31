@@ -17,6 +17,7 @@ import {
   floatElementStore,
   FloatElementItem,
   defineNameStore,
+  styleStore,
 } from '@/containers/store';
 import {
   MainCanvas,
@@ -121,7 +122,10 @@ function updateActiveCell(controller: IController) {
     rowCount: activeCell.rowCount,
     colCount: activeCell.colCount,
     value: convertResultTypeToString(cell?.value),
-    formula: cell?.formula,
+    formula: cell?.formula || '',
+    defineName,
+  });
+  styleStore.mergeState({
     isBold,
     isItalic,
     isStrike,
@@ -132,7 +136,6 @@ function updateActiveCell(controller: IController) {
     isWrapText,
     underline,
     numberFormat,
-    defineName,
     isMergeCell: isMerged,
   });
 }
@@ -153,7 +156,7 @@ const handleStateChange = (
       sheetId: v.sheetId,
       name: v.name,
       isHide: v.isHide,
-      tabColor: v.tabColor,
+      tabColor: v.tabColor || '',
     }));
     sheetListStore.setState(sheetList);
   }
@@ -269,6 +272,7 @@ export function initCanvas(controller: IController): () => void {
     'undoRedo',
     'antLine',
   ]);
+
   handleStateChange(changeSet, controller);
   requestAnimationFrame(() => {
     mainCanvas.resize();

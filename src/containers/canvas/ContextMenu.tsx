@@ -245,4 +245,4 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
     </div>
   );
 });
-ContextMenu.displayName = 'ContextMenuContainer';
+ContextMenu.displayName = 'CanvasContextMenu';

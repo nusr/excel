@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Button, Icon } from '../components';
 import styles from './index.module.css';
 import { sizeConfig, darkColor, lightColor, setTheme, getTheme } from '@/util';
@@ -49,17 +49,17 @@ export const Theme: React.FunctionComponent<Props> = memo(({ toggleTheme }) => {
     }
   }, [toggleTheme]);
 
-  const handleClick = (old: ThemeType) => {
-    const n = old === 'dark' ? 'light' : 'dark';
+  const handleClick = useCallback(() => {
+    const n = themeData === 'dark' ? 'light' : 'dark';
     updateCssVariable(n);
     setTheme(n);
     setThemeData(n);
     toggleTheme();
-  };
+  }, [themeData]);
   return (
     <div data-testid="menubar-theme" className={styles.theme}>
       <Button
-        onClick={() => handleClick(themeData)}
+        onClick={handleClick}
         className={styles['theme-button']}
         testId="menubar-theme-toggle"
       >
@@ -68,3 +68,5 @@ export const Theme: React.FunctionComponent<Props> = memo(({ toggleTheme }) => {
     </div>
   );
 });
+
+Theme.displayName = 'Theme';
