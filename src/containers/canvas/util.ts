@@ -284,10 +284,9 @@ export function initCanvas(controller: IController): () => void {
   mainCanvas.resize();
   mainCanvas.render({ changeSet });
   setTimeout(() => {
-    handleStateChange(changeSet, controller);
     mainCanvas.resize();
     mainCanvas.render({ changeSet });
-  }, 0);
+  }, 1000);
 
 
 
