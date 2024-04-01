@@ -67,13 +67,15 @@ export class Controller implements IController {
   getSheetInfo(sheetId?: string) {
     return this.model.getSheetInfo(sheetId);
   }
-  batchUpdate(fn: () => void): void {
+  batchUpdate(fn: () => void, isEmit = true): void {
     this.isNoChange = true;
     fn();
     this.isNoChange = false;
-    this.emitChange();
+    if (isEmit) {
+      this.emitChange();
+    }
   }
-  private emitChange(): void {
+  emitChange(): void {
     if (this.isNoChange) {
       return;
     }

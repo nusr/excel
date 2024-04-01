@@ -110,7 +110,7 @@ export class Content implements ContentView {
         check = true;
         controller.setColWidth(c, w);
       }
-    });
+    }, false);
     ctx.restore();
     return check;
   }

@@ -4,6 +4,7 @@ import React, {
   useState,
   useMemo,
   memo,
+  useCallback,
 } from 'react';
 import {
   classnames,
@@ -57,30 +58,42 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
       setMenuPosition(pos);
       return false;
     };
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-      event.stopPropagation();
-      if (event.key === 'Enter') {
-        const t = event.currentTarget.value;
-        if (!t) {
-          return;
+    const handleKeyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLInputElement>) => {
+        event.stopPropagation();
+        if (event.key === 'Enter') {
+          const t = event.currentTarget.value;
+          if (!t) {
+            return;
+          }
+          setSheetName(t);
         }
-        setSheetName(t);
-      }
-    };
-    const handleChange = (value: string) => {
+      },
+      [],
+    );
+    const handleChange = useCallback((value: string) => {
       setPopupActive(false);
       if (!value) {
         return;
       }
       controller.setCurrentSheetId(value);
-    };
+    }, []);
+    const addSheet = useCallback(() => {
+      controller.addSheet();
+    }, []);
+    const hideMenu = useCallback(() => {
+      setMenuPosition(DEFAULT_POSITION);
+    }, []);
+    const editSheetName = useCallback(() => {
+      setEditing(true);
+    }, []);
+    const togglePopup = useCallback(() => {
+      setPopupActive((v) => !v);
+    }, []);
     return (
       <div className={styles['sheet-bar-wrapper']}>
         <div>
-          <Button
-            onClick={() => setPopupActive((v) => !v)}
-            className={styles['menu-button']}
-          >
+          <Button onClick={togglePopup} className={styles['menu-button']}>
             <Icon name="menu" />
           </Button>
           {popupActive && (
@@ -148,7 +161,7 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
           })}
         </div>
         <Button
-          onClick={() => controller.addSheet()}
+          onClick={addSheet}
           type="circle"
           className={styles['add-button']}
         >
@@ -160,8 +173,8 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
             position={menuPosition}
             sheetList={sheetList}
             currentSheetId={currentSheetId}
-            hideMenu={() => setMenuPosition(DEFAULT_POSITION)}
-            editSheetName={() => setEditing(true)}
+            hideMenu={hideMenu}
+            editSheetName={editSheetName}
           />
         )}
       </div>

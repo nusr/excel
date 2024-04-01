@@ -8,7 +8,6 @@ import {
   ModelCellValue,
   CustomItem,
   FloatElement,
-  IHistory,
   ChangeEventType,
   ICommandItem,
   DefinedNameItem,
@@ -35,7 +34,7 @@ import { RowManager } from './row';
 import { ColManager } from './col';
 
 export class Model implements IModel {
-  private history: IHistory;
+  private history: History;
   private workbookManager: Workbook;
   private rangeMapManager: RangeMap;
   private drawingsManager: Drawing;
@@ -74,7 +73,7 @@ export class Model implements IModel {
       this.worksheetManager.computeFormulas();
     }
     if (set.has('scroll')) {
-      this.history.push({
+      this.push({
         type: 'scroll',
         key: '',
         newValue: '',
@@ -82,7 +81,7 @@ export class Model implements IModel {
       });
     }
     if (set.has('antLine')) {
-      this.history.push({
+      this.push({
         type: 'antLine',
         key: '',
         newValue: '',
@@ -364,60 +363,24 @@ export class Model implements IModel {
     eventEmitter.emit('modelChange', { changeSet });
   };
   private historyRedo = (item: ICommandItem) => {
-    if (item.type === 'currentSheetId' || item.type === 'workbook') {
-      this.workbookManager.redo(item);
-      return;
-    } else if (item.type === 'rangeMap') {
-      this.rangeMapManager.redo(item);
-      return;
-    } else if (item.type === 'drawings') {
-      this.drawingsManager.redo(item);
-      return;
-    } else if (item.type === 'definedNames') {
-      this.definedNameManager.redo(item);
-      return;
-    } else if (item.type === 'worksheets') {
-      this.worksheetManager.redo(item);
-      return;
-    } else if (item.type === 'mergeCells') {
-      this.mergeCellManager.redo(item);
-      return;
-    } else if (item.type === 'customHeight') {
-      this.rowManager.redo(item);
-      return;
-    } else if (item.type === 'customWidth') {
-      this.colManager.redo(item);
-      return;
-    }
-    console.error(`not support redo type: ${item.type}`);
+    this.workbookManager.redo(item);
+    this.rangeMapManager.redo(item);
+    this.drawingsManager.redo(item);
+    this.definedNameManager.redo(item);
+    this.worksheetManager.redo(item);
+    this.mergeCellManager.redo(item);
+    this.rowManager.redo(item);
+    this.colManager.redo(item);
   };
   private historyUndo = (item: ICommandItem) => {
-    if (item.type === 'currentSheetId' || item.type === 'workbook') {
-      this.workbookManager.undo(item);
-      return;
-    } else if (item.type === 'rangeMap') {
-      this.rangeMapManager.undo(item);
-      return;
-    } else if (item.type === 'drawings') {
-      this.drawingsManager.undo(item);
-      return;
-    } else if (item.type === 'definedNames') {
-      this.definedNameManager.undo(item);
-      return;
-    } else if (item.type === 'worksheets') {
-      this.worksheetManager.undo(item);
-      return;
-    } else if (item.type === 'mergeCells') {
-      this.mergeCellManager.undo(item);
-      return;
-    } else if (item.type === 'customHeight') {
-      this.rowManager.undo(item);
-      return;
-    } else if (item.type === 'customWidth') {
-      this.colManager.undo(item);
-      return;
-    }
-    console.error(`not support undo type: ${item.type}`);
+    this.workbookManager.undo(item);
+    this.rangeMapManager.undo(item);
+    this.drawingsManager.undo(item);
+    this.definedNameManager.undo(item);
+    this.worksheetManager.undo(item);
+    this.mergeCellManager.undo(item);
+    this.rowManager.undo(item);
+    this.colManager.undo(item);
   };
   private computeViewSize() {
     const headerSize = headerSizeSet.get();

@@ -20,7 +20,8 @@ export class DefinedName implements IDefinedName {
     };
   }
   fromJSON(json: WorkBookJSON): void {
-    this.definedNames = { ...(json.definedNames || {}) };
+    const data = json.definedNames || {};
+    this.definedNames = { ...data };
   }
   undo(item: ICommandItem): void {
     if (item.type === 'definedNames') {

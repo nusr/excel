@@ -32,7 +32,8 @@ export class Worksheet implements IWorksheet {
     };
   }
   fromJSON(json: WorkBookJSON): void {
-    this.worksheets = { ...(json.worksheets || {}) };
+    const data = json.worksheets || {};
+    this.worksheets = { ...data };
   }
   undo(item: ICommandItem): void {
     if (item.type === 'worksheets') {

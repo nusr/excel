@@ -21,7 +21,8 @@ export class Drawing implements IDrawings {
     };
   }
   fromJSON(json: WorkBookJSON): void {
-    this.drawings = { ...(json.drawings || {}) };
+    const data = json.drawings || {};
+    this.drawings = { ...data };
   }
   undo(item: ICommandItem): void {
     if (item.type === 'drawings') {

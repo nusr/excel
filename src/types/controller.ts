@@ -36,19 +36,20 @@ export type ActiveRange = {
 };
 
 export interface IController extends IBaseModel {
-  setNextActiveCell: (direction: 'left' | 'right' | 'down' | 'up') => IRange;
-  getActiveRange: () => ActiveRange;
-  getCellSize: (range: IRange) => IWindowSize;
-  computeCellPosition: (range: IRange) => IPosition;
-  paste: (event?: ClipboardEvent) => void;
-  copy: (event?: ClipboardEvent) => void;
-  cut: (event?: ClipboardEvent) => void;
-  getCopyRanges: () => IRange[];
-  getDomRect: () => CanvasOverlayPosition;
-  setMainDom: (dom: MainDom) => void;
-  getMainDom: () => MainDom;
-  setScroll: (scroll: ScrollValue) => void;
-  getScroll: (sheetId?: string) => ScrollValue;
-  setFloatElementUuid: (uuid: string) => void;
-  batchUpdate: (fn: ()=> void) => void;
+  emitChange(): void;
+  setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up'): IRange;
+  getActiveRange(): ActiveRange;
+  getCellSize(range: IRange): IWindowSize;
+  computeCellPosition(range: IRange): IPosition;
+  paste(event?: ClipboardEvent): void;
+  copy(event?: ClipboardEvent): void;
+  cut(event?: ClipboardEvent): void;
+  getCopyRanges(): IRange[];
+  getDomRect(): CanvasOverlayPosition;
+  setMainDom(dom: MainDom): void;
+  getMainDom(): MainDom;
+  setScroll(scroll: ScrollValue): void;
+  getScroll(sheetId?: string): ScrollValue;
+  setFloatElementUuid(uuid: string): void;
+  batchUpdate: (fn: () => void, isEmit?: boolean) => void;
 }

@@ -20,7 +20,8 @@ export class ColManager implements ICol {
     };
   }
   fromJSON(json: WorkBookJSON): void {
-    this.customWidth = { ...(json.customWidth || {}) };
+    const data = json.customWidth || {};
+    this.customWidth = { ...data };
   }
   undo(item: ICommandItem): void {
     if (item.type === 'customWidth') {

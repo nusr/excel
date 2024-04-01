@@ -84,7 +84,7 @@ export class MainCanvas {
     this.isRendering = false;
     if (check) {
       canvasLog('render again');
-      this.render({ changeSet: new Set(['row']) });
+      this.controller.emitChange();
     }
   };
 

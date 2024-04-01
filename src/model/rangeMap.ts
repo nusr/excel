@@ -14,7 +14,8 @@ export class RangeMap implements IRangeMap {
     };
   }
   fromJSON(json: WorkBookJSON): void {
-    this.rangeMap = { ...(json.rangeMap || {}) };
+    const data = json.rangeMap || {};
+    this.rangeMap = { ...data };
   }
   undo(item: ICommandItem): void {
     if (item.type === 'rangeMap') {

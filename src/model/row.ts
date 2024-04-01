@@ -20,16 +20,17 @@ export class RowManager implements IRow {
     };
   }
   fromJSON(json: WorkBookJSON): void {
-    this.customHeight = { ...(json.customHeight || {}) };
+    const data = json.customHeight || {};
+    this.customHeight = { ...data };
   }
   undo(item: ICommandItem): void {
     if (item.type === 'customHeight') {
-      transformData(this, item, 'undo')
+      transformData(this, item, 'undo');
     }
   }
   redo(item: ICommandItem): void {
     if (item.type === 'customHeight') {
-      transformData(this, item, 'redo')
+      transformData(this, item, 'redo');
     }
   }
   addRow(rowIndex: number, count: number): void {

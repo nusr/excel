@@ -78,14 +78,14 @@ export class History implements IHistory {
         v.type !== 'scroll' && v.type !== 'antLine' && v.type !== 'rangeMap',
     );
     if (list.length === 0) {
-      this.change(this.commands, 'commit');
+      this.change(this.commands.slice(), 'commit');
       this.commands = [];
       return;
     }
 
     this.position++;
 
-    this.commandList[this.position] = list;
+    this.commandList[this.position] = [...list];
     for (let i = this.position + 1; i < this.commandList.length; i++) {
       this.commandList[i] = [];
     }
@@ -104,7 +104,7 @@ export class History implements IHistory {
       }
     }
 
-    this.change(this.commands, 'commit');
+    this.change(this.commands.slice(), 'commit');
     this.commands = [];
   }
   redo(): void {

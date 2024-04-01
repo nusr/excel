@@ -21,7 +21,8 @@ export class MergeCell implements IMergeCell {
     };
   }
   fromJSON(json: WorkBookJSON): void {
-    this.mergeCells = { ...(json.mergeCells || {}) };
+    const data = json.mergeCells || {};
+    this.mergeCells = { ...data };
   }
   undo(item: ICommandItem): void {
     if (item.type === 'mergeCells') {
