@@ -62,7 +62,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
       });
     };
     const handleTabColorChange = (color: string) => {
-      controller.setTabColor(color);
+      controller.updateSheetInfo({ tabColor: color });
       hideMenu();
     };
     return (

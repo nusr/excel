@@ -1,6 +1,7 @@
 import { ResultType } from './parser';
 import { IRange } from './range';
 import type { ChartType } from 'chart.js';
+import type { ICommandItem } from './history';
 
 export enum EVerticalAlign {
   TOP,
@@ -125,58 +126,149 @@ export type WorkBookJSON = {
   rangeMap: Record<string, IRange>; // key: sheetId
 };
 
-export interface IModel extends IBaseModel {
-  pasteRange: (range: IRange, isCut: boolean) => IRange;
-  emitChange: (dataset: Set<ChangeEventType>) => void;
-}
 export type DefinedNameItem = { range: IRange; name: string };
 
-export interface IBaseModel {
-  getCell: (range: IRange) => ModelCellValue | null;
-  getColWidth: (col: number, sheetId?: string) => CustomItem;
-  setColWidth: (col: number, width: number, sheetId?: string) => void;
-  getRowHeight: (row: number, sheetId?: string) => CustomItem;
-  setRowHeight: (row: number, height: number, sheetId?: string) => void;
-  setCellValues: (
+export interface IBaseManager {
+  fromJSON(json: WorkBookJSON): void;
+  undo(item: ICommandItem): void;
+  redo(item: ICommandItem): void;
+  deleteAll(sheetId?: string): void;
+}
+
+export interface IWorkbook extends IBaseManager {
+  toJSON(): Pick<WorkBookJSON, 'currentSheetId' | 'workbook'>;
+  setCurrentSheetId(id: string): void;
+  getCurrentSheetId(): string;
+  addSheet(): WorksheetType;
+  deleteSheet(sheetId?: string): void;
+  hideSheet(sheetId?: string): void;
+  unhideSheet(sheetId?: string): void;
+  renameSheet(sheetName: string, sheetId?: string): void;
+  getSheetInfo(sheetId?: string): WorksheetType | undefined;
+  updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string): void;
+  getSheetList(): WorksheetType[];
+}
+
+export interface IRangeMap extends IBaseManager {
+  toJSON(): Pick<WorkBookJSON, 'rangeMap'>;
+  setActiveCell(range: IRange): void;
+  getActiveCell(): IRange;
+}
+
+export interface IDrawings extends IBaseManager {
+  toJSON(): Pick<WorkBookJSON, 'drawings'>;
+  getFloatElementList(sheetId?: string): FloatElement[];
+  addFloatElement(data: FloatElement): void;
+  updateFloatElement(uuid: string, value: Partial<FloatElement>): void;
+  deleteFloatElement(uuid: string): void;
+  deleteCol(colIndex: number, count: number): void;
+  deleteRow(rowIndex: number, count: number): void;
+}
+
+export interface IDefinedName extends IBaseManager {
+  toJSON(): Pick<WorkBookJSON, 'definedNames'>;
+  getDefineName(range: IRange): string;
+  setDefineName(range: IRange, name: string): void;
+  checkDefineName(name: string): IRange | undefined;
+  getDefineNameList(): DefinedNameItem[];
+}
+
+export interface IMergeCell extends IBaseManager {
+  toJSON(): Pick<WorkBookJSON, 'mergeCells'>;
+  getMergeCells(sheetId?: string): IRange[];
+  addMergeCell(range: IRange): void;
+  deleteMergeCell(range: IRange): void;
+}
+
+export interface IRow extends IBaseManager {
+  toJSON(): Pick<WorkBookJSON, 'customHeight'>;
+  addRow(rowIndex: number, count: number): void;
+  deleteRow(rowIndex: number, count: number): void;
+  hideRow(rowIndex: number, count: number): void;
+  getRowHeight(row: number, sheetId?: string): CustomItem;
+  setRowHeight(row: number, height: number, sheetId?: string): void;
+}
+
+export interface ICol extends IBaseManager {
+  toJSON(): Pick<WorkBookJSON, 'customWidth'>;
+  addCol(colIndex: number, count: number): void;
+  deleteCol(colIndex: number, count: number): void;
+  hideCol(colIndex: number, count: number): void;
+  getColWidth(col: number, sheetId?: string): CustomItem;
+  setColWidth(col: number, width: number, sheetId?: string): void;
+}
+export interface IWorksheet extends IBaseManager {
+  toJSON(): Pick<WorkBookJSON, 'worksheets'>;
+  pasteRange(fromRange: IRange, isCut: boolean): IRange;
+  getWorksheet(sheetId?: string): WorksheetData | undefined;
+  setWorksheet(data: WorksheetData, sheetId?: string): void;
+  getCell(range: IRange): ModelCellValue | null;
+  setCellValues(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
     ranges: IRange[],
-  ) => void;
-  setActiveCell: (range: IRange) => void;
-  getActiveCell: () => IRange;
-  setCurrentSheetId: (id: string) => void;
-  getCurrentSheetId: () => string;
-  addSheet: () => void;
-  setTabColor: (color: string, sheetId?: string) => void;
-  deleteSheet: (sheetId?: string) => void;
-  hideSheet: (sheetId?: string) => void;
-  unhideSheet: (sheetId?: string) => void;
-  renameSheet: (sheetName: string, sheetId?: string) => void;
-  toJSON: () => WorkBookJSON;
-  fromJSON: (json: WorkBookJSON) => void;
-  updateCellStyle: (style: Partial<StyleType>, ranges: IRange[]) => void;
-  getSheetInfo: (sheetId: string) => WorksheetType | undefined;
-  getSheetList: () => WorksheetType[];
-  addRow: (rowIndex: number, count: number) => void;
-  addCol: (colIndex: number, count: number) => void;
-  deleteCol: (colIndex: number, count: number) => void;
-  deleteRow: (rowIndex: number, count: number) => void;
-  hideRow: (rowIndex: number, count: number) => void;
-  hideCol: (colIndex: number, count: number) => void;
-  canRedo: () => boolean;
-  canUndo: () => boolean;
-  undo: () => void;
-  redo: () => void;
-  deleteAll: (sheetId?: string) => void;
-  getDefineName: (range: IRange) => string;
-  setDefineName: (range: IRange, name: string) => void;
-  checkDefineName: (name: string) => IRange | undefined;
-  getDefineNameList: () => DefinedNameItem[];
-  getFloatElementList: (sheetId: string) => FloatElement[];
-  addFloatElement: (data: FloatElement) => void;
-  updateFloatElement(uuid: string, value: Partial<FloatElement>): void;
-  deleteFloatElement: (uuid: string) => void;
-  getMergeCells: (sheetId?: string) => IRange[];
-  addMergeCell: (range: IRange) => void;
-  deleteMergeCell: (range: IRange) => void;
+  ): void;
+  updateCellStyle(style: Partial<StyleType>, ranges: IRange[]): void;
+  computeFormulas(): void;
+}
+
+export interface IModel extends IBaseModel {
+  pasteRange: (range: IRange, isCut: boolean) => IRange;
+  emitChange: (dataset: Set<ChangeEventType>) => void;
+  push(command: ICommandItem): void;
+  iterateRange(range: IRange, fn: (row: number, col: number) => boolean): void;
+}
+export interface IBaseModel
+  extends Pick<
+      IWorkbook,
+      | 'setCurrentSheetId'
+      | 'getCurrentSheetId'
+      | 'addSheet'
+      | 'deleteSheet'
+      | 'hideSheet'
+      | 'unhideSheet'
+      | 'renameSheet'
+      | 'getSheetInfo'
+      | 'updateSheetInfo'
+      | 'getSheetList'
+      | 'deleteAll'
+      | 'fromJSON'
+    >,
+    Pick<IRangeMap, 'setActiveCell' | 'getActiveCell'>,
+    Pick<
+      IDrawings,
+      | 'getFloatElementList'
+      | 'addFloatElement'
+      | 'updateFloatElement'
+      | 'deleteFloatElement'
+    >,
+    Pick<
+      IDefinedName,
+      | 'getDefineName'
+      | 'setDefineName'
+      | 'checkDefineName'
+      | 'getDefineNameList'
+    >,
+    Pick<IMergeCell, 'getMergeCells' | 'addMergeCell' | 'deleteMergeCell'>,
+    Pick<
+      IRow,
+      'addRow' | 'deleteRow' | 'hideRow' | 'getRowHeight' | 'setRowHeight'
+    >,
+    Pick<
+      ICol,
+      'addCol' | 'deleteCol' | 'hideCol' | 'getColWidth' | 'setColWidth'
+    >,
+    Pick<
+      IWorksheet,
+      | 'getCell'
+      | 'setCellValues'
+      | 'updateCellStyle'
+      | 'getWorksheet'
+      | 'setWorksheet'
+    > {
+  toJSON(): WorkBookJSON;
+  canRedo(): boolean;
+  canUndo(): boolean;
+  undo(): void;
+  redo(): void;
 }

@@ -158,20 +158,20 @@ export function isMobile() {
 export function modelToChangeSet(list: ICommandItem[]) {
   const result = new Set<ChangeEventType>();
   for (const item of list) {
-    const type = item.t;
+    const type = item.type;
     result.add(type);
     if (type === 'worksheets') {
-      if (item.k.includes('value') || item.k.includes('formula')) {
+      if (item.key.includes('value') || item.key.includes('formula')) {
         result.add('cellValue');
       }
-      if (item.k.includes('style')) {
+      if (item.key.includes('style')) {
         result.add('cellStyle');
       }
     } else if (type === 'workbook') {
-      if (item.k.includes('rowCount')) {
+      if (item.key.includes('rowCount')) {
         result.add('row');
       }
-      if (item.k.includes('colCount')) {
+      if (item.key.includes('colCount')) {
         result.add('col');
       }
     } else if (type === 'customHeight') {

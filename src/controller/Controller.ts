@@ -17,6 +17,7 @@ import {
   FloatElement,
   IPosition,
   DefinedNameItem,
+  WorksheetData,
 } from '@/types';
 import {
   Range,
@@ -63,7 +64,7 @@ export class Controller implements IController {
   getSheetList(): WorksheetType[] {
     return this.model.getSheetList();
   }
-  getSheetInfo(sheetId: string) {
+  getSheetInfo(sheetId?: string) {
     return this.model.getSheetInfo(sheetId);
   }
   batchUpdate(fn: () => void): void {
@@ -251,8 +252,14 @@ export class Controller implements IController {
 
     this.setScroll(this.getScroll());
   }
-  addSheet = (): void => {
-    this.model.addSheet();
+  getWorksheet(sheetId?: string | undefined): WorksheetData | undefined {
+    return this.model.getWorksheet(sheetId);
+  }
+  setWorksheet(data: WorksheetData, sheetId?: string | undefined): void {
+    this.model.setWorksheet(data, sheetId);
+  }
+  addSheet() {
+    const result = this.model.addSheet();
     this.setScroll({
       top: 0,
       left: 0,
@@ -261,13 +268,14 @@ export class Controller implements IController {
       scrollLeft: 0,
       scrollTop: 0,
     });
-  };
+    return result;
+  }
   deleteSheet = (sheetId?: string): void => {
     this.model.deleteSheet(sheetId);
     this.emitChange();
   };
-  setTabColor(color: string, sheetId?: string) {
-    this.model.setTabColor(color, sheetId);
+  updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string): void {
+    this.model.updateSheetInfo(data, sheetId);
     this.emitChange();
   }
   hideSheet(sheetId?: string | undefined): void {

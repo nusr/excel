@@ -1,20 +1,52 @@
 import { IHistory, ICommandItem } from '@/types';
+import { noop } from '@/util';
 
-type ChangeType = 'undoRedo' | 'commit';
+export type HistoryChangeType = 'undoRedo' | 'commit';
 
 type Options = {
-  change: (list: ICommandItem[], type: ChangeType) => void;
+  change: (list: ICommandItem[], type: HistoryChangeType) => void;
   maxLength: number;
   redo: (item: ICommandItem) => void;
   undo: (item: ICommandItem) => void;
 };
 
-const noop = () => {};
+export const DELETE_FLAG = Symbol('delete');
+
+export function transformData(
+  obj: Record<string, any>,
+  item: ICommandItem,
+  type: 'undo' | 'redo',
+) {
+  const key = item.type + (item.key ? '.' + item.key : '');
+  if (type === 'undo') {
+    setData(obj, key, item.oldValue);
+  } else {
+    setData(obj, key, item.newValue);
+  }
+}
+
+function setData(obj: Record<string, any>, key: string, value: any): void {
+  if (!obj || typeof obj !== 'object') {
+    return;
+  }
+  const keyList = key.split('.');
+  keyList.reduce((res, key, index, arr) => {
+    if (index === arr.length - 1) {
+      if (value === DELETE_FLAG) {
+        delete res[key];
+      } else {
+        res[key] = value;
+      }
+    } else if (res[key] === null || res[key] === undefined) {
+      res[key] = {};
+    }
+    return res[key];
+  }, obj);
+}
 export class History implements IHistory {
   private position = -1;
   private commandList: ICommandItem[][] = [];
   private commands: ICommandItem[] = [];
-  private isNoChange = false;
   private options: Options = {
     change: noop,
     maxLength: 100,
@@ -34,18 +66,16 @@ export class History implements IHistory {
       this.options.undo = options.undo;
     }
   }
-  push(...commands: ICommandItem[]) {
-    if (commands.length === 0) {
-      return;
-    }
-    this.commands = this.commands.concat(commands);
+  push(command: ICommandItem) {
+    this.commands.push(command);
   }
   commit() {
-    if (this.isNoChange || this.commands.length === 0) {
+    if (this.commands.length === 0) {
       return;
     }
     const list = this.commands.filter(
-      (v) => v.t !== 'scroll' && v.t !== 'antLine' && v.t !== 'rangeMap',
+      (v) =>
+        v.type !== 'scroll' && v.type !== 'antLine' && v.type !== 'rangeMap',
     );
     if (list.length === 0) {
       this.change(this.commands, 'commit');
@@ -127,7 +157,7 @@ export class History implements IHistory {
     }
     this.commands = [];
   }
-  private change(_list: ICommandItem[], type: ChangeType) {
+  private change(_list: ICommandItem[], type: HistoryChangeType) {
     this.options.change(_list, type);
   }
   get(): ICommandItem[] {
