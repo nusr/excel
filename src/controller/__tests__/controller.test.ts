@@ -96,4 +96,65 @@ describe('controller.test.ts', () => {
       expect(size).toEqual({ left: 0, top: 0, width: 0, height: 0 });
     });
   });
+  describe('deleteAll', () => {
+    test('normal', () => {
+      controller.setDefineName(
+        { row: 0, col: 0, sheetId: '', rowCount: 1, colCount: 1 },
+        'foo',
+      );
+      controller.setCell([[1]], [[{ isBold: true }]], {
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      controller.addMergeCell({
+        row: 20,
+        col: 20,
+        rowCount: 3,
+        colCount: 3,
+        sheetId: '',
+      });
+      controller.setColWidth(40, 100);
+      controller.setRowHeight(40, 200);
+      controller.addDrawing({
+        width: 400,
+        height: 300,
+        originHeight: 300,
+        originWidth: 400,
+        title: 'chart',
+        type: 'chart',
+        uuid: 'test',
+        sheetId: controller.getCurrentSheetId(),
+        fromRow: 10,
+        fromCol: 10,
+        chartRange: {
+          row: 0,
+          col: 0,
+          rowCount: 4,
+          colCount: 4,
+          sheetId: controller.getCurrentSheetId(),
+        },
+        chartType: 'line',
+        marginX: 0,
+        marginY: 0,
+      });
+      controller.deleteAll();
+      expect(controller.checkDefineName('foo')).toBeNull();
+      expect(controller.getDrawingList()).toHaveLength(0);
+      expect(controller.getColWidth(40).len).not.toEqual(100);
+      expect(controller.getRowHeight(40).len).not.toEqual(200);
+      expect(controller.getMergeCellList()).toHaveLength(0);
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          sheetId: '',
+          rowCount: 1,
+          colCount: 1,
+        }),
+      ).toBeNull();
+    });
+  });
 });

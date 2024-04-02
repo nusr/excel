@@ -144,7 +144,7 @@ export interface IWorkbook extends IBaseManager {
   hideSheet(sheetId?: string): void;
   unhideSheet(sheetId?: string): void;
   renameSheet(sheetName: string, sheetId?: string): void;
-  getSheetInfo(sheetId?: string): WorksheetType | undefined;
+  getSheetInfo(sheetId?: string): WorksheetType | null;
   updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string): void;
   getSheetList(): WorksheetType[];
 }
@@ -171,7 +171,7 @@ export interface IDefinedName extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'definedNames'>;
   getDefineName(range: IRange): string;
   setDefineName(range: IRange, name: string): void;
-  checkDefineName(name: string): IRange | undefined;
+  checkDefineName(name: string): IRange | null;
   getDefineNameList(): DefinedNameItem[];
 }
 
@@ -202,7 +202,7 @@ export interface IWorksheet extends IBaseManager {
   deleteCol(colIndex: number, count: number): void;
   deleteRow(rowIndex: number, count: number): void;
   pasteRange(fromRange: IRange, isCut: boolean): IRange;
-  getWorksheet(sheetId?: string): WorksheetData | undefined;
+  getWorksheet(sheetId?: string): WorksheetData | null;
   setWorksheet(data: WorksheetData, sheetId?: string): void;
   getCell(range: IRange): ModelCellValue | null;
   setCell(

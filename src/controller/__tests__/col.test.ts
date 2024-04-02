@@ -390,6 +390,15 @@ describe('col.test.ts', () => {
           sheetId: '',
         })?.value,
       ).toEqual(12);
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 2,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: '',
+        })?.value,
+      ).toBeUndefined();
     });
     test('deleteCol addDrawing', () => {
       controller.setCell(

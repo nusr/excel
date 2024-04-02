@@ -59,7 +59,7 @@ export class Worksheet implements IWorksheet {
     const endIndex = isAbove ? rowIndex : rowIndex + 1;
     for (let i = list.length - 1; i >= 0; i--) {
       const item = list[i];
-      if (item.row <= endIndex) {
+      if (item.row < endIndex) {
         continue;
       }
       const key = coordinateToString(item.row, item.col);
@@ -210,9 +210,13 @@ export class Worksheet implements IWorksheet {
       });
     }
   }
-  getWorksheet(sheetId?: string | undefined): WorksheetData | undefined {
+  getWorksheet(sheetId?: string): WorksheetData | null {
     const id = sheetId || this.model.getCurrentSheetId();
-    return this.worksheets[id];
+    const item = this.worksheets[id];
+    if (item) {
+      return item;
+    }
+    return null;
   }
   computeFormulas() {
     const id = this.model.getCurrentSheetId();
@@ -245,7 +249,7 @@ export class Worksheet implements IWorksheet {
     }
     const oldData = this.worksheets[id]
       ? { ...this.worksheets[id] }
-      : undefined;
+      : null;
     this.worksheets[id] = data;
     this.model.push({
       type: 'worksheets',
@@ -399,7 +403,6 @@ export class Worksheet implements IWorksheet {
       const oldValue = sheetData[key]?.style?.[k];
 
       const newValue = style[k];
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       sheetData[key].style[k] = newValue;
 

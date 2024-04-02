@@ -87,7 +87,6 @@ export class Drawing implements IDrawings {
     for (const key of keyList) {
       if (item[key] !== value[key]) {
         const oldValue = item[key];
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         item[key] = value[key];
         this.model.push({

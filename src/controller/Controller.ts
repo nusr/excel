@@ -130,7 +130,6 @@ export class Controller implements IController {
     };
     if (direction === 'left') {
       startCol--;
-      // eslint-disable-next-line no-constant-condition
       while (1) {
         let check1 = false;
         let check2 = false;
@@ -157,7 +156,6 @@ export class Controller implements IController {
     }
     if (direction === 'right') {
       startCol++;
-      // eslint-disable-next-line no-constant-condition
       while (1) {
         let check1 = false;
         let check2 = false;
@@ -187,7 +185,6 @@ export class Controller implements IController {
     }
     if (direction === 'up') {
       startRow--;
-      // eslint-disable-next-line no-constant-condition
       while (1) {
         let check1 = false;
         let check2 = false;
@@ -214,7 +211,6 @@ export class Controller implements IController {
     }
     if (direction === 'down') {
       startRow++;
-      // eslint-disable-next-line no-constant-condition
       while (1) {
         let check1 = false;
         let check2 = false;
@@ -255,10 +251,10 @@ export class Controller implements IController {
 
     this.setScroll(this.getScroll());
   }
-  getWorksheet(sheetId?: string | undefined): WorksheetData | undefined {
+  getWorksheet(sheetId?: string): WorksheetData | null {
     return this.model.getWorksheet(sheetId);
   }
-  setWorksheet(data: WorksheetData, sheetId?: string | undefined): void {
+  setWorksheet(data: WorksheetData, sheetId?: string): void {
     this.model.setWorksheet(data, sheetId);
   }
   addSheet() {
@@ -281,15 +277,15 @@ export class Controller implements IController {
     this.model.updateSheetInfo(data, sheetId);
     this.emitChange();
   }
-  hideSheet(sheetId?: string | undefined): void {
+  hideSheet(sheetId?: string): void {
     this.model.hideSheet(sheetId);
     this.emitChange();
   }
-  unhideSheet(sheetId?: string | undefined): void {
+  unhideSheet(sheetId?: string): void {
     this.model.unhideSheet(sheetId);
     this.emitChange();
   }
-  renameSheet(sheetName: string, sheetId?: string | undefined): void {
+  renameSheet(sheetName: string, sheetId?: string): void {
     this.model.renameSheet(sheetName, sheetId);
     this.emitChange();
   }
@@ -737,7 +733,7 @@ export class Controller implements IController {
 
     this.emitChange();
   }
-  checkDefineName(name: string): IRange | undefined {
+  checkDefineName(name: string): IRange | null {
     return this.model.checkDefineName(name);
   }
   getDrawingList(sheetId?: string): DrawingElement[] {

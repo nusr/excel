@@ -39,26 +39,32 @@ export class Workbook implements IWorkbook {
   }
   undo(item: ICommandItem): void {
     if (item.type === 'currentSheetId') {
-      if (!this.workbook[item.oldValue] || this.workbook[item.oldValue].isHide) {
+      if (
+        !this.workbook[item.oldValue] ||
+        this.workbook[item.oldValue].isHide
+      ) {
         this.currentSheetId = this.getSheetId();
       } else {
         this.currentSheetId = item.oldValue;
       }
       return;
     } else if (item.type === 'workbook') {
-      transformData(this, item, 'undo')
+      transformData(this, item, 'undo');
     }
   }
   redo(item: ICommandItem): void {
     if (item.type === 'currentSheetId') {
-      if (!this.workbook[item.newValue] || this.workbook[item.newValue].isHide) {
+      if (
+        !this.workbook[item.newValue] ||
+        this.workbook[item.newValue].isHide
+      ) {
         this.currentSheetId = this.getSheetId();
       } else {
         this.currentSheetId = item.newValue;
       }
       return;
     } else if (item.type === 'workbook') {
-      transformData(this, item, 'redo')
+      transformData(this, item, 'redo');
     }
   }
   updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string) {
@@ -133,7 +139,7 @@ export class Workbook implements IWorkbook {
       oldValue: oldSheet,
     });
   }
-  hideSheet(sheetId?: string | undefined): void {
+  hideSheet(sheetId?: string): void {
     const sheetList = this.getSheetList();
     const list = sheetList.filter((v) => !v.isHide);
     assert(
@@ -142,11 +148,11 @@ export class Workbook implements IWorkbook {
     );
     this.updateSheetInfo({ isHide: true }, sheetId);
   }
-  unhideSheet(sheetId?: string | undefined): void {
+  unhideSheet(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
     this.updateSheetInfo({ isHide: true }, id);
   }
-  renameSheet(sheetName: string, sheetId?: string | undefined): void {
+  renameSheet(sheetName: string, sheetId?: string): void {
     assert(!!sheetName, $('the-value-cannot-be-empty'));
     const sheetList = this.getSheetList();
     const item = sheetList.find((v) => v.name === sheetName);
@@ -158,11 +164,11 @@ export class Workbook implements IWorkbook {
     }
     this.updateSheetInfo({ name: sheetName }, sheetId);
   }
-  getSheetInfo(id?: string): WorksheetType | undefined {
+  getSheetInfo(id?: string): WorksheetType | null {
     const sheetId = id || this.currentSheetId;
     const item = this.workbook[sheetId];
     if (!item) {
-      return undefined;
+      return null;
     }
     if (item) {
       item.sheetId = sheetId;

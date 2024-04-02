@@ -99,7 +99,7 @@ export class DefinedNamesMapImpl implements DefinedNamesMap {
   set(name: string, value: IRange): void {
     this.map.set(name, value);
   }
-  get(name: string): IRange | undefined {
+  get(name: string): IRange | null {
     return this.map.get(name)!;
   }
   has(name: string): boolean {

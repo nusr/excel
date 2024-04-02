@@ -60,7 +60,7 @@ function getChartData(
         colCount: 1,
         sheetId,
       });
-      if (!t || typeof t.value === 'undefined') {
+      if (!t) {
         continue;
       }
       list.push(parseNumber(t.value));

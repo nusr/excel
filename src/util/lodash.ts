@@ -1,21 +1,5 @@
 type Params = any[];
-export const debounce = (
-  fn: (...params: Params) => void,
-  wait: number = 500,
-) => {
-  let timer: ReturnType<typeof setTimeout> | null = null;
-  return function (...rest: Params) {
-    if (timer) {
-      clearTimeout(timer);
-    }
-    timer = setTimeout(() => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      fn.apply(this, rest);
-      timer = null;
-    }, wait);
-  };
-};
+
 export function throttle(fn: (...params: Params) => void, wait: number = 500) {
   let check = false;
   let lastArgs: Params | null = null;
@@ -23,12 +7,10 @@ export function throttle(fn: (...params: Params) => void, wait: number = 500) {
     if (check) {
       lastArgs = args;
     } else {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       fn.apply(this, args);
       setTimeout(() => {
         if (lastArgs) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           fn.apply(this, lastArgs);
         }
@@ -106,13 +88,6 @@ export function deepEqual(x: any, y: any) {
     return true;
   }
   return false;
-}
-
-export function camelCase(str: string) {
-  const a = str
-    .toLowerCase()
-    .replace(/[-_\s.]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''));
-  return a.substring(0, 1).toLowerCase() + a.substring(1);
 }
 
 export function noop() {}
