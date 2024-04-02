@@ -54,5 +54,9 @@
   "uuid-is-duplicate": "The uuid is duplicate",
   "cells-must-contain-data": "The selected cells must contain the data",
   "image-source-is-empty": "The image source is empty",
-  "merging-cell-is-duplicate": "The merging cell is duplicate"
+  "merging-cell-is-duplicate": "The merging cell is duplicate",
+  "insert-column-left": "Insert Column Left",
+  "insert-column-right": "Insert Column Right",
+  "insert-row-above": "Insert Row Above",
+  "insert-row-below": "Insert Row Below"
 }

@@ -64,7 +64,7 @@ export class MainCanvas {
       return;
     }
     this.isRendering = true;
-    const check = this.content.render(params);
+    this.content.render(params);
     this.clear();
 
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
@@ -82,16 +82,13 @@ export class MainCanvas {
 
     this.renderMergeCell();
     this.isRendering = false;
-    if (check) {
-      canvasLog('render again');
-      this.controller.emitChange();
-    }
+    this.content.check();
   };
 
   private renderMergeCell() {
     const { controller } = this;
     const range = controller.getActiveCell();
-    const mergeCells = controller.getMergeCells(controller.getCurrentSheetId());
+    const mergeCells = controller.getMergeCellList(controller.getCurrentSheetId());
     if (mergeCells.length === 0) {
       return;
     }
@@ -224,7 +221,7 @@ export class MainCanvas {
     const { rowCount } = controller.getSheetInfo(
       controller.getCurrentSheetId(),
     )!;
-    const mergeCells = controller.getMergeCells(controller.getCurrentSheetId());
+    const mergeCells = controller.getMergeCellList(controller.getCurrentSheetId());
     this.ctx.save();
     const range = this.controller.getActiveCell();
     this.ctx.fillStyle = getThemeColor('white');
@@ -270,7 +267,7 @@ export class MainCanvas {
     const { colCount } = controller.getSheetInfo(
       controller.getCurrentSheetId(),
     )!;
-    const mergeCells = controller.getMergeCells(controller.getCurrentSheetId());
+    const mergeCells = controller.getMergeCellList(controller.getCurrentSheetId());
     const range = this.controller.getActiveCell();
     const pointList: Point[] = [];
     this.ctx.save();

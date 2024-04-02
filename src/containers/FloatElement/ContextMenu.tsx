@@ -123,7 +123,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             toast({ type: 'error', message: $('reference-is-not-valid') });
             return;
           }
-          controller.updateFloatElement(uuid, { chartRange: range });
+          controller.updateDrawing(uuid, { chartRange: range });
           hideContextMenu();
         },
         onCancel: () => {
@@ -157,7 +157,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             toast({ type: 'error', message: $('the-value-cannot-be-empty') });
             return;
           }
-          controller.updateFloatElement(uuid, { title: realValue });
+          controller.updateDrawing(uuid, { title: realValue });
           hideContextMenu();
         },
         onCancel: () => {
@@ -183,14 +183,14 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           hideContextMenu();
         },
         onOk() {
-          controller.updateFloatElement(uuid, { chartType: newChartType });
+          controller.updateDrawing(uuid, { chartType: newChartType });
           hideContextMenu();
         },
       });
     };
     const saveAsPicture = () => {
       hideContextMenu();
-      const list = controller.getFloatElementList(
+      const list = controller.getDrawingList(
         controller.getCurrentSheetId(),
       );
       const item = list.find((v) => v.uuid === uuid);
@@ -290,7 +290,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           testId="float-element-context-reset-size"
           onClick={() => {
             hideContextMenu();
-            controller.updateFloatElement(uuid, {
+            controller.updateDrawing(uuid, {
               height: originHeight,
               width: originWidth,
             });
@@ -303,7 +303,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           testId="float-element-context-menu-delete"
           onClick={() => {
             hideContextMenu();
-            controller.deleteFloatElement(uuid);
+            controller.deleteDrawing(uuid);
           }}
         >
           {$('delete')}

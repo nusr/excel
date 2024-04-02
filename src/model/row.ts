@@ -1,11 +1,5 @@
 import { WorkBookJSON, ICommandItem, IRow, CustomItem, IModel } from '@/types';
-import {
-  coordinateToString,
-  stringToCoordinate,
-  getCustomWidthOrHeightKey,
-  CELL_HEIGHT,
-  HIDE_CELL,
-} from '@/util';
+import { getCustomWidthOrHeightKey, CELL_HEIGHT, HIDE_CELL } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 
 export class RowManager implements IRow {
@@ -31,82 +25,6 @@ export class RowManager implements IRow {
   redo(item: ICommandItem): void {
     if (item.type === 'customHeight') {
       transformData(this, item, 'redo');
-    }
-  }
-  addRow(rowIndex: number, count: number): void {
-    const id = this.model.getCurrentSheetId();
-    const sheetData = this.model.getWorksheet();
-    if (!sheetData) {
-      return;
-    }
-    const list = Array.from(Object.keys(sheetData)).map((key) =>
-      stringToCoordinate(key),
-    );
-    list.sort((a, b) => a.row - b.row);
-    for (let i = list.length - 1; i >= 0; i--) {
-      const item = list[i];
-      if (item.row <= rowIndex) {
-        break;
-      }
-      const key = coordinateToString(item.row, item.col);
-      const newKey = coordinateToString(item.row + count, item.col);
-
-      const newValue = sheetData[key] ? { ...sheetData[key] } : {};
-      const oldData = sheetData[newKey] ? { ...sheetData[newKey] } : {};
-      delete sheetData[key];
-      this.model.push({
-        type: 'worksheets',
-        key: `${id}.${key}`,
-        newValue: DELETE_FLAG,
-        oldValue: newValue,
-      });
-      sheetData[newKey] = { ...newValue };
-      this.model.push({
-        type: 'worksheets',
-        key: `${id}.${newKey}`,
-        newValue: newValue,
-        oldValue: oldData,
-      });
-    }
-  }
-  deleteRow(rowIndex: number, count: number): void {
-    const id = this.model.getCurrentSheetId();
-    const sheetData = this.model.getWorksheet();
-    if (!sheetData) {
-      return;
-    }
-
-    const list = Array.from(Object.keys(sheetData)).map((key) =>
-      stringToCoordinate(key),
-    );
-    list.sort((a, b) => a.row - b.row);
-    for (let i = 0; i < list.length; i++) {
-      const item = list[i];
-      if (item.row < rowIndex) {
-        continue;
-      }
-      const key = coordinateToString(item.row, item.col);
-      const newValue = sheetData[key] ? { ...sheetData[key] } : {};
-      if (item.row >= rowIndex + count) {
-        const newKey = coordinateToString(item.row - count, item.col);
-        const oldValue = sheetData[newKey] ? { ...sheetData[newKey] } : {};
-
-        sheetData[newKey] = { ...newValue };
-        this.model.push({
-          type: 'worksheets',
-          key: `${id}.${newKey}`,
-          newValue: newValue,
-          oldValue: oldValue,
-        });
-      }
-
-      delete sheetData[key];
-      this.model.push({
-        type: 'worksheets',
-        key: `${id}.${key}`,
-        newValue: DELETE_FLAG,
-        oldValue: newValue,
-      });
     }
   }
   hideRow(rowIndex: number, count: number): void {

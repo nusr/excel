@@ -125,35 +125,38 @@ const MOCK_MODEL: WorkBookJSON = {
 
       '1_0': {
         formula: '=SUM(F:F)',
+        value: '',
       },
       '1_5': {
         value: '5',
       },
       '3_0': {
+        value: '',
         style: {
           fillColor: 'red',
         },
       },
       '3_1': {
+        value: '',
         style: {
           fillColor: 'red',
         },
       },
       '4_0': {
+        value: '',
         style: {
           fillColor: 'red',
         },
       },
       '4_1': {
+        value: '',
         style: {
           fillColor: 'red',
         },
       },
     },
     '2': {
-      '0_0': {
-        formula: '=basic!A1',
-      },
+      '0_0': { value: '', formula: '=basic!A1' },
     },
     '4': {
       '6_6': {
@@ -201,6 +204,7 @@ const MOCK_MODEL: WorkBookJSON = {
         },
       },
       '0_6': {
+        value: '',
         formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
         style: {
           fontSize: 36,
@@ -224,29 +228,18 @@ const MOCK_MODEL: WorkBookJSON = {
     },
     '7': {
       '0_0': {
+        value: '',
         formula: '=SUM(1,2)',
       },
       '0_1': {
         value: 'test',
       },
-      '0_2': {
-        formula: '=CONCATENATE(A1,B1)',
-      },
-      '0_3': {
-        formula: '=UNICODE("测试")',
-      },
-      '1_0': {
-        formula: '=PI()',
-      },
-      '2_0': {
-        formula: '=E()',
-      },
-      '3_0': {
-        formula: '=E()*PI()',
-      },
-      '4_0': {
-        formula: '=SUM(1, SIN(PI()/2),3)',
-      },
+      '0_2': { value: '', formula: '=CONCATENATE(A1,B1)' },
+      '0_3': { value: '', formula: '=UNICODE("测试")' },
+      '1_0': { value: '', formula: '=PI()' },
+      '2_0': { value: '', formula: '=E()' },
+      '3_0': { value: '', formula: '=E()*PI()' },
+      '4_0': { value: '', formula: '=SUM(1, SIN(PI()/2),3)' },
     },
   },
 

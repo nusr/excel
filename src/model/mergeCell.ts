@@ -34,7 +34,7 @@ export class MergeCell implements IMergeCell {
       transformData(this, item, 'redo');
     }
   }
-  getMergeCells(sheetId?: string): IRange[] {
+  getMergeCellList(sheetId?: string): IRange[] {
     const id = sheetId || this.model.getCurrentSheetId();
     return Object.values(this.mergeCells).filter((v) => v.sheetId === id);
   }

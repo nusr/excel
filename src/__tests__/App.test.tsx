@@ -86,7 +86,7 @@ describe('App.test.ts', () => {
         clientY: 200,
         clientX: 200,
       });
-      expect(screen.getByTestId('context-menu')!.childNodes).toHaveLength(3);
+      expect(screen.getByTestId('context-menu')!.childNodes).toHaveLength(7);
     });
   });
   describe('sheet bar', () => {

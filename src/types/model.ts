@@ -57,7 +57,7 @@ export interface WorksheetType {
 }
 
 export interface ModelCellType {
-  value?: ResultType;
+  value: ResultType;
   formula?: string;
   style?: Partial<StyleType>;
 }
@@ -81,7 +81,7 @@ export interface MergeCellItem {
   end: Coordinate;
 }
 
-export type FloatElement = {
+export type DrawingElement = {
   title: string;
   type: 'floating-picture' | 'chart';
   uuid: string;
@@ -122,7 +122,7 @@ export type WorkBookJSON = {
   customWidth: CustomHeightOrWidthItem; // key: sheetId_col worksheets_*.xml_worksheet_sheetData_customHeight
   definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
   currentSheetId: string;
-  drawings: Record<string, FloatElement>; // key: uuid,  chart floatImage
+  drawings: Record<string, DrawingElement>; // key: uuid,  chart floatImage
   rangeMap: Record<string, IRange>; // key: sheetId
 };
 
@@ -157,10 +157,12 @@ export interface IRangeMap extends IBaseManager {
 
 export interface IDrawings extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'drawings'>;
-  getFloatElementList(sheetId?: string): FloatElement[];
-  addFloatElement(data: FloatElement): void;
-  updateFloatElement(uuid: string, value: Partial<FloatElement>): void;
-  deleteFloatElement(uuid: string): void;
+  getDrawingList(sheetId?: string): DrawingElement[];
+  addDrawing(data: DrawingElement): void;
+  updateDrawing(uuid: string, value: Partial<DrawingElement>): void;
+  deleteDrawing(uuid: string): void;
+  addCol(colIndex: number, count: number): void;
+  addRow(rowIndex: number, count: number): void;
   deleteCol(colIndex: number, count: number): void;
   deleteRow(rowIndex: number, count: number): void;
 }
@@ -175,15 +177,13 @@ export interface IDefinedName extends IBaseManager {
 
 export interface IMergeCell extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'mergeCells'>;
-  getMergeCells(sheetId?: string): IRange[];
+  getMergeCellList(sheetId?: string): IRange[];
   addMergeCell(range: IRange): void;
   deleteMergeCell(range: IRange): void;
 }
 
 export interface IRow extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'customHeight'>;
-  addRow(rowIndex: number, count: number): void;
-  deleteRow(rowIndex: number, count: number): void;
   hideRow(rowIndex: number, count: number): void;
   getRowHeight(row: number, sheetId?: string): CustomItem;
   setRowHeight(row: number, height: number, sheetId?: string): void;
@@ -191,24 +191,26 @@ export interface IRow extends IBaseManager {
 
 export interface ICol extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'customWidth'>;
-  addCol(colIndex: number, count: number): void;
-  deleteCol(colIndex: number, count: number): void;
   hideCol(colIndex: number, count: number): void;
   getColWidth(col: number, sheetId?: string): CustomItem;
   setColWidth(col: number, width: number, sheetId?: string): void;
 }
 export interface IWorksheet extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'worksheets'>;
+  addCol(colIndex: number, count: number, isRight?: boolean): void;
+  addRow(rowIndex: number, count: number, isAbove?: boolean): void;
+  deleteCol(colIndex: number, count: number): void;
+  deleteRow(rowIndex: number, count: number): void;
   pasteRange(fromRange: IRange, isCut: boolean): IRange;
   getWorksheet(sheetId?: string): WorksheetData | undefined;
   setWorksheet(data: WorksheetData, sheetId?: string): void;
   getCell(range: IRange): ModelCellValue | null;
-  setCellValues(
+  setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
-    ranges: IRange[],
+    range: IRange,
   ): void;
-  updateCellStyle(style: Partial<StyleType>, ranges: IRange[]): void;
+  updateCellStyle(style: Partial<StyleType>, range: IRange): void;
   computeFormulas(): void;
 }
 
@@ -237,10 +239,7 @@ export interface IBaseModel
     Pick<IRangeMap, 'setActiveCell' | 'getActiveCell'>,
     Pick<
       IDrawings,
-      | 'getFloatElementList'
-      | 'addFloatElement'
-      | 'updateFloatElement'
-      | 'deleteFloatElement'
+      'getDrawingList' | 'addDrawing' | 'updateDrawing' | 'deleteDrawing'
     >,
     Pick<
       IDefinedName,
@@ -249,19 +248,17 @@ export interface IBaseModel
       | 'checkDefineName'
       | 'getDefineNameList'
     >,
-    Pick<IMergeCell, 'getMergeCells' | 'addMergeCell' | 'deleteMergeCell'>,
-    Pick<
-      IRow,
-      'addRow' | 'deleteRow' | 'hideRow' | 'getRowHeight' | 'setRowHeight'
-    >,
-    Pick<
-      ICol,
-      'addCol' | 'deleteCol' | 'hideCol' | 'getColWidth' | 'setColWidth'
-    >,
+    Pick<IMergeCell, 'getMergeCellList' | 'addMergeCell' | 'deleteMergeCell'>,
+    Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight'>,
+    Pick<ICol, 'hideCol' | 'getColWidth' | 'setColWidth'>,
     Pick<
       IWorksheet,
+      | 'addRow'
+      | 'deleteRow'
+      | 'addCol'
+      | 'deleteCol'
       | 'getCell'
-      | 'setCellValues'
+      | 'setCell'
       | 'updateCellStyle'
       | 'getWorksheet'
       | 'setWorksheet'

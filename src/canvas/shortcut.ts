@@ -260,11 +260,7 @@ export function checkFocus(controller: IController) {
 
 export function setActiveCellValue(controller: IController) {
   const inputDom = controller.getMainDom().input!;
-  controller.setCellValues(
-    [[inputDom.value]],
-    [],
-    [controller.getActiveRange().range],
-  );
+  controller.setCell([[inputDom.value]], [], controller.getActiveRange().range);
   inputDom.value = '';
   inputDom.blur();
   coreStore.mergeState({
@@ -391,9 +387,10 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       const cellData = controller.getCell(controller.getActiveCell());
-      controller.updateCellStyle({ isBold: !cellData?.style?.isBold }, [
+      controller.updateCellStyle(
+        { isBold: !cellData?.style?.isBold },
         controller.getActiveCell(),
-      ]);
+      );
     },
   },
   {
@@ -405,9 +402,10 @@ export const keyboardEventList: KeyboardEventItem[] = [
       }
 
       const cellData = controller.getCell(controller.getActiveCell());
-      controller.updateCellStyle({ isItalic: !cellData?.style?.isItalic }, [
+      controller.updateCellStyle(
+        { isItalic: !cellData?.style?.isItalic },
         controller.getActiveCell(),
-      ]);
+      );
     },
   },
   {
@@ -418,9 +416,10 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       const cellData = controller.getCell(controller.getActiveCell());
-      controller.updateCellStyle({ isStrike: !cellData?.style?.isStrike }, [
+      controller.updateCellStyle(
+        { isStrike: !cellData?.style?.isStrike },
         controller.getActiveCell(),
-      ]);
+      );
     },
   },
   {
@@ -438,9 +437,10 @@ export const keyboardEventList: KeyboardEventItem[] = [
       } else {
         newUnderline = EUnderLine.NONE;
       }
-      controller.updateCellStyle({ underline: newUnderline }, [
+      controller.updateCellStyle(
+        { underline: newUnderline },
         controller.getActiveCell(),
-      ]);
+      );
     },
   },
   {

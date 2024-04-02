@@ -1,6 +1,6 @@
-import type { FloatElement } from '@/types';
+import type { DrawingElement } from '@/types';
 import { BaseStore } from './base';
-export type FloatElementItem = FloatElement & {
+export type FloatElementItem = DrawingElement & {
   labels: string[];
   datasets: Array<{ label: string; data: number[] }>;
   top: number;

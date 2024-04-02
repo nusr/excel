@@ -2,7 +2,7 @@ import {
   WorkBookJSON,
   ICommandItem,
   IDrawings,
-  FloatElement,
+  DrawingElement,
   IModel,
 } from '@/types';
 import { assert } from '@/util';
@@ -34,12 +34,12 @@ export class Drawing implements IDrawings {
       transformData(this, item, 'redo');
     }
   }
-  getFloatElementList(sheetId?: string): FloatElement[] {
+  getDrawingList(sheetId?: string): DrawingElement[] {
     const id = sheetId || this.model.getCurrentSheetId();
     const list = Object.values(this.drawings).filter((v) => v.sheetId === id);
     return list.slice();
   }
-  addFloatElement(data: FloatElement) {
+  addDrawing(data: DrawingElement) {
     const oldData = this.drawings[data.uuid];
     assert(!oldData, $('uuid-is-duplicate'));
     if (data.type === 'chart') {
@@ -75,12 +75,15 @@ export class Drawing implements IDrawings {
       oldValue: DELETE_FLAG,
     });
   }
-  updateFloatElement(uuid: string, value: Partial<FloatElement>) {
+  updateDrawing(uuid: string, value: Partial<DrawingElement>) {
+    const keyList = Object.keys(value) as Array<keyof DrawingElement>;
+    if (keyList.length === 0) {
+      return;
+    }
     const item = this.drawings[uuid];
     if (!item) {
       return;
     }
-    const keyList = Object.keys(value) as Array<keyof FloatElement>;
     for (const key of keyList) {
       if (item[key] !== value[key]) {
         const oldValue = item[key];
@@ -96,7 +99,7 @@ export class Drawing implements IDrawings {
       }
     }
   }
-  deleteFloatElement(uuid: string) {
+  deleteDrawing(uuid: string) {
     const oldData = this.drawings[uuid];
     if (!oldData) {
       return;
@@ -109,52 +112,65 @@ export class Drawing implements IDrawings {
       oldValue: oldData,
     });
   }
+  addCol(colIndex: number, count: number, isRight = false): void {
+    const colCount = this.model.getSheetInfo()!.colCount;
+    for (const [uuid, item] of Object.entries(this.drawings)) {
+      const result: Partial<DrawingElement> = {};
+      const startIndex = isRight ? colIndex + 1 : colIndex;
+
+      if (item.fromCol >= startIndex) {
+        result.fromCol = Math.min(colCount - 1, item.fromCol + count);
+      }
+      if (item.type === 'chart' && item.chartRange!.col >= startIndex) {
+        const chartRange = item.chartRange!;
+        result.chartRange = {
+          ...chartRange,
+          col: Math.min(item.chartRange!.col + count, colCount - 1),
+        };
+      }
+
+      this.updateDrawing(uuid, result);
+    }
+  }
+  addRow(rowIndex: number, count: number, isAbove = false): void {
+    if (count <= 0) {
+      return;
+    }
+    const rowCount = this.model.getSheetInfo()!.rowCount;
+    for (const [uuid, item] of Object.entries(this.drawings)) {
+      const result: Partial<DrawingElement> = {};
+      const startIndex = isAbove ? rowIndex : rowIndex + 1;
+
+      if (item.fromRow >= startIndex) {
+        result.fromRow = Math.min(rowCount - 1, item.fromRow + count);
+      }
+      if (item.type === 'chart' && item.chartRange!.row >= startIndex) {
+        const chartRange = item.chartRange!;
+        result.chartRange = {
+          ...chartRange,
+          row: Math.min(item.chartRange!.row + count, rowCount - 1),
+        };
+      }
+      this.updateDrawing(uuid, result);
+    }
+  }
   deleteCol(colIndex: number, count: number): void {
     if (count <= 0) {
       return;
     }
     for (const [uuid, item] of Object.entries(this.drawings)) {
+      const result: Partial<DrawingElement> = {};
       if (item.fromCol >= colIndex) {
-        const oldValue = item.fromCol;
-        if (item.fromCol >= count) {
-          item.fromCol -= count;
-        } else {
-          item.fromCol = 0;
-        }
-        this.model.push({
-          type: 'drawings',
-          key: `${uuid}.fromCol`,
-          newValue: item.fromCol,
-          oldValue: oldValue,
-        });
+        result.fromCol = Math.max(item.fromCol - count, 0);
       }
       if (item.type === 'chart' && item.chartRange!.col >= colIndex) {
-        const oldCol = item.chartRange!.col;
-        const oldColCount = item.chartRange!.colCount;
-        if (item.chartRange!.col >= count) {
-          item.chartRange!.col -= count;
-        } else {
-          const t = count - item.chartRange!.col;
-          item.chartRange!.col = 0;
-          if (item.chartRange!.colCount >= t) {
-            item.chartRange!.colCount -= t;
-          } else {
-            item.chartRange!.colCount = 1;
-          }
-          this.model.push({
-            type: 'drawings',
-            key: `${uuid}.chartRange.colCount`,
-            newValue: item.chartRange!.col,
-            oldValue: oldColCount,
-          });
-        }
-        this.model.push({
-          type: 'drawings',
-          key: `${uuid}.chartRange.col`,
-          newValue: item.chartRange!.col,
-          oldValue: oldCol,
-        });
+        const chartRange = item.chartRange!;
+        result.chartRange = {
+          ...chartRange,
+          col: Math.max(item.chartRange!.col - count, 0),
+        };
       }
+      this.updateDrawing(uuid, result);
     }
   }
   deleteRow(rowIndex: number, count: number): void {
@@ -162,47 +178,18 @@ export class Drawing implements IDrawings {
       return;
     }
     for (const [uuid, item] of Object.entries(this.drawings)) {
+      const result: Partial<DrawingElement> = {};
       if (item.fromRow >= rowIndex) {
-        const oldValue = item.fromRow;
-        if (item.fromRow >= count) {
-          item.fromRow -= count;
-        } else {
-          item.fromRow = 0;
-        }
-        this.model.push({
-          type: 'drawings',
-          key: `${uuid}.fromRow`,
-          newValue: item.fromRow,
-          oldValue: oldValue,
-        });
+        result.fromRow = Math.max(item.fromRow - count, 0);
       }
       if (item.type === 'chart' && item.chartRange!.row >= rowIndex) {
-        const oldRow = item.chartRange!.row;
-        const oldRowCount = item.chartRange!.rowCount;
-        if (item.chartRange!.row >= count) {
-          item.chartRange!.row -= count;
-        } else {
-          const t = count - item.chartRange!.row;
-          item.chartRange!.row = 0;
-          if (item.chartRange!.rowCount >= t) {
-            item.chartRange!.rowCount -= t;
-          } else {
-            item.chartRange!.rowCount = 1;
-          }
-          this.model.push({
-            type: 'drawings',
-            key: `${uuid}.chartRange.rowCount`,
-            newValue: item.chartRange!.row,
-            oldValue: oldRowCount,
-          });
-        }
-        this.model.push({
-          type: 'drawings',
-          key: `${uuid}.chartRange.row`,
-          newValue: item.chartRange!.row,
-          oldValue: oldRow,
-        });
+        const chartRange = item.chartRange!;
+        result.chartRange = {
+          ...chartRange,
+          row: Math.max(item.chartRange!.row - count, 0),
+        };
       }
+      this.updateDrawing(uuid, result);
     }
   }
   deleteAll(sheetId?: string): void {

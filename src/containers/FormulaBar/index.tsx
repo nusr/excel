@@ -34,7 +34,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
         `${intToColumnName(activeCell.col)}${activeCell.row + 1}`
       );
     }, [activeCell]);
-    const editorValue = activeCell.formula || String(activeCell.value || '');
+    const editorValue = activeCell.formula || activeCell.value;
     const handleClick = () => {
       coreStore.mergeState({
         editorStatus: EditorStatus.EDIT_FORMULA_BAR,

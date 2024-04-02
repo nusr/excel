@@ -7,7 +7,7 @@ import {
   IRange,
   ModelCellValue,
   CustomItem,
-  FloatElement,
+  DrawingElement,
   ChangeEventType,
   ICommandItem,
   DefinedNameItem,
@@ -166,16 +166,16 @@ export class Model implements IModel {
     };
   };
 
-  setCellValues(
+  setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
-    ranges: IRange[],
+    range: IRange,
   ): void {
-    this.worksheetManager.setCellValues(value, style, ranges);
+    this.worksheetManager.setCell(value, style, range);
   }
 
-  updateCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
-    return this.worksheetManager.updateCellStyle(style, ranges);
+  updateCellStyle(style: Partial<StyleType>, range: IRange): void {
+    return this.worksheetManager.updateCellStyle(style, range);
   }
   getCell = (range: IRange): ModelCellValue | null => {
     return this.worksheetManager.getCell(range);
@@ -186,7 +186,7 @@ export class Model implements IModel {
   setWorksheet(data: WorksheetData, sheetId?: string): void {
     this.worksheetManager.setWorksheet(data, sheetId);
   }
-  addCol(colIndex: number, count: number): void {
+  addCol(colIndex: number, count: number, isRight = false): void {
     if (count <= 0) {
       return;
     }
@@ -198,7 +198,8 @@ export class Model implements IModel {
     const id = this.getCurrentSheetId();
     const newCount = sheetInfo.colCount + count;
     this.workbookManager.updateSheetInfo({ colCount: newCount }, id);
-    this.colManager.addCol(colIndex, count);
+    this.drawingsManager.addCol(colIndex, count, isRight);
+    this.worksheetManager.addCol(colIndex, count, isRight);
   }
   deleteCol(colIndex: number, count: number): void {
     if (count <= 0) {
@@ -207,11 +208,9 @@ export class Model implements IModel {
     const sheetInfo = this.getSheetInfo()!;
     const id = this.getCurrentSheetId();
     const newCount = sheetInfo.colCount - count;
-
     this.workbookManager.updateSheetInfo({ colCount: newCount }, id);
     this.drawingsManager.deleteCol(colIndex, count);
-
-    this.colManager.deleteCol(colIndex, count);
+    this.worksheetManager.deleteCol(colIndex, count);
   }
 
   hideCol(colIndex: number, count: number): void {
@@ -224,7 +223,7 @@ export class Model implements IModel {
     this.colManager.setColWidth(col, width, sheetId);
   }
 
-  addRow(rowIndex: number, count: number): void {
+  addRow(rowIndex: number, count: number, isAbove = false): void {
     if (count <= 0) {
       return;
     }
@@ -235,7 +234,8 @@ export class Model implements IModel {
 
     const newCount = sheetInfo.rowCount + count;
     this.workbookManager.updateSheetInfo({ rowCount: newCount });
-    this.rowManager.addRow(rowIndex, count);
+    this.drawingsManager.addRow(rowIndex, count, isAbove);
+    this.worksheetManager.addRow(rowIndex, count, isAbove);
   }
   deleteRow(rowIndex: number, count: number): void {
     if (count <= 0) {
@@ -243,10 +243,11 @@ export class Model implements IModel {
     }
     const sheetInfo = this.getSheetInfo()!;
     const newCount = sheetInfo.rowCount - count;
-    this.drawingsManager.deleteRow(rowIndex, count);
     this.workbookManager.updateSheetInfo({ rowCount: newCount });
-    this.rowManager.deleteRow(rowIndex, count);
+    this.drawingsManager.deleteRow(rowIndex, count);
+    this.worksheetManager.deleteRow(rowIndex, count);
   }
+
   hideRow(rowIndex: number, count: number): void {
     this.rowManager.hideRow(rowIndex, count);
   }
@@ -330,20 +331,20 @@ export class Model implements IModel {
     }
   }
 
-  getFloatElementList(sheetId?: string): FloatElement[] {
-    return this.drawingsManager.getFloatElementList(sheetId);
+  getDrawingList(sheetId?: string): DrawingElement[] {
+    return this.drawingsManager.getDrawingList(sheetId);
   }
-  addFloatElement(data: FloatElement) {
-    this.drawingsManager.addFloatElement(data);
+  addDrawing(data: DrawingElement) {
+    this.drawingsManager.addDrawing(data);
   }
-  updateFloatElement(uuid: string, value: Partial<FloatElement>) {
-    this.drawingsManager.updateFloatElement(uuid, value);
+  updateDrawing(uuid: string, value: Partial<DrawingElement>) {
+    this.drawingsManager.updateDrawing(uuid, value);
   }
-  deleteFloatElement(uuid: string) {
-    this.drawingsManager.deleteFloatElement(uuid);
+  deleteDrawing(uuid: string) {
+    this.drawingsManager.deleteDrawing(uuid);
   }
-  getMergeCells(sheetId?: string): IRange[] {
-    return this.mergeCellManager.getMergeCells(sheetId);
+  getMergeCellList(sheetId?: string): IRange[] {
+    return this.mergeCellManager.getMergeCellList(sheetId);
   }
   addMergeCell(range: IRange): void {
     this.mergeCellManager.addMergeCell(range);

@@ -12,9 +12,8 @@ import {
   QUERY_ALL_LOCAL_FONT,
   LOCAL_FONT_KEY,
   isSupportFontFamily,
-  isMobile,
 } from '@/util';
-import { StyleType, EUnderLine, OptionItem, IController } from '@/types';
+import { EUnderLine, OptionItem, IController } from '@/types';
 import styles from './index.module.css';
 import { fontFamilyStore, styleStore, coreStore } from '@/containers/store';
 import { InsertFloatingPicture, InsertChart } from '../FloatElement';
@@ -78,9 +77,6 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       },
       [],
     );
-    const setCellStyle = (value: Partial<StyleType>) => {
-      controller.updateCellStyle(value, [controller.getActiveCell()]);
-    };
     const handleFontFamilyChange = useCallback((value: string | number) => {
       const t = String(value);
       const queryLocalFonts = (window as any).queryLocalFonts;
@@ -109,7 +105,10 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           },
         );
       } else {
-        setCellStyle({ fontFamily: String(value) });
+        controller.updateCellStyle(
+          { fontFamily: String(value) },
+          controller.getActiveCell(),
+        );
       }
     }, []);
     const undo = useCallback(() => {
@@ -128,44 +127,52 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       controller.paste();
     }, []);
     const setFontSize = useCallback((value: string | number) => {
-      controller.updateCellStyle({ fontSize: Number(value) }, [
+      controller.updateCellStyle(
+        { fontSize: Number(value) },
         controller.getActiveCell(),
-      ]);
+      );
     }, []);
     const toggleBold = useCallback(() => {
-      controller.updateCellStyle({ isBold: !cellStyle.isBold }, [
+      controller.updateCellStyle(
+        { isBold: !cellStyle.isBold },
         controller.getActiveCell(),
-      ]);
+      );
     }, [cellStyle.isBold]);
     const toggleItalic = useCallback(() => {
-      controller.updateCellStyle({ isItalic: !cellStyle.isItalic }, [
+      controller.updateCellStyle(
+        { isItalic: !cellStyle.isItalic },
         controller.getActiveCell(),
-      ]);
+      );
     }, [cellStyle.isItalic]);
     const toggleStrike = useCallback(() => {
-      controller.updateCellStyle({ isStrike: !cellStyle.isStrike }, [
+      controller.updateCellStyle(
+        { isStrike: !cellStyle.isStrike },
         controller.getActiveCell(),
-      ]);
+      );
     }, [cellStyle.isStrike]);
     const setUnderline = useCallback((value: string | number) => {
-      controller.updateCellStyle({ underline: Number(value) }, [
+      controller.updateCellStyle(
+        { underline: Number(value) },
         controller.getActiveCell(),
-      ]);
+      );
     }, []);
     const setFillColor = useCallback((value: string) => {
-      controller.updateCellStyle({ fillColor: value }, [
+      controller.updateCellStyle(
+        { fillColor: value },
         controller.getActiveCell(),
-      ]);
+      );
     }, []);
     const setFontColor = useCallback((value: string) => {
-      controller.updateCellStyle({ fontColor: value }, [
+      controller.updateCellStyle(
+        { fontColor: value },
         controller.getActiveCell(),
-      ]);
+      );
     }, []);
     const toggleWrapText = useCallback(() => {
-      controller.updateCellStyle({ isWrapText: !cellStyle.isWrapText }, [
+      controller.updateCellStyle(
+        { isWrapText: !cellStyle.isWrapText },
         controller.getActiveCell(),
-      ]);
+      );
     }, [cellStyle.isWrapText]);
     return (
       <div className={styles['toolbar-wrapper']} data-testid="toolbar">
@@ -266,7 +273,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           {$('wrap-text')}
         </Button>
         <InsertFloatingPicture controller={controller} />
-        {isMobile() ? null : <InsertChart controller={controller} />}
+        <InsertChart controller={controller} />
         {/* <Button
         active={cellStyle.isMergeCell}
         onClick={() => {

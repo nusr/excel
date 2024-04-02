@@ -1,8 +1,6 @@
 import { WorkBookJSON, ICommandItem, ICol, IModel, CustomItem } from '@/types';
 import {
   getCustomWidthOrHeightKey,
-  stringToCoordinate,
-  coordinateToString,
   CELL_WIDTH,
   HIDE_CELL,
 } from '@/util';
@@ -31,127 +29,6 @@ export class ColManager implements ICol {
   redo(item: ICommandItem): void {
     if (item.type === 'customWidth') {
       transformData(this, item, 'redo');
-    }
-  }
-  addCol(colIndex: number, count: number): void {
-    const sheetInfo = this.model.getSheetInfo()!;
-
-    const id = this.model.getCurrentSheetId();
-    const sheetData = this.model.getWorksheet();
-    const newCount = sheetInfo.colCount + count;
-    if (!sheetData) {
-      return;
-    }
-    for (let i = newCount - 1; i >= colIndex + count; i--) {
-      const oldKey = getCustomWidthOrHeightKey(id, i - count);
-      const newKey = getCustomWidthOrHeightKey(id, i);
-      const oldValue = this.customWidth[oldKey]
-        ? { ...this.customWidth[oldKey] }
-        : undefined;
-      const newValue = this.customWidth[newKey]
-        ? { ...this.customWidth[newKey] }
-        : undefined;
-      if (oldValue) {
-        delete this.customWidth[oldKey];
-        this.model.push({
-          type: 'customWidth',
-          key: oldKey,
-          newValue: DELETE_FLAG,
-          oldValue: oldValue,
-        });
-      }
-      if (newValue) {
-        if (oldValue) {
-          this.customWidth[newKey] = oldValue;
-          this.model.push({
-            type: 'customWidth',
-            key: newKey,
-            newValue: oldValue,
-            oldValue: newValue,
-          });
-        } else {
-          delete this.customWidth[newKey];
-          this.model.push({
-            type: 'customWidth',
-            key: newKey,
-            newValue: DELETE_FLAG,
-            oldValue: newValue,
-          });
-        }
-      }
-    }
-    const list = Array.from(Object.keys(sheetData)).map((key) =>
-      stringToCoordinate(key),
-    );
-    list.sort((a, b) => a.col - b.col);
-    for (let i = list.length - 1; i >= 0; i--) {
-      const item = list[i];
-      if (item.col <= colIndex) {
-        break;
-      }
-
-      const key = coordinateToString(item.row, item.col);
-      const newKey = coordinateToString(item.row, item.col + count);
-      if (!sheetData[key]) {
-        continue;
-      }
-      const newValue = sheetData[key] ? { ...sheetData[key] } : {};
-      const oldValue = sheetData[newKey] ? { ...sheetData[newKey] } : {};
-      delete sheetData[key];
-      this.model.push({
-        type: 'worksheets',
-        key: `${id}.${key}`,
-        newValue: DELETE_FLAG,
-        oldValue: newValue,
-      });
-
-      sheetData[newKey] = { ...newValue };
-      this.model.push({
-        type: 'worksheets',
-        key: `${id}.${newKey}`,
-        newValue: newValue,
-        oldValue: oldValue,
-      });
-    }
-  }
-  deleteCol(colIndex: number, count: number): void {
-    const id = this.model.getCurrentSheetId();
-    const sheetData = this.model.getWorksheet();
-
-    if (!sheetData) {
-      return;
-    }
-    const list = Array.from(Object.keys(sheetData)).map((key) =>
-      stringToCoordinate(key),
-    );
-    list.sort((a, b) => a.col - b.col);
-    for (let i = 0; i < list.length; i++) {
-      const item = list[i];
-      if (item.col < colIndex) {
-        continue;
-      }
-      const key = coordinateToString(item.row, item.col);
-      const newValue = sheetData[key] ? { ...sheetData[key] } : {};
-      if (item.col >= colIndex + count) {
-        const newKey = coordinateToString(item.row, item.col - count);
-        const oldValue = sheetData[newKey] ? { ...sheetData[newKey] } : {};
-
-        sheetData[newKey] = { ...newValue };
-        this.model.push({
-          type: 'worksheets',
-          key: `${id}.${newKey}`,
-          newValue: newValue,
-          oldValue: oldValue,
-        });
-      }
-
-      delete sheetData[key];
-      this.model.push({
-        type: 'worksheets',
-        key: `${id}.${key}`,
-        newValue: DELETE_FLAG,
-        oldValue: newValue,
-      });
     }
   }
 

@@ -204,7 +204,7 @@ const handleStateChange = (
     const minY = scroll.top;
     const maxX = canvasSize.width + minX;
     const maxY = canvasSize.height + minY;
-    const list = controller.getFloatElementList(controller.getCurrentSheetId());
+    const list = controller.getDrawingList(controller.getCurrentSheetId());
     const result: FloatElementItem[] = [];
     for (const v of list) {
       const p = controller.computeCellPosition({
@@ -249,10 +249,8 @@ const handleStateChange = (
   }
 };
 export function initCanvas(controller: IController): () => void {
-  const mainCanvas = new MainCanvas(
-    controller,
-    new Content(controller, createCanvas()),
-  );
+  const content = new Content(controller, createCanvas());
+  const mainCanvas = new MainCanvas(controller, content);
   const resize = () => {
     mainCanvas.resize();
     mainCanvas.render({ changeSet: new Set<ChangeEventType>(['row']) });

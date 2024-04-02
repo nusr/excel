@@ -37,13 +37,13 @@ describe('exportXLSX.test.ts', () => {
     });
     test('normal', () => {
       const controller = initController();
-      controller.setCellValues(
+      controller.setCell(
         [
           [true, false, 'true', 'false', 'ab'],
           ['=SUM(1,SUM(1,3))', 5, 6, '测', '永1'],
         ],
         [],
-        [{ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }],
+        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
       );
       controller.setColWidth(1, 80);
       controller.hideCol(1, 1);

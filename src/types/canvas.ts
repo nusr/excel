@@ -11,5 +11,6 @@ export interface KeyboardEventItem {
 export interface ContentView {
   getCanvas: () => HTMLCanvasElement;
   resize: () => void;
-  render: (value: EventType) => boolean;
+  render: (value: EventType) => void;
+  check(): void;
 }

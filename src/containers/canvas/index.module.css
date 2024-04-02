@@ -58,7 +58,7 @@
   position: fixed;
   background-color: var(--white);
   border-radius: var(--borderRadius);
-  width: 110px;
+  min-width: 150px;
   z-index: 4;
 }
 

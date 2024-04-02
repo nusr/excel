@@ -54,5 +54,9 @@
   "uuid-is-duplicate": "UUID 重复",
   "cells-must-contain-data": "所选单元格必须包含数据",
   "image-source-is-empty": "图像源为空",
-  "merging-cell-is-duplicate": "合并单元格重复"
+  "merging-cell-is-duplicate": "合并单元格重复",
+  "insert-column-left": "向左插入列",
+  "insert-column-right": "向右插入列",
+  "insert-row-above": "在上面插入行",
+  "insert-row-below": "在下面插入行"
 }

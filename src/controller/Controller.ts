@@ -14,7 +14,7 @@ import {
   ClipboardData,
   ClipboardType,
   MainDom,
-  FloatElement,
+  DrawingElement,
   IPosition,
   DefinedNameItem,
   WorksheetData,
@@ -33,6 +33,7 @@ import {
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
   controllerLog,
+  convertResultTypeToString,
 } from '@/util';
 
 const defaultScrollValue: ScrollValue = {
@@ -67,11 +68,11 @@ export class Controller implements IController {
   getSheetInfo(sheetId?: string) {
     return this.model.getSheetInfo(sheetId);
   }
-  batchUpdate(fn: () => void, isEmit = true): void {
+  batchUpdate(fn: () => boolean): void {
     this.isNoChange = true;
-    fn();
+    const check = fn();
     this.isNoChange = false;
-    if (isEmit) {
+    if (check) {
       this.emitChange();
     }
   }
@@ -88,7 +89,7 @@ export class Controller implements IController {
     return range;
   }
   private getRange(range: IRange) {
-    const mergeCells = this.getMergeCells(this.getCurrentSheetId());
+    const mergeCells = this.getMergeCellList(this.getCurrentSheetId());
     if (mergeCells.length === 0) {
       return {
         range,
@@ -123,7 +124,7 @@ export class Controller implements IController {
     let startCol = range.col;
     let startRow = range.row;
     const sheetInfo = this.getSheetInfo(range.sheetId)!;
-    const mergeCells = this.getMergeCells(range.sheetId);
+    const mergeCells = this.getMergeCellList(range.sheetId);
     const result = {
       ...range,
     };
@@ -300,16 +301,16 @@ export class Controller implements IController {
     return this.model.toJSON();
   }
 
-  setCellValues(
+  setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
-    ranges: IRange[],
+    range: IRange,
   ): void {
-    this.model.setCellValues(value, style, ranges);
+    this.model.setCell(value, style, range);
     this.emitChange();
   }
-  updateCellStyle(style: Partial<StyleType>, ranges: IRange[]): void {
-    this.model.updateCellStyle(style, ranges);
+  updateCellStyle(style: Partial<StyleType>, range: IRange): void {
+    this.model.updateCellStyle(style, range);
 
     this.emitChange();
   }
@@ -413,19 +414,16 @@ export class Controller implements IController {
     };
   }
 
-  addRow(rowIndex: number, count: number): void {
-    this.model.addRow(rowIndex, count);
-
+  addRow(rowIndex: number, count: number, isAbove = false): void {
+    this.model.addRow(rowIndex, count, isAbove);
     this.emitChange();
   }
-  addCol(colIndex: number, count: number): void {
-    this.model.addCol(colIndex, count);
-
+  addCol(colIndex: number, count: number, isRight = false): void {
+    this.model.addCol(colIndex, count, isRight);
     this.emitChange();
   }
   deleteCol(colIndex: number, count: number): void {
     this.model.deleteCol(colIndex, count);
-
     this.emitChange();
   }
   deleteRow(rowIndex: number, count: number): void {
@@ -536,7 +534,7 @@ export class Controller implements IController {
         if (!a) {
           continue;
         }
-        const str = String(a.value || '');
+        const str = convertResultTypeToString(a.value);
         temp.push(str);
         if (a.style) {
           let text = convertToCssString(a.style);
@@ -570,7 +568,7 @@ export class Controller implements IController {
         const uuid = this.floatElementUuid;
         const range = this.getActiveCell();
 
-        this.model.updateFloatElement(uuid, {
+        this.model.updateDrawing(uuid, {
           fromCol: range.col,
           fromRow: range.row,
           marginX: 0,
@@ -582,7 +580,7 @@ export class Controller implements IController {
         this.floatElementUuid = '';
         this.emitChange();
       } else {
-        const list = this.getFloatElementList(this.getCurrentSheetId());
+        const list = this.getDrawingList(this.getCurrentSheetId());
         const item = list.find((v) => v.uuid === this.floatElementUuid);
         if (item) {
           const size = this.getCellSize({
@@ -604,7 +602,7 @@ export class Controller implements IController {
           } else if (marginY - offset >= 0) {
             marginY -= offset;
           }
-          this.addFloatElement({
+          this.addDrawing({
             ...item,
             uuid: generateUUID(),
             marginX,
@@ -637,7 +635,7 @@ export class Controller implements IController {
       if (result.value.length > 0) {
         activeCell = result.range;
 
-        this.model.setCellValues(result.value, result.style, [result.range]);
+        this.model.setCell(result.value, result.style, result.range);
         check = true;
       }
     }
@@ -645,7 +643,7 @@ export class Controller implements IController {
       const result = this.parseText(text);
       if (result.value.length > 0) {
         activeCell = result.range;
-        this.model.setCellValues(result.value, [], [result.range]);
+        this.model.setCell(result.value, [], result.range);
         check = true;
       }
     }
@@ -742,26 +740,26 @@ export class Controller implements IController {
   checkDefineName(name: string): IRange | undefined {
     return this.model.checkDefineName(name);
   }
-  getFloatElementList(sheetId: string): FloatElement[] {
-    return this.model.getFloatElementList(sheetId);
+  getDrawingList(sheetId?: string): DrawingElement[] {
+    return this.model.getDrawingList(sheetId);
   }
-  addFloatElement(data: FloatElement) {
-    this.model.addFloatElement(data);
+  addDrawing(data: DrawingElement) {
+    this.model.addDrawing(data);
 
     this.emitChange();
   }
-  updateFloatElement(uuid: string, value: Partial<FloatElement>) {
-    this.model.updateFloatElement(uuid, value);
+  updateDrawing(uuid: string, value: Partial<DrawingElement>) {
+    this.model.updateDrawing(uuid, value);
 
     this.emitChange();
   }
-  deleteFloatElement(uuid: string) {
-    this.model.deleteFloatElement(uuid);
+  deleteDrawing(uuid: string) {
+    this.model.deleteDrawing(uuid);
 
     this.emitChange();
   }
-  getMergeCells(sheetId?: string): IRange[] {
-    return this.model.getMergeCells(sheetId);
+  getMergeCellList(sheetId?: string): IRange[] {
+    return this.model.getMergeCellList(sheetId);
   }
   addMergeCell(range: IRange): void {
     this.model.addMergeCell(range);

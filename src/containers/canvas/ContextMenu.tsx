@@ -110,12 +110,14 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
             for (let i = 0; i < rowCount; i++) {
               controller.setRowHeight(row + i, value);
             }
+            return true;
           });
         } else {
           controller.batchUpdate(() => {
             for (let i = 0; i < colCount; i++) {
               controller.setColWidth(col + i, value);
             }
+            return true;
           });
         }
         hideContextMenu();
@@ -158,6 +160,48 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       >
         {$('paste')}
       </Button>
+      {(position === ClickPosition.ROW_HEADER ||
+        position === ClickPosition.CONTENT) && (
+        <Fragment>
+          <Button
+            onClick={() => {
+              hideContextMenu();
+              controller.addRow(row, rowCount, true);
+            }}
+          >
+            {$('insert-row-above')}
+          </Button>
+          <Button
+            onClick={() => {
+              hideContextMenu();
+              controller.addRow(row, rowCount);
+            }}
+          >
+            {$('insert-row-below')}
+          </Button>
+        </Fragment>
+      )}
+      {(position === ClickPosition.COLUMN_HEADER ||
+        position === ClickPosition.CONTENT) && (
+        <Fragment>
+          <Button
+            onClick={() => {
+              hideContextMenu();
+              controller.addCol(col, colCount);
+            }}
+          >
+            {$('insert-column-left')}
+          </Button>
+          <Button
+            onClick={() => {
+              hideContextMenu();
+              controller.addCol(col, colCount, true);
+            }}
+          >
+            {$('insert-column-right')}
+          </Button>
+        </Fragment>
+      )}
       {position === ClickPosition.TRIANGLE && (
         <Button
           onClick={() => {
@@ -170,14 +214,6 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       )}
       {position === ClickPosition.COLUMN_HEADER && (
         <Fragment>
-          <Button
-            onClick={() => {
-              hideContextMenu();
-              controller.addCol(col, colCount);
-            }}
-          >
-            {$('insert-columns')}
-          </Button>
           <Button
             onClick={() => {
               hideContextMenu();
@@ -210,15 +246,6 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           <Button
             onClick={() => {
               hideContextMenu();
-              controller.addRow(row, rowCount);
-            }}
-          >
-            {$('insert-rows')}
-          </Button>
-          <Button
-            onClick={() => {
-              hideContextMenu();
-
               controller.deleteRow(row, rowCount);
             }}
           >
@@ -227,7 +254,6 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           <Button
             onClick={() => {
               hideContextMenu();
-
               controller.hideRow(row, rowCount);
             }}
           >

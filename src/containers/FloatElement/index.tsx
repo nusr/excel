@@ -135,11 +135,11 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
         }
         if (state.current.resizePosition) {
           if (state.current.resizePosition === ResizePosition.rotate) {
-            controller.updateFloatElement(activeUuid, {
+            controller.updateDrawing(activeUuid, {
               imageAngle: position.imageAngle,
             });
           } else if (position.height > 0 && position.width > 0) {
-            controller.updateFloatElement(activeUuid, {
+            controller.updateDrawing(activeUuid, {
               height: position.height,
               width: position.width,
             });
@@ -150,7 +150,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
         if (left >= 0 && top >= 0 && left < rect.width && top < rect.height) {
           const newRange = getHitInfo(controller, left, top);
           if (newRange) {
-            controller.updateFloatElement(activeUuid, {
+            controller.updateDrawing(activeUuid, {
               fromCol: newRange.col,
               fromRow: newRange.row,
               marginX: newRange.marginX,

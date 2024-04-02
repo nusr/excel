@@ -5,6 +5,8 @@ import { ContentView, IController, EventType } from '@/types';
 export class Content implements ContentView {
   private ctx: CanvasRenderingContext2D;
   private controller: IController;
+  private rowMap = new Map<number, number>();
+  private colMap = new Map<number, number>();
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     const ctx = canvas.getContext('2d')!;
@@ -21,7 +23,7 @@ export class Content implements ContentView {
   }
   render({ changeSet }: EventType) {
     if (changeSet.size === 0) {
-      return false;
+      return;
     }
 
     const check =
@@ -34,11 +36,36 @@ export class Content implements ContentView {
       changeSet.has('scroll');
 
     if (!check) {
-      return false;
+      return;
     }
     canvasLog('render canvas content');
     this.clear();
-    return this.renderContent();
+    this.renderContent();
+  }
+  check() {
+    const { controller } = this;
+    if (this.rowMap.size === 0 && this.colMap.size === 0) {
+      return;
+    }
+    canvasLog('render again');
+    controller.batchUpdate(() => {
+      let check = false;
+      for (const [r, h] of this.rowMap.entries()) {
+        if (h <= 0 || controller.getRowHeight(r).len === h) {
+          continue;
+        }
+        check = true;
+        controller.setRowHeight(r, h);
+      }
+      for (const [c, w] of this.colMap.entries()) {
+        if (w <= 0 || controller.getColWidth(c).len === w) {
+          continue;
+        }
+        check = true;
+        controller.setColWidth(c, w);
+      }
+      return check;
+    });
   }
 
   private clear() {
@@ -47,7 +74,6 @@ export class Content implements ContentView {
   }
 
   private renderContent() {
-    let check = false;
     const { controller, ctx } = this;
     const { width, height } = controller.getDomRect();
     const headerSize = headerSizeSet.get();
@@ -71,47 +97,22 @@ export class Content implements ContentView {
     const endCol = c;
     ctx.save();
 
-    const rowMap = new Map<number, number>();
-    const colMap = new Map<number, number>();
+    this.rowMap = new Map<number, number>();
+    this.colMap = new Map<number, number>();
 
     for (let rowIndex = row; rowIndex < endRow; rowIndex++) {
       for (let colIndex = col; colIndex < endCol; colIndex++) {
         const size = renderCellData(controller, ctx, rowIndex, colIndex);
-        rowMap.set(
-          rowIndex,
-          Math.max(
-            rowMap.get(rowIndex) || 0,
-            controller.getRowHeight(rowIndex).len,
-            size.height,
-          ),
-        );
-        colMap.set(
-          colIndex,
-          Math.max(
-            colMap.get(colIndex) || 0,
-            controller.getColWidth(colIndex).len,
-            size.width,
-          ),
-        );
+        const height = Math.max(this.rowMap.get(rowIndex) || 0, size.height);
+        const width = Math.max(this.colMap.get(colIndex) || 0, size.width);
+        if (height > controller.getRowHeight(rowIndex).len) {
+          this.rowMap.set(rowIndex, height);
+        }
+        if (width > controller.getColWidth(colIndex).len) {
+          this.colMap.set(colIndex, width);
+        }
       }
     }
-    controller.batchUpdate(() => {
-      for (const [r, h] of rowMap.entries()) {
-        if (h <= 0 || controller.getRowHeight(r).len === h) {
-          continue;
-        }
-        check = true;
-        controller.setRowHeight(r, h);
-      }
-      for (const [c, w] of colMap.entries()) {
-        if (w <= 0 || controller.getColWidth(c).len === w) {
-          continue;
-        }
-        check = true;
-        controller.setColWidth(c, w);
-      }
-    }, false);
     ctx.restore();
-    return check;
   }
 }

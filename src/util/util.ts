@@ -66,7 +66,6 @@ export function splitToWords(str: string): string[] {
     // firefox
     return [...str];
   }
-  // graphemer
   const list = new Intl.Segmenter([], { granularity: 'word' }).segment(str);
   const arr = [...list];
   return arr.map((x) => x.segment);

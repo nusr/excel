@@ -6,7 +6,7 @@ import {
   EHorizontalAlign,
   EVerticalAlign,
   EUnderLine,
-  FloatElement,
+  DrawingElement,
   IWindowSize,
 } from '@/types';
 import {
@@ -584,6 +584,7 @@ export function convertXMLDataToModel(
         const style = getCellStyle(xmlData[STYLE_PATH], styleId, themeData);
         const t: ModelCellType = {
           style,
+          value: ''
         };
         if (col.t === 's') {
           const i = parseInt(val, 10);
@@ -680,7 +681,7 @@ export function convertXMLDataToModel(
         continue;
       }
       const uuid = generateUUID();
-      const floatElementData: FloatElement = {
+      const floatElementData: DrawingElement = {
         title: '',
         type: isImage ? 'floating-picture' : 'chart',
         uuid,

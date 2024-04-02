@@ -15,7 +15,7 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = memo(
       image.src = base64Image;
       image.onload = function () {
         const range = controller.getActiveCell();
-        controller.addFloatElement({
+        controller.addDrawing({
           width: image.width,
           height: image.height,
           originHeight: image.height,
@@ -75,7 +75,7 @@ export const InsertChart: React.FunctionComponent<Props> = memo(
   ({ controller }) => {
     const handleClick = () => {
       const range = controller.getActiveCell();
-      controller.addFloatElement({
+      controller.addDrawing({
         width: 400,
         height: 300,
         originHeight: 300,

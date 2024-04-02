@@ -13,10 +13,10 @@ describe('model.test.ts', () => {
     const model = new Model();
     model.addSheet();
     expect(model.getCell(new Range(0, 0, 1, 1, ''))).toBeNull();
-    model.setCellValues(
+    model.setCell(
       [['test']],
       [],
-      [new Range(0, 0, 1, 1, model.getCurrentSheetId())],
+      new Range(0, 0, 1, 1, model.getCurrentSheetId()),
     );
     expect(model.getCell(new Range(0, 0, 1, 1, ''))).toEqual({
       value: 'test',
@@ -61,6 +61,7 @@ describe('model.test.ts', () => {
         '2': {
           '0_0': {
             formula: '=Sheet1!A1',
+            value: '',
           },
         },
       },
@@ -87,6 +88,7 @@ describe('model.test.ts', () => {
         '2': {
           '0_0': {
             formula: '=Sheet1!A1',
+            value: '',
           },
         },
       },
