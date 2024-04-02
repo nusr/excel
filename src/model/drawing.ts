@@ -122,11 +122,19 @@ export class Drawing implements IDrawings {
         result.fromCol = Math.min(colCount - 1, item.fromCol + count);
       }
       if (item.type === 'chart' && item.chartRange!.col >= startIndex) {
-        const chartRange = item.chartRange!;
         result.chartRange = {
-          ...chartRange,
-          col: Math.min(item.chartRange!.col + count, colCount - 1),
+          ...item.chartRange!,
         };
+        const col = result.chartRange.col;
+        if (col + count <= colCount - 1) {
+          result.chartRange.col += count;
+        } else {
+          result.chartRange.col = colCount - 1;
+          result.chartRange.colCount = Math.max(
+            colCount - 1 - count - col + result.chartRange.colCount,
+            1,
+          );
+        }
       }
 
       this.updateDrawing(uuid, result);
@@ -145,11 +153,19 @@ export class Drawing implements IDrawings {
         result.fromRow = Math.min(rowCount - 1, item.fromRow + count);
       }
       if (item.type === 'chart' && item.chartRange!.row >= startIndex) {
-        const chartRange = item.chartRange!;
         result.chartRange = {
-          ...chartRange,
-          row: Math.min(item.chartRange!.row + count, rowCount - 1),
+          ...item.chartRange!,
         };
+        const row = result.chartRange.row;
+        if (row + count <= rowCount - 1) {
+          result.chartRange.row += count;
+        } else {
+          result.chartRange.row = rowCount - 1;
+          result.chartRange.rowCount = Math.max(
+            rowCount - 1 - count - row + result.chartRange.rowCount,
+            1,
+          );
+        }
       }
       this.updateDrawing(uuid, result);
     }
@@ -164,11 +180,19 @@ export class Drawing implements IDrawings {
         result.fromCol = Math.max(item.fromCol - count, 0);
       }
       if (item.type === 'chart' && item.chartRange!.col >= colIndex) {
-        const chartRange = item.chartRange!;
         result.chartRange = {
-          ...chartRange,
-          col: Math.max(item.chartRange!.col - count, 0),
+          ...item.chartRange!,
         };
+        const col = result.chartRange.col;
+        if (col >= count) {
+          result.chartRange.col -= count;
+        } else {
+          result.chartRange.col = 0;
+          result.chartRange.colCount = Math.max(
+            col - count + result.chartRange.colCount,
+            1,
+          );
+        }
       }
       this.updateDrawing(uuid, result);
     }
@@ -183,11 +207,19 @@ export class Drawing implements IDrawings {
         result.fromRow = Math.max(item.fromRow - count, 0);
       }
       if (item.type === 'chart' && item.chartRange!.row >= rowIndex) {
-        const chartRange = item.chartRange!;
         result.chartRange = {
-          ...chartRange,
-          row: Math.max(item.chartRange!.row - count, 0),
+          ...item.chartRange!,
         };
+        const row = result.chartRange.row;
+        if (row >= count) {
+          result.chartRange.row = row - count;
+        } else {
+          result.chartRange.row = 0;
+          result.chartRange.rowCount = Math.max(
+            row - count + result.chartRange.rowCount,
+            1,
+          );
+        }
       }
       this.updateDrawing(uuid, result);
     }

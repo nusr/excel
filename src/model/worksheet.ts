@@ -56,39 +56,34 @@ export class Worksheet implements IWorksheet {
       stringToCoordinate(key),
     );
     list.sort((a, b) => a.row - b.row);
+    const endIndex = isAbove ? rowIndex : rowIndex + 1;
     for (let i = list.length - 1; i >= 0; i--) {
       const item = list[i];
-      if (isAbove) {
-        if (item.row < rowIndex) {
-          continue;
-        }
-      } else {
-        if (item.row <= rowIndex) {
-          continue;
-        }
+      if (item.row <= endIndex) {
+        continue;
       }
       const key = coordinateToString(item.row, item.col);
       const newKey = coordinateToString(item.row + count, item.col);
 
-      const newValue = sheetData[key] ? { ...sheetData[key] } : undefined;
-      const oldData = sheetData[newKey] ? { ...sheetData[newKey] } : undefined;
-      if (newValue) {
-        sheetData[newKey] = { ...newValue };
-        delete sheetData[key];
-        this.model.push({
-          type: 'worksheets',
-          key: `${id}.${key}`,
-          newValue: DELETE_FLAG,
-          oldValue: newValue,
-        });
+      const newValue = sheetData[key] ? { ...sheetData[key] } : { value: '' };
+      const oldData = sheetData[newKey]
+        ? { ...sheetData[newKey] }
+        : { value: '' };
 
-        this.model.push({
-          type: 'worksheets',
-          key: `${id}.${newKey}`,
-          newValue: newValue,
-          oldValue: oldData ? oldData : DELETE_FLAG,
-        });
-      }
+      delete sheetData[key];
+      this.model.push({
+        type: 'worksheets',
+        key: `${id}.${key}`,
+        newValue: DELETE_FLAG,
+        oldValue: newValue,
+      });
+      sheetData[newKey] = { ...newValue };
+      this.model.push({
+        type: 'worksheets',
+        key: `${id}.${newKey}`,
+        newValue: newValue,
+        oldValue: oldData,
+      });
     }
   }
   deleteRow(rowIndex: number, count: number): void {
@@ -144,39 +139,33 @@ export class Worksheet implements IWorksheet {
       stringToCoordinate(key),
     );
     list.sort((a, b) => a.col - b.col);
+    const endIndex = isRight ? colIndex + 1 : colIndex;
     for (let i = list.length - 1; i >= 0; i--) {
       const item = list[i];
-      if (isRight) {
-        if (item.col <= colIndex) {
-          break;
-        }
-      } else {
-        if (item.col < colIndex) {
-          break;
-        }
+      if (item.col < endIndex) {
+        continue;
       }
 
       const key = coordinateToString(item.row, item.col);
       const newKey = coordinateToString(item.row, item.col + count);
-      const newValue = sheetData[key] ? { ...sheetData[key] } : undefined;
-      const oldValue = sheetData[newKey] ? { ...sheetData[newKey] } : undefined;
-
-      if (newValue) {
-        sheetData[newKey] = newValue;
-        delete sheetData[key];
-        this.model.push({
-          type: 'worksheets',
-          key: `${id}.${newKey}`,
-          newValue: newValue,
-          oldValue: oldValue ? oldValue : DELETE_FLAG,
-        });
-        this.model.push({
-          type: 'worksheets',
-          key: `${id}.${key}`,
-          newValue: DELETE_FLAG,
-          oldValue: newValue,
-        });
-      }
+      const newValue = sheetData[key] ? { ...sheetData[key] } : { value: '' };
+      const oldValue = sheetData[newKey]
+        ? { ...sheetData[newKey] }
+        : { value: '' };
+      delete sheetData[key];
+      this.model.push({
+        type: 'worksheets',
+        key: `${id}.${key}`,
+        newValue: DELETE_FLAG,
+        oldValue: newValue,
+      });
+      sheetData[newKey] = newValue;
+      this.model.push({
+        type: 'worksheets',
+        key: `${id}.${newKey}`,
+        newValue: newValue,
+        oldValue: oldValue,
+      });
     }
   }
   deleteCol(colIndex: number, count: number): void {

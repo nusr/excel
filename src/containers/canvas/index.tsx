@@ -31,11 +31,11 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
 
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    if (!ref.current) {
-      return;
-    }
     controller.setMainDom({ canvas: ref.current! });
-    return initCanvas(controller);
+    const fn = initCanvas(controller);
+    return () => {
+      fn();
+    };
   }, []);
   const handleContextMenu = (event: React.MouseEvent<HTMLCanvasElement>) => {
     event.preventDefault();
