@@ -67,6 +67,130 @@ describe('worksheet.test.ts', () => {
         }),
       ).toEqual({ formula: '=SUM(1,2)', row: 0, col: 0, value: 3 });
     });
+    test('setFormula setValue', () => {
+      controller.setCell([['=SUM(1,2)']], [], {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ formula: '=SUM(1,2)', row: 0, col: 0, value: 3 });
+
+      controller.setCell([['test']], [], {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ formula: '', row: 0, col: 0, value: 'test' });
+    });
+    test('copy', async () => {
+      controller.setCell([['=SUM(1,2)']], [[{ isBold: true }]], {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      controller.setActiveCell({
+        row: 0,
+        col: 0,
+        colCount: 2,
+        rowCount: 2,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      await controller.copy();
+      controller.setActiveCell({
+        row: 5,
+        col: 5,
+        colCount: 2,
+        rowCount: 2,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      await controller.paste();
+      expect(
+        controller.getCell({
+          row: 5,
+          col: 5,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({
+        formula: '=SUM(1,2)',
+        row: 5,
+        col: 5,
+        value: 3,
+        style: { isBold: true },
+      });
+    });
+    test('cut', async () => {
+      controller.setCell([['=SUM(1,2)']], [[{ isBold: true }]], {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      controller.setActiveCell({
+        row: 0,
+        col: 0,
+        colCount: 2,
+        rowCount: 2,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      await controller.cut();
+      controller.setActiveCell({
+        row: 5,
+        col: 5,
+        colCount: 2,
+        rowCount: 2,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      await controller.paste();
+      expect(
+        controller.getCell({
+          row: 5,
+          col: 5,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({
+        formula: '=SUM(1,2)',
+        row: 5,
+        col: 5,
+        value: 3,
+        style: { isBold: true },
+      });
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toBeNull();
+    });
     test('undo redo', () => {
       controller.setCell([[1]], [], {
         row: 0,
@@ -135,6 +259,48 @@ describe('worksheet.test.ts', () => {
           sheetId: controller.getCurrentSheetId(),
         }),
       ).toEqual({ value: 1, row: 0, col: 0, style: { isBold: true } });
+    });
+    test('update', () => {
+      controller.setCell([[1]], [[{ isBold: true }]], {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ value: 1, row: 0, col: 0, style: { isBold: true } });
+      controller.updateCellStyle(
+        { isBold: false, isItalic: true },
+        {
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        },
+      );
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({
+        value: 1,
+        row: 0,
+        col: 0,
+        style: { isBold: false, isItalic: true },
+      });
     });
     test('undo redo', () => {
       controller.setCell([[1]], [[{ isBold: true }]], {

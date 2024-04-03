@@ -31,6 +31,9 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
 
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    if (!ref.current) {
+      return;
+    }
     controller.setMainDom({ canvas: ref.current! });
     const fn = initCanvas(controller);
     return () => {

@@ -1,9 +1,5 @@
 import { WorkBookJSON, ICommandItem, ICol, IModel, CustomItem } from '@/types';
-import {
-  getCustomWidthOrHeightKey,
-  CELL_WIDTH,
-  HIDE_CELL,
-} from '@/util';
+import { getCustomWidthOrHeightKey, CELL_WIDTH, HIDE_CELL } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 
 export class ColManager implements ICol {
@@ -19,7 +15,14 @@ export class ColManager implements ICol {
   }
   fromJSON(json: WorkBookJSON): void {
     const data = json.customWidth || {};
+    const oldValue = { ...this.customWidth };
     this.customWidth = { ...data };
+    this.model.push({
+      type: 'customHeight',
+      key: '',
+      newValue: data,
+      oldValue,
+    });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'customWidth') {
@@ -79,10 +82,8 @@ export class ColManager implements ICol {
       return;
     }
 
-    const newData = { ...oldData };
+    const newData = { ...oldData, len: width };
     const old = this.customWidth[key];
-
-    newData.len = width;
     this.customWidth[key] = newData;
     this.model.push({
       type: 'customWidth',

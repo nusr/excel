@@ -22,7 +22,9 @@ export class Drawing implements IDrawings {
   }
   fromJSON(json: WorkBookJSON): void {
     const data = json.drawings || {};
+    const oldValue = { ...this.drawings };
     this.drawings = { ...data };
+    this.model.push({ type: 'drawings', key: '', newValue: data, oldValue });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'drawings') {
@@ -86,7 +88,11 @@ export class Drawing implements IDrawings {
     }
     for (const key of keyList) {
       if (item[key] !== value[key]) {
-        const oldValue = item[key];
+        const oldValue =
+          typeof item[key] === 'object' && item[key]
+            ? // @ts-ignore
+              { ...item[key] }
+            : item[key];
         // @ts-ignore
         item[key] = value[key];
         this.model.push({

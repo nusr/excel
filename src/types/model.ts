@@ -109,7 +109,8 @@ export type ChangeEventType =
   | 'col'
   | 'cellValue'
   | 'cellStyle'
-  | 'undoRedo';
+  | 'undoRedo'
+  | 'noHistory';
 export interface EventType {
   changeSet: Set<ChangeEventType>;
 }

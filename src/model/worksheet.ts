@@ -34,7 +34,10 @@ export class Worksheet implements IWorksheet {
   }
   fromJSON(json: WorkBookJSON): void {
     const data = json.worksheets || {};
+    this.worksheets = this.worksheets || {};
+    const oldValue = { ...this.worksheets };
     this.worksheets = { ...data };
+    this.model.push({ type: 'worksheets', key: '', newValue: data, oldValue });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'worksheets') {
@@ -247,9 +250,7 @@ export class Worksheet implements IWorksheet {
     if (deepEqual(data, this.worksheets[id])) {
       return;
     }
-    const oldData = this.worksheets[id]
-      ? { ...this.worksheets[id] }
-      : null;
+    const oldData = this.worksheets[id] ? { ...this.worksheets[id] } : null;
     this.worksheets[id] = data;
     this.model.push({
       type: 'worksheets',

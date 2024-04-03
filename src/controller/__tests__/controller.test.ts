@@ -1,6 +1,7 @@
 import { Controller } from '..';
 import { Model } from '@/model';
 import { HTML_FORMAT, PLAIN_FORMAT, headerSizeSet } from '@/util';
+import { WorkBookJSON } from '@/types';
 
 describe('controller.test.ts', () => {
   let controller: Controller;
@@ -30,7 +31,30 @@ describe('controller.test.ts', () => {
         scrollTop: 0,
       });
     });
-    test('set', () => {
+    test('set 10', () => {
+      const headerSize = headerSizeSet.get();
+      controller.setScroll({
+        top: 1000,
+        left: 0,
+        row: 10,
+        col: 0,
+        scrollLeft: 0,
+        scrollTop: 80800,
+      });
+      expect(controller.getScroll()).toEqual({
+        top: 1000,
+        left: 0,
+        row: 10,
+        col: 0,
+        scrollLeft: 0,
+        scrollTop: 80800,
+      });
+      expect(headerSizeSet.get()).toEqual({
+        width: headerSize.width,
+        height: headerSize.height,
+      });
+    });
+    test('set 100000', () => {
       const headerSize = headerSizeSet.get();
       controller.setScroll({
         top: 1000,
@@ -155,6 +179,238 @@ describe('controller.test.ts', () => {
           colCount: 1,
         }),
       ).toBeNull();
+    });
+  });
+  describe('json', () => {
+    test('toJSON', () => {
+      controller.setDefineName(
+        { row: 0, col: 0, sheetId: '', rowCount: 1, colCount: 1 },
+        'foo',
+      );
+      controller.setCell([[1]], [[{ isBold: true }]], {
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      controller.addMergeCell({
+        row: 20,
+        col: 20,
+        rowCount: 3,
+        colCount: 3,
+        sheetId: '',
+      });
+      controller.setColWidth(40, 100);
+      controller.setRowHeight(50, 200);
+      controller.addDrawing({
+        width: 400,
+        height: 300,
+        originHeight: 300,
+        originWidth: 400,
+        title: 'chart',
+        type: 'chart',
+        uuid: 'test',
+        sheetId: controller.getCurrentSheetId(),
+        fromRow: 10,
+        fromCol: 10,
+        chartRange: {
+          row: 0,
+          col: 0,
+          rowCount: 4,
+          colCount: 4,
+          sheetId: controller.getCurrentSheetId(),
+        },
+        chartType: 'line',
+        marginX: 0,
+        marginY: 0,
+      });
+      const sheetId = controller.getCurrentSheetId();
+      controller.setActiveCell({
+        row: 3,
+        col: 3,
+        rowCount: 1,
+        colCount: 1,
+        sheetId,
+      });
+      const result: WorkBookJSON = {
+        currentSheetId: sheetId,
+        rangeMap: {
+          [sheetId]: { row: 3, col: 3, rowCount: 1, colCount: 1, sheetId },
+        },
+        workbook: {
+          [sheetId]: {
+            rowCount: 200,
+            colCount: 30,
+            sort: 1,
+            name: 'Sheet1',
+            sheetId,
+            isHide: false,
+          },
+        },
+        definedNames: {
+          foo: { row: 0, col: 0, sheetId, rowCount: 1, colCount: 1 },
+        },
+        worksheets: {
+          [sheetId]: {
+            '0_0': {
+              value: 1,
+              style: {
+                isBold: true,
+              },
+            },
+          },
+        },
+        mergeCells: {
+          'Sheet1!$U$21:$X$24': {
+            row: 20,
+            col: 20,
+            rowCount: 3,
+            colCount: 3,
+            sheetId,
+          },
+        },
+        customHeight: {
+          [`${sheetId}_50`]: {
+            len: 200,
+            isHide: false,
+          },
+        },
+        customWidth: {
+          [`${sheetId}_40`]: {
+            len: 100,
+            isHide: false,
+          },
+        },
+        drawings: {
+          test: {
+            width: 400,
+            height: 300,
+            originHeight: 300,
+            originWidth: 400,
+            title: 'chart',
+            type: 'chart',
+            uuid: 'test',
+            sheetId,
+            fromRow: 10,
+            fromCol: 10,
+            chartRange: {
+              row: 0,
+              col: 0,
+              rowCount: 4,
+              colCount: 4,
+              sheetId,
+            },
+            chartType: 'line',
+            marginX: 0,
+            marginY: 0,
+          },
+        },
+      };
+      expect(controller.toJSON()).toEqual(result);
+    });
+    test('fromJSON', () => {
+      const sheetId = '1';
+      const result: WorkBookJSON = {
+        currentSheetId: sheetId,
+        rangeMap: {
+          [sheetId]: { row: 3, col: 3, rowCount: 1, colCount: 1, sheetId },
+        },
+        workbook: {
+          [sheetId]: {
+            rowCount: 200,
+            colCount: 30,
+            sort: 1,
+            name: 'Sheet1',
+            sheetId,
+            isHide: false,
+          },
+        },
+        definedNames: {
+          foo: { row: 0, col: 0, sheetId, rowCount: 1, colCount: 1 },
+        },
+        worksheets: {
+          [sheetId]: {
+            '0_0': {
+              formula: '=SUM(1,2)',
+              value: '',
+              style: {
+                isBold: true,
+              },
+            },
+          },
+        },
+        mergeCells: {
+          'Sheet1!$U$21:$X$24': {
+            row: 20,
+            col: 20,
+            rowCount: 3,
+            colCount: 3,
+            sheetId,
+          },
+        },
+        customHeight: {
+          [`${sheetId}_50`]: {
+            len: 200,
+            isHide: false,
+          },
+        },
+        customWidth: {
+          [`${sheetId}_40`]: {
+            len: 300,
+            isHide: false,
+          },
+        },
+        drawings: {
+          test: {
+            width: 400,
+            height: 300,
+            originHeight: 300,
+            originWidth: 400,
+            title: 'chart',
+            type: 'chart',
+            uuid: 'test',
+            sheetId,
+            fromRow: 10,
+            fromCol: 10,
+            chartRange: {
+              row: 0,
+              col: 0,
+              rowCount: 4,
+              colCount: 4,
+              sheetId,
+            },
+            chartType: 'line',
+            marginX: 0,
+            marginY: 0,
+          },
+        },
+      };
+      controller.fromJSON(result);
+      expect(controller.getCurrentSheetId()).toEqual(sheetId);
+      expect(controller.getSheetList()).toHaveLength(1);
+      expect(controller.getDefineNameList()).toHaveLength(1);
+      expect(controller.getMergeCellList()).toHaveLength(1);
+      expect(controller.getDrawingList()).toHaveLength(1);
+      expect(controller.getColWidth(40).len).toEqual(300);
+      expect(controller.getRowHeight(50).len).toEqual(200);
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          rowCount: 1,
+          colCount: 1,
+          sheetId,
+        }),
+      ).toEqual({
+        row: 0,
+        col: 0,
+        formula: '=SUM(1,2)',
+        value: 3,
+        style: {
+          isBold: true,
+        },
+      });
     });
   });
 });

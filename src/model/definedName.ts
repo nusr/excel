@@ -21,7 +21,14 @@ export class DefinedName implements IDefinedName {
   }
   fromJSON(json: WorkBookJSON): void {
     const data = json.definedNames || {};
+    const oldValue = { ...this.definedNames };
     this.definedNames = { ...data };
+    this.model.push({
+      type: 'definedNames',
+      key: '',
+      newValue: data,
+      oldValue,
+    });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'definedNames') {

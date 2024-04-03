@@ -49,23 +49,19 @@ export class Content implements ContentView {
     }
     canvasLog('render again');
     controller.batchUpdate(() => {
-      let check = false;
       for (const [r, h] of this.rowMap.entries()) {
         if (h <= 0 || controller.getRowHeight(r).len === h) {
           continue;
         }
-        check = true;
         controller.setRowHeight(r, h);
       }
       for (const [c, w] of this.colMap.entries()) {
         if (w <= 0 || controller.getColWidth(c).len === w) {
           continue;
         }
-        check = true;
         controller.setColWidth(c, w);
       }
-      return check;
-    });
+    }, true);
   }
 
   private clear() {

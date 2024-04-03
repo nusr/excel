@@ -73,7 +73,7 @@ describe('History.test.ts', () => {
       };
       history.push(command);
       history.commit();
-      expect(history.get()).toEqual([command]);
+      expect(history.canUndo()).toEqual(true);
     });
     test('support change options', () => {
       let value = '1';
@@ -124,8 +124,6 @@ describe('History.test.ts', () => {
         newValue: '1',
         oldValue: '2',
       };
-      history.push(command);
-      history.commit();
       history.push(command);
       history.commit();
 

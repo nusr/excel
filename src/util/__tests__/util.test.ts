@@ -20,6 +20,7 @@ describe('util.test.ts', () => {
       expect(getDefaultSheetInfo()).toMatchObject({
         name: 'Sheet1',
         sheetId: '1',
+        sort: 1,
       });
     });
     it('should convert array', () => {
@@ -37,6 +38,7 @@ describe('util.test.ts', () => {
       ).toMatchObject({
         name: 'Sheet4',
         sheetId: '4',
+        sort: 4,
       });
     });
   });

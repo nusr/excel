@@ -1,8 +1,4 @@
-import {
-  IController,
-  KeyboardEventItem,
-  EditorStatus,
-} from '@/types';
+import { IController, KeyboardEventItem, EditorStatus } from '@/types';
 import { throttle } from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';

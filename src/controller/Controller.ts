@@ -68,13 +68,14 @@ export class Controller implements IController {
   getSheetInfo(sheetId?: string) {
     return this.model.getSheetInfo(sheetId);
   }
-  batchUpdate(fn: () => boolean): void {
+  batchUpdate(fn: () => void, isNoHistory = false): void {
     this.isNoChange = true;
-    const check = fn();
-    this.isNoChange = false;
-    if (check) {
-      this.emitChange();
+    fn();
+    if (isNoHistory) {
+      this.changeSet.add('noHistory');
     }
+    this.isNoChange = false;
+    this.emitChange();
   }
   emitChange(): void {
     if (this.isNoChange) {
@@ -248,7 +249,6 @@ export class Controller implements IController {
   }
   setCurrentSheetId(id: string): void {
     this.model.setCurrentSheetId(id);
-
     this.setScroll(this.getScroll());
   }
   getWorksheet(sheetId?: string): WorksheetData | null {
@@ -307,7 +307,6 @@ export class Controller implements IController {
   }
   updateCellStyle(style: Partial<StyleType>, range: IRange): void {
     this.model.updateCellStyle(style, range);
-
     this.emitChange();
   }
   getCell = (range: IRange) => {
@@ -424,17 +423,14 @@ export class Controller implements IController {
   }
   deleteRow(rowIndex: number, count: number): void {
     this.model.deleteRow(rowIndex, count);
-
     this.emitChange();
   }
   hideCol(colIndex: number, count: number): void {
     this.model.hideCol(colIndex, count);
-
     this.emitChange();
   }
   hideRow(rowIndex: number, count: number): void {
     this.model.hideRow(rowIndex, count);
-
     this.emitChange();
   }
   getScroll(sheetId?: string): ScrollValue {
@@ -563,7 +559,6 @@ export class Controller implements IController {
       if (this.isCut) {
         const uuid = this.floatElementUuid;
         const range = this.getActiveCell();
-
         this.model.updateDrawing(uuid, {
           fromCol: range.col,
           fromRow: range.row,
@@ -575,36 +570,36 @@ export class Controller implements IController {
         this.isCut = false;
         this.floatElementUuid = '';
         this.emitChange();
-      } else {
-        const list = this.getDrawingList(this.getCurrentSheetId());
-        const item = list.find((v) => v.uuid === this.floatElementUuid);
-        if (item) {
-          const size = this.getCellSize({
-            row: item.fromRow,
-            col: item.fromCol,
-            rowCount: 1,
-            colCount: 1,
-            sheetId: item.sheetId,
-          });
-          let { marginX, marginY } = item;
-          const offset = 14;
-          if (marginX + offset < size.width) {
-            marginX += offset;
-          } else if (marginX - offset >= 0) {
-            marginX -= offset;
-          }
-          if (marginY + offset < size.width) {
-            marginY += offset;
-          } else if (marginY - offset >= 0) {
-            marginY -= offset;
-          }
-          this.addDrawing({
-            ...item,
-            uuid: generateUUID(),
-            marginX,
-            marginY,
-          });
+        return;
+      }
+      const list = this.getDrawingList(this.getCurrentSheetId());
+      const item = list.find((v) => v.uuid === this.floatElementUuid);
+      if (item) {
+        const size = this.getCellSize({
+          row: item.fromRow,
+          col: item.fromCol,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: item.sheetId,
+        });
+        let { marginX, marginY } = item;
+        const offset = 14;
+        if (marginX + offset < size.width) {
+          marginX += offset;
+        } else if (marginX - offset >= 0) {
+          marginX -= offset;
         }
+        if (marginY + offset < size.width) {
+          marginY += offset;
+        } else if (marginY - offset >= 0) {
+          marginY -= offset;
+        }
+        this.addDrawing({
+          ...item,
+          uuid: generateUUID(),
+          marginX,
+          marginY,
+        });
       }
       return;
     }
@@ -730,7 +725,6 @@ export class Controller implements IController {
   }
   setDefineName(range: IRange, name: string): void {
     this.model.setDefineName(range, name);
-
     this.emitChange();
   }
   checkDefineName(name: string): IRange | null {
@@ -741,17 +735,14 @@ export class Controller implements IController {
   }
   addDrawing(data: DrawingElement) {
     this.model.addDrawing(data);
-
     this.emitChange();
   }
   updateDrawing(uuid: string, value: Partial<DrawingElement>) {
     this.model.updateDrawing(uuid, value);
-
     this.emitChange();
   }
   deleteDrawing(uuid: string) {
     this.model.deleteDrawing(uuid);
-
     this.emitChange();
   }
   getMergeCellList(sheetId?: string): IRange[] {
@@ -759,12 +750,10 @@ export class Controller implements IController {
   }
   addMergeCell(range: IRange): void {
     this.model.addMergeCell(range);
-
     this.emitChange();
   }
   deleteMergeCell(range: IRange): void {
     this.model.deleteMergeCell(range);
-
     this.emitChange();
   }
   setFloatElementUuid(uuid: string) {

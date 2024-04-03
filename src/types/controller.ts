@@ -51,5 +51,5 @@ export interface IController extends IBaseModel {
   setScroll(scroll: ScrollValue): void;
   getScroll(sheetId?: string): ScrollValue;
   setFloatElementUuid(uuid: string): void;
-  batchUpdate: (fn: () => boolean) => void;
+  batchUpdate: (fn: () => void, isNoHistory?: boolean) => void;
 }

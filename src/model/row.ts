@@ -15,7 +15,14 @@ export class RowManager implements IRow {
   }
   fromJSON(json: WorkBookJSON): void {
     const data = json.customHeight || {};
+    const oldValue = { ...this.customHeight };
     this.customHeight = { ...data };
+    this.model.push({
+      type: 'customHeight',
+      key: '',
+      newValue: data,
+      oldValue,
+    });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'customHeight') {

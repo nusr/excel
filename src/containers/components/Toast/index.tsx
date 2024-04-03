@@ -11,10 +11,9 @@ type Props = {
   duration?: number; // second
 };
 
-const Toast: React.FunctionComponent<Pick<Props, 'message' | 'type'>> = ({
-  message,
-  type,
-}) => {
+export const Toast: React.FunctionComponent<
+  Pick<Props, 'message' | 'type'>
+> = ({ message, type }) => {
   return (
     <div className={classnames(styles['toast'], styles[type])}>
       <Icon

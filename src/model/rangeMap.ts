@@ -15,7 +15,9 @@ export class RangeMap implements IRangeMap {
   }
   fromJSON(json: WorkBookJSON): void {
     const data = json.rangeMap || {};
+    const oldValue = { ...this.rangeMap };
     this.rangeMap = { ...data };
+    this.model.push({ type: 'rangeMap', key: '', newValue: data, oldValue });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'rangeMap') {
@@ -53,7 +55,9 @@ export class RangeMap implements IRangeMap {
     if (row < 0 || col < 0 || row >= sheet.rowCount || col >= sheet.colCount) {
       return;
     }
-    const oldValue = this.rangeMap[newRange.sheetId];
+    const oldValue = this.rangeMap[newRange.sheetId]
+      ? { ...this.rangeMap[newRange.sheetId] }
+      : undefined;
     if (oldValue && isSameRange(oldValue, newRange)) {
       return;
     }

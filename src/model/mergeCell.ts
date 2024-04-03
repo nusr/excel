@@ -22,7 +22,9 @@ export class MergeCell implements IMergeCell {
   }
   fromJSON(json: WorkBookJSON): void {
     const data = json.mergeCells || {};
+    const oldValue = { ...this.mergeCells };
     this.mergeCells = { ...data };
+    this.model.push({ type: 'mergeCells', key: '', newValue: data, oldValue });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'mergeCells') {

@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState, memo } from 'react';
+import React, { FunctionComponent, useState, memo, useCallback } from 'react';
 import styles from './index.module.css';
 import { classnames } from '@/util';
 import { useClickOutside } from '../../hooks';
@@ -59,9 +59,9 @@ export const SubMenu: FunctionComponent<
 export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = memo(
   ({ menuButton, children, style, testId, className }) => {
     const [open, setOpen] = useState(false);
-    const handleClick = () => {
+    const handleClick = useCallback(() => {
       setOpen((v) => !v);
-    };
+    }, []);
     const [ref] = useClickOutside(() => setOpen(false));
     return (
       <div className={classnames(styles.container, className)} ref={ref}>

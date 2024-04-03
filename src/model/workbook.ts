@@ -30,12 +30,21 @@ export class Workbook implements IWorkbook {
   fromJSON(json: WorkBookJSON): void {
     const workbook = json.workbook || {};
     const currentSheetId = json.currentSheetId || '';
+    const oldValue = { ...this.workbook };
+
     this.workbook = { ...workbook };
+
+    let newSheetId = this.getSheetId();
     if (workbook[currentSheetId] && !workbook[currentSheetId].isHide) {
-      this.currentSheetId = currentSheetId;
-    } else {
-      this.currentSheetId = this.getSheetId();
+      newSheetId = currentSheetId;
     }
+    this.setCurrentSheetId(newSheetId);
+    this.model.push({
+      type: 'workbook',
+      key: '',
+      newValue: workbook,
+      oldValue,
+    });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'currentSheetId') {
@@ -104,7 +113,6 @@ export class Workbook implements IWorkbook {
       isHide: false,
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
-      sort: list.length,
     };
     const check = this.workbook[sheet.sheetId];
     assert(!check, $('sheet-id-is-duplicate'));

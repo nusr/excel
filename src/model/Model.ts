@@ -49,6 +49,7 @@ export class Model implements IModel {
       undo: this.historyUndo,
       redo: this.historyRedo,
       change: this.historyChange,
+      maxLength: 1000,
     });
     this.workbookManager = new Workbook(this);
     this.rangeMapManager = new RangeMap(this);
@@ -88,11 +89,18 @@ export class Model implements IModel {
         oldValue: '',
       });
     }
+    if (set.has('noHistory')) {
+      this.push({
+        type: 'noHistory',
+        key: '',
+        newValue: '',
+        oldValue: '',
+      });
+    }
     if (!set.has('undoRedo')) {
       this.history.commit();
-    } else {
-      this.history.clear(false);
-    }
+    } 
+    this.history.clear(false);
   }
 
   getSheetList(): WorksheetType[] {
@@ -151,6 +159,7 @@ export class Model implements IModel {
     this.mergeCellManager.fromJSON(json);
     this.rowManager.fromJSON(json);
     this.colManager.fromJSON(json);
+    this.worksheetManager.computeFormulas();
     this.history.clear(true);
   };
   toJSON = (): WorkBookJSON => {

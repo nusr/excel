@@ -49,11 +49,12 @@ export function getListMaxNum(list: string[] = []): number {
 
 export function getDefaultSheetInfo(
   list: WorksheetType[] = [],
-): Pick<WorksheetType, 'name' | 'sheetId'> {
+): Pick<WorksheetType, 'name' | 'sheetId' | 'sort'> {
   const sheetId = getListMaxNum(list.map((item) => item.sheetId)) + 1;
   return {
     name: `${SHEET_NAME_PREFIX}${sheetId}`,
     sheetId: String(sheetId),
+    sort: sheetId,
   };
 }
 

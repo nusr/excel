@@ -73,12 +73,13 @@ export class History implements IHistory {
     if (this.commands.length === 0) {
       return;
     }
+    const check = this.commands.some((v) => v.type === 'noHistory');
     const list = this.commands.filter(
       (v) =>
         v.type !== 'scroll' && v.type !== 'antLine' && v.type !== 'rangeMap',
     );
-    if (list.length === 0) {
-      this.change(this.commands.slice(), 'commit');
+    if (check || list.length === 0) {
+      this.change([...this.commands], 'commit');
       this.commands = [];
       return;
     }
@@ -104,51 +105,67 @@ export class History implements IHistory {
       }
     }
 
-    this.change(this.commands.slice(), 'commit');
+    this.change([...this.commands], 'commit');
     this.commands = [];
   }
   redo(): void {
-    if (!this.canRedo()) {
+    const index = this.findRedoIndex();
+    if (index < 0) {
       return;
     }
-    this.position++;
-    const list = this.commandList[this.position];
+    const list = this.commandList[index];
     if (list.length > 0) {
       for (const item of list) {
         this.options.redo(item as ICommandItem);
       }
     }
+    this.position = index;
     this.change(list, 'undoRedo');
   }
   undo(): void {
-    if (!this.canUndo()) {
+    const index = this.findUndoIndex();
+    if (index < 0) {
       return;
     }
-    const list = this.commandList[this.position];
+    const list = this.commandList[index];
     if (list.length > 0) {
       for (const item of list) {
         this.options.undo(item as ICommandItem);
       }
     }
-    this.position--;
+    this.position = index - 1;
     this.change(list, 'undoRedo');
   }
-  canRedo(): boolean {
+  private findRedoIndex() {
     if (this.position >= this.commandList.length - 1) {
-      return false;
+      return -1;
     }
-    let hasRecord = false;
     for (let i = this.position + 1; i < this.commandList.length; i++) {
       if (this.commandList[i].length > 0) {
-        hasRecord = true;
-        break;
+        return i;
       }
     }
-    return hasRecord;
+    return -1;
+  }
+
+  canRedo(): boolean {
+    const index = this.findRedoIndex();
+    return index >= 0;
+  }
+  private findUndoIndex() {
+    if (this.position < 0) {
+      return -1;
+    }
+    for (let i = this.position; i >= 0; i--) {
+      if (this.commandList[i].length > 0) {
+        return i;
+      }
+    }
+    return -1;
   }
   canUndo(): boolean {
-    const lower = Math.max(this.commandList.length - this.options.maxLength, 0);
-    return this.position > lower;
+    const index = this.findUndoIndex();
+    return index >= 0;
   }
   clear(clearAll: boolean = false): void {
     if (clearAll) {
@@ -161,10 +178,7 @@ export class History implements IHistory {
     this.options.change(_list, type);
   }
   get(): ICommandItem[] {
-    if (this.position >= 0 && this.position < this.commandList.length) {
-      return this.commandList[this.position];
-    }
-    return [];
+    return this.commands;
   }
   getLength(): number {
     return Math.min(this.commandList.length, this.options.maxLength);

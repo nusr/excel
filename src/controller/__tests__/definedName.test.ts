@@ -35,8 +35,16 @@ describe('definedName.test.ts', () => {
         },
         'foo',
       );
-      const list = controller.getDefineNameList();
-      expect(list).toHaveLength(1);
+      expect(
+        controller.getDefineName({
+          row: 0,
+          col: 0,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual('foo');
+      expect(controller.getDefineNameList()).toHaveLength(1);
       expect(controller.checkDefineName('foo')).toEqual({
         row: 0,
         col: 0,
