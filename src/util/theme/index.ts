@@ -1,14 +1,14 @@
 import { ThemeType } from '@/types';
 import size from './size';
 import zIndex from './zIndex';
-
 import { lightColor, darkColor } from './color';
+import { convertColorToDark } from './convert';
+
 export const sizeConfig = {
   ...size,
   ...zIndex,
 };
 
-export { darkColor, lightColor };
 const themeKey = 'data-theme' as const;
 
 export function setTheme(value: ThemeType) {
@@ -35,3 +35,4 @@ export function getThemeColor(key: keyof typeof lightColor) {
     return lightColor[key];
   }
 }
+export { darkColor, lightColor, convertColorToDark };

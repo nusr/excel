@@ -85,6 +85,9 @@
   margin: 0 var(--tinyPadding);
 }
 
+.bottom-bar-input {
+  width: 60px;
+}
 .add-button {
   display: flex;
   align-items: center;

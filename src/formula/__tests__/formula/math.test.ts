@@ -1,14 +1,16 @@
-import { SUM, SIN } from '../../formula/math';
+import { ABS, ACOS, SUM, SIN } from '../../formula/math';
 
 describe('math.test.ts', () => {
-  describe('SUM', () => {
-    test('normal', () => {
-      expect(SUM(1, 2, 'a')).toEqual(3);
-    });
+  test('ABS', () => {
+    expect(ABS(-1)).toEqual(1);
   });
-  describe('SIN', () => {
-    test('normal', () => {
-      expect(SIN(90)).toEqual(Math.sin(90));
-    });
+  test('ACOS', () => {
+    expect(ACOS(1)).toEqual(0);
+  });
+  test('SUM', () => {
+    expect(SUM(1, 2, 'a')).toEqual(3);
+  });
+  test('SIN', () => {
+    expect(SIN(Math.PI / 2)).toEqual(1);
   });
 });

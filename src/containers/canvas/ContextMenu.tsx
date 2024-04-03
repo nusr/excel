@@ -62,6 +62,8 @@ function computeMenuStyle(controller: IController, top: number, left: number) {
   };
 }
 
+const threshold = 10000;
+
 export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
   const {
     controller,
@@ -84,7 +86,16 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       ? controller.getRowHeight(row).len
       : controller.getColWidth(col).len;
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      value = parseInt(event.currentTarget.value, 10);
+      const t = parseInt(event.target.value, 10);
+      if (!isNaN(t)) {
+        if (t < 0) {
+          value = 0;
+        } else if (value > threshold) {
+          value = threshold;
+        } else {
+          value = t;
+        }
+      }
       event.stopPropagation();
     };
     info({
@@ -93,8 +104,8 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       children: (
         <input
           type="number"
-          min="0"
-          max="10000"
+          min={0}
+          max={threshold}
           style={{ width: '200px' }}
           defaultValue={value}
           onChange={handleChange}
@@ -138,6 +149,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           controller.setFloatElementUuid('');
           controller.copy();
         }}
+        testId="context-menu-copy"
       >
         {$('copy')}
       </Button>
@@ -147,10 +159,12 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           controller.setFloatElementUuid('');
           controller.cut();
         }}
+        testId="context-menu-cut"
       >
         {$('cut')}
       </Button>
       <Button
+        testId="context-menu-paste"
         onClick={() => {
           hideContextMenu();
           controller.paste();
@@ -162,6 +176,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
         position === ClickPosition.CONTENT) && (
         <Fragment>
           <Button
+            testId="context-menu-insert-row-above"
             onClick={() => {
               hideContextMenu();
               controller.addRow(row, rowCount, true);
@@ -170,6 +185,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
             {$('insert-row-above')}
           </Button>
           <Button
+            testId="context-menu-insert-row-below"
             onClick={() => {
               hideContextMenu();
               controller.addRow(row, rowCount);
@@ -183,6 +199,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
         position === ClickPosition.CONTENT) && (
         <Fragment>
           <Button
+            testId="context-menu-insert-column-left"
             onClick={() => {
               hideContextMenu();
               controller.addCol(col, colCount);
@@ -191,6 +208,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
             {$('insert-column-left')}
           </Button>
           <Button
+            testId="context-menu-insert-column-right"
             onClick={() => {
               hideContextMenu();
               controller.addCol(col, colCount, true);
@@ -202,6 +220,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       )}
       {position === ClickPosition.TRIANGLE && (
         <Button
+          testId="context-menu-delete"
           onClick={() => {
             hideContextMenu();
             controller.deleteAll(controller.getCurrentSheetId());
@@ -213,24 +232,25 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       {position === ClickPosition.COLUMN_HEADER && (
         <Fragment>
           <Button
+            testId="context-menu-delete-column"
             onClick={() => {
               hideContextMenu();
-
               controller.deleteCol(col, colCount);
             }}
           >
             {$('delete-columns')}
           </Button>
           <Button
+            testId="context-menu-hide-column"
             onClick={() => {
               hideContextMenu();
-
               controller.hideCol(col, colCount);
             }}
           >
             {$('hide-columns')}
           </Button>
           <Button
+            testId="context-menu-column-width"
             onClick={() => {
               handleDialog(false);
             }}
@@ -242,6 +262,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       {position === ClickPosition.ROW_HEADER && (
         <Fragment>
           <Button
+            testId="context-menu-delete-row"
             onClick={() => {
               hideContextMenu();
               controller.deleteRow(row, rowCount);
@@ -250,6 +271,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
             {$('delete-rows')}
           </Button>
           <Button
+            testId="context-menu-hide-row"
             onClick={() => {
               hideContextMenu();
               controller.hideRow(row, rowCount);
@@ -258,6 +280,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
             {$('hide-rows')}
           </Button>
           <Button
+            testId="context-menu-row-height"
             onClick={() => {
               handleDialog(true);
             }}

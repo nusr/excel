@@ -112,6 +112,24 @@ describe('controller.test.ts', () => {
         top: headerSize.height,
       });
     });
+    test('distance', () => {
+      const size = controller.computeCellPosition({
+        row: 5,
+        col: 5,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: '',
+      });
+      const size2 = controller.computeCellPosition({
+        row: 6,
+        col: 6,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: '',
+      });
+      expect(size2.left - size.left).toEqual(controller.getColWidth(5).len);
+      expect(size2.top - size.top).toEqual(controller.getRowHeight(5).len);
+    });
   });
 
   describe('DomRect', () => {

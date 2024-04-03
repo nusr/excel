@@ -125,117 +125,40 @@ export class Controller implements IController {
     let startCol = range.col;
     let startRow = range.row;
     const sheetInfo = this.getSheetInfo(range.sheetId)!;
-    const mergeCells = this.getMergeCellList(range.sheetId);
     const result = {
       ...range,
     };
     if (direction === 'left') {
       startCol--;
-      while (1) {
-        let check1 = false;
-        let check2 = false;
-        for (const item of mergeCells) {
-          if (startCol >= item.col && startCol < item.col + item.colCount) {
-            startCol = Math.min(startCol, item.col - 1);
-            check1 = true;
-            break;
-          }
-        }
-        while (startCol > 0 && this.getColWidth(startCol).len <= 0) {
-          startCol--;
-          check2 = true;
-        }
-        if (startCol <= 0) {
-          startCol = 0;
-          break;
-        }
-        if (!check2 && !check1) {
-          break;
-        }
+      while (startCol > 0 && this.getColWidth(startCol).len <= 0) {
+        startCol--;
       }
       result.col = startCol;
     }
     if (direction === 'right') {
       startCol++;
-      while (1) {
-        let check1 = false;
-        let check2 = false;
-        for (const item of mergeCells) {
-          if (startCol >= item.col && startCol < item.col + item.colCount) {
-            startCol = Math.max(startCol, item.col + item.colCount);
-            check1 = true;
-            break;
-          }
-        }
-        while (
-          startCol < sheetInfo.colCount &&
-          this.getColWidth(startCol).len <= 0
-        ) {
-          startCol++;
-          check2 = true;
-        }
-        if (startCol >= sheetInfo.colCount - 1) {
-          startCol = sheetInfo.colCount - 1;
-          break;
-        }
-        if (!check2 && !check1) {
-          break;
-        }
+      while (
+        startCol < sheetInfo.colCount &&
+        this.getColWidth(startCol).len <= 0
+      ) {
+        startCol++;
       }
       result.col = startCol;
     }
     if (direction === 'up') {
       startRow--;
-      while (1) {
-        let check1 = false;
-        let check2 = false;
-        for (const item of mergeCells) {
-          if (startRow >= item.row && startRow < item.row + item.rowCount) {
-            startRow = Math.min(startRow, item.row - 1);
-            check1 = true;
-            break;
-          }
-        }
-        while (startRow > 0 && this.getColWidth(startRow).len <= 0) {
-          startRow--;
-          check2 = true;
-        }
-        if (startRow <= 0) {
-          startRow = 0;
-          break;
-        }
-        if (!check2 && !check1) {
-          break;
-        }
+      while (startRow > 0 && this.getRowHeight(startRow).len <= 0) {
+        startRow--;
       }
       result.row = startRow;
     }
     if (direction === 'down') {
       startRow++;
-      while (1) {
-        let check1 = false;
-        let check2 = false;
-        for (const item of mergeCells) {
-          if (startRow >= item.row && startRow < item.row + item.rowCount) {
-            startRow = Math.max(startRow, item.row + item.rowCount);
-            check1 = true;
-            break;
-          }
-        }
-        while (
-          startRow < sheetInfo.rowCount &&
-          this.getColWidth(startRow).len <= 0
-        ) {
-          startRow++;
-          check2 = true;
-        }
-        if (startRow >= sheetInfo.rowCount - 1) {
-          startRow = sheetInfo.rowCount - 1;
-          break;
-        }
-        if (!check2 && !check1) {
-          break;
-        }
+      while (
+        startRow < sheetInfo.rowCount &&
+        this.getRowHeight(startRow).len <= 0
+      ) {
+        startRow++;
       }
       result.row = startRow;
     }

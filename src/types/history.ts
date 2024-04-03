@@ -4,7 +4,7 @@ export type ICommandItem = {
   /**
    * type, eg. worksheets workbook
    */
-  type: keyof WorkBookJSON | 'antLine' | 'scroll' | 'noHistory';
+  type: keyof WorkBookJSON | 'antLine' | 'scroll';
   /**
    * key eg. 1.6_4.value, 1.name
    */

@@ -53,30 +53,93 @@ describe('rangeMap.test.ts', () => {
         colCount: 1,
         sheetId: controller.getCurrentSheetId(),
       });
+    });
+    test('hideRow up', () => {
+      controller.setActiveCell({
+        row: 5,
+        col: 5,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
+      controller.hideRow(3, 2);
       expect(controller.setNextActiveCell('up')).toEqual({
-        row: 1,
-        col: 2,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: controller.getCurrentSheetId(),
-      });
-      expect(controller.setNextActiveCell('left')).toEqual({
-        row: 1,
-        col: 1,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: controller.getCurrentSheetId(),
-      });
-      expect(controller.setNextActiveCell('right')).toEqual({
-        row: 1,
-        col: 2,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: controller.getCurrentSheetId(),
-      });
-      expect(controller.setNextActiveCell('down')).toEqual({
         row: 2,
+        col: 5,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+    });
+    test('mergeCell up', () => {
+      controller.setActiveCell({
+        row: 5,
+        col: 5,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
+      controller.addMergeCell({
+        row: 4,
+        col: 5,
+        rowCount: 1,
+        colCount: 10,
+        sheetId: '',
+      });
+      expect(controller.setNextActiveCell('up')).toEqual({
+        row: 4,
+        col: 5,
+        rowCount: 1,
+        colCount: 10,
+        sheetId: controller.getCurrentSheetId(),
+      });
+    });
+    test('hideRow down', () => {
+      controller.setActiveCell({
+        row: 5,
+        col: 5,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
+      controller.hideRow(6, 2);
+      expect(controller.setNextActiveCell('down')).toEqual({
+        row: 8,
+        col: 5,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+    });
+    test('hideCol left', () => {
+      controller.setActiveCell({
+        row: 5,
+        col: 5,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
+      controller.hideCol(3, 2);
+      expect(controller.setNextActiveCell('left')).toEqual({
+        row: 5,
         col: 2,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+    });
+    test('hideCol right', () => {
+      controller.setActiveCell({
+        row: 5,
+        col: 5,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
+      controller.hideCol(6, 2);
+      expect(controller.setNextActiveCell('right')).toEqual({
+        row: 5,
+        col: 8,
         rowCount: 1,
         colCount: 1,
         sheetId: controller.getCurrentSheetId(),

@@ -1,5 +1,5 @@
 import { IController, KeyboardEventItem, EditorStatus } from '@/types';
-import { throttle } from '@/util';
+import { throttle, isTestEnv } from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';
 
@@ -45,10 +45,9 @@ export function registerGlobalEvent(
   }
 
   const handleWheel = throttle((event: WheelEvent) => {
-    if (event.target !== controller.getMainDom().canvas!) {
-      return;
+    if (event.target === controller.getMainDom().canvas! || isTestEnv()) {
+      scrollBar(controller, event.deltaX, event.deltaY);
     }
-    scrollBar(controller, event.deltaX, event.deltaY);
   }, 1000 / 60);
 
   function handlePaste(event: ClipboardEvent) {

@@ -10,6 +10,9 @@
   margin-right: 8px;
   margin-bottom: var(--mediumPadding);
 }
+.fontFamily {
+  font-size: var(--largeFont);
+}
 .bold {
   font-weight: bold;
 }

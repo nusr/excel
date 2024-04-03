@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export function useFPS() {
   const [fps, setFps] = useState(0);
+  const ref = useRef(0);
 
   useEffect(() => {
     let fpsCounter = 0;
     let lastCalledTime = performance.now();
-    let timer: number;
     function updateFPS() {
       fpsCounter++;
       let delta = (performance.now() - lastCalledTime) / 1000;
@@ -16,11 +16,11 @@ export function useFPS() {
         fpsCounter = 0;
         lastCalledTime = performance.now();
       }
-      timer = requestAnimationFrame(updateFPS);
+      ref.current = requestAnimationFrame(updateFPS);
     }
-    timer = requestAnimationFrame(updateFPS);
+    ref.current = requestAnimationFrame(updateFPS);
     return () => {
-      cancelAnimationFrame(timer);
+      cancelAnimationFrame(ref.current);
     };
   }, []);
 

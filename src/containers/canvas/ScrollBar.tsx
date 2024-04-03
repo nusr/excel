@@ -1,4 +1,11 @@
-import React, { useRef, Fragment, useSyncExternalStore, memo } from 'react';
+import React, {
+  useRef,
+  Fragment,
+  useSyncExternalStore,
+  memo,
+  useEffect,
+  useCallback,
+} from 'react';
 import { IController, ScrollStatus, ScrollValue } from '@/types';
 import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
 import styles from './index.module.css';
@@ -42,87 +49,102 @@ function scrollBar(controller: IController, scrollX: number, scrollY: number) {
     scrollLeft,
     scrollTop,
   };
+  const activeCell = controller.getActiveCell();
+  if (data.row != oldScroll.row) {
+    activeCell.row = data.row;
+  }
+  if (data.col !== oldScroll.col) {
+    activeCell.col = data.col;
+  }
   controller.setScroll(data);
+  return data;
 }
+const initState: State = {
+  prevPageX: 0,
+  prevPageY: 0,
+  scrollStatus: ScrollStatus.NONE,
+};
 export const ScrollBar: React.FunctionComponent<Props> = memo(
   ({ controller }) => {
-    const state = useRef<State>({
-      prevPageX: 0,
-      prevPageY: 0,
-      scrollStatus: ScrollStatus.NONE,
-    });
+    const state = useRef<State>({ ...initState });
     const { scrollLeft, scrollTop } = useSyncExternalStore(
       scrollStore.subscribe,
       scrollStore.getSnapshot,
     );
-    function handleDrag(event: PointerEvent) {
-      if (event.buttons !== 1) {
-        return;
+    useEffect(() => {
+      function handleDragEnd() {
+        state.current = { ...initState };
       }
-      event.stopPropagation();
-      if (state.current.scrollStatus === ScrollStatus.VERTICAL) {
-        if (state.current.prevPageY) {
-          scrollBar(controller, 0, event.pageY - state.current.prevPageY);
+      function handleDrag(event: PointerEvent) {
+        if (
+          event.buttons !== 1 ||
+          state.current.scrollStatus === ScrollStatus.NONE
+        ) {
+          return;
         }
-        state.current.prevPageY = event.pageY;
-      } else if (state.current.scrollStatus === ScrollStatus.HORIZONTAL) {
-        if (state.current.prevPageX) {
-          scrollBar(controller, event.pageX - state.current.prevPageX, 0);
+        if (state.current.scrollStatus === ScrollStatus.VERTICAL) {
+          scrollBar(controller, 0, event.clientY - state.current.prevPageY);
+          state.current.prevPageY = event.clientY;
+        } else if (state.current.scrollStatus === ScrollStatus.HORIZONTAL) {
+          scrollBar(controller, event.clientX - state.current.prevPageX, 0);
+          state.current.prevPageX = event.clientX;
         }
-        state.current.prevPageX = event.pageX;
       }
-    }
-    function handleDragEnd() {
-      state.current.scrollStatus = ScrollStatus.NONE;
-      state.current.prevPageY = 0;
-      state.current.prevPageX = 0;
-      document.removeEventListener('pointermove', handleDrag);
-      document.removeEventListener('pointerup', handleDragEnd);
-    }
-    function register(
-      event: React.PointerEvent<HTMLDivElement>,
-      status: ScrollStatus,
-    ) {
-      if (event.buttons !== 1) {
-        return;
-      }
-      if (state.current.scrollStatus) {
-        return;
-      }
-      state.current.scrollStatus = status;
       document.addEventListener('pointermove', handleDrag);
       document.addEventListener('pointerup', handleDragEnd);
-    }
+      return () => {
+        document.removeEventListener('pointermove', handleDrag);
+        document.removeEventListener('pointerup', handleDragEnd);
+      };
+    }, []);
+    const handleVerticalBarDown = useCallback(
+      (event: React.PointerEvent<HTMLDivElement>) => {
+        if (event.buttons !== 1) {
+          return;
+        }
+        state.current.prevPageX = event.clientX;
+        state.current.prevPageY = event.clientY;
+        state.current.scrollStatus = ScrollStatus.VERTICAL;
+      },
+      [],
+    );
+    const handleHorizontalBarDown = useCallback(
+      (event: React.PointerEvent<HTMLDivElement>) => {
+        if (event.buttons !== 1) {
+          return;
+        }
+        state.current.prevPageX = event.clientX;
+        state.current.prevPageY = event.clientY;
+        state.current.scrollStatus = ScrollStatus.HORIZONTAL;
+      },
+      [],
+    );
     return (
       <Fragment>
         <div
           className={styles['vertical-scroll-bar']}
           data-testid="vertical-scroll-bar"
-          onPointerLeave={handleDragEnd}
-          onPointerDown={(event) => {
-            register(event, ScrollStatus.VERTICAL);
-          }}
+          onPointerDown={handleVerticalBarDown}
         >
           <div
             className={styles['vertical-scroll-bar-content']}
             style={{
               transform: `translateY(${scrollTop}px)`,
             }}
+            data-testid="vertical-scroll-bar-content"
           />
         </div>
         <div
           className={styles['horizontal-scroll-bar']}
           data-testid="horizontal-scroll-bar"
-          onPointerLeave={handleDragEnd}
-          onPointerDown={(event) => {
-            register(event, ScrollStatus.HORIZONTAL);
-          }}
+          onPointerDown={handleHorizontalBarDown}
         >
           <div
             className={styles['horizontal-scroll-bar-content']}
             style={{
               transform: `translateX(${scrollLeft}px)`,
             }}
+            data-testid="horizontal-scroll-bar-content"
           />
         </div>
       </Fragment>

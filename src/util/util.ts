@@ -182,3 +182,11 @@ export function modelToChangeSet(list: ICommandItem[]) {
   }
   return result;
 }
+
+export function isTestEnv() {
+  return process.env.NODE_ENV === 'test';
+}
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

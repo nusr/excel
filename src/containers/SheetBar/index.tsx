@@ -91,7 +91,7 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
       setPopupActive((v) => !v);
     }, []);
     return (
-      <div className={styles['sheet-bar-wrapper']}>
+      <div className={styles['sheet-bar-wrapper']} data-testid="sheet-bar">
         <div>
           <Button onClick={togglePopup} className={styles['menu-button']}>
             <Icon name="menu" />
@@ -142,6 +142,7 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
                     type="text"
                     spellCheck
                     maxLength={MAX_NAME_LENGTH}
+                    data-testid="sheet-bar-rename-input"
                   />
                 ) : (
                   <React.Fragment>
@@ -149,6 +150,7 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
                       <span
                         className={styles['sheet-bar-item-color']}
                         style={{ backgroundColor: tabColor }}
+                        data-testid="sheet-bar-tab-color-item"
                       />
                     )}
                     <span className={styles['sheet-bar-item-text']}>
@@ -164,6 +166,7 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
           onClick={addSheet}
           type="circle"
           className={styles['add-button']}
+          testId="sheet-bar-add-sheet"
         >
           <Icon name="plus" />
         </Button>

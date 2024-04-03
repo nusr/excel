@@ -88,7 +88,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         },
       );
       const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        value = event.currentTarget.value;
+        value = event.target.value;
         event.stopPropagation();
       };
       info({
@@ -134,7 +134,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
     const changeChartTitle = () => {
       let value = title;
       const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        value = event.currentTarget.value;
+        value = event.target.value;
         event.stopPropagation();
       };
       info({

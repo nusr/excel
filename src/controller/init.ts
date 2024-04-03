@@ -8,6 +8,5 @@ export function initController(): IController {
   const controller = new Controller(model, { copyOrCut, paste });
   controller.addSheet();
   (window as any).controller = controller;
-  (window as any).model = model;
   return controller;
 }

@@ -12,9 +12,7 @@ const config: Config = {
     '^.+\\.(ts|tsx)$': path.join(__dirname, 'transform.js'),
   },
   collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    'src/*.{ts,tsx}',
-    '!src/types/*.{ts,tsx}',
+    'src/**/*.{ts,tsx,js,jsx}',
   ],
 
   coverageReporters: [
@@ -30,8 +28,6 @@ const config: Config = {
   moduleNameMapper: {
     '@/(.*)': '<rootDir>/src/$1',
   },
-  // maxConcurrency: 1,
-  // maxWorkers: '50%',
 };
 
 export default config;

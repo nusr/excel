@@ -5,12 +5,7 @@ import React, {
   memo,
   useCallback,
 } from 'react';
-import {
-  CanvasOverlayPosition,
-  IController,
-  EditorStatus,
-  StyleType,
-} from '@/types';
+import { IController, EditorStatus, StyleType } from '@/types';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
 import { handleTabClick, handleEnterClick } from '../../canvas/shortcut';
@@ -70,15 +65,12 @@ export function getEditorStyle(
   if (isFormulaBar) {
     return editorStyle;
   }
-  const cellPosition: CanvasOverlayPosition = {
+  return {
+    ...editorStyle,
     top: style.top,
     left: style.left,
     width: style.width,
     height: style.height,
-  };
-  return {
-    ...editorStyle,
-    ...cellPosition,
     border: '1px solid var(--primaryColor)',
   };
 }
@@ -92,6 +84,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = memo(
       }
       controller.setMainDom({ input: ref.current });
     }, []);
+
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLInputElement>) => {
         event.stopPropagation();

@@ -1,0 +1,149 @@
+import { App } from '@/containers';
+import { initController } from '@/controller';
+import * as React from 'react';
+import {
+  cleanup,
+  render,
+  screen,
+  fireEvent,
+  act,
+} from '@testing-library/react';
+import '@testing-library/jest-dom';
+
+describe('SheetBar.test.ts', () => {
+  afterEach(cleanup);
+
+  describe('sheet bar', () => {
+    test('normal', () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(1);
+    });
+    test('add sheet', () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(3);
+    });
+    test('context menu', () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.contextMenu(
+        screen.getByTestId('sheet-bar-list')!.childNodes[0],
+        {
+          clientX: 199,
+        },
+      );
+      expect(
+        screen.getByTestId('sheet-bar-context-menu').childNodes,
+      ).toHaveLength(6);
+    });
+
+    test('insert sheet', () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.contextMenu(
+        screen.getByTestId('sheet-bar-list')!.childNodes[0],
+        {
+          clientX: 199,
+        },
+      );
+      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-insert'));
+
+      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(2);
+    });
+    test('hide sheet', () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.contextMenu(
+        screen.getByTestId('sheet-bar-list')!.childNodes[0],
+        {
+          clientX: 199,
+        },
+      );
+      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-insert'));
+      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(2);
+
+      fireEvent.contextMenu(
+        screen.getByTestId('sheet-bar-list')!.childNodes[1],
+        {
+          clientX: 199,
+        },
+      );
+      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-hide'));
+      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(1);
+    });
+
+    test('delete sheet', () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.contextMenu(
+        screen.getByTestId('sheet-bar-list')!.childNodes[0],
+        {
+          clientX: 199,
+        },
+      );
+      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-insert'));
+      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(2);
+
+      fireEvent.contextMenu(
+        screen.getByTestId('sheet-bar-list')!.childNodes[1],
+        {
+          clientX: 199,
+        },
+      );
+      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-delete'));
+      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(1);
+    });
+
+    test('rename sheet', async () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.contextMenu(
+        screen.getByTestId('sheet-bar-list')!.childNodes[0],
+        {
+          clientX: 199,
+        },
+      );
+      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-rename'));
+
+      fireEvent.change(screen.getByTestId('sheet-bar-rename-input'), {
+        currentTarget: { value: 'test_sheet_name' },
+        target: { value: 'test_sheet_name' },
+      });
+      fireEvent.keyDown(screen.getByTestId('sheet-bar-rename-input'), {
+        key: 'Enter',
+      });
+      expect(screen.getByTestId('sheet-bar-list').textContent).toEqual(
+        'test_sheet_name',
+      );
+    });
+    test('tab color', async () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.contextMenu(
+        screen.getByTestId('sheet-bar-list')!.childNodes[0],
+        {
+          clientX: 199,
+        },
+      );
+      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-tab-color'));
+
+      const dom = screen.getByTestId('sheet-bar-context-menu-tab-color-list');
+      dom.setAttribute('data-color', '#B2B2B2');
+      fireEvent.click(dom);
+      expect(screen.getByTestId('sheet-bar-tab-color-item')).toHaveStyle({
+        backgroundColor: '#B2B2B2',
+      });
+    });
+  });
+});

@@ -68,7 +68,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(
           scrollToView(controller, r);
           return;
         }
-        if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(t) && t.length <= 255) {
+        if (/^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(t) && t.length <= 255) {
           controller.setDefineName(controller.getActiveCell(), t);
         } else {
           setValue(displayName);
@@ -76,7 +76,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(
       }
     };
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      setValue(event.currentTarget.value);
+      setValue(event.target.value);
     };
     const handleClick = () => {
       setActive((v) => !v);
@@ -108,6 +108,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(
           className={styles['formula-bar-name-editor']}
           onKeyDown={handleKeyDown}
           maxLength={MAX_NAME_LENGTH * 8}
+          data-testid="formula-bar-name-input"
         />
         <Button
           className={styles['formula-bar-name-select']}

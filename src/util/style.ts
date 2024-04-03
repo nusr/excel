@@ -9,9 +9,7 @@
  */
 import { npx } from './dpr';
 import { EUnderLine, StyleType } from '@/types';
-
-export const DEFAULT_FONT_SIZE = 11;
-export const MUST_FONT_FAMILY = 'sans-serif';
+import { DEFAULT_FONT_SIZE, MUST_FONT_FAMILY } from './constant';
 
 export const FONT_SIZE_LIST = [
   6,
@@ -19,7 +17,6 @@ export const FONT_SIZE_LIST = [
   9,
   10,
   DEFAULT_FONT_SIZE,
-  12,
   14,
   16,
   18,
@@ -36,7 +33,7 @@ export const FONT_SIZE_LIST = [
 export function makeFont(
   fontStyle: 'none' | 'normal' | 'italic' | 'oblique' = 'normal',
   fontWeight = 'normal',
-  fontSize = 12,
+  fontSize = DEFAULT_FONT_SIZE,
   fontFamily = '',
 ): string {
   const temp = `${fontStyle} ${fontWeight} ${fontSize}px `;

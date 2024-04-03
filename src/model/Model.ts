@@ -90,16 +90,12 @@ export class Model implements IModel {
       });
     }
     if (set.has('noHistory')) {
-      this.push({
-        type: 'noHistory',
-        key: '',
-        newValue: '',
-        oldValue: '',
-      });
+      this.historyChange(this.history.get(), 'commit');
+    } else {
+      if (!set.has('undoRedo')) {
+        this.history.commit();
+      }
     }
-    if (!set.has('undoRedo')) {
-      this.history.commit();
-    } 
     this.history.clear(false);
   }
 

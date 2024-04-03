@@ -1,4 +1,4 @@
-import React, { useRef, memo } from 'react';
+import React, { useRef, memo, useCallback } from 'react';
 import { IController } from '@/types';
 import { Button } from '../components';
 import { generateUUID } from '@/util';
@@ -7,31 +7,36 @@ import { $ } from '@/i18n';
 interface Props {
   controller: IController;
 }
+const readImage = (
+  base64Image: string,
+  fileName: string,
+  controller: IController,
+) => {
+  const image = new Image();
+  image.src = base64Image;
+  image.onload = function () {
+    const range = controller.getActiveCell();
+    controller.addDrawing({
+      width: image.width,
+      height: image.height,
+      originHeight: image.height,
+      originWidth: image.width,
+      title: fileName,
+      type: 'floating-picture',
+      uuid: generateUUID(),
+      imageSrc: base64Image,
+      sheetId: range.sheetId,
+      fromRow: range.row,
+      fromCol: range.col,
+      marginX: 0,
+      marginY: 0,
+    });
+  };
+};
 export const InsertFloatingPicture: React.FunctionComponent<Props> = memo(
   ({ controller }) => {
     const ref = useRef<HTMLInputElement>(null);
-    const readImage = (base64Image: string, fileName: string) => {
-      const image = new Image();
-      image.src = base64Image;
-      image.onload = function () {
-        const range = controller.getActiveCell();
-        controller.addDrawing({
-          width: image.width,
-          height: image.height,
-          originHeight: image.height,
-          originWidth: image.width,
-          title: fileName,
-          type: 'floating-picture',
-          uuid: generateUUID(),
-          imageSrc: base64Image,
-          sheetId: range.sheetId,
-          fromRow: range.row,
-          fromCol: range.col,
-          marginX: 0,
-          marginY: 0,
-        });
-      };
-    };
+
     const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
       event.stopPropagation();
       const file = event.target.files?.[0];
@@ -49,7 +54,7 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = memo(
         if (!base64Image || typeof base64Image !== 'string') {
           return;
         }
-        readImage(base64Image, fileName);
+        readImage(base64Image, fileName, controller);
       };
 
       reader.readAsDataURL(file);
@@ -73,7 +78,7 @@ InsertFloatingPicture.displayName = 'InsertFloatingPicture';
 
 export const InsertChart: React.FunctionComponent<Props> = memo(
   ({ controller }) => {
-    const handleClick = () => {
+    const handleClick = useCallback(() => {
       const range = controller.getActiveCell();
       controller.addDrawing({
         width: 400,
@@ -91,7 +96,7 @@ export const InsertChart: React.FunctionComponent<Props> = memo(
         marginX: 0,
         marginY: 0,
       });
-    };
+    }, []);
 
     return (
       <Button testId="toolbar-chart" onClick={handleClick}>

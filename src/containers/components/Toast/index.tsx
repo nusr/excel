@@ -9,13 +9,19 @@ type Props = {
   message: string;
   type: MessageType;
   duration?: number; // second
+  testId?: string;
 };
 
-export const Toast: React.FunctionComponent<
-  Pick<Props, 'message' | 'type'>
-> = ({ message, type }) => {
+export const Toast: React.FunctionComponent<Omit<Props, 'duration'>> = ({
+  message,
+  type,
+  testId,
+}) => {
   return (
-    <div className={classnames(styles['toast'], styles[type])}>
+    <div
+      className={classnames(styles['toast'], styles[type])}
+      data-testid={testId}
+    >
       <Icon
         name={type}
         className={classnames(styles[`${type}_icon`], styles['icon'])}

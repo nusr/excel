@@ -1,4 +1,4 @@
-import { MUST_FONT_FAMILY } from './style';
+import { MUST_FONT_FAMILY } from './constant';
 import { OptionItem } from '@/types';
 import { FONT_FAMILY_LIST, LOCAL_FONT_KEY, QUERY_ALL_LOCAL_FONT } from './font';
 

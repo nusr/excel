@@ -36,7 +36,7 @@ export const Select: FunctionComponent<SelectProps> = memo((props) => {
   } = props;
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
-      onChange(event.currentTarget.value);
+      onChange(event.target.value);
     },
     [],
   );

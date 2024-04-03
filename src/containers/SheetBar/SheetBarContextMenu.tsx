@@ -73,6 +73,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
         data-testid="sheet-bar-context-menu"
       >
         <Button
+          testId="sheet-bar-context-menu-insert"
           onClick={() => {
             hideMenu();
             controller.addSheet();
@@ -81,6 +82,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
           {$('insert')}
         </Button>
         <Button
+          testId="sheet-bar-context-menu-delete"
           onClick={() => {
             hideMenu();
             controller.deleteSheet();
@@ -89,6 +91,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
           {$('delete')}
         </Button>
         <Button
+          testId="sheet-bar-context-menu-rename"
           onClick={() => {
             hideMenu();
             editSheetName();
@@ -97,6 +100,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
           {$('rename')}
         </Button>
         <Button
+          testId="sheet-bar-context-menu-hide"
           onClick={() => {
             hideMenu();
             controller.hideSheet();
@@ -105,6 +109,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
           {$('hide')}
         </Button>
         <Button
+          testId="sheet-bar-context-menu-unhide"
           className={styles['sheet-bar-unhide']}
           disabled={hideSheetList.length === 0}
           onClick={handleUnhide}
@@ -115,8 +120,12 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
           color={tabColor}
           onChange={handleTabColorChange}
           position="top"
+          testId='sheet-bar-context-menu-tab-color'
         >
-          <Button className={styles['sheet-bar-unhide']}>
+          <Button
+            className={styles['sheet-bar-unhide']}
+            testId="sheet-bar-context-menu-tab-color"
+          >
             {$('tab-color')}
           </Button>
         </ColorPicker>

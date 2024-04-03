@@ -73,12 +73,11 @@ export class History implements IHistory {
     if (this.commands.length === 0) {
       return;
     }
-    const check = this.commands.some((v) => v.type === 'noHistory');
     const list = this.commands.filter(
       (v) =>
         v.type !== 'scroll' && v.type !== 'antLine' && v.type !== 'rangeMap',
     );
-    if (check || list.length === 0) {
+    if (list.length === 0) {
       this.change([...this.commands], 'commit');
       this.commands = [];
       return;

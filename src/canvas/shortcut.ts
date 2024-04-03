@@ -300,9 +300,11 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus(controller)) {
         return;
       }
-      checkActiveElement(controller);
-      const viewSize = sheetViewSizeSet.get();
-      scrollBar(controller, 0, viewSize.height);
+      controller.batchUpdate(() => {
+        checkActiveElement(controller);
+        const viewSize = sheetViewSizeSet.get();
+        scrollBar(controller, 0, viewSize.height);
+      });
     },
   },
   {
@@ -312,9 +314,11 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus(controller)) {
         return;
       }
-      checkActiveElement(controller);
-      const viewSize = sheetViewSizeSet.get();
-      scrollBar(controller, 0, -viewSize.height);
+      controller.batchUpdate(() => {
+        checkActiveElement(controller);
+        const viewSize = sheetViewSizeSet.get();
+        scrollBar(controller, 0, -viewSize.height);
+      });
     },
   },
   {
@@ -324,9 +328,11 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus(controller)) {
         return;
       }
-      checkActiveElement(controller);
-      const viewSize = sheetViewSizeSet.get();
-      scrollBar(controller, viewSize.width, 0);
+      controller.batchUpdate(() => {
+        checkActiveElement(controller);
+        const viewSize = sheetViewSizeSet.get();
+        scrollBar(controller, viewSize.width, 0);
+      });
     },
   },
   {
@@ -336,9 +342,11 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus(controller)) {
         return;
       }
-      checkActiveElement(controller);
-      const viewSize = sheetViewSizeSet.get();
-      scrollBar(controller, -viewSize.width, 0);
+      controller.batchUpdate(() => {
+        checkActiveElement(controller);
+        const viewSize = sheetViewSizeSet.get();
+        scrollBar(controller, -viewSize.width, 0);
+      });
     },
   },
   {
@@ -358,9 +366,11 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus(controller)) {
         return;
       }
-      checkActiveElement(controller);
-      controller.setNextActiveCell('up');
-      recalculateScroll(controller);
+      controller.batchUpdate(() => {
+        checkActiveElement(controller);
+        controller.setNextActiveCell('up');
+        recalculateScroll(controller);
+      });
     },
   },
   {
@@ -380,9 +390,11 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus(controller)) {
         return;
       }
-      checkActiveElement(controller);
-      controller.setNextActiveCell('left');
-      recalculateScroll(controller);
+      controller.batchUpdate(() => {
+        checkActiveElement(controller);
+        controller.setNextActiveCell('left');
+        recalculateScroll(controller);
+      });
     },
   },
   {

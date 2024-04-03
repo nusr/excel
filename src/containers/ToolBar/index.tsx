@@ -72,7 +72,6 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       (value: string | number): React.CSSProperties => {
         return {
           fontFamily: String(value),
-          fontSize: '16px',
         };
       },
       [],
@@ -151,10 +150,14 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       );
     }, [cellStyle.isStrike]);
     const setUnderline = useCallback((value: string | number) => {
-      controller.updateCellStyle(
-        { underline: Number(value) },
-        controller.getActiveCell(),
-      );
+      const t = Number(value);
+      let underline = EUnderLine.NONE;
+      if (t === EUnderLine.SINGLE) {
+        underline = EUnderLine.SINGLE;
+      } else if (t === EUnderLine.DOUBLE) {
+        underline = EUnderLine.DOUBLE;
+      }
+      controller.updateCellStyle({ underline }, controller.getActiveCell());
     }, []);
     const setFillColor = useCallback((value: string) => {
       controller.updateCellStyle(
@@ -208,11 +211,14 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           style={selectStyle}
           getItemStyle={getItemStyle}
           onChange={handleFontFamilyChange}
+          testId="toolbar-font-family"
+          className={styles.fontFamily}
         />
         <Select
           data={FONT_SIZE_LIST}
           value={cellStyle.fontSize}
           onChange={setFontSize}
+          testId="toolbar-font-size"
         />
         <Button
           active={cellStyle.isBold}
@@ -244,13 +250,15 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           style={selectStyle}
           title="Underline"
           onChange={setUnderline}
+          testId="toolbar-underline"
         />
         <ColorPicker
           key="fill-color"
           color={cellStyle.fillColor}
           onChange={setFillColor}
+          testId='toolbar-fill-color'
         >
-          <Button style={fillStyle}>
+          <Button style={fillStyle} testId="toolbar-fill-color">
             <FillColorIcon />
           </Button>
         </ColorPicker>
@@ -259,8 +267,9 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           key="font-color"
           color={cellStyle.fontColor}
           onChange={setFontColor}
+          testId='toolbar-font-color'
         >
-          <Button style={fontStyle}>
+          <Button style={fontStyle} testId="toolbar-font-color">
             <Icon name="fontColor" />
           </Button>
         </ColorPicker>
