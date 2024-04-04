@@ -31,20 +31,22 @@ export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
   if (!visible) {
     return null;
   }
+  const cancelTestId = testId ? `${testId}-cancel` : undefined;
+  const confirmTestId = testId ? `${testId}-confirm` : undefined;
   return createPortal(
     <div className={classnames(styles['dialog-modal'])} data-testid={testId}>
       <div className={styles['dialog-container']} style={dialogStyle}>
         <div className={styles['dialog-title']}>{title}</div>
         <div className={styles['dialog-content']}>{children}</div>
         <div className={styles['dialog-button']}>
-          <Button onClick={onCancel} data-testid="dialog-cancel-button">
+          <Button onClick={onCancel} testId={cancelTestId}>
             {$('cancel')}
           </Button>
           <Button
             onClick={onOk}
             className={styles['dialog-cancel']}
             type="primary"
-            data-testid="dialog-confirm-button"
+            testId={confirmTestId}
           >
             {$('confirm')}
           </Button>

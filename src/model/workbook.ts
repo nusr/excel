@@ -38,7 +38,9 @@ export class Workbook implements IWorkbook {
     if (workbook[currentSheetId] && !workbook[currentSheetId].isHide) {
       newSheetId = currentSheetId;
     }
-    this.setCurrentSheetId(newSheetId);
+    if (newSheetId) {
+      this.setCurrentSheetId(newSheetId);
+    }
     this.model.push({
       type: 'workbook',
       key: '',
@@ -48,11 +50,14 @@ export class Workbook implements IWorkbook {
   }
   undo(item: ICommandItem): void {
     if (item.type === 'currentSheetId') {
+      const sheetId = this.getSheetId();
       if (
         !this.workbook[item.oldValue] ||
         this.workbook[item.oldValue].isHide
       ) {
-        this.currentSheetId = this.getSheetId();
+        if (sheetId) {
+          this.currentSheetId = sheetId;
+        }
       } else {
         this.currentSheetId = item.oldValue;
       }
@@ -67,7 +72,10 @@ export class Workbook implements IWorkbook {
         !this.workbook[item.newValue] ||
         this.workbook[item.newValue].isHide
       ) {
-        this.currentSheetId = this.getSheetId();
+        const sheetId = this.getSheetId();
+        if (sheetId) {
+          this.currentSheetId = sheetId;
+        }
       } else {
         this.currentSheetId = item.newValue;
       }
@@ -158,7 +166,7 @@ export class Workbook implements IWorkbook {
   }
   unhideSheet(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
-    this.updateSheetInfo({ isHide: true }, id);
+    this.updateSheetInfo({ isHide: false }, id);
   }
   renameSheet(sheetName: string, sheetId?: string): void {
     assert(!!sheetName, $('the-value-cannot-be-empty'));
@@ -202,10 +210,10 @@ export class Workbook implements IWorkbook {
     return this.currentSheetId;
   }
 
-  private getSheetId() {
+  private getSheetId(): string | undefined {
     const list = this.getSheetList();
     const result = list.filter((v) => !v.isHide);
-    return result[0].sheetId;
+    return result[0]?.sheetId;
   }
   deleteAll(): void {}
 }

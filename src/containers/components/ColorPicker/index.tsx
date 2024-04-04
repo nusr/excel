@@ -42,7 +42,7 @@ export const ColorPicker: FunctionComponent<
     onChange('');
   }, []);
   const handleClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    const color = (event.target as any)?.dataset?.color;
+    const color = (event.target as any)?.dataset?.value;
     if (color) {
       onChange(color);
     }
@@ -79,7 +79,7 @@ export const ColorPicker: FunctionComponent<
                 key={item}
                 className={styles['color-picker-item']}
                 style={{ backgroundColor: item }}
-                data-color={item}
+                data-value={item}
               />
             );
           })}

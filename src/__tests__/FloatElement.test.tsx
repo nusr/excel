@@ -9,43 +9,40 @@ import {
   act,
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { type } from './util';
+import { sleep } from '@/util';
 
-describe.skip('FloatElement.test.ts', () => {
+describe('FloatElement.test.ts', () => {
   afterEach(cleanup);
   describe('float element', () => {
-    test('add chart', async () => {
-      const controller = initController();
-      const range = {
-        row: 0,
-        col: 0,
-        rowCount: 3,
-        colCount: 3,
-        sheetId: controller.getCurrentSheetId(),
-      };
-      controller.setActiveCell(range);
-      controller.setCell(
-        [
-          [1, 2, 3],
-          [4, 5, 6],
-          [7, 8, 9],
-        ],
-        [],
-        range,
-      );
+    test('throw error', () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
 
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      expect(screen.getByTestId('assert_toast')).toHaveTextContent(
+        'The selected cells must contain the data',
+      );
+    });
+  });
+  describe.skip('context menu', () => {
+    test('context menu', async () => {
+      const controller = initController();
       act(() => {
         render(<App controller={controller} />);
       });
-      controller.setActiveCell(range);
-      fireEvent.click(screen.getByTestId('toolbar-chart'), {
-        clientX: 10,
-        clientY: 10,
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      await sleep(1000);
+      fireEvent.contextMenu(screen.getByTestId('float-element'), {
+        clientY: 20,
+        clientX: 20,
       });
-      fireEvent.click(screen.getByTestId('toolbar-chart'), {
-        clientX: 10,
-        clientY: 10,
-      });
-      expect(screen.getByTestId('float-element')).toBeVisible();
+
+      expect(
+        screen.getByTestId('float-element-context-menu')!.childNodes,
+      ).toHaveLength(10);
     });
   });
 });

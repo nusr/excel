@@ -1,5 +1,11 @@
 import { FloatElementContainer } from '../FloatElement';
-import { cleanup, render, screen, fireEvent } from '@testing-library/react';
+import {
+  cleanup,
+  render,
+  screen,
+  fireEvent,
+  act,
+} from '@testing-library/react';
 import React from 'react';
 import { initController } from '@/controller';
 import { floatElementStore, FloatElementItem } from '../store';
@@ -66,7 +72,9 @@ describe('FloatElementContainer.test.ts', () => {
   test('normal', () => {
     floatElementStore.setState(mockData);
 
-    render(<FloatElementContainer controller={initController()} />);
+    act(() => {
+      render(<FloatElementContainer controller={initController()} />);
+    });
 
     expect(screen.getAllByTestId('float-element')).toHaveLength(2);
   });
@@ -74,7 +82,9 @@ describe('FloatElementContainer.test.ts', () => {
   test('context-menu', () => {
     floatElementStore.setState([mockData[0]]);
 
-    render(<FloatElementContainer controller={initController()} />);
+    act(() => {
+      render(<FloatElementContainer controller={initController()} />);
+    });
 
     fireEvent.contextMenu(screen.getByTestId('float-element'), {
       clientY: 20,
@@ -94,7 +104,9 @@ describe('FloatElementContainer.test.ts', () => {
     test(`context-menu-${item}`, () => {
       floatElementStore.setState([mockData[0]]);
 
-      render(<FloatElementContainer controller={initController()} />);
+      act(() => {
+        render(<FloatElementContainer controller={initController()} />);
+      });
 
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
         clientY: 20,

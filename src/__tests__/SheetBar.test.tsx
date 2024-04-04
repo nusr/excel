@@ -28,7 +28,10 @@ describe('SheetBar.test.ts', () => {
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(3);
     });
-    test('context menu', () => {
+  });
+
+  describe('context menu', () => {
+    test('normal', () => {
       act(() => {
         render(<App controller={initController()} />);
       });
@@ -139,11 +142,81 @@ describe('SheetBar.test.ts', () => {
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-tab-color'));
 
       const dom = screen.getByTestId('sheet-bar-context-menu-tab-color-list');
-      dom.setAttribute('data-color', '#B2B2B2');
+      dom.setAttribute('data-value', '#B2B2B2');
       fireEvent.click(dom);
       expect(screen.getByTestId('sheet-bar-tab-color-item')).toHaveStyle({
         backgroundColor: '#B2B2B2',
       });
+    });
+  });
+  describe('unhide sheet', () => {
+    test('normal', () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
+        clientX: 199,
+      });
+      expect(
+        (
+          screen.getByTestId(
+            'sheet-bar-context-menu-unhide',
+          ) as HTMLButtonElement
+        ).disabled,
+      ).toBeTruthy();
+    });
+
+    test('unhide', () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+      fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
+        clientX: 199,
+      });
+      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-hide'));
+
+      fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
+        clientX: 199,
+      });
+      expect(
+        (
+          screen.getByTestId(
+            'sheet-bar-context-menu-unhide',
+          ) as HTMLButtonElement
+        ).disabled,
+      ).toBeFalsy();
+      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-unhide'));
+
+      fireEvent.click(
+        screen.getByTestId('sheet-bar-context-menu-unhide-dialog-confirm'),
+      );
+      expect(screen.getByTestId('sheet-bar-active-item').textContent).toEqual(
+        'Sheet4',
+      );
+    });
+  });
+  describe('select sheet', () => {
+    test('normal', () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+      expect(screen.getByTestId('sheet-bar-active-item').textContent).toEqual(
+        'Sheet3',
+      );
+
+      fireEvent.click(screen.getByTestId('sheet-bar-select-sheet'));
+
+      const dom = screen.getByTestId('sheet-bar-select-sheet-popup');
+      dom.setAttribute('data-value', '1');
+      fireEvent.click(dom);
+      expect(screen.getByTestId('sheet-bar-active-item').textContent).toEqual(
+        'Sheet1',
+      );
     });
   });
 });

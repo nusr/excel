@@ -9,6 +9,7 @@ import {
   act,
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { type } from './util';
 
 describe('FormulaBar.test.tsx', () => {
   afterEach(cleanup);
@@ -42,9 +43,8 @@ describe('FormulaBar.test.tsx', () => {
       ).toEqual('G100');
     });
     test('define name jump', async () => {
-      const controller = initController();
       act(() => {
-        render(<App controller={controller} />);
+        render(<App controller={initController()} />);
       });
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
         currentTarget: { value: 'foo' },
@@ -73,6 +73,17 @@ describe('FormulaBar.test.tsx', () => {
         (screen.getByTestId('formula-bar-name-input') as HTMLInputElement)
           .value,
       ).toEqual('A1');
+    });
+  });
+  describe('formula editor', () => {
+    test('input', async () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      type('3');
+      expect(
+        screen.getByTestId('formula-editor-trigger').textContent,
+      ).toEqual('3');
     });
   });
 });

@@ -40,6 +40,9 @@ function createFakeElement(value: string) {
 }
 
 function writeDataToClipboard(textData: ClipboardData) {
+  if (typeof ClipboardItem !== 'function') {
+    return;
+  }
   const result: Record<string, Blob> = {};
   const keyList = Object.keys(textData) as ClipboardType[];
   for (const key of keyList) {
@@ -58,11 +61,11 @@ async function readDataFromClipboard(): Promise<ClipboardData> {
   for (const item of list) {
     if (item.types.includes(PLAIN_FORMAT)) {
       const buf = await item.getType(PLAIN_FORMAT);
-      result[PLAIN_FORMAT] = await buf.text();
+      result[PLAIN_FORMAT] = await buf?.text();
     }
     if (item.types.includes(HTML_FORMAT)) {
       const buf = await item.getType(HTML_FORMAT);
-      result[HTML_FORMAT] = await buf.text();
+      result[HTML_FORMAT] = await buf?.text();
     }
   }
   return result;
@@ -76,7 +79,9 @@ const fakeCopyAction = (
   let fakeElement: HTMLTextAreaElement | null = createFakeElement(value);
   container.appendChild(fakeElement);
   const selectedText = select(fakeElement);
-  document.execCommand(type);
+  if (typeof document.execCommand === 'function') {
+    document.execCommand(type);
+  }
   fakeElement.remove();
   fakeElement = null;
   return selectedText;

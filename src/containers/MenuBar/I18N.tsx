@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { Select } from '../components';
 import { OptionItem, LanguageType } from '@/types';
 import { LANGUAGE_LIST } from '@/util';
@@ -13,11 +13,10 @@ const dataList: OptionItem[] = LANGUAGE_LIST.map((v) => ({
 const defaultValue = getLanguage();
 
 export const I18N: React.FunctionComponent = memo(() => {
-  const handleChange = (c: string | number) => {
-    const l = String(c) as LanguageType;
-    setLanguage(l);
+  const handleChange = useCallback((c: string | number) => {
+    setLanguage(String(c) as LanguageType);
     window.location.reload();
-  };
+  }, []);
   return (
     <div className={styles.i18n} data-testid="menubar-i18n">
       <Select

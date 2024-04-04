@@ -2,7 +2,6 @@
  * query all installed fonts
  * window.queryLocalFonts()
  */
-
 export const QUERY_ALL_LOCAL_FONT = 'QUERY_ALL_LOCAL_FONT';
 export const LOCAL_FONT_KEY = 'LOCAL_FONT_KEY';
 export const FONT_FAMILY_LIST = [

@@ -49,6 +49,10 @@
 }
 .popup-item-icon {
   color: var(--primaryColor);
+  display: none;
+}
+.popup-item-icon.active {
+  display: block;
 }
 .popup-item-content {
   flex: 1;

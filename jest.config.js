@@ -1,19 +1,16 @@
-import * as path from 'path';
-import type { Config } from 'jest';
+const path = require('path');
 
 const rootDir = process.cwd();
-
-const config: Config = {
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+module.exports = {
   rootDir,
+  preset: 'ts-jest',
   testEnvironment: 'jsdom',
   testMatch: ['<rootDir>/src/**/*.test.[jt]s?(x)'],
   transform: {
-    '^.+\\.css$': path.join(__dirname, 'transform-css.js'),
-    '^.+\\.(ts|tsx)$': path.join(__dirname, 'transform.js'),
+    '^.+\\.css$': path.join(rootDir, './scripts/transform-css.js'),
   },
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx,js,jsx}',
-  ],
+  collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}'],
 
   coverageReporters: [
     'json',
@@ -29,5 +26,3 @@ const config: Config = {
     '@/(.*)': '<rootDir>/src/$1',
   },
 };
-
-export default config;

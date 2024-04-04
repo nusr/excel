@@ -14,7 +14,7 @@ export function SupportFontFamilyFactory() {
   //we test using 72px font size, we may use any size. I guess larger the better.
   const testSize = '72px';
 
-  const h = document.getElementsByTagName('body')[0];
+  const body = document.body;
 
   // create a SPAN in the document to get the width of the text we use to test
   const s = document.createElement('span');
@@ -25,21 +25,21 @@ export function SupportFontFamilyFactory() {
   for (const item of baseFonts) {
     //get the default width for the three base fonts
     s.style.fontFamily = item;
-    h.appendChild(s);
+    body.appendChild(s);
     defaultWidth[item] = s.offsetWidth; //width for the default font
     defaultHeight[item] = s.offsetHeight; //height for the defualt font
-    h.removeChild(s);
+    body.removeChild(s);
   }
 
   function detect(font: string) {
     let detected = false;
     for (const item of baseFonts) {
       s.style.fontFamily = font + ',' + item; // name of the font along with the base font for fallback.
-      h.appendChild(s);
+      body.appendChild(s);
       const matched =
         s.offsetWidth != defaultWidth[item] ||
         s.offsetHeight != defaultHeight[item];
-      h.removeChild(s);
+      body.removeChild(s);
       detected = detected || matched;
     }
     return detected;
@@ -55,7 +55,9 @@ export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
   const cacheFont = localStorage.getItem(LOCAL_FONT_KEY);
   if (cacheFont) {
     const list = JSON.parse(cacheFont) as string[];
-    return list.map((v) => ({ value: v, label: v, disabled: false }));
+    if (list.length > 0) {
+      return list.map((v) => ({ value: v, label: v, disabled: false }));
+    }
   }
   const list = fontList
     .map((v) => ({
@@ -64,7 +66,7 @@ export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
       disabled: !isSupportFontFamily(v),
     }))
     .filter((v) => !v.disabled);
-  if ((window as any).queryLocalFonts) {
+  if (typeof window.queryLocalFonts === 'function') {
     list.push({
       value: QUERY_ALL_LOCAL_FONT,
       label: '--> get all local installed fonts',

@@ -46,6 +46,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
       info({
         visible: true,
         title: $('unhide-sheet'),
+        testId: 'sheet-bar-context-menu-unhide-dialog',
         children: (
           <Select
             data={hideSheetList}

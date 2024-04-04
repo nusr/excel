@@ -87,6 +87,7 @@ export interface SelectPopupProps {
   className?: string;
   position?: 'top' | 'bottom';
   style?: React.CSSProperties;
+  testId?: string;
 }
 
 export const SelectPopup: FunctionComponent<SelectPopupProps> = memo(
@@ -114,14 +115,19 @@ export const SelectPopup: FunctionComponent<SelectPopupProps> = memo(
         onClick={handleSelect}
         ref={ref}
         style={props.style}
+        data-testid={props.testId}
       >
         {props.data.map((v) => (
           <div key={v.value} className={styles['popup-item']}>
             <span className={styles['popup-item-content']} data-value={v.value}>
               {v.label}
             </span>
-            <span className={styles['popup-item-icon']}>
-              {v.value === props.value && <Icon name="confirm" />}
+            <span
+              className={classnames(styles['popup-item-icon'], {
+                [styles.active]: v.value === props.value,
+              })}
+            >
+              <Icon name="confirm" />
             </span>
           </div>
         ))}

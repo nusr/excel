@@ -1,14 +1,9 @@
-import React, {
-  CSSProperties,
-  useRef,
-  useEffect,
-  memo,
-  useCallback,
-} from 'react';
+import React, { CSSProperties, useRef, useEffect, memo } from 'react';
 import { IController, EditorStatus, StyleType } from '@/types';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
-import { handleTabClick, handleEnterClick } from '../../canvas/shortcut';
+import { MAX_NAME_LENGTH } from '@/util';
+import { coreStore } from '../store';
 
 interface Props {
   controller: IController;
@@ -85,17 +80,28 @@ export const FormulaEditor: React.FunctionComponent<Props> = memo(
       controller.setMainDom({ input: ref.current });
     }, []);
 
-    const handleKeyDown = useCallback(
-      (event: React.KeyboardEvent<HTMLInputElement>) => {
-        event.stopPropagation();
-        if (event.key === 'Enter') {
-          handleEnterClick(controller);
-        } else if (event.key === 'Tab') {
-          handleTabClick(controller);
-        }
-      },
-      [],
-    );
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        controller.batchUpdate(() => {
+          controller.setCell(
+            [[event.currentTarget.value]],
+            [],
+            controller.getActiveCell(),
+          );
+          if (event.key === 'Enter') {
+            controller.setNextActiveCell('down');
+          } else {
+            controller.setNextActiveCell('right');
+          }
+        });
+        coreStore.mergeState({
+          editorStatus: EditorStatus.NONE,
+        });
+        ref.current!.value = '';
+        ref.current!.blur();
+      }
+    };
     return (
       <input
         className={styles['base-editor']}
@@ -105,6 +111,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = memo(
         onKeyDown={handleKeyDown}
         type="text"
         style={style}
+        maxLength={MAX_NAME_LENGTH * 100}
         data-testid={testId}
       />
     );

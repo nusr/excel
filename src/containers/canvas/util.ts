@@ -7,6 +7,9 @@ import {
   getThemeColor,
   convertResultTypeToString,
   eventEmitter,
+  initFontFamilyList,
+  isTestEnv,
+  QUERY_ALL_LOCAL_FONT,
 } from '@/util';
 import {
   coreStore,
@@ -249,6 +252,23 @@ const handleStateChange = (
   }
 };
 export function initCanvas(controller: IController): () => void {
+  let familyList = initFontFamilyList();
+  if (familyList.length === 0 && isTestEnv()) {
+    // just for test
+    familyList.push(
+      {
+        value: 'serif',
+        label: 'serif',
+        disabled: false,
+      },
+      {
+        value: QUERY_ALL_LOCAL_FONT,
+        label: '--> get all local installed fonts',
+        disabled: false,
+      },
+    );
+  }
+  fontFamilyStore.setState(familyList);
   const content = new Content(controller, createCanvas());
   const mainCanvas = new MainCanvas(controller, content);
   const resize = () => {

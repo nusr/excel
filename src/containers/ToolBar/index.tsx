@@ -77,32 +77,32 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       [],
     );
     const handleFontFamilyChange = useCallback((value: string | number) => {
-      const t = String(value);
-      const queryLocalFonts = (window as any).queryLocalFonts;
-      if (t === QUERY_ALL_LOCAL_FONT && typeof queryLocalFonts === 'function') {
-        queryLocalFonts().then(
-          (
-            list: Array<{
-              fullName: string;
-              family: string;
-              postscriptName: string;
-              style: string;
-            }>,
-          ) => {
-            let fontList = list.map((v) => v.fullName);
-            fontList = Array.from(new Set(fontList)).filter((v) =>
-              isSupportFontFamily(v),
-            );
-            fontList.sort((a, b) => a.localeCompare(b));
-            localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(fontList));
-            const l = fontList.map((v) => ({
-              label: v,
-              value: v,
-              disabled: false,
-            }));
+      if (
+        String(value) === QUERY_ALL_LOCAL_FONT &&
+        typeof window.queryLocalFonts === 'function'
+      ) {
+        window.queryLocalFonts().then((list) => {
+          let fontList = list.map((v) => v.fullName);
+          fontList = Array.from(new Set(fontList)).filter((v) =>
+            isSupportFontFamily(v),
+          );
+          fontList.sort((a, b) => a.localeCompare(b));
+          const l = fontList.map((v) => ({
+            label: v,
+            value: v,
+            disabled: false,
+          }));
+          if (fontList.length > 0) {
             fontFamilyStore.setState(l);
-          },
-        );
+            localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(fontList));
+          } else {
+            fontFamilyStore.setState(
+              fontFamilyStore
+                .getSnapshot()
+                .filter((v) => v.value !== QUERY_ALL_LOCAL_FONT),
+            );
+          }
+        });
       } else {
         controller.updateCellStyle(
           { fontFamily: String(value) },
@@ -256,7 +256,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           key="fill-color"
           color={cellStyle.fillColor}
           onChange={setFillColor}
-          testId='toolbar-fill-color'
+          testId="toolbar-fill-color"
         >
           <Button style={fillStyle} testId="toolbar-fill-color">
             <FillColorIcon />
@@ -267,7 +267,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           key="font-color"
           color={cellStyle.fontColor}
           onChange={setFontColor}
-          testId='toolbar-font-color'
+          testId="toolbar-font-color"
         >
           <Button style={fontStyle} testId="toolbar-font-color">
             <Icon name="fontColor" />

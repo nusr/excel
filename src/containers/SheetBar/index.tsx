@@ -72,10 +72,10 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
       [],
     );
     const handleChange = useCallback((value: string) => {
-      setPopupActive(false);
       if (!value) {
         return;
       }
+      setPopupActive(false);
       controller.setCurrentSheetId(value);
     }, []);
     const addSheet = useCallback(() => {
@@ -93,7 +93,11 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
     return (
       <div className={styles['sheet-bar-wrapper']} data-testid="sheet-bar">
         <div>
-          <Button onClick={togglePopup} className={styles['menu-button']}>
+          <Button
+            onClick={togglePopup}
+            className={styles['menu-button']}
+            testId="sheet-bar-select-sheet"
+          >
             <Icon name="menu" />
           </Button>
           {popupActive && (
@@ -104,6 +108,7 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
               position="top"
               style={menuStyle}
               value={currentSheetId}
+              testId="sheet-bar-select-sheet-popup"
             />
           )}
         </div>
@@ -119,6 +124,7 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
             if (!isActive && !editing && tabColor) {
               style = { backgroundColor: tabColor };
             }
+            const testId = isActive ? 'sheet-bar-active-item' : undefined;
             return (
               <div
                 data-testid={`${SHEET_ITEM_TEST_ID_PREFIX}${item.sheetId}`}
@@ -153,7 +159,10 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
                         data-testid="sheet-bar-tab-color-item"
                       />
                     )}
-                    <span className={styles['sheet-bar-item-text']}>
+                    <span
+                      className={styles['sheet-bar-item-text']}
+                      data-testid={testId}
+                    >
                       {item.name}
                     </span>
                   </React.Fragment>
