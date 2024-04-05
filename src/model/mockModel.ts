@@ -8,7 +8,7 @@ import {
 import { mockImage } from './mockData';
 
 const MOCK_MODEL: WorkBookJSON = {
-  currentSheetId: '4',
+  currentSheetId: '',
   rangeMap: {
     '1': {
       row: 2,

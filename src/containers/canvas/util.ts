@@ -10,6 +10,7 @@ import {
   initFontFamilyList,
   isTestEnv,
   QUERY_ALL_LOCAL_FONT,
+  mainDomSet,
 } from '@/util';
 import {
   coreStore,
@@ -81,7 +82,7 @@ function getChartData(
 }
 
 function updateActiveCell(controller: IController) {
-  const { top } = controller.getDomRect();
+  const { top } = mainDomSet.getDomRect();
   const { range: activeCell, isMerged } = controller.getActiveRange();
   const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
   const cell = controller.getCell(activeCell);
@@ -180,7 +181,7 @@ const handleStateChange = (
 
   if (changeSet.has('scroll')) {
     const scroll = controller.getScroll();
-    const canvasSize = controller.getDomRect();
+    const canvasSize = mainDomSet.getDomRect();
     const showBottomBar = scroll.scrollTop / canvasSize.height >= 0.91;
     scrollStore.mergeState({
       scrollLeft: scroll.scrollLeft,
@@ -202,7 +203,7 @@ const handleStateChange = (
     changeSet.has('scroll')
   ) {
     const scroll = controller.getScroll();
-    const canvasSize = controller.getDomRect();
+    const canvasSize = mainDomSet.getDomRect();
     const minX = scroll.left;
     const minY = scroll.top;
     const maxX = canvasSize.width + minX;
@@ -225,7 +226,7 @@ const handleStateChange = (
         (left > minX && left < maxX) ||
         (top + v.height > minY && top + v.height < maxY) ||
         (left + v.width > minX && left + v.width < maxX);
-      if (check || isTestEnv()) {
+      if (check) {
         const t: FloatElementItem = {
           ...v,
           top,

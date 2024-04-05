@@ -24,7 +24,7 @@ interface State {
 function scrollBar(controller: IController, scrollX: number, scrollY: number) {
   const oldScroll = controller.getScroll();
   const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } =
-    computeScrollPosition(controller, oldScroll.left, oldScroll.top);
+    computeScrollPosition(oldScroll.left, oldScroll.top);
 
   let scrollTop = oldScroll.scrollTop + Math.ceil(scrollY);
   let scrollLeft = oldScroll.scrollLeft + Math.ceil(scrollX);

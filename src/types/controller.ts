@@ -45,9 +45,6 @@ export interface IController extends IBaseModel {
   copy(event?: ClipboardEvent): void;
   cut(event?: ClipboardEvent): void;
   getCopyRanges(): IRange[];
-  getDomRect(): CanvasOverlayPosition;
-  setMainDom(dom: MainDom): void;
-  getMainDom(): MainDom;
   setScroll(scroll: ScrollValue): void;
   getScroll(sheetId?: string): ScrollValue;
   setFloatElementUuid(uuid: string): void;

@@ -31,7 +31,7 @@ export function SupportFontFamilyFactory() {
     body.removeChild(s);
   }
 
-  function detect(font: string) {
+  function detect(font: string): boolean {
     let detected = false;
     for (const item of baseFonts) {
       s.style.fontFamily = font + ',' + item; // name of the font along with the base font for fallback.
@@ -59,13 +59,13 @@ export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
       return list.map((v) => ({ value: v, label: v, disabled: false }));
     }
   }
-  const list = fontList
-    .map((v) => ({
-      label: v,
-      value: v,
-      disabled: !isSupportFontFamily(v),
-    }))
-    .filter((v) => !v.disabled);
+  const list: OptionItem[] = [];
+  for (const item of fontList) {
+    if (isSupportFontFamily(item)) {
+      list.push({ label: item, value: item, disabled: false });
+    }
+  }
+
   if (typeof window.queryLocalFonts === 'function') {
     list.push({
       value: QUERY_ALL_LOCAL_FONT,

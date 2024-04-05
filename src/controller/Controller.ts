@@ -7,13 +7,11 @@ import {
   IModel,
   WorksheetType,
   IWindowSize,
-  CanvasOverlayPosition,
   ScrollValue,
   IRange,
   ResultType,
   ClipboardData,
   ClipboardType,
-  MainDom,
   DrawingElement,
   IPosition,
   DefinedNameItem,
@@ -28,7 +26,6 @@ import {
   containRange,
   parseHTML,
   generateUUID,
-  sizeConfig,
   headerSizeSet,
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
@@ -54,7 +51,6 @@ export class Controller implements IController {
   private floatElementUuid = '';
   private isNoChange = false;
   private hooks: IHooks;
-  private mainDom: MainDom = {};
   constructor(model: IModel, hooks: IHooks) {
     this.model = model;
     this.hooks = hooks;
@@ -608,32 +604,6 @@ export class Controller implements IController {
       return [];
     }
     return this.copyRanges.slice();
-  }
-  getDomRect(): CanvasOverlayPosition {
-    const { canvas } = this.getMainDom();
-    if (!canvas) {
-      return {
-        top: 0,
-        left: 0,
-        width: 0,
-        height: 0,
-      };
-    }
-    const dom = canvas.parentElement!;
-    const scrollbarSize = parseInt(sizeConfig.scrollBarSize, 10);
-    const size = dom.getBoundingClientRect();
-    return {
-      top: size.top,
-      left: size.left,
-      width: dom.clientWidth - scrollbarSize,
-      height: dom.clientHeight - scrollbarSize,
-    };
-  }
-  setMainDom(dom: MainDom): void {
-    this.mainDom = Object.assign(this.mainDom, dom);
-  }
-  getMainDom(): MainDom {
-    return this.mainDom;
   }
   deleteAll(sheetId?: string): void {
     this.model.deleteAll(sheetId);

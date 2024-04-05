@@ -10,6 +10,7 @@ import {
   containRange,
   getThemeColor,
   headerSizeSet,
+  mainDomSet,
 } from '@/util';
 import {
   EventType,
@@ -38,7 +39,7 @@ export class MainCanvas {
   private controller: IController;
   private isRendering = false;
   constructor(controller: IController, content: ContentView) {
-    const canvas = controller.getMainDom().canvas!;
+    const canvas = mainDomSet.get().canvas!;
     this.controller = controller;
     this.ctx = canvas.getContext('2d')!;
     this.content = content;
@@ -46,13 +47,13 @@ export class MainCanvas {
     this.ctx.scale(size, size);
   }
   resize() {
-    const size = this.controller.getDomRect();
+    const size = mainDomSet.getDomRect();
     const { width, height } = size;
     resizeCanvas(this.ctx.canvas, width, height);
     this.content.resize();
   }
   private clear() {
-    const { width, height } = this.controller.getDomRect();
+    const { width, height } = mainDomSet.getDomRect();
     this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
   render = (params: EventType): void => {
@@ -63,13 +64,24 @@ export class MainCanvas {
       canvasLog('It is rendering');
       return;
     }
-    this.isRendering = true;
-    this.content.render(params);
-    this.clear();
+    const { changeSet } = params;
+    const checkContent =
+      changeSet.has('row') ||
+      changeSet.has('col') ||
+      changeSet.has('workbook') ||
+      changeSet.has('currentSheetId') ||
+      changeSet.has('cellStyle') ||
+      changeSet.has('cellValue') ||
+      changeSet.has('scroll');
 
+    this.isRendering = true;
+    this.clear();
+    if (checkContent) {
+      this.content.render(params);
+    }
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
 
-    const { width, height } = this.controller.getDomRect();
+    const { width, height } = mainDomSet.getDomRect();
     const headerSize = headerSizeSet.get();
     const realContentHeight = this.renderRowsHeader(height);
     const realContentWidth = this.renderColsHeader(width);
@@ -88,7 +100,9 @@ export class MainCanvas {
   private renderMergeCell() {
     const { controller } = this;
     const range = controller.getActiveCell();
-    const mergeCells = controller.getMergeCellList(controller.getCurrentSheetId());
+    const mergeCells = controller.getMergeCellList(
+      controller.getCurrentSheetId(),
+    );
     if (mergeCells.length === 0) {
       return;
     }
@@ -221,7 +235,9 @@ export class MainCanvas {
     const { rowCount } = controller.getSheetInfo(
       controller.getCurrentSheetId(),
     )!;
-    const mergeCells = controller.getMergeCellList(controller.getCurrentSheetId());
+    const mergeCells = controller.getMergeCellList(
+      controller.getCurrentSheetId(),
+    );
     this.ctx.save();
     const range = this.controller.getActiveCell();
     this.ctx.fillStyle = getThemeColor('white');
@@ -267,7 +283,9 @@ export class MainCanvas {
     const { colCount } = controller.getSheetInfo(
       controller.getCurrentSheetId(),
     )!;
-    const mergeCells = controller.getMergeCellList(controller.getCurrentSheetId());
+    const mergeCells = controller.getMergeCellList(
+      controller.getCurrentSheetId(),
+    );
     const range = this.controller.getActiveCell();
     const pointList: Point[] = [];
     this.ctx.save();

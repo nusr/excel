@@ -1,7 +1,7 @@
 import { Model } from '@/model';
 import { IController } from '@/types';
 import { Controller } from './Controller';
-import { copyOrCut, paste, isTestEnv } from '@/util';
+import { copyOrCut, paste } from '@/util';
 
 export function initController(isNoHistory = false): IController {
   const model = new Model();
@@ -9,8 +9,6 @@ export function initController(isNoHistory = false): IController {
   controller.batchUpdate(() => {
     controller.addSheet();
   }, isNoHistory);
-  if (!isTestEnv()) {
-    (window as any).controller = controller;
-  }
+  (window as any).controller = controller;
   return controller;
 }

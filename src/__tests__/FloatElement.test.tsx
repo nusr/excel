@@ -10,16 +10,22 @@ import {
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { type } from './util';
+import { mainDomSet } from '@/util';
 
 describe('FloatElement.test.ts', () => {
-  afterEach(cleanup);
   beforeAll(() => {
     global.ResizeObserver = class ResizeObserver {
       observe() {}
       unobserve() {}
       disconnect() {}
     };
+    const spy = jest.spyOn(mainDomSet, 'getDomRect');
+    spy.mockReturnValue({ top: 0, left: 0, width: 1000, height: 800 });
   });
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
+  afterEach(cleanup);
   describe('float element', () => {
     test('throw error', () => {
       act(() => {

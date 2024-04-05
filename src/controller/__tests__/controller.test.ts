@@ -132,12 +132,6 @@ describe('controller.test.ts', () => {
     });
   });
 
-  describe('DomRect', () => {
-    test('get', () => {
-      const size = controller.getDomRect();
-      expect(size).toEqual({ left: 0, top: 0, width: 0, height: 0 });
-    });
-  });
   describe('deleteAll', () => {
     test('normal', () => {
       controller.setDefineName(

@@ -98,9 +98,9 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
     result.fontId = String(styles.fonts.length);
     extraList.push('applyFont="1"');
     styles.fonts.push(
-      `<font>${fontList.join(
-        '',
-      )}<charset val="0"/><scheme val="minor"/></font>`,
+      `<font>\n${fontList.join(
+        '\n',
+      )}\n<charset val="0"/>\n<scheme val="minor"/>\n</font>`,
     );
   }
 
@@ -141,14 +141,16 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
         list.push(`vertical="${alignMap[style.verticalAlign]}"`);
       }
     }
-    alignment = `<alignment ${list.join(' ')}/>`;
+    if (list.length > 0) {
+      alignment = `<alignment ${list.join(' ')}/>`;
+    }
   }
 
   const t = `<xf numFmtId="${result.numFmtId}" fontId="${
     result.fontId
   }" fillId="${result.fillId}" borderId="0" xfId="0" ${extraList.join(
     ' ',
-  )}>${alignment}</xf>`;
+  )}>\n${alignment}\n</xf>`;
   styles.cellXfs.push(t);
 }
 function compileTemplate(template: string, target: Partial<CommonData> = {}) {
@@ -531,11 +533,6 @@ export function convertToXMLData(controller: IController) {
     },
   );
   const styles: StyleData = {
-    cellXfs: [
-      `<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0">
-    <alignment vertical="center"/>
-  </xf>`,
-    ],
     numFmts: [],
     fonts: [
       `<font>
@@ -550,6 +547,11 @@ export function convertToXMLData(controller: IController) {
       `<fill>
     <patternFill patternType="none"/>
   </fill>`,
+    ],
+    cellXfs: [
+      `<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0">
+    <alignment vertical="center"/>
+  </xf>`,
     ],
   };
   for (const item of sheetList) {

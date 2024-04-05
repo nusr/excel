@@ -1,5 +1,6 @@
-import { IWindowSize } from '@/types';
+import { IWindowSize, CanvasOverlayPosition, MainDom } from '@/types';
 import { ROW_TITLE_HEIGHT, COL_TITLE_WIDTH } from './constant';
+import { sizeConfig } from './theme';
 class BaseSet<T extends Record<string, any>> {
   private state: T;
   constructor(initValue: T) {
@@ -15,6 +16,30 @@ class BaseSet<T extends Record<string, any>> {
     return this.state;
   }
 }
+
+class MainDomSet extends BaseSet<MainDom> {
+  getDomRect(): CanvasOverlayPosition {
+    const canvas = this.get().canvas;
+    if (!canvas) {
+      return {
+        top: 0,
+        left: 0,
+        width: 0,
+        height: 0,
+      };
+    }
+    const dom = canvas.parentElement!;
+    const scrollbarSize = parseInt(sizeConfig.scrollBarSize, 10);
+    const size = dom.getBoundingClientRect();
+    return {
+      top: size.top,
+      left: size.left,
+      width: dom.clientWidth - scrollbarSize,
+      height: dom.clientHeight - scrollbarSize,
+    };
+  }
+}
+export const mainDomSet = new MainDomSet({});
 
 export const sheetViewSizeSet = new BaseSet<IWindowSize>({
   width: 0,

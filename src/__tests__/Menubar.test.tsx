@@ -16,7 +16,7 @@ describe('Menubar.test.ts', () => {
       act(() => {
         render(<App controller={initController()} />);
       });
-      expect(screen.getByTestId('menubar')!.childNodes.length).toEqual(3);
+      expect(screen.getByTestId('menubar')!.childNodes.length).toEqual(4);
     });
     test('menu', () => {
       act(() => {

@@ -7,7 +7,7 @@ import { Theme } from './Theme';
 import { $ } from '@/i18n';
 import { I18N } from './I18N';
 import { FPS } from './FPS';
-import { saveAs, eventEmitter, isTestEnv } from '@/util';
+import { saveAs, eventEmitter } from '@/util';
 
 interface Props {
   controller: IController;
@@ -77,7 +77,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
             })
           }
         />
-        {!isTestEnv() && <FPS />}
+        <FPS />
       </div>
     );
   },

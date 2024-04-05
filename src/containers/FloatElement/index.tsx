@@ -10,7 +10,7 @@ import { IController, IWindowSize } from '@/types';
 import { floatElementStore, coreStore } from '@/containers/store';
 import { FloatElement } from './FloatElement';
 import styles from './FloatElement.module.css';
-import { getHitInfo, classnames } from '@/util';
+import { getHitInfo, classnames, mainDomSet } from '@/util';
 import {
   State,
   ResizePosition,
@@ -104,7 +104,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
         }
 
         const newData = {
-          ...roundPosition(top, left, controller),
+          ...roundPosition(top, left),
           imageAngle: old.imageAngle,
           width,
           height,
@@ -145,7 +145,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
             });
           }
         }
-        const rect = controller.getDomRect();
+        const rect = mainDomSet.getDomRect();
         const { left, top } = position;
         if (left >= 0 && top >= 0 && left < rect.width && top < rect.height) {
           const newRange = getHitInfo(controller, left, top);
@@ -188,7 +188,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
           const newLeft = old.left + deltaX;
 
           const newData = {
-            ...roundPosition(newTop, newLeft, controller),
+            ...roundPosition(newTop, newLeft),
             imageAngle: old.imageAngle,
             width: old.width,
             height: old.height,

@@ -11,6 +11,7 @@ import {
   sheetViewSizeSet,
   headerSizeSet,
   sizeConfig,
+  mainDomSet,
 } from '@/util';
 import { coreStore } from '@/containers/store';
 export const BOTTOM_BUFF = 200;
@@ -69,13 +70,9 @@ export function computeScrollRowAndCol(
   };
 }
 
-export function computeScrollPosition(
-  controller: IController,
-  left: number,
-  top: number,
-) {
+export function computeScrollPosition(left: number, top: number) {
   const contentSize = parseInt(sizeConfig.scrollBarContent, 10);
-  const canvasRect = controller.getDomRect();
+  const canvasRect = mainDomSet.getDomRect();
   const viewSize = sheetViewSizeSet.get();
   const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
   const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
@@ -128,7 +125,7 @@ export function scrollToView(controller: IController, range: IRange) {
       rowCount: 1,
       sheetId: sheetId,
     });
-    const size = controller.getDomRect();
+    const size = mainDomSet.getDomRect();
     const headerSize = headerSizeSet.get();
     const { top, left } = controller.computeCellPosition(range);
     const minTop = old.top;
@@ -155,7 +152,7 @@ export function scrollBar(
 ) {
   const oldScroll = controller.getScroll();
   const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } =
-    computeScrollPosition(controller, oldScroll.left, oldScroll.top);
+    computeScrollPosition(oldScroll.left, oldScroll.top);
   let top = oldScroll.top + Math.ceil(scrollY);
   if (top < 0) {
     top = 0;
@@ -193,13 +190,13 @@ function recalculateScroll(controller: IController) {
   };
   const position = controller.computeCellPosition(temp);
   const cellSize = controller.getCellSize(temp);
-  const domRect = controller.getDomRect();
+  const domRect = mainDomSet.getDomRect();
   const oldScroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
   const headerSize = headerSizeSet.get();
   const buff = 5;
   const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } =
-    computeScrollPosition(controller, oldScroll.left, oldScroll.top);
+    computeScrollPosition(oldScroll.left, oldScroll.top);
   if (position.left + cellSize.width + buff > domRect.width) {
     if (oldScroll.col <= sheetInfo.colCount - 2) {
       const col = oldScroll.col + 1;
@@ -256,8 +253,8 @@ function recalculateScroll(controller: IController) {
   }
 }
 
-export function checkFocus(controller: IController) {
-  const inputDom = controller.getMainDom()?.input;
+export function checkFocus() {
+  const inputDom = mainDomSet.get()?.input;
   if (!inputDom) {
     return false;
   }
@@ -265,7 +262,7 @@ export function checkFocus(controller: IController) {
 }
 
 export function setActiveCellValue(controller: IController) {
-  const inputDom = controller.getMainDom().input!;
+  const inputDom = mainDomSet.get().input!;
   controller.setCell([[inputDom.value]], [], controller.getActiveRange().range);
   inputDom.value = '';
   inputDom.blur();
@@ -275,7 +272,7 @@ export function setActiveCellValue(controller: IController) {
 }
 
 function checkActiveElement(controller: IController) {
-  if (!checkFocus(controller)) {
+  if (!checkFocus()) {
     return false;
   }
   setActiveCellValue(controller);
@@ -297,7 +294,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowDown',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       controller.batchUpdate(() => {
@@ -311,7 +308,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowUp',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       controller.batchUpdate(() => {
@@ -325,7 +322,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowRight',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       controller.batchUpdate(() => {
@@ -339,7 +336,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowLeft',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       controller.batchUpdate(() => {
@@ -353,7 +350,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowDown',
     modifierKey: [],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       handleEnterClick(controller);
@@ -363,7 +360,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowUp',
     modifierKey: [],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       controller.batchUpdate(() => {
@@ -377,7 +374,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowRight',
     modifierKey: [],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       handleTabClick(controller);
@@ -387,7 +384,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'ArrowLeft',
     modifierKey: [],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       controller.batchUpdate(() => {
@@ -401,7 +398,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'b',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       const cellData = controller.getCell(controller.getActiveCell());
@@ -415,7 +412,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'i',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
 
@@ -430,7 +427,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: '5',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       const cellData = controller.getCell(controller.getActiveCell());
@@ -444,7 +441,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
     key: 'u',
     modifierKey: [isMac() ? 'meta' : 'ctrl'],
     handler: (controller) => {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         return;
       }
       const cellData = controller.getCell(controller.getActiveCell());

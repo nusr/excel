@@ -1,6 +1,6 @@
-import { npx, dpr, canvasLog, headerSizeSet } from '@/util';
+import { npx, dpr, canvasLog, headerSizeSet, mainDomSet } from '@/util';
 import { resizeCanvas, renderCellData } from './util';
-import { ContentView, IController, EventType } from '@/types';
+import { ContentView, IController } from '@/types';
 
 export class Content implements ContentView {
   private ctx: CanvasRenderingContext2D;
@@ -18,26 +18,10 @@ export class Content implements ContentView {
     return this.ctx.canvas;
   }
   resize() {
-    const { width, height } = this.controller.getDomRect();
+    const { width, height } = mainDomSet.getDomRect();
     resizeCanvas(this.ctx.canvas, width, height);
   }
-  render({ changeSet }: EventType) {
-    if (changeSet.size === 0) {
-      return;
-    }
-
-    const check =
-      changeSet.has('row') ||
-      changeSet.has('col') ||
-      changeSet.has('workbook') ||
-      changeSet.has('currentSheetId') ||
-      changeSet.has('cellStyle') ||
-      changeSet.has('cellValue') ||
-      changeSet.has('scroll');
-
-    if (!check) {
-      return;
-    }
+  render() {
     canvasLog('render canvas content');
     this.clear();
     this.renderContent();
@@ -65,13 +49,13 @@ export class Content implements ContentView {
   }
 
   private clear() {
-    const { width, height } = this.controller.getDomRect();
+    const { width, height } = mainDomSet.getDomRect();
     this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
 
   private renderContent() {
     const { controller, ctx } = this;
-    const { width, height } = controller.getDomRect();
+    const { width, height } = mainDomSet.getDomRect();
     const headerSize = headerSizeSet.get();
     const { row, col } = controller.getScroll();
 

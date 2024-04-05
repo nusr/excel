@@ -1,6 +1,11 @@
 import React, { useRef, useEffect, Fragment, useState, memo } from 'react';
 import { IController, EditorStatus } from '@/types';
-import { getHitInfo, DEFAULT_POSITION, headerSizeSet } from '@/util';
+import {
+  getHitInfo,
+  DEFAULT_POSITION,
+  headerSizeSet,
+  mainDomSet,
+} from '@/util';
 import styles from './index.module.css';
 import { coreStore } from '@/containers/store';
 import { ScrollBar } from './ScrollBar';
@@ -35,7 +40,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       return;
     }
     const canvas = ref.current!;
-    controller.setMainDom({ canvas });
+    mainDomSet.merge({ canvas });
     const fn = initCanvas(controller);
     return () => {
       fn();
@@ -60,7 +65,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       return;
     }
     const headerSize = headerSizeSet.get();
-    const rect = controller.getDomRect();
+    const rect = mainDomSet.getDomRect();
     const { clientX, clientY } = event;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
@@ -115,7 +120,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       return;
     }
     const headerSize = headerSizeSet.get();
-    const canvasRect = controller.getDomRect();
+    const canvasRect = mainDomSet.getDomRect();
     const { timeStamp, clientX, clientY } = event;
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;
@@ -162,7 +167,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       activeCell.row === position.row &&
       activeCell.col === position.col;
     if (!check) {
-      if (checkFocus(controller)) {
+      if (checkFocus()) {
         setActiveCellValue(controller);
       }
       controller.setActiveCell({

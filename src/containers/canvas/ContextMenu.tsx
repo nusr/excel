@@ -5,7 +5,7 @@ import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
 import { activeCellStore } from '@/containers/store';
 import { $ } from '@/i18n';
-import { headerSizeSet } from '@/util';
+import { headerSizeSet, mainDomSet } from '@/util';
 
 interface Props {
   controller: IController;
@@ -24,9 +24,9 @@ enum ClickPosition {
 const MENU_WIDTH = 110;
 const ITEM_HEIGHT = 20;
 
-function computeMenuStyle(controller: IController, top: number, left: number) {
+function computeMenuStyle(top: number, left: number) {
   const headerSize = headerSizeSet.get();
-  const rect = controller.getMainDom().canvas!.getBoundingClientRect();
+  const rect = mainDomSet.get().canvas!.getBoundingClientRect();
   let clickPosition = ClickPosition.CONTENT;
   let menuHeight = ITEM_HEIGHT * 3;
   const y = top - rect.top;
@@ -78,7 +78,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
   );
   const [ref] = useClickOutside(hideContextMenu);
   const { style, position } = useMemo(() => {
-    const temp = computeMenuStyle(controller, top, left);
+    const temp = computeMenuStyle(top, left);
     return temp;
   }, [top, left]);
   const handleDialog = (isRow: boolean) => {

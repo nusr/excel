@@ -2,7 +2,7 @@ import React, { CSSProperties, useRef, useEffect, memo } from 'react';
 import { IController, EditorStatus, StyleType } from '@/types';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
-import { MAX_NAME_LENGTH } from '@/util';
+import { MAX_NAME_LENGTH,mainDomSet } from '@/util';
 import { coreStore } from '../store';
 
 interface Props {
@@ -77,7 +77,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = memo(
       if (!ref.current) {
         return;
       }
-      controller.setMainDom({ input: ref.current });
+      mainDomSet.merge({ input: ref.current });
     }, []);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {

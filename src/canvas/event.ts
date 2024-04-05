@@ -1,5 +1,5 @@
 import { IController, KeyboardEventItem, EditorStatus } from '@/types';
-import { throttle, isTestEnv } from '@/util';
+import { throttle, isTestEnv,mainDomSet } from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';
 
@@ -41,11 +41,11 @@ export function registerGlobalEvent(
     coreStore.mergeState({
       editorStatus: EditorStatus.EDIT_CELL,
     });
-    controller.getMainDom().input?.focus();
+    mainDomSet.get().input?.focus();
   }
 
   const handleWheel = throttle((event: WheelEvent) => {
-    if (event.target === controller.getMainDom().canvas! || isTestEnv()) {
+    if (event.target === mainDomSet.get().canvas! || isTestEnv()) {
       scrollBar(controller, event.deltaX, event.deltaY);
     }
   }, 1000 / 60);

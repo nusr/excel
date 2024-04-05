@@ -190,14 +190,4 @@ export function isTestEnv() {
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-export function execAsync(fn: () => void) {
-  if (isTestEnv()) {
-    fn();
-    return;
-  }
-  if (typeof queueMicrotask === 'function') {
-    queueMicrotask(fn);
-  } else {
-    setTimeout(fn, 0);
-  }
-}
+

@@ -57,7 +57,7 @@ export const FONT_FAMILY_LIST = [
   'Microsoft Yahei UI',
   'Microsoft YaHei UI Light',
   'Microsoft Yi Baiti',
-  'SimSun-ExtB',
+  'SimSun',
   'Times New Roman',
   'Yu Gothic Light',
   'Yu Gothic Medium',
