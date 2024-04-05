@@ -7,12 +7,13 @@ export interface IconProps {
   name: BaseIconName;
   className?: string;
   fill?: string;
+  testId?: string;
 }
 
 export const Icon: FunctionComponent<IconProps> = memo(
-  ({ name, className = '', fill }) => {
+  ({ name, className = '', fill, testId }) => {
     const paths = iconConfig[name].map((item) => ({ d: item }));
-    return BaseIcon({ className, paths, fill });
+    return BaseIcon({ className, paths, fill, testId });
   },
 );
 Icon.displayName = 'Icon';

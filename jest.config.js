@@ -24,5 +24,6 @@ module.exports = {
 
   moduleNameMapper: {
     '@/(.*)': '<rootDir>/src/$1',
+    '\\.css$': path.join(rootDir, './scripts/style-mock.js'),
   },
 };

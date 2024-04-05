@@ -52,6 +52,9 @@ devDependencies:
   husky:
     specifier: 9.0.11
     version: 9.0.11
+  identity-obj-proxy:
+    specifier: ^3.0.0
+    version: 3.0.0
   jest:
     specifier: 29.7.0
     version: 29.7.0(@types/node@20.12.4)
@@ -59,7 +62,7 @@ devDependencies:
     specifier: 29.7.0
     version: 29.7.0(canvas@2.11.2)
   ts-jest:
-    specifier: ^29.1.2
+    specifier: 29.1.2
     version: 29.1.2(@babel/core@7.22.17)(esbuild@0.20.2)(jest@29.7.0)(typescript@5.4.3)
   typescript:
     specifier: 5.4.3
@@ -2077,6 +2080,10 @@ packages:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
     dev: true
 
+  /harmony-reflect@1.6.2:
+    resolution: {integrity: sha512-HIp/n38R9kQjDEziXyDTuW3vvoxxyxjxFzXLrBr18uB47GnSt+G9D29fqrpM5ZkspMcPICud3XsBJQ4Y2URg8g==}
+    dev: true
+
   /has-bigints@1.0.2:
     resolution: {integrity: sha512-tSvCKtBr9lkF0Ex0aQiP9N+OpV4zi2r/Nee5VkRDbaqv35RLYMzbwQfFSZZH0kR+Rd6302UJZ2p/bJCEoR3VoQ==}
     dev: true
@@ -2179,6 +2186,13 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       safer-buffer: 2.1.2
+    dev: true
+
+  /identity-obj-proxy@3.0.0:
+    resolution: {integrity: sha512-00n6YnVHKrinT9t0d9+5yZC6UBNJANpYEQvL2LlX6Ab9lnmxzIRcEmTPuyGScvl1+jKuCICX1Z0Ab1pPKKdikA==}
+    engines: {node: '>=4'}
+    dependencies:
+      harmony-reflect: 1.6.2
     dev: true
 
   /immediate@3.0.6:

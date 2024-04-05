@@ -89,6 +89,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
                 className={classnames(styles['resize-handler'], styles['top'])}
                 data-position={ResizePosition.top}
                 onPointerDown={resizeDown}
+                data-testid="float-element-resize-top"
               >
                 <div className={styles['scale-dot']}></div>
               </div>
@@ -99,6 +100,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
                 )}
                 data-position={ResizePosition.topRight}
                 onPointerDown={resizeDown}
+                data-testid="float-element-resize-top-right"
               >
                 <div className={styles['scale-dot']}></div>
               </div>
@@ -109,6 +111,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
                 )}
                 data-position={ResizePosition.topLeft}
                 onPointerDown={resizeDown}
+                data-testid="float-element-resize-top-left"
               >
                 <div className={styles['scale-dot']}></div>
               </div>
@@ -116,6 +119,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
                 className={classnames(styles['resize-handler'], styles['left'])}
                 data-position={ResizePosition.left}
                 onPointerDown={resizeDown}
+                data-testid="float-element-resize-left"
               >
                 <div className={styles['scale-dot']}></div>
               </div>
@@ -126,6 +130,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
                 )}
                 data-position={ResizePosition.right}
                 onPointerDown={resizeDown}
+                data-testid="float-element-resize-right"
               >
                 <div className={styles['scale-dot']}></div>
               </div>
@@ -136,6 +141,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
                 )}
                 data-position={ResizePosition.bottomRight}
                 onPointerDown={resizeDown}
+                data-testid="float-element-resize-bottom-right"
               >
                 <div className={styles['scale-dot']}></div>
               </div>
@@ -146,6 +152,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
                 )}
                 data-position={ResizePosition.bottomLeft}
                 onPointerDown={resizeDown}
+                data-testid="float-element-resize-bottom-left"
               >
                 <div className={styles['scale-dot']}></div>
               </div>
@@ -156,6 +163,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
                 )}
                 data-position={ResizePosition.bottom}
                 onPointerDown={resizeDown}
+                data-testid="float-element-resize-bottom"
               >
                 <div className={styles['scale-dot']}></div>
               </div>
@@ -167,6 +175,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
                   )}
                   data-position={ResizePosition.rotate}
                   onPointerDown={resizeDown}
+                  data-testid="float-element-rotate"
                 >
                   <div className={styles['rotate-icon']}>
                     <Icon name="rotate" />

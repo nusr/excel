@@ -69,7 +69,7 @@ function ChartComponent<
 
     if (redraw) {
       destroyChart();
-      setTimeout(renderChart, 0);
+      setTimeout(renderChart);
     } else {
       if (!deepEqual(chartRef.current.data, data)) {
         chartRef.current.data = data;

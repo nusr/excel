@@ -34,7 +34,8 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     if (!ref.current) {
       return;
     }
-    controller.setMainDom({ canvas: ref.current! });
+    const canvas = ref.current!;
+    controller.setMainDom({ canvas });
     const fn = initCanvas(controller);
     return () => {
       fn();

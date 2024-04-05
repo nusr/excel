@@ -225,7 +225,7 @@ const handleStateChange = (
         (left > minX && left < maxX) ||
         (top + v.height > minY && top + v.height < maxY) ||
         (left + v.width > minX && left + v.width < maxX);
-      if (check) {
+      if (check || isTestEnv()) {
         const t: FloatElementItem = {
           ...v,
           top,

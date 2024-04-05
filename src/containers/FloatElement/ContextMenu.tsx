@@ -103,6 +103,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             defaultValue={value}
             onChange={handleChange}
             maxLength={MAX_NAME_LENGTH * 2}
+            data-testid="dialog-select-data-input"
           />
         ),
         onOk: () => {
@@ -123,6 +124,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             toast({ type: 'error', message: $('reference-is-not-valid') });
             return;
           }
+          range.sheetId = range.sheetId || controller.getCurrentSheetId();
           controller.updateDrawing(uuid, { chartRange: range });
           hideContextMenu();
         },
@@ -149,6 +151,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             defaultValue={value}
             onChange={handleChange}
             maxLength={MAX_NAME_LENGTH}
+            data-testid="dialog-change-chart-title-input"
           />
         ),
         onOk: () => {
@@ -177,6 +180,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             defaultValue={newChartType}
             data={chartList.map((v) => ({ ...v, disabled: false }))}
             onChange={(v) => (newChartType = String(v) as ChartType)}
+            testId="dialog-change-chart-type-select"
           />
         ),
         onCancel() {
@@ -190,9 +194,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
     };
     const saveAsPicture = () => {
       hideContextMenu();
-      const list = controller.getDrawingList(
-        controller.getCurrentSheetId(),
-      );
+      const list = controller.getDrawingList(controller.getCurrentSheetId());
       const item = list.find((v) => v.uuid === uuid);
       if (!item) {
         return;
@@ -284,7 +286,12 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             </Button>
           </React.Fragment>
         ) : null}
-        <Button testId="float-element-context-menu-save-as-picture" onClick={saveAsPicture}>{$('save-as-picture')}</Button>
+        <Button
+          testId="float-element-context-menu-save-as-picture"
+          onClick={saveAsPicture}
+        >
+          {$('save-as-picture')}
+        </Button>
         <Button
           disabled={width === originWidth && height === originHeight}
           testId="float-element-context-reset-size"

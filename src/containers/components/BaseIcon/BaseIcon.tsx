@@ -11,12 +11,14 @@ export interface BaseIconProps {
   className?: string;
   paths: PathItem[];
   fill?: string;
+  testId?: string;
 }
 
 export const BaseIcon: FunctionComponent<BaseIconProps> = ({
   className = '',
   paths = [],
   fill = 'currentcolor',
+  testId,
 }) => {
   return (
     <svg
@@ -24,6 +26,7 @@ export const BaseIcon: FunctionComponent<BaseIconProps> = ({
       className={classnames(styles.baseIcon, className)}
       viewBox="0 0 1137 1024"
       aria-hidden
+      data-testid={testId}
     >
       {paths.map((item, i) => (
         <path d={item.d} key={i} fillOpacity={item['fill-opacity']} />
