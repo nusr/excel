@@ -10,6 +10,7 @@ import {
   parseReference,
   isSameRange,
   MAX_NAME_LENGTH,
+  extractImageType,
 } from '@/util';
 import { FloatElementItem } from '@/containers/store';
 import { IWindowSize } from '@/types';
@@ -22,17 +23,6 @@ type Props = FloatElementItem & {
   resetResize: (size: IWindowSize) => void;
   hideContextMenu: () => void;
 };
-
-function extractTypeFromBase64(base64: string) {
-  const text = 'data:image/';
-  let i = text.length;
-  for (; i < base64.length; i++) {
-    if (base64[i] === ';') {
-      break;
-    }
-  }
-  return base64.slice(text.length, i);
-}
 
 const chartList: Array<{ value: ChartType; label: string }> = [
   {
@@ -200,10 +190,8 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         return;
       }
       if (type === 'floating-picture' && item.imageSrc) {
-        saveAs(
-          item.imageSrc,
-          item.title + '.' + extractTypeFromBase64(item.imageSrc),
-        );
+        const result = extractImageType(item.imageSrc);
+        saveAs(item.imageSrc, item.title + result.ext);
       }
       if (type === 'chart') {
         const dom = document.querySelector<HTMLCanvasElement>(

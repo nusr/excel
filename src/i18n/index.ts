@@ -6,13 +6,21 @@ import zh from './lang/zh.json';
 let languageKey = 'language';
 
 export function getLanguage(): LanguageType {
+  let language: LanguageType = 'en';
   const l = localStorage.getItem(languageKey);
   if (l && LANGUAGE_LIST.some((v) => v === l)) {
-    return l as LanguageType;
+    language = l as LanguageType;
+  } else {
+    const lang = navigator?.language || '';
+    const item = LANGUAGE_LIST.find((v) => lang.includes(v));
+    if (item) {
+      language = item;
+    }
   }
-  const lang = navigator?.language || '';
-  const item = LANGUAGE_LIST.find((v) => lang.includes(v));
-  return item || 'en';
+  if (document.documentElement.getAttribute('lang') !== language) {
+    document.documentElement.setAttribute('lang', language);
+  }
+  return language;
 }
 
 export function setLanguage(lang: LanguageType) {

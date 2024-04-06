@@ -50,6 +50,12 @@ export const ATANH = (...list: ResultType[]): number => {
   return Math.log((1 + data) / (data + 1)) / 2;
 };
 
+export const AVERAGE = (...rest: ResultType[]): number => {
+  const list = parseNumberArray(rest);
+  assert(list.length <= MAX_PARAMS_COUNT && list.length >= 1);
+  return list.reduce((sum, cur) => sum + cur, 0) / list.length;
+};
+
 export const COS = (...list: ResultType[]): number => {
   const data = mustOneNumber(list);
   return Math.cos(data);
@@ -125,12 +131,6 @@ export const SUM = (...rest: ResultType[]): number => {
   const list = parseNumberArray(rest);
   assert(list.length <= MAX_PARAMS_COUNT);
   return list.reduce((sum, cur) => sum + cur, 0);
-};
-
-export const AVERAGE = (...rest: ResultType[]): number => {
-  const list = parseNumberArray(rest);
-  assert(list.length <= MAX_PARAMS_COUNT && list.length >= 1);
-  return list.reduce((sum, cur) => sum + cur, 0) / list.length;
 };
 
 const formulas: MathFormulaType = {

@@ -3,28 +3,20 @@ import { Interactive, Interaction } from './Interactive';
 import { Pointer } from './Pointer';
 import { HsvaColor } from './types';
 import { hsvaToHslString } from './convert';
-import { clamp } from './clamp';
 import { round } from './round';
 import styles from './panel.module.css';
 
 interface Props {
   hsva: HsvaColor;
+  testId?: string;
   onChange: (newColor: { s: number; v: number }) => void;
 }
 
-const SaturationBase = ({ hsva, onChange }: Props) => {
+const SaturationBase = ({ hsva, testId, onChange }: Props) => {
   const handleMove = useCallback((interaction: Interaction) => {
     onChange({
       s: interaction.left * 100,
       v: 100 - interaction.top * 100,
-    });
-  }, []);
-
-  const handleKey = useCallback((offset: Interaction) => {
-    // Saturation and brightness always fit into [0, 100] range
-    onChange({
-      s: clamp(hsva.s + offset.left * 100, 0, 100),
-      v: clamp(hsva.v - offset.top * 100, 0, 100),
     });
   }, []);
 
@@ -39,11 +31,11 @@ const SaturationBase = ({ hsva, onChange }: Props) => {
     >
       <Interactive
         onMove={handleMove}
-        onKey={handleKey}
         aria-label="Color"
         aria-valuetext={`Saturation ${round(hsva.s)}%, Brightness ${round(
           hsva.v,
         )}%`}
+        testId={`${testId}-saturation`}
       >
         <Pointer
           className={styles['color-picker-panel__saturation-pointer']}

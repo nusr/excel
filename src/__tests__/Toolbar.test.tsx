@@ -280,6 +280,30 @@ describe('Toolbar.test.ts', () => {
         fillColor: '#B2B2B2',
       });
     });
+    test('saturation', () => {
+      const controller = initController();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      fireEvent.click(screen.getByTestId('toolbar-fill-color'));
+
+      fireEvent.pointerDown(
+        screen.getByTestId('toolbar-fill-color-saturation'),
+        { buttons: 1, clientX: 10, clientY: 10, pageX: 10, pageY: 10 },
+      );
+      fireEvent.pointerMove(document.body, {
+        buttons: 1,
+        clientX: 100,
+        clientY: 100,
+        pageX: 100,
+        pageY: 100,
+      });
+      fireEvent.pointerUp(document.body);
+
+      expect(controller.getCell(controller.getActiveCell())?.style).toEqual({
+        fillColor: '#ffffff',
+      });
+    });
   });
   describe('font color', () => {
     test('normal', () => {
@@ -294,6 +318,30 @@ describe('Toolbar.test.ts', () => {
       fireEvent.click(dom);
       expect(controller.getCell(controller.getActiveCell())?.style).toEqual({
         fontColor: '#B2B2B2',
+      });
+    });
+    test('saturation', () => {
+      const controller = initController();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      fireEvent.click(screen.getByTestId('toolbar-font-color'));
+
+      fireEvent.pointerDown(
+        screen.getByTestId('toolbar-font-color-saturation'),
+        { buttons: 1, clientX: 10, clientY: 10, pageX: 10, pageY: 10 },
+      );
+      fireEvent.pointerMove(document.body, {
+        buttons: 1,
+        clientX: 100,
+        clientY: 100,
+        pageX: 100,
+        pageY: 100,
+      });
+      fireEvent.pointerUp(document.body);
+
+      expect(controller.getCell(controller.getActiveCell())?.style).toEqual({
+        fontColor: '#ffffff',
       });
     });
   });

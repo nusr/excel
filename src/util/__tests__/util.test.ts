@@ -55,6 +55,9 @@ describe('util.test.ts', () => {
     it("should convert '1' to true", () => {
       expect(isNumber('1')).toBeTruthy();
     });
+    it("should convert '1a' to false", () => {
+      expect(isNumber('1a')).toBeFalsy();
+    });
   });
   describe('parseNumber', () => {
     it('should convert null to 0', () => {

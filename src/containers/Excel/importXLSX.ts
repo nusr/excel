@@ -20,6 +20,7 @@ import {
   coordinateToString,
   getCustomWidthOrHeightKey,
   generateUUID,
+  IMAGE_TYPE_MAP,
 } from '@/util';
 
 function getImageSize(base64: string): Promise<IWindowSize> {
@@ -49,19 +50,6 @@ const SHARED_STRINGS = 'xl/sharedStrings.xml';
 const textKey = '#text';
 const DRAWING_PREFIX_KEY = 'xl/drawings/';
 const DRAWING_FLAG = '../drawings/';
-
-export const imageTypeMap = {
-  'image/apng': ['.apng'],
-  'image/bmp': ['.bmp'],
-  'image/x-icon': ['.ico', '.cur'],
-  // 'image/tiff': ['.tif', '.tiff'], // only Safari
-  'image/png': ['.png'],
-  'image/webp': ['.webp'],
-  'image/svg+xml': ['.svg'],
-  'image/avif': ['.avif'],
-  'image/gif': ['.gif'],
-  'image/jpeg': ['.jpeg', '.jpg', '.jfif', '.pjpeg', '.pjp'],
-} as const;
 
 export const chartTypeList = [
   // 'area',
@@ -584,7 +572,7 @@ export function convertXMLDataToModel(
         const style = getCellStyle(xmlData[STYLE_PATH], styleId, themeData);
         const t: ModelCellType = {
           style,
-          value: ''
+          value: '',
         };
         if (col.t === 's') {
           const i = parseInt(val, 10);
@@ -771,7 +759,7 @@ export async function importXLSX(file: File) {
       }
     } else {
       let imageType = '';
-      for (const [type, list] of Object.entries(imageTypeMap)) {
+      for (const [type, list] of Object.entries(IMAGE_TYPE_MAP)) {
         if (list.some((v) => key.endsWith(v))) {
           imageType = type;
           break;

@@ -8,8 +8,10 @@
  * e.g italic bold 14px/16px sans-serif;
  */
 import { npx } from './dpr';
-import { EUnderLine, StyleType } from '@/types';
+import { EUnderLine, StyleType, ResultType } from '@/types';
 import { DEFAULT_FONT_SIZE, MUST_FONT_FAMILY } from './constant';
+import { camelCase } from './lodash';
+import { isNumber } from './util';
 
 export const FONT_SIZE_LIST = [
   6,
@@ -152,7 +154,8 @@ function parseStyle(
   tagName: string,
 ): Partial<StyleType> {
   let result: Partial<StyleType> = {};
-  const t = styleMap[tagName] || styleMap[tagName.toLowerCase()];
+  const name = tagName.toLowerCase();
+  const t = styleMap[tagName] || styleMap[name];
   if (t) {
     result = pickCSSStyle(t);
   }
@@ -162,13 +165,13 @@ function parseStyle(
 
   result = Object.assign(result, pickCSSStyle(style));
 
-  if (tagName === 's' || tagName === 'strike') {
+  if (name === 's' || name === 'strike') {
     result.isStrike = true;
-  } else if (tagName === 'i') {
+  } else if (name === 'i') {
     result.isItalic = true;
-  } else if (tagName === 'b' || tagName === 'strong') {
+  } else if (name === 'b' || name === 'strong') {
     result.isBold = true;
-  } else if (tagName === 'u') {
+  } else if (name === 'u') {
     result.underline = EUnderLine.SINGLE;
   }
   return result;
@@ -177,14 +180,25 @@ function parseStyle(
 function convertToCssStyleDeclaration(cssStr: string) {
   const str = cssStr.replace(/\s+/g, '').replace('<!--', '');
   const regex = /([^{}]+)\s*\{([^}]*)\}/g;
-  const matches: Record<string, Partial<CSSStyleDeclaration>> = {};
+  const matches: Record<string, Record<string, string | number>> = {};
   let match;
   while ((match = regex.exec(str)) !== null) {
-    let div: HTMLDivElement | null = document.createElement('div');
-    div.style.cssText = match[2];
-    const key = match[1].trim();
-    matches[key] = div.style;
-    div = null;
+    const name = (match[1] || '').trim();
+    const cssText = (match[2] || '').trim();
+    if (!name || !cssText) {
+      continue;
+    }
+    matches[name] = {};
+    const list = cssText.split(';');
+    for (const item of list) {
+      const [n, v] = item.split(':').map((v) => v.trim());
+      if (!v || !n) {
+        continue;
+      }
+      const realKey = camelCase(n);
+      const value = isNumber(v) ? Number(v) : v;
+      matches[name][realKey] = value;
+    }
   }
   return matches;
 }
@@ -200,13 +214,13 @@ export function parseHTML(html: string) {
       styleMap[key] = Object.assign(styleMap[key] || {}, value);
     }
   }
-  const textList: string[][] = [];
+  const textList: Array<Array<ResultType>> = [];
   const styleList: Array<Array<Partial<StyleType>>> = [];
   // TODO col width and row height
   // const colList = doc.querySelectorAll('col');
   const trList = doc.querySelectorAll('tr');
   for (const tr of trList) {
-    const texts: string[] = [];
+    const texts: ResultType[] = [];
     const list: Array<Partial<StyleType>> = [];
     for (const td of tr.children) {
       if (td.tagName !== 'TD') {
@@ -229,7 +243,8 @@ export function parseHTML(html: string) {
         }
       }
       list.push(itemStyle);
-      texts.push(temp.textContent || '');
+      const value = (temp.textContent || '').trim();
+      texts.push(isNumber(value) ? Number(value) : value);
     }
     textList.push(texts);
     styleList.push(list);

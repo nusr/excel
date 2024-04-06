@@ -7,7 +7,9 @@ import {
   screen,
   fireEvent,
   act,
+  RenderResult,
 } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 describe('Menubar.test.ts', () => {
   afterEach(cleanup);
@@ -38,14 +40,33 @@ describe('Menubar.test.ts', () => {
       expect(before).not.toEqual(after);
       expect(new Set([after, before])).toEqual(new Set(['light', 'dark']));
     });
-    test('i18n', () => {
+  });
+  describe('i18n', () => {
+    test('default', () => {
       act(() => {
         render(<App controller={initController()} />);
       });
-      expect(
-        screen.getByTestId('menubar-i18n')!.querySelector('select')!.value,
-      ).toEqual('en');
-      expect(screen.getByTestId('menubar-excel').textContent).toEqual('Menu');
+      expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('en');
+    });
+    test('change', () => {
+      let result: RenderResult;
+      const controller = initController();
+      const g = window as any;
+      delete g.location;
+      g.location = {
+        reload: () => {
+          act(() => {
+            result.rerender(<App controller={controller} />);
+          });
+        },
+      };
+      act(() => {
+        result = render(<App controller={controller} />);
+      });
+      fireEvent.change(screen.getByTestId('menubar-i18n-select'), {
+        target: { value: 'zh' },
+      });
+      expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('zh');
     });
   });
 });

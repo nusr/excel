@@ -16,11 +16,11 @@ import {
   convertColorToHex,
   getCustomWidthOrHeightKey,
   NUMBER_FORMAT_LIST,
+  extractImageType,
 } from '@/util';
 import {
   CUSTOM_WIdTH_RADIO,
   XfItem,
-  imageTypeMap,
   chartTypeList,
 } from './importXLSX';
 interface StyleData {
@@ -219,25 +219,6 @@ function buildStyle(style: StyleData) {
   return list.join('\n');
 }
 
-function extractImageType(src: string): {
-  ext: string;
-  type: string;
-  base64: string;
-} {
-  if (!src) {
-    return { ext: '', base64: '', type: '' };
-  }
-  const base64Prefix = ';base64,';
-  const i = src.indexOf(base64Prefix);
-  const prefix = 'data:';
-  const type = src.slice(prefix.length, i);
-  // @ts-ignore
-  const list = imageTypeMap[type] || [];
-  if (list.length > 0) {
-    return { ext: list[0], type, base64: src.slice(i + base64Prefix.length) };
-  }
-  return { ext: '', base64: '', type: '' };
-}
 
 export function convertToXMLData(controller: IController) {
   const model = controller.toJSON();
@@ -517,14 +498,14 @@ export function convertToXMLData(controller: IController) {
     size: activeIndex >= 0 ? ` activeTab="${activeIndex}" ` : '',
     large:
       defineNames.length > 0
-        ? `<definedNames>${defineNames.join('')}</definedNames>`
+        ? `<definedNames>\n${defineNames.join('\n')}\n</definedNames>`
         : '',
     children: sheetList
       .map((v) => {
         const item = sheetRelMap[v.sheetId];
         return `<sheet name="${v.name}" sheetId="${v.sheetId}" r:id="${item.rid}"/>`;
       })
-      .join(''),
+      .join('\n'),
   });
   result['[Content_Types].xml'] = compileTemplate(
     CONFIG['[Content_Types].xml'],

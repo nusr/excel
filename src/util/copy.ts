@@ -129,9 +129,8 @@ export function generateHTML(style: string, content: string): string {
     </style>
   </head>
 
-  <body >
-    <table
-    >
+  <body>
+    <table>
       ${content}
     </table>
   </body>

@@ -85,7 +85,7 @@ export const ColorPicker: FunctionComponent<
           })}
         </div>
         <div>
-          <ColorPickerPanel color={color} onChange={onChange} />
+          <ColorPickerPanel color={color} onChange={onChange} testId={testId} />
         </div>
         <div>
           <Button

@@ -165,27 +165,7 @@ describe('FloatElement.test.ts', () => {
       fireEvent.click(screen.getByTestId('dialog-change-chart-title-confirm'));
       expect(controller.getDrawingList()[0].title).toEqual('new_chart_title');
     });
-    test('change chart title', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
-      type('1');
-      fireEvent.click(screen.getByTestId('toolbar-chart'));
-      fireEvent.contextMenu(screen.getByTestId('float-element'), {
-        clientY: 20,
-        clientX: 20,
-      });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-change-chart-type'),
-      );
-      fireEvent.change(screen.getByTestId('dialog-change-chart-type-select'), {
-        target: { value: 'line' },
-      });
 
-      fireEvent.click(screen.getByTestId('dialog-change-chart-type-confirm'));
-      expect(controller.getDrawingList()[0].chartType!).toEqual('line');
-    });
     test('select data', async () => {
       const controller = initController();
       act(() => {
@@ -268,5 +248,40 @@ describe('FloatElement.test.ts', () => {
       ).height;
       expect(parseInt(newHeight, 10)).toEqual(parseInt(height, 10) + 20);
     });
+  });
+  describe.only('chart type', () => {
+    for (const item of [
+      'line',
+      'bar',
+      'pie',
+      'scatter',
+      'radar',
+      'polarArea',
+    ]) {
+      test(`change chart type to: ${item}`, async () => {
+        const controller = initController();
+        act(() => {
+          render(<App controller={controller} />);
+        });
+        type('1');
+        fireEvent.click(screen.getByTestId('toolbar-chart'));
+        fireEvent.contextMenu(screen.getByTestId('float-element'), {
+          clientY: 20,
+          clientX: 20,
+        });
+        fireEvent.click(
+          screen.getByTestId('float-element-context-menu-change-chart-type'),
+        );
+        fireEvent.change(
+          screen.getByTestId('dialog-change-chart-type-select'),
+          {
+            target: { value: item },
+          },
+        );
+
+        fireEvent.click(screen.getByTestId('dialog-change-chart-type-confirm'));
+        expect(controller.getDrawingList()[0].chartType!).toEqual(item);
+      });
+    }
   });
 });

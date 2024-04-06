@@ -1,4 +1,5 @@
 import type { ErrorTypes } from '@/types';
+import { isNumber } from '@/util';
 
 export class CustomError extends Error {
   readonly value: ErrorTypes;
@@ -8,7 +9,10 @@ export class CustomError extends Error {
   }
 }
 
-export function assert(condition: boolean, message: ErrorTypes = '#VALUE!'): asserts condition {
+export function assert(
+  condition: boolean,
+  message: ErrorTypes = '#VALUE!',
+): asserts condition {
   if (!condition) {
     throw new CustomError(message);
   }
@@ -28,8 +32,8 @@ export function mustOneString(list: any[]): string {
 
 export function mustOneNumber(list: any[]): number {
   const value = mustOne(list);
-  assert(typeof value === 'number' && !isNaN(value));
-  return value;
+  assert(isNumber(value));
+  return Number(value);
 }
 
 export function mustEmpty(list: any[]) {

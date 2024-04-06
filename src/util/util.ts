@@ -13,7 +13,7 @@ export function isNumber(value: any): boolean {
   if (typeof value !== 'string') {
     return false;
   }
-  const temp = parseFloat(value);
+  const temp = Number(value);
   return !window.isNaN(temp);
 }
 
@@ -27,7 +27,7 @@ export function parseNumber(value: any): number {
 export function parseNumberArray(list: any[]): number[] {
   const result: number[] = [];
   for (let i = 0; i < list.length; i++) {
-    const temp = parseNumber(list[i]);
+    const temp = Number(list[i]);
     if (!window.isNaN(temp)) {
       result.push(temp);
     }
@@ -190,4 +190,3 @@ export function isTestEnv() {
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-

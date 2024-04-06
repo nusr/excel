@@ -49,4 +49,5 @@ export interface ColorPickerBaseProps<T extends AnyColor> {
   color: T;
   onChange: (newColor: T) => void;
   className?: string;
+  testId?: string;
 }
