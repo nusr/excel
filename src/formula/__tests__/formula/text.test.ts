@@ -102,7 +102,7 @@ describe('text.test.ts', () => {
       expect(CONCAT()).toEqual('');
     });
     test('error', () => {
-      const list: number[] = new Array(MAX_PARAMS_COUNT + 3).fill(3);
+      const list = Array.from<number>({ length: MAX_PARAMS_COUNT + 3 }).fill(3);
       expect(() => CONCAT(...list)).toThrow();
     });
   });

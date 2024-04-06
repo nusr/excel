@@ -128,7 +128,7 @@ describe('math.test.ts', () => {
       expect(AVERAGE(1, 'a', '11')).toEqual(6);
     });
     test('error', () => {
-      const list = new Array(MAX_PARAMS_COUNT + 3).fill(3);
+      const list = Array.from<number>({ length: MAX_PARAMS_COUNT + 3 }).fill(3);
       expect(() => AVERAGE(...list)).toThrow();
     });
   });
@@ -279,7 +279,7 @@ describe('math.test.ts', () => {
       expect(SUM(0.1, 0.2)).toEqual(0.3);
     });
     test('error', () => {
-      const list = new Array(MAX_PARAMS_COUNT + 3).fill(3);
+      const list = Array.from<number>({ length: MAX_PARAMS_COUNT + 3 }).fill(3);
       expect(() => SUM(...list)).toThrow();
     });
   });

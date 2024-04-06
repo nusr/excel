@@ -8,11 +8,10 @@
     "start": "npm run build -- --nodeEnv development",
     "build": "node ./scripts/esbuild.js",
     "test": "jest --config ./jest.config.js --forceExit --detectOpenHandles",
-    "test-only": "jest ./src/__tests__/FloatElement.test.tsx --config ./jest.config.js --forceExit --detectOpenHandles --verbose",
     "coverage": "npm run test -- --coverage",
     "ci": "npm run e2e && npm run test && npm run build && npm run update-md && npm run lint && npx tsc",
-    "postinstall": "node ./post-install.js",
-    "prebuild": "npm run postinstall",
+    "postinstall": "node ./post-install.js && ./install.sh",
+    "prebuild": "node ./post-install.js",
     "e2e": "npx playwright test",
     "lint": "npx oxlint@latest --fix",
     "update-md": "node ./scripts/update-md.js"

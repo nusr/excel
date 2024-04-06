@@ -112,9 +112,9 @@ describe('style.test.ts', () => {
       <meta name=Generator content="Microsoft Excel">
       <!--[if !mso]>
       <style>
-      v\:* {behavior:url(#default#VML);}
-      o\:* {behavior:url(#default#VML);}
-      x\:* {behavior:url(#default#VML);}
+      v:* {behavior:url(#default#VML);}
+      o:* {behavior:url(#default#VML);}
+      x:* {behavior:url(#default#VML);}
       .shape {behavior:url(#default#VML);}
       </style>
       <![endif]-->
