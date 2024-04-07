@@ -28,5 +28,12 @@
     "resolveJsonModule": true,
     "checkJs": true
   },
-  "exclude": ["node_modules", "dist", "coverage"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "lib",
+    "playwright-report",
+    "test-results"
+  ]
 }
