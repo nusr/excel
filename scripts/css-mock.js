@@ -1,4 +1,4 @@
-const obj = new Proxy(
+const proxyObj = new Proxy(
   {},
   {
     get: (_target, key) => {
@@ -10,4 +10,4 @@ const obj = new Proxy(
   },
 );
 
-export default obj;
+module.exports = proxyObj;

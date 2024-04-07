@@ -77,7 +77,7 @@ export const ScrollBar: React.FunctionComponent<Props> = memo(
       }
       function handleDrag(event: PointerEvent) {
         if (
-          event.buttons !== 1 ||
+          event.buttons <= 0 ||
           state.current.scrollStatus === ScrollStatus.NONE
         ) {
           return;
@@ -99,7 +99,7 @@ export const ScrollBar: React.FunctionComponent<Props> = memo(
     }, []);
     const handleVerticalBarDown = useCallback(
       (event: React.PointerEvent<HTMLDivElement>) => {
-        if (event.buttons !== 1) {
+        if (event.buttons <= 0) {
           return;
         }
         state.current.prevPageX = event.clientX;
@@ -110,7 +110,7 @@ export const ScrollBar: React.FunctionComponent<Props> = memo(
     );
     const handleHorizontalBarDown = useCallback(
       (event: React.PointerEvent<HTMLDivElement>) => {
-        if (event.buttons !== 1) {
+        if (event.buttons <= 0) {
           return;
         }
         state.current.prevPageX = event.clientX;

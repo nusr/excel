@@ -1,6 +1,6 @@
 import { EHorizontalAlign, EUnderLine, EVerticalAlign } from '@/types';
 import { convertToXMLData } from '../exportXLSX';
-import { initController } from '@/controller';
+import { initControllerForTest } from '@/controller';
 import { mockImage } from '../../../model/mockData';
 
 function trimData(content: string) {
@@ -24,7 +24,7 @@ function trimData(content: string) {
 describe('exportXLSX.test.ts', () => {
   describe('convertToXMLData', () => {
     test('empty', () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       const result = convertToXMLData(controller);
       expect(trimData(result['xl/worksheets/sheet1.xml'])).toEqual(
         trimData(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -49,7 +49,7 @@ describe('exportXLSX.test.ts', () => {
       );
     });
     test('normal', () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       controller.setCell(
         [
           [true, false, 'true', 'false', 'ab'],

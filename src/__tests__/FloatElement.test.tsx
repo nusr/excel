@@ -1,5 +1,4 @@
 import { App } from '@/containers';
-import { initController } from '@/controller';
 import * as React from 'react';
 import {
   cleanup,
@@ -9,27 +8,15 @@ import {
   act,
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { type } from './util';
-import { mainDomSet } from '@/util';
+import { type, extractDataFromTransform } from './util';
+import { initControllerForTest } from '@/controller';
 
 describe('FloatElement.test.ts', () => {
-  beforeAll(() => {
-    global.ResizeObserver = class ResizeObserver {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    };
-    const spy = jest.spyOn(mainDomSet, 'getDomRect');
-    spy.mockReturnValue({ top: 0, left: 0, width: 1000, height: 800 });
-  });
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
   afterEach(cleanup);
   describe('float element', () => {
     test('throw error', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
 
       fireEvent.click(screen.getByTestId('toolbar-chart'));
@@ -39,17 +26,29 @@ describe('FloatElement.test.ts', () => {
     });
     test('add chart', async () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       expect(screen.getAllByTestId('float-element')).toHaveLength(1);
     });
+    test('active chart', async () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      expect(screen.getByTestId('float-element')).not.toHaveClass('active');
+      fireEvent.pointerDown(screen.getByTestId('float-element'), {
+        buttons: 1,
+      });
+      expect(screen.getByTestId('float-element')).toHaveClass('active');
+    });
   });
   describe('context menu', () => {
     test('show', async () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
@@ -64,7 +63,7 @@ describe('FloatElement.test.ts', () => {
     });
     test('copy', async () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
@@ -83,7 +82,7 @@ describe('FloatElement.test.ts', () => {
       expect(screen.getAllByTestId('float-element')).toHaveLength(2);
     });
     test('cut', async () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -108,7 +107,7 @@ describe('FloatElement.test.ts', () => {
     });
     test('duplicate', async () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
@@ -123,7 +122,7 @@ describe('FloatElement.test.ts', () => {
     });
     test('delete', async () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
@@ -145,7 +144,7 @@ describe('FloatElement.test.ts', () => {
       expect(screen.getAllByTestId('float-element')).toHaveLength(1);
     });
     test('change chart title', async () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -167,7 +166,7 @@ describe('FloatElement.test.ts', () => {
     });
 
     test('select data', async () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -195,7 +194,7 @@ describe('FloatElement.test.ts', () => {
     });
     test('reset size disabled', async () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
@@ -207,9 +206,9 @@ describe('FloatElement.test.ts', () => {
         screen.getByTestId('float-element-context-reset-size'),
       ).toBeDisabled();
     });
-    test.skip('reset size', async () => {
+    test('reset size', async () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
@@ -217,10 +216,8 @@ describe('FloatElement.test.ts', () => {
         buttons: 1,
         clientX: 0,
         clientY: 0,
-        stopPropagation: () => {},
-        preventDefault: () => {},
       });
-      const height = window.getComputedStyle(
+      const oldHeight = window.getComputedStyle(
         screen.getByTestId('float-element'),
       ).height;
       const dom = screen.getByTestId('float-element-resize-top');
@@ -228,28 +225,33 @@ describe('FloatElement.test.ts', () => {
       fireEvent.pointerDown(dom, {
         clientX: 0,
         clientY: 0,
-        stopPropagation: () => {},
-        preventDefault: () => {},
       });
       fireEvent.pointerMove(document, {
         buttons: 1,
         clientX: 0,
         clientY: 20,
-        stopPropagation: () => {},
-        preventDefault: () => {},
       });
       fireEvent.pointerUp(document, {
-        stopPropagation: () => {},
-        preventDefault: () => {},
         buttons: 1,
       });
-      const newHeight = window.getComputedStyle(
-        screen.getByTestId('float-element'),
-      ).height;
-      expect(parseInt(newHeight, 10)).toEqual(parseInt(height, 10) + 20);
+      expect(
+        parseInt(
+          window.getComputedStyle(screen.getByTestId('float-element')).height,
+          10,
+        ),
+      ).toEqual(parseInt(oldHeight, 10) - 20);
+
+      fireEvent.contextMenu(screen.getByTestId('float-element'), {
+        clientY: 20,
+        clientX: 20,
+      });
+      fireEvent.click(screen.getByTestId('float-element-context-reset-size'));
+      expect(
+        window.getComputedStyle(screen.getByTestId('float-element')).height,
+      ).toEqual(oldHeight);
     });
   });
-  describe.only('chart type', () => {
+  describe('chart type', () => {
     for (const item of [
       'line',
       'bar',
@@ -259,7 +261,7 @@ describe('FloatElement.test.ts', () => {
       'polarArea',
     ]) {
       test(`change chart type to: ${item}`, async () => {
-        const controller = initController();
+        const controller = initControllerForTest();
         act(() => {
           render(<App controller={controller} />);
         });
@@ -283,5 +285,243 @@ describe('FloatElement.test.ts', () => {
         expect(controller.getDrawingList()[0].chartType!).toEqual(item);
       });
     }
+  });
+  describe('resize float element', () => {
+    for (const item of ['top', 'top-right', 'top-left']) {
+      test(item, async () => {
+        act(() => {
+          render(<App controller={initControllerForTest()} />);
+        });
+        type('1');
+        fireEvent.click(screen.getByTestId('toolbar-chart'));
+        fireEvent.pointerDown(screen.getByTestId('float-element'), {
+          buttons: 1,
+          clientX: 0,
+          clientY: 0,
+        });
+        const oldStyle = window.getComputedStyle(
+          screen.getByTestId('float-element'),
+        );
+        const oldHeight = oldStyle.height;
+        const oldTop = extractDataFromTransform(
+          oldStyle.transform,
+          'translateY',
+        );
+        const dom = screen.getByTestId('float-element-resize-top');
+        dom.setAttribute('data-position', item);
+        fireEvent.pointerDown(dom, {
+          clientX: 0,
+          clientY: 0,
+        });
+        fireEvent.pointerMove(document, {
+          buttons: 1,
+          clientX: 0,
+          clientY: 20,
+        });
+        fireEvent.pointerUp(document, {
+          buttons: 1,
+        });
+        const newStyle = window.getComputedStyle(
+          screen.getByTestId('float-element'),
+        );
+        const newTop = extractDataFromTransform(
+          newStyle.transform,
+          'translateY',
+        );
+        expect(parseInt(newStyle.height, 10)).toEqual(
+          parseInt(oldHeight, 10) - 20,
+        );
+        expect(newTop).toEqual(oldTop + 20);
+      });
+    }
+    for (const item of ['bottom', 'bottom-right', 'bottom-left']) {
+      test(item, async () => {
+        act(() => {
+          render(<App controller={initControllerForTest()} />);
+        });
+        type('1');
+        fireEvent.click(screen.getByTestId('toolbar-chart'));
+        fireEvent.pointerDown(screen.getByTestId('float-element'), {
+          buttons: 1,
+          clientX: 0,
+          clientY: 0,
+        });
+        const oldHeight = window.getComputedStyle(
+          screen.getByTestId('float-element'),
+        ).height;
+        const dom = screen.getByTestId('float-element-resize-top');
+        dom.setAttribute('data-position', item);
+        fireEvent.pointerDown(dom, {
+          clientX: 0,
+          clientY: 0,
+        });
+        fireEvent.pointerMove(document, {
+          buttons: 1,
+          clientX: 0,
+          clientY: 20,
+        });
+        fireEvent.pointerUp(document, {
+          buttons: 1,
+        });
+        expect(
+          parseInt(
+            window.getComputedStyle(screen.getByTestId('float-element')).height,
+            10,
+          ),
+        ).toEqual(parseInt(oldHeight, 10) + 20);
+      });
+    }
+    for (const item of ['top-left', 'bottom-left', 'left']) {
+      test(item, async () => {
+        act(() => {
+          render(<App controller={initControllerForTest()} />);
+        });
+        type('1');
+        fireEvent.click(screen.getByTestId('toolbar-chart'));
+        fireEvent.pointerDown(screen.getByTestId('float-element'), {
+          buttons: 1,
+          clientX: 0,
+          clientY: 0,
+        });
+        const oldStyle = window.getComputedStyle(
+          screen.getByTestId('float-element'),
+        );
+        const oldWidth = oldStyle.width;
+        const oldLeft = extractDataFromTransform(
+          oldStyle.transform,
+          'translateX',
+        );
+        const dom = screen.getByTestId('float-element-resize-top');
+        dom.setAttribute('data-position', item);
+        fireEvent.pointerDown(dom, {
+          clientX: 0,
+          clientY: 0,
+        });
+        fireEvent.pointerMove(document, {
+          buttons: 1,
+          clientX: 20,
+          clientY: 0,
+        });
+        fireEvent.pointerUp(document, {
+          buttons: 1,
+        });
+        const newStyle = window.getComputedStyle(
+          screen.getByTestId('float-element'),
+        );
+        const newLeft = extractDataFromTransform(
+          newStyle.transform,
+          'translateX',
+        );
+        expect(parseInt(newStyle.width, 10)).toEqual(
+          parseInt(oldWidth, 10) - 20,
+        );
+        expect(newLeft).toEqual(oldLeft + 20);
+      });
+    }
+    for (const item of ['top-right', 'bottom-right', 'right']) {
+      test(item, async () => {
+        act(() => {
+          render(<App controller={initControllerForTest()} />);
+        });
+        type('1');
+        fireEvent.click(screen.getByTestId('toolbar-chart'));
+        fireEvent.pointerDown(screen.getByTestId('float-element'), {
+          buttons: 1,
+          clientX: 0,
+          clientY: 0,
+        });
+        const oldWidth = window.getComputedStyle(
+          screen.getByTestId('float-element'),
+        ).width;
+        const dom = screen.getByTestId('float-element-resize-top');
+        dom.setAttribute('data-position', item);
+        fireEvent.pointerDown(dom, {
+          clientX: 0,
+          clientY: 0,
+        });
+        fireEvent.pointerMove(document, {
+          buttons: 1,
+          clientX: 20,
+          clientY: 0,
+        });
+        fireEvent.pointerUp(document, {
+          buttons: 1,
+        });
+        expect(
+          parseInt(
+            window.getComputedStyle(screen.getByTestId('float-element')).width,
+            10,
+          ),
+        ).toEqual(parseInt(oldWidth, 10) + 20);
+      });
+    }
+  });
+  describe('move float element', () => {
+    test('move right', async () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      fireEvent.pointerDown(screen.getByTestId('float-element'), {
+        buttons: 1,
+        clientX: 0,
+        clientY: 0,
+      });
+      const oldStyle = window.getComputedStyle(
+        screen.getByTestId('float-element'),
+      );
+      const oldLeft = extractDataFromTransform(
+        oldStyle.transform,
+        'translateX',
+      );
+
+      fireEvent.pointerMove(document, {
+        buttons: 1,
+        clientX: 20,
+        clientY: 0,
+      });
+      fireEvent.pointerUp(document, {
+        buttons: 1,
+      });
+      const newStyle = window.getComputedStyle(
+        screen.getByTestId('float-element'),
+      );
+      const newLeft = extractDataFromTransform(
+        newStyle.transform,
+        'translateX',
+      );
+      expect(newLeft).toEqual(oldLeft + 20);
+    });
+    test('move down', async () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      fireEvent.pointerDown(screen.getByTestId('float-element'), {
+        buttons: 1,
+        clientX: 0,
+        clientY: 0,
+      });
+      const oldStyle = window.getComputedStyle(
+        screen.getByTestId('float-element'),
+      );
+      const oldTop = extractDataFromTransform(oldStyle.transform, 'translateY');
+
+      fireEvent.pointerMove(document, {
+        buttons: 1,
+        clientX: 0,
+        clientY: 20,
+      });
+      fireEvent.pointerUp(document, {
+        buttons: 1,
+      });
+      const newStyle = window.getComputedStyle(
+        screen.getByTestId('float-element'),
+      );
+      const newTop = extractDataFromTransform(newStyle.transform, 'translateY');
+      expect(newTop).toEqual(oldTop + 20);
+    });
   });
 });

@@ -58,5 +58,6 @@
   "insert-column-left": "向左插入列",
   "insert-column-right": "向右插入列",
   "insert-row-above": "在上面插入行",
-  "insert-row-below": "在下面插入行"
+  "insert-row-below": "在下面插入行",
+  "get-all-installed-fonts": "获取本地安装的所有字体"
 }

@@ -40,11 +40,7 @@ const InteractiveBase = ({ onMove, testId, ...rest }: Props) => {
       event.preventDefault();
       container.current.focus();
       onMoveCallback(
-        getRelativePosition(
-          container.current,
-          event.clientX || event.pageX,
-          event.clientY || event.pageY,
-        ),
+        getRelativePosition(container.current, event.clientX, event.clientY),
       );
       toggleDocumentEvents(true);
     };

@@ -4,6 +4,7 @@ import type {
   ChangeEventType,
   Coordinate,
   ICommandItem,
+  ResultType,
 } from '@/types';
 
 export function isNumber(value: any): boolean {
@@ -11,6 +12,9 @@ export function isNumber(value: any): boolean {
     return true;
   }
   if (typeof value !== 'string') {
+    return false;
+  }
+  if (!value) {
     return false;
   }
   const temp = Number(value);
@@ -96,6 +100,26 @@ export function convertResultTypeToString(value: any): string {
   }
 
   return '';
+}
+
+export function convertStringToResultType(value: any): ResultType {
+  if (isNumber(value)) {
+    return Number(value);
+  }
+  if (typeof value === 'string') {
+    const temp = value.toUpperCase();
+    if (['TRUE', 'FALSE'].includes(temp)) {
+      return temp === 'TRUE';
+    }
+  }
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'object' && value !== null) {
+    return JSON.stringify(value);
+  }
+
+  return value;
 }
 
 export function coordinateToString(

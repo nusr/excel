@@ -46,7 +46,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
     ) => {
       event.stopPropagation();
       event.preventDefault();
-      if (event.buttons !== 1) {
+      if (event.buttons <= 0) {
         return;
       }
 
@@ -164,7 +164,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
         if (!activeUuid) {
           return;
         }
-        if (event.buttons !== 1) {
+        if (event.buttons <= 0) {
           return;
         }
 
@@ -235,7 +235,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
               pointerDown={(event) => {
                 event.stopPropagation();
                 event.preventDefault();
-                if (event.buttons !== 1) {
+                if (event.buttons <= 0) {
                   return;
                 }
                 state.current.moveStartX = event.clientX;

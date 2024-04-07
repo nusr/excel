@@ -17,6 +17,7 @@ import {
   isEmpty,
   deepEqual,
   stringToCoordinate,
+  convertStringToResultType,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { parseFormula, CustomError } from '@/formula';
@@ -36,8 +37,38 @@ export class Worksheet implements IWorksheet {
     const data = json.worksheets || {};
     this.worksheets = this.worksheets || {};
     const oldValue = { ...this.worksheets };
-    this.worksheets = { ...data };
-    this.model.push({ type: 'worksheets', key: '', newValue: data, oldValue });
+    for (const [sheetId, sheetData] of Object.entries(data)) {
+      this.worksheets[sheetId] = {};
+      if (isEmpty(sheetData)) {
+        continue;
+      }
+      for (const [key, cell] of Object.entries(sheetData)) {
+        if (isEmpty(cell)) {
+          continue;
+        }
+        this.worksheets[sheetId][key] = {
+          value: convertStringToResultType(cell.value),
+        };
+        if (!isEmpty(cell.style)) {
+          this.worksheets[sheetId][key].style = { ...cell.style };
+        }
+        if (cell.formula) {
+          if (cell.formula.startsWith(FORMULA_PREFIX)) {
+            this.worksheets[sheetId][key].formula = cell.formula;
+          } else {
+            this.worksheets[sheetId][key].formula =
+              FORMULA_PREFIX + cell.formula;
+          }
+        }
+      }
+    }
+
+    this.model.push({
+      type: 'worksheets',
+      key: '',
+      newValue: this.worksheets,
+      oldValue,
+    });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'worksheets') {
@@ -390,15 +421,15 @@ export class Worksheet implements IWorksheet {
     });
   }
   private updateStyle(style: Partial<StyleType>, range: Coordinate) {
-    if (isEmpty(style)) {
-      return;
-    }
     const key = coordinateToString(range.row, range.col);
     const id = this.model.getCurrentSheetId();
     this.worksheets[id] = this.worksheets[id] || {};
     this.worksheets[id][key] = this.worksheets[id][key] || {};
     const sheetData = this.worksheets[id];
     sheetData[key].style = sheetData[key].style || {};
+    if (isEmpty(style) && isEmpty(sheetData[key].style)) {
+      return;
+    }
     const keyList = Object.keys(style) as Array<keyof Partial<StyleType>>;
     for (const k of keyList) {
       const oldValue = sheetData[key]?.style?.[k];
@@ -448,13 +479,7 @@ export class Worksheet implements IWorksheet {
       return;
     }
     const oldValue = oldData.value;
-    let newValue = value;
-    if (
-      typeof value === 'string' &&
-      ['TRUE', 'FALSE'].includes(value.toUpperCase())
-    ) {
-      newValue = value.toUpperCase() === 'TRUE' ? true : false;
-    }
+    const newValue = convertStringToResultType(value);
 
     sheetData[key].value = newValue;
 

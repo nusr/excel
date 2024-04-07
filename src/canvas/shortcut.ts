@@ -4,6 +4,7 @@ import {
   EUnderLine,
   EditorStatus,
   IRange,
+  ScrollValue,
 } from '@/types';
 import {
   isMac,
@@ -70,27 +71,6 @@ export function computeScrollRowAndCol(
   };
 }
 
-export function computeScrollPosition(left: number, top: number) {
-  const contentSize = parseInt(sizeConfig.scrollBarContent, 10);
-  const canvasRect = mainDomSet.getDomRect();
-  const viewSize = sheetViewSizeSet.get();
-  const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
-  const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-  const maxScrollHeight = canvasRect.height - contentSize;
-  const maxScrollWidth = canvasRect.width - contentSize;
-
-  const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
-  const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
-  return {
-    maxHeight,
-    maxWidth,
-    maxScrollHeight,
-    maxScrollWidth,
-    scrollTop,
-    scrollLeft,
-  };
-}
-
 export function scrollSheetToView(sheetId: string) {
   const selector = `div[data-testid="${SHEET_ITEM_TEST_ID_PREFIX}${sheetId}"]`;
   const dom = document.querySelector(selector);
@@ -145,6 +125,26 @@ export function scrollToView(controller: IController, range: IRange) {
   });
 }
 
+export function computeScrollPosition(left: number, top: number) {
+  const contentSize = parseInt(sizeConfig.scrollBarContent, 10);
+  const canvasRect = mainDomSet.getDomRect();
+  const viewSize = sheetViewSizeSet.get();
+  const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
+  const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
+  const maxScrollHeight = canvasRect.height - contentSize;
+  const maxScrollWidth = canvasRect.width - contentSize;
+
+  const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
+  const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
+  return {
+    maxHeight,
+    maxWidth,
+    maxScrollHeight,
+    maxScrollWidth,
+    scrollTop,
+    scrollLeft,
+  };
+}
 export function scrollBar(
   controller: IController,
   scrollX: number,
@@ -169,14 +169,15 @@ export function scrollBar(
   const { row, col } = computeScrollRowAndCol(controller, left, top);
   const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
   const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
-  controller.setScroll({
+  const newValue: ScrollValue = {
     row,
     col,
     top,
     left,
     scrollTop,
     scrollLeft,
-  });
+  };
+  controller.setScroll(newValue);
 }
 
 function recalculateScroll(controller: IController) {

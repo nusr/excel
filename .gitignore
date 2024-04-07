@@ -6,7 +6,6 @@ yarn.lock
 package-lock.json
 coverage
 dist
-scripts/*.js
 .DS_Store
 lib
 output

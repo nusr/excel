@@ -216,8 +216,8 @@ export interface IWorksheet extends IBaseManager {
 }
 
 export interface IModel extends IBaseModel {
-  pasteRange: (range: IRange, isCut: boolean) => IRange;
-  emitChange: (dataset: Set<ChangeEventType>) => void;
+  pasteRange(range: IRange, isCut: boolean): IRange;
+  emitChange(dataset: Set<ChangeEventType>): void;
   push(command: ICommandItem): void;
   iterateRange(range: IRange, fn: (row: number, col: number) => boolean): void;
 }

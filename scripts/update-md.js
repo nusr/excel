@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+const fs = require('fs');
+const path = require('path');
 
 const FORMULA_DIR = path.join(process.cwd(), './src/formula/formula');
 const PREFIX_TEXT = 'const formulas:';
@@ -12,7 +12,8 @@ function updateMarkdown() {
     return;
   }
   const fileList = fs.readdirSync(FORMULA_DIR);
-  const formulaMap: Record<string, string[]> = {};
+  /** @type Record<string,string[]> */
+  const formulaMap = {};
 
   for (const item of fileList) {
     const filePath = path.join(FORMULA_DIR, item);
@@ -39,8 +40,8 @@ function updateMarkdown() {
       .trim()
       .split('\n')
       .map((item) => {
-        const list = /[A-Z0-9]+/g.exec(item.trim());
-        return list![0];
+        const list = /[A-Z0-9]+/g.exec(item.trim()) || [];
+        return list[0] || '';
       })
       .filter((v) => v);
     keyList.sort((a, b) => a.localeCompare(b));

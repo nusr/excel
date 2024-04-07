@@ -1,5 +1,5 @@
 import { IController, KeyboardEventItem, EditorStatus } from '@/types';
-import { throttle, isTestEnv,mainDomSet } from '@/util';
+import { throttle, mainDomSet, isTestEnv } from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';
 
@@ -45,7 +45,8 @@ export function registerGlobalEvent(
   }
 
   const handleWheel = throttle((event: WheelEvent) => {
-    if (event.target === mainDomSet.get().canvas! || isTestEnv()) {
+    const check = event.target === mainDomSet.get().canvas || isTestEnv();
+    if (check) {
       scrollBar(controller, event.deltaX, event.deltaY);
     }
   }, 1000 / 60);

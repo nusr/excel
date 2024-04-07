@@ -2,7 +2,6 @@ import { ErrorTypes, NumberFormatItem, LanguageType } from '@/types';
 
 export const DEFAULT_FONT_SIZE = 12;
 export const MUST_FONT_FAMILY = 'sans-serif';
-export const LANGUAGE_LIST: LanguageType[] = ['en', 'zh'];
 export const SHEET_NAME_PREFIX = 'Sheet';
 export const CELL_HEIGHT = 24;
 export const CELL_WIDTH = 68;

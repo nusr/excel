@@ -18,7 +18,6 @@ import {
   WorksheetData,
 } from '@/types';
 import {
-  Range,
   PLAIN_FORMAT,
   HTML_FORMAT,
   generateHTML,
@@ -210,7 +209,14 @@ export class Controller implements IController {
   }
   fromJSON(json: WorkBookJSON): void {
     this.model.fromJSON(json);
-    this.emitChange();
+    this.setScroll({
+      top: 0,
+      left: 0,
+      row: 0,
+      col: 0,
+      scrollLeft: 0,
+      scrollTop: 0,
+    });
   }
   toJSON(): WorkBookJSON {
     return this.model.toJSON();
@@ -441,7 +447,13 @@ export class Controller implements IController {
       const temp: ResultType[] = [];
       const t: string[] = [];
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
-        const a = this.model.getCell(new Range(r, c, 1, 1, currentSheetId));
+        const a = this.model.getCell({
+          row: r,
+          col: c,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: currentSheetId,
+        });
         if (!a) {
           continue;
         }

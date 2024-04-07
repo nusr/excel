@@ -1,5 +1,5 @@
 import { App } from '@/containers';
-import { initController } from '@/controller';
+import { initControllerForTest } from '@/controller';
 import * as React from 'react';
 import {
   cleanup,
@@ -11,18 +11,19 @@ import {
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+
 describe('Menubar.test.ts', () => {
   afterEach(cleanup);
   describe('menubar', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       expect(screen.getByTestId('menubar')!.childNodes.length).toEqual(4);
     });
     test('menu', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.click(screen.getByTestId('menubar-excel'));
       expect(
@@ -32,7 +33,7 @@ describe('Menubar.test.ts', () => {
     });
     test('dark mode', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       const before = document.documentElement.getAttribute('data-theme');
       fireEvent.click(screen.getByTestId('menubar-theme-toggle'));
@@ -44,27 +45,21 @@ describe('Menubar.test.ts', () => {
   describe('i18n', () => {
     test('default', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('en');
     });
     test('change', () => {
       let result: RenderResult;
-      const controller = initController();
-      const g = window as any;
-      delete g.location;
-      g.location = {
-        reload: () => {
-          act(() => {
-            result.rerender(<App controller={controller} />);
-          });
-        },
-      };
+      const controller = initControllerForTest();
       act(() => {
         result = render(<App controller={controller} />);
       });
       fireEvent.change(screen.getByTestId('menubar-i18n-select'), {
         target: { value: 'zh' },
+      });
+      act(() => {
+        result.rerender(<App controller={controller} />);
       });
       expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('zh');
     });

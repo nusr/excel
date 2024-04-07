@@ -1,10 +1,10 @@
 import { exportToCsv } from '../exportCSV';
-import { initController } from '@/controller';
+import { initControllerForTest } from '@/controller';
 
 describe('exportToCsv.test.ts', () => {
   describe('exportToCsv', () => {
     test('normal', () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       controller.setCell(
         [
           [true, false, 'true', 'false'],

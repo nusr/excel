@@ -1,8 +1,11 @@
-import { convertXMLToJSON, convertXMLDataToModel } from '../importXLSX';
-import { WorkBookJSON } from '@/types';
+import { convertXMLToJSON, importXLSX } from '../importXLSX';
+import { WorkBookJSON, EVerticalAlign, EUnderLine } from '@/types';
+import fs from 'fs/promises';
+import path from 'path';
+
 describe('importXLSX.test.ts', () => {
   describe('convertColorToHex', () => {
-    it('normal', () => {
+    test('normal', () => {
       expect(
         convertXMLToJSON(`
           <tile>
@@ -18,138 +21,13 @@ describe('importXLSX.test.ts', () => {
       });
     });
   });
-  describe('convertXMLDataToModel', () => {
-    it('normal', () => {
-      const xml = {
-        'xl/_rels/workbook.xml.rels': {
-          Relationships: {
-            Relationship: [
-              {
-                Id: 'rId1',
-                Target: 'worksheets/sheet1.xml',
-              },
-              {
-                Id: 'rId2',
-                Target: 'worksheets/sheet2.xml',
-              },
-            ],
-          },
-        },
-        'xl/worksheets/sheet1.xml': {
-          worksheet: {
-            sheetData: {
-              row: [
-                {
-                  customHeight: '1',
-                  ht: '200pt',
-                  r: '1',
-                  c: [
-                    {
-                      r: 'A1',
-                      s: '1',
-                      v: {
-                        '#text': '1',
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-        },
-        'xl/styles.xml': {
-          styleSheet: {
-            fonts: {
-              fills: {
-                fill: [
-                  {},
-                  {
-                    patternFill: {
-                      fgColor: {
-                        rgb: 'FFFFFFCC',
-                      },
-                    },
-                  },
-                ],
-              },
-              font: [
-                {},
-                {
-                  sz: {
-                    val: '16pt',
-                    b: '1',
-                    i: '1',
-                    strike: '1',
-                    u: '1',
-                    color: {
-                      rgb: 'FFFF0000',
-                    },
-                  },
-                },
-              ],
-            },
-            cellXfs: {
-              xf: [
-                {},
-                {
-                  applyFill: '1',
-                  fillId: '1',
-                  applyNumberFormat: '',
-                  numFmtId: '1',
-                  applyAlignment: '1',
-                  alignment: {
-                    horizontal: 'left',
-                    vertical: 'top',
-                    wrapText: '1',
-                  },
-                  applyFont: '1',
-                  fontId: '1',
-                },
-              ],
-            },
-          },
-        },
-        'xl/workbook.xml': {
-          workbook: {
-            definedNames: {
-              definedName: [
-                {
-                  name: 'foo',
-                  '#text': 'Sheet1!$A$1',
-                },
-                {
-                  name: 'boo',
-                  '#text': 'Sheet2!$A$1',
-                },
-              ],
-            },
-            sheets: {
-              sheet: [
-                {
-                  name: 'Sheet1',
-                  sheetId: '1',
-                  'r:id': 'rId1',
-                },
-                {
-                  name: 'Sheet2',
-                  sheetId: '2',
-                  'r:id': 'rId2',
-                },
-              ],
-            },
-          },
-        },
-      };
+  describe('importXLSX', () => {
+    test('normal', async () => {
+      const filePath = path.join(__dirname, './origin.xlsx');
+      const fileData = await fs.readFile(filePath);
+      const model = await importXLSX(fileData);
       const result: WorkBookJSON = {
         workbook: {
-          '1': {
-            sheetId: '1',
-            name: 'Sheet1',
-            isHide: false,
-            rowCount: 200,
-            colCount: 200,
-            sort: 0,
-          },
           '2': {
             sheetId: '2',
             name: 'Sheet2',
@@ -158,41 +36,275 @@ describe('importXLSX.test.ts', () => {
             colCount: 200,
             sort: 1,
           },
+          '3': {
+            sheetId: '3',
+            name: 'Sheet3',
+            isHide: false,
+            rowCount: 200,
+            colCount: 200,
+            sort: 2,
+          },
+          '4': {
+            sheetId: '4',
+            name: 'Sheet4',
+            isHide: false,
+            rowCount: 200,
+            colCount: 200,
+            sort: 3,
+          },
+          '5': {
+            sheetId: '5',
+            name: 'Sheet1',
+            isHide: false,
+            rowCount: 200,
+            colCount: 200,
+            sort: 0,
+          },
         },
         mergeCells: {},
-        customHeight: { '1_0': { isHide: false, len: 200 } },
-        customWidth: {},
-        definedNames: {
-          foo: { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' },
-          boo: { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '2' },
+        customHeight: {},
+        customWidth: {
+          '2_1': { len: 149, isHide: false },
+          '2_3': { len: 350, isHide: false },
         },
-        currentSheetId: '1',
-        drawings: {},
-        rangeMap: {},
-        worksheets: {
+        definedNames: {},
+        currentSheetId: '5',
+        drawings: {
           '1': {
+            title: 'Picture 2',
+            type: 'floating-picture',
+            uuid: '1',
+            width: 300,
+            height: 300,
+            originHeight: 300,
+            originWidth: 300,
+            fromCol: 8,
+            fromRow: 5,
+            sheetId: '3',
+            marginX: 0,
+            marginY: 0,
+            imageAngle: 0,
+            imageSrc:
+              'data:image/jpeg;base64,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',
+          },
+          '2': {
+            title: 'test',
+            type: 'chart',
+            uuid: '2',
+            width: 300,
+            height: 300,
+            originHeight: 300,
+            originWidth: 300,
+            fromCol: 3,
+            fromRow: 6,
+            sheetId: '4',
+            marginX: 0,
+            marginY: 0,
+            chartType: 'bar',
+            chartRange: {
+              row: 3,
+              col: 4,
+              rowCount: 1,
+              colCount: 2,
+              sheetId: '4',
+            },
+          },
+        },
+        rangeMap: {
+          '2': { row: 0, col: 2, rowCount: 1, colCount: 1, sheetId: '2' },
+          '3': { row: 9, col: 8, rowCount: 2, colCount: 1, sheetId: '3' },
+          '4': { row: 19, col: 9, rowCount: 1, colCount: 1, sheetId: '4' },
+          '5': { row: 0, col: 2, rowCount: 1, colCount: 1, sheetId: '5' },
+        },
+        worksheets: {
+          '2': {
             '0_0': {
               style: {
-                fontFamily: undefined,
-                fontSize: 16,
-                horizontalAlign: 0,
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+                fontSize: 11,
                 isBold: false,
                 isItalic: false,
                 isStrike: false,
-                isWrapText: true,
-                underline: 0,
-                verticalAlign: 0,
+                underline: EUnderLine.NONE,
+                fontFamily: 'Calibri',
+                fontColor: '#FF0000',
               },
-              value: '1',
+              value: '1a',
+            },
+            '0_1': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+                fontSize: 26,
+                isBold: false,
+                isItalic: false,
+                isStrike: false,
+                underline: EUnderLine.NONE,
+                fontFamily: 'Calibri',
+                fontColor: '#000000',
+              },
+              value: '',
+            },
+            '0_2': {
+              style: { verticalAlign: EVerticalAlign.CENTER, isWrapText: true },
+              value: '1a',
+            },
+            '0_3': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+                fontSize: 36,
+                isBold: false,
+                isItalic: false,
+                isStrike: false,
+                underline: EUnderLine.NONE,
+                fontFamily: 'Calibri',
+                fontColor: '#000000',
+              },
+              value: 'large text',
+            },
+            '1_0': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: 15,
+            },
+            '1_1': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+            '1_2': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+            '1_3': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+            '2_0': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+            '2_1': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+            '2_2': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+            '2_3': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+            '3_0': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+                fillColor: '#FF0000',
+              },
+              value: '',
+            },
+            '3_1': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+                fillColor: '#FF0000',
+              },
+              value: '',
+            },
+            '3_2': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+            '3_3': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+            '4_0': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+                fillColor: '#FF0000',
+              },
+              value: '',
+            },
+            '4_1': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+                fillColor: '#FF0000',
+              },
+              value: '',
+            },
+            '4_2': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+            '4_3': {
+              style: {
+                verticalAlign: EVerticalAlign.CENTER,
+                isWrapText: true,
+              },
+              value: '',
+            },
+          },
+          '4': {
+            '3_4': { value: 22 },
+            '6_4': { value: 33 },
+          },
+          '5': {
+            '0_0': {
+              value: 1,
+            },
+            '0_1': {
+              value: 2,
+            },
+            '0_2': {
+              formula: '=SUM(A1,B1)',
+              value: 3,
             },
           },
         },
       };
-      expect(convertXMLDataToModel(xml, {})).toEqual(result);
+      expect(model).toEqual(result);
     });
   });
-  test('convertXMLToJSON', () => {
-    const mockXML = `<worksheet>
+  describe('convertXMLToJSON', () => {
+    test('ok', () => {
+      const mockXML = `<worksheet>
       <sheetData>
         <row r="1" spans="1:1">
           <c r="A1" s="1">
@@ -204,33 +316,34 @@ describe('importXLSX.test.ts', () => {
         </row>
       </sheetData>
     </worksheet>`;
-    const result = convertXMLToJSON(mockXML);
-    expect(result).toEqual({
-      worksheet: {
-        sheetData: {
-          row: [
-            {
-              r: '1',
-              spans: '1:1',
-              c: {
-                r: 'A1',
-                s: '1',
-                v: {
-                  '#text': '123',
+      const result = convertXMLToJSON(mockXML);
+      expect(result).toEqual({
+        worksheet: {
+          sheetData: {
+            row: [
+              {
+                r: '1',
+                spans: '1:1',
+                c: {
+                  r: 'A1',
+                  s: '1',
+                  v: {
+                    '#text': '123',
+                  },
                 },
               },
-            },
-            {
-              r: '2',
-              spans: '1:1',
-              c: {
-                r: 'A2',
-                s: '2',
+              {
+                r: '2',
+                spans: '1:1',
+                c: {
+                  r: 'A2',
+                  s: '2',
+                },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
+      });
     });
   });
 });

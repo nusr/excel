@@ -25,7 +25,8 @@
     "outDir": "dist",
     "removeComments": true,
     "declaration": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "checkJs": true
   },
   "exclude": ["node_modules", "dist", "coverage"]
 }

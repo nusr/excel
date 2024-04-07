@@ -1,5 +1,5 @@
 import type { IController } from '@/types';
-import { headerSizeSet } from './set'
+import { headerSizeSet } from './set';
 
 type HitInfoResult = {
   row: number;
@@ -15,8 +15,8 @@ export function stopPropagation(event: Event) {
 
 export function getHitInfo(
   controller: IController,
-  x: number,
-  y: number,
+  x: number = 0,
+  y: number = 0,
 ): HitInfoResult | null {
   if (x < 0 || y < 0) {
     return null;
@@ -26,7 +26,7 @@ export function getHitInfo(
     return null;
   }
   const scroll = controller.getScroll();
-  const headerSize = headerSizeSet.get()
+  const headerSize = headerSizeSet.get();
   let resultX = headerSize.width;
   let resultY = headerSize.height;
   let marginX = x - headerSize.width;

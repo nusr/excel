@@ -26,7 +26,7 @@ const ITEM_HEIGHT = 20;
 
 function computeMenuStyle(top: number, left: number) {
   const headerSize = headerSizeSet.get();
-  const rect = mainDomSet.get().canvas!.getBoundingClientRect();
+  const rect = mainDomSet.getDomRect();
   let clickPosition = ClickPosition.CONTENT;
   let menuHeight = ITEM_HEIGHT * 3;
   const y = top - rect.top;
@@ -69,7 +69,6 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
     controller,
     top,
     left,
-
     hideContextMenu,
   } = props;
   const { row, col, colCount, rowCount } = useSyncExternalStore(
@@ -101,6 +100,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
     info({
       visible: true,
       title: isRow ? $('row-height') : $('column-width'),
+      testId: 'context-menu-width-height-dialog',
       children: (
         <input
           type="number"
@@ -109,6 +109,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           style={{ width: '200px' }}
           defaultValue={value}
           onChange={handleChange}
+          data-testid="context-menu-width-height-dialog-input"
         />
       ),
       onOk: () => {

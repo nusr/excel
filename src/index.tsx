@@ -33,7 +33,7 @@ function initSentry() {
 
 function initExcel(rootId = 'root') {
   const domNode = document.getElementById(rootId)!;
-  const controller = initController(true);
+  const controller = initController();
   const root = createRoot(domNode);
   root.render(
     <StrictMode>

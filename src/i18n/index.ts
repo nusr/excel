@@ -1,9 +1,11 @@
 import { LanguageType } from '@/types';
-import { LANGUAGE_LIST } from '@/util';
+
 import en from './lang/en.json';
 import zh from './lang/zh.json';
 
 let languageKey = 'language';
+
+export const LANGUAGE_LIST: LanguageType[] = ['en', 'zh'];
 
 export function getLanguage(): LanguageType {
   let language: LanguageType = 'en';

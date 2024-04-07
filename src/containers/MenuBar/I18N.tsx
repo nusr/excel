@@ -1,9 +1,8 @@
 import React, { memo, useCallback } from 'react';
 import { Select } from '../components';
 import { OptionItem, LanguageType } from '@/types';
-import { LANGUAGE_LIST } from '@/util';
 import styles from './index.module.css';
-import { getLanguage, setLanguage } from '@/i18n';
+import { getLanguage, setLanguage, LANGUAGE_LIST } from '@/i18n';
 
 const dataList: OptionItem[] = LANGUAGE_LIST.map((v) => ({
   value: v,

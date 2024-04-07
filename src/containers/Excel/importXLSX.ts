@@ -19,11 +19,15 @@ import {
   XLSX_MAX_COL_COUNT,
   coordinateToString,
   getCustomWidthOrHeightKey,
-  generateUUID,
   IMAGE_TYPE_MAP,
+  Range,
+  mergeRange,
+  convertStringToResultType,
+  isEmpty,
+  FORMULA_PREFIX,
 } from '@/util';
 
-function getImageSize(base64: string): Promise<IWindowSize> {
+export function getImageSize(base64: string): Promise<IWindowSize> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.onload = () => {
@@ -92,6 +96,9 @@ interface ColItem {
   r: string;
   s: string;
   t?: string;
+  f?: {
+    [textKey]: string;
+  };
   v?: {
     [textKey]: string;
   };
@@ -480,8 +487,8 @@ export function convertXMLDataToModel(
     };
     result.workbook[sheetData.sheetId] = sheetData;
     if (range) {
-      result.rangeMap[item.sheetId] = range;
-      range.sheetId = item.sheetId;
+      range.sheetId = sheetData.sheetId;
+      result.rangeMap[item.sheetId] = range.toIRange();
     }
   }
   const sheets = Object.values(result.workbook);
@@ -523,7 +530,7 @@ export function convertXMLDataToModel(
           ) {
             result.customWidth[getCustomWidthOrHeightKey(item.sheetId, start)] =
               {
-                len: w,
+                len: Math.floor(w),
                 isHide,
               };
           }
@@ -550,7 +557,7 @@ export function convertXMLDataToModel(
         const isDefault = defaultWOrH.defaultRowHeight === row.ht;
         result.customHeight[getCustomWidthOrHeightKey(item.sheetId, realRow)] =
           {
-            len: isDefault ? CELL_HEIGHT : parseFloat(row.ht),
+            len: isDefault ? CELL_HEIGHT : Math.floor(parseFloat(row.ht)),
             isHide: Boolean(row.hidden),
           };
       }
@@ -571,9 +578,19 @@ export function convertXMLDataToModel(
         const styleId = parseInt(col.s, 10);
         const style = getCellStyle(xmlData[STYLE_PATH], styleId, themeData);
         const t: ModelCellType = {
-          style,
           value: '',
         };
+        const formula = col?.f?.[textKey] || '';
+        if (formula) {
+          if (formula.startsWith(FORMULA_PREFIX)) {
+            t.formula = formula;
+          } else {
+            t.formula = FORMULA_PREFIX + formula;
+          }
+        }
+        if (!isEmpty(style)) {
+          t.style = style;
+        }
         if (col.t === 's') {
           const i = parseInt(val, 10);
           if (!isNaN(i)) {
@@ -584,10 +601,8 @@ export function convertXMLDataToModel(
             }
           }
         }
-        if (val.startsWith('=')) {
-          t.formula = val;
-        } else {
-          t.value = val;
+        if (val) {
+          t.value = convertStringToResultType(val);
         }
 
         result.worksheets[item.sheetId] = result.worksheets[item.sheetId] || {};
@@ -668,7 +683,7 @@ export function convertXMLDataToModel(
       if (!fromRow || !fromCol) {
         continue;
       }
-      const uuid = generateUUID();
+      const uuid = String(drawingId);
       const floatElementData: DrawingElement = {
         title: '',
         type: isImage ? 'floating-picture' : 'chart',
@@ -706,33 +721,51 @@ export function convertXMLDataToModel(
           'c:chartSpace.c:chart.c:title.c:tx.c:rich.a:p.0.a:r.a:t.' + textKey,
           '',
         );
-        let ref = '';
+        let refList: string[] = [];
         for (const chartType of chartTypeList) {
-          const t = get(
+          const chartData = get(
             xmlData[filePath],
-            `c:chartSpace.c:chart.c:plotArea.c:${chartType}Chart.c:ser.0.c:val.c:numRef.c:f.${textKey}`,
+            `c:chartSpace.c:chart.c:plotArea.c:${chartType}Chart`,
             '',
           );
-          if (t) {
-            ref = t;
+          if (chartData) {
             floatElementData.chartType = chartType;
+            let list = get(chartData, 'c:ser', []);
+            if (!Array.isArray(list)) {
+              list = [list];
+            }
+            refList = list
+              .map((v) => get(v, `c:val.c:numRef.c:f.${textKey}`, ''))
+              .filter((v) => v);
             break;
           }
         }
 
-        if (!ref) {
+        if (refList.length === 0) {
           continue;
         }
-        const range = parseReference(ref, (sheetName: string) => {
+        const convertSheetNameToSheetId = (sheetName: string) => {
           const data = Object.values(result.workbook).find(
             (v) => v.name === sheetName,
           );
           return data?.sheetId || '';
-        });
-        if (!range) {
+        };
+        let chartRange: Range | null = null;
+        for (const item of refList) {
+          const t = parseReference(item, convertSheetNameToSheetId);
+          if (t) {
+            if (!chartRange) {
+              chartRange = t;
+            } else {
+              chartRange = mergeRange(chartRange, t);
+            }
+          }
+        }
+        if (!chartRange) {
           continue;
         }
-        floatElementData.chartRange = range;
+        chartRange.sheetId = chartRange.sheetId || sheetId;
+        floatElementData.chartRange = chartRange.toIRange();
       }
 
       result.drawings[uuid] = floatElementData;
@@ -742,7 +775,7 @@ export function convertXMLDataToModel(
   return result;
 }
 
-export async function importXLSX(file: File) {
+export async function importXLSX(file: File | Buffer) {
   const jszip = await import('jszip');
   const zip = await jszip.default.loadAsync(file);
   const { files } = zip;

@@ -1,5 +1,4 @@
 import { App } from '@/containers';
-import { initController } from '@/controller';
 import * as React from 'react';
 import {
   cleanup,
@@ -11,13 +10,15 @@ import {
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { type } from './util';
+import { initControllerForTest } from '@/controller';
+import { EUnderLine } from '@/types';
 
 describe('Toolbar.test.ts', () => {
   afterEach(cleanup);
   describe('toolbar', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       expect(
         screen.getByTestId('toolbar')!.childNodes.length,
@@ -26,7 +27,7 @@ describe('Toolbar.test.ts', () => {
   });
   describe('fontSize', () => {
     test('normal', () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -41,7 +42,7 @@ describe('Toolbar.test.ts', () => {
   describe('fontFamily', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.change(screen.getByTestId('toolbar-font-family'), {
         target: { value: 'serif' },
@@ -71,7 +72,7 @@ describe('Toolbar.test.ts', () => {
         },
       });
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
 
       fireEvent.change(screen.getByTestId('toolbar-font-family'), {
@@ -87,20 +88,18 @@ describe('Toolbar.test.ts', () => {
   describe('undo', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       expect(screen.getByTestId('toolbar-undo')).not.toBeDisabled();
     });
     test('able', () => {
       act(() => {
-        render(<App controller={initController(true)} />);
+        render(<App controller={initControllerForTest()} />);
       });
-      expect(screen.getByTestId('toolbar-undo')).toBeDisabled();
       fireEvent.click(screen.getByTestId('toolbar-bold'));
       expect(screen.getByTestId('toolbar-undo')).not.toBeDisabled();
 
       fireEvent.click(screen.getByTestId('toolbar-undo'));
-      expect(screen.getByTestId('toolbar-undo')).toBeDisabled();
       expect(screen.getByTestId('toolbar-redo')).not.toBeDisabled();
     });
   });
@@ -108,13 +107,13 @@ describe('Toolbar.test.ts', () => {
   describe('redo', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       expect(screen.getByTestId('toolbar-redo')).toBeDisabled();
     });
     test('able', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       expect(screen.getByTestId('toolbar-redo')).toBeDisabled();
       fireEvent.click(screen.getByTestId('toolbar-bold'));
@@ -128,7 +127,7 @@ describe('Toolbar.test.ts', () => {
   });
   describe('copy', () => {
     test('toolbar', async () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -154,7 +153,7 @@ describe('Toolbar.test.ts', () => {
   });
   describe('cut', () => {
     test('toolbar', async () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -187,7 +186,7 @@ describe('Toolbar.test.ts', () => {
   describe('bold', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.click(screen.getByTestId('toolbar-bold'));
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -198,7 +197,7 @@ describe('Toolbar.test.ts', () => {
   describe('italic', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.click(screen.getByTestId('toolbar-italic'));
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -209,7 +208,7 @@ describe('Toolbar.test.ts', () => {
   describe('strike', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.click(screen.getByTestId('toolbar-strike'));
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -220,7 +219,7 @@ describe('Toolbar.test.ts', () => {
   describe('underline', () => {
     test('single underline', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.change(screen.getByTestId('toolbar-underline'), {
         target: { value: '1' },
@@ -231,7 +230,7 @@ describe('Toolbar.test.ts', () => {
     });
     test('double underline', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.change(screen.getByTestId('toolbar-underline'), {
         target: { value: '2' },
@@ -242,7 +241,7 @@ describe('Toolbar.test.ts', () => {
     });
     test('strike', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.change(screen.getByTestId('toolbar-underline'), {
         target: { value: '1' },
@@ -255,19 +254,60 @@ describe('Toolbar.test.ts', () => {
   });
   describe('wrap text', () => {
     test('normal', () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
+      type('This is a very long text that needs to be wrapped');
       fireEvent.click(screen.getByTestId('toolbar-wrap-text'));
       expect(controller.getCell(controller.getActiveCell())?.style).toEqual({
         isWrapText: true,
       });
     });
+    test('single underline', () => {
+      const controller = initControllerForTest();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      type('This is a very long text that needs to be wrapped');
+      fireEvent.click(screen.getByTestId('toolbar-wrap-text'));
+
+      fireEvent.change(screen.getByTestId('toolbar-underline'), {
+        target: { value: '1' },
+      });
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
+        textDecorationLine: 'underline',
+      });
+
+      expect(controller.getCell(controller.getActiveCell())?.style).toEqual({
+        isWrapText: true,
+        underline: EUnderLine.SINGLE,
+      });
+    });
+    test('double underline', () => {
+      const controller = initControllerForTest();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      type('This is a very long text that needs to be wrapped');
+      fireEvent.click(screen.getByTestId('toolbar-wrap-text'));
+
+      fireEvent.change(screen.getByTestId('toolbar-underline'), {
+        target: { value: '2' },
+      });
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
+        textDecorationLine: 'underline',
+      });
+
+      expect(controller.getCell(controller.getActiveCell())?.style).toEqual({
+        isWrapText: true,
+        underline: EUnderLine.DOUBLE,
+      });
+    });
   });
   describe('fill color', () => {
     test('normal', () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -281,7 +321,7 @@ describe('Toolbar.test.ts', () => {
       });
     });
     test('saturation', () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -289,25 +329,23 @@ describe('Toolbar.test.ts', () => {
 
       fireEvent.pointerDown(
         screen.getByTestId('toolbar-fill-color-saturation'),
-        { buttons: 1, clientX: 10, clientY: 10, pageX: 10, pageY: 10 },
+        { buttons: 1, clientX: 10, clientY: 10 },
       );
       fireEvent.pointerMove(document.body, {
         buttons: 1,
         clientX: 100,
         clientY: 100,
-        pageX: 100,
-        pageY: 100,
       });
       fireEvent.pointerUp(document.body);
 
       expect(controller.getCell(controller.getActiveCell())?.style).toEqual({
-        fillColor: '#ffffff',
+        fillColor: '#804949',
       });
     });
   });
   describe('font color', () => {
     test('normal', () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -321,7 +359,7 @@ describe('Toolbar.test.ts', () => {
       });
     });
     test('saturation', () => {
-      const controller = initController();
+      const controller = initControllerForTest();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -329,19 +367,17 @@ describe('Toolbar.test.ts', () => {
 
       fireEvent.pointerDown(
         screen.getByTestId('toolbar-font-color-saturation'),
-        { buttons: 1, clientX: 10, clientY: 10, pageX: 10, pageY: 10 },
+        { buttons: 1, clientX: 20, clientY: 20 },
       );
       fireEvent.pointerMove(document.body, {
         buttons: 1,
-        clientX: 100,
-        clientY: 100,
-        pageX: 100,
-        pageY: 100,
+        clientX: 50,
+        clientY: 50,
       });
       fireEvent.pointerUp(document.body);
 
       expect(controller.getCell(controller.getActiveCell())?.style).toEqual({
-        fontColor: '#ffffff',
+        fontColor: '#bf9696',
       });
     });
   });

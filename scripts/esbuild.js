@@ -1,9 +1,9 @@
-import { build, BuildOptions, context } from 'esbuild';
-import packageJson from '../package.json';
-import fs from 'fs';
-import path from 'path';
-import { parseArgs } from 'util';
-import { networkInterfaces } from 'os';
+const { build, context } = require('esbuild');
+const packageJson = require('../package.json');
+const path = require('path');
+const fs = require('fs');
+const { parseArgs } = require('util');
+const { networkInterfaces } = require('os');
 
 const { values: envConfig } = parseArgs({
   options: {
@@ -48,9 +48,11 @@ function umdWrapper() {
 }
 
 /**
- * build esm
+ * build ESM
+ * @param {string} filePath
+ * @returns {import('esbuild').BuildOptions}
  */
-function buildESM(filePath: string): BuildOptions {
+function buildESM(filePath) {
   return buildBrowserConfig({
     outfile: filePath,
     format: 'esm',
@@ -58,9 +60,11 @@ function buildESM(filePath: string): BuildOptions {
 }
 
 /**
- * build umd
+ * build UMD
+ * @param {string} filePath
+ * @returns {import('esbuild').BuildOptions}
  */
-function buildUMD(filePath: string): BuildOptions {
+function buildUMD(filePath) {
   const umd = umdWrapper();
   return buildBrowserConfig({
     outfile: filePath,
@@ -75,14 +79,50 @@ function buildUMD(filePath: string): BuildOptions {
   });
 }
 
-function buildBrowserConfig(options: BuildOptions): BuildOptions {
+/**
+ *
+ * @param { import('esbuild').BuildOptions } options
+ * @returns {import('esbuild').BuildOptions}
+ */
+function buildBrowserConfig(options) {
   const minify = !!options.outfile?.includes('.min.');
   const namespace = 'external-package';
-  const externals: Record<string, string> = {
+  /** @type Record<string,string> */
+  const externals = {
     react: 'window.React',
     'react-dom': 'window.ReactDOM',
   };
-  const realOptions: BuildOptions = {
+
+  /** @type {import('esbuild').Plugin} */
+  const externalPlugin = {
+    name: namespace,
+    setup(build) {
+      build.onResolve(
+        {
+          filter: new RegExp('^(' + Object.keys(externals).join('|') + ')$'),
+        },
+        (args) => ({
+          path: args.path,
+          namespace: namespace,
+        }),
+      );
+
+      build.onLoad(
+        {
+          filter: /.*/,
+          namespace,
+        },
+        (args) => {
+          const contents = `module.exports = ${externals[args.path]}`;
+          return {
+            contents,
+          };
+        },
+      );
+    },
+  };
+  /** @type {import('esbuild').BuildOptions} */
+  const realOptions = {
     bundle: true,
     entryPoints: ['src/index.tsx'],
     tsconfig: 'tsconfig.json',
@@ -98,37 +138,7 @@ function buildBrowserConfig(options: BuildOptions): BuildOptions {
     minify,
     metafile: minify,
     logLevel: 'error',
-    plugins: [
-      {
-        name: namespace,
-        setup(build) {
-          build.onResolve(
-            {
-              filter: new RegExp(
-                '^(' + Object.keys(externals).join('|') + ')$',
-              ),
-            },
-            (args) => ({
-              path: args.path,
-              namespace: namespace,
-            }),
-          );
-
-          build.onLoad(
-            {
-              filter: /.*/,
-              namespace,
-            },
-            (args) => {
-              const contents = `module.exports = ${externals[args.path]}`;
-              return {
-                contents,
-              };
-            },
-          );
-        },
-      },
-    ],
+    plugins: [externalPlugin],
   };
   Object.assign(realOptions, options);
 
@@ -170,7 +180,11 @@ function buildHtml() {
   }
 }
 
-function deleteDir(dir: string) {
+/**
+ * delete directory
+ * @param {string} dir
+ */
+function deleteDir(dir) {
   const t = path.join(process.cwd(), dir);
   if (fs.existsSync(t)) {
     fs.rmSync(t, { recursive: true, force: true });
@@ -179,7 +193,7 @@ function deleteDir(dir: string) {
 
 async function buildProd() {
   const options = buildESM('');
-  const distOptions: BuildOptions = {
+  const distOptions = {
     ...options,
     outdir: distDir,
     splitting: true,
@@ -206,7 +220,8 @@ function getIp() {
     if (!localIPs || !localIPs[key]) {
       continue;
     }
-    for (const iface of localIPs[key]!) {
+    const list = localIPs[key] || [];
+    for (const iface of list) {
       if (iface.family === 'IPv4' && !iface.internal) {
         return iface.address;
       }

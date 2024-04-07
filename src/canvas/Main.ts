@@ -38,8 +38,11 @@ export class MainCanvas {
   private content: ContentView;
   private controller: IController;
   private isRendering = false;
-  constructor(controller: IController, content: ContentView) {
-    const canvas = mainDomSet.get().canvas!;
+  constructor(
+    controller: IController,
+    canvas: HTMLCanvasElement,
+    content: ContentView,
+  ) {
     this.controller = controller;
     this.ctx = canvas.getContext('2d')!;
     this.content = content;

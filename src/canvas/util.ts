@@ -177,7 +177,8 @@ export function renderCell(
 ): IRenderCellResult {
   const { style, value, left, top, width, height } = cellInfo;
   const result: IRenderCellResult = { height: 0, width: 0 };
-  if (isEmpty(cellInfo.value) && isEmpty(cellInfo.style)) {
+  const text = convertResultTypeToString(value);
+  if (!text && isEmpty(cellInfo.style)) {
     return result;
   }
   const isNum = isNumber(value);
@@ -197,7 +198,6 @@ export function renderCell(
       fillRect(ctx, left, top, width, height);
     }
   }
-  const text = convertResultTypeToString(value);
   if (ERROR_SET.has(text as ErrorTypes)) {
     fillStyle = getThemeColor('errorFormulaColor');
   }

@@ -1,5 +1,5 @@
 import { App } from '@/containers';
-import { initController } from '@/controller';
+import { initControllerForTest } from '@/controller';
 import * as React from 'react';
 import {
   cleanup,
@@ -16,13 +16,13 @@ describe('SheetBar.test.ts', () => {
   describe('sheet bar', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(1);
     });
     test('add sheet', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
@@ -33,7 +33,7 @@ describe('SheetBar.test.ts', () => {
   describe('context menu', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.contextMenu(
         screen.getByTestId('sheet-bar-list')!.childNodes[0],
@@ -48,7 +48,7 @@ describe('SheetBar.test.ts', () => {
 
     test('insert sheet', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.contextMenu(
         screen.getByTestId('sheet-bar-list')!.childNodes[0],
@@ -62,7 +62,7 @@ describe('SheetBar.test.ts', () => {
     });
     test('hide sheet', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.contextMenu(
         screen.getByTestId('sheet-bar-list')!.childNodes[0],
@@ -85,7 +85,7 @@ describe('SheetBar.test.ts', () => {
 
     test('delete sheet', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.contextMenu(
         screen.getByTestId('sheet-bar-list')!.childNodes[0],
@@ -108,7 +108,7 @@ describe('SheetBar.test.ts', () => {
 
     test('rename sheet', async () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.contextMenu(
         screen.getByTestId('sheet-bar-list')!.childNodes[0],
@@ -119,7 +119,7 @@ describe('SheetBar.test.ts', () => {
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-rename'));
 
       fireEvent.change(screen.getByTestId('sheet-bar-rename-input'), {
-        currentTarget: { value: 'test_sheet_name' },
+        // currentTarget: { value: 'test_sheet_name' },
         target: { value: 'test_sheet_name' },
       });
       fireEvent.keyDown(screen.getByTestId('sheet-bar-rename-input'), {
@@ -131,7 +131,7 @@ describe('SheetBar.test.ts', () => {
     });
     test('tab color', async () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.contextMenu(
         screen.getByTestId('sheet-bar-list')!.childNodes[0],
@@ -152,7 +152,7 @@ describe('SheetBar.test.ts', () => {
   describe('unhide sheet', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
@@ -168,7 +168,7 @@ describe('SheetBar.test.ts', () => {
 
     test('unhide', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
@@ -201,7 +201,7 @@ describe('SheetBar.test.ts', () => {
   describe('select sheet', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initController()} />);
+        render(<App controller={initControllerForTest()} />);
       });
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));

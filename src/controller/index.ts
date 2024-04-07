@@ -1,2 +1,2 @@
 export { Controller } from './Controller';
-export { initController } from './init';
+export { initControllerForTest, initController } from './init';

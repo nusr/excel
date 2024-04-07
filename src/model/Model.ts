@@ -60,7 +60,6 @@ export class Model implements IModel {
     this.rowManager = new RowManager(this);
     this.colManager = new ColManager(this);
   }
-
   push(command: ICommandItem): void {
     this.history.push(command);
   }
@@ -112,6 +111,7 @@ export class Model implements IModel {
     const result = this.workbookManager.addSheet();
     this.worksheetManager.setWorksheet({}, result.sheetId);
     this.workbookManager.setCurrentSheetId(result.sheetId);
+    this.computeViewSize();
     return result;
   }
   deleteSheet(sheetId?: string): void {
@@ -156,7 +156,6 @@ export class Model implements IModel {
     this.rowManager.fromJSON(json);
     this.colManager.fromJSON(json);
     this.worksheetManager.computeFormulas();
-    this.history.clear(true);
   };
   toJSON = (): WorkBookJSON => {
     return {
@@ -394,8 +393,7 @@ export class Model implements IModel {
     if (!sheetInfo) {
       return;
     }
-    let { width } = headerSize;
-    let { height } = headerSize;
+    let { width, height } = headerSize;
     for (let i = 0; i < sheetInfo.colCount; i++) {
       width += this.getColWidth(i).len;
     }

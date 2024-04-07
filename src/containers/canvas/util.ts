@@ -1,7 +1,6 @@
 import { IController, ChangeEventType, EUnderLine, IRange } from '@/types';
 import {
   DEFAULT_FONT_SIZE,
-  Range,
   parseNumber,
   HIDE_CELL,
   getThemeColor,
@@ -86,9 +85,13 @@ function updateActiveCell(controller: IController) {
   const { range: activeCell, isMerged } = controller.getActiveRange();
   const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
   const cell = controller.getCell(activeCell);
-  const defineName = controller.getDefineName(
-    new Range(activeCell.row, activeCell.col, 1, 1, sheetId),
-  );
+  const defineName = controller.getDefineName({
+    row: activeCell.row,
+    col: activeCell.col,
+    rowCount: 1,
+    colCount: 1,
+    sheetId,
+  });
   const cellSize = controller.getCellSize(activeCell);
   const cellPosition = controller.computeCellPosition(activeCell);
   cellPosition.top = top + cellPosition.top;
@@ -252,7 +255,10 @@ const handleStateChange = (
     }, 0);
   }
 };
-export function initCanvas(controller: IController): () => void {
+export function initCanvas(
+  controller: IController,
+  canvas: HTMLCanvasElement,
+): () => void {
   let familyList = initFontFamilyList();
   if (familyList.length === 0 && isTestEnv()) {
     // just for test
@@ -271,7 +277,7 @@ export function initCanvas(controller: IController): () => void {
   }
   fontFamilyStore.setState(familyList);
   const content = new Content(controller, createCanvas());
-  const mainCanvas = new MainCanvas(controller, content);
+  const mainCanvas = new MainCanvas(controller, canvas, content);
   const resize = () => {
     mainCanvas.resize();
     mainCanvas.render({ changeSet: new Set<ChangeEventType>(['row']) });

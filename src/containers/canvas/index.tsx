@@ -41,7 +41,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     }
     const canvas = ref.current!;
     mainDomSet.merge({ canvas });
-    const fn = initCanvas(controller);
+    const fn = initCanvas(controller, canvas);
     return () => {
       fn();
     };
@@ -52,7 +52,6 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       top: event.clientY,
       left: event.clientX,
     });
-    return false;
   };
   const hideContextMenu = () => {
     setMenuPosition({
@@ -61,12 +60,12 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     });
   };
   const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (event.buttons !== 1) {
+    if (event.buttons <= 0) {
       return;
     }
     const headerSize = headerSizeSet.get();
     const rect = mainDomSet.getDomRect();
-    const { clientX, clientY } = event;
+    const { clientX = 0, clientY = 0 } = event;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
 
@@ -116,12 +115,12 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     }
   };
   const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    if (event.buttons !== 1) {
+    if (event.buttons <= 0) {
       return;
     }
     const headerSize = headerSizeSet.get();
     const canvasRect = mainDomSet.getDomRect();
-    const { timeStamp, clientX, clientY } = event;
+    const { timeStamp, clientX = 0, clientY = 0 } = event;
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;
     const position = getHitInfo(controller, x, y);
