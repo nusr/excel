@@ -1,4 +1,4 @@
-import { ErrorTypes, NumberFormatItem, LanguageType } from '@/types';
+import { ErrorTypes, NumberFormatItem } from '@/types';
 
 export const DEFAULT_FONT_SIZE = 12;
 export const MUST_FONT_FAMILY = 'sans-serif';

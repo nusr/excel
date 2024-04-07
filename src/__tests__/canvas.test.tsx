@@ -533,5 +533,69 @@ describe('Canvas.test.ts', () => {
 
       expect(controller.getSheetInfo()!.rowCount).toEqual(oldRowCount + 1);
     });
+    test('delete all', async () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      type('test');
+      fireEvent.click(screen.getByTestId('toolbar-bold'));
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
+        fontWeight: 'bold',
+      });
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
+        'test',
+      );
+
+      fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
+        timeStamp: 100,
+        clientX: 11,
+        clientY: 150,
+        buttons: 1,
+      });
+      fireEvent.contextMenu(screen.getByTestId('canvas-main'), {
+        clientX: 11,
+        clientY: 150,
+      });
+
+      fireEvent.click(screen.getByTestId('context-menu-delete'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('formula-editor-trigger')).not.toHaveStyle({
+          fontWeight: 'bold',
+        });
+        expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
+          '',
+        );
+      });
+    });
+
+    test('change row height cancel', () => {
+      const controller = initControllerForTest();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      const oldHeight = controller.getRowHeight(
+        controller.getActiveCell().row,
+      ).len;
+      fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
+        timeStamp: 100,
+        clientX: 17,
+        clientY: 298,
+        buttons: 1,
+      });
+      fireEvent.contextMenu(screen.getByTestId('canvas-main'), {
+        clientX: 17,
+        clientY: 298,
+      });
+
+      fireEvent.click(screen.getByTestId('context-menu-row-height'));
+
+      fireEvent.click(
+        screen.getByTestId('context-menu-width-height-dialog-cancel'),
+      );
+      expect(
+        controller.getRowHeight(controller.getActiveCell().row).len,
+      ).toEqual(oldHeight);
+    });
   });
 });

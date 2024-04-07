@@ -165,33 +165,6 @@ describe('FloatElement.test.ts', () => {
       expect(controller.getDrawingList()[0].title).toEqual('new_chart_title');
     });
 
-    test('select data', async () => {
-      const controller = initControllerForTest();
-      act(() => {
-        render(<App controller={controller} />);
-      });
-      type('1');
-      fireEvent.click(screen.getByTestId('toolbar-chart'));
-      fireEvent.contextMenu(screen.getByTestId('float-element'), {
-        clientY: 20,
-        clientX: 20,
-      });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-select-data'),
-      );
-      fireEvent.change(screen.getByTestId('dialog-select-data-input'), {
-        target: { value: 'C3' },
-      });
-
-      fireEvent.click(screen.getByTestId('dialog-select-data-confirm'));
-      expect(controller.getDrawingList()[0].chartRange!).toEqual({
-        row: 2,
-        col: 2,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: controller.getCurrentSheetId(),
-      });
-    });
     test('reset size disabled', async () => {
       act(() => {
         render(<App controller={initControllerForTest()} />);
@@ -251,6 +224,141 @@ describe('FloatElement.test.ts', () => {
       ).toEqual(oldHeight);
     });
   });
+
+  describe('select data', () => {
+    test('ok', async () => {
+      const controller = initControllerForTest();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      fireEvent.contextMenu(screen.getByTestId('float-element'), {
+        clientY: 20,
+        clientX: 20,
+      });
+      fireEvent.click(
+        screen.getByTestId('float-element-context-menu-select-data'),
+      );
+      fireEvent.change(screen.getByTestId('dialog-select-data-input'), {
+        target: { value: 'C3' },
+      });
+
+      fireEvent.click(screen.getByTestId('dialog-select-data-confirm'));
+      expect(controller.getDrawingList()[0].chartRange!).toEqual({
+        row: 2,
+        col: 2,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+    });
+    test('empty', async () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      fireEvent.contextMenu(screen.getByTestId('float-element'), {
+        clientY: 20,
+        clientX: 20,
+      });
+      fireEvent.click(
+        screen.getByTestId('float-element-context-menu-select-data'),
+      );
+      fireEvent.change(screen.getByTestId('dialog-select-data-input'), {
+        target: { value: '' },
+      });
+
+      fireEvent.click(screen.getByTestId('dialog-select-data-confirm'));
+      expect(screen.getByTestId('assert_toast').textContent).not.toEqual('');
+    });
+
+    test('invalid', async () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      fireEvent.contextMenu(screen.getByTestId('float-element'), {
+        clientY: 20,
+        clientX: 20,
+      });
+      fireEvent.click(
+        screen.getByTestId('float-element-context-menu-select-data'),
+      );
+      fireEvent.change(screen.getByTestId('dialog-select-data-input'), {
+        target: { value: '_.fe3435' },
+      });
+
+      fireEvent.click(screen.getByTestId('dialog-select-data-confirm'));
+      expect(screen.getByTestId('assert_toast').textContent).not.toEqual('');
+    });
+    test('cancel dialog', async () => {
+      const controller = initControllerForTest();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      const oldChartRange = controller.getDrawingList()[0].chartRange!;
+      fireEvent.contextMenu(screen.getByTestId('float-element'), {
+        clientY: 20,
+        clientX: 20,
+      });
+      fireEvent.click(
+        screen.getByTestId('float-element-context-menu-select-data'),
+      );
+      fireEvent.change(screen.getByTestId('dialog-select-data-input'), {
+        target: { value: '_.fe3435' },
+      });
+
+      fireEvent.click(screen.getByTestId('dialog-select-data-cancel'));
+      expect(controller.getDrawingList()[0].chartRange!).toEqual(oldChartRange);
+    });
+  });
+  describe('chart title', () => {
+    test('ok', async () => {
+      const controller = initControllerForTest();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      fireEvent.contextMenu(screen.getByTestId('float-element'), {
+        clientY: 20,
+        clientX: 20,
+      });
+      fireEvent.click(
+        screen.getByTestId('float-element-context-menu-change-chart-title'),
+      );
+      fireEvent.change(screen.getByTestId('dialog-change-chart-title-input'), {
+        target: { value: 'new_chart_title' },
+      });
+
+      fireEvent.click(screen.getByTestId('dialog-change-chart-title-confirm'));
+      expect(controller.getDrawingList()[0].title).toEqual('new_chart_title');
+    });
+    test('cancel dialog', async () => {
+      const controller = initControllerForTest();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      const oldData = controller.getDrawingList()[0].title;
+      fireEvent.contextMenu(screen.getByTestId('float-element'), {
+        clientY: 20,
+        clientX: 20,
+      });
+      fireEvent.click(
+        screen.getByTestId('float-element-context-menu-change-chart-title'),
+      );
+
+      fireEvent.click(screen.getByTestId('dialog-change-chart-title-cancel'));
+      expect(controller.getDrawingList()[0].title).toEqual(oldData);
+    });
+  });
   describe('chart type', () => {
     for (const item of [
       'line',
@@ -285,6 +393,25 @@ describe('FloatElement.test.ts', () => {
         expect(controller.getDrawingList()[0].chartType!).toEqual(item);
       });
     }
+    test('cancel dialog', async () => {
+      const controller = initControllerForTest();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      type('1');
+      fireEvent.click(screen.getByTestId('toolbar-chart'));
+      const oldData = controller.getDrawingList()[0].chartType!;
+      fireEvent.contextMenu(screen.getByTestId('float-element'), {
+        clientY: 20,
+        clientX: 20,
+      });
+      fireEvent.click(
+        screen.getByTestId('float-element-context-menu-change-chart-type'),
+      );
+
+      fireEvent.click(screen.getByTestId('dialog-change-chart-type-cancel'));
+      expect(controller.getDrawingList()[0].chartType!).toEqual(oldData);
+    });
   });
   describe('resize float element', () => {
     for (const item of ['top', 'top-right', 'top-left']) {

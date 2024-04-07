@@ -9,7 +9,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { isMac, mainDomSet } from '@/util';
+import { isMac } from '@/util';
 import { initControllerForTest } from '@/controller';
 
 describe('shortcut.test.tsx', () => {
@@ -287,7 +287,6 @@ describe('shortcut.test.tsx', () => {
       fireEvent.wheel(document.body, {
         deltaX: 0,
         deltaY: 200,
-        value: mainDomSet.get().canvas,
       });
       const transform = window.getComputedStyle(
         screen.getByTestId('vertical-scroll-bar-content'),
@@ -306,7 +305,6 @@ describe('shortcut.test.tsx', () => {
       fireEvent.wheel(document.body, {
         deltaX: 200,
         deltaY: 0,
-        target: mainDomSet.get().canvas,
       });
       const transform = window.getComputedStyle(
         screen.getByTestId('horizontal-scroll-bar-content'),
@@ -315,33 +313,33 @@ describe('shortcut.test.tsx', () => {
     });
   });
 
-  describe('undo', ()=> {
+  describe('undo', () => {
     test('ok', () => {
       act(() => {
         render(<App controller={initControllerForTest(true)} />);
       });
-      expect(screen.getByTestId('toolbar-undo')).toBeDisabled()
-      fireEvent.click(screen.getByTestId('toolbar-bold'))
-      expect(screen.getByTestId('toolbar-undo')).not.toBeDisabled()
+      expect(screen.getByTestId('toolbar-undo')).toBeDisabled();
+      fireEvent.click(screen.getByTestId('toolbar-bold'));
+      expect(screen.getByTestId('toolbar-undo')).not.toBeDisabled();
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'z', [key]: true });
-      expect(screen.getByTestId('toolbar-undo')).toBeDisabled()
+      expect(screen.getByTestId('toolbar-undo')).toBeDisabled();
     });
-  })
+  });
 
-  describe('redo', ()=> {
+  describe('redo', () => {
     test('ok', () => {
       act(() => {
         render(<App controller={initControllerForTest(true)} />);
       });
-      fireEvent.click(screen.getByTestId('toolbar-bold'))
-      expect(screen.getByTestId('toolbar-redo')).toBeDisabled()
+      fireEvent.click(screen.getByTestId('toolbar-bold'));
+      expect(screen.getByTestId('toolbar-redo')).toBeDisabled();
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'z', [key]: true });
-      expect(screen.getByTestId('toolbar-redo')).not.toBeDisabled()
+      expect(screen.getByTestId('toolbar-redo')).not.toBeDisabled();
       fireEvent.keyDown(document.body, { key: 'y', [key]: true });
-      expect(screen.getByTestId('toolbar-redo')).toBeDisabled()
-      expect(screen.getByTestId('toolbar-undo')).not.toBeDisabled()
+      expect(screen.getByTestId('toolbar-redo')).toBeDisabled();
+      expect(screen.getByTestId('toolbar-undo')).not.toBeDisabled();
     });
-  })
+  });
 });

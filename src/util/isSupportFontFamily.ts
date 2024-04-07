@@ -66,7 +66,7 @@ export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
   if (typeof window.queryLocalFonts === 'function') {
     list.push({
       value: QUERY_ALL_LOCAL_FONT,
-      label: '--- ' + $('get-all-installed-fonts') + ' ---',
+      label: '---> ' + $('get-all-installed-fonts'),
       disabled: false,
     });
   }

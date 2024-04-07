@@ -7,9 +7,8 @@ import {
   convertResultTypeToString,
   eventEmitter,
   initFontFamilyList,
-  isTestEnv,
-  QUERY_ALL_LOCAL_FONT,
   mainDomSet,
+  canvasLog,
 } from '@/util';
 import {
   coreStore,
@@ -151,6 +150,7 @@ const handleStateChange = (
   changeSet: Set<ChangeEventType>,
   controller: IController,
 ) => {
+  canvasLog('handleStateChange', changeSet);
   if (
     changeSet.has('rangeMap') ||
     changeSet.has('cellStyle') ||
@@ -259,22 +259,7 @@ export function initCanvas(
   controller: IController,
   canvas: HTMLCanvasElement,
 ): () => void {
-  let familyList = initFontFamilyList();
-  if (familyList.length === 0 && isTestEnv()) {
-    // just for test
-    familyList.push(
-      {
-        value: 'serif',
-        label: 'serif',
-        disabled: false,
-      },
-      {
-        value: QUERY_ALL_LOCAL_FONT,
-        label: '--> get all local installed fonts',
-        disabled: false,
-      },
-    );
-  }
+  const familyList = initFontFamilyList();
   fontFamilyStore.setState(familyList);
   const content = new Content(controller, createCanvas());
   const mainCanvas = new MainCanvas(controller, canvas, content);

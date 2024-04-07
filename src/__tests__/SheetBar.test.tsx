@@ -119,7 +119,6 @@ describe('SheetBar.test.ts', () => {
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-rename'));
 
       fireEvent.change(screen.getByTestId('sheet-bar-rename-input'), {
-        // currentTarget: { value: 'test_sheet_name' },
         target: { value: 'test_sheet_name' },
       });
       fireEvent.keyDown(screen.getByTestId('sheet-bar-rename-input'), {

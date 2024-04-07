@@ -41,6 +41,13 @@ describe('Toolbar.test.ts', () => {
   });
   describe('fontFamily', () => {
     test('normal', () => {
+      Object.defineProperty(window, 'queryLocalFonts', {
+        writable: true,
+        value: async () => {
+          return [];
+        },
+      });
+      localStorage.setItem('LOCAL_FONT_KEY', JSON.stringify(['serif']));
       act(() => {
         render(<App controller={initControllerForTest()} />);
       });
@@ -80,8 +87,28 @@ describe('Toolbar.test.ts', () => {
       });
       await waitFor(() => {
         expect(
-          screen.getByTestId('toolbar-font-family').textContent,
-        ).not.toContain('--> get all local installed fonts');
+          screen.getByTestId('toolbar-font-family'),
+        ).not.toHaveTextContent('---> Get all the fonts installed locally');
+      });
+    });
+    test('query all empty', async () => {
+      Object.defineProperty(window, 'queryLocalFonts', {
+        writable: true,
+        value: async () => {
+          return [];
+        },
+      });
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+
+      fireEvent.change(screen.getByTestId('toolbar-font-family'), {
+        target: { value: 'QUERY_ALL_LOCAL_FONT' },
+      });
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('toolbar-font-family'),
+        ).not.toHaveTextContent('---> Get all the fonts installed locally');
       });
     });
   });

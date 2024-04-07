@@ -31,7 +31,6 @@ describe('FormulaBar.test.tsx', () => {
       });
 
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
-        // currentTarget: { value: 'G100' },
         target: { value: 'G100' },
       });
       fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
@@ -47,7 +46,6 @@ describe('FormulaBar.test.tsx', () => {
         render(<App controller={initControllerForTest()} />);
       });
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
-        // currentTarget: { value: 'foo' },
         target: { value: 'foo' },
       });
       fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
@@ -63,7 +61,6 @@ describe('FormulaBar.test.tsx', () => {
         render(<App controller={initControllerForTest()} />);
       });
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
-        // currentTarget: { value: 'foo_343.=' },
         target: { value: 'foo_343.=' },
       });
       fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {

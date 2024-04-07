@@ -619,7 +619,6 @@ export class Controller implements IController {
   }
   deleteAll(sheetId?: string): void {
     this.model.deleteAll(sheetId);
-
     this.emitChange();
   }
   getDefineName(range: IRange): string {

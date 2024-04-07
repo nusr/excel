@@ -252,7 +252,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         >
           {$('duplicate')}
         </Button>
-        {type === 'chart' ? (
+        {type === 'chart' && (
           <React.Fragment>
             <Button
               onClick={selectData}
@@ -273,7 +273,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
               {$('change-chart-type')}
             </Button>
           </React.Fragment>
-        ) : null}
+        )}
         <Button
           testId="float-element-context-menu-save-as-picture"
           onClick={saveAsPicture}

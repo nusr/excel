@@ -1,3 +1,4 @@
+// mock mainDomSet getDomRect method
 const { mainDomSet } = require('../src/util');
 class PointerEventMock extends Event {
   /**
@@ -102,7 +103,7 @@ global.location = {
 };
 
 const spy = jest.spyOn(mainDomSet, 'getDomRect');
-spy.mockReturnValue({ top: 144.5, left: 0, width: 1300, height: 500 });
+spy.mockReturnValue({ top: 144, left: 0, width: 1300, height: 500 });
 
 global.localStorage = new LocalStorageMock();
 // @ts-ignore

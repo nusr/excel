@@ -185,11 +185,10 @@ export function modelToChangeSet(list: ICommandItem[]) {
     const type = item.type;
     result.add(type);
     if (type === 'worksheets') {
-      if (item.key.includes('value') || item.key.includes('formula')) {
-        result.add('cellValue');
-      }
       if (item.key.includes('style')) {
         result.add('cellStyle');
+      } else {
+        result.add('cellValue');
       }
     } else if (type === 'workbook') {
       if (item.key.includes('rowCount')) {
@@ -205,12 +204,4 @@ export function modelToChangeSet(list: ICommandItem[]) {
     }
   }
   return result;
-}
-
-export function isTestEnv() {
-  return process.env.NODE_ENV === 'test';
-}
-
-export function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

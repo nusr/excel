@@ -197,33 +197,57 @@ const MOCK_MODEL: WorkBookJSON = {
       },
     },
     '6': {
+      '0_0': {
+        value: '你好，世界',
+      },
       '0_1': {
         value: 'Z͑ͫ̓ͪ̂ͫ̽͏̴̙̤̞͉͚̯̞̠͍A̴̵̜̰͔ͫ͗͢L̠ͨͧͩ͘G̴̻͈͍͔̹̑͗̎̅͛́Ǫ̵̹̻̝̳͂̌̌͘!͖̬̰̙̗̿̋ͥͥ̂ͣ̐́́͜͞',
         style: {
           fontSize: 26,
         },
       },
-      '0_6': {
+      '0_2': {
         value: '',
         formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
         style: {
           fontSize: 36,
         },
       },
-      '0_7': {
-        value: '뎌쉐',
-        style: {
-          fontSize: 36,
-        },
-      },
-      '0_8': {
-        value: 'Ĺo͂řȩm̅',
-        style: {
-          fontSize: 36,
-        },
-      },
-      '0_10': {
+      '0_3': {
         value: '🌷🎁💩😜👍🏳️‍🌈',
+      },
+      '1_0': {
+        value: 'Hello World',
+      },
+      '2_0': {
+        value: 'Bonjour le monde',
+      },
+      '3_0': {
+        value: 'Hola mundo',
+      },
+      '4_0': {
+        value: 'Привет, мир',
+      },
+      '5_0': {
+        value: 'Hallo Welt',
+      },
+      '6_0': {
+        value: 'こんにちは、世界',
+      },
+      '7_0': {
+        value: '안녕 세계',
+      },
+      '8_0': {
+        value: 'हैलोवर्ल्ड',
+      },
+      '9_0': {
+        value: 'Halo Dunia',
+      },
+      '10_0': {
+        value: 'Olá mundo',
+      },
+      '11_0': {
+        value: 'Witaj świecie',
       },
     },
     '7': {
@@ -246,7 +270,24 @@ const MOCK_MODEL: WorkBookJSON = {
   // TODO:
   mergeCells: {},
   customHeight: {},
-  customWidth: {},
+  customWidth: {
+    '6_0': {
+      len: 150,
+      isHide: false,
+    },
+    '6_1': {
+      len: 150,
+      isHide: false,
+    },
+    '6_2': {
+      len: 150,
+      isHide: false,
+    },
+    '6_3': {
+      len: 150,
+      isHide: false,
+    }
+  },
   definedNames: {
     foo: {
       row: 0,
