@@ -21,7 +21,9 @@ jobs:
           npx tsc
           npm run coverage
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: E2E
