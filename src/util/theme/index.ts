@@ -20,10 +20,11 @@ export function getTheme(): ThemeType {
   if (l && (l === 'dark' || l === 'light')) {
     return l as ThemeType;
   }
-  if (window.matchMedia && typeof window.matchMedia === 'function') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  if (typeof window.matchMedia === 'function') {
+    const result = window.matchMedia('(prefers-color-scheme: dark)').matches
       ? 'dark'
       : 'light';
+    return result;
   }
   return 'light';
 }

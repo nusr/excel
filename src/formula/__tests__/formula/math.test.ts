@@ -29,6 +29,11 @@ import {
   ATANH,
 } from '../../formula/math';
 import { MAX_PARAMS_COUNT } from '@/util';
+import { roundNumber } from '../../formula/float';
+
+function equal(result: number, expected: number) {
+  expect(roundNumber(result)).toEqual(expected);
+}
 
 describe('math.test.ts', () => {
   describe('ABS', () => {
@@ -143,8 +148,8 @@ describe('math.test.ts', () => {
     });
   });
   describe('COT', () => {
-    test.skip('ok', () => {
-      expect(COT(Math.PI / 4)).toEqual(1);
+    test('ok', () => {
+      equal(COT(Math.PI / 4), 1);
     });
     test('error', () => {
       expect(() => COT(1, 2)).toThrow();
@@ -275,8 +280,8 @@ describe('math.test.ts', () => {
     test('ok', () => {
       expect(SUM(1, 'a', '11', true)).toEqual(13);
     });
-    test.skip('special', () => {
-      expect(SUM(0.1, 0.2)).toEqual(0.3);
+    test('special', () => {
+      equal(SUM(0.1, 0.2), 0.3);
     });
     test('error', () => {
       const list = Array.from<number>({ length: MAX_PARAMS_COUNT + 3 }).fill(3);
@@ -299,6 +304,18 @@ describe('math.test.ts', () => {
     test('error', () => {
       expect(() => PI(1, 2)).toThrow();
       expect(() => PI(1)).toThrow();
+    });
+  });
+  describe('roundNumber', () => {
+    test('normal', () => {
+      expect(roundNumber(1)).toEqual(1);
+      expect(roundNumber(0.111111111)).toEqual(0.111111111);
+      expect(roundNumber(100.111111111)).toEqual(100.111111111);
+    });
+    test('round', () => {
+      expect(roundNumber(1.000000000000001)).toEqual(1);
+      expect(roundNumber(0.1111111111)).toEqual(0.111111111);
+      expect(roundNumber(100.1111111111)).toEqual(100.111111111);
     });
   });
 });

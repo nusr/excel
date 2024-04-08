@@ -5,6 +5,7 @@ import React, {
   memo,
   useEffect,
   useCallback,
+  useMemo,
 } from 'react';
 import { IController, ScrollStatus, ScrollValue } from '@/types';
 import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
@@ -71,15 +72,17 @@ export const ScrollBar: React.FunctionComponent<Props> = memo(
       scrollStore.subscribe,
       scrollStore.getSnapshot,
     );
-    useEffect(() => {
-      function handleDragEnd() {
+    const [toggleEvents] = useMemo(() => {
+      function handlePointerUp() {
         state.current = { ...initState };
+        toggleEvents(false);
       }
-      function handleDrag(event: PointerEvent) {
-        if (
-          event.buttons <= 0 ||
-          state.current.scrollStatus === ScrollStatus.NONE
-        ) {
+      function handlePointerMove(event: PointerEvent) {
+        if (event.buttons <= 0) {
+          toggleEvents(false)
+          return;
+        }
+        if (state.current.scrollStatus === ScrollStatus.NONE) {
           return;
         }
         if (state.current.scrollStatus === ScrollStatus.VERTICAL) {
@@ -90,34 +93,40 @@ export const ScrollBar: React.FunctionComponent<Props> = memo(
           state.current.prevPageX = event.clientX;
         }
       }
-      document.addEventListener('pointermove', handleDrag);
-      document.addEventListener('pointerup', handleDragEnd);
-      return () => {
-        document.removeEventListener('pointermove', handleDrag);
-        document.removeEventListener('pointerup', handleDragEnd);
-      };
+      function toggleEvents(state?: boolean) {
+        const toggleEvent = state
+          ? document.addEventListener
+          : document.removeEventListener;
+        toggleEvent('pointermove', handlePointerMove);
+        toggleEvent('pointerup', handlePointerUp);
+      }
+      return [toggleEvents];
     }, []);
+    useEffect(() => toggleEvents, [toggleEvents]);
+
     const handleVerticalBarDown = useCallback(
       (event: React.PointerEvent<HTMLDivElement>) => {
         if (event.buttons <= 0) {
           return;
         }
+        toggleEvents(true);
         state.current.prevPageX = event.clientX;
         state.current.prevPageY = event.clientY;
         state.current.scrollStatus = ScrollStatus.VERTICAL;
       },
-      [],
+      [toggleEvents],
     );
     const handleHorizontalBarDown = useCallback(
       (event: React.PointerEvent<HTMLDivElement>) => {
         if (event.buttons <= 0) {
           return;
         }
+        toggleEvents(true);
         state.current.prevPageX = event.clientX;
         state.current.prevPageY = event.clientY;
         state.current.scrollStatus = ScrollStatus.HORIZONTAL;
       },
-      [],
+      [toggleEvents],
     );
     return (
       <Fragment>

@@ -1,6 +1,6 @@
 import { Scanner } from './scanner';
 import { Parser } from './parser';
-import allFormulas, { CustomError } from './formula';
+import allFormulas, { CustomError, roundNumber } from './formula';
 import { Interpreter } from './interpreter';
 import {
   CellDataMap,
@@ -33,9 +33,12 @@ export function parseFormula(
       strList.push(item.toString());
     }
     expressionStr = strList.join('');
-
+    let value = result;
+    if (typeof value === 'number' && !isNaN(value)) {
+      value = roundNumber(value);
+    }
     return {
-      result,
+      result: value,
       error: null,
       expressionStr,
     };

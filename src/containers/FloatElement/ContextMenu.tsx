@@ -11,6 +11,7 @@ import {
   isSameRange,
   MAX_NAME_LENGTH,
   extractImageType,
+  CHART_TYPE_LIST,
 } from '@/util';
 import { FloatElementItem } from '@/containers/store';
 import { IWindowSize } from '@/types';
@@ -23,33 +24,6 @@ type Props = FloatElementItem & {
   resetResize: (size: IWindowSize) => void;
   hideContextMenu: () => void;
 };
-
-const chartList: Array<{ value: ChartType; label: string }> = [
-  {
-    value: 'line',
-    label: $('line-chart'),
-  },
-  {
-    value: 'bar',
-    label: $('bar-chart'),
-  },
-  {
-    value: 'pie',
-    label: $('pie-chart'),
-  },
-  {
-    value: 'scatter',
-    label: $('scatter-chart'),
-  },
-  {
-    value: 'radar',
-    label: $('radar-chart'),
-  },
-  {
-    value: 'polarArea',
-    label: $('polar-area-chart'),
-  },
-];
 
 export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
   (props) => {
@@ -168,7 +142,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           <Select
             style={{ width: '100%' }}
             defaultValue={newChartType}
-            data={chartList.map((v) => ({ ...v, disabled: false }))}
+            data={CHART_TYPE_LIST.map((v) => ({ ...v, disabled: false }))}
             onChange={(v) => (newChartType = String(v) as ChartType)}
             testId="dialog-change-chart-type-select"
           />
@@ -200,7 +174,8 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         if (!dom) {
           return;
         }
-        saveAs(dom.toDataURL(), item.title + '.png');
+        const chartData = dom.toDataURL();
+        saveAs(chartData, item.title + '.png');
       }
     };
     return (

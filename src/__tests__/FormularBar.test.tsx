@@ -78,7 +78,7 @@ describe('FormulaBar.test.tsx', () => {
         render(<App controller={initControllerForTest()} />);
       });
       type('3');
-      expect(screen.getByTestId('formula-editor-trigger').textContent).toEqual(
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
         '3',
       );
     });

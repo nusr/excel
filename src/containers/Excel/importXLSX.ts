@@ -25,25 +25,8 @@ import {
   convertStringToResultType,
   isEmpty,
   FORMULA_PREFIX,
+  getImageSize,
 } from '@/util';
-
-export function getImageSize(base64: string): Promise<IWindowSize> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => {
-      // 获取图像的宽度和高度
-      const width = image.width;
-      const height = image.height;
-
-      resolve({ width, height });
-    };
-    image.onerror = (error) => {
-      reject(error);
-    };
-    // 设置图像的源为 Blob 对象
-    image.src = base64;
-  });
-}
 
 const COMMON_PREFIX = 'xl';
 const STYLE_PATH = 'xl/styles.xml';

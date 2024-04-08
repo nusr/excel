@@ -8,3 +8,4 @@ const allFormulas: FormulaType = {
 };
 export * from './error';
 export default allFormulas;
+export * from './float';

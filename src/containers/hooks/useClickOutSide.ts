@@ -19,7 +19,6 @@ export function useClickOutside(
 
   useEffect(() => {
     document.addEventListener('pointerdown', handleEvent);
-
     return () => {
       document.removeEventListener('pointerdown', handleEvent);
     };

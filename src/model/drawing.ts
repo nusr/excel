@@ -5,7 +5,7 @@ import {
   DrawingElement,
   IModel,
 } from '@/types';
-import { assert } from '@/util';
+import { assert, CHART_TYPE_LIST, isEmpty } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { $ } from '@/i18n';
 
@@ -22,9 +22,29 @@ export class Drawing implements IDrawings {
   }
   fromJSON(json: WorkBookJSON): void {
     const data = json.drawings || {};
+    if (isEmpty(data)) {
+      return;
+    }
     const oldValue = { ...this.drawings };
     this.drawings = { ...data };
-    this.model.push({ type: 'drawings', key: '', newValue: data, oldValue });
+    for (const [uuid, value] of Object.entries(data)) {
+      if (isEmpty(value)) {
+        continue;
+      }
+      if (value.type === 'chart') {
+        assert(
+          CHART_TYPE_LIST.findIndex((v) => v.value === value.chartType!) >= 0,
+          $('unsupported-chart-types'),
+        );
+      }
+      this.drawings[uuid] = value;
+    }
+    this.model.push({
+      type: 'drawings',
+      key: '',
+      newValue: this.drawings,
+      oldValue,
+    });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'drawings') {
@@ -62,6 +82,10 @@ export class Drawing implements IDrawings {
           return false;
         }
       });
+      assert(
+        CHART_TYPE_LIST.findIndex((v) => v.value === data.chartType!) >= 0,
+        $('unsupported-chart-types'),
+      );
       assert(check, $('cells-must-contain-data'));
     } else if (data.type === 'floating-picture') {
       assert(!!data.imageSrc, $('image-source-is-empty'));
@@ -88,6 +112,12 @@ export class Drawing implements IDrawings {
     }
     for (const key of keyList) {
       if (item[key] !== value[key]) {
+        if (key === 'chartType') {
+          assert(
+            CHART_TYPE_LIST.findIndex((v) => v.value === value.chartType!) >= 0,
+            $('unsupported-chart-types'),
+          );
+        }
         const oldValue =
           typeof item[key] === 'object' && item[key]
             ? // @ts-ignore

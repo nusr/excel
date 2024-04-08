@@ -59,6 +59,10 @@ describe('Toolbar.test.ts', () => {
       });
     });
     test('query all', async () => {
+      localStorage.setItem(
+        'LOCAL_FONT_KEY',
+        JSON.stringify(['simsun', 'QUERY_ALL_LOCAL_FONT']),
+      );
       Object.defineProperty(window, 'queryLocalFonts', {
         writable: true,
         value: async () => {
@@ -86,12 +90,16 @@ describe('Toolbar.test.ts', () => {
         target: { value: 'QUERY_ALL_LOCAL_FONT' },
       });
       await waitFor(() => {
-        expect(
-          screen.getByTestId('toolbar-font-family'),
-        ).not.toHaveTextContent('---> Get all the fonts installed locally');
+        expect(screen.getByTestId('toolbar-font-family')).not.toHaveTextContent(
+          '---> Get all the fonts installed locally',
+        );
       });
     });
     test('query all empty', async () => {
+      localStorage.setItem(
+        'LOCAL_FONT_KEY',
+        JSON.stringify(['simsun', 'QUERY_ALL_LOCAL_FONT']),
+      );
       Object.defineProperty(window, 'queryLocalFonts', {
         writable: true,
         value: async () => {
@@ -106,9 +114,9 @@ describe('Toolbar.test.ts', () => {
         target: { value: 'QUERY_ALL_LOCAL_FONT' },
       });
       await waitFor(() => {
-        expect(
-          screen.getByTestId('toolbar-font-family'),
-        ).not.toHaveTextContent('---> Get all the fonts installed locally');
+        expect(screen.getByTestId('toolbar-font-family')).not.toHaveTextContent(
+          '---> Get all the fonts installed locally',
+        );
       });
     });
   });

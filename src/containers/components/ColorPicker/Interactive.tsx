@@ -46,7 +46,11 @@ const InteractiveBase = ({ onMove, testId, ...rest }: Props) => {
     };
 
     const handleMove = (event: MouseEvent) => {
-      if (event.buttons > 0 && container.current) {
+      if (event.buttons < 0) {
+        toggleDocumentEvents(false);
+        return;
+      }
+      if (container.current) {
         event.preventDefault();
         onMoveCallback(
           getRelativePosition(

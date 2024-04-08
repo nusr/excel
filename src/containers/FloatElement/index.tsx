@@ -5,6 +5,7 @@ import React, {
   useState,
   useEffect,
   useRef,
+  useMemo,
 } from 'react';
 import { IController, IWindowSize } from '@/types';
 import { floatElementStore, coreStore } from '@/containers/store';
@@ -32,7 +33,11 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
       coreStore.subscribe,
       coreStore.getSnapshot,
     );
-    const state = useRef<State>({ ...INITIAL_STATE });
+    const state = useRef<State>({
+      ...INITIAL_STATE,
+      position: { ...INITIAL_STATE.position },
+    });
+
     const [position, setPosition] = useState<FloatElementPosition>({
       width: -1,
       height: -1,
@@ -40,6 +45,162 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
       top: -1,
       left: -1,
     });
+    state.current.activeUuid = activeUuid;
+    state.current.position = { ...position };
+
+    const [toggleEvents] = useMemo(() => {
+      const updateSize = (e: PointerEvent) => {
+        const deltaX = Math.round(e.clientX - state.current.moveStartX);
+        const deltaY = Math.round(e.clientY - state.current.moveStartY);
+        setPosition((old) => {
+          const p = state.current.resizePosition as ResizePosition;
+          let { top, left, width, height } = old;
+          if (
+            [
+              ResizePosition.topRight,
+              ResizePosition.topLeft,
+              ResizePosition.top,
+            ].includes(p)
+          ) {
+            height -= deltaY;
+            top += deltaY;
+          } else if (
+            [
+              ResizePosition.bottomRight,
+              ResizePosition.bottom,
+              ResizePosition.bottomLeft,
+            ].includes(p)
+          ) {
+            height += deltaY;
+          }
+
+          if (
+            [
+              ResizePosition.topLeft,
+              ResizePosition.bottomLeft,
+              ResizePosition.left,
+            ].includes(p)
+          ) {
+            width -= deltaX;
+            left += deltaX;
+          } else if (
+            [
+              ResizePosition.topRight,
+              ResizePosition.bottomRight,
+              ResizePosition.right,
+            ].includes(p)
+          ) {
+            width += deltaX;
+          }
+
+          const newData = {
+            ...roundPosition(top, left),
+            imageAngle: old.imageAngle,
+            width,
+            height,
+          };
+          return newData;
+        });
+      };
+      const updateRotate = (event: PointerEvent) => {
+        const deltaX = event.clientX - state.current.moveStartX;
+        const deltaY = event.clientY - state.current.moveStartY;
+        const imageAngle = (Math.atan2(deltaY, deltaX) * 180) / Math.PI;
+        setPosition((old) => {
+          const newData = {
+            ...old,
+            imageAngle,
+          };
+          return newData;
+        });
+      };
+      const handlePointerUp = (event: PointerEvent) => {
+        event.stopPropagation();
+        event.preventDefault();
+
+        const uuid = state.current.activeUuid;
+        if (!uuid || !state.current.resizePosition) {
+          state.current = {
+            ...INITIAL_STATE,
+            position: { ...INITIAL_STATE.position },
+          };
+          return;
+        }
+        const pos = state.current.position;
+        if (state.current.resizePosition === ResizePosition.rotate) {
+          controller.updateDrawing(uuid, {
+            imageAngle: pos.imageAngle,
+          });
+        } else if (state.current.resizePosition === ResizePosition.active) {
+          const rect = mainDomSet.getDomRect();
+          const { left, top } = pos;
+          if (left >= 0 && top >= 0 && left < rect.width && top < rect.height) {
+            const newRange = getHitInfo(controller, left, top);
+            if (newRange) {
+              controller.updateDrawing(uuid, {
+                fromCol: newRange.col,
+                fromRow: newRange.row,
+                marginX: newRange.marginX,
+                marginY: newRange.marginY,
+              });
+            }
+          }
+        } else {
+          if (pos.height > 0 && pos.width > 0) {
+            controller.updateDrawing(uuid, {
+              height: pos.height,
+              width: pos.width,
+            });
+          }
+        }
+        state.current = {
+          ...INITIAL_STATE,
+          position: { ...INITIAL_STATE.position },
+        };
+      };
+      const handlePointerMove = (event: PointerEvent) => {
+        if (!state.current.resizePosition || event.buttons <= 0) {
+          return;
+        }
+        event.stopPropagation();
+        event.preventDefault();
+        if (state.current.resizePosition === ResizePosition.rotate) {
+          updateRotate(event);
+          return;
+        } else if (state.current.resizePosition === ResizePosition.active) {
+          const deltaX = Math.round(event.clientX - state.current.moveStartX);
+          const deltaY = Math.round(event.clientY - state.current.moveStartY);
+          setPosition((old) => {
+            const newTop = old.top + deltaY;
+            const newLeft = old.left + deltaX;
+            const newData = {
+              ...roundPosition(newTop, newLeft),
+              imageAngle: old.imageAngle,
+              width: old.width,
+              height: old.height,
+            };
+            return newData;
+          });
+          state.current.moveStartX = event.clientX;
+          state.current.moveStartY = event.clientY;
+        } else {
+          updateSize(event);
+          state.current.moveStartX = event.clientX;
+          state.current.moveStartY = event.clientY;
+          return;
+        }
+      };
+      function toggleEvents(state?: boolean) {
+        const toggleEvent = state
+          ? document.addEventListener
+          : document.removeEventListener;
+        toggleEvent('pointermove', handlePointerMove);
+        toggleEvent('pointerup', handlePointerUp);
+      }
+      return [toggleEvents];
+    }, []);
+
+    useEffect(() => toggleEvents, [toggleEvents]);
 
     const handleResizePointerDown = (
       event: React.PointerEvent<HTMLDivElement>,
@@ -58,163 +219,21 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
       state.current.moveStartX = event.clientX;
       state.current.moveStartY = event.clientY;
     };
-
-    const updateSize = (e: PointerEvent) => {
-      const deltaX = Math.round(e.clientX - state.current.moveStartX);
-      const deltaY = Math.round(e.clientY - state.current.moveStartY);
-      setPosition((old) => {
-        const p = state.current.resizePosition as ResizePosition;
-        let { top, left, width, height } = old;
-        if (
-          [
-            ResizePosition.topRight,
-            ResizePosition.topLeft,
-            ResizePosition.top,
-          ].includes(p)
-        ) {
-          height -= deltaY;
-          top += deltaY;
-        } else if (
-          [
-            ResizePosition.bottomRight,
-            ResizePosition.bottom,
-            ResizePosition.bottomLeft,
-          ].includes(p)
-        ) {
-          height += deltaY;
-        }
-
-        if (
-          [
-            ResizePosition.topLeft,
-            ResizePosition.bottomLeft,
-            ResizePosition.left,
-          ].includes(p)
-        ) {
-          width -= deltaX;
-          left += deltaX;
-        } else if (
-          [
-            ResizePosition.topRight,
-            ResizePosition.bottomRight,
-            ResizePosition.right,
-          ].includes(p)
-        ) {
-          width += deltaX;
-        }
-
-        const newData = {
-          ...roundPosition(top, left),
-          imageAngle: old.imageAngle,
-          width,
-          height,
-        };
-        return newData;
-      });
-    };
-    const updateRotate = (event: PointerEvent) => {
-      const deltaX = event.clientX - state.current.moveStartX;
-      const deltaY = event.clientY - state.current.moveStartY;
-      const imageAngle = (Math.atan2(deltaY, deltaX) * 180) / Math.PI;
-      setPosition((old) => {
-        const newData = {
-          ...old,
-          imageAngle,
-        };
-        return newData;
-      });
-    };
-
-    useEffect(() => {
-      const handlePointerUp = (event: PointerEvent) => {
-        event.stopPropagation();
-        event.preventDefault();
-        if (!activeUuid) {
-          state.current = { ...INITIAL_STATE };
-          return;
-        }
-        if (state.current.resizePosition) {
-          if (state.current.resizePosition === ResizePosition.rotate) {
-            controller.updateDrawing(activeUuid, {
-              imageAngle: position.imageAngle,
-            });
-          } else if (position.height > 0 && position.width > 0) {
-            controller.updateDrawing(activeUuid, {
-              height: position.height,
-              width: position.width,
-            });
-          }
-        }
-        const rect = mainDomSet.getDomRect();
-        const { left, top } = position;
-        if (left >= 0 && top >= 0 && left < rect.width && top < rect.height) {
-          const newRange = getHitInfo(controller, left, top);
-          if (newRange) {
-            controller.updateDrawing(activeUuid, {
-              fromCol: newRange.col,
-              fromRow: newRange.row,
-              marginX: newRange.marginX,
-              marginY: newRange.marginY,
-            });
-          }
-        }
-        state.current = { ...INITIAL_STATE };
-      };
-      const handlePointerMove = (event: PointerEvent) => {
-        if (!activeUuid) {
-          return;
-        }
-        if (event.buttons <= 0) {
-          return;
-        }
-
-        event.stopPropagation();
-        event.preventDefault();
-        if (state.current.resizePosition) {
-          if (state.current.resizePosition === ResizePosition.rotate) {
-            updateRotate(event);
-          } else {
-            updateSize(event);
-            state.current.moveStartX = event.clientX;
-            state.current.moveStartY = event.clientY;
-          }
-
-          return;
-        }
-        const deltaX = Math.round(event.clientX - state.current.moveStartX);
-        const deltaY = Math.round(event.clientY - state.current.moveStartY);
-        setPosition((old) => {
-          const newTop = old.top + deltaY;
-          const newLeft = old.left + deltaX;
-
-          const newData = {
-            ...roundPosition(newTop, newLeft),
-            imageAngle: old.imageAngle,
-            width: old.width,
-            height: old.height,
-          };
-          return newData;
-        });
-        state.current.moveStartX = event.clientX;
-        state.current.moveStartY = event.clientY;
-      };
-      document.addEventListener('pointerup', handlePointerUp);
-      document.addEventListener('pointermove', handlePointerMove);
-      return () => {
-        document.removeEventListener('pointerup', handlePointerUp);
-        document.removeEventListener('pointermove', handlePointerMove);
-      };
-    }, [activeUuid, position]);
     return (
       <Fragment>
         <div
           className={classnames(styles['float-element-mask'], {
             [styles['active']]: !!activeUuid,
           })}
+          data-testid="float-element-mask"
           onPointerDown={() => {
-            state.current = { ...INITIAL_STATE };
+            state.current = {
+              ...INITIAL_STATE,
+              position: { ...INITIAL_STATE.position },
+            };
             coreStore.mergeState({ activeUuid: '' });
             controller.setFloatElementUuid('');
+            toggleEvents(false);
           }}
         />
         {floatElementList.map((v) => {
@@ -238,8 +257,10 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
                 if (event.buttons <= 0) {
                   return;
                 }
+                state.current.resizePosition = ResizePosition.active;
                 state.current.moveStartX = event.clientX;
                 state.current.moveStartY = event.clientY;
+                state.current.activeUuid = v.uuid;
                 controller.setFloatElementUuid(v.uuid);
                 coreStore.mergeState({ activeUuid: v.uuid });
                 setPosition({
@@ -249,6 +270,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
                   height: v.height,
                   imageAngle: v.imageAngle || 0,
                 });
+                toggleEvents(true);
               }}
               resizeDown={handleResizePointerDown}
             />

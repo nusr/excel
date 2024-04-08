@@ -1,12 +1,15 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { Button, Icon } from '../components';
 import styles from './index.module.css';
-import { sizeConfig, darkColor, lightColor, setTheme, getTheme } from '@/util';
+import {
+  sizeConfig,
+  darkColor,
+  lightColor,
+  setTheme,
+  getTheme,
+  eventEmitter,
+} from '@/util';
 import { ThemeType } from '@/types';
-
-interface Props {
-  toggleTheme: () => void;
-}
 
 function setCssVariable(data: Record<string, string | number>) {
   const keyList = Object.keys(data);
@@ -23,38 +26,40 @@ function updateCssVariable(value: ThemeType) {
   } else {
     setCssVariable(lightColor);
   }
-  document.documentElement.setAttribute('data-theme', value);
 }
 
-export const Theme: React.FunctionComponent<Props> = memo(({ toggleTheme }) => {
+export const Theme: React.FunctionComponent = memo(() => {
   const [themeData, setThemeData] = useState<ThemeType>('light');
   useEffect(() => {
     setCssVariable(sizeConfig);
   }, []);
   useEffect(() => {
     const update = (c: ThemeType) => {
-      setThemeData(c);
       setTheme(c);
       updateCssVariable(c);
-      toggleTheme();
+      setThemeData(c);
+      eventEmitter.emit('modelChange', {
+        changeSet: new Set(['cellStyle']),
+      });
     };
     update(getTheme());
-    if (window.matchMedia && typeof window.matchMedia === 'function') {
+    if (typeof window.matchMedia === 'function') {
       window
         .matchMedia('(prefers-color-scheme: dark)')
         .addEventListener('change', (event) => {
-          const { matches: isDark } = event;
-          update(isDark ? 'dark' : 'light');
+          update(event.matches ? 'dark' : 'light');
         });
     }
-  }, [toggleTheme]);
+  }, []);
 
   const handleClick = useCallback(() => {
     const n = themeData === 'dark' ? 'light' : 'dark';
     updateCssVariable(n);
     setTheme(n);
     setThemeData(n);
-    toggleTheme();
+    eventEmitter.emit('modelChange', {
+      changeSet: new Set(['cellStyle']),
+    });
   }, [themeData]);
   return (
     <div data-testid="menubar-theme" className={styles.theme}>

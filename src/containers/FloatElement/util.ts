@@ -10,6 +10,7 @@ export enum ResizePosition {
   left = 'left',
   right = 'right',
   rotate = 'rotate',
+  active = 'active',
 }
 export type FloatElementPosition = {
   width: number;
@@ -22,12 +23,22 @@ export type State = {
   moveStartX: number;
   moveStartY: number;
   resizePosition: string;
+  activeUuid: string;
+  position: FloatElementPosition;
 };
 
 export const INITIAL_STATE: State = {
   resizePosition: '',
   moveStartX: 0,
   moveStartY: 0,
+  activeUuid: '',
+  position: {
+    width: -1,
+    height: -1,
+    imageAngle: 0,
+    top: -1,
+    left: -1,
+  },
 };
 
 export function roundPosition(top: number, left: number) {

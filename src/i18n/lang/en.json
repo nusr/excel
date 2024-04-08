@@ -59,5 +59,6 @@
   "insert-column-right": "Insert Column Right",
   "insert-row-above": "Insert Row Above",
   "insert-row-below": "Insert Row Below",
-  "get-all-installed-fonts": "Get all the fonts installed locally"
+  "get-all-installed-fonts": "Get all the fonts installed locally",
+  "unsupported-chart-types": "Unsupported chart types"
 }

@@ -124,7 +124,7 @@ describe('SheetBar.test.ts', () => {
       fireEvent.keyDown(screen.getByTestId('sheet-bar-rename-input'), {
         key: 'Enter',
       });
-      expect(screen.getByTestId('sheet-bar-list').textContent).toEqual(
+      expect(screen.getByTestId('sheet-bar-list')).toHaveTextContent(
         'test_sheet_name',
       );
     });
@@ -157,12 +157,8 @@ describe('SheetBar.test.ts', () => {
         clientX: 199,
       });
       expect(
-        (
-          screen.getByTestId(
-            'sheet-bar-context-menu-unhide',
-          ) as HTMLButtonElement
-        ).disabled,
-      ).toBeTruthy();
+        screen.getByTestId('sheet-bar-context-menu-unhide'),
+      ).toBeDisabled();
     });
 
     test('unhide', () => {
@@ -181,18 +177,14 @@ describe('SheetBar.test.ts', () => {
         clientX: 199,
       });
       expect(
-        (
-          screen.getByTestId(
-            'sheet-bar-context-menu-unhide',
-          ) as HTMLButtonElement
-        ).disabled,
-      ).toBeFalsy();
+        screen.getByTestId('sheet-bar-context-menu-unhide'),
+      ).not.toBeDisabled();
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-unhide'));
 
       fireEvent.click(
         screen.getByTestId('sheet-bar-context-menu-unhide-dialog-confirm'),
       );
-      expect(screen.getByTestId('sheet-bar-active-item').textContent).toEqual(
+      expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent(
         'Sheet4',
       );
     });
@@ -204,7 +196,7 @@ describe('SheetBar.test.ts', () => {
       });
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
-      expect(screen.getByTestId('sheet-bar-active-item').textContent).toEqual(
+      expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent(
         'Sheet3',
       );
 
@@ -213,7 +205,7 @@ describe('SheetBar.test.ts', () => {
       const dom = screen.getByTestId('sheet-bar-select-sheet-popup');
       dom.setAttribute('data-value', '1');
       fireEvent.click(dom);
-      expect(screen.getByTestId('sheet-bar-active-item').textContent).toEqual(
+      expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent(
         'Sheet1',
       );
     });

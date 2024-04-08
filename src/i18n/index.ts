@@ -19,9 +19,7 @@ export function getLanguage(): LanguageType {
       language = item;
     }
   }
-  if (document.documentElement.getAttribute('lang') !== language) {
-    document.documentElement.setAttribute('lang', language);
-  }
+  document.documentElement.setAttribute('lang', language);
   return language;
 }
 

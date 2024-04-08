@@ -1,6 +1,9 @@
 import { setTheme, getTheme, convertColorToDark } from '../theme';
 
 describe('theme.test.ts', () => {
+  afterEach(() => {
+    sessionStorage.clear();
+  });
   describe('setTheme', () => {
     test('dark', () => {
       setTheme('dark');
@@ -15,6 +18,33 @@ describe('theme.test.ts', () => {
       expect(document.documentElement.getAttribute('data-theme')).toEqual(
         'light',
       );
+    });
+  });
+  describe('getTheme', () => {
+    test('light', () => {
+      expect(getTheme()).toEqual('light');
+    });
+    test('mock matchMedia dark', () => {
+      Object.defineProperty(global, 'matchMedia', {
+        writable: true,
+        value: () => {
+          return {
+            matches: true,
+          };
+        },
+      });
+      expect(getTheme()).toEqual('dark');
+    });
+    test('mock matchMedia light', () => {
+      Object.defineProperty(global, 'matchMedia', {
+        writable: true,
+        value: () => {
+          return {
+            matches: false,
+          };
+        },
+      });
+      expect(getTheme()).toEqual('light');
     });
   });
   describe('convertColorToDark', () => {

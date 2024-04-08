@@ -1,4 +1,6 @@
 import { ErrorTypes, NumberFormatItem } from '@/types';
+import type { ChartType } from 'chart.js';
+import { $ } from '@/i18n';
 
 export const DEFAULT_FONT_SIZE = 12;
 export const MUST_FONT_FAMILY = 'sans-serif';
@@ -19,6 +21,37 @@ export const FORMULA_PREFIX = '=';
 export const SPLITTER = '_';
 export const MAX_NAME_LENGTH = 35;
 export const MAX_PARAMS_COUNT = 256;
+export const FORMULA_MAX_PRECISION = 9;
+
+export const CHART_TYPE_LIST: Array<{
+  value: ChartType;
+  label: string;
+}> = [
+  {
+    value: 'line',
+    label: $('line-chart'),
+  },
+  {
+    value: 'bar',
+    label: $('bar-chart'),
+  },
+  {
+    value: 'pie',
+    label: $('pie-chart'),
+  },
+  {
+    value: 'scatter',
+    label: $('scatter-chart'),
+  },
+  {
+    value: 'radar',
+    label: $('radar-chart'),
+  },
+  {
+    value: 'polarArea',
+    label: $('polar-area-chart'),
+  },
+];
 
 export const ERROR_SET = new Set<ErrorTypes>([
   '#ERROR!',
