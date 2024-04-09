@@ -1,9 +1,8 @@
 import { memo } from 'react';
 import { BaseIcon } from './BaseIcon';
 
-export const FillColorIcon = memo(({ fill }: { fill?: string }) => {
+export const FillColorIcon = memo(() => {
   return BaseIcon({
-    fill,
     paths: [
       {
         d: 'M0 0h1024v1024H0z',

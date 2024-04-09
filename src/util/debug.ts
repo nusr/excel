@@ -1,8 +1,8 @@
 import { COLOR_PICKER_COLOR_LIST } from './constant';
 
-type NameSpaceType = 'react' | 'controller' | 'canvas' | 'model';
+type NameSpaceType = 'react' | 'controller' | 'canvas' | 'model' | 'test';
 
-class Debug {
+export class Debug {
   namespace: NameSpaceType;
 
   static readonly colorMap: Map<NameSpaceType, string> = new Map<

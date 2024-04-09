@@ -10,16 +10,11 @@ import {
 import '@testing-library/jest-dom';
 import { type } from './util';
 import { initControllerForTest } from '@/controller';
-import { saveAs } from '@/util';
 import './global.mock';
+import * as Util from '../util/saveAs';
 
-jest.mock('@/util', () => {
-  const originalModule = jest.requireActual('@/util');
-  return {
-    __esModule: true,
-    ...originalModule,
-    saveAs: jest.fn(), // just mock saveAs
-  };
+beforeAll(() => {
+  Object.defineProperty(Util, 'saveAs', { writable: true, value: jest.fn() });
 });
 
 describe('Export.test.ts', () => {
@@ -39,7 +34,7 @@ describe('Export.test.ts', () => {
       fireEvent.click(
         screen.getByTestId('float-element-context-menu-save-as-picture'),
       );
-      expect(saveAs).toHaveBeenCalled();
+      expect(Util.saveAs).toHaveBeenCalled();
     });
   });
   describe('download floating picture', () => {
@@ -65,7 +60,7 @@ describe('Export.test.ts', () => {
       fireEvent.click(
         screen.getByTestId('float-element-context-menu-save-as-picture'),
       );
-      expect(saveAs).toHaveBeenCalled();
+      expect(Util.saveAs).toHaveBeenCalled();
     });
   });
   describe('download xlsx', () => {
@@ -77,7 +72,7 @@ describe('Export.test.ts', () => {
       fireEvent.click(screen.getByTestId('menubar-excel'));
       fireEvent.click(screen.getByTestId('menubar-export'));
       fireEvent.click(screen.getByTestId('menubar-export-xlsx'));
-      expect(saveAs).toHaveBeenCalled();
+      expect(Util.saveAs).toHaveBeenCalled();
     });
   });
   describe('download csv', () => {
@@ -89,7 +84,7 @@ describe('Export.test.ts', () => {
       fireEvent.click(screen.getByTestId('menubar-excel'));
       fireEvent.click(screen.getByTestId('menubar-export'));
       fireEvent.click(screen.getByTestId('menubar-export-csv'));
-      expect(saveAs).toHaveBeenCalled();
+      expect(Util.saveAs).toHaveBeenCalled();
     });
   });
 });

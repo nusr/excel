@@ -90,7 +90,7 @@ describe('Toolbar.test.ts', () => {
       });
       await waitFor(() => {
         expect(screen.getByTestId('toolbar-font-family')).not.toHaveTextContent(
-          '---> Get all the fonts installed locally',
+          'Get all the fonts installed locally',
         );
       });
     });
@@ -114,7 +114,7 @@ describe('Toolbar.test.ts', () => {
       });
       await waitFor(() => {
         expect(screen.getByTestId('toolbar-font-family')).not.toHaveTextContent(
-          '---> Get all the fonts installed locally',
+          'Get all the fonts installed locally',
         );
       });
     });

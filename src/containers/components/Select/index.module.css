@@ -4,7 +4,7 @@
 }
 .selectItem {
   font-size: var(--font);
-  cursor: pointer;
+  text-wrap: nowrap;
 }
 .selectItem.disabled {
   background-color: var(--white);
@@ -57,4 +57,36 @@
 .popup-item-content {
   flex: 1;
   text-align: left;
+}
+
+.select-list-container {
+  height: 100%;
+  border-radius: 2px;
+  text-align: center;
+  background-color: var(--white);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  position: relative;
+  border: 1px solid var(--borderColor);
+  box-sizing: border-box;
+}
+
+.select-list-trigger {
+  position: absolute;
+  right: 0;
+  border: none;
+  border-radius: unset;
+  border-right: none;
+  border-left: 1px solid var(--borderColor);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.select-list-container.active .select-list-trigger {
+  transform: rotate(180deg);
+  border-right: 1px solid var(--borderColor);
+  border-left: none;
 }

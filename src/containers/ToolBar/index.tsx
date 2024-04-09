@@ -41,13 +41,6 @@ const underlineList: OptionItem[] = [
   },
 ];
 
-const selectStyle = {
-  width: 140,
-};
-const wrapTextStyle = {
-  minWidth: 80,
-};
-
 export const ToolbarContainer: React.FunctionComponent<Props> = memo(
   ({ controller }) => {
     const coreData = useSyncExternalStore(
@@ -208,7 +201,6 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         <Select
           data={fontFamilyList}
           value={cellStyle.fontFamily}
-          style={selectStyle}
           getItemStyle={getItemStyle}
           onChange={handleFontFamilyChange}
           testId="toolbar-font-family"
@@ -247,7 +239,6 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         <Select
           data={underlineList}
           value={cellStyle.underline}
-          style={selectStyle}
           title="Underline"
           onChange={setUnderline}
           testId="toolbar-underline"
@@ -277,7 +268,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           active={cellStyle.isWrapText}
           onClick={toggleWrapText}
           testId="toolbar-wrap-text"
-          style={wrapTextStyle}
+          className={styles['wrap-text']}
         >
           {$('wrap-text')}
         </Button>

@@ -144,3 +144,7 @@
   width: 1px;
   background-color: var(--borderColor);
 }
+
+.chart-type-select {
+  width: 200px;
+}

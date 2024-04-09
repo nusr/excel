@@ -12,7 +12,7 @@ import { IController, IWindowSize } from '@/types';
 import { floatElementStore, coreStore } from '@/containers/store';
 import { FloatElement } from './FloatElement';
 import styles from './FloatElement.module.css';
-import { getHitInfo, classnames, mainDomSet } from '@/util';
+import { getHitInfo, classnames, canvasSizeSet } from '@/util';
 import {
   State,
   ResizePosition,
@@ -121,7 +121,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
             imageAngle: pos.imageAngle,
           });
         } else if (state.current.resizePosition === ResizePosition.active) {
-          const rect = mainDomSet.getDomRect();
+          const rect = canvasSizeSet.get();
           const { left, top } = pos;
           if (left >= 0 && top >= 0 && left < rect.width && top < rect.height) {
             const newRange = getHitInfo(controller, left, top);

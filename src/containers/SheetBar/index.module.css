@@ -94,3 +94,12 @@
   align-items: center;
   justify-self: center;
 }
+
+.sheet-bar-wrapper .select-popup {
+  left: var(--largePadding);
+  width: 200px;
+}
+
+.unhide-select {
+  width: 300px;
+}

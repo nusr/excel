@@ -2,7 +2,7 @@ import React, { CSSProperties, useRef, useEffect, memo } from 'react';
 import { IController, EditorStatus, StyleType } from '@/types';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
-import { MAX_NAME_LENGTH,mainDomSet } from '@/util';
+import { MAX_NAME_LENGTH, FORMULA_EDITOR_ROLE } from '@/util';
 import { coreStore } from '../store';
 
 interface Props {
@@ -77,7 +77,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = memo(
       if (!ref.current) {
         return;
       }
-      mainDomSet.merge({ input: ref.current });
+      ref.current.focus();
     }, []);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -104,7 +104,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = memo(
     };
     return (
       <input
-        className={styles['base-editor']}
+        className={styles['formula-editor']}
         ref={ref}
         spellCheck
         defaultValue={initValue}
@@ -113,6 +113,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = memo(
         style={style}
         maxLength={MAX_NAME_LENGTH * 100}
         data-testid={testId}
+        data-role={FORMULA_EDITOR_ROLE}
       />
     );
   },

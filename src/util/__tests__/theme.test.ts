@@ -56,5 +56,29 @@ describe('theme.test.ts', () => {
     test('rgba', () => {
       expect(convertColorToDark('rgba(198,198,198)')).toEqual('#393939');
     });
+    test('r max', () => {
+      expect(convertColorToDark('rgba(200,150,100)')).toEqual('#96693c');
+    });
+    test('g max', () => {
+      expect(convertColorToDark('rgba(100,200,150)')).toEqual('#3c9669');
+    });
+    test('b max', () => {
+      expect(convertColorToDark('rgba(100,150,200)')).toEqual('#3c6996');
+    });
+    test('h 60', () => {
+      expect(convertColorToDark('#bfbf40')).toEqual('#b9b946');
+    });
+    test('h 120', () => {
+      expect(convertColorToDark('#40bf40')).toEqual('#46b946');
+    });
+    test('h 180', () => {
+      expect(convertColorToDark('#40bfbf')).toEqual('#46b9b9');
+    });
+    test('h 240', () => {
+      expect(convertColorToDark('#4040bf')).toEqual('#4646b9');
+    });
+    test('h 300', () => {
+      expect(convertColorToDark('#bf40bf')).toEqual('#b946b9');
+    });
   });
 });

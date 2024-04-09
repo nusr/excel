@@ -1,4 +1,4 @@
-import React, { FunctionComponent, CSSProperties, memo } from 'react';
+import React, { FunctionComponent, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { createRoot, Root } from 'react-dom/client';
 import { Button } from '../Button';
@@ -8,8 +8,8 @@ import { $ } from '@/i18n';
 
 interface DialogProps {
   title: string;
-  dialogStyle?: CSSProperties;
   visible: boolean;
+  className?: string;
   children?: React.ReactNode;
   testId?: string;
   getContainer?: () => HTMLElement;
@@ -21,7 +21,7 @@ export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
   const {
     children,
     title,
-    dialogStyle,
+    className,
     onCancel,
     onOk,
     visible,
@@ -34,8 +34,8 @@ export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
   const cancelTestId = testId ? `${testId}-cancel` : undefined;
   const confirmTestId = testId ? `${testId}-confirm` : undefined;
   return createPortal(
-    <div className={classnames(styles['dialog-modal'])} data-testid={testId}>
-      <div className={styles['dialog-container']} style={dialogStyle}>
+    <div className={styles['dialog-modal']} data-testid={testId}>
+      <div className={classnames(styles['dialog-container'], className)}>
         <div className={styles['dialog-title']}>{title}</div>
         <div className={styles['dialog-content']}>{children}</div>
         <div className={styles['dialog-button']}>
@@ -72,7 +72,7 @@ export function info(props: DialogProps) {
       <Dialog
         visible={modalProps.visible}
         title={modalProps.title}
-        dialogStyle={modalProps.dialogStyle}
+        className={modalProps.className}
         onCancel={(event) => {
           event.stopPropagation();
           if (modalProps.onCancel) {

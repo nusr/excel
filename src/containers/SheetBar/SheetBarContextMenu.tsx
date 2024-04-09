@@ -24,9 +24,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
     hideMenu,
     editSheetName,
   }) => {
-    const [ref] = useClickOutside(() => {
-      hideMenu();
-    });
+    const [ref] = useClickOutside(hideMenu);
     const tabColor = useMemo(() => {
       return (
         sheetList.find((v) => v.sheetId === currentSheetId)?.tabColor || ''
@@ -50,9 +48,12 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
         children: (
           <Select
             data={hideSheetList}
-            onChange={(v) => (value = String(v))}
-            style={{ width: 300 }}
+            onChange={(v) => {
+              value = String(v);
+            }}
+            className={styles['unhide-select']}
             defaultValue={value}
+            testId="sheet-bar-context-menu-unhide-dialog-select"
           />
         ),
         onCancel: hideMenu,
@@ -121,7 +122,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
           color={tabColor}
           onChange={handleTabColorChange}
           position="top"
-          testId='sheet-bar-context-menu-tab-color'
+          testId="sheet-bar-context-menu-tab-color"
         >
           <Button
             className={styles['sheet-bar-unhide']}

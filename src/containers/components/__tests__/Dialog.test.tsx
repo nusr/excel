@@ -12,6 +12,14 @@ describe('Dialog.test.ts', () => {
     );
     expect(screen.getByTestId('dialog').textContent).toEqual('test');
   });
+  test('empty', () => {
+    render(
+      <Dialog visible={false} title="test" getContainer={() => document.body}>
+        <div data-testid="dialog">test</div>
+      </Dialog>,
+    );
+    expect(() => screen.getByTestId('dialog')).toThrow();
+  });
   test('info', () => {
     let result: any = {
       update: () => {},
@@ -28,6 +36,7 @@ describe('Dialog.test.ts', () => {
     act(() => {
       result.close();
     });
+    expect(() => screen.getByTestId('dialog')).toThrow();
   });
   test('info update', () => {
     let result: any = {

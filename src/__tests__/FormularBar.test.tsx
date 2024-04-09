@@ -1,11 +1,6 @@
 import { App } from '@/containers';
 import * as React from 'react';
-import {
-  render,
-  screen,
-  fireEvent,
-  act,
-} from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { type } from './util';
 import { initControllerForTest } from '@/controller';
@@ -17,9 +12,7 @@ describe('FormulaBar.test.tsx', () => {
       act(() => {
         render(<App controller={initControllerForTest()} />);
       });
-      expect(
-        screen.getByTestId('formula-bar-name')!.querySelector('input')!.value,
-      ).toEqual('A1');
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
       expect(screen.getByTestId('formula-bar')!.childNodes).toHaveLength(2);
     });
     test('range jump', async () => {
@@ -34,10 +27,7 @@ describe('FormulaBar.test.tsx', () => {
       fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
         key: 'Enter',
       });
-      expect(
-        (screen.getByTestId('formula-bar-name-input') as HTMLInputElement)
-          .value,
-      ).toEqual('G100');
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('G100');
     });
     test('define name jump', async () => {
       act(() => {
@@ -49,10 +39,7 @@ describe('FormulaBar.test.tsx', () => {
       fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
         key: 'Enter',
       });
-      expect(
-        (screen.getByTestId('formula-bar-name-input') as HTMLInputElement)
-          .value,
-      ).toEqual('foo');
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('foo');
     });
     test('error define name', async () => {
       act(() => {
@@ -64,10 +51,63 @@ describe('FormulaBar.test.tsx', () => {
       fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
         key: 'Enter',
       });
-      expect(
-        (screen.getByTestId('formula-bar-name-input') as HTMLInputElement)
-          .value,
-      ).toEqual('A1');
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
+    });
+    test('empty', async () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
+        target: { value: '' },
+      });
+      fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
+        key: 'Enter',
+      });
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
+    });
+
+    test('popup jump', async () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
+        target: { value: 'foo' },
+      });
+      fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
+        key: 'Enter',
+      });
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('foo');
+
+      fireEvent.keyDown(document.body, { key: 'Enter' });
+
+      fireEvent.click(screen.getByTestId('formula-bar-name-trigger'));
+      const dom = screen.getByTestId('formula-bar-name-popup');
+      dom.setAttribute('data-value', 'foo');
+      fireEvent.click(dom);
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('foo');
+    });
+
+    test('duplicate', async () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
+        target: { value: 'foo' },
+      });
+      fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
+        key: 'Enter',
+      });
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('foo');
+
+      fireEvent.keyDown(document.body, { key: 'Enter' });
+
+      fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
+        target: { value: 'foo' },
+      });
+      fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
+        key: 'Enter',
+      });
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('foo');
     });
   });
   describe('formula editor', () => {

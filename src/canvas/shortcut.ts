@@ -12,7 +12,8 @@ import {
   sheetViewSizeSet,
   headerSizeSet,
   sizeConfig,
-  mainDomSet,
+  canvasSizeSet,
+  FORMULA_EDITOR_ROLE,
 } from '@/util';
 import { coreStore } from '@/containers/store';
 export const BOTTOM_BUFF = 200;
@@ -105,7 +106,7 @@ export function scrollToView(controller: IController, range: IRange) {
       rowCount: 1,
       sheetId: sheetId,
     });
-    const size = mainDomSet.getDomRect();
+    const size = canvasSizeSet.get();
     const headerSize = headerSizeSet.get();
     const { top, left } = controller.computeCellPosition(range);
     const minTop = old.top;
@@ -127,7 +128,7 @@ export function scrollToView(controller: IController, range: IRange) {
 
 export function computeScrollPosition(left: number, top: number) {
   const contentSize = parseInt(sizeConfig.scrollBarContent, 10);
-  const canvasRect = mainDomSet.getDomRect();
+  const canvasRect = canvasSizeSet.get();
   const viewSize = sheetViewSizeSet.get();
   const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
   const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
@@ -191,7 +192,7 @@ function recalculateScroll(controller: IController) {
   };
   const position = controller.computeCellPosition(temp);
   const cellSize = controller.getCellSize(temp);
-  const domRect = mainDomSet.getDomRect();
+  const domRect = canvasSizeSet.get();
   const oldScroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
   const headerSize = headerSizeSet.get();
@@ -255,15 +256,15 @@ function recalculateScroll(controller: IController) {
 }
 
 export function checkFocus() {
-  const inputDom = mainDomSet.get()?.input;
-  if (!inputDom) {
+  const dom = document.activeElement;
+  if (!dom || dom.getAttribute('data-role') !== FORMULA_EDITOR_ROLE) {
     return false;
   }
-  return document.activeElement === inputDom;
+  return true;
 }
 
 export function setActiveCellValue(controller: IController) {
-  const inputDom = mainDomSet.get().input!;
+  const inputDom = document.activeElement as HTMLInputElement;
   controller.setCell([[inputDom.value]], [], controller.getActiveRange().range);
   inputDom.value = '';
   inputDom.blur();
@@ -274,10 +275,9 @@ export function setActiveCellValue(controller: IController) {
 
 function checkActiveElement(controller: IController) {
   if (!checkFocus()) {
-    return false;
+    return;
   }
   setActiveCellValue(controller);
-  return true;
 }
 
 export const keyboardEventList: KeyboardEventItem[] = [

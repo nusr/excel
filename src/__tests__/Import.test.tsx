@@ -72,9 +72,9 @@ describe('Import.test.tsx', () => {
       });
       await sleep(100);
       await waitFor(() => {
-        expect(
-          screen.getByTestId('formula-editor-trigger').textContent,
-        ).toEqual('=SUM(A1,B1)');
+        expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
+          '=SUM(A1,B1)',
+        );
       });
     });
     test('empty', async () => {
@@ -87,7 +87,7 @@ describe('Import.test.tsx', () => {
           target: { files: [] },
         });
       });
-      expect(screen.getByTestId('formula-editor-trigger').textContent).toEqual(
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
         '',
       );
     });

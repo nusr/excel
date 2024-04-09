@@ -9,7 +9,7 @@ describe('BaseIcon.test.ts', () => {
     const dom = render(<Toast type="success" message="test" />);
     expect(dom.container.childNodes.length).toEqual(1);
   });
-  test('toast', () => {
+  test('close', () => {
     let close: any;
     act(() => {
       close = toast({
@@ -20,6 +20,26 @@ describe('BaseIcon.test.ts', () => {
       });
     });
     expect(screen.getByTestId('toast').textContent).toEqual('test');
+    act(() => {
+      close();
+    });
+    expect(() => screen.getByTestId('toast')).toThrow();
+  });
+  test('close twice', () => {
+    let close: any;
+    act(() => {
+      close = toast({
+        type: 'success',
+        message: 'test',
+        testId: 'toast',
+        duration: 1,
+      });
+    });
+    expect(screen.getByTestId('toast').textContent).toEqual('test');
+    act(() => {
+      close();
+    });
+    expect(() => screen.getByTestId('toast')).toThrow();
     act(() => {
       close();
     });

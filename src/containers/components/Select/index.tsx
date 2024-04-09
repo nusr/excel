@@ -3,17 +3,18 @@ import React, {
   FunctionComponent,
   memo,
   useCallback,
+  useState,
 } from 'react';
 import { classnames } from '@/util';
 import { OptionItem } from '@/types';
 import styles from './index.module.css';
 import { Icon } from '../BaseIcon';
 import { useClickOutside } from '../../hooks';
+import { Button } from '../Button';
 
 export interface SelectProps {
   value?: string | number;
   defaultValue?: string | number;
-  style?: CSSProperties;
   data: Array<string | number | OptionItem>;
   getItemStyle?: (value: string | number) => CSSProperties;
   onChange: (value: string | number) => void;
@@ -26,7 +27,6 @@ export const Select: FunctionComponent<SelectProps> = memo((props) => {
   const {
     data,
     value: activeValue,
-    style,
     className,
     onChange,
     getItemStyle,
@@ -45,7 +45,6 @@ export const Select: FunctionComponent<SelectProps> = memo((props) => {
     <select
       onChange={handleChange}
       value={activeValue}
-      style={style}
       defaultValue={defaultValue}
       name="select"
       className={classnames(styles.selectList, className)}
@@ -84,47 +83,54 @@ export interface SelectPopupProps {
   value: string;
   data: Array<OptionItem>;
   onChange: (value: string) => void;
-  className?: string;
   position?: 'top' | 'bottom';
-  style?: React.CSSProperties;
   testId?: string;
+  className?: string;
 }
 
 export const SelectPopup: FunctionComponent<SelectPopupProps> = memo(
-  (props) => {
-    const [ref] = useClickOutside(() => props.onChange(''));
+  ({
+    onChange,
+    value,
+    active,
+    data,
+    className,
+    position = 'bottom',
+    testId,
+  }) => {
+    const [ref] = useClickOutside(() => onChange(''));
     const handleSelect = useCallback(
       (event: React.MouseEvent<HTMLDivElement>) => {
         const v = (event.target as any).dataset?.value;
-        if (!v || v === props.value) {
+        if (!v || v === value) {
           return;
         }
-        props.onChange(v);
+        onChange(v);
       },
-      [],
+      [onChange, value],
     );
     return (
       <div
         className={classnames(
           styles['popup-container'],
-          props.position === 'top' ? styles.top : '',
+          className,
+          position === 'top' ? styles.top : '',
           {
-            [styles.active]: props.active,
+            [styles.active]: active,
           },
         )}
         onClick={handleSelect}
         ref={ref}
-        style={props.style}
-        data-testid={props.testId}
+        data-testid={testId}
       >
-        {props.data.map((v) => (
+        {data.map((v) => (
           <div key={v.value} className={styles['popup-item']}>
             <span className={styles['popup-item-content']} data-value={v.value}>
               {v.label}
             </span>
             <span
               className={classnames(styles['popup-item-icon'], {
-                [styles.active]: v.value === props.value,
+                [styles.active]: v.value === value,
               })}
             >
               <Icon name="confirm" />
@@ -137,3 +143,52 @@ export const SelectPopup: FunctionComponent<SelectPopupProps> = memo(
 );
 
 SelectPopup.displayName = 'SelectPopup';
+
+export type SelectListProps = Omit<SelectPopupProps, 'active'>;
+
+export const SelectList: FunctionComponent<
+  React.PropsWithChildren<SelectListProps>
+> = memo(({ children, value, data, onChange, position, testId, className }) => {
+  const [active, setActive] = useState(false);
+  const handleClick = useCallback(() => {
+    setActive((v) => !v);
+  }, []);
+  const handleChange = useCallback(
+    (value: string) => {
+      setActive(false);
+      if (value) {
+        onChange(value);
+      }
+    },
+    [onChange],
+  );
+  return (
+    <div
+      className={classnames(styles['select-list-container'], className, {
+        [styles.active]: active,
+      })}
+      data-testid={testId}
+    >
+      {children}
+      <Button
+        className={styles['select-list-trigger']}
+        onClick={handleClick}
+        testId={`${testId}-trigger`}
+      >
+        <Icon name="down"></Icon>
+      </Button>
+      {active && (
+        <SelectPopup
+          active
+          value={value}
+          data={data}
+          onChange={handleChange}
+          position={position}
+          testId={`${testId}-popup`}
+        />
+      )}
+    </div>
+  );
+});
+
+SelectList.displayName = 'SelectList';

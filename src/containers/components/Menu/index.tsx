@@ -9,13 +9,11 @@ type MenuItemProps = {
 };
 type SubMenuProps = {
   label: string;
-  style?: React.CSSProperties;
   testId?: string;
   className?: string;
 };
 type MenuProps = {
   menuButton: React.ReactElement;
-  style?: React.CSSProperties;
   testId?: string;
   className?: string;
 };
@@ -31,7 +29,7 @@ export const MenuItem: FunctionComponent<
 
 export const SubMenu: FunctionComponent<
   React.PropsWithChildren<SubMenuProps>
-> = ({ label, children, style, testId, className }) => {
+> = ({ label, children, testId, className }) => {
   const [open, setOpen] = useState(false);
   const handleClick = () => {
     setOpen((v) => !v);
@@ -45,10 +43,7 @@ export const SubMenu: FunctionComponent<
     >
       <div>{label}</div>
       {open && (
-        <div
-          className={classnames(styles.subMenuContainer, styles.portal)}
-          style={style}
-        >
+        <div className={classnames(styles.subMenuContainer, styles.portal)}>
           <ul className={styles.menu}>{children}</ul>
         </div>
       )}
@@ -57,7 +52,7 @@ export const SubMenu: FunctionComponent<
 };
 
 export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = memo(
-  ({ menuButton, children, style, testId, className }) => {
+  ({ menuButton, children, testId, className }) => {
     const [open, setOpen] = useState(false);
     const handleClick = useCallback(() => {
       setOpen((v) => !v);
@@ -71,7 +66,6 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = memo(
         {open && (
           <div
             className={classnames(styles.menuContainer, styles.portal)}
-            style={style}
             data-testid={`${testId}-portal`}
           >
             <ul className={styles.menu}>{children}</ul>

@@ -2,6 +2,10 @@ import { convertColorToHex } from '../color';
 
 describe('color.test.ts', () => {
   describe('convertColorToHex', () => {
+    test('invalid', ()=> {
+      expect(convertColorToHex('#g00')).toEqual('');
+      expect(convertColorToHex('')).toEqual('');
+    })
     it('convert white to Hex', () => {
       expect(convertColorToHex('black')).toEqual('#000000FF');
       expect(convertColorToHex('white')).toEqual('#FFFFFFFF');
@@ -12,6 +16,9 @@ describe('color.test.ts', () => {
     });
     it('convert rgb to Hex', () => {
       expect(convertColorToHex('rgb(255,0,255)')).toEqual('#FF00FFFF');
+    });
+    it('convert rgba to Hex', () => {
+      expect(convertColorToHex('rgba(255,0,255,0.4)')).toEqual('#FF00FF66');
     });
     it('convert HSLA to Hex', () => {
       expect(convertColorToHex('hsla(0, 0%, 0%,1.5)')).toEqual('');

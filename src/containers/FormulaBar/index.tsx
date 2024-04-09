@@ -4,7 +4,7 @@ import {
   getEditorStyle,
   getDisplayStyle,
 } from './FormulaEditor';
-import { classnames, intToColumnName, mainDomSet } from '@/util';
+import { classnames, intToColumnName } from '@/util';
 import styles from './index.module.css';
 import { IController, EditorStatus } from '@/types';
 import { activeCellStore, coreStore, styleStore } from '@/containers/store';
@@ -39,7 +39,6 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
       coreStore.mergeState({
         editorStatus: EditorStatus.EDIT_FORMULA_BAR,
       });
-      mainDomSet.get().input?.focus();
     };
     const style = useMemo(() => {
       return getDisplayStyle(cellStyle);

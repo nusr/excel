@@ -33,6 +33,7 @@
   box-sizing: border-box;
   text-align: center;
   user-select: none;
+  text-wrap: nowrap;
 }
 
 .menuItem + .menuItem {

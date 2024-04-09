@@ -1,4 +1,4 @@
-import { headerSizeSet, mainDomSet } from '@/util';
+import { headerSizeSet, canvasSizeSet } from '@/util';
 
 export enum ResizePosition {
   top = 'top',
@@ -43,7 +43,7 @@ export const INITIAL_STATE: State = {
 
 export function roundPosition(top: number, left: number) {
   const size = headerSizeSet.get();
-  const canvasSize = mainDomSet.getDomRect();
+  const canvasSize = canvasSizeSet.get();
   const minTop = size.height;
   const minLeft = size.width;
   if (top < minTop) {

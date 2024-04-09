@@ -14,8 +14,8 @@ const defaultWidth = 234;
 
 const getRelativePosition = (
   node: HTMLDivElement,
-  clientX: number = 0,
-  clientY: number = 0,
+  clientX: number,
+  clientY: number,
 ): Interaction => {
   const rect = node.getBoundingClientRect();
   return {
@@ -36,7 +36,9 @@ const InteractiveBase = ({ onMove, testId, ...rest }: Props) => {
 
   const [handleMoveStart, toggleDocumentEvents] = useMemo(() => {
     const handleMoveStart = (event: React.MouseEvent) => {
-      if (!container.current) return;
+      if (!container.current) {
+        return;
+      }
       event.preventDefault();
       container.current.focus();
       onMoveCallback(
@@ -46,18 +48,13 @@ const InteractiveBase = ({ onMove, testId, ...rest }: Props) => {
     };
 
     const handleMove = (event: MouseEvent) => {
-      if (event.buttons < 0) {
-        toggleDocumentEvents(false);
+      if (event.buttons <= 0) {
         return;
       }
       if (container.current) {
         event.preventDefault();
         onMoveCallback(
-          getRelativePosition(
-            container.current,
-            event.clientX || event.pageX,
-            event.clientY || event.pageY,
-          ),
+          getRelativePosition(container.current, event.clientX, event.clientY),
         );
       }
     };

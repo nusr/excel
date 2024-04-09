@@ -10,19 +10,16 @@ interface PathItem {
 export interface BaseIconProps {
   className?: string;
   paths: PathItem[];
-  fill?: string;
   testId?: string;
 }
 
 export const BaseIcon: FunctionComponent<BaseIconProps> = ({
   className = '',
-  paths = [],
-  fill = 'currentcolor',
+  paths,
   testId,
 }) => {
   return (
     <svg
-      fill={fill}
       className={classnames(styles.baseIcon, className)}
       viewBox="0 0 1137 1024"
       aria-hidden

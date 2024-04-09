@@ -1,5 +1,5 @@
 import { IController, KeyboardEventItem, EditorStatus } from '@/types';
-import { throttle, mainDomSet } from '@/util';
+import { throttle } from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';
 
@@ -41,7 +41,6 @@ export function registerGlobalEvent(
     coreStore.mergeState({
       editorStatus: EditorStatus.EDIT_CELL,
     });
-    mainDomSet.get().input?.focus();
   }
 
   const handleWheel = throttle((event: WheelEvent) => {

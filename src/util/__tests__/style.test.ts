@@ -3,14 +3,21 @@ import { EUnderLine } from '@/types';
 
 describe('style.test.ts', () => {
   describe('parseText', () => {
-    test('ok', () => {
+    test('ok \n', () => {
       expect(parseText('=SUM(1,2)\t2\ntest\ttrue')).toEqual([
+        ['=SUM(1,2)', 2],
+        ['test', true],
+      ]);
+    });
+    test('ok \r\n', () => {
+      expect(parseText('=SUM(1,2)\t2\r\ntest\ttrue')).toEqual([
         ['=SUM(1,2)', 2],
         ['test', true],
       ]);
     });
     test('filter empty', () => {
       expect(parseText('\t \n \t ')).toEqual([]);
+      expect(parseText('1 \t 2 \n \t ')).toEqual([[1, 2]]);
     });
   });
   describe('makeFont', () => {

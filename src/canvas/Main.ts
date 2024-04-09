@@ -10,7 +10,7 @@ import {
   containRange,
   getThemeColor,
   headerSizeSet,
-  mainDomSet,
+  canvasSizeSet,
 } from '@/util';
 import {
   EventType,
@@ -50,13 +50,13 @@ export class MainCanvas {
     this.ctx.scale(size, size);
   }
   resize() {
-    const size = mainDomSet.getDomRect();
+    const size = canvasSizeSet.get();
     const { width, height } = size;
     resizeCanvas(this.ctx.canvas, width, height);
     this.content.resize();
   }
   private clear() {
-    const { width, height } = mainDomSet.getDomRect();
+    const { width, height } = canvasSizeSet.get();
     this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
   render = (params: EventType): void => {
@@ -84,7 +84,7 @@ export class MainCanvas {
     }
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
 
-    const { width, height } = mainDomSet.getDomRect();
+    const { width, height } = canvasSizeSet.get();
     const headerSize = headerSizeSet.get();
     const realContentHeight = this.renderRowsHeader(height);
     const realContentWidth = this.renderColsHeader(width);

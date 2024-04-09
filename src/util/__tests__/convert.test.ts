@@ -1,11 +1,21 @@
-import { columnNameToInt, intToColumnName } from '../convert';
+import { columnNameToInt, intToColumnName, rowLabelToInt } from '../convert';
 
 describe('convert.test.ts', () => {
+  describe('rowLabelToInt', () => {
+    test('invalid', () => {
+      expect(rowLabelToInt('ff')).toEqual(-1);
+      expect(rowLabelToInt('-10')).toEqual(-1);
+    });
+    test('ok', () => {
+      expect(rowLabelToInt('1')).toEqual(0);
+      expect(rowLabelToInt('10')).toEqual(9);
+    });
+  });
   describe('columnNameToInt', () => {
-    test('invalid', ()=> {
+    test('invalid', () => {
       expect(columnNameToInt('1')).toEqual(-16);
       expect(columnNameToInt('')).toEqual(-1);
-    })
+    });
     it('should convert A, B and C to 1, 2 and 3', () => {
       expect(columnNameToInt('A')).toEqual(0);
       expect(columnNameToInt('B')).toEqual(1);

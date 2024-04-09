@@ -12,6 +12,7 @@
 }
 .fontFamily {
   font-size: var(--largeFont);
+  max-width: 200px;
 }
 .bold {
   font-weight: bold;
@@ -21,4 +22,8 @@
 }
 .strike {
   text-decoration-line: line-through;
+}
+
+.wrap-text {
+  text-wrap: nowrap;
 }

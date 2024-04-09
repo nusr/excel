@@ -13,9 +13,9 @@ function convertSheetNameToSheetId(value: string) {
 
 function parseCell(
   ref: string,
-  convertSheetName = convertSheetNameToSheetId,
+  convertSheetName: typeof convertSheetNameToSheetId,
 ): Range | null {
-  if (typeof ref !== 'string' || !ref) {
+  if (!ref) {
     return null;
   }
   const realRef = ref.trim();
@@ -104,16 +104,17 @@ export function mergeRange(start: Range, end: Range): Range | null {
   ) {
     return start;
   }
-  if (start.rowCount === 0 || end.rowCount === 0) {
-    if (end.rowCount !== 0 || end.rowCount !== 0) {
-      return null;
-    }
+  if (start.rowCount === 0 && end.rowCount !== 0) {
+    return null;
   }
-
-  if (start.colCount === 0 || end.colCount === 0) {
-    if (end.colCount !== 0 || end.colCount !== 0) {
-      return null;
-    }
+  if (start.rowCount !== 0 && end.rowCount === 0) {
+    return null;
+  }
+  if (start.colCount === 0 && end.colCount !== 0) {
+    return null;
+  }
+  if (start.colCount !== 0 && end.colCount === 0) {
+    return null;
   }
 
   const rowCount = Math.abs(start.row - end.row) + 1;

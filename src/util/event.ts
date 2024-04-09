@@ -10,8 +10,8 @@ type HitInfoResult = {
 
 export function getHitInfo(
   controller: IController,
-  x: number = 0,
-  y: number = 0,
+  x: number,
+  y: number,
 ): HitInfoResult | null {
   if (x < 0 || y < 0) {
     return null;

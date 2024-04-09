@@ -40,6 +40,9 @@ describe('reference.test.ts', () => {
     it('should convert B2', () => {
       expect(parseReference('B2')).toEqual(new Range(1, 1, 1, 1, ''));
     });
+    it('should convert aa!B2', () => {
+      expect(parseReference('aa!B2')).toEqual(new Range(1, 1, 1, 1, 'aa'));
+    });
     it('should convert A to { row:0,col:0,rowCount:200,colCount: 0 } ', () => {
       expect(parseReference('A')).toEqual(new Range(0, 0, 200, 0, ''));
     });
@@ -68,14 +71,24 @@ describe('reference.test.ts', () => {
         mergeRange(new Range(0, 0, 1, 1, 'a'), new Range(1, 1, 1, 1, '2')),
       ).toBeNull();
     });
-    test('rowCount === 0', () => {
+    test('start.rowCount === 0 && end.rowCount !== 0', () => {
       expect(
         mergeRange(new Range(0, 0, 0, 1, ''), new Range(1, 1, 1, 1, '')),
       ).toBeNull();
     });
-    test('colCount === 0', () => {
+    test('start.rowCount !== 0 && end.rowCount === 0', () => {
+      expect(
+        mergeRange(new Range(0, 0, 1, 1, ''), new Range(1, 1, 0, 1, '')),
+      ).toBeNull();
+    });
+    test('start.colCount === 0 && end.colCount !== 0', () => {
       expect(
         mergeRange(new Range(0, 0, 1, 0, ''), new Range(1, 1, 1, 1, '')),
+      ).toBeNull();
+    });
+    test('start.colCount !== 0 && end.colCount === 0', () => {
+      expect(
+        mergeRange(new Range(0, 0, 1, 1, ''), new Range(1, 1, 1, 0, '')),
       ).toBeNull();
     });
     it('A1:B2', () => {

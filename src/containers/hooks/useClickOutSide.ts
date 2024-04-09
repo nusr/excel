@@ -1,17 +1,14 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 
 export function useClickOutside(
   callback: () => void,
-): [ref: React.RefObject<HTMLDivElement>, clickedOutSide: boolean] {
+): [ref: React.RefObject<HTMLDivElement>] {
   const ref = useRef<HTMLDivElement>(null);
-  const [clickedOutSide, setState] = useState(false);
 
   function handleEvent(event: Event) {
     if (ref && ref.current) {
       if (ref.current.contains(event.target! as Node)) {
-        setState(false);
       } else {
-        setState(true);
         callback();
       }
     }
@@ -24,5 +21,5 @@ export function useClickOutside(
     };
   }, []);
 
-  return [ref, clickedOutSide];
+  return [ref];
 }

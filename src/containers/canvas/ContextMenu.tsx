@@ -5,7 +5,7 @@ import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
 import { activeCellStore } from '@/containers/store';
 import { $ } from '@/i18n';
-import { headerSizeSet, mainDomSet } from '@/util';
+import { headerSizeSet, canvasSizeSet } from '@/util';
 
 interface Props {
   controller: IController;
@@ -26,7 +26,7 @@ const ITEM_HEIGHT = 20;
 
 function computeMenuStyle(top: number, left: number) {
   const headerSize = headerSizeSet.get();
-  const rect = mainDomSet.getDomRect();
+  const rect = canvasSizeSet.get();
   let clickPosition = ClickPosition.CONTENT;
   let menuHeight = ITEM_HEIGHT * 3;
   const y = top - rect.top;

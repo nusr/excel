@@ -205,7 +205,7 @@ function convertToCssStyleDeclaration(cssStr: string) {
 
 export function parseText(text: string) {
   let list: string[];
-  if (text.indexOf('\r\n') > -1) {
+  if (text.indexOf('\r\n') >= 0) {
     list = text.split('\r\n');
   } else {
     list = text.split('\n');

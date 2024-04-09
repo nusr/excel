@@ -4,9 +4,55 @@ import {
   parseNumber,
   getDefaultSheetInfo,
   splitToWords,
+  convertResultTypeToString,
+  convertStringToResultType,
+  stringToCoordinate,
 } from '../util';
 
 describe('util.test.ts', () => {
+  describe('stringToCoordinate', () => {
+    test('invalid', () => {
+      expect(stringToCoordinate('-10_-10')).toEqual({ row: -10, col: -10 });
+      expect(stringToCoordinate('ff_test')).toEqual({ row: -1, col: -1 });
+    });
+    test('ok', () => {
+      expect(stringToCoordinate('10_10')).toEqual({ row: 10, col: 10 });
+    });
+  });
+  describe('convertResultTypeToString', () => {
+    test('string', () => {
+      expect(convertResultTypeToString('test')).toEqual('test');
+    });
+    test('number', () => {
+      expect(convertResultTypeToString('1')).toEqual('1');
+      expect(convertResultTypeToString(1)).toEqual('1');
+    });
+    test('boolean string', () => {
+      expect(convertResultTypeToString('tRue')).toEqual('TRUE');
+      expect(convertResultTypeToString('False')).toEqual('FALSE');
+    });
+    test('boolean', () => {
+      expect(convertResultTypeToString(true)).toEqual('TRUE');
+      expect(convertResultTypeToString(false)).toEqual('FALSE');
+    });
+  });
+  describe('convertStringToResultType', () => {
+    test('string', () => {
+      expect(convertStringToResultType('test')).toEqual('test');
+    });
+    test('number', () => {
+      expect(convertStringToResultType('1')).toEqual(1);
+      expect(convertStringToResultType(1)).toEqual(1);
+    });
+    test('boolean string', () => {
+      expect(convertStringToResultType('tRue')).toEqual(true);
+      expect(convertStringToResultType('False')).toEqual(false);
+    });
+    test('boolean', () => {
+      expect(convertStringToResultType(true)).toEqual(true);
+      expect(convertStringToResultType(false)).toEqual(false);
+    });
+  });
   describe('getListMaxNum', () => {
     it('should convert empty array to 0', () => {
       expect(getListMaxNum()).toEqual(0);
@@ -80,8 +126,15 @@ describe('util.test.ts', () => {
     });
   });
   describe('splitToWords', () => {
-    it('should splitToWords', () => {
+    test('should splitToWords', () => {
       expect(splitToWords('😊👨‍👨‍👧‍👧👦🏾')).toEqual(['😊', '👨‍👨‍👧‍👧', '👦🏾']);
+    });
+    test('invalid', () => {
+      // @ts-ignore
+      delete global.Intl.Segmenter;
+      // @ts-ignore
+      global.Intl.Segmenter = null;
+      expect(splitToWords('😊👨‍👨‍👧‍👧👦🏾').length).toBeGreaterThan(3);
     });
   });
 });

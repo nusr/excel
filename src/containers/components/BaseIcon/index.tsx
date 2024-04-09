@@ -1,23 +1,20 @@
 import { FunctionComponent, memo } from 'react';
 import iconConfig from './icon';
 import type { BaseIconName } from './icon';
-import { BaseIcon, BaseIconProps } from './BaseIcon';
+import { BaseIcon } from './BaseIcon';
 
-export interface IconProps {
+interface IconProps {
   name: BaseIconName;
   className?: string;
-  fill?: string;
   testId?: string;
 }
 
 export const Icon: FunctionComponent<IconProps> = memo(
-  ({ name, className = '', fill, testId }) => {
+  ({ name, className = '', testId }) => {
     const paths = iconConfig[name].map((item) => ({ d: item }));
-    return BaseIcon({ className, paths, fill, testId });
+    return BaseIcon({ className, paths, testId });
   },
 );
 Icon.displayName = 'Icon';
-
-export { BaseIcon, BaseIconProps };
 
 export { FillColorIcon } from './FillColorIcon';

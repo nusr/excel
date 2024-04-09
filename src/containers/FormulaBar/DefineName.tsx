@@ -5,12 +5,13 @@ import React, {
   useSyncExternalStore,
   useMemo,
   memo,
+  useCallback,
 } from 'react';
 import { IController } from '@/types';
 import styles from './index.module.css';
-import { classnames, parseReference, MAX_NAME_LENGTH } from '@/util';
+import { parseReference, MAX_NAME_LENGTH } from '@/util';
 import { scrollToView } from '@/canvas';
-import { Button, Icon, SelectPopup } from '../components';
+import { SelectList } from '../components';
 import { defineNameStore } from '../store';
 
 interface Props {
@@ -24,7 +25,6 @@ export const DefineName: React.FunctionComponent<Props> = memo(
     const ref = useRef<HTMLInputElement>(null);
 
     const [value, setValue] = useState(displayName);
-    const [active, setActive] = useState(false);
     const defineNameList = useSyncExternalStore(
       defineNameStore.subscribe,
       defineNameStore.getSnapshot,
@@ -40,64 +40,65 @@ export const DefineName: React.FunctionComponent<Props> = memo(
       setValue(displayName);
     }, [displayName]);
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-      event.stopPropagation();
-      if (event.key === 'Enter') {
-        const t = event.currentTarget.value.trim().toLowerCase();
-        if (!t) {
-          return;
+    const handleKeyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLInputElement>) => {
+        event.stopPropagation();
+        if (event.key === 'Enter') {
+          const t = event.currentTarget.value.trim().toLowerCase();
+          ref.current?.blur();
+          if (!t) {
+            setValue(displayName);
+            return;
+          }
+          const range = controller.checkDefineName(t);
+          if (range) {
+            setValue(displayName);
+            scrollToView(controller, range);
+            return;
+          }
+          const r = parseReference(t, (sheetName: string) => {
+            const list = controller.getSheetList();
+            const item = list.find((v) => v.name === sheetName);
+            return item?.sheetId || '';
+          });
+          const sheetInfo = controller.getSheetInfo(
+            r?.sheetId || controller.getCurrentSheetId(),
+          )!;
+          if (r && r.col < sheetInfo.colCount && r.row < sheetInfo.rowCount) {
+            r.sheetId = r.sheetId || controller.getCurrentSheetId();
+            setValue(displayName);
+            scrollToView(controller, r);
+            return;
+          }
+          if (/^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(t) && t.length <= 255) {
+            controller.setDefineName(controller.getActiveCell(), t);
+          } else {
+            setValue(displayName);
+          }
         }
-        ref.current?.blur();
-        const range = controller.checkDefineName(t);
-        if (range) {
-          setValue(displayName);
-          scrollToView(controller, range);
-          return;
-        }
-        const r = parseReference(t, (sheetName: string) => {
-          const list = controller.getSheetList();
-          const item = list.find((v) => v.name === sheetName);
-          return item?.sheetId || '';
-        });
-        const sheetInfo = controller.getSheetInfo(
-          r?.sheetId || controller.getCurrentSheetId(),
-        )!;
-        if (r && r.col < sheetInfo.colCount && r.row < sheetInfo.rowCount) {
-          r.sheetId = r.sheetId || controller.getCurrentSheetId();
-          setValue(displayName);
-          scrollToView(controller, r);
-          return;
-        }
-        if (/^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(t) && t.length <= 255) {
-          controller.setDefineName(controller.getActiveCell(), t);
-        } else {
-          setValue(displayName);
-        }
-      }
-    };
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      setValue(event.target.value);
-    };
-    const handleClick = () => {
-      setActive((v) => !v);
-    };
-    const handleSelect = (value: string) => {
-      setActive(false);
-      if (!value) {
-        return;
-      }
+      },
+      [displayName],
+    );
+    const handleChange = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(event.target.value);
+      },
+      [],
+    );
+    const handleSelect = useCallback((value: string) => {
       const range = controller.checkDefineName(value);
       if (!range) {
         return;
       }
       scrollToView(controller, range);
-    };
+    }, []);
     return (
-      <div
-        className={classnames(styles['formula-bar-name'], {
-          [styles.active]: active,
-        })}
-        data-testid="formula-bar-name"
+      <SelectList
+        testId="formula-bar-name"
+        value={defineName}
+        data={popupList}
+        onChange={handleSelect}
+        className={styles['defined-name']}
       >
         <input
           value={value}
@@ -105,24 +106,12 @@ export const DefineName: React.FunctionComponent<Props> = memo(
           spellCheck
           type="text"
           onChange={handleChange}
-          className={styles['formula-bar-name-editor']}
+          className={styles['defined-name-editor']}
           onKeyDown={handleKeyDown}
           maxLength={MAX_NAME_LENGTH * 8}
           data-testid="formula-bar-name-input"
         />
-        <Button
-          className={styles['formula-bar-name-select']}
-          onClick={handleClick}
-        >
-          <Icon name="down"></Icon>
-        </Button>
-        <SelectPopup
-          active={active}
-          value={defineName}
-          data={popupList}
-          onChange={handleSelect}
-        />
-      </div>
+      </SelectList>
     );
   },
 );

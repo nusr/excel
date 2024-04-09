@@ -12,7 +12,6 @@ import { saveAs } from '@/util';
 interface Props {
   controller: IController;
 }
-const menuStyle = { width: 150, flex: 1 };
 
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
   ({ controller }) => {
@@ -50,7 +49,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
         <div className={styles['menubar-menu']}>
           <Menu
             menuButton={<Button>{$('menu')}</Button>}
-            style={menuStyle}
+            className={styles.menu}
             testId="menubar-excel"
           >
             <MenuItem testId="menubar-import-xlsx">
@@ -65,7 +64,11 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
               />
               <label htmlFor="import_xlsx">{$('import-xlsx')}</label>
             </MenuItem>
-            <SubMenu label="Export" style={menuStyle} testId="menubar-export">
+            <SubMenu
+              label="Export"
+              className={styles.menu}
+              testId="menubar-export"
+            >
               <MenuItem onClick={handleExportXLSX} testId="menubar-export-xlsx">
                 {$('export-xlsx')}
               </MenuItem>

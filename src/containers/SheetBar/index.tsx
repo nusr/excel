@@ -10,7 +10,6 @@ import {
   classnames,
   DEFAULT_POSITION,
   MAX_NAME_LENGTH,
-  sizeConfig,
   SHEET_ITEM_TEST_ID_PREFIX,
 } from '@/util';
 import { Button, Icon, SelectPopup } from '../components';
@@ -22,8 +21,6 @@ import { sheetListStore, coreStore } from '@/containers/store';
 interface Props {
   controller: IController;
 }
-
-const menuStyle = { width: 200, left: sizeConfig.largePadding };
 
 export const SheetBarContainer: FunctionComponent<Props> = memo(
   ({ controller }) => {
@@ -47,34 +44,30 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
     );
     const [menuPosition, setMenuPosition] = useState(DEFAULT_POSITION);
     const [editing, setEditing] = useState(false);
-
-    const setSheetName = (sheetName: string) => {
-      controller.renameSheet(sheetName);
-      setEditing(false);
-    };
-    const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      const pos = (event.clientX || 0) - 30;
-      setMenuPosition(pos);
-      return false;
-    };
+    const handleContextMenu = useCallback(
+      (event: React.MouseEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        const pos = (event.clientX || 0) - 30;
+        setMenuPosition(pos);
+        return false;
+      },
+      [],
+    );
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLInputElement>) => {
         event.stopPropagation();
         if (event.key === 'Enter') {
           const t = event.currentTarget.value;
+          setEditing(false);
           if (!t) {
             return;
           }
-          setSheetName(t);
+          controller.renameSheet(t);
         }
       },
       [],
     );
     const handleChange = useCallback((value: string) => {
-      if (!value) {
-        return;
-      }
       setPopupActive(false);
       controller.setCurrentSheetId(value);
     }, []);
@@ -106,9 +99,9 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
               onChange={handleChange}
               active
               position="top"
-              style={menuStyle}
               value={currentSheetId}
               testId="sheet-bar-select-sheet-popup"
+              className={styles['select-popup']}
             />
           )}
         </div>

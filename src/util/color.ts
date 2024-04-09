@@ -124,11 +124,6 @@ function padHex(color: string) {
     const t = `${color}ff`;
     return t.toUpperCase();
   }
-  if (color.length === 5) {
-    const [, a, b, c, d] = color;
-    const t = `#${a}${a}${b}${b}${c}${c}${d}${d}`;
-    return t.toUpperCase();
-  }
   if (color.length === 4) {
     const [, a, b, c] = color;
     const t = `#${a}${a}${b}${b}${c}${c}ff`;
@@ -137,9 +132,6 @@ function padHex(color: string) {
   return '';
 }
 export function convertColorToHex(color: string): string {
-  if (!color) {
-    return '';
-  }
   if (colorMap[color]) {
     return padHex(colorMap[color]);
   }

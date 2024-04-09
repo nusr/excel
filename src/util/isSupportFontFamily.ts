@@ -8,7 +8,13 @@ function createElement(font: string) {
   s.style.fontSize = '72px';
   s.innerHTML = 'mmmmmmmmmmlli';
   s.style.fontFamily = font;
-  return s;
+  document.body.appendChild(s);
+  const { offsetWidth, offsetHeight } = s;
+  document.body.removeChild(s);
+  return {
+    offsetHeight,
+    offsetWidth,
+  };
 }
 
 export function SupportFontFamilyFactory() {
@@ -16,22 +22,18 @@ export function SupportFontFamilyFactory() {
   const defaultWidth: Record<string, number> = {};
   const defaultHeight: Record<string, number> = {};
   for (const item of baseFonts) {
-    const s = createElement(item);
-    document.body.appendChild(s);
-    defaultWidth[item] = s.offsetWidth;
-    defaultHeight[item] = s.offsetHeight;
-    document.body.removeChild(s);
+    const { offsetWidth, offsetHeight } = createElement(item);
+    defaultWidth[item] = offsetWidth;
+    defaultHeight[item] = offsetHeight;
   }
 
   function detect(font: string): boolean {
     for (const item of baseFonts) {
-      const s = createElement(font + ',' + item);
-      document.body.appendChild(s);
-      const matched =
-        s.offsetWidth !== defaultWidth[item] ||
-        s.offsetHeight !== defaultHeight[item];
-      document.body.removeChild(s);
-      if (matched) {
+      const { offsetWidth, offsetHeight } = createElement(font + ',' + item);
+      if (
+        offsetWidth !== defaultWidth[item] ||
+        offsetHeight !== defaultHeight[item]
+      ) {
         return true;
       }
     }
@@ -44,7 +46,10 @@ export function SupportFontFamilyFactory() {
 const isSupportFontFamily = SupportFontFamilyFactory();
 export { isSupportFontFamily };
 
-export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
+export function initFontFamilyList(
+  check = isSupportFontFamily,
+  fontList = FONT_FAMILY_LIST,
+): OptionItem[] {
   const cacheFont = localStorage.getItem(LOCAL_FONT_KEY);
   if (cacheFont) {
     const list = JSON.parse(cacheFont) as string[];
@@ -54,7 +59,7 @@ export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
   }
   const list: OptionItem[] = [];
   for (const item of fontList) {
-    if (isSupportFontFamily(item)) {
+    if (check(item)) {
       list.push({
         label: item,
         value: item,
@@ -66,7 +71,7 @@ export function initFontFamilyList(fontList = FONT_FAMILY_LIST): OptionItem[] {
   if (typeof window.queryLocalFonts === 'function') {
     list.push({
       value: QUERY_ALL_LOCAL_FONT,
-      label: '---> ' + $('get-all-installed-fonts'),
+      label: $('get-all-installed-fonts'),
       disabled: false,
     });
   }

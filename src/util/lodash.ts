@@ -1,6 +1,6 @@
 type Params = any[];
 
-export function throttle(fn: (...params: Params) => void, wait: number = 500) {
+export function throttle(fn: (...params: Params) => void, wait: number) {
   let check = false;
   let lastArgs: Params | null = null;
   return function (...args: Params) {

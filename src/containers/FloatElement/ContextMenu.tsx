@@ -140,7 +140,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         visible: true,
         children: (
           <Select
-            style={{ width: '100%' }}
+            className={styles['chart-type-select']}
             defaultValue={newChartType}
             data={CHART_TYPE_LIST.map((v) => ({ ...v, disabled: false }))}
             onChange={(v) => (newChartType = String(v) as ChartType)}

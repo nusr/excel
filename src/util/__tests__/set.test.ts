@@ -1,38 +1,22 @@
-import { mainDomSet } from '..';
+import { canvasSizeSet } from '..';
 
-describe.skip('set.test.ts', () => {
-  describe('mainDomSet', () => {
-    test('getDomRect empty', () => {
-      expect(mainDomSet.getDomRect()).toEqual({
+describe('set.test.ts', () => {
+  describe('canvasSizeSet', () => {
+    test('get', () => {
+      expect(canvasSizeSet.get()).toEqual({
         top: 0,
         left: 0,
         width: 0,
         height: 0,
       });
     });
-    test('getDomRect', () => {
-      const canvas = {
-        parentElement: {
-          clientWidth: 218,
-          clientHeight: 218,
-          getBoundingClientRect() {
-            return {
-              top: 100,
-              left: 100,
-              width: 200,
-              height: 200,
-            };
-          },
-        },
-      } as HTMLCanvasElement;
-      mainDomSet.merge({
-        canvas,
-      });
-      expect(mainDomSet.getDomRect()).toEqual({
-        top: 100,
-        left: 100,
-        width: 200,
-        height: 200,
+    test('set', () => {
+      canvasSizeSet.set({ top: 10, left: 20, width: 30, height: 40 });
+      expect(canvasSizeSet.get()).toEqual({
+        top: 10,
+        left: 20,
+        width: 30,
+        height: 40,
       });
     });
   });

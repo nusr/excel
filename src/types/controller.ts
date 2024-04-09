@@ -27,7 +27,7 @@ export type ClipboardType = 'text/plain' | 'text/html';
 
 export interface MainDom {
   input?: HTMLInputElement;
-  canvas?: HTMLCanvasElement;
+  // canvas?: HTMLCanvasElement;
 }
 
 export type ActiveRange = {

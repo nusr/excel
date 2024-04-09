@@ -7,8 +7,9 @@ import {
   convertResultTypeToString,
   eventEmitter,
   initFontFamilyList,
-  mainDomSet,
   reactLog,
+  sizeConfig,
+  canvasSizeSet,
 } from '@/util';
 import {
   coreStore,
@@ -80,7 +81,7 @@ function getChartData(
 }
 
 function updateActiveCell(controller: IController) {
-  const { top } = mainDomSet.getDomRect();
+  const { top } = canvasSizeSet.get();
   const { range: activeCell, isMerged } = controller.getActiveRange();
   const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
   const cell = controller.getCell(activeCell);
@@ -184,7 +185,7 @@ const handleStateChange = (
 
   if (changeSet.has('scroll')) {
     const scroll = controller.getScroll();
-    const canvasSize = mainDomSet.getDomRect();
+    const canvasSize = canvasSizeSet.get();
     const showBottomBar = scroll.scrollTop / canvasSize.height >= 0.91;
     scrollStore.mergeState({
       scrollLeft: scroll.scrollLeft,
@@ -206,7 +207,7 @@ const handleStateChange = (
     changeSet.has('scroll')
   ) {
     const scroll = controller.getScroll();
-    const canvasSize = mainDomSet.getDomRect();
+    const canvasSize = canvasSizeSet.get();
     const minX = scroll.left;
     const minY = scroll.top;
     const maxX = canvasSize.width + minX;
@@ -255,6 +256,21 @@ const handleStateChange = (
     }, 0);
   }
 };
+
+function computeCanvasSize(canvas: HTMLCanvasElement) {
+  const scrollbarSize = parseInt(sizeConfig.scrollBarSize, 10);
+  const dom = canvas.parentElement!;
+  const size = dom.getBoundingClientRect();
+  const result = {
+    top: size.top,
+    left: size.left,
+    width: dom.clientWidth - scrollbarSize,
+    height: dom.clientHeight - scrollbarSize,
+  };
+  canvasSizeSet.set(result);
+  return result;
+}
+
 export function initCanvas(
   controller: IController,
   canvas: HTMLCanvasElement,
@@ -264,6 +280,7 @@ export function initCanvas(
   const content = new Content(controller, createCanvas());
   const mainCanvas = new MainCanvas(controller, canvas, content);
   const resize = () => {
+    computeCanvasSize(canvas);
     mainCanvas.resize();
     mainCanvas.render({ changeSet: new Set<ChangeEventType>(['row']) });
   };
@@ -292,6 +309,7 @@ export function initCanvas(
   ]);
 
   handleStateChange(changeSet, controller);
+  computeCanvasSize(canvas);
   mainCanvas.resize();
   mainCanvas.render({ changeSet });
 

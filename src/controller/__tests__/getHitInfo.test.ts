@@ -20,7 +20,22 @@ describe('getHitInfo.test.ts', () => {
     expect(range!.row).toEqual(1);
     expect(range!.col).toEqual(1);
   });
-  test('null', () => {
+  test('not found sheetId', () => {
+    const controller = new Controller(new Model(), {
+      async copyOrCut() {
+        return '';
+      },
+      async paste() {
+        return {
+          [HTML_FORMAT]: '',
+          [PLAIN_FORMAT]: '',
+        };
+      },
+    });
+    const range = getHitInfo(controller, 10, 10);
+    expect(range).toBeNull();
+  });
+  test('x is negative', () => {
     const controller = new Controller(new Model(), {
       async copyOrCut() {
         return '';
@@ -36,7 +51,7 @@ describe('getHitInfo.test.ts', () => {
     const range = getHitInfo(controller, -1, -1);
     expect(range).toBeNull();
   });
-  test('null', () => {
+  test('over threshold', () => {
     const controller = new Controller(new Model(), {
       async copyOrCut() {
         return '';

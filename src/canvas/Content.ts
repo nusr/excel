@@ -1,4 +1,4 @@
-import { npx, dpr, canvasLog, headerSizeSet, mainDomSet } from '@/util';
+import { npx, dpr, canvasLog, headerSizeSet, canvasSizeSet } from '@/util';
 import { resizeCanvas, renderCellData } from './util';
 import { ContentView, IController } from '@/types';
 
@@ -18,7 +18,7 @@ export class Content implements ContentView {
     return this.ctx.canvas;
   }
   resize() {
-    const { width, height } = mainDomSet.getDomRect();
+    const { width, height } = canvasSizeSet.get();
     resizeCanvas(this.ctx.canvas, width, height);
   }
   render() {
@@ -49,13 +49,13 @@ export class Content implements ContentView {
   }
 
   private clear() {
-    const { width, height } = mainDomSet.getDomRect();
+    const { width, height } = canvasSizeSet.get();
     this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
 
   private renderContent() {
     const { controller, ctx } = this;
-    const { width, height } = mainDomSet.getDomRect();
+    const { width, height } = canvasSizeSet.get();
     const headerSize = headerSizeSet.get();
     const { row, col } = controller.getScroll();
 

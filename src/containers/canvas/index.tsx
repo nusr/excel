@@ -4,7 +4,7 @@ import {
   getHitInfo,
   DEFAULT_POSITION,
   headerSizeSet,
-  mainDomSet,
+  canvasSizeSet,
 } from '@/util';
 import styles from './index.module.css';
 import { coreStore } from '@/containers/store';
@@ -39,9 +39,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     if (!ref.current) {
       return;
     }
-    const canvas = ref.current!;
-    mainDomSet.merge({ canvas });
-    const fn = initCanvas(controller, canvas);
+    const fn = initCanvas(controller, ref.current);
     return () => {
       fn();
     };
@@ -64,7 +62,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       return;
     }
     const headerSize = headerSizeSet.get();
-    const rect = mainDomSet.getDomRect();
+    const rect = canvasSizeSet.get();
     const { clientX = 0, clientY = 0 } = event;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
@@ -119,7 +117,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       return;
     }
     const headerSize = headerSizeSet.get();
-    const canvasRect = mainDomSet.getDomRect();
+    const canvasRect = canvasSizeSet.get();
     const { timeStamp, clientX = 0, clientY = 0 } = event;
     const x = clientX - canvasRect.left;
     const y = clientY - canvasRect.top;

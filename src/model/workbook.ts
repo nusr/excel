@@ -192,7 +192,7 @@ export class Workbook implements IWorkbook {
     return { ...item };
   }
   setCurrentSheetId(newSheetId: string): void {
-    if (!this.workbook[newSheetId]) {
+    if (!newSheetId || !this.workbook[newSheetId]) {
       return;
     }
     if (this.currentSheetId !== newSheetId) {

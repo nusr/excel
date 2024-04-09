@@ -67,7 +67,7 @@ export function splitToWords(str: string): string[] {
     return [];
   }
   // unicode
-  if (!Intl || !Intl.Segmenter) {
+  if (typeof Intl === 'undefined' || typeof Intl.Segmenter !== 'function') {
     // firefox
     return [...str];
   }
@@ -83,20 +83,11 @@ export function convertResultTypeToString(value: any): string {
     }
     return value;
   }
-  if (typeof value === 'bigint') {
-    return '' + value;
-  }
   if (typeof value === 'number') {
     return '' + value;
   }
   if (typeof value === 'boolean') {
     return value ? 'TRUE' : 'FALSE';
-  }
-  if (value instanceof Date) {
-    return '' + value.getTime();
-  }
-  if (typeof value === 'object' && value !== null) {
-    return JSON.stringify(value);
   }
 
   return '';
@@ -115,10 +106,6 @@ export function convertStringToResultType(value: any): ResultType {
   if (typeof value === 'boolean') {
     return value;
   }
-  if (typeof value === 'object' && value !== null) {
-    return JSON.stringify(value);
-  }
-
   return value;
 }
 
@@ -134,8 +121,8 @@ export function stringToCoordinate(key: string): Coordinate {
   const r = parseInt(row, 10);
   const c = parseInt(col, 10);
   return {
-    row: isNaN(r) ? 0 : r,
-    col: isNaN(c) ? 0 : c,
+    row: isNaN(r) ? -1 : r,
+    col: isNaN(c) ? -1 : c,
   };
 }
 
@@ -147,10 +134,6 @@ export function getCustomWidthOrHeightKey(
 }
 
 export function generateUUID() {
-  if (typeof crypto === 'object' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-
   let d = new Date().getTime();
 
   const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(

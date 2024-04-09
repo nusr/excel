@@ -1,6 +1,5 @@
 import React, {
   FunctionComponent,
-  CSSProperties,
   useState,
   memo,
   useCallback,
@@ -14,8 +13,8 @@ import { $ } from '@/i18n';
 
 export interface ColorPickerProps {
   color: string;
-  style?: CSSProperties;
   onChange: (value: string) => void;
+  className?: string;
   position?: 'top' | 'bottom';
   testId?: string;
 }
@@ -24,12 +23,12 @@ export const ColorPicker: FunctionComponent<
   React.PropsWithChildren<ColorPickerProps>
 > = memo((props) => {
   const {
-    style,
     onChange,
     children,
     color,
     position = 'bottom',
-    testId = 'color-picker',
+    testId,
+    className,
   } = props;
   const [visible, setVisible] = useState(false);
   const [ref] = useClickOutside(() => {
@@ -51,9 +50,9 @@ export const ColorPicker: FunctionComponent<
     <div
       className={classnames(
         styles['color-picker'],
+        className,
         position === 'top' ? styles['top'] : '',
       )}
-      style={style}
       ref={ref}
     >
       <div
