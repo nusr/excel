@@ -62,7 +62,7 @@ function parseCell(
   } else {
     col = columnNameToInt(colText);
   }
-  if (row === -1 || col === -1) {
+  if (row < 0 || col < 0) {
     return null;
   }
   const range = new Range(

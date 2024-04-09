@@ -24,6 +24,7 @@ import {
   convertToCssString,
   containRange,
   parseHTML,
+  parseText,
   generateUUID,
   headerSizeSet,
   ROW_TITLE_HEIGHT,
@@ -383,35 +384,12 @@ export class Controller implements IController {
     this.emitChange();
   }
   private parseText(text: string) {
-    let list: string[][];
-    if (text.indexOf('\r\n') > -1) {
-      list = text
-        .split('\r\n')
-        .map((item) => item)
-        .map((item) => item.split('\t'));
-    } else {
-      list = text
-        .split('\n')
-        .map((item) => item)
-        .map((item) => item.split('\t'));
-    }
-    if (list[0].length !== list[list.length - 1].length) {
-      // delete last empty cell
-      const last = list[list.length - 1];
-      if (last.length === 1 && !last[0]) {
-        list.pop();
-      }
-    }
-    const rowCount = list.length;
-    let colCount = 0;
-    for (const item of list) {
-      if (item.length > colCount) {
-        colCount = item.length;
-      }
-    }
+    const textList = parseText(text);
+    const rowCount = textList.length;
     const activeCell = this.getActiveCell();
+    const colCount = Math.max(...textList.map((v) => v.length));
     return {
-      value: list,
+      value: textList,
       style: [],
       range: {
         ...activeCell,
@@ -556,7 +534,6 @@ export class Controller implements IController {
       const result = this.parseHTML(html);
       if (result.value.length > 0) {
         activeCell = result.range;
-
         this.model.setCell(result.value, result.style, result.range);
         check = true;
       }
@@ -571,7 +548,6 @@ export class Controller implements IController {
     }
     if (!check && this.copyRanges.length > 0) {
       const [range] = this.copyRanges.slice();
-
       activeCell = this.model.pasteRange(range, this.isCut);
     }
     if (this.isCut) {

@@ -1,7 +1,6 @@
 import { App } from '@/containers';
 import * as React from 'react';
 import {
-  cleanup,
   render,
   screen,
   act,
@@ -12,9 +11,9 @@ import '@testing-library/jest-dom';
 import { type } from './util';
 import { initControllerForTest } from '@/controller';
 import { EUnderLine } from '@/types';
+import './global.mock';
 
 describe('Toolbar.test.ts', () => {
-  afterEach(cleanup);
   describe('toolbar', () => {
     test('normal', () => {
       act(() => {
@@ -414,6 +413,52 @@ describe('Toolbar.test.ts', () => {
       expect(controller.getCell(controller.getActiveCell())?.style).toEqual({
         fontColor: '#bf9696',
       });
+    });
+
+    test('hue', () => {
+      const controller = initControllerForTest();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      fireEvent.click(screen.getByTestId('toolbar-font-color'));
+
+      fireEvent.pointerDown(screen.getByTestId('toolbar-font-color-hue'), {
+        buttons: 1,
+        clientX: 20,
+        clientY: 20,
+      });
+      fireEvent.pointerDown(
+        screen.getByTestId('toolbar-font-color-saturation'),
+        { buttons: 1, clientX: 20, clientY: 20 },
+      );
+      fireEvent.pointerMove(document.body, {
+        buttons: 1,
+        clientX: 50,
+        clientY: 50,
+      });
+      fireEvent.pointerUp(document.body);
+
+      expect(controller.getCell(controller.getActiveCell())?.style).toEqual({
+        fontColor: '#b4bf96',
+      });
+    });
+    test('reset', () => {
+      const controller = initControllerForTest();
+      act(() => {
+        render(<App controller={controller} />);
+      });
+      fireEvent.click(screen.getByTestId('toolbar-font-color'));
+
+      const dom = screen.getByTestId('toolbar-font-color-list');
+      dom.setAttribute('data-value', '#B2B2B2');
+      fireEvent.click(dom);
+      expect(controller.getCell(controller.getActiveCell())?.style).toEqual(
+        { fontColor: '#B2B2B2' },
+      );
+      fireEvent.click(screen.getByTestId('toolbar-font-color-reset'));
+      expect(controller.getCell(controller.getActiveCell())?.style).toEqual(
+        { fontColor: '' },
+      );
     });
   });
 });

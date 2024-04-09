@@ -19,18 +19,6 @@ export class EventEmitter<
     this.event[name].push(callback);
     return () => this.off(name, callback);
   }
-  emitAsync<T extends keyof EventType>(name: T, data: EventType[T]): void {
-    // @ts-ignore
-    const list = this.event[name];
-    if (!list || list.length <= 0) {
-      return;
-    }
-    for (const item of list) {
-      window.requestAnimationFrame(() => {
-        item(data);
-      });
-    }
-  }
   emit<T extends keyof EventType>(name: T, data: EventType[T]): void {
     // @ts-ignore
     const list = this.event[name];
@@ -62,9 +50,6 @@ export class EventEmitter<
       // @ts-ignore
       delete this.event[name];
     }
-  }
-  offAll(): void {
-    this.event = {};
   }
   once<T extends keyof EventType>(
     name: T,

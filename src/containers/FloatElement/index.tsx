@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useRef,
   useMemo,
+  useCallback,
 } from 'react';
 import { IController, IWindowSize } from '@/types';
 import { floatElementStore, coreStore } from '@/containers/store';
@@ -102,18 +103,6 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
           return newData;
         });
       };
-      const updateRotate = (event: PointerEvent) => {
-        const deltaX = event.clientX - state.current.moveStartX;
-        const deltaY = event.clientY - state.current.moveStartY;
-        const imageAngle = (Math.atan2(deltaY, deltaX) * 180) / Math.PI;
-        setPosition((old) => {
-          const newData = {
-            ...old,
-            imageAngle,
-          };
-          return newData;
-        });
-      };
       const handlePointerUp = (event: PointerEvent) => {
         event.stopPropagation();
         event.preventDefault();
@@ -165,7 +154,16 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
         event.stopPropagation();
         event.preventDefault();
         if (state.current.resizePosition === ResizePosition.rotate) {
-          updateRotate(event);
+          const deltaX = event.clientX - state.current.moveStartX;
+          const deltaY = event.clientY - state.current.moveStartY;
+          const imageAngle = (Math.atan2(deltaY, deltaX) * 180) / Math.PI;
+          setPosition((old) => {
+            const newData = {
+              ...old,
+              imageAngle,
+            };
+            return newData;
+          });
           return;
         } else if (state.current.resizePosition === ResizePosition.active) {
           const deltaX = Math.round(event.clientX - state.current.moveStartX);
@@ -202,23 +200,36 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
 
     useEffect(() => toggleEvents, [toggleEvents]);
 
-    const handleResizePointerDown = (
-      event: React.PointerEvent<HTMLDivElement>,
-    ) => {
-      event.stopPropagation();
-      event.preventDefault();
-      if (event.buttons <= 0) {
-        return;
-      }
+    const handleResizePointerDown = useCallback(
+      (event: React.PointerEvent<HTMLDivElement>) => {
+        event.stopPropagation();
+        event.preventDefault();
+        if (event.buttons <= 0) {
+          return;
+        }
 
-      const p = event.currentTarget.dataset.position || '';
-      if (!p) {
-        return;
-      }
-      state.current.resizePosition = p;
-      state.current.moveStartX = event.clientX;
-      state.current.moveStartY = event.clientY;
-    };
+        const p = event.currentTarget.dataset.position || '';
+        if (!p) {
+          return;
+        }
+        state.current.resizePosition = p;
+        state.current.moveStartX = event.clientX;
+        state.current.moveStartY = event.clientY;
+      },
+      [],
+    );
+    const resetResize = useCallback((size: IWindowSize) => {
+      setPosition((old) => ({ ...old, ...size }));
+    }, []);
+    const handleMaskPointerDown = useCallback(() => {
+      state.current = {
+        ...INITIAL_STATE,
+        position: { ...INITIAL_STATE.position },
+      };
+      coreStore.mergeState({ activeUuid: '' });
+      controller.setFloatElementUuid('');
+      toggleEvents(false);
+    }, [toggleEvents]);
     return (
       <Fragment>
         <div
@@ -226,15 +237,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
             [styles['active']]: !!activeUuid,
           })}
           data-testid="float-element-mask"
-          onPointerDown={() => {
-            state.current = {
-              ...INITIAL_STATE,
-              position: { ...INITIAL_STATE.position },
-            };
-            coreStore.mergeState({ activeUuid: '' });
-            controller.setFloatElementUuid('');
-            toggleEvents(false);
-          }}
+          onPointerDown={handleMaskPointerDown}
         />
         {floatElementList.map((v) => {
           const isActive = v.uuid === activeUuid;
@@ -248,9 +251,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
               {...props}
               active={isActive}
               controller={controller}
-              resetResize={(size: IWindowSize) =>
-                setPosition((old) => ({ ...old, ...size }))
-              }
+              resetResize={resetResize}
               pointerDown={(event) => {
                 event.stopPropagation();
                 event.preventDefault();

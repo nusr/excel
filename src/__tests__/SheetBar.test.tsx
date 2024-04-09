@@ -1,18 +1,11 @@
 import { App } from '@/containers';
 import { initControllerForTest } from '@/controller';
 import * as React from 'react';
-import {
-  cleanup,
-  render,
-  screen,
-  fireEvent,
-  act,
-} from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import './global.mock';
 
 describe('SheetBar.test.ts', () => {
-  afterEach(cleanup);
-
   describe('sheet bar', () => {
     test('normal', () => {
       act(() => {

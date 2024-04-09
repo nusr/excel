@@ -2,7 +2,6 @@ import '@testing-library/jest-dom';
 import { App } from '@/containers';
 import * as React from 'react';
 import {
-  cleanup,
   render,
   fireEvent,
   act,
@@ -11,9 +10,9 @@ import {
 } from '@testing-library/react';
 import { isMac } from '@/util';
 import { initControllerForTest } from '@/controller';
+import './global.mock';
 
 describe('shortcut.test.tsx', () => {
-  afterEach(cleanup);
   describe('Enter', () => {
     test('normal', async () => {
       render(<App controller={initControllerForTest()} />);

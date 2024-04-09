@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import styles from './FloatElement.module.css';
 import { FloatElementItem } from '@/containers/store';
 import { FloatElementContextMenu } from './ContextMenu';
@@ -35,18 +35,20 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
       left: DEFAULT_POSITION,
     });
 
-    const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      setContextMenuPosition({ top: event.clientY, left: event.clientX });
-      return false;
-    };
-    const hideContextMenu = () => {
+    const handleContextMenu = useCallback(
+      (event: React.MouseEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setContextMenuPosition({ top: event.clientY, left: event.clientX });
+      },
+      [],
+    );
+    const hideContextMenu = useCallback(() => {
       setContextMenuPosition({
         top: DEFAULT_POSITION,
         left: DEFAULT_POSITION,
       });
-    };
+    }, []);
 
     let children = null;
     if (type === 'floating-picture') {

@@ -9,10 +9,6 @@ class Debug {
     NameSpaceType,
     string
   >();
-  static readonly enableMap: Map<NameSpaceType, boolean> = new Map<
-    NameSpaceType,
-    boolean
-  >([]);
   constructor(namespace: NameSpaceType) {
     this.namespace = namespace;
   }
@@ -34,7 +30,7 @@ class Debug {
     return COLOR_PICKER_COLOR_LIST[index];
   };
   enable() {
-    return this.checkEnable() && Debug.enableMap.get(this.namespace) !== false;
+    return this.checkEnable();
   }
   checkEnable(storage = window.localStorage) {
     return storage.getItem('debug') === '*';
@@ -44,11 +40,9 @@ class Debug {
       Debug.colorMap.set(this.namespace, this.getRandomColor());
     }
   }
-  static disable(key: NameSpaceType) {
-    Debug.enableMap.set(key, false);
-  }
 }
 
 export const controllerLog = new Debug('controller').init();
 export const canvasLog = new Debug('canvas').init();
 export const modelLog = new Debug('model').init();
+export const reactLog = new Debug('react').init();

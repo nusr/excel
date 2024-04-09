@@ -1,7 +1,6 @@
 import { App } from '@/containers';
 import * as React from 'react';
 import {
-  cleanup,
   render,
   screen,
   fireEvent,
@@ -11,9 +10,9 @@ import {
 import '@testing-library/jest-dom';
 import { type, extractDataFromTransform } from './util';
 import { initControllerForTest } from '@/controller';
+import './global.mock';
 
 describe('FloatElement.test.ts', () => {
-  afterEach(cleanup);
   describe('float element', () => {
     test('throw error', () => {
       act(() => {

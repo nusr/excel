@@ -1,7 +1,6 @@
 import { App } from '@/containers';
 import * as React from 'react';
 import {
-  cleanup,
   render,
   screen,
   fireEvent,
@@ -12,6 +11,7 @@ import '@testing-library/jest-dom';
 import { type } from './util';
 import { initControllerForTest } from '@/controller';
 import { saveAs } from '@/util';
+import './global.mock';
 
 jest.mock('@/util', () => {
   const originalModule = jest.requireActual('@/util');
@@ -23,7 +23,6 @@ jest.mock('@/util', () => {
 });
 
 describe('Export.test.ts', () => {
-  afterEach(cleanup);
   describe('download chart', () => {
     test('ok', async () => {
       act(() => {

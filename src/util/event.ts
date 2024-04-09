@@ -8,11 +8,6 @@ type HitInfoResult = {
   marginY: number;
 };
 
-export function stopPropagation(event: Event) {
-  event.preventDefault();
-  event.stopPropagation();
-}
-
 export function getHitInfo(
   controller: IController,
   x: number = 0,

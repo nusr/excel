@@ -20,4 +20,36 @@ describe('getHitInfo.test.ts', () => {
     expect(range!.row).toEqual(1);
     expect(range!.col).toEqual(1);
   });
+  test('null', () => {
+    const controller = new Controller(new Model(), {
+      async copyOrCut() {
+        return '';
+      },
+      async paste() {
+        return {
+          [HTML_FORMAT]: '',
+          [PLAIN_FORMAT]: '',
+        };
+      },
+    });
+    controller.addSheet();
+    const range = getHitInfo(controller, -1, -1);
+    expect(range).toBeNull();
+  });
+  test('null', () => {
+    const controller = new Controller(new Model(), {
+      async copyOrCut() {
+        return '';
+      },
+      async paste() {
+        return {
+          [HTML_FORMAT]: '',
+          [PLAIN_FORMAT]: '',
+        };
+      },
+    });
+    controller.addSheet();
+    const range = getHitInfo(controller, 100 * 60, 100 * 60);
+    expect(range).toBeNull();
+  });
 });

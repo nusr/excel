@@ -20,8 +20,7 @@ class BaseSet<T extends Record<string, any>> {
 class MainDomSet extends BaseSet<MainDom> {
   getDomRect(): CanvasOverlayPosition {
     const canvas = this.get().canvas;
-
-    if (!canvas) {
+    if (!canvas || !canvas.parentElement) {
       return {
         top: 0,
         left: 0,
@@ -30,7 +29,7 @@ class MainDomSet extends BaseSet<MainDom> {
       };
     }
     const scrollbarSize = parseInt(sizeConfig.scrollBarSize, 10);
-    const dom = canvas.parentElement!;
+    const dom = canvas.parentElement;
     const size = dom.getBoundingClientRect();
     return {
       top: size.top,

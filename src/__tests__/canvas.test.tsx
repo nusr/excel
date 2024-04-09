@@ -1,7 +1,6 @@
 import { App } from '@/containers';
 import * as React from 'react';
 import {
-  cleanup,
   render,
   screen,
   fireEvent,
@@ -12,10 +11,9 @@ import { isMac } from '@/util';
 import '@testing-library/jest-dom';
 import { type, extractDataFromTransform } from './util';
 import { initControllerForTest } from '@/controller';
+import './global.mock';
 
 describe('Canvas.test.ts', () => {
-  afterEach(cleanup);
-
   describe('canvas', () => {
     test('normal', () => {
       act(() => {

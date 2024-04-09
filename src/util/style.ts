@@ -11,7 +11,7 @@ import { npx } from './dpr';
 import { EUnderLine, StyleType, ResultType } from '@/types';
 import { DEFAULT_FONT_SIZE, MUST_FONT_FAMILY } from './constant';
 import { camelCase } from './lodash';
-import { isNumber } from './util';
+import { isNumber, convertStringToResultType } from './util';
 
 export const FONT_SIZE_LIST = [
   6,
@@ -119,7 +119,7 @@ function pickCSSStyle(style: Partial<CSSStyleDeclaration>): Partial<StyleType> {
   if (fontStyle === 'italic') {
     result.isItalic = true;
   }
-  if (fontWeight && ['700', '800', '900', 'bold'].includes(fontWeight)) {
+  if (fontWeight && [700, 800, 900, 'bold'].includes(fontWeight)) {
     result.isBold = true;
   }
   if (
@@ -203,6 +203,33 @@ function convertToCssStyleDeclaration(cssStr: string) {
   return matches;
 }
 
+export function parseText(text: string) {
+  let list: string[];
+  if (text.indexOf('\r\n') > -1) {
+    list = text.split('\r\n');
+  } else {
+    list = text.split('\n');
+  }
+  const result = list
+    .map((v) => v.trim())
+    .filter((v) => v)
+    .map((v) =>
+      v
+        .split('\t')
+        .map((v) => v.trim())
+        .filter((v) => v),
+    );
+  const textList: Array<Array<ResultType>> = [];
+  for (const item of result) {
+    if (item.length === 0) {
+      continue;
+    }
+    const list = item.map((v) => convertStringToResultType(v));
+    textList.push(list);
+  }
+  return textList;
+}
+
 export function parseHTML(html: string) {
   let template: HTMLTemplateElement | null = document.createElement('template');
   template.innerHTML = html;
@@ -244,7 +271,7 @@ export function parseHTML(html: string) {
       }
       list.push(itemStyle);
       const value = (temp.textContent || '').trim();
-      texts.push(isNumber(value) ? Number(value) : value);
+      texts.push(convertStringToResultType(value));
     }
     textList.push(texts);
     styleList.push(list);

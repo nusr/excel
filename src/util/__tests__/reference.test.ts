@@ -3,6 +3,11 @@ import { Range } from '../range';
 
 describe('reference.test.ts', () => {
   describe('parseReference', () => {
+    test('invalid', () => {
+      expect(parseReference(':')).toBeNull();
+      expect(parseReference('A-1')).toBeNull();
+      expect(parseReference('-1')).toBeNull();
+    });
     it('should convert a1 to { row:0,col:0,rowCount:1,colCount: 1 } ', () => {
       expect(parseReference('a1')).toEqual(new Range(0, 0, 1, 1, ''));
     });
@@ -19,6 +24,9 @@ describe('reference.test.ts', () => {
     });
     it('D1:E1', () => {
       expect(parseReference('D1:E1')).toEqual(new Range(0, 3, 1, 2, ''));
+    });
+    it('aa!D1:E1', () => {
+      expect(parseReference('aa!D1:E1')).toEqual(new Range(0, 3, 1, 2, 'aa'));
     });
   });
   describe('parseCell', () => {
@@ -39,16 +47,37 @@ describe('reference.test.ts', () => {
       expect(parseReference('1')).toEqual(new Range(0, 0, 0, 30, ''));
     });
     it('should convert Sheet1!1 to { row:0,col:0,rowCount:0,colCount: 30, sheetId: Sheet1 } ', () => {
-      expect(parseReference('Sheet1!1')).toEqual(new Range(0, 0, 0, 30, 'Sheet1'));
+      expect(parseReference('Sheet1!1')).toEqual(
+        new Range(0, 0, 0, 30, 'Sheet1'),
+      );
     });
     it('should convert Sheet1!A to { row:0,col:0,rowCount:200,colCount: 0, sheetId: Sheet1 } ', () => {
-      expect(parseReference('Sheet1!A')).toEqual(new Range(0, 0, 200, 0, 'Sheet1'));
+      expect(parseReference('Sheet1!A')).toEqual(
+        new Range(0, 0, 200, 0, 'Sheet1'),
+      );
     });
     it('should convert Sheet1!A1 to { row:0,col:0,rowCount:1,colCount: 1, sheetId: Sheet1 } ', () => {
-      expect(parseReference('Sheet1!A1')).toEqual(new Range(0, 0, 1, 1, 'Sheet1'));
+      expect(parseReference('Sheet1!A1')).toEqual(
+        new Range(0, 0, 1, 1, 'Sheet1'),
+      );
     });
   });
   describe('mergeRange', () => {
+    test('not same sheetId', () => {
+      expect(
+        mergeRange(new Range(0, 0, 1, 1, 'a'), new Range(1, 1, 1, 1, '2')),
+      ).toBeNull();
+    });
+    test('rowCount === 0', () => {
+      expect(
+        mergeRange(new Range(0, 0, 0, 1, ''), new Range(1, 1, 1, 1, '')),
+      ).toBeNull();
+    });
+    test('colCount === 0', () => {
+      expect(
+        mergeRange(new Range(0, 0, 1, 0, ''), new Range(1, 1, 1, 1, '')),
+      ).toBeNull();
+    });
     it('A1:B2', () => {
       expect(
         mergeRange(new Range(0, 0, 1, 1, ''), new Range(1, 1, 1, 1, '')),

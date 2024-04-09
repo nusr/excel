@@ -1,7 +1,18 @@
-import { makeFont, convertToCssString, parseHTML } from '../style';
+import { makeFont, convertToCssString, parseHTML, parseText } from '../style';
 import { EUnderLine } from '@/types';
 
 describe('style.test.ts', () => {
+  describe('parseText', () => {
+    test('ok', () => {
+      expect(parseText('=SUM(1,2)\t2\ntest\ttrue')).toEqual([
+        ['=SUM(1,2)', 2],
+        ['test', true],
+      ]);
+    });
+    test('filter empty', () => {
+      expect(parseText('\t \n \t ')).toEqual([]);
+    });
+  });
   describe('makeFont', () => {
     it('should get normal normal 12px sans-serif', () => {
       expect(makeFont()).toEqual('normal normal 12px sans-serif');
@@ -13,7 +24,7 @@ describe('style.test.ts', () => {
     });
   });
   describe('convertToCssString', () => {
-    it('normal', () => {
+    test('ok', () => {
       const result: string[] = [
         'color:red',
         'background-color:white',
@@ -40,6 +51,22 @@ describe('style.test.ts', () => {
         }),
       ).toEqual(result.join(';') + ';');
     });
+    test('only underline', () => {
+      const result: string[] = ['text-decoration-line:underline'];
+      expect(
+        convertToCssString({
+          underline: EUnderLine.SINGLE,
+        }),
+      ).toEqual(result.join(';') + ';');
+    });
+    test('only strike', () => {
+      const result: string[] = ['text-decoration-line:line-through'];
+      expect(
+        convertToCssString({
+          isStrike: true,
+        }),
+      ).toEqual(result.join(';') + ';');
+    });
   });
   describe('parseHTML', () => {
     test('normal', () => {
@@ -54,6 +81,10 @@ describe('style.test.ts', () => {
         <meta name="ProgId" content="Excel.Sheet" />
         <meta name="Generator" content="Microsoft Excel 15" />
         <style>
+          .xl3{
+            font-weight: 700;
+          }
+          .test{ }
           .xl1{color:#738DF2;background-color:#FCE869;font-size:36pt;font-style:italic;font-weight:700;white-space:normal;text-decoration-line:underline line-through;text-decoration-style: double;}
           .xl2{color:#738DF2;background-color:#FCE869;font-style:italic;font-weight:700;white-space:normal;text-decoration-line:underline line-through;text-decoration-style: double;}
           td{
@@ -65,9 +96,12 @@ describe('style.test.ts', () => {
       <body>
         <table>
           <tr>
-            <td> 1 </td>
+            <s>a</s>
+            <td class="xl3"><i>1</i> </td>
             <td class="xl1"> large text </td>
             <td class="xl2"> This is a very long text that needs to be wrapped </td>
+            <td><b>2</b></td>
+            <td></td>
           </tr>
         </table>
       </body>
@@ -79,16 +113,19 @@ describe('style.test.ts', () => {
             1,
             'large text',
             'This is a very long text that needs to be wrapped',
+            2,
+            '',
           ],
         ],
         styleList: [
           [
-            { fontColor: 'red' },
+            { fontColor: 'red', isBold: true, isItalic: true },
             {
               fillColor: '#FCE869',
               fontColor: '#738DF2',
               fontSize: 36,
               isItalic: true,
+              isBold: true,
               isStrike: true,
               isWrapText: true,
               underline: EUnderLine.DOUBLE,
@@ -96,10 +133,18 @@ describe('style.test.ts', () => {
             {
               fillColor: '#FCE869',
               fontColor: '#738DF2',
+              isBold: true,
               isItalic: true,
               isStrike: true,
               isWrapText: true,
               underline: EUnderLine.DOUBLE,
+            },
+            {
+              fontColor: 'red',
+              isBold: true,
+            },
+            {
+              fontColor: 'red',
             },
           ],
         ],
@@ -225,6 +270,7 @@ describe('style.test.ts', () => {
               fontColor: '#000000',
               fontFamily: 'Calibri',
               fontSize: 11,
+              isBold: true,
               isItalic: true,
               underline: EUnderLine.SINGLE,
             },

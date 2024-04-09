@@ -2,6 +2,10 @@ import { columnNameToInt, intToColumnName } from '../convert';
 
 describe('convert.test.ts', () => {
   describe('columnNameToInt', () => {
+    test('invalid', ()=> {
+      expect(columnNameToInt('1')).toEqual(-16);
+      expect(columnNameToInt('')).toEqual(-1);
+    })
     it('should convert A, B and C to 1, 2 and 3', () => {
       expect(columnNameToInt('A')).toEqual(0);
       expect(columnNameToInt('B')).toEqual(1);

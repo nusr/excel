@@ -2,7 +2,6 @@ import { App } from '@/containers';
 import { initControllerForTest } from '@/controller';
 import * as React from 'react';
 import {
-  cleanup,
   render,
   screen,
   fireEvent,
@@ -10,11 +9,11 @@ import {
   RenderResult,
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import './global.mock';
 
 type MatchMediaFun = (data: { matches: boolean }) => void;
 
 describe('Menubar.test.ts', () => {
-  afterEach(cleanup);
   describe('menubar', () => {
     test('normal', () => {
       act(() => {

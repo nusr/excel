@@ -1,7 +1,6 @@
 import { App } from '@/containers';
 import * as React from 'react';
 import {
-  cleanup,
   render,
   screen,
   fireEvent,
@@ -13,9 +12,9 @@ import { initControllerForTest } from '@/controller';
 import fs from 'fs/promises';
 import path from 'path';
 import { sleep } from '@/util';
+import './global.mock';
 
 describe('Import.test.tsx', () => {
-  afterEach(cleanup);
   describe('upload image', () => {
     test('ok', async () => {
       act(() => {

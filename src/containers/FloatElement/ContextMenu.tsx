@@ -83,7 +83,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           if (
             !range ||
             !range.isValid() ||
-            isSameRange(range, props.chartRange!)
+            (props.chartRange && isSameRange(range, props.chartRange))
           ) {
             toast({ type: 'error', message: $('reference-is-not-valid') });
             return;

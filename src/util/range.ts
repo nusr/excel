@@ -10,10 +10,7 @@ export function isCol(range: IRange): boolean {
   return range.rowCount === 0;
 }
 
-export function isSameRange(oldRange?: IRange, newRange?: IRange): boolean {
-  if (!oldRange || !newRange) {
-    return false;
-  }
+export function isSameRange(oldRange: IRange, newRange: IRange): boolean {
   return (
     oldRange.col === newRange.col &&
     oldRange.row === newRange.row &&

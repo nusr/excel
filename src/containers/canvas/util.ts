@@ -8,7 +8,7 @@ import {
   eventEmitter,
   initFontFamilyList,
   mainDomSet,
-  canvasLog,
+  reactLog,
 } from '@/util';
 import {
   coreStore,
@@ -150,7 +150,7 @@ const handleStateChange = (
   changeSet: Set<ChangeEventType>,
   controller: IController,
 ) => {
-  canvasLog('handleStateChange', changeSet);
+  reactLog('handleStateChange', changeSet);
   if (
     changeSet.has('rangeMap') ||
     changeSet.has('cellStyle') ||
@@ -267,7 +267,7 @@ export function initCanvas(
     mainCanvas.resize();
     mainCanvas.render({ changeSet: new Set<ChangeEventType>(['row']) });
   };
-  eventEmitter.on('modelChange', ({ changeSet }) => {
+  const offEvent = eventEmitter.on('modelChange', ({ changeSet }) => {
     handleStateChange(changeSet, controller);
     mainCanvas.render({ changeSet });
   });
@@ -297,6 +297,6 @@ export function initCanvas(
 
   return () => {
     removeEvent();
-    eventEmitter.offAll();
+    offEvent();
   };
 }

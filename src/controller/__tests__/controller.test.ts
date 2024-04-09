@@ -1,7 +1,7 @@
 import { Controller } from '..';
 import { Model } from '@/model';
 import { HTML_FORMAT, PLAIN_FORMAT, headerSizeSet } from '@/util';
-import { WorkBookJSON } from '@/types';
+import { WorkBookJSON, EUnderLine } from '@/types';
 
 describe('controller.test.ts', () => {
   let controller: Controller;
@@ -18,6 +18,106 @@ describe('controller.test.ts', () => {
       },
     });
     controller.addSheet();
+  });
+
+  describe('paste', () => {
+    test('html', () => {
+      const mockHTML = `<html>
+      <head>
+        <style>
+          .xl1{
+            color:#738DF2;
+            background-color:#FCE869;
+            font-size:36pt;
+            font-style:italic;
+            font-weight:700;
+            white-space:normal;
+            text-decoration-line:underline line-through;
+            text-decoration-style: double;
+          }
+        </style>
+      </head>
+      <body>
+        <table>
+          <tr>
+            <td class="xl1"><i>=SUM(1,2)</i> </td>
+          </tr>
+        </table>
+      </body>
+    </html>`;
+      const event = {
+        clipboardData: {
+          getData(format: string) {
+            if (format === HTML_FORMAT) {
+              return mockHTML;
+            }
+            return '';
+          },
+        },
+      } as ClipboardEvent;
+      controller.paste(event);
+      const sheetData = controller.getWorksheet(controller.getCurrentSheetId());
+      expect(controller.getActiveCell()).toEqual({
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(sheetData).toEqual({
+        '0_0': {
+          value: 3,
+          formula: '=SUM(1,2)',
+          style: {
+            fillColor: '#FCE869',
+            fontColor: '#738DF2',
+            fontSize: 36,
+            isItalic: true,
+            isBold: true,
+            isStrike: true,
+            isWrapText: true,
+            underline: EUnderLine.DOUBLE,
+          },
+        },
+      });
+    });
+    test('text', () => {
+      const mockData = '=SUM(1,2)\t2\ntest\ttrue';
+      const event = {
+        clipboardData: {
+          getData(format: string) {
+            if (format === PLAIN_FORMAT) {
+              return mockData;
+            }
+            return '';
+          },
+        },
+      } as ClipboardEvent;
+      controller.paste(event);
+      const sheetData = controller.getWorksheet(controller.getCurrentSheetId());
+      expect(controller.getActiveCell()).toEqual({
+        row: 0,
+        col: 0,
+        rowCount: 2,
+        colCount: 2,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(sheetData).toEqual({
+        '0_0': {
+          value: 3,
+          formula: '=SUM(1,2)',
+        },
+        '0_1': {
+          value: 2,
+        },
+        '1_0': {
+          value: 'test',
+        },
+        '1_1': {
+          value: true,
+        },
+      });
+    });
   });
 
   describe('scroll', () => {

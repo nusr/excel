@@ -10,6 +10,7 @@ export const IMAGE_TYPE_MAP = {
   'image/gif': ['.gif'],
   'image/jpeg': ['.jpeg', '.jpg', '.jfif', '.pjpeg', '.pjp'],
 } as const;
+
 export function extractImageType(src: string): {
   ext: string;
   type: string;

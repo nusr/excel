@@ -1,7 +1,6 @@
 import { App } from '@/containers';
 import * as React from 'react';
 import {
-  cleanup,
   render,
   screen,
   fireEvent,
@@ -10,10 +9,9 @@ import {
 import '@testing-library/jest-dom';
 import { type } from './util';
 import { initControllerForTest } from '@/controller';
+import './global.mock';
 
 describe('FormulaBar.test.tsx', () => {
-  afterEach(cleanup);
-
   describe('formula bar', () => {
     test('normal', () => {
       act(() => {
