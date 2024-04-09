@@ -50,10 +50,30 @@ export class MergeCell implements IMergeCell {
         'absolute',
         this.convertSheetIdToName,
       );
+      let firstCell = {
+        row: range.row,
+        col: range.col,
+      };
+      this.model.iterateRange(range, (row, col) => {
+        const cellInfo = this.model.getCell({
+          row,
+          col,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: range.sheetId,
+        });
+        if (cellInfo) {
+          firstCell.row = row;
+          firstCell.col = col;
+          return true;
+        }
+        return false;
+      });
       assert(!this.mergeCells[ref], $('merging-cell-is-duplicate'));
       this.mergeCells[ref] = {
         range,
         type,
+        firstCell,
       };
       this.model.push({
         type: 'mergeCells',

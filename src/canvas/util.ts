@@ -25,6 +25,7 @@ import {
   StyleType,
   EMergeCellType,
   EHorizontalAlign,
+  Coordinate,
 } from '@/types';
 
 const measureTextMap = new Map<string, IWindowSize>();
@@ -143,26 +144,20 @@ export function renderCellData(
   ctx: CanvasRenderingContext2D,
   range: IRange,
   type?: EMergeCellType,
+  firstCell?: Coordinate,
 ): IWindowSize {
   let cellInfo = controller.getCell(range);
   const result: IWindowSize = {
     width: 0,
     height: 0,
   };
-  if (type !== undefined && !cellInfo) {
-    const list = controller.getRangeData(range);
-    // look for first not empty cell
-    for (const item of list) {
-      for (const col of item) {
-        if (col) {
-          cellInfo = col;
-          break;
-        }
-      }
-      if (cellInfo) {
-        break;
-      }
-    }
+  if (type !== undefined && !cellInfo && firstCell) {
+    cellInfo = controller.getCell({
+      ...firstCell,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
   }
   if (!cellInfo) {
     return result;

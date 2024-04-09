@@ -1,5 +1,6 @@
 import { Controller } from '..';
 import { Model } from '@/model';
+import { EMergeCellType } from '@/types';
 import { HTML_FORMAT, PLAIN_FORMAT } from '@/util';
 
 describe('rangeMap.test.ts', () => {
@@ -36,6 +37,11 @@ describe('rangeMap.test.ts', () => {
           sheetId: '1',
         },
         isMerged: false,
+        type: EMergeCellType.MERGE_CENTER,
+        firstCell: {
+          row: 0,
+          col: 0,
+        },
       });
     });
     test('set', () => {

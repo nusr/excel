@@ -92,9 +92,10 @@ export class Controller implements IController {
     const mergeCells = this.getMergeCellList(this.getCurrentSheetId());
     if (mergeCells.length === 0) {
       return {
+        firstCell: { row: range.row, col: range.col },
         range,
         isMerged: false,
-        mergeType: EMergeCellType.MERGE_CENTER,
+        type: EMergeCellType.MERGE_CENTER,
       };
     }
 
@@ -107,15 +108,17 @@ export class Controller implements IController {
         return {
           range: newRange,
           isMerged: true,
-          mergeType: item.type,
+          type: item.type,
+          firstCell: item.firstCell,
         };
       }
     }
 
     return {
+      firstCell: { row: range.row, col: range.col },
       range,
       isMerged: false,
-      mergeType: EMergeCellType.MERGE_CENTER,
+      type: EMergeCellType.MERGE_CENTER,
     };
   }
   getActiveRange() {

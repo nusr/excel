@@ -20,7 +20,6 @@ import {
   Point,
   IRange,
   MergeCellItem,
-  EMergeCellType,
 } from '@/types';
 import {
   fillRect,
@@ -126,6 +125,7 @@ export class MainCanvas {
         this.ctx,
         range,
         item.type,
+        item.firstCell,
         // item.type === EMergeCellType.MERGE_CONTENT,
       );
       if (isSheet(activeCell) || isRow(activeCell) || isCol(activeCell)) {

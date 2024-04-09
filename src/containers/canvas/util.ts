@@ -85,10 +85,19 @@ function updateActiveCell(controller: IController) {
   const {
     range: activeCell,
     isMerged,
-    mergeType,
+    type: mergeType,
+    firstCell,
   } = controller.getActiveRange();
   const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
-  const cell = controller.getCell(activeCell);
+  let cell = controller.getCell(activeCell);
+  if (!cell && isMerged) {
+    cell = controller.getCell({
+      ...firstCell,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
+  }
   const defineName = controller.getDefineName({
     row: activeCell.row,
     col: activeCell.col,

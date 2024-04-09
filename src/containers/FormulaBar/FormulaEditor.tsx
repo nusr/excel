@@ -1,5 +1,5 @@
 import React, { CSSProperties, useRef, useEffect, memo } from 'react';
-import { IController, EditorStatus, StyleType } from '@/types';
+import { IController, EditorStatus, StyleType, IRange } from '@/types';
 import styles from './index.module.css';
 import { CellStoreType } from '../store';
 import { MAX_NAME_LENGTH, FORMULA_EDITOR_ROLE } from '@/util';
@@ -81,11 +81,11 @@ export const FormulaEditor: React.FunctionComponent<Props> = memo(
       event.stopPropagation();
       if (event.key === 'Enter' || event.key === 'Tab') {
         controller.batchUpdate(() => {
-          controller.setCell(
-            [[event.currentTarget.value]],
-            [],
-            controller.getActiveCell(),
-          );
+          const data = controller.getActiveRange();
+          const activeCell: IRange = data.isMerged
+            ? { ...data.firstCell, rowCount: 1, colCount: 1, sheetId: '' }
+            : data.range;
+          controller.setCell([[event.currentTarget.value]], [], activeCell);
           if (event.key === 'Enter') {
             controller.setNextActiveCell('down');
           } else {

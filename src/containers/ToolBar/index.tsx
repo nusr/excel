@@ -49,10 +49,16 @@ const mergeOptionList: OptionItem[] = [
     disabled: false,
   },
   {
-    value: EMergeCellType.MERGE_CONTENT,
-    label: $('merge-content'),
+    value: EMergeCellType.MERGE_CELL,
+    label: $('merge-cells'),
     disabled: false,
   },
+  // TODO
+  // {
+  //   value: EMergeCellType.MERGE_CONTENT,
+  //   label: $('merge-content'),
+  //   disabled: false,
+  // },
 ];
 
 export const ToolbarContainer: React.FunctionComponent<Props> = memo(

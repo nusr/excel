@@ -383,6 +383,10 @@ describe('controller.test.ts', () => {
               sheetId,
             },
             type: EMergeCellType.MERGE_CENTER,
+            firstCell: {
+              row: 20,
+              col: 20,
+            },
           },
         },
         customHeight: {
@@ -465,6 +469,10 @@ describe('controller.test.ts', () => {
               sheetId,
             },
             type: EMergeCellType.MERGE_CENTER,
+            firstCell: {
+              row: 20,
+              col: 20,
+            },
           },
         },
         customHeight: {

@@ -117,8 +117,9 @@ export enum EMergeCellType {
 }
 
 export interface MergeCellItem {
-  range: IRange;
-  type: EMergeCellType;
+  range: IRange; // merge range
+  type: EMergeCellType; // merge type
+  firstCell: Coordinate; // first cell not empty
 }
 
 export type WorkBookJSON = {

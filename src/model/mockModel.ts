@@ -307,6 +307,10 @@ const MOCK_MODEL: WorkBookJSON = {
         sheetId: '8',
       },
       type: EMergeCellType.MERGE_CENTER,
+      firstCell: {
+        row: 2,
+        col: 2,
+      },
     },
   },
   customHeight: {},
