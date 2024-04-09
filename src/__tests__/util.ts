@@ -1,15 +1,19 @@
 import { screen, fireEvent } from '@testing-library/react';
 
-export function type(content: string) {
+export function type(content: string, isEnter = true) {
   fireEvent.click(screen.getByTestId('formula-editor-trigger'));
   fireEvent.change(screen.getByTestId('formula-editor'), {
     target: { value: content },
   });
   fireEvent.keyDown(screen.getByTestId('formula-editor'), {
-    key: 'Enter',
+    key: isEnter ? 'Enter' : 'Tab',
   });
 
-  fireEvent.keyDown(document.body, { key: 'ArrowUp' });
+  if (isEnter) {
+    fireEvent.keyDown(document.body, { key: 'ArrowUp' });
+  } else {
+    fireEvent.keyDown(document.body, { key: 'ArrowLeft' });
+  }
 }
 export function extractDataFromTransform(
   transform: string,

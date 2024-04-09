@@ -87,10 +87,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(
     );
     const handleSelect = useCallback((value: string) => {
       const range = controller.checkDefineName(value);
-      if (!range) {
-        return;
-      }
-      scrollToView(controller, range);
+      scrollToView(controller, range!);
     }, []);
     return (
       <SelectList

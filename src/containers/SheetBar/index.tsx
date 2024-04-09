@@ -47,7 +47,7 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
     const handleContextMenu = useCallback(
       (event: React.MouseEvent<HTMLDivElement>) => {
         event.preventDefault();
-        const pos = (event.clientX || 0) - 30;
+        const pos = event.clientX - 30;
         setMenuPosition(pos);
         return false;
       },

@@ -18,6 +18,31 @@ describe('row.test.ts', () => {
     });
     controller.addSheet();
   });
+  describe('setRowHeight', () => {
+    test('ok', () => {
+      controller.setRowHeight(0, 100);
+      expect(controller.getRowHeight(0).len).toEqual(100);
+    });
+    test('no changed', () => {
+      controller.setRowHeight(0, 100);
+      expect(controller.getRowHeight(0).len).toEqual(100);
+      controller.setRowHeight(0, 100);
+      expect(controller.getRowHeight(0).len).toEqual(100);
+    });
+  });
+  describe('hideRow', () => {
+    test('ok', () => {
+      controller.hideRow(20, 1);
+      expect(controller.getRowHeight(20).len).toEqual(0);
+    });
+    test('not changed', () => {
+      controller.hideRow(20, 1);
+      expect(controller.getRowHeight(20).len).toEqual(0);
+      controller.hideRow(20, 1);
+      expect(controller.getRowHeight(20).len).toEqual(0);
+    });
+  });
+
   describe('row', () => {
     test('add', () => {
       const old = controller.getSheetInfo(
@@ -45,10 +70,7 @@ describe('row.test.ts', () => {
         controller.getSheetInfo(controller.getCurrentSheetId())!.rowCount,
       ).toEqual(old.rowCount - 10);
     });
-    test('hide', () => {
-      controller.hideRow(20, 1);
-      expect(controller.getRowHeight(20).len).toEqual(0);
-    });
+
     test('undo redo', () => {
       const old = controller.getRowHeight(20).len;
       controller.hideRow(20, 1);
@@ -63,10 +85,7 @@ describe('row.test.ts', () => {
     test('get', () => {
       expect(controller.getRowHeight(100).len).toEqual(24);
     });
-    test('set', () => {
-      controller.setRowHeight(0, 100);
-      expect(controller.getRowHeight(0).len).toEqual(100);
-    });
+
     test('hide', () => {
       controller.hideRow(0, 2);
       expect(controller.getRowHeight(0).len).toEqual(0);

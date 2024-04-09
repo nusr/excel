@@ -54,6 +54,54 @@ describe('rangeMap.test.ts', () => {
         sheetId: controller.getCurrentSheetId(),
       });
     });
+    test('set sheetId not found', () => {
+      const oldData = controller.getActiveCell();
+      controller.setActiveCell({
+        row: 2,
+        col: 2,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: 'test',
+      });
+      expect(controller.getActiveCell()).toEqual(oldData);
+    });
+    test('set data invalid', () => {
+      const oldData = controller.getActiveCell();
+      controller.setActiveCell({
+        row: -2,
+        col: -2,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
+      expect(controller.getActiveCell()).toEqual(oldData);
+    });
+    test('undo', () => {
+      const oldData = controller.getActiveCell();
+      controller.setActiveCell({
+        row: 2,
+        col: 2,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
+      controller.undo();
+      expect(controller.getActiveCell()).toEqual(oldData);
+    });
+    test('redo', () => {
+      controller.setActiveCell({
+        row: 2,
+        col: 2,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      });
+      const newData = controller.getActiveCell();
+      controller.undo();
+      expect(controller.canRedo()).toEqual(true);
+      controller.redo();
+      expect(controller.getActiveCell()).toEqual(newData);
+    });
     test('hideRow up', () => {
       controller.setActiveCell({
         row: 5,

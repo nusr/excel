@@ -65,8 +65,15 @@ export class Drawing implements IDrawings {
     const oldData = this.drawings[data.uuid];
     assert(!oldData, $('uuid-is-duplicate'));
     if (data.type === 'chart') {
-      const range = data.chartRange!;
+      assert(!!data.chartType);
+      assert(
+        CHART_TYPE_LIST.findIndex((v) => v.value === data.chartType) >= 0,
+        $('unsupported-chart-types'),
+      );
+      assert(!!data.chartRange);
+      const range = data.chartRange;
       let check = false;
+
       this.model.iterateRange(range, (row: number, col: number) => {
         const data = this.model.getCell({
           row,
@@ -82,10 +89,6 @@ export class Drawing implements IDrawings {
           return false;
         }
       });
-      assert(
-        CHART_TYPE_LIST.findIndex((v) => v.value === data.chartType!) >= 0,
-        $('unsupported-chart-types'),
-      );
       assert(check, $('cells-must-contain-data'));
     } else if (data.type === 'floating-picture') {
       assert(!!data.imageSrc, $('image-source-is-empty'));
@@ -103,11 +106,8 @@ export class Drawing implements IDrawings {
   }
   updateDrawing(uuid: string, value: Partial<DrawingElement>) {
     const keyList = Object.keys(value) as Array<keyof DrawingElement>;
-    if (keyList.length === 0) {
-      return;
-    }
     const item = this.drawings[uuid];
-    if (!item) {
+    if (keyList.length === 0 || !item) {
       return;
     }
     for (const key of keyList) {

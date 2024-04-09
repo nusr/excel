@@ -177,7 +177,7 @@ export const SelectList: FunctionComponent<
       >
         <Icon name="down"></Icon>
       </Button>
-      {active && (
+      {active && data.length > 0 && (
         <SelectPopup
           active
           value={value}

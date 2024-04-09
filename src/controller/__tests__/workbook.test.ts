@@ -18,7 +18,37 @@ describe('workbook.test.ts', () => {
     });
     controller.addSheet();
   });
-
+  describe('rename', () => {
+    test('ok', () => {
+      controller.renameSheet('test');
+      expect(controller.getSheetInfo()?.name).toEqual('test');
+    });
+    test('not changed', () => {
+      controller.renameSheet('Sheet1');
+      expect(controller.getSheetInfo()?.name).toEqual('Sheet1');
+    });
+    test('empty', () => {
+      expect(() => controller.renameSheet('')).toThrow();
+    });
+    test('exist', () => {
+      controller.addSheet();
+      expect(() => controller.renameSheet('Sheet1')).toThrow();
+    });
+  });
+  describe('delete sheet', () => {
+    test('ok', () => {
+      const sheetId = controller.getCurrentSheetId();
+      controller.addSheet();
+      expect(controller.getSheetList()).toHaveLength(2);
+      controller.deleteSheet(controller.getCurrentSheetId());
+      expect(controller.getSheetList()).toHaveLength(1);
+      expect(controller.getCurrentSheetId()).toEqual(sheetId);
+    });
+    test('no exist', () => {
+      controller.addSheet();
+      expect(() => controller.deleteSheet('test43434')).toThrow();
+    });
+  });
   describe('sheet', () => {
     test('addSheet', () => {
       expect(controller.getScroll()).toEqual({
@@ -32,15 +62,6 @@ describe('workbook.test.ts', () => {
       expect(controller.getSheetList()).toHaveLength(1);
       controller.addSheet();
       expect(controller.getSheetList()).toHaveLength(2);
-    });
-
-    test('deleteSheet', () => {
-      const sheetId = controller.getCurrentSheetId();
-      controller.addSheet();
-      expect(controller.getSheetList()).toHaveLength(2);
-      controller.deleteSheet(controller.getCurrentSheetId());
-      expect(controller.getSheetList()).toHaveLength(1);
-      expect(controller.getCurrentSheetId()).toEqual(sheetId);
     });
 
     test('hideSheet', () => {

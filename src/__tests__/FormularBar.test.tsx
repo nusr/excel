@@ -7,7 +7,7 @@ import { initControllerForTest } from '@/controller';
 import './global.mock';
 
 describe('FormulaBar.test.tsx', () => {
-  describe('formula bar', () => {
+  describe('defined name', () => {
     test('normal', () => {
       act(() => {
         render(<App controller={initControllerForTest()} />);
@@ -16,9 +16,8 @@ describe('FormulaBar.test.tsx', () => {
       expect(screen.getByTestId('formula-bar')!.childNodes).toHaveLength(2);
     });
     test('range jump', async () => {
-      const controller = initControllerForTest();
       act(() => {
-        render(<App controller={controller} />);
+        render(<App controller={initControllerForTest()} />);
       });
 
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
@@ -111,11 +110,20 @@ describe('FormulaBar.test.tsx', () => {
     });
   });
   describe('formula editor', () => {
-    test('input', async () => {
+    test('enter', async () => {
       act(() => {
         render(<App controller={initControllerForTest()} />);
       });
       type('3');
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
+        '3',
+      );
+    });
+    test('tab', async () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      type('3', false);
       expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
         '3',
       );

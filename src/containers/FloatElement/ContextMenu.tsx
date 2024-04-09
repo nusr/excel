@@ -73,7 +73,11 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         onOk: () => {
           const realValue = value.trim();
           if (!realValue) {
-            toast({ type: 'error', message: $('reference-is-empty') });
+            toast({
+              type: 'error',
+              message: $('reference-is-empty'),
+              testId: 'select-data-empty-toast',
+            });
             return;
           }
           const sheetList = controller.getSheetList();
@@ -85,7 +89,11 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             !range.isValid() ||
             (props.chartRange && isSameRange(range, props.chartRange))
           ) {
-            toast({ type: 'error', message: $('reference-is-not-valid') });
+            toast({
+              type: 'error',
+              message: $('reference-is-not-valid'),
+              testId: 'select-data-invalid-toast',
+            });
             return;
           }
           range.sheetId = range.sheetId || controller.getCurrentSheetId();
@@ -121,7 +129,11 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         onOk: () => {
           const realValue = value.trim();
           if (!realValue) {
-            toast({ type: 'error', message: $('the-value-cannot-be-empty') });
+            toast({
+              type: 'error',
+              message: $('the-value-cannot-be-empty'),
+              testId: 'change-chart-title-toast',
+            });
             return;
           }
           controller.updateDrawing(uuid, { title: realValue });

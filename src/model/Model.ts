@@ -406,7 +406,7 @@ export class Model implements IModel {
     const id = sheetId || this.getCurrentSheetId();
     const list = this.getSheetList();
     const index = list.findIndex((item) => item.sheetId === id);
-    assert(index >= 0);
+    assert(index >= 0, 'not found next sheet');
     const isLast = index === list.length - 1;
     let lastIndex = isLast
       ? (index - 1 + list.length) % list.length

@@ -9,7 +9,7 @@ type Props = {
   message: string;
   type: MessageType;
   duration?: number; // second
-  testId?: string;
+  testId: string;
 };
 
 export const Toast: React.FunctionComponent<Omit<Props, 'duration'>> = ({

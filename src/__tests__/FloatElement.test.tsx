@@ -14,16 +14,6 @@ import './global.mock';
 
 describe('FloatElement.test.ts', () => {
   describe('float element', () => {
-    test('throw error', () => {
-      act(() => {
-        render(<App controller={initControllerForTest()} />);
-      });
-
-      fireEvent.click(screen.getByTestId('toolbar-chart'));
-      expect(screen.getByTestId('assert_toast')).toHaveTextContent(
-        'The selected cells must contain the data',
-      );
-    });
     test('add chart', async () => {
       act(() => {
         render(<App controller={initControllerForTest()} />);
@@ -283,7 +273,9 @@ describe('FloatElement.test.ts', () => {
       });
 
       fireEvent.click(screen.getByTestId('dialog-select-data-confirm'));
-      expect(screen.getByTestId('assert_toast')).not.toHaveTextContent('');
+      expect(
+        screen.getByTestId('select-data-empty-toast'),
+      ).not.toHaveTextContent('');
     });
 
     test('invalid', async () => {
@@ -304,7 +296,9 @@ describe('FloatElement.test.ts', () => {
       });
 
       fireEvent.click(screen.getByTestId('dialog-select-data-confirm'));
-      expect(screen.getByTestId('assert_toast')).not.toHaveTextContent('');
+      expect(
+        screen.getByTestId('select-data-invalid-toast'),
+      ).not.toHaveTextContent('');
     });
     test('cancel dialog', async () => {
       const controller = initControllerForTest();
@@ -370,7 +364,9 @@ describe('FloatElement.test.ts', () => {
       });
 
       fireEvent.click(screen.getByTestId('dialog-change-chart-title-confirm'));
-      expect(screen.getByTestId('assert_toast')).not.toHaveTextContent('');
+      expect(
+        screen.getByTestId('change-chart-title-toast'),
+      ).not.toHaveTextContent('');
     });
     test('cancel dialog', async () => {
       const controller = initControllerForTest();

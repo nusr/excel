@@ -170,15 +170,16 @@ export class Workbook implements IWorkbook {
   }
   renameSheet(sheetName: string, sheetId?: string): void {
     assert(!!sheetName, $('the-value-cannot-be-empty'));
+    const id = sheetId || this.currentSheetId;
     const sheetList = this.getSheetList();
     const item = sheetList.find((v) => v.name === sheetName);
     if (item) {
-      if (item.sheetId === sheetId) {
+      if (item.sheetId === id) {
         return;
       }
       assert(false, $('sheet-name-is-duplicate'));
     }
-    this.updateSheetInfo({ name: sheetName }, sheetId);
+    this.updateSheetInfo({ name: sheetName }, id);
   }
   getSheetInfo(id?: string): WorksheetType | null {
     const sheetId = id || this.currentSheetId;

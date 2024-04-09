@@ -18,8 +18,86 @@ describe('drawing.test.ts', () => {
     });
     controller.addSheet();
   });
-  describe('float element', () => {
-    test('add', () => {
+  describe('addDrawing', () => {
+    test('empty chartType', () => {
+      expect(() =>
+        controller.addDrawing({
+          title: 'chart',
+          type: 'chart',
+          chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+          sheetId: controller.getCurrentSheetId(),
+          width: 300,
+          height: 300,
+          marginX: 0,
+          marginY: 0,
+          originHeight: 300,
+          originWidth: 300,
+          uuid: '1',
+          fromCol: 4,
+          fromRow: 4,
+        }),
+      ).toThrow();
+    });
+    test('not support chartType', () => {
+      expect(() =>
+        controller.addDrawing({
+          title: 'chart',
+          type: 'chart',
+          chartType: 'test' as any,
+          chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+          sheetId: controller.getCurrentSheetId(),
+          width: 300,
+          height: 300,
+          marginX: 0,
+          marginY: 0,
+          originHeight: 300,
+          originWidth: 300,
+          uuid: '1',
+          fromCol: 4,
+          fromRow: 4,
+        }),
+      ).toThrow();
+    });
+    test('not support chartRange', () => {
+      expect(() =>
+        controller.addDrawing({
+          title: 'chart',
+          type: 'chart',
+          chartType: 'line',
+          sheetId: controller.getCurrentSheetId(),
+          width: 300,
+          height: 300,
+          marginX: 0,
+          marginY: 0,
+          originHeight: 300,
+          originWidth: 300,
+          uuid: '1',
+          fromCol: 4,
+          fromRow: 4,
+        }),
+      ).toThrow();
+    });
+    test('chartRange not data', () => {
+      expect(() =>
+        controller.addDrawing({
+          title: 'chart',
+          type: 'chart',
+          chartType: 'line',
+          chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+          sheetId: controller.getCurrentSheetId(),
+          width: 300,
+          height: 300,
+          marginX: 0,
+          marginY: 0,
+          originHeight: 300,
+          originWidth: 300,
+          uuid: '1',
+          fromCol: 4,
+          fromRow: 4,
+        }),
+      ).toThrow();
+    });
+    test('ok', () => {
       controller.setCell(
         [
           [1, 2, 3],
@@ -31,6 +109,7 @@ describe('drawing.test.ts', () => {
       controller.addDrawing({
         title: 'chart',
         type: 'chart',
+        chartType: 'bar',
         chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
         sheetId: controller.getCurrentSheetId(),
         width: 300,
@@ -48,6 +127,157 @@ describe('drawing.test.ts', () => {
       controller.deleteDrawing('1');
       expect(controller.getDrawingList('')).toHaveLength(0);
     });
+  });
+  describe('updateDrawing', () => {
+    test('empty value', () => {
+      controller.setCell(
+        [
+          [1, 2, 3],
+          [4, 5, 6],
+        ],
+        [],
+        { row: 0, col: 0, colCount: 1, rowCount: 1, sheetId: '' },
+      );
+      controller.addDrawing({
+        title: 'chart',
+        type: 'chart',
+        chartType: 'bar',
+        chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+        sheetId: controller.getCurrentSheetId(),
+        width: 300,
+        height: 300,
+        marginX: 0,
+        marginY: 0,
+        originHeight: 300,
+        originWidth: 300,
+        uuid: '1',
+        fromCol: 4,
+        fromRow: 4,
+      });
+      expect(controller.getDrawingList()[0].chartType).toEqual('bar');
+      controller.updateDrawing('1', {});
+      expect(controller.getDrawingList()[0].chartType).toEqual('bar');
+    });
+    test('not found uuids', () => {
+      controller.setCell(
+        [
+          [1, 2, 3],
+          [4, 5, 6],
+        ],
+        [],
+        { row: 0, col: 0, colCount: 1, rowCount: 1, sheetId: '' },
+      );
+      controller.addDrawing({
+        title: 'chart',
+        type: 'chart',
+        chartType: 'bar',
+        chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+        sheetId: controller.getCurrentSheetId(),
+        width: 300,
+        height: 300,
+        marginX: 0,
+        marginY: 0,
+        originHeight: 300,
+        originWidth: 300,
+        uuid: '1',
+        fromCol: 4,
+        fromRow: 4,
+      });
+      expect(controller.getDrawingList()[0].chartType).toEqual('bar');
+      controller.updateDrawing('aaa', { chartType: 'line' });
+      expect(controller.getDrawingList()[0].chartType).toEqual('bar');
+    });
+    test('ok', () => {
+      controller.setCell(
+        [
+          [1, 2, 3],
+          [4, 5, 6],
+        ],
+        [],
+        { row: 0, col: 0, colCount: 1, rowCount: 1, sheetId: '' },
+      );
+      controller.addDrawing({
+        title: 'chart',
+        type: 'chart',
+        chartType: 'bar',
+        chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+        sheetId: controller.getCurrentSheetId(),
+        width: 300,
+        height: 300,
+        marginX: 0,
+        marginY: 0,
+        originHeight: 300,
+        originWidth: 300,
+        uuid: '1',
+        fromCol: 4,
+        fromRow: 4,
+      });
+      expect(controller.getDrawingList()[0].chartType).toEqual('bar');
+      controller.updateDrawing('1', { chartType: 'line' });
+      expect(controller.getDrawingList()[0].chartType).toEqual('line');
+    });
+  });
+  describe('deleteDrawing', ()=> {
+    test('not found uuid', ()=> {
+      controller.setCell(
+        [
+          [1, 2, 3],
+          [4, 5, 6],
+        ],
+        [],
+        { row: 0, col: 0, colCount: 1, rowCount: 1, sheetId: '' },
+      );
+      controller.addDrawing({
+        title: 'chart',
+        type: 'chart',
+        chartType: 'bar',
+        chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+        sheetId: controller.getCurrentSheetId(),
+        width: 300,
+        height: 300,
+        marginX: 0,
+        marginY: 0,
+        originHeight: 300,
+        originWidth: 300,
+        uuid: '1',
+        fromCol: 4,
+        fromRow: 4,
+      });
+      expect(controller.getDrawingList()).toHaveLength(1)
+      controller.deleteDrawing('aaaa')
+      expect(controller.getDrawingList()).toHaveLength(1)
+    })
+    test('ok', ()=> {
+      controller.setCell(
+        [
+          [1, 2, 3],
+          [4, 5, 6],
+        ],
+        [],
+        { row: 0, col: 0, colCount: 1, rowCount: 1, sheetId: '' },
+      );
+      controller.addDrawing({
+        title: 'chart',
+        type: 'chart',
+        chartType: 'bar',
+        chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+        sheetId: controller.getCurrentSheetId(),
+        width: 300,
+        height: 300,
+        marginX: 0,
+        marginY: 0,
+        originHeight: 300,
+        originWidth: 300,
+        uuid: '1',
+        fromCol: 4,
+        fromRow: 4,
+      });
+      expect(controller.getDrawingList()).toHaveLength(1)
+      controller.deleteDrawing('1')
+      expect(controller.getDrawingList()).toHaveLength(0)
+    })
+  })
+  describe('float element', () => {
     test('copy', async () => {
       controller.setCell(
         [
@@ -60,6 +290,7 @@ describe('drawing.test.ts', () => {
       controller.addDrawing({
         title: 'chart',
         type: 'chart',
+        chartType: 'bar',
         chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
         sheetId: controller.getCurrentSheetId(),
         width: 300,
@@ -95,6 +326,7 @@ describe('drawing.test.ts', () => {
       controller.addDrawing({
         title: 'chart',
         type: 'chart',
+        chartType: 'bar',
         chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
         sheetId: controller.getCurrentSheetId(),
         width: 300,

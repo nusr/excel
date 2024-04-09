@@ -21,6 +21,19 @@ describe('SheetBar.test.ts', () => {
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(3);
     });
+    test('click active', () => {
+      act(() => {
+        render(<App controller={initControllerForTest()} />);
+      });
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+      const text =
+        screen.getByTestId('sheet-bar-active-item').textContent || '';
+      fireEvent.click(screen.getByTestId('sheet-bar-active-item'));
+      expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent(
+        text,
+      );
+    });
   });
   describe('tab color', () => {
     test('ok', async () => {
@@ -128,19 +141,6 @@ describe('SheetBar.test.ts', () => {
       });
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-hide'));
       expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(1);
-    });
-    test.skip('hide context menu', async () => {
-      act(() => {
-        render(<App controller={initControllerForTest()} />);
-      });
-      fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
-        clientX: 199,
-      });
-      expect(
-        screen.getByTestId('sheet-bar-context-menu'),
-      ).not.toHaveTextContent('');
-      fireEvent.click(screen.getByTestId('toolbar-bold'));
-      expect(() => screen.getByTestId('sheet-bar-context-menu')).toThrow();
     });
 
     test('insert sheet', () => {

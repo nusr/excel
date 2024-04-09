@@ -342,4 +342,45 @@ describe('worksheet.test.ts', () => {
       ).toEqual({ value: 1, row: 0, col: 0, style: { isBold: true } });
     });
   });
+  describe('worksheet', () => {
+    test('get', () => {
+      controller.setCell([['1']], [[{ isBold: true }]], {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+
+      expect(controller.getWorksheet()).toEqual({
+        '0_0': { value: 1, style: { isBold: true } },
+      });
+    });
+    test('set', () => {
+      controller.setCell([[1]], [], {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        })?.value,
+      ).toEqual(1);
+
+      controller.setWorksheet({
+        '0_0': { value: 'test', style: { isBold: true } },
+      });
+
+      expect(controller.getWorksheet()).toEqual({
+        '0_0': { value: 'test', style: { isBold: true } },
+      });
+    });
+  });
 });

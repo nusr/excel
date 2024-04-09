@@ -18,7 +18,30 @@ describe('col.test.ts', () => {
     });
     controller.addSheet();
   });
-
+  describe('getColWidth', () => {
+    test('not changed', () => {
+      controller.setColWidth(0, 100);
+      expect(controller.getColWidth(0).len).toEqual(100);
+      controller.setColWidth(0, 100);
+      expect(controller.getColWidth(0).len).toEqual(100);
+    });
+    test('ok', () => {
+      controller.setColWidth(0, 100);
+      expect(controller.getColWidth(0).len).toEqual(100);
+    });
+  });
+  describe('hideCol', () => {
+    test('ok', () => {
+      controller.hideCol(20, 1);
+      expect(controller.getColWidth(20).len).toEqual(0);
+    });
+    test('no changed', () => {
+      controller.hideCol(20, 1);
+      expect(controller.getColWidth(20).len).toEqual(0);
+      controller.hideCol(20, 1);
+      expect(controller.getColWidth(20).len).toEqual(0);
+    });
+  });
   describe('col', () => {
     test('add', () => {
       const old = controller.getSheetInfo(
@@ -46,10 +69,7 @@ describe('col.test.ts', () => {
         controller.getSheetInfo(controller.getCurrentSheetId())!.colCount,
       ).toEqual(old.colCount - 10);
     });
-    test('hide', () => {
-      controller.hideCol(20, 1);
-      expect(controller.getColWidth(20).len).toEqual(0);
-    });
+
     test('undo redo', () => {
       const old = controller.getColWidth(20).len;
       controller.hideCol(20, 1);
@@ -63,10 +83,6 @@ describe('col.test.ts', () => {
   describe('ColWidth', () => {
     test('get', () => {
       expect(controller.getColWidth(100).len).toEqual(68);
-    });
-    test('set', () => {
-      controller.setColWidth(0, 100);
-      expect(controller.getColWidth(0).len).toEqual(100);
     });
     test('hide', () => {
       controller.hideCol(0, 2);

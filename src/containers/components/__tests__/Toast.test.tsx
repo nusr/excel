@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 describe('BaseIcon.test.ts', () => {
   afterEach(cleanup);
   test('normal', () => {
-    const dom = render(<Toast type="success" message="test" />);
+    const dom = render(<Toast type="success" message="test" testId='test' />);
     expect(dom.container.childNodes.length).toEqual(1);
   });
   test('close', () => {
@@ -15,15 +15,15 @@ describe('BaseIcon.test.ts', () => {
       close = toast({
         type: 'success',
         message: 'test',
-        testId: 'toast',
+        testId: 'toast-close',
         duration: 1,
       });
     });
-    expect(screen.getByTestId('toast').textContent).toEqual('test');
+    expect(screen.getByTestId('toast-close').textContent).toEqual('test');
     act(() => {
       close();
     });
-    expect(() => screen.getByTestId('toast')).toThrow();
+    expect(() => screen.getByTestId('toast-close')).toThrow();
   });
   test('close twice', () => {
     let close: any;
@@ -31,18 +31,18 @@ describe('BaseIcon.test.ts', () => {
       close = toast({
         type: 'success',
         message: 'test',
-        testId: 'toast',
+        testId: 'toast-twice',
         duration: 1,
       });
     });
-    expect(screen.getByTestId('toast').textContent).toEqual('test');
+    expect(screen.getByTestId('toast-twice').textContent).toEqual('test');
     act(() => {
       close();
     });
-    expect(() => screen.getByTestId('toast')).toThrow();
+    expect(() => screen.getByTestId('toast-twice')).toThrow();
     act(() => {
       close();
     });
-    expect(() => screen.getByTestId('toast')).toThrow();
+    expect(() => screen.getByTestId('toast-twice')).toThrow();
   });
 });

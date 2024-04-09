@@ -1,8 +1,8 @@
 import { toast } from '../containers/components';
+
 export function assert(
   condition: boolean,
   message = 'assert error',
-  env = process.env.NODE_ENV,
 ): asserts condition {
   if (!condition) {
     toast({
@@ -11,8 +11,6 @@ export function assert(
       duration: 5,
       testId: 'assert_toast',
     });
-    if (env !== 'test') {
-      throw new Error(message);
-    }
+    throw new Error(message);
   }
 }

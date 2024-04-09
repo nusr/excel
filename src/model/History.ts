@@ -74,8 +74,7 @@ export class History implements IHistory {
       return;
     }
     const list = this.commands.filter(
-      (v) =>
-        v.type !== 'scroll' && v.type !== 'antLine' && v.type !== 'rangeMap',
+      (v) => v.type !== 'scroll' && v.type !== 'antLine',
     );
     if (list.length === 0) {
       this.change([...this.commands], 'commit');

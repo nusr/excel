@@ -53,9 +53,6 @@ export class DefinedName implements IDefinedName {
   getDefineName(range: IRange): string {
     const sheetId = range.sheetId || this.model.getCurrentSheetId();
     for (const [key, t] of Object.entries(this.definedNames)) {
-      if (!t) {
-        continue;
-      }
       if (t.row === range.row && t.col === range.col && t.sheetId === sheetId) {
         return key;
       }
@@ -63,6 +60,9 @@ export class DefinedName implements IDefinedName {
     return '';
   }
   setDefineName(range: IRange, name: string): void {
+    if (!name) {
+      return;
+    }
     const oldName = this.getDefineName(range);
     if (oldName === name) {
       return;

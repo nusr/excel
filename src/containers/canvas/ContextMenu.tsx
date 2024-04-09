@@ -65,12 +65,7 @@ function computeMenuStyle(top: number, left: number) {
 const threshold = 10000;
 
 export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
-  const {
-    controller,
-    top,
-    left,
-    hideContextMenu,
-  } = props;
+  const { controller, top, left, hideContextMenu } = props;
   const { row, col, colCount, rowCount } = useSyncExternalStore(
     activeCellStore.subscribe,
     activeCellStore.getSnapshot,
@@ -114,7 +109,11 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       ),
       onOk: () => {
         if (value < 0) {
-          toast({ type: 'error', message: $('greater-than-zero') });
+          toast({
+            type: 'error',
+            message: $('greater-than-zero'),
+            testId: 'context-menu-width-height-toast',
+          });
           return;
         }
         if (isRow) {

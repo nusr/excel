@@ -74,10 +74,7 @@ export const FormulaEditor: React.FunctionComponent<Props> = memo(
   ({ controller, initValue, style, testId }) => {
     const ref = useRef<HTMLInputElement>(null);
     useEffect(() => {
-      if (!ref.current) {
-        return;
-      }
-      ref.current.focus();
+      ref.current?.focus();
     }, []);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
