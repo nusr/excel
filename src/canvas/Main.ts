@@ -19,6 +19,8 @@ import {
   IController,
   Point,
   IRange,
+  MergeCellItem,
+  EMergeCellType,
 } from '@/types';
 import {
   fillRect,
@@ -102,7 +104,7 @@ export class MainCanvas {
 
   private renderMergeCell() {
     const { controller } = this;
-    const range = controller.getActiveCell();
+    const activeCell = controller.getActiveCell();
     const mergeCells = controller.getMergeCellList(
       controller.getCurrentSheetId(),
     );
@@ -110,19 +112,26 @@ export class MainCanvas {
       return;
     }
     for (const item of mergeCells) {
-      const position = controller.computeCellPosition(item);
-      const size = controller.getCellSize(item);
+      const range = item.range;
+      const position = controller.computeCellPosition(range);
+      const size = controller.getCellSize(range);
       if (size.width <= 0 || size.height <= 0) {
         continue;
       }
       // clear merge cell area
       clearRect(this.ctx, position.left, position.top, size.width, size.height);
       // render content
-      renderCellData(controller, this.ctx, item.row, item.col);
-      if (isSheet(range) || isRow(range) || isCol(range)) {
+      renderCellData(
+        controller,
+        this.ctx,
+        range,
+        item.type,
+        // item.type === EMergeCellType.MERGE_CONTENT,
+      );
+      if (isSheet(activeCell) || isRow(activeCell) || isCol(activeCell)) {
         continue;
       }
-      if (containRange(range.row, range.col, item)) {
+      if (containRange(activeCell.row, activeCell.col, range)) {
         this.ctx.strokeStyle = getThemeColor('primaryColor');
         this.ctx.lineWidth = dpr();
         // highlight line
@@ -198,7 +207,7 @@ export class MainCanvas {
     this.ctx.restore();
   }
   private isHighlightRow(
-    mergeCells: IRange[],
+    mergeCells: MergeCellItem[],
     range: IRange,
     row: number,
   ): boolean {
@@ -211,11 +220,13 @@ export class MainCanvas {
     if (row >= range.row && row < range.row + range.rowCount) {
       return true;
     }
-    return mergeCells.some((v) => row >= v.row && row < v.row + v.rowCount);
+    return mergeCells.some(
+      (v) => row >= v.range.row && row < v.range.row + v.range.rowCount,
+    );
   }
 
   private isHighlightCol(
-    mergeCells: IRange[],
+    mergeCells: MergeCellItem[],
     range: IRange,
     col: number,
   ): boolean {
@@ -229,7 +240,9 @@ export class MainCanvas {
     if (col >= range.col && col < range.col + range.colCount) {
       return true;
     }
-    return mergeCells.some((v) => col >= v.col && col < v.col + v.colCount);
+    return mergeCells.some(
+      (v) => col >= v.range.col && col < v.range.col + v.range.colCount,
+    );
   }
   private renderRowsHeader(height: number) {
     const { controller } = this;
@@ -409,7 +422,7 @@ export class MainCanvas {
       cellSize.width,
       cellSize.height,
     );
-    renderCellData(controller, this.ctx, range.row, range.col);
+    renderCellData(controller, this.ctx, temp);
   }
   private renderSelectRange() {
     const { controller } = this;

@@ -70,6 +70,7 @@ src
 - [x] Redo
 - [x] Dark Mode
 - [x] I18N
+- [x] Merge Cells
 
 ## Supported Formulas
 

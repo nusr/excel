@@ -6,6 +6,7 @@ import {
   Select,
   FillColorIcon,
   ColorPicker,
+  SelectList,
 } from '../components';
 import {
   FONT_SIZE_LIST,
@@ -13,7 +14,7 @@ import {
   LOCAL_FONT_KEY,
   isSupportFontFamily,
 } from '@/util';
-import { EUnderLine, OptionItem, IController } from '@/types';
+import { EUnderLine, OptionItem, IController, EMergeCellType } from '@/types';
 import styles from './index.module.css';
 import { fontFamilyStore, styleStore, coreStore } from '@/containers/store';
 import { InsertFloatingPicture, InsertChart } from '../FloatElement';
@@ -26,17 +27,30 @@ interface Props {
 const underlineList: OptionItem[] = [
   {
     value: EUnderLine.NONE,
-    label: 'none',
+    label: $('none'),
     disabled: false,
   },
   {
     value: EUnderLine.SINGLE,
-    label: 'single underline',
+    label: $('single-underline'),
     disabled: false,
   },
   {
     value: EUnderLine.DOUBLE,
-    label: 'double underline',
+    label: $('double-underline'),
+    disabled: false,
+  },
+];
+
+const mergeOptionList: OptionItem[] = [
+  {
+    value: EMergeCellType.MERGE_CENTER,
+    label: $('merge-and-center'),
+    disabled: false,
+  },
+  {
+    value: EMergeCellType.MERGE_CONTENT,
+    label: $('merge-content'),
     disabled: false,
   },
 ];
@@ -170,6 +184,25 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         controller.getActiveCell(),
       );
     }, [cellStyle.isWrapText]);
+    const toggleMergeCell = useCallback(() => {
+      const { range, isMerged } = controller.getActiveRange();
+      if (isMerged) {
+        controller.deleteMergeCell(range);
+      } else {
+        controller.addMergeCell(range);
+      }
+    }, []);
+    const handleMergeCell = useCallback((value: string) => {
+      if (!value) {
+        return;
+      }
+      const { range, isMerged } = controller.getActiveRange();
+      if (isMerged) {
+        controller.deleteMergeCell(range);
+      } else {
+        controller.addMergeCell(range, Number(value));
+      }
+    }, []);
     return (
       <div className={styles['toolbar-wrapper']} data-testid="toolbar">
         <Button
@@ -274,21 +307,23 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         </Button>
         <InsertFloatingPicture controller={controller} />
         <InsertChart controller={controller} />
-        {/* <Button
-        active={cellStyle.isMergeCell}
-        onClick={() => {
-          const { range, isMerged } = controller.getActiveRange();
-          if (isMerged) {
-            controller.deleteMergeCell(range);
-          } else {
-            controller.addMergeCell(range);
-          }
-        }}
-        testId="toolbar-merge-cells"
-        style={wrapTextStyle}
-      >
-        Merge Cells
-      </Button> */}
+        <SelectList
+          data={mergeOptionList}
+          value={cellStyle.mergeType}
+          onChange={handleMergeCell}
+          className={styles['merge-cell']}
+          testId="toolbar-merge-cell-select"
+        >
+          <Button
+            active={cellStyle.isMergeCell}
+            onClick={toggleMergeCell}
+            testId="toolbar-merge-cell"
+            className={styles['merge-cell-button']}
+            type="plain"
+          >
+            {$('merge-cell')}
+          </Button>
+        </SelectList>
         <Github />
       </div>
     );

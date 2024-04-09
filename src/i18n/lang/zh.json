@@ -60,5 +60,11 @@
   "insert-row-above": "在上面插入行",
   "insert-row-below": "在下面插入行",
   "get-all-installed-fonts": "获取本地安装的所有字体",
-  "unsupported-chart-types": "不支持的图表类型"
+  "unsupported-chart-types": "不支持的图表类型",
+  "merge-cell": "合并单元格",
+  "merge-and-center": "合并并且居中",
+  "merge-content": "合并内容",
+  "none": "无",
+  "single-underline": "单层下划线",
+  "double-underline": "双层下划线"
 }

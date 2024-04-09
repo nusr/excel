@@ -7,7 +7,10 @@ import {
 import { NUMBER_FORMAT_LIST, DEFAULT_FONT_SIZE, getThemeColor } from '@/util';
 import { BaseStore } from './base';
 
-export type StyleStoreType = StyleType & { isMergeCell: boolean };
+export type StyleStoreType = StyleType & {
+  isMergeCell: boolean;
+  mergeType: string;
+};
 
 const cellData: StyleStoreType = {
   isBold: false,
@@ -23,6 +26,7 @@ const cellData: StyleStoreType = {
   horizontalAlign: EHorizontalAlign.LEFT,
   numberFormat: NUMBER_FORMAT_LIST[0].id,
   isMergeCell: false,
+  mergeType: '',
 };
 
 export const styleStore = new BaseStore<StyleStoreType>(cellData);

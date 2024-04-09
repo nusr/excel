@@ -76,11 +76,6 @@ export interface CustomItem {
 }
 export type CustomHeightOrWidthItem = Record<string, CustomItem>; // key: sheetId + '_' + row number or col number value: height or width
 
-export interface MergeCellItem {
-  start: Coordinate;
-  end: Coordinate;
-}
-
 export type DrawingElement = {
   title: string;
   type: 'floating-picture' | 'chart';
@@ -115,10 +110,21 @@ export interface EventType {
   changeSet: Set<ChangeEventType>;
 }
 
+export enum EMergeCellType {
+  MERGE_CENTER = 0,
+  MERGE_CELL,
+  MERGE_CONTENT,
+}
+
+export interface MergeCellItem {
+  range: IRange;
+  type: EMergeCellType;
+}
+
 export type WorkBookJSON = {
   worksheets: Record<string, WorksheetData>; // key: sheetId
   workbook: Record<string, WorksheetType>; // key: sheetId, workbook.xml_workbook_sheets
-  mergeCells: Record<string, IRange>; // key: ref, worksheets_*.xml_worksheet_mergeCells
+  mergeCells: Record<string, MergeCellItem>; // key: ref, worksheets_*.xml_worksheet_mergeCells
   customHeight: CustomHeightOrWidthItem; // key: sheetId_row worksheets_*.xml_worksheet_sheetData_customHeight
   customWidth: CustomHeightOrWidthItem; // key: sheetId_col worksheets_*.xml_worksheet_sheetData_customHeight
   definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
@@ -178,8 +184,8 @@ export interface IDefinedName extends IBaseManager {
 
 export interface IMergeCell extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'mergeCells'>;
-  getMergeCellList(sheetId?: string): IRange[];
-  addMergeCell(range: IRange): void;
+  getMergeCellList(sheetId?: string): MergeCellItem[];
+  addMergeCell(range: IRange, type?: EMergeCellType): void;
   deleteMergeCell(range: IRange): void;
 }
 
@@ -213,6 +219,7 @@ export interface IWorksheet extends IBaseManager {
   ): void;
   updateCellStyle(style: Partial<StyleType>, range: IRange): void;
   computeFormulas(): void;
+  getRangeData(range: IRange): Array<Array<ModelCellValue | null>>;
 }
 
 export interface IModel extends IBaseModel {
@@ -263,6 +270,7 @@ export interface IBaseModel
       | 'updateCellStyle'
       | 'getWorksheet'
       | 'setWorksheet'
+      | 'getRangeData'
     > {
   toJSON(): WorkBookJSON;
   canRedo(): boolean;

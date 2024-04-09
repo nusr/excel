@@ -1,4 +1,4 @@
-import { IBaseModel } from './model';
+import { IBaseModel, EMergeCellType } from './model';
 import { CanvasOverlayPosition, ScrollValue } from './components';
 import { IRange } from './range';
 import { IWindowSize, IPosition } from './event';
@@ -25,14 +25,10 @@ export interface IHooks {
 
 export type ClipboardType = 'text/plain' | 'text/html';
 
-export interface MainDom {
-  input?: HTMLInputElement;
-  // canvas?: HTMLCanvasElement;
-}
-
 export type ActiveRange = {
   range: IRange;
   isMerged: boolean;
+  mergeType: EMergeCellType;
 };
 
 export interface IController extends IBaseModel {

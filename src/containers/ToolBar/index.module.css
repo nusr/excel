@@ -10,6 +10,15 @@
   margin-right: 8px;
   margin-bottom: var(--mediumPadding);
 }
+.toolbar-wrapper .merge-cell {
+  height: unset;
+  width: 116px;
+}
+.toolbar-wrapper .merge-cell-button {
+  margin-right: 20px;
+  flex: 1;
+  border-radius: unset;
+}
 .fontFamily {
   font-size: var(--largeFont);
   max-width: 200px;

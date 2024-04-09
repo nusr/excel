@@ -20,6 +20,11 @@ import {
   EUnderLine,
   IController,
   IWindowSize,
+  IRange,
+  ResultType,
+  StyleType,
+  EMergeCellType,
+  EHorizontalAlign,
 } from '@/types';
 
 const measureTextMap = new Map<string, IWindowSize>();
@@ -136,36 +141,59 @@ function drawUnderlineData(
 export function renderCellData(
   controller: IController,
   ctx: CanvasRenderingContext2D,
-  row: number,
-  col: number,
+  range: IRange,
+  type?: EMergeCellType,
 ): IWindowSize {
-  const range = {
-    row,
-    col,
-    colCount: 1,
-    rowCount: 1,
-    sheetId: '',
-  };
-  const cellInfo = controller.getCell(range);
+  let cellInfo = controller.getCell(range);
   const result: IWindowSize = {
     width: 0,
     height: 0,
   };
+  if (type !== undefined && !cellInfo) {
+    const list = controller.getRangeData(range);
+    // look for first not empty cell
+    for (const item of list) {
+      for (const col of item) {
+        if (col) {
+          cellInfo = col;
+          break;
+        }
+      }
+      if (cellInfo) {
+        break;
+      }
+    }
+  }
   if (!cellInfo) {
     return result;
+  }
+  let style: Partial<StyleType> | undefined = cellInfo.style;
+  // TODO EMergeCellType.MERGE_CONTENT
+  if (
+    type === EMergeCellType.MERGE_CENTER ||
+    type === EMergeCellType.MERGE_CELL
+  ) {
+    if (!style) {
+      style = {};
+    }
+    style.horizontalAlign = EHorizontalAlign.CENTER;
   }
   const cellSize = controller.getCellSize(range);
   if (cellSize.width <= 0 || cellSize.height <= 0) {
     return result;
   }
   const position = controller.computeCellPosition(range);
-  const newSize = renderCell(ctx, {
-    ...cellInfo,
-    top: position.top,
-    left: position.left,
-    width: cellSize.width,
-    height: cellSize.height,
-  });
+  const newSize = renderCell(
+    ctx,
+    {
+      top: position.top,
+      left: position.left,
+      width: cellSize.width,
+      height: cellSize.height,
+    },
+    cellInfo.value,
+    style,
+  );
   result.height = Math.ceil(newSize.height);
   result.width = Math.ceil(newSize.width);
   return result;
@@ -173,15 +201,17 @@ export function renderCellData(
 
 export function renderCell(
   ctx: CanvasRenderingContext2D,
-  cellInfo: ModelCellType & CanvasOverlayPosition,
+  cellInfo: CanvasOverlayPosition,
+  value: ResultType,
+  style?: Partial<StyleType>,
 ): IRenderCellResult {
-  const { style, value, left, top, width, height } = cellInfo;
+  const { left, top, width, height } = cellInfo;
   const result: IRenderCellResult = { height: 0, width: 0 };
   const text = convertResultTypeToString(value);
-  if (!text && isEmpty(cellInfo.style)) {
+  if (!text && isEmpty(style)) {
     return result;
   }
-  const isNum = isNumber(value);
+  const isNum = isNumber(text);
   let font = DEFAULT_FONT_CONFIG;
   let fillStyle: string = getThemeColor('contentColor');
   const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
@@ -207,6 +237,19 @@ export function renderCell(
     return result;
   }
   ctx.textAlign = isNum ? 'right' : 'left';
+  const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
+  let offsetX = isNum ? width - lineGap : lineGap;
+  if (style?.horizontalAlign === EHorizontalAlign.CENTER) {
+    ctx.textAlign = 'center';
+    offsetX = Math.ceil(width / 2 + lineGap);
+  } else if (style?.horizontalAlign === EHorizontalAlign.LEFT) {
+    ctx.textAlign = 'left';
+    offsetX = lineGap;
+  } else if (style?.horizontalAlign === EHorizontalAlign.RIGHT) {
+    ctx.textAlign = 'right';
+    offsetX = width - lineGap;
+  }
+
   ctx.font = font;
   ctx.fillStyle = fillStyle;
   ctx.textBaseline = 'middle';
@@ -217,10 +260,8 @@ export function renderCell(
   if (style?.underline) {
     ctx.strokeStyle = fillStyle;
   }
-
   const textHeight = Math.ceil(fontSize * sizeConfig.lineHeight);
-  const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
-  const x = left + (isNum ? width - lineGap : lineGap);
+  const x = left + offsetX;
   result.height = textHeight;
   if (style?.isWrapText) {
     result.height = lineGap * 2;

@@ -290,6 +290,22 @@ export class Worksheet implements IWorksheet {
       oldValue: oldData ? oldData : DELETE_FLAG,
     });
   }
+  getRangeData(range: IRange): Array<Array<ModelCellValue | null>> {
+    const result: Array<Array<ModelCellValue | null>> = [];
+    const sheetId = range.sheetId || this.model.getCurrentSheetId();
+    let startRow = range.row;
+    let list: Array<ModelCellValue | null> = [];
+    this.model.iterateRange(range, (row, col) => {
+      if (row !== startRow) {
+        result.push(list.slice());
+        list = [];
+        startRow++;
+      }
+      list.push(this.getCell({ row, col, sheetId, rowCount: 1, colCount: 1 }));
+      return false;
+    });
+    return result;
+  }
   getCell(range: IRange): ModelCellValue | null {
     const { row, col, sheetId } = range;
     const id = sheetId || this.model.getCurrentSheetId();

@@ -16,6 +16,9 @@ import {
   IPosition,
   DefinedNameItem,
   WorksheetData,
+  MergeCellItem,
+  EMergeCellType,
+  ActiveRange,
 } from '@/types';
 import {
   PLAIN_FORMAT,
@@ -85,24 +88,26 @@ export class Controller implements IController {
     const range = this.model.getActiveCell();
     return range;
   }
-  private getRange(range: IRange) {
+  private getRange(range: IRange): ActiveRange {
     const mergeCells = this.getMergeCellList(this.getCurrentSheetId());
     if (mergeCells.length === 0) {
       return {
         range,
         isMerged: false,
+        mergeType: EMergeCellType.MERGE_CENTER,
       };
     }
 
     for (const item of mergeCells) {
-      if (containRange(range.row, range.col, item)) {
+      if (containRange(range.row, range.col, item.range)) {
         const newRange = {
-          ...item,
-          sheetId: item.sheetId || this.getCurrentSheetId(),
+          ...item.range,
+          sheetId: item.range.sheetId || this.getCurrentSheetId(),
         };
         return {
           range: newRange,
           isMerged: true,
+          mergeType: item.type,
         };
       }
     }
@@ -110,6 +115,7 @@ export class Controller implements IController {
     return {
       range,
       isMerged: false,
+      mergeType: EMergeCellType.MERGE_CENTER,
     };
   }
   getActiveRange() {
@@ -117,12 +123,14 @@ export class Controller implements IController {
     return this.getRange(range);
   }
   setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up'): IRange {
-    const range = this.getActiveCell();
+    const { range, isMerged } = this.getActiveRange();
     let startCol = range.col;
     let startRow = range.row;
     const sheetInfo = this.getSheetInfo(range.sheetId)!;
-    const result = {
+    const result: IRange = {
       ...range,
+      rowCount: 1,
+      colCount: 1,
     };
     if (direction === 'left') {
       startCol--;
@@ -132,7 +140,11 @@ export class Controller implements IController {
       result.col = startCol;
     }
     if (direction === 'right') {
-      startCol++;
+      if (isMerged) {
+        startCol = range.col + range.colCount;
+      } else {
+        startCol++;
+      }
       while (
         startCol < sheetInfo.colCount &&
         this.getColWidth(startCol).len <= 0
@@ -149,7 +161,12 @@ export class Controller implements IController {
       result.row = startRow;
     }
     if (direction === 'down') {
-      startRow++;
+      if (isMerged) {
+        startRow = range.row + range.rowCount;
+      } else {
+        startRow++;
+      }
+
       while (
         startRow < sheetInfo.rowCount &&
         this.getRowHeight(startRow).len <= 0
@@ -239,6 +256,9 @@ export class Controller implements IController {
     const result = this.model.getCell(range);
     return result;
   };
+  getRangeData(range: IRange) {
+    return this.model.getRangeData(range);
+  }
   canRedo(): boolean {
     return this.model.canRedo();
   }
@@ -625,11 +645,11 @@ export class Controller implements IController {
     this.model.deleteDrawing(uuid);
     this.emitChange();
   }
-  getMergeCellList(sheetId?: string): IRange[] {
+  getMergeCellList(sheetId?: string): MergeCellItem[] {
     return this.model.getMergeCellList(sheetId);
   }
-  addMergeCell(range: IRange): void {
-    this.model.addMergeCell(range);
+  addMergeCell(range: IRange, type?: EMergeCellType): void {
+    this.model.addMergeCell(range, type);
     this.emitChange();
   }
   deleteMergeCell(range: IRange): void {

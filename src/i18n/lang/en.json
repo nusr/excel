@@ -60,5 +60,11 @@
   "insert-row-above": "Insert Row Above",
   "insert-row-below": "Insert Row Below",
   "get-all-installed-fonts": "Get all the fonts installed locally",
-  "unsupported-chart-types": "Unsupported chart types"
+  "unsupported-chart-types": "Unsupported chart types",
+  "merge-cell": "Merge",
+  "merge-and-center": "Merge and Center",
+  "merge-content": "Merge Content",
+  "none": "none",
+  "single-underline": "single underline",
+  "double-underline": "double underline"
 }

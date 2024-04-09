@@ -82,7 +82,13 @@ export class Content implements ContentView {
 
     for (let rowIndex = row; rowIndex < endRow; rowIndex++) {
       for (let colIndex = col; colIndex < endCol; colIndex++) {
-        const size = renderCellData(controller, ctx, rowIndex, colIndex);
+        const size = renderCellData(controller, ctx, {
+          row: rowIndex,
+          col: colIndex,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: '',
+        });
         const height = Math.max(this.rowMap.get(rowIndex) || 0, size.height);
         const width = Math.max(this.colMap.get(colIndex) || 0, size.width);
         if (height > controller.getRowHeight(rowIndex).len) {

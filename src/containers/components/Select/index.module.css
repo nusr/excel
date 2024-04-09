@@ -61,23 +61,21 @@
 
 .select-list-container {
   height: 100%;
-  border-radius: 2px;
   text-align: center;
   background-color: var(--white);
   user-select: none;
   display: flex;
   align-items: center;
   position: relative;
+  border-radius: var(--borderRadius);
   border: 1px solid var(--borderColor);
   box-sizing: border-box;
 }
 
-.select-list-trigger {
+.select-list-container .select-list-trigger {
   position: absolute;
   right: 0;
-  border: none;
   border-radius: unset;
-  border-right: none;
   border-left: 1px solid var(--borderColor);
   display: flex;
   align-items: center;

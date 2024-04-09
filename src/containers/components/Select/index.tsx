@@ -174,6 +174,7 @@ export const SelectList: FunctionComponent<
         className={styles['select-list-trigger']}
         onClick={handleClick}
         testId={`${testId}-trigger`}
+        type="plain"
       >
         <Icon name="down"></Icon>
       </Button>

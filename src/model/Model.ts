@@ -12,6 +12,8 @@ import {
   ICommandItem,
   DefinedNameItem,
   WorksheetData,
+  MergeCellItem,
+  EMergeCellType,
 } from '@/types';
 import {
   assert,
@@ -184,6 +186,9 @@ export class Model implements IModel {
   getCell = (range: IRange): ModelCellValue | null => {
     return this.worksheetManager.getCell(range);
   };
+  getRangeData(range: IRange) {
+    return this.worksheetManager.getRangeData(range);
+  }
   getWorksheet(sheetId?: string): WorksheetData | null {
     return this.worksheetManager.getWorksheet(sheetId);
   }
@@ -347,11 +352,11 @@ export class Model implements IModel {
   deleteDrawing(uuid: string) {
     this.drawingsManager.deleteDrawing(uuid);
   }
-  getMergeCellList(sheetId?: string): IRange[] {
+  getMergeCellList(sheetId?: string): MergeCellItem[] {
     return this.mergeCellManager.getMergeCellList(sheetId);
   }
-  addMergeCell(range: IRange): void {
-    this.mergeCellManager.addMergeCell(range);
+  addMergeCell(range: IRange, type?: EMergeCellType): void {
+    this.mergeCellManager.addMergeCell(range, type);
   }
   deleteMergeCell(range: IRange): void {
     this.mergeCellManager.deleteMergeCell(range);

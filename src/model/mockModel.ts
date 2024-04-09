@@ -1,4 +1,4 @@
-import { WorkBookJSON, EUnderLine } from '@/types';
+import { WorkBookJSON, EUnderLine, EMergeCellType } from '@/types';
 import {
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
@@ -6,9 +6,10 @@ import {
   isMobile,
 } from '@/util';
 import { mockImage } from './mockData';
+import { $ } from '@/i18n';
 
 const MOCK_MODEL: WorkBookJSON = {
-  currentSheetId: '',
+  currentSheetId: '8',
   rangeMap: {
     '1': {
       row: 2,
@@ -30,6 +31,13 @@ const MOCK_MODEL: WorkBookJSON = {
       rowCount: 2,
       colCount: 2,
       sheetId: '3',
+    },
+    '8': {
+      row: 2,
+      col: 2,
+      rowCount: 2,
+      colCount: 2,
+      sheetId: '8',
     },
   },
   workbook: {
@@ -93,6 +101,14 @@ const MOCK_MODEL: WorkBookJSON = {
       rowCount: DEFAULT_ROW_COUNT,
       sort: 7,
       tabColor: '#E7258F',
+    },
+    '8': {
+      sheetId: '8',
+      name: 'merge cell',
+      isHide: false,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      sort: 8,
     },
   },
   worksheets: {
@@ -265,10 +281,34 @@ const MOCK_MODEL: WorkBookJSON = {
       '3_0': { value: '', formula: '=E()*PI()' },
       '4_0': { value: '', formula: '=SUM(1, SIN(PI()/2),3)' },
     },
+    '8': {
+      '2_2': {
+        value: 1,
+      },
+      '2_3': {
+        value: 2,
+      },
+      '3_2': {
+        value: 3,
+      },
+      '3_3': {
+        value: 4,
+      },
+    },
   },
 
-  // TODO:
-  mergeCells: {},
+  mergeCells: {
+    'merge cell!$C$3:$D$4': {
+      range: {
+        row: 2,
+        col: 2,
+        rowCount: 2,
+        colCount: 2,
+        sheetId: '8',
+      },
+      type: EMergeCellType.MERGE_CENTER,
+    },
+  },
   customHeight: {},
   customWidth: {
     '6_0': {
@@ -286,7 +326,7 @@ const MOCK_MODEL: WorkBookJSON = {
     '6_3': {
       len: 150,
       isHide: false,
-    }
+    },
   },
   definedNames: {
     foo: {
@@ -310,7 +350,7 @@ const MOCK_MODEL: WorkBookJSON = {
 if (!isMobile()) {
   const imageUuid = generateUUID();
   MOCK_MODEL.drawings[imageUuid] = {
-    title: 'icon',
+    title: $('floating-picture'),
     type: 'floating-picture',
     uuid: imageUuid,
     imageSrc: mockImage,
@@ -326,7 +366,7 @@ if (!isMobile()) {
   };
   const chartUuid = generateUUID();
   MOCK_MODEL.drawings[chartUuid] = {
-    title: 'Chart Title',
+    title: $('chart-title'),
     type: 'chart',
     uuid: chartUuid,
     width: 400,
@@ -349,7 +389,14 @@ if (!isMobile()) {
   };
 }
 
-for (let i = 9; i < 20; i++) {
+const maxSheetId = Math.max(
+  ...Object.values(MOCK_MODEL.workbook).map((v) => {
+    const t = parseInt(v.sheetId, 10);
+    return isNaN(t) ? 0 : t;
+  }),
+);
+
+for (let i = maxSheetId + 1; i < 20; i++) {
   const id = String(i);
   MOCK_MODEL.workbook[id] = {
     sheetId: id,

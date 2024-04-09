@@ -82,7 +82,11 @@ function getChartData(
 
 function updateActiveCell(controller: IController) {
   const { top } = canvasSizeSet.get();
-  const { range: activeCell, isMerged } = controller.getActiveRange();
+  const {
+    range: activeCell,
+    isMerged,
+    mergeType,
+  } = controller.getActiveRange();
   const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
   const cell = controller.getCell(activeCell);
   const defineName = controller.getDefineName({
@@ -144,6 +148,7 @@ function updateActiveCell(controller: IController) {
     underline,
     numberFormat,
     isMergeCell: isMerged,
+    mergeType: isMerged ? String(mergeType) : '',
   });
 }
 

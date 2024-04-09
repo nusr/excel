@@ -1,7 +1,7 @@
 import { Controller } from '..';
 import { Model } from '@/model';
 import { HTML_FORMAT, PLAIN_FORMAT, headerSizeSet } from '@/util';
-import { WorkBookJSON, EUnderLine } from '@/types';
+import { WorkBookJSON, EUnderLine, EMergeCellType } from '@/types';
 
 describe('controller.test.ts', () => {
   let controller: Controller;
@@ -375,11 +375,14 @@ describe('controller.test.ts', () => {
         },
         mergeCells: {
           'Sheet1!$U$21:$X$24': {
-            row: 20,
-            col: 20,
-            rowCount: 3,
-            colCount: 3,
-            sheetId,
+            range: {
+              row: 20,
+              col: 20,
+              rowCount: 3,
+              colCount: 3,
+              sheetId,
+            },
+            type: EMergeCellType.MERGE_CENTER,
           },
         },
         customHeight: {
@@ -454,11 +457,14 @@ describe('controller.test.ts', () => {
         },
         mergeCells: {
           'Sheet1!$U$21:$X$24': {
-            row: 20,
-            col: 20,
-            rowCount: 3,
-            colCount: 3,
-            sheetId,
+            range: {
+              row: 20,
+              col: 20,
+              rowCount: 3,
+              colCount: 3,
+              sheetId,
+            },
+            type: EMergeCellType.MERGE_CENTER,
           },
         },
         customHeight: {
