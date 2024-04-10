@@ -8,6 +8,7 @@ export const SHEET_NAME_PREFIX = 'Sheet';
 export const CELL_HEIGHT = 24;
 export const CELL_WIDTH = 68;
 export const HIDE_CELL = 0;
+export const MERGE_CELL_LINE_BREAK = '&#10;';
 export const XLSX_MAX_COL_COUNT = 16384; // XFD
 export const XLSX_MAX_ROW_COUNT = 1048576;
 export const DEFAULT_ROW_COUNT = 200;

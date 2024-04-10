@@ -265,11 +265,7 @@ export function checkFocus() {
 
 export function setActiveCellValue(controller: IController) {
   const inputDom = document.activeElement as HTMLInputElement;
-  const data = controller.getActiveRange();
-  const activeCell: IRange = data.isMerged
-    ? { ...data.firstCell, rowCount: 1, colCount: 1, sheetId: '' }
-    : data.range;
-  controller.setCell([[inputDom.value]], [], activeCell);
+  controller.setCell([[inputDom.value]], [], controller.getActiveRange().range);
   inputDom.value = '';
   inputDom.blur();
   coreStore.mergeState({

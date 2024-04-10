@@ -16,7 +16,6 @@ import {
   IPosition,
   DefinedNameItem,
   WorksheetData,
-  MergeCellItem,
   EMergeCellType,
   ActiveRange,
 } from '@/types';
@@ -92,33 +91,27 @@ export class Controller implements IController {
     const mergeCells = this.getMergeCellList(this.getCurrentSheetId());
     if (mergeCells.length === 0) {
       return {
-        firstCell: { row: range.row, col: range.col },
         range,
         isMerged: false,
-        type: EMergeCellType.MERGE_CENTER,
       };
     }
 
     for (const item of mergeCells) {
-      if (containRange(range.row, range.col, item.range)) {
+      if (containRange(range.row, range.col, item)) {
         const newRange = {
-          ...item.range,
-          sheetId: item.range.sheetId || this.getCurrentSheetId(),
+          ...item,
+          sheetId: item.sheetId || this.getCurrentSheetId(),
         };
         return {
           range: newRange,
           isMerged: true,
-          type: item.type,
-          firstCell: item.firstCell,
         };
       }
     }
 
     return {
-      firstCell: { row: range.row, col: range.col },
       range,
       isMerged: false,
-      type: EMergeCellType.MERGE_CENTER,
     };
   }
   getActiveRange() {
@@ -648,7 +641,7 @@ export class Controller implements IController {
     this.model.deleteDrawing(uuid);
     this.emitChange();
   }
-  getMergeCellList(sheetId?: string): MergeCellItem[] {
+  getMergeCellList(sheetId?: string) {
     return this.model.getMergeCellList(sheetId);
   }
   addMergeCell(range: IRange, type?: EMergeCellType): void {

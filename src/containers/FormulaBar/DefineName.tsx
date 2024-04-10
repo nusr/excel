@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import { IController } from '@/types';
 import styles from './index.module.css';
-import { parseReference, MAX_NAME_LENGTH } from '@/util';
+import { parseReference, MAX_NAME_LENGTH, MAX_PARAMS_COUNT } from '@/util';
 import { scrollToView } from '@/canvas';
 import { SelectList } from '../components';
 import { defineNameStore } from '../store';
@@ -70,7 +70,10 @@ export const DefineName: React.FunctionComponent<Props> = memo(
             scrollToView(controller, r);
             return;
           }
-          if (/^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(t) && t.length <= 255) {
+          if (
+            /^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(t) &&
+            t.length <= MAX_PARAMS_COUNT
+          ) {
             controller.setDefineName(controller.getActiveCell(), t);
           } else {
             setValue(displayName);
@@ -87,6 +90,9 @@ export const DefineName: React.FunctionComponent<Props> = memo(
     );
     const handleSelect = useCallback((value: string) => {
       const range = controller.checkDefineName(value);
+      if (!range) {
+        return;
+      }
       scrollToView(controller, range!);
     }, []);
     return (

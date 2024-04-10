@@ -60,15 +60,38 @@ describe('importXLSX.test.ts', () => {
             colCount: 200,
             sort: 0,
           },
+          '6': {
+            colCount: 200,
+            isHide: false,
+            name: 'Sheet5',
+            rowCount: 200,
+            sheetId: '6',
+            sort: 4,
+          },
         },
-        mergeCells: {},
+        mergeCells: {
+          'Sheet5!B2:C3': {
+            col: 1,
+            colCount: 2,
+            row: 1,
+            rowCount: 2,
+            sheetId: '6',
+          },
+          'Sheet5!F7:G8': {
+            col: 5,
+            colCount: 2,
+            row: 6,
+            rowCount: 2,
+            sheetId: '6',
+          },
+        },
         customHeight: {},
         customWidth: {
           '2_1': { len: 149, isHide: false },
           '2_3': { len: 350, isHide: false },
         },
         definedNames: {},
-        currentSheetId: '5',
+        currentSheetId: '6',
         drawings: {
           '1': {
             title: 'Picture 2',
@@ -115,6 +138,13 @@ describe('importXLSX.test.ts', () => {
           '3': { row: 9, col: 8, rowCount: 2, colCount: 1, sheetId: '3' },
           '4': { row: 19, col: 9, rowCount: 1, colCount: 1, sheetId: '4' },
           '5': { row: 0, col: 2, rowCount: 1, colCount: 1, sheetId: '5' },
+          '6': {
+            col: 7,
+            colCount: 1,
+            row: 6,
+            rowCount: 1,
+            sheetId: '6',
+          },
         },
         worksheets: {
           '2': {
@@ -295,6 +325,47 @@ describe('importXLSX.test.ts', () => {
             '0_2': {
               formula: '=SUM(A1,B1)',
               value: 3,
+            },
+          },
+          '6': {
+            '1_1': {
+              style: {
+                isWrapText: true,
+                verticalAlign: 1,
+              },
+              value: '1\n3\n2\n4',
+            },
+            '6_5': {
+              style: {
+                horizontalAlign: 1,
+                isWrapText: false,
+                verticalAlign: 1,
+              },
+              value: 2,
+            },
+            '6_6': {
+              style: {
+                horizontalAlign: 1,
+                isWrapText: false,
+                verticalAlign: 1,
+              },
+              value: '',
+            },
+            '7_5': {
+              style: {
+                horizontalAlign: 1,
+                isWrapText: false,
+                verticalAlign: 1,
+              },
+              value: '',
+            },
+            '7_6': {
+              style: {
+                horizontalAlign: 1,
+                isWrapText: false,
+                verticalAlign: 1,
+              },
+              value: '',
             },
           },
         },

@@ -1,7 +1,7 @@
 import { Controller } from '..';
 import { Model } from '@/model';
 import { HTML_FORMAT, PLAIN_FORMAT, headerSizeSet } from '@/util';
-import { WorkBookJSON, EUnderLine, EMergeCellType } from '@/types';
+import { WorkBookJSON, EUnderLine } from '@/types';
 
 describe('controller.test.ts', () => {
   let controller: Controller;
@@ -375,18 +375,11 @@ describe('controller.test.ts', () => {
         },
         mergeCells: {
           'Sheet1!$U$21:$X$24': {
-            range: {
-              row: 20,
-              col: 20,
-              rowCount: 3,
-              colCount: 3,
-              sheetId,
-            },
-            type: EMergeCellType.MERGE_CENTER,
-            firstCell: {
-              row: 20,
-              col: 20,
-            },
+            row: 20,
+            col: 20,
+            rowCount: 3,
+            colCount: 3,
+            sheetId,
           },
         },
         customHeight: {
@@ -438,7 +431,7 @@ describe('controller.test.ts', () => {
         workbook: {
           [sheetId]: {
             rowCount: 200,
-            colCount: 30,
+            colCount: 100,
             sort: 1,
             name: 'Sheet1',
             sheetId,
@@ -461,18 +454,11 @@ describe('controller.test.ts', () => {
         },
         mergeCells: {
           'Sheet1!$U$21:$X$24': {
-            range: {
-              row: 20,
-              col: 20,
-              rowCount: 3,
-              colCount: 3,
-              sheetId,
-            },
-            type: EMergeCellType.MERGE_CENTER,
-            firstCell: {
-              row: 20,
-              col: 20,
-            },
+            row: 20,
+            col: 20,
+            rowCount: 3,
+            colCount: 3,
+            sheetId,
           },
         },
         customHeight: {
@@ -513,13 +499,13 @@ describe('controller.test.ts', () => {
         },
       };
       controller.fromJSON(result);
+      expect(controller.getColWidth(40).len).toEqual(300);
+      expect(controller.getRowHeight(50).len).toEqual(200);
       expect(controller.getCurrentSheetId()).toEqual(sheetId);
       expect(controller.getSheetList()).toHaveLength(1);
       expect(controller.getDefineNameList()).toHaveLength(1);
       expect(controller.getMergeCellList()).toHaveLength(1);
       expect(controller.getDrawingList()).toHaveLength(1);
-      expect(controller.getColWidth(40).len).toEqual(300);
-      expect(controller.getRowHeight(50).len).toEqual(200);
       expect(
         controller.getCell({
           row: 0,
@@ -529,8 +515,6 @@ describe('controller.test.ts', () => {
           sheetId,
         }),
       ).toEqual({
-        row: 0,
-        col: 0,
         formula: '=SUM(1,2)',
         value: 3,
         style: {

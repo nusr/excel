@@ -34,7 +34,6 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
         `${intToColumnName(activeCell.col)}${activeCell.row + 1}`
       );
     }, [activeCell]);
-    const editorValue = activeCell.formula || activeCell.value;
     const handleClick = () => {
       coreStore.mergeState({
         editorStatus: EditorStatus.EDIT_FORMULA_BAR,
@@ -54,7 +53,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
           {editorStatus !== EditorStatus.NONE && (
             <FormulaEditor
               controller={controller}
-              initValue={editorValue}
+              initValue={activeCell.value}
               style={getEditorStyle(activeCell, editorStatus, cellStyle)}
               testId="formula-editor"
             />
@@ -67,7 +66,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
             onClick={handleClick}
             data-testid="formula-editor-trigger"
           >
-            {editorValue}
+            {activeCell.value}
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { WorkBookJSON, EUnderLine, EMergeCellType } from '@/types';
+import { WorkBookJSON, EUnderLine, EHorizontalAlign } from '@/types';
 import {
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
@@ -9,7 +9,7 @@ import { mockImage } from './mockData';
 import { $ } from '@/i18n';
 
 const MOCK_MODEL: WorkBookJSON = {
-  currentSheetId: '8',
+  currentSheetId: '',
   rangeMap: {
     '1': {
       row: 2,
@@ -284,36 +284,28 @@ const MOCK_MODEL: WorkBookJSON = {
     '8': {
       '2_2': {
         value: 1,
-      },
-      '2_3': {
-        value: 2,
-      },
-      '3_2': {
-        value: 3,
-      },
-      '3_3': {
-        value: 4,
+        style: {
+          horizontalAlign: EHorizontalAlign.CENTER,
+        },
       },
     },
   },
 
   mergeCells: {
     'merge cell!$C$3:$D$4': {
-      range: {
-        row: 2,
-        col: 2,
-        rowCount: 2,
-        colCount: 2,
-        sheetId: '8',
-      },
-      type: EMergeCellType.MERGE_CENTER,
-      firstCell: {
-        row: 2,
-        col: 2,
-      },
+      row: 2,
+      col: 2,
+      rowCount: 2,
+      colCount: 2,
+      sheetId: '8',
     },
   },
-  customHeight: {},
+  customHeight: {
+    '1_1': {
+      len: 100,
+      isHide: false,
+    }
+  },
   customWidth: {
     '6_0': {
       len: 150,

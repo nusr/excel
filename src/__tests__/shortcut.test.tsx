@@ -232,8 +232,6 @@ describe('shortcut.test.tsx', () => {
       await waitFor(() => {
         expect(controller.getCell(controller.getActiveCell())).toEqual({
           style: { isBold: true },
-          row: 1,
-          col: 0,
         });
         expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
       });
@@ -258,8 +256,6 @@ describe('shortcut.test.tsx', () => {
       await waitFor(() => {
         expect(controller.getCell(controller.getActiveCell())).toEqual({
           style: { isBold: true },
-          row: 1,
-          col: 0,
         });
         expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
       });

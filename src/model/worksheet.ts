@@ -1,7 +1,6 @@
 import {
   WorkBookJSON,
   ICommandItem,
-  ModelCellValue,
   Coordinate,
   IRange,
   IModel,
@@ -9,6 +8,9 @@ import {
   ResultType,
   StyleType,
   WorksheetData,
+  EMergeCellType,
+  ModelCellType,
+  EHorizontalAlign,
 } from '@/types';
 import {
   coordinateToString,
@@ -18,6 +20,8 @@ import {
   deepEqual,
   stringToCoordinate,
   convertStringToResultType,
+  MERGE_CELL_LINE_BREAK,
+  convertResultTypeToString,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { parseFormula, CustomError } from '@/formula';
@@ -78,6 +82,88 @@ export class Worksheet implements IWorksheet {
   redo(item: ICommandItem): void {
     if (item.type === 'worksheets') {
       transformData(this, item, 'redo');
+    }
+  }
+  addMergeCell(range: IRange, type?: EMergeCellType): void {
+    const isMergeContent = type === EMergeCellType.MERGE_CONTENT;
+    let list: ModelCellType[] = [];
+    this.model.iterateRange(range, (row, col) => {
+      const cellInfo = this.model.getCell({
+        row,
+        col,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: range.sheetId,
+      });
+      if (!cellInfo) {
+        return false;
+      }
+
+      if (isMergeContent) {
+        list.push({ ...cellInfo });
+      } else {
+        if (list.length === 0) {
+          list.push({ ...cellInfo });
+        }
+      }
+      if (row !== range.row || col !== range.col) {
+        const oldValue = { ...cellInfo };
+        const key = coordinateToString(row, col);
+        delete this.worksheets[range.sheetId][key];
+        this.model.push({
+          type: 'worksheets',
+          key: `${range.sheetId}.${key}`,
+          newValue: DELETE_FLAG,
+          oldValue,
+        });
+      }
+      return false;
+    });
+    if (list.length === 0) {
+      return;
+    }
+    // If it exists formula, only use the first cell data
+    if (list.some((v) => v.formula)) {
+      list = [list[0]];
+    }
+    const key = coordinateToString(range.row, range.col);
+    let newCellData: ModelCellType | null = null;
+    if (list.length > 1) {
+      newCellData = {
+        value: '',
+        style: list[0].style,
+      };
+      newCellData.value = list
+        .map((v) => convertResultTypeToString(v.value))
+        .join(MERGE_CELL_LINE_BREAK);
+    } else {
+      newCellData = list[0];
+    }
+    if (newCellData) {
+      const oldValue = this.worksheets[range.sheetId][key]
+        ? { ...this.worksheets[range.sheetId][key] }
+        : undefined;
+      if (
+        type === EMergeCellType.MERGE_CELL ||
+        type === EMergeCellType.MERGE_CENTER
+      ) {
+        if (!newCellData.style) {
+          newCellData.style = {};
+        }
+        newCellData.style.horizontalAlign = EHorizontalAlign.CENTER;
+      } else if (type === EMergeCellType.MERGE_CONTENT) {
+        if (!newCellData.style) {
+          newCellData.style = {};
+        }
+        newCellData.style.isWrapText = true;
+      }
+      this.worksheets[range.sheetId][key] = newCellData;
+      this.model.push({
+        type: 'worksheets',
+        key: `${range.sheetId}.${key}`,
+        newValue: newCellData,
+        oldValue: oldValue ? oldValue : DELETE_FLAG,
+      });
     }
   }
   addRow(rowIndex: number, count: number, isAbove = false): void {
@@ -290,11 +376,11 @@ export class Worksheet implements IWorksheet {
       oldValue: oldData ? oldData : DELETE_FLAG,
     });
   }
-  getRangeData(range: IRange): Array<Array<ModelCellValue | null>> {
-    const result: Array<Array<ModelCellValue | null>> = [];
+  getRangeData(range: IRange): Array<Array<ModelCellType | null>> {
+    const result: Array<Array<ModelCellType | null>> = [];
     const sheetId = range.sheetId || this.model.getCurrentSheetId();
     let startRow = range.row;
-    let list: Array<ModelCellValue | null> = [];
+    let list: Array<ModelCellType | null> = [];
     this.model.iterateRange(range, (row, col) => {
       if (row !== startRow) {
         result.push(list.slice());
@@ -306,7 +392,7 @@ export class Worksheet implements IWorksheet {
     });
     return result;
   }
-  getCell(range: IRange): ModelCellValue | null {
+  getCell(range: IRange): ModelCellType | null {
     const { row, col, sheetId } = range;
     const id = sheetId || this.model.getCurrentSheetId();
     if (
@@ -324,8 +410,6 @@ export class Worksheet implements IWorksheet {
     }
     return {
       ...cellData,
-      row,
-      col,
     };
   }
   setCell(

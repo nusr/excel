@@ -5,14 +5,12 @@ import {
   IModel,
   ResultType,
   IRange,
-  ModelCellValue,
   CustomItem,
   DrawingElement,
   ChangeEventType,
   ICommandItem,
   DefinedNameItem,
   WorksheetData,
-  MergeCellItem,
   EMergeCellType,
 } from '@/types';
 import {
@@ -111,6 +109,9 @@ export class Model implements IModel {
   }
   addSheet() {
     const result = this.workbookManager.addSheet();
+    if (!result) {
+      return null;
+    }
     this.worksheetManager.setWorksheet({}, result.sheetId);
     this.workbookManager.setCurrentSheetId(result.sheetId);
     this.computeViewSize();
@@ -183,7 +184,7 @@ export class Model implements IModel {
   updateCellStyle(style: Partial<StyleType>, range: IRange): void {
     return this.worksheetManager.updateCellStyle(style, range);
   }
-  getCell = (range: IRange): ModelCellValue | null => {
+  getCell = (range: IRange) => {
     return this.worksheetManager.getCell(range);
   };
   getRangeData(range: IRange) {
@@ -352,14 +353,28 @@ export class Model implements IModel {
   deleteDrawing(uuid: string) {
     this.drawingsManager.deleteDrawing(uuid);
   }
-  getMergeCellList(sheetId?: string): MergeCellItem[] {
+  getMergeCellList(sheetId?: string) {
     return this.mergeCellManager.getMergeCellList(sheetId);
   }
-  addMergeCell(range: IRange, type?: EMergeCellType): void {
-    this.mergeCellManager.addMergeCell(range, type);
+  addMergeCell(range: IRange, type = EMergeCellType.MERGE_CENTER): void {
+    if (range.colCount === 1 && range.rowCount === 1) {
+      return;
+    }
+    range.sheetId = range.sheetId || this.getCurrentSheetId();
+    this.mergeCellManager.addMergeCell(range);
+    this.worksheetManager.addMergeCell(range, type);
   }
   deleteMergeCell(range: IRange): void {
     this.mergeCellManager.deleteMergeCell(range);
+  }
+  validateRange(range: IRange) {
+    return this.rangeMapManager.validateRange(range);
+  }
+  validateDrawing(data: DrawingElement) {
+    return this.drawingsManager.validateDrawing(data);
+  }
+  validateDefinedName(name: string) {
+    return this.definedNameManager.validateDefinedName(name);
   }
   private historyChange = (list: ICommandItem[], type: HistoryChangeType) => {
     const changeSet = modelToChangeSet(list);

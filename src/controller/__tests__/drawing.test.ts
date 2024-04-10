@@ -20,62 +20,59 @@ describe('drawing.test.ts', () => {
   });
   describe('addDrawing', () => {
     test('empty chartType', () => {
-      expect(() =>
-        controller.addDrawing({
-          title: 'chart',
-          type: 'chart',
-          chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
-          sheetId: controller.getCurrentSheetId(),
-          width: 300,
-          height: 300,
-          marginX: 0,
-          marginY: 0,
-          originHeight: 300,
-          originWidth: 300,
-          uuid: '1',
-          fromCol: 4,
-          fromRow: 4,
-        }),
-      ).toThrow();
+      controller.addDrawing({
+        title: 'chart',
+        type: 'chart',
+        chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+        sheetId: controller.getCurrentSheetId(),
+        width: 300,
+        height: 300,
+        marginX: 0,
+        marginY: 0,
+        originHeight: 300,
+        originWidth: 300,
+        uuid: '1',
+        fromCol: 4,
+        fromRow: 4,
+      }),
+        expect(controller.getDrawingList()).toHaveLength(0);
     });
     test('not support chartType', () => {
-      expect(() =>
-        controller.addDrawing({
-          title: 'chart',
-          type: 'chart',
-          chartType: 'test' as any,
-          chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
-          sheetId: controller.getCurrentSheetId(),
-          width: 300,
-          height: 300,
-          marginX: 0,
-          marginY: 0,
-          originHeight: 300,
-          originWidth: 300,
-          uuid: '1',
-          fromCol: 4,
-          fromRow: 4,
-        }),
-      ).toThrow();
+      controller.addDrawing({
+        title: 'chart',
+        type: 'chart',
+        chartType: 'test' as any,
+        chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+        sheetId: controller.getCurrentSheetId(),
+        width: 300,
+        height: 300,
+        marginX: 0,
+        marginY: 0,
+        originHeight: 300,
+        originWidth: 300,
+        uuid: '1',
+        fromCol: 4,
+        fromRow: 4,
+      }),
+        expect(controller.getDrawingList()).toHaveLength(0);
     });
     test('not support chartRange', () => {
-      expect(() =>
-        controller.addDrawing({
-          title: 'chart',
-          type: 'chart',
-          chartType: 'line',
-          sheetId: controller.getCurrentSheetId(),
-          width: 300,
-          height: 300,
-          marginX: 0,
-          marginY: 0,
-          originHeight: 300,
-          originWidth: 300,
-          uuid: '1',
-          fromCol: 4,
-          fromRow: 4,
-        }),
-      ).toThrow();
+      controller.addDrawing({
+        title: 'chart',
+        type: 'chart',
+        chartType: 'line',
+        sheetId: controller.getCurrentSheetId(),
+        width: 300,
+        height: 300,
+        marginX: 0,
+        marginY: 0,
+        originHeight: 300,
+        originWidth: 300,
+        uuid: '1',
+        fromCol: 4,
+        fromRow: 4,
+      });
+      expect(controller.getDrawingList()).toHaveLength(0);
     });
     test('chartRange not data', () => {
       expect(() =>
@@ -217,8 +214,8 @@ describe('drawing.test.ts', () => {
       expect(controller.getDrawingList()[0].chartType).toEqual('line');
     });
   });
-  describe('deleteDrawing', ()=> {
-    test('not found uuid', ()=> {
+  describe('deleteDrawing', () => {
+    test('not found uuid', () => {
       controller.setCell(
         [
           [1, 2, 3],
@@ -243,11 +240,11 @@ describe('drawing.test.ts', () => {
         fromCol: 4,
         fromRow: 4,
       });
-      expect(controller.getDrawingList()).toHaveLength(1)
-      controller.deleteDrawing('aaaa')
-      expect(controller.getDrawingList()).toHaveLength(1)
-    })
-    test('ok', ()=> {
+      expect(controller.getDrawingList()).toHaveLength(1);
+      controller.deleteDrawing('aaaa');
+      expect(controller.getDrawingList()).toHaveLength(1);
+    });
+    test('ok', () => {
       controller.setCell(
         [
           [1, 2, 3],
@@ -272,11 +269,11 @@ describe('drawing.test.ts', () => {
         fromCol: 4,
         fromRow: 4,
       });
-      expect(controller.getDrawingList()).toHaveLength(1)
-      controller.deleteDrawing('1')
-      expect(controller.getDrawingList()).toHaveLength(0)
-    })
-  })
+      expect(controller.getDrawingList()).toHaveLength(1);
+      controller.deleteDrawing('1');
+      expect(controller.getDrawingList()).toHaveLength(0);
+    });
+  });
   describe('float element', () => {
     test('copy', async () => {
       controller.setCell(

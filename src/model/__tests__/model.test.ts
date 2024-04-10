@@ -1,5 +1,5 @@
 import { Model } from '..';
-import { Range } from '@/util';
+import { SheetRange } from '@/util';
 import { WorkBookJSON } from '@/types';
 
 describe('model.test.ts', () => {
@@ -12,16 +12,14 @@ describe('model.test.ts', () => {
   test('setCellValue', () => {
     const model = new Model();
     model.addSheet();
-    expect(model.getCell(new Range(0, 0, 1, 1, ''))).toBeNull();
+    expect(model.getCell(new SheetRange(0, 0, 1, 1, ''))).toBeNull();
     model.setCell(
       [['test']],
       [],
-      new Range(0, 0, 1, 1, model.getCurrentSheetId()),
+      new SheetRange(0, 0, 1, 1, model.getCurrentSheetId()),
     );
-    expect(model.getCell(new Range(0, 0, 1, 1, ''))).toEqual({
+    expect(model.getCell(new SheetRange(0, 0, 1, 1, ''))).toEqual({
       value: 'test',
-      row: 0,
-      col: 0,
     });
   });
   test('toJSON', () => {

@@ -10,6 +10,8 @@ import {
   assert,
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
+  XLSX_MAX_COL_COUNT,
+  XLSX_MAX_ROW_COUNT,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { $ } from '@/i18n';
@@ -20,6 +22,29 @@ export class Workbook implements IWorkbook {
   private model: IModel;
   constructor(model: IModel) {
     this.model = model;
+  }
+  validateSheet(data: WorksheetType): boolean {
+    if (!data) {
+      return false;
+    }
+    if (
+      !data.sheetId ||
+      !data.name ||
+      typeof data.isHide !== 'boolean' ||
+      typeof data.sort !== 'number' ||
+      typeof data.colCount !== 'number' ||
+      typeof data.rowCount !== 'number'
+    ) {
+      return false;
+    }
+    if (data.rowCount > XLSX_MAX_ROW_COUNT) {
+      return false;
+    }
+    if (data.colCount > XLSX_MAX_COL_COUNT) {
+      return false;
+    }
+
+    return true;
   }
   toJSON() {
     return {
@@ -32,10 +57,15 @@ export class Workbook implements IWorkbook {
     const currentSheetId = json.currentSheetId || '';
     const oldValue = { ...this.workbook };
 
-    this.workbook = { ...workbook };
+    for (const sheet of Object.values(workbook)) {
+      if (!this.validateSheet(sheet)) {
+        continue;
+      }
+      this.workbook[sheet.sheetId] = sheet;
+    }
 
     let newSheetId = this.getSheetId();
-    if (workbook[currentSheetId] && !workbook[currentSheetId].isHide) {
+    if (this.workbook[currentSheetId] && !this.workbook[currentSheetId].isHide) {
       newSheetId = currentSheetId;
     }
     if (newSheetId) {
@@ -44,7 +74,7 @@ export class Workbook implements IWorkbook {
     this.model.push({
       type: 'workbook',
       key: '',
-      newValue: workbook,
+      newValue: this.workbook,
       oldValue,
     });
   }
@@ -113,7 +143,7 @@ export class Workbook implements IWorkbook {
     list.sort((a, b) => a.sort - b.sort);
     return list.slice();
   }
-  addSheet(): WorksheetType {
+  addSheet() {
     const list = this.getSheetList();
     const item = getDefaultSheetInfo(list);
     const sheet: WorksheetType = {
@@ -122,6 +152,9 @@ export class Workbook implements IWorkbook {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
     };
+    if (!this.validateSheet(sheet)) {
+      return null;
+    }
     const check = this.workbook[sheet.sheetId];
     assert(!check, $('sheet-id-is-duplicate'));
     this.workbook[sheet.sheetId] = sheet;

@@ -29,7 +29,7 @@ export function containRange(row: number, col: number, range: IRange): boolean {
   );
 }
 
-export class Range implements IRange {
+export class SheetRange implements IRange {
   row = 0;
   col = 0;
   colCount = 0;
@@ -54,8 +54,8 @@ export class Range implements IRange {
       this.row >= 0 && this.col >= 0 && this.colCount >= 0 && this.rowCount >= 0
     );
   }
-  static makeRange(range: IRange): Range {
-    return new Range(
+  static makeRange(range: IRange): SheetRange {
+    return new SheetRange(
       range.row,
       range.col,
       range.rowCount,

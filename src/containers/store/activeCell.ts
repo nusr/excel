@@ -6,12 +6,10 @@ export type CellStoreType = CanvasOverlayPosition &
   Omit<IRange, 'sheetId'> & {
     defineName: string;
     value: string;
-    formula: string;
   };
 
 const cellData: CellStoreType = {
   value: '',
-  formula: '',
   row: 0,
   col: 0,
   left: DEFAULT_POSITION,

@@ -244,7 +244,6 @@ export function parseHTML(html: string) {
   const textList: Array<Array<ResultType>> = [];
   const styleList: Array<Array<Partial<StyleType>>> = [];
   // TODO col width and row height
-  // const colList = doc.querySelectorAll('col');
   const trList = doc.querySelectorAll('tr');
   for (const tr of trList) {
     const texts: ResultType[] = [];

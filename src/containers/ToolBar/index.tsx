@@ -44,21 +44,20 @@ const underlineList: OptionItem[] = [
 
 const mergeOptionList: OptionItem[] = [
   {
-    value: EMergeCellType.MERGE_CENTER,
+    value: String(EMergeCellType.MERGE_CENTER),
     label: $('merge-and-center'),
     disabled: false,
   },
   {
-    value: EMergeCellType.MERGE_CELL,
+    value: String(EMergeCellType.MERGE_CELL),
     label: $('merge-cells'),
     disabled: false,
   },
-  // TODO
-  // {
-  //   value: EMergeCellType.MERGE_CONTENT,
-  //   label: $('merge-content'),
-  //   disabled: false,
-  // },
+  {
+    value: String(EMergeCellType.MERGE_CONTENT),
+    label: $('merge-content'),
+    disabled: false,
+  },
 ];
 
 export const ToolbarContainer: React.FunctionComponent<Props> = memo(

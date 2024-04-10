@@ -12,7 +12,6 @@ describe('getEditorStyle', () => {
       getEditorStyle(
         {
           value: '',
-          formula: '',
           row: 0,
           col: 0,
           left: 0,
@@ -55,7 +54,6 @@ describe('getEditorStyle', () => {
       getEditorStyle(
         {
           value: '',
-          formula: '',
           row: 0,
           col: 0,
           left: 0,
@@ -103,7 +101,6 @@ describe('getEditorStyle', () => {
       getEditorStyle(
         {
           value: '',
-          formula: '',
           row: 0,
           col: 0,
           left: 0,

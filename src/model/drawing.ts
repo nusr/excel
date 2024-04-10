@@ -15,6 +15,31 @@ export class Drawing implements IDrawings {
   constructor(model: IModel) {
     this.model = model;
   }
+  validateDrawing(data: DrawingElement): boolean {
+    if (!data || !data.uuid) {
+      return false;
+    }
+    const sheetInfo = this.model.getSheetInfo(data.sheetId);
+    if (!sheetInfo) {
+      return false;
+    }
+    if (data.type === 'floating-picture') {
+      if (!data.imageSrc) {
+        return false;
+      }
+    } else {
+      if (data.chartType === undefined || data.chartRange === undefined) {
+        return false;
+      }
+      if (CHART_TYPE_LIST.findIndex((v) => v.value === data.chartType) < 0) {
+        return false;
+      }
+      if (!this.model.validateRange(data.chartRange)) {
+        return false;
+      }
+    }
+    return true;
+  }
   toJSON() {
     return {
       drawings: this.drawings,
@@ -28,14 +53,8 @@ export class Drawing implements IDrawings {
     const oldValue = { ...this.drawings };
     this.drawings = { ...data };
     for (const [uuid, value] of Object.entries(data)) {
-      if (isEmpty(value)) {
-        continue;
-      }
-      if (value.type === 'chart') {
-        assert(
-          CHART_TYPE_LIST.findIndex((v) => v.value === value.chartType!) >= 0,
-          $('unsupported-chart-types'),
-        );
+      if (!this.validateDrawing(value) || !uuid) {
+        return
       }
       this.drawings[uuid] = value;
     }
@@ -64,16 +83,12 @@ export class Drawing implements IDrawings {
   addDrawing(data: DrawingElement) {
     const oldData = this.drawings[data.uuid];
     assert(!oldData, $('uuid-is-duplicate'));
+    if (!this.validateDrawing(data)) {
+      return;
+    }
     if (data.type === 'chart') {
-      assert(!!data.chartType);
-      assert(
-        CHART_TYPE_LIST.findIndex((v) => v.value === data.chartType) >= 0,
-        $('unsupported-chart-types'),
-      );
-      assert(!!data.chartRange);
-      const range = data.chartRange;
+      const range = data.chartRange!;
       let check = false;
-
       this.model.iterateRange(range, (row: number, col: number) => {
         const data = this.model.getCell({
           row,
@@ -91,7 +106,6 @@ export class Drawing implements IDrawings {
       });
       assert(check, $('cells-must-contain-data'));
     } else if (data.type === 'floating-picture') {
-      assert(!!data.imageSrc, $('image-source-is-empty'));
       if (typeof data.imageAngle !== 'number') {
         data.imageAngle = 0;
       }

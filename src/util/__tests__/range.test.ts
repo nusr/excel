@@ -1,33 +1,33 @@
-import { Range, isCol, isRow, isSheet, containRange } from '../range';
+import { SheetRange, isCol, isRow, isSheet, containRange } from '../range';
 
 describe('range.test.ts', () => {
   const mockSheetName = 'test';
   describe('isRow', () => {
     it('should get true ', () => {
-      expect(isRow(new Range(0, 0, 30, 0, mockSheetName))).toBeTruthy();
+      expect(isRow(new SheetRange(0, 0, 30, 0, mockSheetName))).toBeTruthy();
     });
   });
   describe('isCol', () => {
     it('should get true ', () => {
-      expect(isCol(new Range(0, 0, 0, 30, mockSheetName))).toBeTruthy();
+      expect(isCol(new SheetRange(0, 0, 0, 30, mockSheetName))).toBeTruthy();
     });
   });
   describe('isSheet', () => {
     it('should get true ', () => {
-      expect(isSheet(new Range(0, 0, 0, 0, mockSheetName))).toBeTruthy();
+      expect(isSheet(new SheetRange(0, 0, 0, 0, mockSheetName))).toBeTruthy();
     });
   });
   describe('Range', () => {
     it('should get true', () => {
       expect(
-        Range.makeRange({
+        SheetRange.makeRange({
           row: 0,
           col: 0,
           rowCount: 0,
           colCount: 0,
           sheetId: mockSheetName,
         }),
-      ).toBeInstanceOf(Range);
+      ).toBeInstanceOf(SheetRange);
     });
   });
   describe('containRange', () => {

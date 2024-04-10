@@ -125,7 +125,7 @@ export interface MergeCellItem {
 export type WorkBookJSON = {
   worksheets: Record<string, WorksheetData>; // key: sheetId
   workbook: Record<string, WorksheetType>; // key: sheetId, workbook.xml_workbook_sheets
-  mergeCells: Record<string, MergeCellItem>; // key: ref, worksheets_*.xml_worksheet_mergeCells
+  mergeCells: Record<string, IRange>; // key: ref, worksheets_*.xml_worksheet_mergeCells
   customHeight: CustomHeightOrWidthItem; // key: sheetId_row worksheets_*.xml_worksheet_sheetData_customHeight
   customWidth: CustomHeightOrWidthItem; // key: sheetId_col worksheets_*.xml_worksheet_sheetData_customHeight
   definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
@@ -147,7 +147,7 @@ export interface IWorkbook extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'currentSheetId' | 'workbook'>;
   setCurrentSheetId(id: string): void;
   getCurrentSheetId(): string;
-  addSheet(): WorksheetType;
+  addSheet(): WorksheetType | null;
   deleteSheet(sheetId?: string): void;
   hideSheet(sheetId?: string): void;
   unhideSheet(sheetId?: string): void;
@@ -155,12 +155,14 @@ export interface IWorkbook extends IBaseManager {
   getSheetInfo(sheetId?: string): WorksheetType | null;
   updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string): void;
   getSheetList(): WorksheetType[];
+  validateSheet(data: WorksheetType): boolean;
 }
 
 export interface IRangeMap extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'rangeMap'>;
   setActiveCell(range: IRange): void;
   getActiveCell(): IRange;
+  validateRange(range: IRange): boolean;
 }
 
 export interface IDrawings extends IBaseManager {
@@ -173,6 +175,7 @@ export interface IDrawings extends IBaseManager {
   addRow(rowIndex: number, count: number): void;
   deleteCol(colIndex: number, count: number): void;
   deleteRow(rowIndex: number, count: number): void;
+  validateDrawing(item: DrawingElement): boolean;
 }
 
 export interface IDefinedName extends IBaseManager {
@@ -181,11 +184,12 @@ export interface IDefinedName extends IBaseManager {
   setDefineName(range: IRange, name: string): void;
   checkDefineName(name: string): IRange | null;
   getDefineNameList(): DefinedNameItem[];
+  validateDefinedName(name: string): boolean;
 }
 
 export interface IMergeCell extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'mergeCells'>;
-  getMergeCellList(sheetId?: string): MergeCellItem[];
+  getMergeCellList(sheetId?: string): IRange[];
   addMergeCell(range: IRange, type?: EMergeCellType): void;
   deleteMergeCell(range: IRange): void;
 }
@@ -212,7 +216,7 @@ export interface IWorksheet extends IBaseManager {
   pasteRange(fromRange: IRange, isCut: boolean): IRange;
   getWorksheet(sheetId?: string): WorksheetData | null;
   setWorksheet(data: WorksheetData, sheetId?: string): void;
-  getCell(range: IRange): ModelCellValue | null;
+  getCell(range: IRange): ModelCellType | null;
   setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
@@ -220,15 +224,10 @@ export interface IWorksheet extends IBaseManager {
   ): void;
   updateCellStyle(style: Partial<StyleType>, range: IRange): void;
   computeFormulas(): void;
-  getRangeData(range: IRange): Array<Array<ModelCellValue | null>>;
+  getRangeData(range: IRange): Array<Array<ModelCellType | null>>;
+  addMergeCell(range: IRange, type?: EMergeCellType): void;
 }
 
-export interface IModel extends IBaseModel {
-  pasteRange(range: IRange, isCut: boolean): IRange;
-  emitChange(dataset: Set<ChangeEventType>): void;
-  push(command: ICommandItem): void;
-  iterateRange(range: IRange, fn: (row: number, col: number) => boolean): void;
-}
 export interface IBaseModel
   extends Pick<
       IWorkbook,
@@ -278,4 +277,15 @@ export interface IBaseModel
   canUndo(): boolean;
   undo(): void;
   redo(): void;
+}
+
+export interface IModel
+  extends IBaseModel,
+    Pick<IRangeMap, 'validateRange'>,
+    Pick<IDefinedName, 'validateDefinedName'>,
+    Pick<IDrawings, 'validateDrawing'> {
+  pasteRange(range: IRange, isCut: boolean): IRange;
+  emitChange(dataset: Set<ChangeEventType>): void;
+  push(command: ICommandItem): void;
+  iterateRange(range: IRange, fn: (row: number, col: number) => boolean): void;
 }

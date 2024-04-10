@@ -177,8 +177,6 @@ describe('Toolbar.test.ts', () => {
       await waitFor(() => {
         expect(controller.getCell(controller.getActiveCell())).toEqual({
           style: { isBold: true, isItalic: true },
-          row: 1,
-          col: 0,
           formula: '=SUM(1,2)',
           value: 3,
         });
@@ -203,8 +201,6 @@ describe('Toolbar.test.ts', () => {
       await waitFor(() => {
         expect(controller.getCell(controller.getActiveCell())).toEqual({
           style: { isBold: true, isItalic: true },
-          row: 1,
-          col: 0,
           formula: '=SUM(1,2)',
           value: 3,
         });

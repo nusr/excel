@@ -133,6 +133,15 @@ export function getCustomWidthOrHeightKey(
   return `${sheetId}${SPLITTER}${rowOrCol}`;
 }
 
+export function WidthOrHeightKeyToData(key: string) {
+  const [sheetId, num] = key.split(SPLITTER);
+  const r = parseInt(num, 10);
+  return {
+    sheetId,
+    rowOrCol: isNaN(r) ? -1 : r,
+  };
+}
+
 export function generateUUID() {
   let d = new Date().getTime();
 
@@ -170,8 +179,11 @@ export function modelToChangeSet(list: ICommandItem[]) {
     if (type === 'worksheets') {
       if (item.key.includes('style')) {
         result.add('cellStyle');
+      } else if (item.key.includes('value') || item.key.includes('formula')) {
+        result.add('cellValue');
       } else {
         result.add('cellValue');
+        result.add('cellStyle');
       }
     } else if (type === 'workbook') {
       if (item.key.includes('rowCount')) {

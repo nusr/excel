@@ -102,12 +102,12 @@ export const SelectPopup: FunctionComponent<SelectPopupProps> = memo(
     const handleSelect = useCallback(
       (event: React.MouseEvent<HTMLDivElement>) => {
         const v = (event.target as any).dataset?.value;
-        if (!v || v === value) {
+        if (!v) {
           return;
         }
         onChange(v);
       },
-      [onChange, value],
+      [onChange],
     );
     return (
       <div

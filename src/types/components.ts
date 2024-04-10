@@ -1,4 +1,4 @@
-import { ModelCellValue } from './model';
+import { ModelCellType, Coordinate } from './model';
 import type {
   ChartType,
   DefaultDataPoint,
@@ -30,7 +30,7 @@ export interface ScrollValue {
   scrollTop: number;
 }
 
-export type ActiveCellType = ModelCellValue & CanvasOverlayPosition;
+export type ActiveCellType = ModelCellType & Coordinate & CanvasOverlayPosition;
 
 export type Point = [x: number, y: number];
 

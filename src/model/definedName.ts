@@ -7,6 +7,7 @@ import {
   IDefinedName,
 } from '@/types';
 import { DELETE_FLAG, transformData } from './History';
+import { MAX_PARAMS_COUNT, parseReference } from '@/util';
 
 export class DefinedName implements IDefinedName {
   private definedNames: WorkBookJSON['definedNames'] = {};
@@ -19,14 +20,49 @@ export class DefinedName implements IDefinedName {
       definedNames: this.definedNames,
     };
   }
+  validateDefinedName(name: string) {
+    if (!name) {
+      return false;
+    }
+    const range = parseReference(name, (sheetName: string) => {
+      const list = this.model.getSheetList();
+      const item = list.find((v) => v.name === sheetName);
+      return item?.sheetId || '';
+    });
+    if (range) {
+      const sheetInfo = this.model.getSheetInfo(range.sheetId);
+      if (
+        sheetInfo &&
+        range.col < sheetInfo.colCount &&
+        range.row < sheetInfo.rowCount
+      ) {
+        return false;
+      }
+    }
+    if (
+      /^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(name) &&
+      name.length <= MAX_PARAMS_COUNT
+    ) {
+      return true;
+    }
+    return false;
+  }
   fromJSON(json: WorkBookJSON): void {
     const data = json.definedNames || {};
     const oldValue = { ...this.definedNames };
-    this.definedNames = { ...data };
+    for (const [key, value] of Object.entries(data)) {
+      if (!this.model.validateRange(value)) {
+        continue;
+      }
+      if (!this.validateDefinedName(key)) {
+        continue;
+      }
+      this.definedNames[key] = value;
+    }
     this.model.push({
       type: 'definedNames',
       key: '',
-      newValue: data,
+      newValue: this.definedNames,
       oldValue,
     });
   }

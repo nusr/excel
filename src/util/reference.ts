@@ -1,6 +1,6 @@
 import { columnNameToInt, rowLabelToInt, intToColumnName } from './convert';
 import { IRange, ReferenceType } from '@/types';
-import { Range } from './range';
+import { SheetRange } from './range';
 import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from './constant';
 
 const isCharacter = (char: string) =>
@@ -14,7 +14,7 @@ function convertSheetNameToSheetId(value: string) {
 function parseCell(
   ref: string,
   convertSheetName: typeof convertSheetNameToSheetId,
-): Range | null {
+): SheetRange | null {
   if (!ref) {
     return null;
   }
@@ -65,7 +65,7 @@ function parseCell(
   if (row < 0 || col < 0) {
     return null;
   }
-  const range = new Range(
+  const range = new SheetRange(
     row,
     col,
     rowCount,
@@ -78,7 +78,7 @@ function parseCell(
 export function parseReference(
   text: string,
   convertSheetName = convertSheetNameToSheetId,
-): Range | null {
+): SheetRange | null {
   const [cell1, cell2] = text.split(':');
   const startCell = parseCell(cell1, convertSheetName);
   if (!startCell) {
@@ -92,7 +92,7 @@ export function parseReference(
   return mergeRange(startCell, endCell);
 }
 
-export function mergeRange(start: Range, end: Range): Range | null {
+export function mergeRange(start: SheetRange, end: SheetRange): SheetRange | null {
   if (start.sheetId !== end.sheetId) {
     return null;
   }
@@ -122,7 +122,7 @@ export function mergeRange(start: Range, end: Range): Range | null {
   const row = start.row < end.row ? start.row : end.row;
   const col = start.col < end.col ? start.col : end.col;
 
-  return new Range(row, col, rowCount, colCount, start.sheetId);
+  return new SheetRange(row, col, rowCount, colCount, start.sheetId);
 }
 
 function convertCell(row: number, col: number, referenceType: ReferenceType) {

@@ -1,4 +1,10 @@
-import { IController, ChangeEventType, EUnderLine, IRange } from '@/types';
+import {
+  IController,
+  ChangeEventType,
+  EUnderLine,
+  IRange,
+  EMergeCellType,
+} from '@/types';
 import {
   DEFAULT_FONT_SIZE,
   parseNumber,
@@ -10,6 +16,7 @@ import {
   reactLog,
   sizeConfig,
   canvasSizeSet,
+  MERGE_CELL_LINE_BREAK,
 } from '@/util';
 import {
   coreStore,
@@ -82,22 +89,9 @@ function getChartData(
 
 function updateActiveCell(controller: IController) {
   const { top } = canvasSizeSet.get();
-  const {
-    range: activeCell,
-    isMerged,
-    type: mergeType,
-    firstCell,
-  } = controller.getActiveRange();
+  const { range: activeCell, isMerged } = controller.getActiveRange();
   const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
-  let cell = controller.getCell(activeCell);
-  if (!cell && isMerged) {
-    cell = controller.getCell({
-      ...firstCell,
-      rowCount: 1,
-      colCount: 1,
-      sheetId: '',
-    });
-  }
+  const cell = controller.getCell(activeCell);
   const defineName = controller.getDefineName({
     row: activeCell.row,
     col: activeCell.col,
@@ -132,6 +126,16 @@ function updateActiveCell(controller: IController) {
     numberFormat = 0,
   } = cell?.style || {};
 
+  const displayValue = convertResultTypeToString(cell?.value);
+  let mergeType = '';
+  if (isMerged) {
+    if (displayValue.includes(MERGE_CELL_LINE_BREAK)) {
+      mergeType = String(EMergeCellType.MERGE_CONTENT);
+    } else {
+      mergeType = String(EMergeCellType.MERGE_CENTER);
+    }
+  }
+  const textValue = cell?.formula ? cell.formula : displayValue;
   activeCellStore.setState({
     top: cellPosition.top,
     left: cellPosition.left,
@@ -141,10 +145,10 @@ function updateActiveCell(controller: IController) {
     col: activeCell.col,
     rowCount: activeCell.rowCount,
     colCount: activeCell.colCount,
-    value: convertResultTypeToString(cell?.value),
-    formula: cell?.formula || '',
+    value: textValue,
     defineName,
   });
+
   styleStore.mergeState({
     isBold,
     isItalic,
@@ -157,7 +161,7 @@ function updateActiveCell(controller: IController) {
     underline,
     numberFormat,
     isMergeCell: isMerged,
-    mergeType: isMerged ? String(mergeType) : '',
+    mergeType,
   });
 }
 
@@ -169,7 +173,9 @@ const handleStateChange = (
   if (
     changeSet.has('rangeMap') ||
     changeSet.has('cellStyle') ||
-    changeSet.has('cellValue')
+    changeSet.has('cellValue') ||
+    changeSet.has('currentSheetId') ||
+    changeSet.has('mergeCells')
   ) {
     updateActiveCell(controller);
   }

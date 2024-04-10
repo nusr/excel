@@ -115,6 +115,8 @@ describe('exportXLSX.test.ts', () => {
           sheetId: controller.getCurrentSheetId(),
         },
       });
+     
+      controller.addSheet();
       controller.addDrawing({
         title: 'icon',
         type: 'floating-picture',
@@ -124,13 +126,12 @@ describe('exportXLSX.test.ts', () => {
         height: 356,
         originHeight: 356,
         originWidth: 200,
-        sheetId: '2',
+        sheetId: controller.getCurrentSheetId(),
         fromCol: 1,
         fromRow: 1,
         marginX: 0,
         marginY: 0,
       });
-      controller.addSheet();
       controller.renameSheet('test sheet');
       controller.setDefineName(
         {

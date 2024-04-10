@@ -1,5 +1,10 @@
 import { WorkBookJSON, ICommandItem, IRow, CustomItem, IModel } from '@/types';
-import { getCustomWidthOrHeightKey, CELL_HEIGHT, HIDE_CELL } from '@/util';
+import {
+  getCustomWidthOrHeightKey,
+  CELL_HEIGHT,
+  HIDE_CELL,
+  WidthOrHeightKeyToData,
+} from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 
 export class RowManager implements IRow {
@@ -16,11 +21,23 @@ export class RowManager implements IRow {
   fromJSON(json: WorkBookJSON): void {
     const data = json.customHeight || {};
     const oldValue = { ...this.customHeight };
-    this.customHeight = { ...data };
+    for (const [key, value] of Object.entries(data)) {
+      const { sheetId, rowOrCol: row } = WidthOrHeightKeyToData(key);
+      if (!sheetId || row < 0) {
+        continue;
+      }
+      const sheetInfo = this.model.getSheetInfo(sheetId);
+      if (!sheetInfo || row >= sheetInfo.rowCount) {
+        continue;
+      }
+      if (typeof value.isHide === 'boolean' && typeof value.len === 'number') {
+        this.customHeight[key] = value;
+      }
+    }
     this.model.push({
       type: 'customHeight',
       key: '',
-      newValue: data,
+      newValue: this.customHeight,
       oldValue,
     });
   }
@@ -97,7 +114,8 @@ export class RowManager implements IRow {
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
     for (const [key, value] of Object.entries(this.customHeight)) {
-      if (key.startsWith(id)) {
+      const { sheetId } = WidthOrHeightKeyToData(key);
+      if (sheetId === id) {
         delete this.customHeight[key];
         this.model.push({
           type: 'customHeight',

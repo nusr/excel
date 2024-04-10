@@ -23,9 +23,7 @@ import {
   IRange,
   ResultType,
   StyleType,
-  EMergeCellType,
   EHorizontalAlign,
-  Coordinate,
 } from '@/types';
 
 const measureTextMap = new Map<string, IWindowSize>();
@@ -143,35 +141,14 @@ export function renderCellData(
   controller: IController,
   ctx: CanvasRenderingContext2D,
   range: IRange,
-  type?: EMergeCellType,
-  firstCell?: Coordinate,
 ): IWindowSize {
   let cellInfo = controller.getCell(range);
   const result: IWindowSize = {
     width: 0,
     height: 0,
   };
-  if (type !== undefined && !cellInfo && firstCell) {
-    cellInfo = controller.getCell({
-      ...firstCell,
-      rowCount: 1,
-      colCount: 1,
-      sheetId: '',
-    });
-  }
   if (!cellInfo) {
     return result;
-  }
-  let style: Partial<StyleType> | undefined = cellInfo.style;
-  // TODO EMergeCellType.MERGE_CONTENT
-  if (
-    type === EMergeCellType.MERGE_CENTER ||
-    type === EMergeCellType.MERGE_CELL
-  ) {
-    if (!style) {
-      style = {};
-    }
-    style.horizontalAlign = EHorizontalAlign.CENTER;
   }
   const cellSize = controller.getCellSize(range);
   if (cellSize.width <= 0 || cellSize.height <= 0) {
@@ -187,11 +164,9 @@ export function renderCellData(
       height: cellSize.height,
     },
     cellInfo.value,
-    style,
+    cellInfo.style,
   );
-  result.height = Math.ceil(newSize.height);
-  result.width = Math.ceil(newSize.width);
-  return result;
+  return newSize;
 }
 
 export function renderCell(
@@ -323,7 +298,8 @@ export function renderCell(
     drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
     result.width = textWidth + lineGap * 2;
   }
-
+  result.height = Math.ceil(result.height);
+  result.width = Math.ceil(result.width);
   return result;
 }
 

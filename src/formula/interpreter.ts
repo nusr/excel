@@ -1,4 +1,4 @@
-import { Range, mergeRange, parseReference } from '@/util';
+import { SheetRange, mergeRange, parseReference } from '@/util';
 import {
   TokenType,
   CellDataMap,
@@ -107,7 +107,7 @@ export class Interpreter implements Visitor {
       let params: ResultType[] = [];
       for (const item of expr.params) {
         const t = this.evaluate(item);
-        if (t instanceof Range) {
+        if (t instanceof SheetRange) {
           const list = this.cellDataMap.get(t);
           params = params.concat(list);
         } else {
@@ -284,7 +284,7 @@ export class Interpreter implements Visitor {
     return this.visitCellExpression(result);
   }
   private getRangeCellValue(value: any): ResultType {
-    if (value instanceof Range) {
+    if (value instanceof SheetRange) {
       if (value.colCount === value.rowCount && value.colCount === 1) {
         const list = this.cellDataMap.get(value);
         return list[0];

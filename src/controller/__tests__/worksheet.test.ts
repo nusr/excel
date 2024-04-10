@@ -47,7 +47,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, row: 0, col: 0 });
+      ).toEqual({ value: 1 });
     });
     test('set formula', () => {
       controller.setCell([['=SUM(1,2)']], [], {
@@ -65,7 +65,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ formula: '=SUM(1,2)', row: 0, col: 0, value: 3 });
+      ).toEqual({ formula: '=SUM(1,2)', value: 3 });
     });
     test('setFormula setValue', () => {
       controller.setCell([['=SUM(1,2)']], [], {
@@ -83,7 +83,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ formula: '=SUM(1,2)', row: 0, col: 0, value: 3 });
+      ).toEqual({ formula: '=SUM(1,2)', value: 3 });
 
       controller.setCell([['test']], [], {
         row: 0,
@@ -100,7 +100,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ formula: '', row: 0, col: 0, value: 'test' });
+      ).toEqual({ formula: '', value: 'test' });
     });
     test('copy', async () => {
       controller.setCell([['=SUM(1,2)']], [[{ isBold: true }]], {
@@ -136,8 +136,6 @@ describe('worksheet.test.ts', () => {
         }),
       ).toEqual({
         formula: '=SUM(1,2)',
-        row: 5,
-        col: 5,
         value: 3,
         style: { isBold: true },
       });
@@ -176,8 +174,6 @@ describe('worksheet.test.ts', () => {
         }),
       ).toEqual({
         formula: '=SUM(1,2)',
-        row: 5,
-        col: 5,
         value: 3,
         style: { isBold: true },
       });
@@ -207,7 +203,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, row: 0, col: 0 });
+      ).toEqual({ value: 1 });
       controller.undo();
       expect(
         controller.getCell({
@@ -227,7 +223,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, row: 0, col: 0 });
+      ).toEqual({ value: 1 });
     });
   });
   describe('cell style', () => {
@@ -258,7 +254,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, row: 0, col: 0, style: { isBold: true } });
+      ).toEqual({ value: 1, style: { isBold: true } });
     });
     test('update', () => {
       controller.setCell([[1]], [[{ isBold: true }]], {
@@ -276,7 +272,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, row: 0, col: 0, style: { isBold: true } });
+      ).toEqual({ value: 1, style: { isBold: true } });
       controller.updateCellStyle(
         { isBold: false, isItalic: true },
         {
@@ -297,8 +293,6 @@ describe('worksheet.test.ts', () => {
         }),
       ).toEqual({
         value: 1,
-        row: 0,
-        col: 0,
         style: { isBold: false, isItalic: true },
       });
     });
@@ -318,7 +312,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, row: 0, col: 0, style: { isBold: true } });
+      ).toEqual({ value: 1, style: { isBold: true } });
 
       controller.undo();
       expect(
@@ -339,7 +333,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, row: 0, col: 0, style: { isBold: true } });
+      ).toEqual({ value: 1, style: { isBold: true } });
     });
   });
   describe('worksheet', () => {

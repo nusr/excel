@@ -4,8 +4,6 @@ import {
   IRange,
   IMergeCell,
   IModel,
-  MergeCellItem,
-  EMergeCellType,
 } from '@/types';
 import { convertToReference, assert } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
@@ -25,8 +23,23 @@ export class MergeCell implements IMergeCell {
   fromJSON(json: WorkBookJSON): void {
     const data = json.mergeCells || {};
     const oldValue = { ...this.mergeCells };
-    this.mergeCells = { ...data };
-    this.model.push({ type: 'mergeCells', key: '', newValue: data, oldValue });
+    for (const range of Object.values(data)) {
+      if (!this.model.validateRange(range)) {
+        continue;
+      }
+      const ref = convertToReference(
+        range,
+        'absolute',
+        this.convertSheetIdToName,
+      );
+      this.mergeCells[ref] = range;
+    }
+    this.model.push({
+      type: 'mergeCells',
+      key: '',
+      newValue: this.mergeCells,
+      oldValue,
+    });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'mergeCells') {
@@ -38,50 +51,24 @@ export class MergeCell implements IMergeCell {
       transformData(this, item, 'redo');
     }
   }
-  getMergeCellList(sheetId?: string): MergeCellItem[] {
+  getMergeCellList(sheetId?: string) {
     const id = sheetId || this.model.getCurrentSheetId();
-    return Object.values(this.mergeCells).filter((v) => v.range.sheetId === id);
+    return Object.values(this.mergeCells).filter((v) => v.sheetId === id);
   }
-  addMergeCell(range: IRange, type = EMergeCellType.MERGE_CENTER): void {
-    if (range.colCount > 1 || range.rowCount > 1) {
-      range.sheetId = range.sheetId || this.model.getCurrentSheetId();
-      const ref = convertToReference(
-        range,
-        'absolute',
-        this.convertSheetIdToName,
-      );
-      let firstCell = {
-        row: range.row,
-        col: range.col,
-      };
-      this.model.iterateRange(range, (row, col) => {
-        const cellInfo = this.model.getCell({
-          row,
-          col,
-          rowCount: 1,
-          colCount: 1,
-          sheetId: range.sheetId,
-        });
-        if (cellInfo) {
-          firstCell.row = row;
-          firstCell.col = col;
-          return true;
-        }
-        return false;
-      });
-      assert(!this.mergeCells[ref], $('merging-cell-is-duplicate'));
-      this.mergeCells[ref] = {
-        range,
-        type,
-        firstCell,
-      };
-      this.model.push({
-        type: 'mergeCells',
-        key: ref,
-        newValue: this.mergeCells[ref],
-        oldValue: DELETE_FLAG,
-      });
-    }
+  addMergeCell(range: IRange): void {
+    const ref = convertToReference(
+      range,
+      'absolute',
+      this.convertSheetIdToName,
+    );
+    assert(!this.mergeCells[ref], $('merging-cell-is-duplicate'));
+    this.mergeCells[ref] = range;
+    this.model.push({
+      type: 'mergeCells',
+      key: ref,
+      newValue: this.mergeCells[ref],
+      oldValue: DELETE_FLAG,
+    });
   }
   deleteMergeCell(range: IRange): void {
     range.sheetId = range.sheetId || this.model.getCurrentSheetId();
@@ -106,7 +93,7 @@ export class MergeCell implements IMergeCell {
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
     for (const [key, value] of Object.entries(this.mergeCells)) {
-      if (value.range.sheetId === id) {
+      if (value.sheetId === id) {
         delete this.mergeCells[key];
         this.model.push({
           type: 'mergeCells',

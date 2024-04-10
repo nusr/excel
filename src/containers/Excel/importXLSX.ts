@@ -20,7 +20,7 @@ import {
   coordinateToString,
   getCustomWidthOrHeightKey,
   IMAGE_TYPE_MAP,
-  Range,
+  SheetRange,
   mergeRange,
   convertStringToResultType,
   isEmpty,
@@ -477,15 +477,35 @@ export function convertXMLDataToModel(
   const sheets = Object.values(result.workbook);
   sheets.sort((a, b) => a.sort - b.sort);
   result.currentSheetId = result.currentSheetId || sheets[0].sheetId;
-
+  const convertSheetName = (sheetName: string) => {
+    const list = Object.values(result.workbook);
+    return list.find((v) => v.name === sheetName)?.sheetId || '';
+  };
   for (const item of sheets) {
     const sheetPath = sheetPathMap[item.sheetId];
     let sheetData: SheetDataRowItem[] = get(
       xmlData[sheetPath],
       'worksheet.sheetData.row',
+      [],
     );
     if (!Array.isArray(sheetData)) {
       sheetData = [sheetData];
+    }
+    let mergeCellData: Array<{ ref: string }> = get(
+      xmlData[sheetPath],
+      'worksheet.mergeCells.mergeCell',
+      [],
+    );
+    if (!Array.isArray(mergeCellData)) {
+      mergeCellData = [mergeCellData];
+    }
+    for (const mergeCell of mergeCellData) {
+      const range = parseReference(mergeCell.ref, convertSheetName);
+      if (range) {
+        range.sheetId = item.sheetId;
+        const ref = `${item.name}!${mergeCell.ref}`;
+        result.mergeCells[ref] = range.toIRange();
+      }
     }
     let customWidth: CustomColItem[] = get(
       xmlData[sheetPath],
@@ -605,13 +625,10 @@ export function convertXMLDataToModel(
     [],
   );
   definedNames = Array.isArray(definedNames) ? definedNames : [definedNames];
-  const convertSheetName = (sheetName: string) => {
-    const list = Object.values(result.workbook);
-    return list.find((v) => v.name === sheetName)?.sheetId || '';
-  };
+
   for (const item of definedNames) {
     const range = parseReference(item[textKey], convertSheetName);
-    if (range && range.sheetId && range.isValid() && item?.name) {
+    if (range && item?.name) {
       result.definedNames[item.name.toLowerCase()] = range.toIRange();
     }
   }
@@ -733,7 +750,7 @@ export function convertXMLDataToModel(
           );
           return data?.sheetId || '';
         };
-        let chartRange: Range | null = null;
+        let chartRange: SheetRange | null = null;
         for (const item of refList) {
           const t = parseReference(item, convertSheetNameToSheetId);
           if (t) {

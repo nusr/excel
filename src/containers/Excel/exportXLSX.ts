@@ -18,11 +18,7 @@ import {
   NUMBER_FORMAT_LIST,
   extractImageType,
 } from '@/util';
-import {
-  CUSTOM_WIdTH_RADIO,
-  XfItem,
-  chartTypeList,
-} from './importXLSX';
+import { CUSTOM_WIdTH_RADIO, XfItem, chartTypeList } from './importXLSX';
 interface StyleData {
   cellXfs: string[];
   numFmts: string[];
@@ -218,7 +214,6 @@ function buildStyle(style: StyleData) {
   }
   return list.join('\n');
 }
-
 
 export function convertToXMLData(controller: IController) {
   const model = controller.toJSON();
@@ -536,6 +531,16 @@ export function convertToXMLData(controller: IController) {
     ],
   };
   for (const item of sheetList) {
+    const mergeCells = Object.values(model.mergeCells)
+      .filter((v) => v.sheetId === item.sheetId)
+      .map((v) => {
+        const ref = convertToReference({
+          ...v,
+          sheetId: '',
+        });
+        return `<mergeCell ref="${ref}"/>`;
+      });
+
     const v = sheetRelMap[item.sheetId];
     const range = model.rangeMap[item.sheetId] || {
       row: 0,
@@ -601,6 +606,16 @@ export function convertToXMLData(controller: IController) {
     }
     if (rowList.length > 0) {
       targetData.children = `<sheetData>\n${rowList.join('\n')}\n</sheetData>`;
+    }
+    // const mergeCells: string[] = [];
+    //<mergeCells count="1">
+
+    // <mergeCell ref="G5:H6"/>
+    //</mergeCells>
+    if (mergeCells.length > 0) {
+      targetData.children += `<mergeCells count="${
+        mergeCells.length
+      }">\n${mergeCells.join('\n')}\n</mergeCells>`;
     }
 
     result[`xl/worksheets/${v.target}`] = compileTemplate(

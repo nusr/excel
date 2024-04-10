@@ -8,6 +8,22 @@ export class RangeMap implements IRangeMap {
   constructor(model: IModel) {
     this.model = model;
   }
+  validateRange(range: IRange) {
+    range.sheetId = range.sheetId || this.model.getCurrentSheetId();
+    const sheetInfo = this.model.getSheetInfo(range.sheetId);
+    if (!sheetInfo) {
+      return false;
+    }
+    if (
+      range.row < 0 ||
+      range.col < 0 ||
+      range.row >= sheetInfo.rowCount ||
+      range.col >= sheetInfo.colCount
+    ) {
+      return false;
+    }
+    return true;
+  }
   toJSON() {
     return {
       rangeMap: this.rangeMap,
@@ -17,7 +33,19 @@ export class RangeMap implements IRangeMap {
     const data = json.rangeMap || {};
     const oldValue = { ...this.rangeMap };
     this.rangeMap = { ...data };
-    this.model.push({ type: 'rangeMap', key: '', newValue: data, oldValue });
+    for (const range of Object.values(data)) {
+      range.sheetId = range.sheetId || this.model.getCurrentSheetId();
+      if (!this.model.validateRange(range)) {
+        continue;
+      }
+      this.rangeMap[range.sheetId] = range;
+    }
+    this.model.push({
+      type: 'rangeMap',
+      key: '',
+      newValue: this.rangeMap,
+      oldValue,
+    });
   }
   undo(item: ICommandItem): void {
     if (item.type === 'rangeMap') {
@@ -47,12 +75,7 @@ export class RangeMap implements IRangeMap {
   }
   setActiveCell(newRange: IRange): void {
     newRange.sheetId = newRange.sheetId || this.model.getCurrentSheetId();
-    const sheet = this.model.getSheetInfo(newRange.sheetId);
-    if (!sheet) {
-      return;
-    }
-    const { row, col } = newRange;
-    if (row < 0 || col < 0 || row >= sheet.rowCount || col >= sheet.colCount) {
+    if (!this.model.validateRange(newRange)) {
       return;
     }
     const oldValue = this.rangeMap[newRange.sheetId]
