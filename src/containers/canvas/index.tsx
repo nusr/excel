@@ -71,14 +71,14 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     if (!position) {
       return;
     }
-    const activeCell = controller.getActiveCell();
+    const activeCell = controller.getActiveRange().range;
     if (activeCell.row === position.row && activeCell.col === position.col) {
       return;
     }
     if (x > headerSize.width && y > headerSize.height) {
       const colCount = Math.abs(position.col - activeCell.col) + 1;
       const rowCount = Math.abs(position.row - activeCell.row) + 1;
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: Math.min(position.row, activeCell.row),
         col: Math.min(position.col, activeCell.col),
         rowCount,
@@ -90,7 +90,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     // select row
     if (headerSize.width > x && headerSize.height <= y) {
       const rowCount = Math.abs(position.row - activeCell.row) + 1;
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: Math.min(position.row, activeCell.row),
         col: Math.min(position.col, activeCell.col),
         rowCount,
@@ -102,7 +102,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     // select col
     if (headerSize.width <= x && headerSize.height > y) {
       const colCount = Math.abs(position.col - activeCell.col) + 1;
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: Math.min(position.row, activeCell.row),
         col: Math.min(position.col, activeCell.col),
         rowCount: 0,
@@ -127,7 +127,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     }
     // select all
     if (headerSize.width > x && headerSize.height > y) {
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 0,
         col: 0,
         colCount: 0,
@@ -138,7 +138,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     }
     // select row
     if (headerSize.width > x && headerSize.height <= y) {
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: position.row,
         col: position.col,
         rowCount: 1,
@@ -149,7 +149,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     }
     // select col
     if (headerSize.width <= x && headerSize.height > y) {
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: position.row,
         col: position.col,
         rowCount: 0,
@@ -158,7 +158,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       });
       return;
     }
-    const activeCell = controller.getActiveCell();
+    const activeCell = controller.getActiveRange().range;
     const check =
       activeCell.row >= 0 &&
       activeCell.row === position.row &&
@@ -167,7 +167,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       if (checkFocus()) {
         setActiveCellValue(controller);
       }
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: position.row,
         col: position.col,
         rowCount: 1,

@@ -1,14 +1,16 @@
 .formula-bar-wrapper {
   width: 100%;
-  box-sizing: content-box;
   padding: var(--mediumPadding) var(--largePadding);
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--borderColor);
+  height: var(--formulaBarHeight);
+  box-sizing: content-box;
 }
 .defined-name {
   margin-right: 10px;
+  min-width: 100px;
 }
 
 .defined-name-editor {
@@ -27,8 +29,10 @@
   border: 1px solid var(--borderColor);
   flex: 1;
   height: 100%;
+  box-sizing: content-box;
   border-radius: 2px;
   background-color: var(--white);
+  position: relative;
 }
 
 .formula-bar-value {
@@ -36,27 +40,36 @@
   margin: 0;
   display: none;
   width: 100%;
-  height: 100%;
   box-sizing: border-box;
+  background-color: var(--white);
+  z-index: var(--middleZIndex);
+  position: relative;
+  min-height: var(--formulaBarHeight);
 }
-
+.formula-bar-value.wrap {
+  white-space: pre-wrap;
+  border: 1px solid var(--borderColor);
+}
 .formula-bar-value.show {
   display: flex;
   align-items: center;
 }
 
 .formula-editor {
+  overflow: hidden;
   width: 100%;
-  min-height: 18px;
+  min-height: var(--formulaBarHeight);
   padding: 0 var(--tinyPadding);
   margin: 0;
-  border: none;
-  border-radius: unset;
+  border: 1px solid var(--primaryColor);
   outline: none;
-  font: inherit;
   background-color: var(--white);
-  overflow: hidden;
-  position: fixed;
+  position: absolute;
   box-sizing: border-box;
   z-index: var(--middleZIndex);
+  resize: none;
+}
+
+.formula-editor.edit-cell {
+  position: fixed;
 }

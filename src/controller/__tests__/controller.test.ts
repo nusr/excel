@@ -56,28 +56,33 @@ describe('controller.test.ts', () => {
         },
       } as ClipboardEvent;
       controller.paste(event);
-      const sheetData = controller.getWorksheet(controller.getCurrentSheetId());
-      expect(controller.getActiveCell()).toEqual({
+      expect(controller.getActiveRange().range).toEqual({
         row: 0,
         col: 0,
         rowCount: 1,
         colCount: 1,
         sheetId: controller.getCurrentSheetId(),
       });
-      expect(sheetData).toEqual({
-        '0_0': {
-          value: 3,
-          formula: '=SUM(1,2)',
-          style: {
-            fillColor: '#FCE869',
-            fontColor: '#738DF2',
-            fontSize: 36,
-            isItalic: true,
-            isBold: true,
-            isStrike: true,
-            isWrapText: true,
-            underline: EUnderLine.DOUBLE,
-          },
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({
+        value: 3,
+        formula: '=SUM(1,2)',
+        style: {
+          fillColor: '#FCE869',
+          fontColor: '#738DF2',
+          fontSize: 36,
+          isItalic: true,
+          isBold: true,
+          isStrike: true,
+          isWrapText: true,
+          underline: EUnderLine.DOUBLE,
         },
       });
     });
@@ -95,7 +100,7 @@ describe('controller.test.ts', () => {
       } as ClipboardEvent;
       controller.paste(event);
       const sheetData = controller.getWorksheet(controller.getCurrentSheetId());
-      expect(controller.getActiveCell()).toEqual({
+      expect(controller.getActiveRange().range).toEqual({
         row: 0,
         col: 0,
         rowCount: 2,
@@ -338,7 +343,7 @@ describe('controller.test.ts', () => {
         marginY: 0,
       });
       const sheetId = controller.getCurrentSheetId();
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 3,
         col: 3,
         rowCount: 1,

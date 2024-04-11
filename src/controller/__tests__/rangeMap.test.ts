@@ -20,7 +20,7 @@ describe('rangeMap.test.ts', () => {
   });
   describe('activeCell', () => {
     test('get', () => {
-      expect(controller.getActiveCell()).toEqual({
+      expect(controller.getActiveRange().range).toEqual({
         row: 0,
         col: 0,
         rowCount: 1,
@@ -39,14 +39,14 @@ describe('rangeMap.test.ts', () => {
       });
     });
     test('set', () => {
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 2,
         col: 2,
         rowCount: 1,
         colCount: 1,
         sheetId: '',
       });
-      expect(controller.getActiveCell()).toEqual({
+      expect(controller.getActiveRange().range).toEqual({
         row: 2,
         col: 2,
         rowCount: 1,
@@ -55,30 +55,30 @@ describe('rangeMap.test.ts', () => {
       });
     });
     test('set sheetId not found', () => {
-      const oldData = controller.getActiveCell();
-      controller.setActiveCell({
+      const oldData = controller.getActiveRange().range;
+      controller.setActiveRange({
         row: 2,
         col: 2,
         rowCount: 1,
         colCount: 1,
         sheetId: 'test',
       });
-      expect(controller.getActiveCell()).toEqual(oldData);
+      expect(controller.getActiveRange().range).toEqual(oldData);
     });
     test('set data invalid', () => {
-      const oldData = controller.getActiveCell();
-      controller.setActiveCell({
+      const oldData = controller.getActiveRange().range;
+      controller.setActiveRange({
         row: -2,
         col: -2,
         rowCount: 1,
         colCount: 1,
         sheetId: '',
       });
-      expect(controller.getActiveCell()).toEqual(oldData);
+      expect(controller.getActiveRange().range).toEqual(oldData);
     });
     test('undo', () => {
-      const oldData = controller.getActiveCell();
-      controller.setActiveCell({
+      const oldData = controller.getActiveRange().range;
+      controller.setActiveRange({
         row: 2,
         col: 2,
         rowCount: 1,
@@ -86,24 +86,24 @@ describe('rangeMap.test.ts', () => {
         sheetId: '',
       });
       controller.undo();
-      expect(controller.getActiveCell()).toEqual(oldData);
+      expect(controller.getActiveRange().range).toEqual(oldData);
     });
     test('redo', () => {
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 2,
         col: 2,
         rowCount: 1,
         colCount: 1,
         sheetId: '',
       });
-      const newData = controller.getActiveCell();
+      const newData = controller.getActiveRange().range;
       controller.undo();
       expect(controller.canRedo()).toEqual(true);
       controller.redo();
-      expect(controller.getActiveCell()).toEqual(newData);
+      expect(controller.getActiveRange().range).toEqual(newData);
     });
     test('hideRow up', () => {
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 5,
         col: 5,
         rowCount: 1,
@@ -111,7 +111,8 @@ describe('rangeMap.test.ts', () => {
         sheetId: '',
       });
       controller.hideRow(3, 2);
-      expect(controller.setNextActiveCell('up')).toEqual({
+      controller.setNextActiveCell('up')
+      expect(controller.getActiveRange().range).toEqual({
         row: 2,
         col: 5,
         rowCount: 1,
@@ -120,7 +121,7 @@ describe('rangeMap.test.ts', () => {
       });
     });
     test('mergeCell up', () => {
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 5,
         col: 5,
         rowCount: 1,
@@ -134,7 +135,8 @@ describe('rangeMap.test.ts', () => {
         colCount: 10,
         sheetId: '',
       });
-      expect(controller.setNextActiveCell('up')).toEqual({
+      controller.setNextActiveCell('up');
+      expect(controller.getActiveRange().range).toEqual({
         row: 4,
         col: 5,
         rowCount: 1,
@@ -143,7 +145,7 @@ describe('rangeMap.test.ts', () => {
       });
     });
     test('hideRow down', () => {
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 5,
         col: 5,
         rowCount: 1,
@@ -151,7 +153,8 @@ describe('rangeMap.test.ts', () => {
         sheetId: '',
       });
       controller.hideRow(6, 2);
-      expect(controller.setNextActiveCell('down')).toEqual({
+      controller.setNextActiveCell('down');
+      expect(controller.getActiveRange().range).toEqual({
         row: 8,
         col: 5,
         rowCount: 1,
@@ -160,7 +163,7 @@ describe('rangeMap.test.ts', () => {
       });
     });
     test('hideCol left', () => {
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 5,
         col: 5,
         rowCount: 1,
@@ -168,7 +171,8 @@ describe('rangeMap.test.ts', () => {
         sheetId: '',
       });
       controller.hideCol(3, 2);
-      expect(controller.setNextActiveCell('left')).toEqual({
+      controller.setNextActiveCell('left');
+      expect(controller.getActiveRange().range).toEqual({
         row: 5,
         col: 2,
         rowCount: 1,
@@ -177,7 +181,7 @@ describe('rangeMap.test.ts', () => {
       });
     });
     test('hideCol right', () => {
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 5,
         col: 5,
         rowCount: 1,
@@ -185,7 +189,8 @@ describe('rangeMap.test.ts', () => {
         sheetId: '',
       });
       controller.hideCol(6, 2);
-      expect(controller.setNextActiveCell('right')).toEqual({
+      controller.setNextActiveCell('right');
+      expect(controller.getActiveRange().range).toEqual({
         row: 5,
         col: 8,
         rowCount: 1,

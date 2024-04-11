@@ -11,6 +11,7 @@ import {
   convertResultTypeToString,
   sizeConfig,
   getThemeColor,
+  MERGE_CELL_LINE_BREAK,
 } from '@/util';
 import {
   ModelCellType,
@@ -174,6 +175,7 @@ export function renderCell(
   cellInfo: CanvasOverlayPosition,
   value: ResultType,
   style?: Partial<StyleType>,
+  isMergeContent?: boolean,
 ): IRenderCellResult {
   const { left, top, width, height } = cellInfo;
   const result: IRenderCellResult = { height: 0, width: 0 };
@@ -202,10 +204,6 @@ export function renderCell(
     fillStyle = getThemeColor('errorFormulaColor');
   }
 
-  const texts = splitToWords(text);
-  if (texts.length === 0) {
-    return result;
-  }
   ctx.textAlign = isNum ? 'right' : 'left';
   const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
   let offsetX = isNum ? width - lineGap : lineGap;
@@ -223,54 +221,72 @@ export function renderCell(
   ctx.font = font;
   ctx.fillStyle = fillStyle;
   ctx.textBaseline = 'middle';
-  if (texts.length === 0) {
-    return result;
-  }
 
   if (style?.underline) {
     ctx.strokeStyle = fillStyle;
   }
+
   const textHeight = Math.ceil(fontSize * sizeConfig.lineHeight);
   const x = left + offsetX;
   result.height = textHeight;
   if (style?.isWrapText) {
-    result.height = lineGap * 2;
-    let y = top + result.height;
-    let line = '';
-    let textWidth = 0;
-    let h = 0;
-    for (let i = 0; i < texts.length; i++) {
-      const testLine = line + texts[i];
-      const size = measureText(ctx, testLine);
-      if (size.width > width) {
+    if (isMergeContent) {
+      result.height = lineGap * 2;
+      let y = top + result.height;
+      const texts = text.split(MERGE_CELL_LINE_BREAK);
+      for (let i = 0; i < texts.length; i++) {
         y += lineGap;
-        if (i === 0) {
+        const item = texts[i];
+        const size = measureText(ctx, item);
+        result.width = Math.max(result.width, size.width);
+        fillText(ctx, item, x, y);
+        drawUnderlineData(ctx, isNum, style, size.height, x, y, size.width);
+        y += size.height + lineGap;
+        result.height += size.height + lineGap * 2;
+      }
+    } else {
+      const texts = splitToWords(text);
+      result.height = lineGap * 2;
+      let y = top + result.height;
+      let line = '';
+      let textWidth = 0;
+      let h = 0;
+      for (let i = 0; i < texts.length; i++) {
+        const testLine = line + texts[i];
+        const size = measureText(ctx, testLine);
+        if (size.width > width) {
+          y += lineGap;
+          if (i === 0) {
+            textWidth = size.width;
+            h = size.height;
+            fillText(ctx, texts[i], x, y);
+            line = '';
+          } else {
+            fillText(ctx, line, x, y);
+            line = texts[i];
+          }
+          drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
+          y += h + lineGap;
+          result.height += h + lineGap * 2;
+          result.width = Math.max(textWidth, result.width);
+        } else {
           textWidth = size.width;
           h = size.height;
-          fillText(ctx, texts[i], x, y);
-          line = '';
-        } else {
-          fillText(ctx, line, x, y);
-          line = texts[i];
+          line = testLine;
         }
-        drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
-        y += h + lineGap;
-        result.height += h + lineGap * 2;
-        result.width = Math.max(textWidth, result.width);
-      } else {
-        textWidth = size.width;
-        h = size.height;
-        line = testLine;
       }
+      if (line) {
+        result.height += h + lineGap;
+        result.width = Math.max(textWidth, result.width);
+        fillText(ctx, line, x, y);
+        drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
+      }
+      result.width += lineGap * 2;
     }
-    if (line) {
-      result.height += h + lineGap;
-      result.width = Math.max(textWidth, result.width);
-      fillText(ctx, line, x, y);
-      drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
-    }
-    result.width += lineGap * 2;
   } else {
+    const texts = splitToWords(
+      isMergeContent ? text.replaceAll(MERGE_CELL_LINE_BREAK, '\n') : text,
+    );
     let line = '';
     let textWidth = 0;
     let h = 0;

@@ -14,6 +14,8 @@ import {
   sizeConfig,
   canvasSizeSet,
   FORMULA_EDITOR_ROLE,
+  MERGE_CELL_LINE_BREAK,
+  LINE_BREAK,
 } from '@/util';
 import { coreStore } from '@/containers/store';
 export const BOTTOM_BUFF = 200;
@@ -114,15 +116,15 @@ export function scrollToView(controller: IController, range: IRange) {
     const maxTop = old.top + size.height - headerSize.height;
     const maxLeft = old.left + size.width - headerSize.width;
     if (top >= minTop && top < maxTop && left >= minLeft && left <= maxLeft) {
-      controller.setActiveCell(range);
+      controller.setActiveRange(range);
       return;
     }
     const oldPosition = controller.computeCellPosition(
-      controller.getActiveCell(),
+      controller.getActiveRange().range,
     );
 
     scrollBar(controller, left - oldPosition.left, top - oldPosition.top);
-    controller.setActiveCell(range);
+    controller.setActiveRange(range);
   });
 }
 
@@ -182,7 +184,7 @@ export function scrollBar(
 }
 
 function recalculateScroll(controller: IController) {
-  const activeCell = controller.getActiveCell();
+  const activeCell = controller.getActiveRange().range;
   const temp = {
     row: activeCell.row,
     col: activeCell.col,
@@ -264,8 +266,21 @@ export function checkFocus() {
 }
 
 export function setActiveCellValue(controller: IController) {
-  const inputDom = document.activeElement as HTMLInputElement;
-  controller.setCell([[inputDom.value]], [], controller.getActiveRange().range);
+  const inputDom = document.activeElement as
+    | HTMLInputElement
+    | HTMLTextAreaElement;
+  const { range, isMerged } = controller.getActiveRange();
+  const cellData = controller.getCell(range);
+  let value = inputDom.value;
+  if (
+    isMerged &&
+    cellData &&
+    typeof cellData.value === 'string' &&
+    cellData.value.includes(MERGE_CELL_LINE_BREAK)
+  ) {
+    value = value.replaceAll(LINE_BREAK, MERGE_CELL_LINE_BREAK);
+  }
+  controller.setCell([[value]], [], range);
   inputDom.value = '';
   inputDom.blur();
   coreStore.mergeState({
@@ -402,10 +417,10 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus()) {
         return;
       }
-      const cellData = controller.getCell(controller.getActiveCell());
+      const cellData = controller.getCell(controller.getActiveRange().range);
       controller.updateCellStyle(
         { isBold: !cellData?.style?.isBold },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     },
   },
@@ -417,10 +432,10 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
 
-      const cellData = controller.getCell(controller.getActiveCell());
+      const cellData = controller.getCell(controller.getActiveRange().range);
       controller.updateCellStyle(
         { isItalic: !cellData?.style?.isItalic },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     },
   },
@@ -431,10 +446,10 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus()) {
         return;
       }
-      const cellData = controller.getCell(controller.getActiveCell());
+      const cellData = controller.getCell(controller.getActiveRange().range);
       controller.updateCellStyle(
         { isStrike: !cellData?.style?.isStrike },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     },
   },
@@ -445,7 +460,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus()) {
         return;
       }
-      const cellData = controller.getCell(controller.getActiveCell());
+      const cellData = controller.getCell(controller.getActiveRange().range);
       const underline = cellData?.style?.underline;
       let newUnderline = EUnderLine.NONE;
       if (underline === undefined || underline === EUnderLine.NONE) {
@@ -455,7 +470,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
       }
       controller.updateCellStyle(
         { underline: newUnderline },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     },
   },

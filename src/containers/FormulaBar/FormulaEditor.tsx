@@ -1,18 +1,33 @@
-import React, { CSSProperties, useRef, useEffect, memo } from 'react';
-import { IController, EditorStatus, StyleType } from '@/types';
+import React, {
+  CSSProperties,
+  memo,
+  useCallback,
+  useState,
+  useRef,
+  useEffect,
+} from 'react';
+import { EditorStatus, IController } from '@/types';
 import styles from './index.module.css';
-import { CellStoreType } from '../store';
-import { MAX_NAME_LENGTH, FORMULA_EDITOR_ROLE } from '@/util';
-import { coreStore } from '../store';
+import { CellStoreType, coreStore, StyleStoreType } from '../store';
+import {
+  MAX_NAME_LENGTH,
+  FORMULA_EDITOR_ROLE,
+  MERGE_CELL_LINE_BREAK,
+  classnames,
+  TEXTAREA_MAX_ROWS,
+  LINE_BREAK,
+} from '@/util';
 
-interface Props {
-  controller: IController;
+interface MultipleLineEditorProps {
+  isMergeCell: boolean;
   initValue: string;
   style: CSSProperties | undefined;
   testId?: string;
+  controller: IController;
+  className?: string;
 }
 export function getDisplayStyle(
-  style: StyleType,
+  style: StyleStoreType,
   isFormulaBar = true,
 ): CSSProperties {
   const result: CSSProperties = {};
@@ -49,71 +64,96 @@ export function getDisplayStyle(
 export function getEditorStyle(
   style: CellStoreType,
   editorStatus: EditorStatus,
-  cellStyle: StyleType,
+  cellStyle: StyleStoreType,
 ): CSSProperties | undefined {
   if (editorStatus === EditorStatus.NONE) {
     return undefined;
   }
   const isFormulaBar = editorStatus === EditorStatus.EDIT_FORMULA_BAR;
 
-  const editorStyle = getDisplayStyle(cellStyle, isFormulaBar);
+  const editorStyle: CSSProperties = getDisplayStyle(cellStyle, isFormulaBar);
   if (isFormulaBar) {
     return editorStyle;
   }
-  return {
+  const result = {
     ...editorStyle,
     top: style.top,
     left: style.left,
     width: style.width,
     height: style.height,
-    border: '1px solid var(--primaryColor)',
   };
+  return result;
 }
 
-export const FormulaEditor: React.FunctionComponent<Props> = memo(
-  ({ controller, initValue, style, testId }) => {
-    const ref = useRef<HTMLInputElement>(null);
-    useEffect(() => {
-      ref.current?.focus();
-    }, []);
+const minRows = 1;
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-      event.stopPropagation();
-      if (event.key === 'Enter' || event.key === 'Tab') {
-        controller.batchUpdate(() => {
-          controller.setCell(
-            [[event.currentTarget.value]],
-            [],
-            controller.getActiveRange().range,
-          );
-          if (event.key === 'Enter') {
-            controller.setNextActiveCell('down');
-          } else {
-            controller.setNextActiveCell('right');
-          }
-        });
-        coreStore.mergeState({
-          editorStatus: EditorStatus.NONE,
-        });
-        ref.current!.value = '';
-        ref.current!.blur();
+function countRows(count: number) {
+  return Math.max(Math.min(TEXTAREA_MAX_ROWS, count), minRows);
+}
+
+export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps> =
+  memo(({ initValue, style, testId, isMergeCell, controller, className }) => {
+    const ref = useRef<HTMLTextAreaElement>(null);
+    const [rowCount, setRowCount] = useState(minRows);
+    useEffect(() => {
+      if (isMergeCell) {
+        const count = initValue.split(MERGE_CELL_LINE_BREAK).length;
+        setRowCount(countRows(count));
+      } else {
+        const rows = Math.ceil((ref.current?.scrollHeight || 20) / 20);
+        setRowCount(countRows(rows));
       }
-    };
+    }, [isMergeCell, initValue]);
+    const onKeyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        event.stopPropagation();
+        if (event.key === 'Enter' || event.key === 'Tab') {
+          let value = event.currentTarget.value;
+          const { range, isMerged } = controller.getActiveRange();
+          const cellData = controller.getCell(range);
+          if (
+            isMerged &&
+            cellData &&
+            typeof cellData.value === 'string' &&
+            cellData.value.includes(MERGE_CELL_LINE_BREAK)
+          ) {
+            value = value.replaceAll(LINE_BREAK, MERGE_CELL_LINE_BREAK);
+          }
+          controller.batchUpdate(() => {
+            controller.setCell([[value]], [], range);
+            if (event.key === 'Enter') {
+              controller.setNextActiveCell('down');
+            } else {
+              controller.setNextActiveCell('right');
+            }
+          });
+          coreStore.mergeState({
+            editorStatus: EditorStatus.NONE,
+          });
+          event.currentTarget.value = '';
+          event.currentTarget.blur();
+        } else {
+          const rows = Math.ceil(event.currentTarget.scrollHeight / 20);
+          setRowCount(countRows(rows));
+        }
+      },
+      [],
+    );
     return (
-      <input
-        className={styles['formula-editor']}
-        ref={ref}
+      <textarea
         spellCheck
-        defaultValue={initValue}
-        onKeyDown={handleKeyDown}
-        type="text"
+        autoFocus
+        ref={ref}
         style={style}
         maxLength={MAX_NAME_LENGTH * 100}
         data-testid={testId}
         data-role={FORMULA_EDITOR_ROLE}
+        onKeyDown={onKeyDown}
+        className={classnames(styles['formula-editor'], className)}
+        defaultValue={initValue}
+        rows={rowCount}
       />
     );
-  },
-);
+  });
 
-FormulaEditor.displayName = 'FormulaEditor';
+MultipleLineEditor.displayName = 'MultipleLineEditor';

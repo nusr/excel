@@ -1,6 +1,7 @@
 import { Controller } from '..';
 import { Model } from '@/model';
-import { HTML_FORMAT, PLAIN_FORMAT } from '@/util';
+import { EHorizontalAlign, EMergeCellType } from '@/types';
+import { HTML_FORMAT, MERGE_CELL_LINE_BREAK, PLAIN_FORMAT } from '@/util';
 
 describe('mergeCell.test.ts', () => {
   let controller: Controller;
@@ -18,8 +19,8 @@ describe('mergeCell.test.ts', () => {
     });
     controller.addSheet();
   });
-  describe('mergeCell', () => {
-    test('normal', () => {
+  describe('addMergeCell', () => {
+    test('ok', () => {
       controller.addMergeCell({
         row: 0,
         col: 0,
@@ -30,6 +31,111 @@ describe('mergeCell.test.ts', () => {
       expect(
         controller.getMergeCellList(controller.getCurrentSheetId()),
       ).toHaveLength(1);
+    });
+    test('merge and center', () => {
+      controller.setCell(
+        [
+          [1, 2],
+          [4, 5],
+        ],
+        [],
+        {
+          row: 0,
+          col: 0,
+          rowCount: 0,
+          colCount: 0,
+          sheetId: controller.getCurrentSheetId(),
+        },
+      );
+      controller.addMergeCell({
+        row: 0,
+        col: 0,
+        rowCount: 2,
+        colCount: 2,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getMergeCellList(controller.getCurrentSheetId()),
+      ).toHaveLength(1);
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: '',
+        }),
+      ).toEqual({
+        value: 1,
+        style: {
+          horizontalAlign: EHorizontalAlign.CENTER,
+        },
+      });
+    });
+    test('merge content', () => {
+      controller.setCell(
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        [],
+        {
+          row: 0,
+          col: 0,
+          rowCount: 0,
+          colCount: 0,
+          sheetId: controller.getCurrentSheetId(),
+        },
+      );
+      controller.addMergeCell(
+        {
+          row: 0,
+          col: 0,
+          rowCount: 2,
+          colCount: 2,
+          sheetId: controller.getCurrentSheetId(),
+        },
+        EMergeCellType.MERGE_CONTENT,
+      );
+      expect(
+        controller.getMergeCellList(controller.getCurrentSheetId()),
+      ).toHaveLength(1);
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: '',
+        }),
+      ).toEqual({
+        value: [1, 2, 3, 4].join(MERGE_CELL_LINE_BREAK),
+        style: { isWrapText: true },
+      });
+    });
+  });
+  describe('deleteMergeCell', () => {
+    test('ok', () => {
+      controller.addMergeCell({
+        row: 0,
+        col: 0,
+        rowCount: 2,
+        colCount: 2,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getMergeCellList(controller.getCurrentSheetId()),
+      ).toHaveLength(1);
+      controller.deleteMergeCell({
+        row: 0,
+        col: 0,
+        rowCount: 2,
+        colCount: 2,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getMergeCellList(controller.getCurrentSheetId()),
+      ).toHaveLength(0);
     });
   });
 });

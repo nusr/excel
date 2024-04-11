@@ -24,7 +24,7 @@
   top: 100%;
   left: 0;
   right: 0;
-  z-index: var(--lowZIndex);
+  z-index: var(--highestZIndex);
   max-height: 200px;
   overflow: auto;
   white-space: nowrap;
@@ -67,7 +67,6 @@
   display: flex;
   align-items: center;
   position: relative;
-  border-radius: var(--borderRadius);
   border: 1px solid var(--borderColor);
   box-sizing: border-box;
 }

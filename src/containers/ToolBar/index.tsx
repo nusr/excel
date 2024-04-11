@@ -118,7 +118,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       } else {
         controller.updateCellStyle(
           { fontFamily: String(value) },
-          controller.getActiveCell(),
+          controller.getActiveRange().range,
         );
       }
     }, []);
@@ -140,25 +140,25 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
     const setFontSize = useCallback((value: string | number) => {
       controller.updateCellStyle(
         { fontSize: Number(value) },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     }, []);
     const toggleBold = useCallback(() => {
       controller.updateCellStyle(
         { isBold: !cellStyle.isBold },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     }, [cellStyle.isBold]);
     const toggleItalic = useCallback(() => {
       controller.updateCellStyle(
         { isItalic: !cellStyle.isItalic },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     }, [cellStyle.isItalic]);
     const toggleStrike = useCallback(() => {
       controller.updateCellStyle(
         { isStrike: !cellStyle.isStrike },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     }, [cellStyle.isStrike]);
     const setUnderline = useCallback((value: string | number) => {
@@ -169,24 +169,24 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       } else if (t === EUnderLine.DOUBLE) {
         underline = EUnderLine.DOUBLE;
       }
-      controller.updateCellStyle({ underline }, controller.getActiveCell());
+      controller.updateCellStyle({ underline }, controller.getActiveRange().range);
     }, []);
     const setFillColor = useCallback((value: string) => {
       controller.updateCellStyle(
         { fillColor: value },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     }, []);
     const setFontColor = useCallback((value: string) => {
       controller.updateCellStyle(
         { fontColor: value },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     }, []);
     const toggleWrapText = useCallback(() => {
       controller.updateCellStyle(
         { isWrapText: !cellStyle.isWrapText },
-        controller.getActiveCell(),
+        controller.getActiveRange().range,
       );
     }, [cellStyle.isWrapText]);
     const toggleMergeCell = useCallback(() => {

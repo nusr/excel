@@ -22,6 +22,7 @@ import {
   eventEmitter,
   sheetViewSizeSet,
   headerSizeSet,
+  containRange,
 } from '@/util';
 import { History, HistoryChangeType } from './History';
 import { Workbook } from './workbook';
@@ -101,11 +102,40 @@ export class Model implements IModel {
   getSheetList(): WorksheetType[] {
     return this.workbookManager.getSheetList();
   }
-  getActiveCell(): IRange {
-    return this.rangeMapManager.getActiveCell();
+  getActiveRange() {
+    const range = this.rangeMapManager.getActiveRange().range;
+    const mergeCells = this.getMergeCellList(range.sheetId);
+
+    for (const item of mergeCells) {
+      if (containRange(range.row, range.col, item)) {
+        const newRange = {
+          ...item,
+          sheetId: item.sheetId || this.getCurrentSheetId(),
+        };
+        return {
+          range: newRange,
+          isMerged: true,
+        };
+      }
+    }
+    return {
+      range,
+      isMerged: false,
+    };
   }
-  setActiveCell(range: IRange): void {
-    this.rangeMapManager.setActiveCell(range);
+  setActiveRange(range: IRange): void {
+    range.sheetId = range.sheetId || this.getCurrentSheetId();
+    const mergeCells = this.getMergeCellList(range.sheetId);
+    let newRange = range;
+    for (const item of mergeCells) {
+      if (containRange(range.row, range.col, item)) {
+        newRange = {
+          ...item,
+          sheetId: item.sheetId || this.getCurrentSheetId(),
+        };
+      }
+    }
+    this.rangeMapManager.setActiveRange(newRange);
   }
   addSheet() {
     const result = this.workbookManager.addSheet();
@@ -187,9 +217,6 @@ export class Model implements IModel {
   getCell = (range: IRange) => {
     return this.worksheetManager.getCell(range);
   };
-  getRangeData(range: IRange) {
-    return this.worksheetManager.getRangeData(range);
-  }
   getWorksheet(sheetId?: string): WorksheetData | null {
     return this.worksheetManager.getWorksheet(sheetId);
   }

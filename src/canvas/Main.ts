@@ -11,6 +11,8 @@ import {
   getThemeColor,
   headerSizeSet,
   canvasSizeSet,
+  isSameRange,
+  MERGE_CELL_LINE_BREAK,
 } from '@/util';
 import {
   EventType,
@@ -94,16 +96,22 @@ export class MainCanvas {
     this.renderTriangle();
 
     const result = this.renderSelection(realContentWidth, realContentHeight);
-    this.renderAntLine(result);
-
+    const { range, isMerged } = this.controller.getActiveRange();
+    const copyRange = this.controller.getCopyRange();
+    const check = isMerged && copyRange && isSameRange(range, copyRange);
+    if (!check) {
+      this.renderAntLine(result);
+    }
     this.renderMergeCell();
+
     this.isRendering = false;
     this.content.check();
   };
 
   private renderMergeCell() {
     const { controller } = this;
-    const activeCell = controller.getActiveCell();
+    const copyRange = controller.getCopyRange();
+    const activeCell = controller.getActiveRange().range;
     const mergeCells = controller.getMergeCellList(
       controller.getCurrentSheetId(),
     );
@@ -123,7 +131,9 @@ export class MainCanvas {
         continue;
       }
       const value = cellInfo.value;
-      // TODO render merge content 
+      const isMergeContent =
+        typeof value === 'string' && value.includes(MERGE_CELL_LINE_BREAK);
+      // TODO render merge content
       renderCell(
         this.ctx,
         {
@@ -134,6 +144,7 @@ export class MainCanvas {
         },
         value,
         cellInfo.style,
+        isMergeContent,
       );
       if (isSheet(activeCell) || isRow(activeCell) || isCol(activeCell)) {
         continue;
@@ -143,6 +154,18 @@ export class MainCanvas {
         this.ctx.lineWidth = dpr();
         // highlight line
         strokeRect(
+          this.ctx,
+          position.left,
+          position.top,
+          size.width,
+          size.height,
+        );
+      }
+      if (copyRange && isSameRange(copyRange, range)) {
+        this.ctx.strokeStyle = getThemeColor('primaryColor');
+        this.ctx.lineWidth = dpr();
+        // highlight line
+        drawAntLine(
           this.ctx,
           position.left,
           position.top,
@@ -258,7 +281,7 @@ export class MainCanvas {
       controller.getCurrentSheetId(),
     );
     this.ctx.save();
-    const range = this.controller.getActiveCell();
+    const range = this.controller.getActiveRange().range;
     this.ctx.fillStyle = getThemeColor('white');
     fillRect(this.ctx, 0, headerSize.height, headerSize.width, height);
     Object.assign(this.ctx, getHeaderStyle());
@@ -305,7 +328,7 @@ export class MainCanvas {
     const mergeCells = controller.getMergeCellList(
       controller.getCurrentSheetId(),
     );
-    const range = this.controller.getActiveCell();
+    const range = this.controller.getActiveRange().range;
     const pointList: Point[] = [];
     this.ctx.save();
     this.ctx.fillStyle = getThemeColor('white');
@@ -361,11 +384,10 @@ export class MainCanvas {
   }
   private renderAntLine(position: CanvasOverlayPosition) {
     const { controller } = this;
-    const ranges = controller.getCopyRanges();
-    if (ranges.length === 0) {
+    const range = controller.getCopyRange();
+    if (!range) {
       return;
     }
-    const [range] = ranges;
     if (range.sheetId !== controller.getCurrentSheetId()) {
       return;
     }
@@ -386,7 +408,7 @@ export class MainCanvas {
     contentHeight: number,
   ): CanvasOverlayPosition {
     const { controller } = this;
-    const range = controller.getActiveCell();
+    const range = controller.getActiveRange().range;
     canvasLog('render canvas selection');
     if (isSheet(range)) {
       const result = this.renderSelectAll(contentWith, contentHeight);
@@ -405,7 +427,7 @@ export class MainCanvas {
 
   private renderActiveCell() {
     const { controller } = this;
-    const range = controller.getActiveCell();
+    const range = controller.getActiveRange().range;
     if (range.rowCount === range.colCount && range.rowCount === 1) {
       return;
     }
@@ -430,7 +452,7 @@ export class MainCanvas {
   private renderSelectRange() {
     const { controller } = this;
     const headerSize = headerSizeSet.get();
-    const range = controller.getActiveCell();
+    const range = controller.getActiveRange().range;
 
     const activeCell = controller.computeCellPosition({
       row: range.row,
@@ -516,7 +538,7 @@ export class MainCanvas {
   private renderSelectCol(height: number) {
     const { controller } = this;
     const headerSize = headerSizeSet.get();
-    const range = controller.getActiveCell();
+    const range = controller.getActiveRange().range;
     this.ctx.fillStyle = getThemeColor('selectionColor');
     const activeCell = controller.computeCellPosition({
       row: range.row,
@@ -578,7 +600,7 @@ export class MainCanvas {
   private renderSelectRow(width: number) {
     const { controller } = this;
     const headerSize = headerSizeSet.get();
-    const range = controller.getActiveCell();
+    const range = controller.getActiveRange().range;
     this.ctx.fillStyle = getThemeColor('selectionColor');
     const activeCell = controller.computeCellPosition({
       row: range.row,

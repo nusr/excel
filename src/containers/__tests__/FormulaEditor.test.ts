@@ -36,6 +36,8 @@ describe('getEditorStyle', () => {
           verticalAlign: EVerticalAlign.TOP,
           horizontalAlign: EHorizontalAlign.LEFT,
           numberFormat: 0,
+          isMergeCell: false,
+          mergeType: ''
         },
       ),
     ).toBeUndefined();
@@ -78,6 +80,8 @@ describe('getEditorStyle', () => {
           verticalAlign: EVerticalAlign.TOP,
           horizontalAlign: EHorizontalAlign.LEFT,
           numberFormat: 0,
+          isMergeCell: false,
+          mergeType: ''
         },
       ),
     ).toEqual(result);
@@ -95,7 +99,6 @@ describe('getEditorStyle', () => {
       top: 0,
       width: 100,
       height: 100,
-      border: '1px solid var(--primaryColor)',
     };
     expect(
       getEditorStyle(
@@ -126,6 +129,8 @@ describe('getEditorStyle', () => {
           verticalAlign: EVerticalAlign.TOP,
           horizontalAlign: EHorizontalAlign.LEFT,
           numberFormat: 0,
+          isMergeCell: false,
+          mergeType: ''
         },
       ),
     ).toEqual(result);

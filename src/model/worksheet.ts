@@ -376,22 +376,6 @@ export class Worksheet implements IWorksheet {
       oldValue: oldData ? oldData : DELETE_FLAG,
     });
   }
-  getRangeData(range: IRange): Array<Array<ModelCellType | null>> {
-    const result: Array<Array<ModelCellType | null>> = [];
-    const sheetId = range.sheetId || this.model.getCurrentSheetId();
-    let startRow = range.row;
-    let list: Array<ModelCellType | null> = [];
-    this.model.iterateRange(range, (row, col) => {
-      if (row !== startRow) {
-        result.push(list.slice());
-        list = [];
-        startRow++;
-      }
-      list.push(this.getCell({ row, col, sheetId, rowCount: 1, colCount: 1 }));
-      return false;
-    });
-    return result;
-  }
   getCell(range: IRange): ModelCellType | null {
     const { row, col, sheetId } = range;
     const id = sheetId || this.model.getCurrentSheetId();
@@ -456,7 +440,7 @@ export class Worksheet implements IWorksheet {
   }
   pasteRange(fromRange: IRange, isCut: boolean): IRange {
     const id = this.model.getCurrentSheetId();
-    const activeCell = this.model.getActiveCell();
+    const activeCell = this.model.getActiveRange().range;
 
     const { row, col, rowCount, colCount, sheetId } = fromRange;
     const realSheetId = sheetId || id;

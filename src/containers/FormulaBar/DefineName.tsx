@@ -74,7 +74,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(
             /^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(t) &&
             t.length <= MAX_PARAMS_COUNT
           ) {
-            controller.setDefineName(controller.getActiveCell(), t);
+            controller.setDefineName(controller.getActiveRange().range, t);
           } else {
             setValue(displayName);
           }

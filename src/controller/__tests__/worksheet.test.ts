@@ -110,7 +110,7 @@ describe('worksheet.test.ts', () => {
         rowCount: 1,
         sheetId: controller.getCurrentSheetId(),
       });
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 0,
         col: 0,
         colCount: 2,
@@ -118,7 +118,7 @@ describe('worksheet.test.ts', () => {
         sheetId: controller.getCurrentSheetId(),
       });
       await controller.copy();
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 5,
         col: 5,
         colCount: 2,
@@ -148,7 +148,7 @@ describe('worksheet.test.ts', () => {
         rowCount: 1,
         sheetId: controller.getCurrentSheetId(),
       });
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 0,
         col: 0,
         colCount: 2,
@@ -156,7 +156,7 @@ describe('worksheet.test.ts', () => {
         sheetId: controller.getCurrentSheetId(),
       });
       await controller.cut();
-      controller.setActiveCell({
+      controller.setActiveRange({
         row: 5,
         col: 5,
         colCount: 2,
@@ -346,8 +346,17 @@ describe('worksheet.test.ts', () => {
         sheetId: controller.getCurrentSheetId(),
       });
 
-      expect(controller.getWorksheet()).toEqual({
-        '0_0': { value: 1, style: { isBold: true } },
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({
+        value: 1,
+        style: { isBold: true },
       });
     });
     test('set', () => {

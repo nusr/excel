@@ -57,23 +57,29 @@ export class RangeMap implements IRangeMap {
       transformData(this, item, 'redo');
     }
   }
-  getActiveCell(): IRange {
+  getActiveRange() {
     const id = this.model.getCurrentSheetId();
+
     const range = this.rangeMap[id];
     if (range) {
+      range.sheetId = range.sheetId || id;
       return {
-        ...range,
+        range: { ...range },
+        isMerged: false,
       };
     }
     return {
-      row: 0,
-      col: 0,
-      rowCount: 1,
-      colCount: 1,
-      sheetId: id,
+      range: {
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: id,
+      },
+      isMerged: false,
     };
   }
-  setActiveCell(newRange: IRange): void {
+  setActiveRange(newRange: IRange): void {
     newRange.sheetId = newRange.sheetId || this.model.getCurrentSheetId();
     if (!this.model.validateRange(newRange)) {
       return;

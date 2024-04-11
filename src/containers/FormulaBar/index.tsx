@@ -1,10 +1,10 @@
-import React, { useSyncExternalStore, useMemo, memo } from 'react';
+import React, { useSyncExternalStore, useMemo, memo, useCallback } from 'react';
 import {
-  FormulaEditor,
+  MultipleLineEditor,
   getEditorStyle,
   getDisplayStyle,
 } from './FormulaEditor';
-import { classnames, intToColumnName } from '@/util';
+import { LINE_BREAK, classnames, intToColumnName } from '@/util';
 import styles from './index.module.css';
 import { IController, EditorStatus } from '@/types';
 import { activeCellStore, coreStore, styleStore } from '@/containers/store';
@@ -33,15 +33,16 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
         activeCell.defineName ||
         `${intToColumnName(activeCell.col)}${activeCell.row + 1}`
       );
-    }, [activeCell]);
-    const handleClick = () => {
+    }, [activeCell.defineName, activeCell.col, activeCell.row]);
+    const handleClick = useCallback(() => {
       coreStore.mergeState({
         editorStatus: EditorStatus.EDIT_FORMULA_BAR,
       });
-    };
+    }, []);
     const style = useMemo(() => {
       return getDisplayStyle(cellStyle);
     }, [cellStyle]);
+
     return (
       <div className={styles['formula-bar-wrapper']} data-testid="formula-bar">
         <DefineName
@@ -51,16 +52,26 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
         />
         <div className={styles['formula-bar-editor-wrapper']}>
           {editorStatus !== EditorStatus.NONE && (
-            <FormulaEditor
-              controller={controller}
+            <MultipleLineEditor
               initValue={activeCell.value}
+              controller={controller}
               style={getEditorStyle(activeCell, editorStatus, cellStyle)}
               testId="formula-editor"
+              isMergeCell={cellStyle.isMergeCell}
+              className={
+                editorStatus === EditorStatus.EDIT_CELL
+                  ? styles['edit-cell']
+                  : ''
+              }
             />
           )}
           <div
             className={classnames(styles['formula-bar-value'], {
               [styles['show']]: editorStatus !== EditorStatus.EDIT_FORMULA_BAR,
+              [styles['wrap']]:
+                cellStyle.isMergeCell &&
+                activeCell.value.includes(LINE_BREAK) &&
+                cellStyle.isWrapText,
             })}
             style={style}
             onClick={handleClick}

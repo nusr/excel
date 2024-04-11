@@ -1,12 +1,15 @@
-import type { IRange, CanvasOverlayPosition } from '@/types';
+import type { CanvasOverlayPosition } from '@/types';
 import { DEFAULT_POSITION } from '@/util';
 import { BaseStore } from './base';
 
-export type CellStoreType = CanvasOverlayPosition &
-  Omit<IRange, 'sheetId'> & {
-    defineName: string;
-    value: string;
-  };
+export type CellStoreType = CanvasOverlayPosition & {
+  defineName: string;
+  value: string;
+  row: number;
+  col: number;
+  rowCount: number;
+  colCount: number;
+};
 
 const cellData: CellStoreType = {
   value: '',

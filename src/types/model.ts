@@ -157,11 +157,14 @@ export interface IWorkbook extends IBaseManager {
   getSheetList(): WorksheetType[];
   validateSheet(data: WorksheetType): boolean;
 }
-
+export type ActiveRange = {
+  isMerged: boolean;
+  range: IRange; // merge range
+};
 export interface IRangeMap extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'rangeMap'>;
-  setActiveCell(range: IRange): void;
-  getActiveCell(): IRange;
+  setActiveRange(range: IRange): void;
+  getActiveRange(): ActiveRange;
   validateRange(range: IRange): boolean;
 }
 
@@ -224,7 +227,6 @@ export interface IWorksheet extends IBaseManager {
   ): void;
   updateCellStyle(style: Partial<StyleType>, range: IRange): void;
   computeFormulas(): void;
-  getRangeData(range: IRange): Array<Array<ModelCellType | null>>;
   addMergeCell(range: IRange, type?: EMergeCellType): void;
 }
 
@@ -244,7 +246,7 @@ export interface IBaseModel
       | 'deleteAll'
       | 'fromJSON'
     >,
-    Pick<IRangeMap, 'setActiveCell' | 'getActiveCell'>,
+    Pick<IRangeMap, 'setActiveRange' | 'getActiveRange'>,
     Pick<
       IDrawings,
       'getDrawingList' | 'addDrawing' | 'updateDrawing' | 'deleteDrawing'
@@ -270,7 +272,6 @@ export interface IBaseModel
       | 'updateCellStyle'
       | 'getWorksheet'
       | 'setWorksheet'
-      | 'getRangeData'
     > {
   toJSON(): WorkBookJSON;
   canRedo(): boolean;

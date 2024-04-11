@@ -9,7 +9,7 @@ import {
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { type } from './util';
-import { initControllerForTest } from '@/controller';
+import { initController } from '@/controller';
 import './global.mock';
 import * as Util from '../util/saveAs';
 
@@ -21,7 +21,7 @@ describe('Export.test.ts', () => {
   describe('download chart', () => {
     test('ok', async () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
@@ -40,7 +40,7 @@ describe('Export.test.ts', () => {
   describe('download floating picture', () => {
     test('ok', async () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const file = new File(['test content'], 'test.png', {
         type: 'image/png',
@@ -66,7 +66,7 @@ describe('Export.test.ts', () => {
   describe('download xlsx', () => {
     test('ok', async () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       type('test');
       fireEvent.click(screen.getByTestId('menubar-excel'));
@@ -78,7 +78,7 @@ describe('Export.test.ts', () => {
   describe('download csv', () => {
     test('ok', async () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       type('test');
       fireEvent.click(screen.getByTestId('menubar-excel'));

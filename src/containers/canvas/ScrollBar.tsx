@@ -50,7 +50,7 @@ function scrollBar(controller: IController, scrollX: number, scrollY: number) {
     scrollLeft,
     scrollTop,
   };
-  const activeCell = controller.getActiveCell();
+  const activeCell = controller.getActiveRange().range
   if (data.row != oldScroll.row) {
     activeCell.row = data.row;
   }

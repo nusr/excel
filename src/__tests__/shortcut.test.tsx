@@ -9,13 +9,13 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { isMac } from '@/util';
-import { initControllerForTest } from '@/controller';
+import { initController } from '@/controller';
 import './global.mock';
 
 describe('shortcut.test.tsx', () => {
   describe('Enter', () => {
     test('normal', async () => {
-      render(<App controller={initControllerForTest()} />);
+      render(<App controller={initController()} />);
       fireEvent.keyDown(document.body, { key: 'Enter' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
     });
@@ -23,7 +23,7 @@ describe('shortcut.test.tsx', () => {
   describe('Tab', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       fireEvent.click(screen.getByTestId('canvas-main'));
       fireEvent.keyDown(document.body, { key: 'Tab' });
@@ -33,7 +33,7 @@ describe('shortcut.test.tsx', () => {
   describe('ArrowDown', () => {
     test('meta', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       expect(screen.getByTestId('canvas-bottom-bar')).not.toHaveClass('active');
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
@@ -44,7 +44,7 @@ describe('shortcut.test.tsx', () => {
   describe('ArrowUp', () => {
     test('normal', async () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       fireEvent.keyDown(document.body, { key: 'ArrowDown' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
@@ -54,7 +54,7 @@ describe('shortcut.test.tsx', () => {
 
     test('meta', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       expect(screen.getByTestId('canvas-bottom-bar')).not.toHaveClass('active');
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
@@ -68,7 +68,7 @@ describe('shortcut.test.tsx', () => {
   describe('ArrowRight', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       fireEvent.keyDown(document.body, { key: 'ArrowRight' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('B1');
@@ -76,7 +76,7 @@ describe('shortcut.test.tsx', () => {
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
     });
     test('meta', () => {
-      const controller = initControllerForTest();
+      const controller = initController();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -87,7 +87,7 @@ describe('shortcut.test.tsx', () => {
   });
   describe('ArrowLeft', () => {
     test('meta', () => {
-      const controller = initControllerForTest();
+      const controller = initController();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -101,7 +101,7 @@ describe('shortcut.test.tsx', () => {
   describe('bold', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'b', [key]: true });
@@ -111,7 +111,7 @@ describe('shortcut.test.tsx', () => {
     });
     test('twice', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'b', [key]: true });
@@ -127,7 +127,7 @@ describe('shortcut.test.tsx', () => {
   describe('italic', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'i', [key]: true });
@@ -137,7 +137,7 @@ describe('shortcut.test.tsx', () => {
     });
     test('twice', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'i', [key]: true });
@@ -153,7 +153,7 @@ describe('shortcut.test.tsx', () => {
   describe('strike', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: '5', [key]: true });
@@ -163,7 +163,7 @@ describe('shortcut.test.tsx', () => {
     });
     test('twice', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: '5', [key]: true });
@@ -179,7 +179,7 @@ describe('shortcut.test.tsx', () => {
   describe('underline', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'u', [key]: true });
@@ -189,7 +189,7 @@ describe('shortcut.test.tsx', () => {
     });
     test('twice', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'u', [key]: true });
@@ -203,7 +203,7 @@ describe('shortcut.test.tsx', () => {
     });
     test('strike', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'u', [key]: true });
@@ -215,7 +215,7 @@ describe('shortcut.test.tsx', () => {
   });
   describe('copy', () => {
     test('normal', async () => {
-      const controller = initControllerForTest();
+      const controller = initController();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -230,7 +230,7 @@ describe('shortcut.test.tsx', () => {
       fireEvent.keyDown(document.body, { key: 'Enter' });
       fireEvent.paste(document.body, { clipboardData: { getData: () => '' } });
       await waitFor(() => {
-        expect(controller.getCell(controller.getActiveCell())).toEqual({
+        expect(controller.getCell(controller.getActiveRange().range)).toEqual({
           style: { isBold: true },
         });
         expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
@@ -239,7 +239,7 @@ describe('shortcut.test.tsx', () => {
   });
   describe('cut', () => {
     test('normal', async () => {
-      const controller = initControllerForTest();
+      const controller = initController();
       act(() => {
         render(<App controller={controller} />);
       });
@@ -254,7 +254,7 @@ describe('shortcut.test.tsx', () => {
       fireEvent.keyDown(document.body, { key: 'Enter' });
       fireEvent.paste(document.body, { clipboardData: { getData: () => '' } });
       await waitFor(() => {
-        expect(controller.getCell(controller.getActiveCell())).toEqual({
+        expect(controller.getCell(controller.getActiveRange().range)).toEqual({
           style: { isBold: true },
         });
         expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
@@ -269,9 +269,9 @@ describe('shortcut.test.tsx', () => {
   });
 
   describe('wheel', () => {
-    test(' scroll down', async () => {
+    test('scroll down', async () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
 
       expect(
@@ -290,7 +290,7 @@ describe('shortcut.test.tsx', () => {
     });
     test(' scroll right', async () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       expect(
         window.getComputedStyle(
@@ -311,7 +311,7 @@ describe('shortcut.test.tsx', () => {
   describe('undo', () => {
     test('ok', () => {
       act(() => {
-        render(<App controller={initControllerForTest(true)} />);
+        render(<App controller={initController(true)} />);
       });
       expect(screen.getByTestId('toolbar-undo')).toBeDisabled();
       fireEvent.click(screen.getByTestId('toolbar-bold'));
@@ -325,7 +325,7 @@ describe('shortcut.test.tsx', () => {
   describe('redo', () => {
     test('ok', () => {
       act(() => {
-        render(<App controller={initControllerForTest(true)} />);
+        render(<App controller={initController(true)} />);
       });
       fireEvent.click(screen.getByTestId('toolbar-bold'));
       expect(screen.getByTestId('toolbar-redo')).toBeDisabled();

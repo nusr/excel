@@ -1,5 +1,5 @@
 import { App } from '@/containers';
-import { initControllerForTest } from '@/controller';
+import { initController } from '@/controller';
 import * as React from 'react';
 import {
   render,
@@ -17,13 +17,13 @@ describe('Menubar.test.ts', () => {
   describe('menubar', () => {
     test('normal', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       expect(screen.getByTestId('menubar')!.childNodes.length).toEqual(4);
     });
     test('menu', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       fireEvent.click(screen.getByTestId('menubar-excel'));
       expect(
@@ -38,7 +38,7 @@ describe('Menubar.test.ts', () => {
     });
     test('toggle', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const before = document.documentElement.getAttribute('data-theme');
       fireEvent.click(screen.getByTestId('menubar-theme-toggle'));
@@ -49,7 +49,7 @@ describe('Menubar.test.ts', () => {
 
     test('toggle twice', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const before = document.documentElement.getAttribute('data-theme');
       fireEvent.click(screen.getByTestId('menubar-theme-toggle'));
@@ -80,7 +80,7 @@ describe('Menubar.test.ts', () => {
         },
       });
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const before = document.documentElement.getAttribute('data-theme');
       expect(before).toEqual('light');
@@ -108,7 +108,7 @@ describe('Menubar.test.ts', () => {
         },
       });
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       const before = document.documentElement.getAttribute('data-theme');
       expect(before).toEqual('dark');
@@ -122,13 +122,13 @@ describe('Menubar.test.ts', () => {
   describe('i18n', () => {
     test('default', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('en');
     });
     test('change', () => {
       let result: RenderResult;
-      const controller = initControllerForTest();
+      const controller = initController();
       act(() => {
         result = render(<App controller={controller} />);
       });

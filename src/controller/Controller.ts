@@ -17,14 +17,12 @@ import {
   DefinedNameItem,
   WorksheetData,
   EMergeCellType,
-  ActiveRange,
 } from '@/types';
 import {
   PLAIN_FORMAT,
   HTML_FORMAT,
   generateHTML,
   convertToCssString,
-  containRange,
   parseHTML,
   parseText,
   generateUUID,
@@ -48,7 +46,7 @@ export class Controller implements IController {
   private scrollValue: Record<string, ScrollValue> = {};
   private model: IModel;
   private changeSet = new Set<ChangeEventType>();
-  private copyRanges: IRange[] = []; // cut or copy ranges
+  private copyRange: IRange | null = null; // cut or copy ranges
   private isCut = false; // cut or copy
   private floatElementUuid = '';
   private isNoChange = false;
@@ -83,42 +81,10 @@ export class Controller implements IController {
     this.model.emitChange(this.changeSet);
     this.changeSet = new Set<ChangeEventType>();
   }
-  getActiveCell(): IRange {
-    const range = this.model.getActiveCell();
-    return range;
-  }
-  private getRange(range: IRange): ActiveRange {
-    const mergeCells = this.getMergeCellList(this.getCurrentSheetId());
-    if (mergeCells.length === 0) {
-      return {
-        range,
-        isMerged: false,
-      };
-    }
-
-    for (const item of mergeCells) {
-      if (containRange(range.row, range.col, item)) {
-        const newRange = {
-          ...item,
-          sheetId: item.sheetId || this.getCurrentSheetId(),
-        };
-        return {
-          range: newRange,
-          isMerged: true,
-        };
-      }
-    }
-
-    return {
-      range,
-      isMerged: false,
-    };
-  }
   getActiveRange() {
-    const range = this.getActiveCell();
-    return this.getRange(range);
+    return this.model.getActiveRange();
   }
-  setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up'): IRange {
+  setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up') {
     const { range, isMerged } = this.getActiveRange();
     let startCol = range.col;
     let startRow = range.row;
@@ -171,12 +137,10 @@ export class Controller implements IController {
       }
       result.row = startRow;
     }
-    const temp = this.getRange(result).range;
-    this.model.setActiveCell(temp);
-    return temp;
+    this.setActiveRange(result);
   }
-  setActiveCell(range: IRange): void {
-    this.model.setActiveCell(range);
+  setActiveRange(range: IRange): void {
+    this.model.setActiveRange(range);
     this.emitChange();
   }
   setCurrentSheetId(id: string): void {
@@ -252,9 +216,6 @@ export class Controller implements IController {
     const result = this.model.getCell(range);
     return result;
   };
-  getRangeData(range: IRange) {
-    return this.model.getRangeData(range);
-  }
   canRedo(): boolean {
     return this.model.canRedo();
   }
@@ -402,7 +363,7 @@ export class Controller implements IController {
   private parseText(text: string) {
     const textList = parseText(text);
     const rowCount = textList.length;
-    const activeCell = this.getActiveCell();
+    const activeCell = this.getActiveRange().range;
     const colCount = Math.max(...textList.map((v) => v.length));
     return {
       value: textList,
@@ -417,7 +378,7 @@ export class Controller implements IController {
   private parseHTML(htmlString: string) {
     const { textList, styleList } = parseHTML(htmlString);
     const rowCount = textList.length;
-    const activeCell = this.getActiveCell();
+    const activeCell = this.getActiveRange().range;
     const colCount = Math.max(...textList.map((v) => v.length));
     return {
       value: textList,
@@ -430,7 +391,7 @@ export class Controller implements IController {
     };
   }
   private getCopyData(): ClipboardData {
-    const activeCell = this.getActiveCell();
+    const { range: activeCell, isMerged } = this.getActiveRange();
     const { row, col, rowCount, colCount } = activeCell;
     const result: ResultType[][] = [];
     const html: string[][] = [];
@@ -465,9 +426,15 @@ export class Controller implements IController {
         } else {
           t.push(`<td> ${str} </td>`);
         }
+        if (isMerged) {
+          break;
+        }
       }
       result.push(temp);
       html.push(t);
+      if (isMerged) {
+        break;
+      }
     }
     const htmlData = generateHTML(
       classList.join('\n'),
@@ -483,7 +450,7 @@ export class Controller implements IController {
     if (this.floatElementUuid) {
       if (this.isCut) {
         const uuid = this.floatElementUuid;
-        const range = this.getActiveCell();
+        const range = this.getActiveRange().range;
         this.model.updateDrawing(uuid, {
           fromCol: range.col,
           fromRow: range.row,
@@ -491,7 +458,7 @@ export class Controller implements IController {
           marginY: 0,
         });
 
-        this.copyRanges = [];
+        this.copyRange = null;
         this.isCut = false;
         this.floatElementUuid = '';
         this.emitChange();
@@ -543,7 +510,7 @@ export class Controller implements IController {
     }
     html = html.trim();
     text = text.trim();
-    let activeCell = this.getActiveCell();
+    let activeCell = this.getActiveRange().range;
 
     let check = false;
     if (html) {
@@ -562,12 +529,11 @@ export class Controller implements IController {
         check = true;
       }
     }
-    if (!check && this.copyRanges.length > 0) {
-      const [range] = this.copyRanges.slice();
-      activeCell = this.model.pasteRange(range, this.isCut);
+    if (!check && this.copyRange) {
+      activeCell = this.model.pasteRange(this.copyRange, this.isCut);
     }
     if (this.isCut) {
-      this.copyRanges = [];
+      this.copyRange = null;
       this.isCut = false;
       this.hooks.copyOrCut(
         {
@@ -577,15 +543,15 @@ export class Controller implements IController {
         'copy',
       );
     }
-    this.setActiveCell(activeCell);
+    this.setActiveRange(activeCell);
   }
   copy(event?: ClipboardEvent): void {
-    this.copyRanges = [this.getActiveCell()];
+    this.copyRange = this.getActiveRange().range;
     this.isCut = false;
     this.baseCopy('copy', event);
   }
   cut(event?: ClipboardEvent) {
-    this.copyRanges = [this.getActiveCell()];
+    this.copyRange = this.getActiveRange().range;
     this.isCut = true;
     this.baseCopy('cut', event);
   }
@@ -603,11 +569,14 @@ export class Controller implements IController {
 
     this.emitChange();
   }
-  getCopyRanges() {
+  getCopyRange() {
     if (this.floatElementUuid) {
-      return [];
+      return null;
     }
-    return this.copyRanges.slice();
+    if (this.copyRange) {
+      return { ...this.copyRange };
+    }
+    return null;
   }
   deleteAll(sheetId?: string): void {
     this.model.deleteAll(sheetId);
@@ -654,7 +623,7 @@ export class Controller implements IController {
   }
   setFloatElementUuid(uuid: string) {
     if (this.floatElementUuid && !uuid) {
-      this.copyRanges = [];
+      this.copyRange = null;
     }
     this.floatElementUuid = uuid;
   }

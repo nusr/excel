@@ -4,12 +4,13 @@ import {
   DEFAULT_COL_COUNT,
   generateUUID,
   isMobile,
+  MERGE_CELL_LINE_BREAK,
 } from '@/util';
 import { mockImage } from './mockData';
 import { $ } from '@/i18n';
 
 const MOCK_MODEL: WorkBookJSON = {
-  currentSheetId: '',
+  currentSheetId: '8',
   rangeMap: {
     '1': {
       row: 2,
@@ -288,6 +289,14 @@ const MOCK_MODEL: WorkBookJSON = {
           horizontalAlign: EHorizontalAlign.CENTER,
         },
       },
+      '5_5': {
+        value: [1, 'Hello World', true, '测试', false].join(
+          MERGE_CELL_LINE_BREAK,
+        ),
+        style: {
+          isWrapText: true,
+        },
+      },
     },
   },
 
@@ -299,12 +308,19 @@ const MOCK_MODEL: WorkBookJSON = {
       colCount: 2,
       sheetId: '8',
     },
+    'merge cell!$F$6:$G$7': {
+      row: 5,
+      col: 5,
+      rowCount: 2,
+      colCount: 2,
+      sheetId: '8',
+    },
   },
   customHeight: {
     '1_1': {
       len: 100,
       isHide: false,
-    }
+    },
   },
   customWidth: {
     '6_0': {

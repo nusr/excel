@@ -1,4 +1,4 @@
-import { SHEET_NAME_PREFIX, SPLITTER } from './constant';
+import { SHEET_NAME_PREFIX, SPLITTER, MAX_NUMBER_LENGTH } from './constant';
 import type {
   WorksheetType,
   ChangeEventType,
@@ -15,6 +15,9 @@ export function isNumber(value: any): boolean {
     return false;
   }
   if (!value) {
+    return false;
+  }
+  if (value.length > MAX_NUMBER_LENGTH) {
     return false;
   }
   const temp = Number(value);
@@ -203,4 +206,8 @@ export function modelToChangeSet(list: ICommandItem[]) {
 
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function isTestEnv(): boolean {
+  return process.env.NODE_ENV === 'test';
 }

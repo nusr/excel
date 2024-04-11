@@ -25,21 +25,15 @@ export interface IHooks {
 
 export type ClipboardType = 'text/plain' | 'text/html';
 
-export type ActiveRange = {
-  isMerged: boolean;
-  range: IRange; // merge range
-};
-
 export interface IController extends IBaseModel {
   emitChange(): void;
-  setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up'): IRange;
-  getActiveRange(): ActiveRange;
+  setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up'): void;
   getCellSize(range: IRange): IWindowSize;
   computeCellPosition(range: IRange): IPosition;
   paste(event?: ClipboardEvent): void;
   copy(event?: ClipboardEvent): void;
   cut(event?: ClipboardEvent): void;
-  getCopyRanges(): IRange[];
+  getCopyRange(): IRange | null;
   setScroll(scroll: ScrollValue): void;
   getScroll(sheetId?: string): ScrollValue;
   setFloatElementUuid(uuid: string): void;

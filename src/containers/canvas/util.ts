@@ -17,6 +17,7 @@ import {
   sizeConfig,
   canvasSizeSet,
   MERGE_CELL_LINE_BREAK,
+  LINE_BREAK,
 } from '@/util';
 import {
   coreStore,
@@ -126,11 +127,12 @@ function updateActiveCell(controller: IController) {
     numberFormat = 0,
   } = cell?.style || {};
 
-  const displayValue = convertResultTypeToString(cell?.value);
+  let displayValue = convertResultTypeToString(cell?.value);
   let mergeType = '';
   if (isMerged) {
     if (displayValue.includes(MERGE_CELL_LINE_BREAK)) {
       mergeType = String(EMergeCellType.MERGE_CONTENT);
+      displayValue = displayValue.replaceAll(MERGE_CELL_LINE_BREAK, LINE_BREAK);
     } else {
       mergeType = String(EMergeCellType.MERGE_CENTER);
     }
@@ -278,7 +280,7 @@ const handleStateChange = (
 };
 
 function computeCanvasSize(canvas: HTMLCanvasElement) {
-  const scrollbarSize = parseInt(sizeConfig.scrollBarSize, 10);
+  const scrollbarSize = parseInt(sizeConfig.largePadding, 10);
   const dom = canvas.parentElement!;
   const size = dom.getBoundingClientRect();
   const result = {
@@ -332,6 +334,7 @@ export function initCanvas(
   computeCanvasSize(canvas);
   mainCanvas.resize();
   mainCanvas.render({ changeSet });
+  queueMicrotask(resize);
 
   return () => {
     removeEvent();

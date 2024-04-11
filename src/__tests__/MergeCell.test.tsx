@@ -3,14 +3,14 @@ import * as React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { type } from './util';
-import { initControllerForTest } from '@/controller';
+import { initController } from '@/controller';
 import './global.mock';
 
 describe('MergeCell.test.tsx', () => {
   describe('toolbar', () => {
     test('add merge cell', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       type('test');
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
@@ -33,7 +33,7 @@ describe('MergeCell.test.tsx', () => {
     });
     test('toggle merge cell', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       type('test');
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
@@ -57,7 +57,7 @@ describe('MergeCell.test.tsx', () => {
     });
     test('merge content', () => {
       act(() => {
-        render(<App controller={initControllerForTest()} />);
+        render(<App controller={initController()} />);
       });
       type('test');
       fireEvent.keyDown(document.body, {
@@ -82,7 +82,7 @@ describe('MergeCell.test.tsx', () => {
       fireEvent.click(dom);
       expect(screen.getByTestId('toolbar-merge-cell')).toHaveClass('active');
       expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
-        'test&#10;aa',
+        'test aa',
       );
     });
   });

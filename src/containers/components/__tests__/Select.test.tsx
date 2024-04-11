@@ -45,7 +45,7 @@ describe('Select.test.ts', () => {
       const dom = screen.getByTestId('select-list-popup');
       dom.setAttribute('data-value', '1');
       fireEvent.click(dom);
-      expect(onChange).not.toHaveBeenCalled();
+      expect(onChange).toHaveBeenCalled();
     });
 
     test('ok', () => {

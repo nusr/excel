@@ -51,7 +51,7 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = memo(
           return;
         }
         const size = await getImageSize(base64);
-        const range = controller.getActiveCell();
+        const range = controller.getActiveRange().range;
         await controller.addDrawing({
           width: size.width,
           height: size.height,
@@ -91,7 +91,7 @@ InsertFloatingPicture.displayName = 'InsertFloatingPicture';
 export const InsertChart: React.FunctionComponent<Props> = memo(
   ({ controller }) => {
     const handleClick = useCallback(async () => {
-      const range = controller.getActiveCell();
+      const range = controller.getActiveRange().range;
       await controller.addDrawing({
         width: 400,
         height: 300,
