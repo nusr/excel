@@ -50,6 +50,7 @@ export class DefinedName implements IDefinedName {
   fromJSON(json: WorkBookJSON): void {
     const data = json.definedNames || {};
     const oldValue = { ...this.definedNames };
+    this.definedNames = {};
     for (const [key, value] of Object.entries(data)) {
       if (!this.model.validateRange(value)) {
         continue;

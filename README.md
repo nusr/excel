@@ -64,6 +64,8 @@ src
 - [x] Paste
 - [x] Import XLSX
 - [x] Export XLSX
+- [x] Import CSV
+- [x] Export CSV
 - [x] Floating Picture
 - [x] Chart
 - [x] Undo

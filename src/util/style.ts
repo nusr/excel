@@ -203,7 +203,22 @@ function convertToCssStyleDeclaration(cssStr: string) {
   return matches;
 }
 
-export function parseText(text: string) {
+export function convertToPx(value: string): number {
+  const num = parseInt(value, 10);
+  if (isNaN(num)) {
+    return -1;
+  }
+  // pt to px
+  if (value.endsWith('pt')) {
+    return Math.ceil((num * 96) / 72);
+  }
+  return num;
+}
+export function convertPxToPt(px: number, other = 'pt'): string {
+  const pt = Math.floor((px * 72) / 96);
+  return String(pt) + other;
+}
+export function parseText(text: string, splitter = '\t') {
   let list: string[];
   if (text.indexOf('\r\n') >= 0) {
     list = text.split('\r\n');
@@ -215,7 +230,7 @@ export function parseText(text: string) {
     .filter((v) => v)
     .map((v) =>
       v
-        .split('\t')
+        .split(splitter)
         .map((v) => v.trim())
         .filter((v) => v),
     );
@@ -243,16 +258,28 @@ export function parseHTML(html: string) {
   }
   const textList: Array<Array<ResultType>> = [];
   const styleList: Array<Array<Partial<StyleType>>> = [];
-  // TODO col width and row height
   const trList = doc.querySelectorAll('tr');
+  const colMap = new Map<number, number>();
+  const rowMap = new Map<number, number>();
+  let row = 0;
   for (const tr of trList) {
+    const height = convertToPx(tr.style.height);
+    if (height > 0) {
+      rowMap.set(row++, height);
+    }
     const texts: ResultType[] = [];
     const list: Array<Partial<StyleType>> = [];
+    let col = 0;
     for (const td of tr.children) {
       if (td.tagName !== 'TD') {
         continue;
       }
+
       let temp = td as HTMLElement;
+      const width = convertToPx(temp.style.width);
+      if (width > 0 && !colMap.has(col)) {
+        colMap.set(col++, width);
+      }
       let itemStyle: Partial<StyleType> = {};
       while (temp.nodeType !== Node.TEXT_NODE) {
         const style = parseStyle(
@@ -279,5 +306,7 @@ export function parseHTML(html: string) {
   return {
     textList,
     styleList,
+    rowMap,
+    colMap,
   };
 }

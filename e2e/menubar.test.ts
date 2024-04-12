@@ -13,15 +13,10 @@ test.describe('menubar.test', () => {
   test(`test menubar click`, async ({ page }) => {
     await page.getByTestId('menubar-excel').click();
 
-    await expect(page.getByTestId('menubar-export')).toBeVisible();
     await expect(page.getByTestId('menubar-import-xlsx')).toBeVisible();
-  });
-
-  test(`test menubar submenu`, async ({ page }) => {
-    await page.getByTestId('menubar-excel').click();
-    await page.getByTestId('menubar-export').click();
-
+    await expect(page.getByTestId('menubar-import-csv')).toBeVisible();
     await expect(page.getByTestId('menubar-export-xlsx')).toBeVisible();
     await expect(page.getByTestId('menubar-export-csv')).toBeVisible();
   });
+
 });

@@ -31,9 +31,9 @@ export const SubMenu: FunctionComponent<
   React.PropsWithChildren<SubMenuProps>
 > = ({ label, children, testId, className }) => {
   const [open, setOpen] = useState(false);
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     setOpen((v) => !v);
-  };
+  }, []);
 
   return (
     <li

@@ -1,7 +1,7 @@
-import React, { useRef, memo, useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { IController } from '@/types';
-import { Menu, MenuItem, SubMenu, Button } from '../components';
-import { importXLSX, exportToXLSX, exportToCsv } from '../Excel';
+import { Menu, MenuItem, Button } from '../components';
+import { importXLSX, exportToXLSX, exportToCsv, importCSV } from '../Excel';
 import styles from './index.module.css';
 import { Theme } from './Theme';
 import { $ } from '@/i18n';
@@ -15,8 +15,6 @@ interface Props {
 
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
   ({ controller }) => {
-    const ref = useRef<HTMLInputElement>(null);
-
     const handleExportXLSX = useCallback(() => {
       exportToXLSX(`excel_${Date.now()}.xlsx`, controller);
     }, []);
@@ -27,7 +25,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       });
       saveAs(blob, `excel_${Date.now()}.csv`);
     }, []);
-    const handleImport = useCallback(
+    const handleImportXLSX = useCallback(
       async (event: React.ChangeEvent<HTMLInputElement>) => {
         event.stopPropagation();
         const file = event.target.files?.[0];
@@ -36,14 +34,24 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
         }
         const model = await importXLSX(file);
         await controller.fromJSON(model);
-        if (ref.current) {
-          ref.current.value = '';
-          ref.current.blur();
-        }
+        event.target.value = '';
+        event.target.blur();
       },
       [],
     );
-
+    const handleImportCSV = useCallback(
+      async (event: React.ChangeEvent<HTMLInputElement>) => {
+        event.stopPropagation();
+        const file = event.target.files?.[0];
+        if (!file) {
+          return;
+        }
+        await importCSV(file, controller);
+        event.target.value = '';
+        event.target.blur();
+      },
+      [],
+    );
     return (
       <div className={styles['menubar-container']} data-testid="menubar">
         <div className={styles['menubar-menu']}>
@@ -56,26 +64,30 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
               <input
                 type="file"
                 hidden
-                onChange={handleImport}
+                onChange={handleImportXLSX}
                 accept=".xlsx"
-                ref={ref}
                 id="import_xlsx"
                 data-testid="menubar-import-xlsx-input"
               />
               <label htmlFor="import_xlsx">{$('import-xlsx')}</label>
             </MenuItem>
-            <SubMenu
-              label="Export"
-              className={styles.menu}
-              testId="menubar-export"
-            >
-              <MenuItem onClick={handleExportXLSX} testId="menubar-export-xlsx">
-                {$('export-xlsx')}
-              </MenuItem>
-              <MenuItem testId="menubar-export-csv" onClick={handleExportCSV}>
-                {$('export-csv')}
-              </MenuItem>
-            </SubMenu>
+            <MenuItem testId="menubar-import-csv">
+              <input
+                type="file"
+                hidden
+                onChange={handleImportCSV}
+                accept=".csv"
+                id="import_csv"
+                data-testid="menubar-import-csv-input"
+              />
+              <label htmlFor="import_csv">{$('import-csv')}</label>
+            </MenuItem>
+            <MenuItem onClick={handleExportXLSX} testId="menubar-export-xlsx">
+              {$('export-xlsx')}
+            </MenuItem>
+            <MenuItem testId="menubar-export-csv" onClick={handleExportCSV}>
+              {$('export-csv')}
+            </MenuItem>
           </Menu>
         </div>
         <I18N />

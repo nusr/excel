@@ -83,7 +83,7 @@ describe('row.test.ts', () => {
   });
   describe('RowHeight', () => {
     test('get', () => {
-      expect(controller.getRowHeight(100).len).toEqual(24);
+      expect(controller.getRowHeight(100).len).toEqual(22);
     });
 
     test('hide', () => {

@@ -47,15 +47,56 @@ describe('Import.test.tsx', () => {
       act(() => {
         render(<App controller={initController()} />);
       });
+      fireEvent.click(screen.getByTestId('menubar-excel'));
       const file = new File([''], 'test.png', {
         type: 'image/png',
       });
       act(() => {
-        fireEvent.change(screen.getByTestId('toolbar-floating-picture-input'), {
+        fireEvent.change(screen.getByTestId('menubar-import-csv-input'), {
           target: { files: [file] },
         });
       });
       expect(() => screen.getByTestId('float-element')).toThrow();
+    });
+  });
+  describe('upload csv', () => {
+    test('ok', async () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.click(screen.getByTestId('menubar-excel'));
+      const file = new File(['test,1\n2,3'], 'test.csv', {
+        type: 'text/csv',
+      });
+      act(() => {
+        fireEvent.change(screen.getByTestId('menubar-import-csv-input'), {
+          target: { files: [file] },
+        });
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
+          'test',
+        );
+      });
+    });
+    test('empty', async () => {
+      act(() => {
+        render(<App controller={initController()} />);
+      });
+      fireEvent.click(screen.getByTestId('menubar-excel'));
+      const file = new File([''], 'test.csv', {
+        type: 'text/csv',
+      });
+      act(() => {
+        fireEvent.change(screen.getByTestId('menubar-import-csv-input'), {
+          target: { files: [file] },
+        });
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
+          '',
+        );
+      });
     });
   });
   describe('upload xlsx', () => {

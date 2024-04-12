@@ -6,20 +6,22 @@ export const MAX_NUMBER_LENGTH = 16;
 export const DEFAULT_FONT_SIZE = 12;
 export const MUST_FONT_FAMILY = 'sans-serif';
 export const SHEET_NAME_PREFIX = 'Sheet';
-export const CELL_HEIGHT = 24;
-export const CELL_WIDTH = 68;
+export const CELL_HEIGHT = 22;
+export const CELL_WIDTH = 76;
+export const ROW_TITLE_HEIGHT = CELL_HEIGHT;
+export const COL_TITLE_WIDTH = CELL_WIDTH / 2;
 export const HIDE_CELL = 0;
 export const TEXTAREA_MAX_ROWS = 10;
 export const MERGE_CELL_LINE_BREAK = '&#10;';
 export const LINE_BREAK = '\n';
+export const CSV_SPLITTER = ','
 export const XLSX_MAX_COL_COUNT = 16384; // XFD
 export const XLSX_MAX_ROW_COUNT = 1048576;
 export const DEFAULT_ROW_COUNT = 200;
 export const MAX_ADD_ROW_THRESHOLD = 200;
 export const DEFAULT_COL_COUNT = 30;
 export const DEFAULT_POSITION = -999;
-export const ROW_TITLE_HEIGHT = 24;
-export const COL_TITLE_WIDTH = 34;
+
 export const SHEET_ITEM_TEST_ID_PREFIX = '__sheet_item_';
 export const FORMULA_PREFIX = '=';
 export const SPLITTER = '_';

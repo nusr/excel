@@ -38,6 +38,20 @@ const textKey = '#text';
 const DRAWING_PREFIX_KEY = 'xl/drawings/';
 const DRAWING_FLAG = '../drawings/';
 
+const CUSTOM_WIdTH_RADIO = 8;
+
+function convertFromPt(value: string) {
+  const val = parseFloat(value);
+  if (isNaN(val)) {
+    return 0;
+  }
+  return Math.floor(val * CUSTOM_WIdTH_RADIO);
+}
+
+export function convertToPt(num: number) {
+  return Math.floor(num / CUSTOM_WIdTH_RADIO);
+}
+
 export const chartTypeList = [
   // 'area',
   'bar',
@@ -50,8 +64,6 @@ export const chartTypeList = [
   // 'scatter',
   // 'surface',
 ] as const;
-
-export const CUSTOM_WIdTH_RADIO = 8;
 
 type SharedStringItem = {
   t?: {
@@ -522,9 +534,7 @@ export function convertXMLDataToModel(
       for (const col of customWidth) {
         if (col && col.customWidth && col.width && col.min && col.max) {
           const isDefault = defaultWOrH.defaultColWidth === col.width;
-          const w = isDefault
-            ? CELL_WIDTH
-            : parseFloat(col.width) * CUSTOM_WIdTH_RADIO;
+          const w = isDefault ? CELL_WIDTH : convertFromPt(col.width);
           const isHide = Boolean(col.hidden);
           for (
             let start = parseInt(col.min, 10) - 1, end = parseInt(col.max, 10);
@@ -533,7 +543,7 @@ export function convertXMLDataToModel(
           ) {
             result.customWidth[getCustomWidthOrHeightKey(item.sheetId, start)] =
               {
-                len: Math.floor(w),
+                len: w,
                 isHide,
               };
           }
@@ -560,7 +570,7 @@ export function convertXMLDataToModel(
         const isDefault = defaultWOrH.defaultRowHeight === row.ht;
         result.customHeight[getCustomWidthOrHeightKey(item.sheetId, realRow)] =
           {
-            len: isDefault ? CELL_HEIGHT : Math.floor(parseFloat(row.ht)),
+            len: isDefault ? CELL_HEIGHT : Math.floor(parseInt(row.ht, 10)),
             isHide: Boolean(row.hidden),
           };
       }

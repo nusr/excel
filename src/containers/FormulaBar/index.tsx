@@ -4,7 +4,11 @@ import {
   getEditorStyle,
   getDisplayStyle,
 } from './FormulaEditor';
-import { LINE_BREAK, classnames, intToColumnName } from '@/util';
+import {
+  LINE_BREAK,
+  classnames,
+  intToColumnName,
+} from '@/util';
 import styles from './index.module.css';
 import { IController, EditorStatus } from '@/types';
 import { activeCellStore, coreStore, styleStore } from '@/containers/store';
@@ -69,9 +73,7 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
             className={classnames(styles['formula-bar-value'], {
               [styles['show']]: editorStatus !== EditorStatus.EDIT_FORMULA_BAR,
               [styles['wrap']]:
-                cellStyle.isMergeCell &&
-                activeCell.value.includes(LINE_BREAK) &&
-                cellStyle.isWrapText,
+                cellStyle.isMergeCell && activeCell.value.includes(LINE_BREAK),
             })}
             style={style}
             onClick={handleClick}

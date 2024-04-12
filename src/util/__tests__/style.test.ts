@@ -1,7 +1,31 @@
-import { makeFont, convertToCssString, parseHTML, parseText } from '../style';
+import {
+  makeFont,
+  convertToCssString,
+  parseHTML,
+  parseText,
+  convertPxToPt,
+  convertToPx,
+} from '../style';
 import { EUnderLine } from '@/types';
 
 describe('style.test.ts', () => {
+  describe('convertPxToPt', () => {
+    test('ok', () => {
+      expect(convertPxToPt(22)).toEqual('16pt');
+      expect(convertPxToPt(76)).toEqual('57pt');
+    });
+  });
+  describe('convertToPx', () => {
+    test('ok', () => {
+      expect(convertToPx('16pt')).toEqual(22);
+      expect(convertToPx('57pt')).toEqual(76);
+      expect(convertToPx('57')).toEqual(57);
+      expect(convertToPx('57px')).toEqual(57);
+    });
+    test('invalid', () => {
+      expect(convertToPx('aa')).toEqual(-1);
+    });
+  });
   describe('parseText', () => {
     test('ok \n', () => {
       expect(parseText('=SUM(1,2)\t2\ntest\ttrue')).toEqual([
@@ -115,6 +139,8 @@ describe('style.test.ts', () => {
     </html>`;
       const result = parseHTML(mockHTML);
       expect(result).toEqual({
+        colMap: new Map(),
+        rowMap: new Map(),
         textList: [
           [
             1,
@@ -267,6 +293,14 @@ describe('style.test.ts', () => {
       </html>`;
       const result = parseHTML(mockHTML);
       expect(result).toEqual({
+        colMap: new Map([
+          [0, 76],
+          [1, 76],
+        ]),
+        rowMap: new Map([
+          [0, 22],
+          [1, 46],
+        ]),
         textList: [
           [1, 2],
           ['test', 4],

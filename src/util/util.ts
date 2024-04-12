@@ -136,7 +136,7 @@ export function getCustomWidthOrHeightKey(
   return `${sheetId}${SPLITTER}${rowOrCol}`;
 }
 
-export function WidthOrHeightKeyToData(key: string) {
+export function widthOrHeightKeyToData(key: string) {
   const [sheetId, num] = key.split(SPLITTER);
   const r = parseInt(num, 10);
   return {

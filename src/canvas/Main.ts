@@ -133,7 +133,6 @@ export class MainCanvas {
       const value = cellInfo.value;
       const isMergeContent =
         typeof value === 'string' && value.includes(MERGE_CELL_LINE_BREAK);
-      // TODO render merge content
       renderCell(
         this.ctx,
         {

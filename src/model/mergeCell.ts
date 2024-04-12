@@ -23,6 +23,7 @@ export class MergeCell implements IMergeCell {
   fromJSON(json: WorkBookJSON): void {
     const data = json.mergeCells || {};
     const oldValue = { ...this.mergeCells };
+    this.mergeCells = {};
     for (const range of Object.values(data)) {
       if (!this.model.validateRange(range)) {
         continue;

@@ -51,10 +51,10 @@ export class Drawing implements IDrawings {
       return;
     }
     const oldValue = { ...this.drawings };
-    this.drawings = { ...data };
+    this.drawings = {};
     for (const [uuid, value] of Object.entries(data)) {
       if (!this.validateDrawing(value) || !uuid) {
-        return
+        return;
       }
       this.drawings[uuid] = value;
     }

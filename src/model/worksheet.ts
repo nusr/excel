@@ -41,6 +41,7 @@ export class Worksheet implements IWorksheet {
     const data = json.worksheets || {};
     this.worksheets = this.worksheets || {};
     const oldValue = { ...this.worksheets };
+    this.worksheets = {};
     for (const [sheetId, sheetData] of Object.entries(data)) {
       this.worksheets[sheetId] = {};
       if (isEmpty(sheetData)) {
@@ -367,13 +368,13 @@ export class Worksheet implements IWorksheet {
     if (deepEqual(data, this.worksheets[id])) {
       return;
     }
-    const oldData = this.worksheets[id] ? { ...this.worksheets[id] } : null;
+    const oldData = this.worksheets[id] ? { ...this.worksheets[id] } : {};
     this.worksheets[id] = data;
     this.model.push({
       type: 'worksheets',
       key: id,
       newValue: data,
-      oldValue: oldData ? oldData : DELETE_FLAG,
+      oldValue: oldData,
     });
   }
   getCell(range: IRange): ModelCellType | null {

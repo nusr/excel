@@ -285,7 +285,7 @@ export function renderCell(
     }
   } else {
     const texts = splitToWords(
-      isMergeContent ? text.replaceAll(MERGE_CELL_LINE_BREAK, '\n') : text,
+      isMergeContent ? text.replaceAll(MERGE_CELL_LINE_BREAK, '') : text,
     );
     let line = '';
     let textWidth = 0;

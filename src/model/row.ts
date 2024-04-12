@@ -3,7 +3,7 @@ import {
   getCustomWidthOrHeightKey,
   CELL_HEIGHT,
   HIDE_CELL,
-  WidthOrHeightKeyToData,
+  widthOrHeightKeyToData,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 
@@ -21,8 +21,9 @@ export class RowManager implements IRow {
   fromJSON(json: WorkBookJSON): void {
     const data = json.customHeight || {};
     const oldValue = { ...this.customHeight };
+    this.customHeight = {};
     for (const [key, value] of Object.entries(data)) {
-      const { sheetId, rowOrCol: row } = WidthOrHeightKeyToData(key);
+      const { sheetId, rowOrCol: row } = widthOrHeightKeyToData(key);
       if (!sheetId || row < 0) {
         continue;
       }
@@ -114,7 +115,7 @@ export class RowManager implements IRow {
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
     for (const [key, value] of Object.entries(this.customHeight)) {
-      const { sheetId } = WidthOrHeightKeyToData(key);
+      const { sheetId } = widthOrHeightKeyToData(key);
       if (sheetId === id) {
         delete this.customHeight[key];
         this.model.push({

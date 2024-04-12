@@ -286,7 +286,7 @@ describe('shortcut.test.tsx', () => {
       const transform = window.getComputedStyle(
         screen.getByTestId('vertical-scroll-bar-content'),
       ).transform;
-      expect(transform).toEqual('translateY(20px)');
+      expect(transform).toEqual('translateY(22px)');
     });
     test(' scroll right', async () => {
       act(() => {
@@ -304,7 +304,7 @@ describe('shortcut.test.tsx', () => {
       const transform = window.getComputedStyle(
         screen.getByTestId('horizontal-scroll-bar-content'),
       ).transform;
-      expect(transform).toEqual('translateX(260px)');
+      expect(transform).toEqual('translateX(208px)');
     });
   });
 

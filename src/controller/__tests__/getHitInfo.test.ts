@@ -16,7 +16,7 @@ describe('getHitInfo.test.ts', () => {
       },
     });
     controller.addSheet();
-    const range = getHitInfo(controller, 102, 48);
+    const range = getHitInfo(controller, 120, 48);
     expect(range!.row).toEqual(1);
     expect(range!.col).toEqual(1);
   });

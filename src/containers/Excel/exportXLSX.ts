@@ -17,8 +17,9 @@ import {
   getCustomWidthOrHeightKey,
   NUMBER_FORMAT_LIST,
   extractImageType,
+  widthOrHeightKeyToData,
 } from '@/util';
-import { CUSTOM_WIdTH_RADIO, XfItem, chartTypeList } from './importXLSX';
+import { XfItem, chartTypeList, convertToPt } from './importXLSX';
 interface StyleData {
   cellXfs: string[];
   numFmts: string[];
@@ -181,18 +182,20 @@ function formatDate() {
 
 function getCustomWidth(
   customWidthMap: CustomHeightOrWidthItem,
-  sheetId: string,
+  currentSheetId: string,
 ) {
   const list: string[] = [];
   for (const [key, value] of Object.entries(customWidthMap)) {
-    if (!key.startsWith(sheetId) || !value) {
+    const { sheetId, rowOrCol: col } = widthOrHeightKeyToData(key);
+    if (currentSheetId !== sheetId || !value) {
       continue;
     }
-    const t = parseInt(key.slice(sheetId.length + 1), 10) + 1;
+    const t = col + 1;
+    const w = convertToPt(value.len);
     list.push(
-      `<col min="${t}" max="${t}" width="${
-        value.len / CUSTOM_WIdTH_RADIO
-      }" customWidth="1" ${value.isHide ? 'hidden="1"' : ''}/>`,
+      `<col min="${t}" max="${t}" width="${w}" customWidth="1" ${
+        value.isHide ? 'hidden="1"' : ''
+      }/>`,
     );
   }
   if (list.length === 0) {
@@ -607,11 +610,6 @@ export function convertToXMLData(controller: IController) {
     if (rowList.length > 0) {
       targetData.children = `<sheetData>\n${rowList.join('\n')}\n</sheetData>`;
     }
-    // const mergeCells: string[] = [];
-    //<mergeCells count="1">
-
-    // <mergeCell ref="G5:H6"/>
-    //</mergeCells>
     if (mergeCells.length > 0) {
       targetData.children += `<mergeCells count="${
         mergeCells.length

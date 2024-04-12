@@ -142,7 +142,7 @@ describe('Canvas.test.ts', () => {
       });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
-        clientX: 341,
+        clientX: 350,
         clientY: 145,
         buttons: 1,
       });
@@ -155,7 +155,7 @@ describe('Canvas.test.ts', () => {
       });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
-        clientX: 341,
+        clientX: 350,
         clientY: 145,
         buttons: 1,
       });
@@ -175,7 +175,7 @@ describe('Canvas.test.ts', () => {
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 17,
-        clientY: 298,
+        clientY: 290,
         buttons: 1,
       });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A6');
@@ -188,7 +188,7 @@ describe('Canvas.test.ts', () => {
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 17,
-        clientY: 298,
+        clientY: 290,
         buttons: 1,
       });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A6');

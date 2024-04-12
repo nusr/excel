@@ -3,7 +3,7 @@ import {
   getCustomWidthOrHeightKey,
   CELL_WIDTH,
   HIDE_CELL,
-  WidthOrHeightKeyToData,
+  widthOrHeightKeyToData,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 
@@ -21,8 +21,9 @@ export class ColManager implements ICol {
   fromJSON(json: WorkBookJSON): void {
     const data = json.customWidth || {};
     const oldValue = { ...this.customWidth };
+    this.customWidth = {};
     for (const [key, value] of Object.entries(data)) {
-      const { sheetId, rowOrCol: col } = WidthOrHeightKeyToData(key);
+      const { sheetId, rowOrCol: col } = widthOrHeightKeyToData(key);
       if (!sheetId || col < 0) {
         continue;
       }
@@ -112,7 +113,7 @@ export class ColManager implements ICol {
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
     for (const [key, value] of Object.entries(this.customWidth)) {
-      const { sheetId } = WidthOrHeightKeyToData(key);
+      const { sheetId } = widthOrHeightKeyToData(key);
       if (sheetId === id) {
         delete this.customWidth[key];
         this.model.push({

@@ -82,7 +82,7 @@ describe('col.test.ts', () => {
   });
   describe('ColWidth', () => {
     test('get', () => {
-      expect(controller.getColWidth(100).len).toEqual(68);
+      expect(controller.getColWidth(100).len).toEqual(76);
     });
     test('hide', () => {
       controller.hideCol(0, 2);

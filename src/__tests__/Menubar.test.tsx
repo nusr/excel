@@ -29,7 +29,7 @@ describe('Menubar.test.ts', () => {
       expect(
         screen.getByTestId('menubar-excel-portal')!.querySelectorAll('li')
           .length,
-      ).toEqual(2);
+      ).toEqual(4);
     });
   });
   describe('dark mode', () => {

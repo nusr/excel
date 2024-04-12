@@ -32,7 +32,7 @@ export class RangeMap implements IRangeMap {
   fromJSON(json: WorkBookJSON): void {
     const data = json.rangeMap || {};
     const oldValue = { ...this.rangeMap };
-    this.rangeMap = { ...data };
+    this.rangeMap = {};
     for (const range of Object.values(data)) {
       range.sheetId = range.sheetId || this.model.getCurrentSheetId();
       if (!this.model.validateRange(range)) {

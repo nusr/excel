@@ -57,6 +57,8 @@ export class Workbook implements IWorkbook {
     const currentSheetId = json.currentSheetId || '';
     const oldValue = { ...this.workbook };
 
+    this.workbook = {};
+    this.currentSheetId = '';
     for (const sheet of Object.values(workbook)) {
       if (!this.validateSheet(sheet)) {
         continue;
@@ -64,13 +66,14 @@ export class Workbook implements IWorkbook {
       this.workbook[sheet.sheetId] = sheet;
     }
 
-    let newSheetId = this.getSheetId();
-    if (this.workbook[currentSheetId] && !this.workbook[currentSheetId].isHide) {
+    let newSheetId = this.getSheetId() || '';
+    if (
+      this.workbook[currentSheetId] &&
+      !this.workbook[currentSheetId].isHide
+    ) {
       newSheetId = currentSheetId;
     }
-    if (newSheetId) {
-      this.setCurrentSheetId(newSheetId);
-    }
+    this.setCurrentSheetId(newSheetId);
     this.model.push({
       type: 'workbook',
       key: '',

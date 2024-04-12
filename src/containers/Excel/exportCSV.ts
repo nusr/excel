@@ -1,8 +1,13 @@
 import { IController, ResultType } from '@/types';
-import { coordinateToString, convertResultTypeToString } from '@/util';
+import {
+  coordinateToString,
+  convertResultTypeToString,
+  CSV_SPLITTER,
+  LINE_BREAK,
+} from '@/util';
 
-const DELIMITER = ',';
-const RECORD_DELIMITER = '\n';
+const DELIMITER = CSV_SPLITTER;
+const RECORD_DELIMITER = LINE_BREAK;
 
 function processRow(row: ResultType[]) {
   const quote = '"';

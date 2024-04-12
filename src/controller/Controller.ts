@@ -31,6 +31,7 @@ import {
   COL_TITLE_WIDTH,
   controllerLog,
   convertResultTypeToString,
+  convertPxToPt,
 } from '@/util';
 
 const defaultScrollValue: ScrollValue = {
@@ -152,6 +153,7 @@ export class Controller implements IController {
   }
   setWorksheet(data: WorksheetData, sheetId?: string): void {
     this.model.setWorksheet(data, sheetId);
+    this.emitChange();
   }
   addSheet() {
     const result = this.model.addSheet();
@@ -365,42 +367,53 @@ export class Controller implements IController {
     const rowCount = textList.length;
     const activeCell = this.getActiveRange().range;
     const colCount = Math.max(...textList.map((v) => v.length));
-    return {
-      value: textList,
-      style: [],
-      range: {
-        ...activeCell,
-        rowCount,
-        colCount,
-      },
+    const range = {
+      ...activeCell,
+      rowCount,
+      colCount,
     };
+    if (textList.length > 0) {
+      this.model.setCell(textList, [], range);
+      return range;
+    }
+    return null;
   }
   private parseHTML(htmlString: string) {
-    const { textList, styleList } = parseHTML(htmlString);
+    const { textList, styleList, rowMap, colMap } = parseHTML(htmlString);
     const rowCount = textList.length;
     const activeCell = this.getActiveRange().range;
     const colCount = Math.max(...textList.map((v) => v.length));
-    return {
-      value: textList,
-      style: styleList,
-      range: {
-        ...activeCell,
-        rowCount,
-        colCount,
-      },
+    const range = {
+      ...activeCell,
+      rowCount,
+      colCount,
     };
+    for (const [row, height] of rowMap.entries()) {
+      this.model.setRowHeight(row, height);
+    }
+    for (const [col, width] of colMap.entries()) {
+      this.model.setColWidth(col, width);
+    }
+    if (textList.length > 0 || styleList.length > 0) {
+      this.model.setCell(textList, styleList, range);
+      return range;
+    }
+
+    return null;
   }
   private getCopyData(): ClipboardData {
     const { range: activeCell, isMerged } = this.getActiveRange();
     const { row, col, rowCount, colCount } = activeCell;
     const result: ResultType[][] = [];
-    const html: string[][] = [];
+    const html: string[] = [];
     let index = 1;
     const classList: string[] = [];
     const currentSheetId = this.model.getCurrentSheetId();
+    const colSet = new Set<string>();
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {
       const temp: ResultType[] = [];
       const t: string[] = [];
+      const h = convertPxToPt(this.getRowHeight(r).len, '');
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
         const a = this.model.getCell({
           row: r,
@@ -414,6 +427,9 @@ export class Controller implements IController {
         }
         const str = convertResultTypeToString(a.value);
         temp.push(str);
+        const w = convertPxToPt(this.getColWidth(c).len, '');
+        const style = `height=${h} width=${w} style='height:${h}pt;width:${w}pt;'`;
+        colSet.add(`<col width=${w} style='width:${w}pt;'>`);
         if (a.style) {
           let text = convertToCssString(a.style);
           if (!str) {
@@ -422,23 +438,23 @@ export class Controller implements IController {
           }
           const className = `xl${index++}`;
           classList.push(`.${className}{${text}}`);
-          t.push(`<td class="${className}"> ${str} </td>`);
+          t.push(`<td ${style} class="${className}"> ${str} </td>`);
         } else {
-          t.push(`<td> ${str} </td>`);
+          t.push(`<td ${style}> ${str} </td>`);
         }
         if (isMerged) {
           break;
         }
       }
       result.push(temp);
-      html.push(t);
+      html.push(`<tr height=${h} style='height:${h}pt;'>${t.join('\n')}</tr>`);
       if (isMerged) {
         break;
       }
     }
     const htmlData = generateHTML(
       classList.join('\n'),
-      html.map((item) => `<tr>${item.join('\n')}</tr>`).join('\n'),
+      Array.from(colSet).join('\n') + '\n' + html.join('\n'),
     );
     const text = `${result.map((item) => item.join('\t')).join('\r\n')}\r\n`;
     return {
@@ -515,17 +531,15 @@ export class Controller implements IController {
     let check = false;
     if (html) {
       const result = this.parseHTML(html);
-      if (result.value.length > 0) {
-        activeCell = result.range;
-        this.model.setCell(result.value, result.style, result.range);
+      if (result) {
+        activeCell = result;
         check = true;
       }
     }
     if (!check && text) {
       const result = this.parseText(text);
-      if (result.value.length > 0) {
-        activeCell = result.range;
-        this.model.setCell(result.value, [], result.range);
+      if (result) {
+        activeCell = result;
         check = true;
       }
     }

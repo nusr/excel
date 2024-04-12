@@ -70,7 +70,6 @@ describe('Export.test.ts', () => {
       });
       type('test');
       fireEvent.click(screen.getByTestId('menubar-excel'));
-      fireEvent.click(screen.getByTestId('menubar-export'));
       fireEvent.click(screen.getByTestId('menubar-export-xlsx'));
       expect(Util.saveAs).toHaveBeenCalled();
     });
@@ -82,7 +81,6 @@ describe('Export.test.ts', () => {
       });
       type('test');
       fireEvent.click(screen.getByTestId('menubar-excel'));
-      fireEvent.click(screen.getByTestId('menubar-export'));
       fireEvent.click(screen.getByTestId('menubar-export-csv'));
       expect(Util.saveAs).toHaveBeenCalled();
     });
