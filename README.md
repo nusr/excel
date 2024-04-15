@@ -38,41 +38,44 @@ src
 
 ## Supported Features
 
-- [x] Font
-- [x] Font size
-- [x] Font bold
-- [x] Font italic
-- [x] Font strike
-- [x] Font underline
-- [x] Text color
-- [x] Fill color
-- [x] Text wrapping
+- [x] Undo
+- [x] Redo
+- [x] Copy
+- [x] Cut
+- [x] Paste
 - [x] Formulas
+- [x] Font Family
+- [x] Font Size
+- [x] Font Bold
+- [x] Font Italic
+- [x] Font Strike
+- [x] Font Underline
+- [x] Font Color
+- [x] Fill Color
+- [x] Text Wrapping
+- [x] Merge Cells
+- [x] Chart
+- [x] Floating Picture
 - [x] Define Name
-- [x] Insert row, column
-- [x] Delete row, column
-- [x] Hide row, column
-- [x] Change row height
-- [x] Change column width
+- [x] Insert Row
+- [x] Insert Column
+- [x] Delete Row
+- [x] Delete Column
+- [x] Hide Row
+- [x] Hide Column
+- [x] Row Height
+- [x] Column Width
 - [x] Insert Sheet
 - [x] Delete Sheet
 - [x] Rename Sheet
 - [x] Hide Sheet
 - [x] Unhide Sheet
-- [x] Copy
-- [x] Cut
-- [x] Paste
 - [x] Import XLSX
 - [x] Export XLSX
 - [x] Import CSV
 - [x] Export CSV
-- [x] Floating Picture
-- [x] Chart
-- [x] Undo
-- [x] Redo
 - [x] Dark Mode
 - [x] I18N
-- [x] Merge Cells
 
 ## Supported Formulas
 

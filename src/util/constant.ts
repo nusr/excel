@@ -1,4 +1,4 @@
-import { ErrorTypes, NumberFormatItem } from '@/types';
+import { ErrorTypes, NumberFormatItem, OptionItem } from '@/types';
 import type { ChartType } from 'chart.js';
 import { $ } from '@/i18n';
 // Number.MAX_SAFE_INTEGER 16
@@ -14,7 +14,7 @@ export const HIDE_CELL = 0;
 export const TEXTAREA_MAX_ROWS = 10;
 export const MERGE_CELL_LINE_BREAK = '&#10;';
 export const LINE_BREAK = '\n';
-export const CSV_SPLITTER = ','
+export const CSV_SPLITTER = ',';
 export const XLSX_MAX_COL_COUNT = 16384; // XFD
 export const XLSX_MAX_ROW_COUNT = 1048576;
 export const DEFAULT_ROW_COUNT = 200;
@@ -120,6 +120,69 @@ export const NUMBER_FORMAT_LIST: NumberFormatItem[] = [
   { formatCode: 'mm:ss.0', label: '', id: 47 },
   { formatCode: '##0.0E+0', label: '', id: 48 },
   { formatCode: '@', label: '', id: 49 },
+];
+
+export const numberFormatOptionList: OptionItem[] = [
+  {
+    value: 0,
+    label: 'General',
+    disabled: false,
+  },
+  {
+    value: 2,
+    label: 'Number',
+    disabled: false,
+  },
+  {
+    value: 42,
+    label: 'Currency',
+    disabled: false,
+  },
+  // {
+  //   value: 44,
+  //   label: 'Accounting',
+  //   disabled: false,
+  // },
+  {
+    value: 14,
+    label: 'Short Date',
+    disabled: false,
+  },
+  // {
+  //   value: 14,
+  //   label: 'Long Date',
+  //   disabled: false,
+  // },
+  {
+    value: 19,
+    label: 'Time',
+    disabled: false,
+  },
+  {
+    value: 10,
+    label: 'Percentage',
+    disabled: false,
+  },
+  {
+    value: 12,
+    label: 'Fraction',
+    disabled: false,
+  },
+  {
+    value: 11,
+    label: 'Scientific',
+    disabled: false,
+  },
+  {
+    value: 49,
+    label: 'Text',
+    disabled: false,
+  },
+  // {
+  //   value: -1,
+  //   label: 'More Number Formats',
+  //   disabled: false,
+  // },
 ];
 
 export const COLOR_PICKER_COLOR_LIST = [

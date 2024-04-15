@@ -2,6 +2,7 @@ import { convertXMLToJSON, importXLSX } from '../importXLSX';
 import { WorkBookJSON, EVerticalAlign, EUnderLine } from '@/types';
 import fs from 'fs/promises';
 import path from 'path';
+import { initController } from '@/controller';
 
 describe('importXLSX.test.ts', () => {
   describe('convertColorToHex', () => {
@@ -26,6 +27,8 @@ describe('importXLSX.test.ts', () => {
       const filePath = path.join(__dirname, './origin.xlsx');
       const fileData = await fs.readFile(filePath);
       const model = await importXLSX(fileData);
+      const controller = initController();
+      controller.fromJSON(model);
       const result: WorkBookJSON = {
         workbook: {
           '2': {
@@ -70,14 +73,14 @@ describe('importXLSX.test.ts', () => {
           },
         },
         mergeCells: {
-          'Sheet5!B2:C3': {
+          'Sheet5!$B$2:$C$3': {
             col: 1,
             colCount: 2,
             row: 1,
             rowCount: 2,
             sheetId: '6',
           },
-          'Sheet5!F7:G8': {
+          'Sheet5!$F$7:$G$8': {
             col: 5,
             colCount: 2,
             row: 6,
@@ -370,7 +373,7 @@ describe('importXLSX.test.ts', () => {
           },
         },
       };
-      expect(model).toEqual(result);
+      expect(controller.toJSON()).toEqual(result);
     });
   });
   describe('convertXMLToJSON', () => {

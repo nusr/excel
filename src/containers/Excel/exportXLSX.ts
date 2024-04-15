@@ -221,7 +221,7 @@ function buildStyle(style: StyleData) {
 export function convertToXMLData(controller: IController) {
   const model = controller.toJSON();
   const sheetList = Object.values(model.workbook);
-
+  sheetList.sort((a, b) => a.sort - b.sort);
   const contentTypeList: string[] = [];
   const sheetRelMap: Record<
     string,

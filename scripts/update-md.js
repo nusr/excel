@@ -7,7 +7,7 @@ const FORMULA_TAG = '## Supported Formulas';
 const MD_PATH = path.join(process.cwd(), 'README.md');
 const ENCODE = 'utf-8';
 
-function updateMarkdown() {
+function updateFormula() {
   if (!fs.existsSync(FORMULA_DIR)) {
     return;
   }
@@ -64,4 +64,4 @@ function updateMarkdown() {
   fs.writeFileSync(MD_PATH, mdText);
 }
 
-updateMarkdown();
+updateFormula();

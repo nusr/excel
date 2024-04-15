@@ -103,7 +103,7 @@ function updateActiveCell(controller: IController) {
   const cellSize = controller.getCellSize(activeCell);
   const cellPosition = controller.computeCellPosition(activeCell);
   cellPosition.top = top + cellPosition.top;
-  let fontFamily = cell?.style?.fontFamily || '';
+  let fontFamily = cell?.style?.fontFamily ?? '';
   if (!fontFamily) {
     let defaultFontFamily = '';
     const list = fontFamilyStore.getSnapshot();

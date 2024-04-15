@@ -89,8 +89,8 @@ export class Content implements ContentView {
           colCount: 1,
           sheetId: '',
         });
-        const height = Math.max(this.rowMap.get(rowIndex) || 0, size.height);
-        const width = Math.max(this.colMap.get(colIndex) || 0, size.width);
+        const height = Math.max(this.rowMap.get(rowIndex) ?? 0, size.height);
+        const width = Math.max(this.colMap.get(colIndex) ?? 0, size.width);
         if (height > controller.getRowHeight(rowIndex).len) {
           this.rowMap.set(rowIndex, height);
         }

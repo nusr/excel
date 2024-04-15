@@ -139,9 +139,6 @@ export class Model implements IModel {
   }
   addSheet() {
     const result = this.workbookManager.addSheet();
-    if (!result) {
-      return null;
-    }
     this.worksheetManager.setWorksheet({}, result.sheetId);
     this.workbookManager.setCurrentSheetId(result.sheetId);
     this.computeViewSize();
@@ -161,11 +158,10 @@ export class Model implements IModel {
     this.workbookManager.hideSheet(sheetId);
     this.workbookManager.setCurrentSheetId(newSheetId);
   }
-  unhideSheet(sheetId?: string): void {
+  unhideSheet(sheetId: string): void {
+    assert(!!sheetId, 'The sheetId can not be empty');
     this.workbookManager.unhideSheet(sheetId);
-    this.workbookManager.setCurrentSheetId(
-      sheetId || this.workbookManager.getCurrentSheetId(),
-    );
+    this.workbookManager.setCurrentSheetId(sheetId);
   }
   renameSheet(sheetName: string, sheetId?: string): void {
     this.workbookManager.renameSheet(sheetName, sheetId);

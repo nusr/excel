@@ -37,18 +37,17 @@ export class Workbook implements IWorkbook {
     ) {
       return false;
     }
-    if (data.rowCount > XLSX_MAX_ROW_COUNT) {
+    if (
+      data.rowCount > XLSX_MAX_ROW_COUNT ||
+      data.colCount > XLSX_MAX_COL_COUNT
+    ) {
       return false;
     }
-    if (data.colCount > XLSX_MAX_COL_COUNT) {
-      return false;
-    }
-
     return true;
   }
   toJSON() {
     return {
-      workbook: this.workbook,
+      workbook: { ...this.workbook },
       currentSheetId: this.currentSheetId,
     };
   }
@@ -73,13 +72,13 @@ export class Workbook implements IWorkbook {
     ) {
       newSheetId = currentSheetId;
     }
-    this.setCurrentSheetId(newSheetId);
     this.model.push({
       type: 'workbook',
       key: '',
       newValue: this.workbook,
       oldValue,
     });
+    this.setCurrentSheetId(newSheetId);
   }
   undo(item: ICommandItem): void {
     if (item.type === 'currentSheetId') {
@@ -155,11 +154,6 @@ export class Workbook implements IWorkbook {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
     };
-    if (!this.validateSheet(sheet)) {
-      return null;
-    }
-    const check = this.workbook[sheet.sheetId];
-    assert(!check, $('sheet-id-is-duplicate'));
     this.workbook[sheet.sheetId] = sheet;
     this.model.push({
       type: 'workbook',
@@ -200,9 +194,9 @@ export class Workbook implements IWorkbook {
     );
     this.updateSheetInfo({ isHide: true }, sheetId);
   }
-  unhideSheet(sheetId?: string): void {
-    const id = sheetId || this.currentSheetId;
-    this.updateSheetInfo({ isHide: false }, id);
+  unhideSheet(sheetId: string): void {
+    
+    this.updateSheetInfo({ isHide: false }, sheetId);
   }
   renameSheet(sheetName: string, sheetId?: string): void {
     assert(!!sheetName, $('the-value-cannot-be-empty'));

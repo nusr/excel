@@ -22,7 +22,6 @@ import {
   IMAGE_TYPE_MAP,
   SheetRange,
   mergeRange,
-  convertStringToResultType,
   isEmpty,
   FORMULA_PREFIX,
   getImageSize,
@@ -587,11 +586,11 @@ export function convertXMLDataToModel(
         if (colCount > XLSX_MAX_COL_COUNT) {
           continue;
         }
-        let val = col?.v?.[textKey] || '';
+        const val = col?.v?.[textKey] ?? '';
         const styleId = parseInt(col.s, 10);
         const style = getCellStyle(xmlData[STYLE_PATH], styleId, themeData);
         const t: ModelCellType = {
-          value: '',
+          value: val,
         };
         const formula = col?.f?.[textKey] || '';
         if (formula) {
@@ -608,14 +607,8 @@ export function convertXMLDataToModel(
           const i = parseInt(val, 10);
           if (!isNaN(i)) {
             const data = sharedStrings[i];
-            const text = data?.t?.[textKey] || '';
-            if (text) {
-              val = text;
-            }
+            t.value = data?.t?.[textKey] ?? '';
           }
-        }
-        if (val) {
-          t.value = convertStringToResultType(val);
         }
 
         result.worksheets[item.sheetId] = result.worksheets[item.sheetId] || {};

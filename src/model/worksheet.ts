@@ -34,7 +34,7 @@ export class Worksheet implements IWorksheet {
   }
   toJSON() {
     return {
-      worksheets: this.worksheets,
+      worksheets: { ...this.worksheets },
     };
   }
   fromJSON(json: WorkBookJSON): void {
@@ -349,7 +349,7 @@ export class Worksheet implements IWorksheet {
     for (const [k, data] of Object.entries(sheetData)) {
       if (data?.formula) {
         const result = this.parseFormula(data.formula);
-        const newValue = result.error ? result.error : result.result;
+        const newValue = result.result;
         const oldValue = data.value;
         if (newValue !== oldValue) {
           data.value = newValue;

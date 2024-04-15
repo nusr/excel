@@ -1,6 +1,6 @@
 import { IRange } from '@/types';
 
-export type ResultType = boolean | string | number | null | undefined;
+export type ResultType = boolean | string | number;
 export type ErrorTypes =
   | '#ERROR!'
   | '#DIV/0!' // div zero
@@ -55,7 +55,7 @@ export interface DefinedNamesMap {
 
 export interface InterpreterResult {
   result: ResultType;
-  error: ErrorTypes | null;
+  isError: boolean;
   expressionStr: string;
 }
 

@@ -179,7 +179,7 @@ export class Controller implements IController {
     this.model.hideSheet(sheetId);
     this.emitChange();
   }
-  unhideSheet(sheetId?: string): void {
+  unhideSheet(sheetId: string): void {
     this.model.unhideSheet(sheetId);
     this.emitChange();
   }

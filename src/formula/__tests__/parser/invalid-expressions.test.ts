@@ -1,6 +1,11 @@
 import { buildTree } from './util';
 
 describe('invalid expressions', () => {
+  it('#ERROR!', () => {
+    expect(() => {
+      buildTree('#ERROR!');
+    }).toThrow();
+  });
   it('SUM(', () => {
     expect(() => {
       buildTree('SUM(');

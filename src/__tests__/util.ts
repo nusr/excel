@@ -21,6 +21,6 @@ export function extractDataFromTransform(
 ): number {
   const p = type === 'rotate' ? 'deg' : 'px';
   const reg = new RegExp(type + `\\((\\d+)${p}\\)`);
-  const t = transform.match(reg) || [];
+  const t = transform.match(reg) ?? [];
   return Number(t[1]);
 }

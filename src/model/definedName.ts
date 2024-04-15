@@ -17,7 +17,7 @@ export class DefinedName implements IDefinedName {
   }
   toJSON() {
     return {
-      definedNames: this.definedNames,
+      definedNames: { ...this.definedNames },
     };
   }
   validateDefinedName(name: string) {

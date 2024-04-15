@@ -13,6 +13,7 @@ import {
   QUERY_ALL_LOCAL_FONT,
   LOCAL_FONT_KEY,
   isSupportFontFamily,
+  numberFormatOptionList,
 } from '@/util';
 import { EUnderLine, OptionItem, IController, EMergeCellType } from '@/types';
 import styles from './index.module.css';
@@ -24,7 +25,7 @@ interface Props {
   controller: IController;
 }
 
-const underlineList: OptionItem[] = [
+const underlineOptionList: OptionItem[] = [
   {
     value: EUnderLine.NONE,
     label: $('none'),
@@ -44,17 +45,17 @@ const underlineList: OptionItem[] = [
 
 const mergeOptionList: OptionItem[] = [
   {
-    value: String(EMergeCellType.MERGE_CENTER),
+    value: EMergeCellType.MERGE_CENTER,
     label: $('merge-and-center'),
     disabled: false,
   },
   {
-    value: String(EMergeCellType.MERGE_CELL),
+    value: EMergeCellType.MERGE_CELL,
     label: $('merge-cells'),
     disabled: false,
   },
   {
-    value: String(EMergeCellType.MERGE_CONTENT),
+    value: EMergeCellType.MERGE_CONTENT,
     label: $('merge-content'),
     disabled: false,
   },
@@ -74,12 +75,19 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       fontFamilyStore.subscribe,
       fontFamilyStore.getSnapshot,
     );
+
     const fillStyle = useMemo(() => {
       return { color: cellStyle.fillColor };
     }, [cellStyle.fillColor]);
     const fontStyle = useMemo(() => {
       return { color: cellStyle.fontColor };
     }, [cellStyle.fontColor]);
+    const numberFormatValue = useMemo(() => {
+      const item = numberFormatOptionList.find(
+        (v) => v.value === cellStyle.numberFormat,
+      );
+      return item?.label || numberFormatOptionList[0].label;
+    }, [cellStyle.numberFormat]);
     const getItemStyle = useCallback(
       (value: string | number): React.CSSProperties => {
         return {
@@ -169,7 +177,10 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       } else if (t === EUnderLine.DOUBLE) {
         underline = EUnderLine.DOUBLE;
       }
-      controller.updateCellStyle({ underline }, controller.getActiveRange().range);
+      controller.updateCellStyle(
+        { underline },
+        controller.getActiveRange().range,
+      );
     }, []);
     const setFillColor = useCallback((value: string) => {
       controller.updateCellStyle(
@@ -207,6 +218,16 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       } else {
         controller.addMergeCell(range, Number(value));
       }
+    }, []);
+    const handleNumberFormat = useCallback((value: string) => {
+      const v = parseInt(value, 10);
+      if (isNaN(v) || v < 0) {
+        return;
+      }
+      controller.updateCellStyle(
+        { numberFormat: v },
+        controller.getActiveRange().range,
+      );
     }, []);
     return (
       <div className={styles['toolbar-wrapper']} data-testid="toolbar">
@@ -275,7 +296,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           <span className={styles.strike}>A</span>
         </Button>
         <Select
-          data={underlineList}
+          data={underlineOptionList}
           value={cellStyle.underline}
           title="Underline"
           onChange={setUnderline}
@@ -310,8 +331,6 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         >
           {$('wrap-text')}
         </Button>
-        <InsertFloatingPicture controller={controller} />
-        <InsertChart controller={controller} />
         <SelectList
           data={mergeOptionList}
           value={cellStyle.mergeType}
@@ -329,6 +348,19 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
             {$('merge-cell')}
           </Button>
         </SelectList>
+        <SelectList
+          data={numberFormatOptionList}
+          value={String(cellStyle.numberFormat)}
+          onChange={handleNumberFormat}
+          className={styles['number-format']}
+          testId="toolbar-number-format-select"
+        >
+          <div className={styles['number-format-value']}>
+            {numberFormatValue}
+          </div>
+        </SelectList>
+        <InsertFloatingPicture controller={controller} />
+        <InsertChart controller={controller} />
         <Github />
       </div>
     );

@@ -11,7 +11,7 @@ import { npx } from './dpr';
 import { EUnderLine, StyleType, ResultType } from '@/types';
 import { DEFAULT_FONT_SIZE, MUST_FONT_FAMILY } from './constant';
 import { camelCase } from './lodash';
-import { isNumber, convertStringToResultType } from './util';
+import { isNumber } from './util';
 
 export const FONT_SIZE_LIST = [
   6,
@@ -239,8 +239,7 @@ export function parseText(text: string, splitter = '\t') {
     if (item.length === 0) {
       continue;
     }
-    const list = item.map((v) => convertStringToResultType(v));
-    textList.push(list);
+    textList.push(item);
   }
   return textList;
 }
@@ -296,8 +295,7 @@ export function parseHTML(html: string) {
         }
       }
       list.push(itemStyle);
-      const value = (temp.textContent || '').trim();
-      texts.push(convertStringToResultType(value));
+      texts.push((temp.textContent ?? '').trim());
     }
     textList.push(texts);
     styleList.push(list);

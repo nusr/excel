@@ -7,7 +7,7 @@ import {
 import {
   LINE_BREAK,
   classnames,
-  intToColumnName,
+  convertToReference,
 } from '@/util';
 import styles from './index.module.css';
 import { IController, EditorStatus } from '@/types';
@@ -35,7 +35,13 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
     const displayName = useMemo(() => {
       return (
         activeCell.defineName ||
-        `${intToColumnName(activeCell.col)}${activeCell.row + 1}`
+        convertToReference({
+          row: activeCell.row,
+          col: activeCell.col,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: '',
+        })
       );
     }, [activeCell.defineName, activeCell.col, activeCell.row]);
     const handleClick = useCallback(() => {

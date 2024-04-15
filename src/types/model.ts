@@ -150,7 +150,7 @@ export interface IWorkbook extends IBaseManager {
   addSheet(): WorksheetType | null;
   deleteSheet(sheetId?: string): void;
   hideSheet(sheetId?: string): void;
-  unhideSheet(sheetId?: string): void;
+  unhideSheet(sheetId: string): void;
   renameSheet(sheetName: string, sheetId?: string): void;
   getSheetInfo(sheetId?: string): WorksheetType | null;
   updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string): void;

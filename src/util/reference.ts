@@ -92,7 +92,10 @@ export function parseReference(
   return mergeRange(startCell, endCell);
 }
 
-export function mergeRange(start: SheetRange, end: SheetRange): SheetRange | null {
+export function mergeRange(
+  start: SheetRange,
+  end: SheetRange,
+): SheetRange | null {
   if (start.sheetId !== end.sheetId) {
     return null;
   }
@@ -126,7 +129,7 @@ export function mergeRange(start: SheetRange, end: SheetRange): SheetRange | nul
 }
 
 function convertCell(row: number, col: number, referenceType: ReferenceType) {
-  const first = referenceType === 'absolute';
+  const first = referenceType === 'absolute' || referenceType === 'mixed';
   const second = referenceType === 'absolute';
   return `${first ? '$' : ''}${intToColumnName(col)}${second ? '$' : ''}${
     row + 1
@@ -143,8 +146,8 @@ export function convertToReference(
   sheetName = sheetName ? `${sheetName}!` : '';
   if (range.colCount > 1 && range.rowCount > 1) {
     const end = convertCell(
-      range.row + range.rowCount,
-      range.col + range.colCount,
+      range.row + range.rowCount - 1,
+      range.col + range.colCount - 1,
       referenceType,
     );
     result = `${result}:${end}`;

@@ -94,4 +94,19 @@ describe('model.test.ts', () => {
       rangeMap: {},
     });
   });
+  test('fromJSON empty', () => {
+    const model = new Model();
+    model.fromJSON({} as any);
+    expect(model.toJSON()).toEqual({
+      workbook: {},
+      mergeCells: {},
+      worksheets: {},
+      customHeight: {},
+      customWidth: {},
+      definedNames: {},
+      currentSheetId: '',
+      drawings: {},
+      rangeMap: {},
+    });
+  });
 });

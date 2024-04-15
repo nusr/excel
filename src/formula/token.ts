@@ -7,9 +7,6 @@ export class Token {
     this.type = type;
     this.value = value;
   }
-  error() {
-    return `type:${this.type},value:${this.value}`;
-  }
   toString(): string {
     return this.value;
   }

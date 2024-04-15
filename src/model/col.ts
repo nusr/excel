@@ -15,7 +15,7 @@ export class ColManager implements ICol {
   }
   toJSON() {
     return {
-      customWidth: this.customWidth,
+      customWidth: { ...this.customWidth },
     };
   }
   fromJSON(json: WorkBookJSON): void {

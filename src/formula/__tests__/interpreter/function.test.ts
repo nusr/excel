@@ -1,87 +1,39 @@
+import { expectResult } from './util';
 import { parseFormula } from '../..';
 
 describe('parseFormula function', () => {
   it('not defined function', () => {
-    expect(parseFormula('foo()')).toEqual({
-      error: '#NAME?',
-      result: null,
-      expressionStr: '',
-    });
+    expectResult('foo()', '#NAME?');
   });
   it('not support function', () => {
-    expect(parseFormula('BAHTTEXT()')).toEqual({
-      error: '#NAME?',
-      result: null,
-      expressionStr: '',
-    });
+    expectResult('BAHTTEXT()', '#NAME?');
   });
   it('function SUM', () => {
-    expect(parseFormula('SUM(1,2)')).toEqual({
-      error: null,
-      result: 3,
-      expressionStr: 'SUM(1,2)',
-    });
-    expect(parseFormula('SUM(1,)')).toEqual({
-      error: null,
-      result: 1,
-      expressionStr: 'SUM(1)',
-    });
-    expect(parseFormula('sUM(1,2)')).toEqual({
-      error: null,
-      result: 3,
-      expressionStr: 'SUM(1,2)',
-    });
-    expect(parseFormula('suM(1,2)')).toEqual({
-      error: null,
-      result: 3,
-      expressionStr: 'SUM(1,2)',
-    });
-    expect(parseFormula('sum(1,2)')).toEqual({
-      error: null,
-      result: 3,
-      expressionStr: 'SUM(1,2)',
-    });
-
-    expect(parseFormula('SUM(1,SUM(2,3))')).toEqual({
-      error: null,
-      result: 6,
-      expressionStr: 'SUM(1,SUM(2,3))',
-    });
+    expectResult('SUM(1,2)', 3, 'SUM(1,2)');
+    expectResult('SUM(1,)', 1, 'SUM(1)');
+    expectResult('sUM(1,2)', 3, 'SUM(1,2)');
+    expectResult('sum(1,2)', 3, 'SUM(1,2)');
+    expectResult('SUM(1,SUM(2,3))', 6, 'SUM(1,SUM(2,3))');
   });
   it('@SUM', () => {
-    expect(parseFormula('@SUM(1)')).toEqual({
-      error: '#NAME?',
-      result: null,
-      expressionStr: '',
-    });
+    expectResult('@SUM(1)', '#NAME?');
   });
   it('function ABS', () => {
     expect(parseFormula('ABS()')).toEqual({
-      error: '#VALUE!',
-      result: null,
+      result: "#VALUE!",
+      isError: true,
       expressionStr: '',
-    });
-    expect(parseFormula('ABS(1)')).toEqual({
-      error: null,
-      result: 1,
-      expressionStr: 'ABS(1)',
-    });
-    expect(parseFormula('ABS(-1)')).toEqual({
-      error: null,
-      result: 1,
-      expressionStr: 'ABS(-1)',
     });
     expect(parseFormula('ABS("ff")')).toEqual({
-      error: '#VALUE!',
-      result: null,
+      result: '#VALUE!',
+      isError: true,
       expressionStr: '',
     });
+
+    expectResult('ABS(1)', 1, 'ABS(1)');
+    expectResult('ABS(-1)', 1, 'ABS(-1)');
   });
   it('function CONCAT', () => {
-    expect(parseFormula('CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")')).toEqual({
-      error: null,
-      result: '😊👨‍👨‍👧‍👧👦🏾',
-      expressionStr: 'CONCAT(😊,👨‍👨‍👧‍👧,👦🏾)',
-    });
+    expectResult('CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")', '😊👨‍👨‍👧‍👧👦🏾', 'CONCAT(😊,👨‍👨‍👧‍👧,👦🏾)');
   });
 });

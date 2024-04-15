@@ -13,7 +13,7 @@ import {
 } from './expression';
 import { CustomError } from './formula';
 
-const errorSet = new Set<ErrorTypes>(['#ERROR!', '#DIV/0!', '#NULL!', '#NUM!', '#REF!', '#VALUE!', '#N/A', '#NAME?']);
+export const errorSet = new Set<ErrorTypes>(['#ERROR!', '#DIV/0!', '#NULL!', '#NUM!', '#REF!', '#VALUE!', '#N/A', '#NAME?']);
 
 export class Parser {
   private readonly tokens: Token[];

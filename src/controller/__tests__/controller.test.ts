@@ -379,7 +379,7 @@ describe('controller.test.ts', () => {
           },
         },
         mergeCells: {
-          'Sheet1!$U$21:$X$24': {
+          'Sheet1!$U$21:$W$23': {
             row: 20,
             col: 20,
             rowCount: 3,

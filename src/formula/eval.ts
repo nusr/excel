@@ -39,21 +39,21 @@ export function parseFormula(
     }
     return {
       result: value,
-      error: null,
+      isError: false,
       expressionStr,
     };
   } catch (error) {
     if (error instanceof CustomError) {
       return {
-        result: null,
-        error: error.value,
+        result: error.value,
+        isError: true,
         expressionStr,
       };
     }
   }
   return {
-    result: null,
-    error: '#ERROR!',
+    result: '#ERROR!',
+    isError: true,
     expressionStr,
   };
 }
@@ -61,7 +61,7 @@ export function parseFormula(
 export class CellDataMapImpl implements CellDataMap {
   private readonly map = new Map<string, ResultType>();
   private sheetNameMap: Record<string, string> = {};
-  private getKey(row: number, col: number, sheetId = '1') {
+  private getKey(row: number, col: number, sheetId: string) {
     const key = `${row}_${col}_${sheetId}`;
     return key;
   }
@@ -83,7 +83,10 @@ export class CellDataMapImpl implements CellDataMap {
     for (let r = row, endRow = row + rowCount; r < endRow; r++) {
       for (let c = col, endCol = col + colCount; c < endCol; c++) {
         const key = this.getKey(r, c, sheetId);
-        list.push(this.map.get(key));
+        const value = this.map.get(key);
+        if (typeof value !== 'undefined') {
+          list.push(value);
+        }
       }
     }
 

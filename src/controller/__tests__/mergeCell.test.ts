@@ -138,4 +138,29 @@ describe('mergeCell.test.ts', () => {
       ).toHaveLength(0);
     });
   });
+  describe('undo redo', () => {
+    test('undo', () => {
+      controller.addMergeCell({
+        row: 0,
+        col: 0,
+        rowCount: 2,
+        colCount: 2,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getMergeCellList(controller.getCurrentSheetId()),
+      ).toHaveLength(1);
+      expect(controller.canUndo()).toEqual(true);
+
+      controller.undo();
+      expect(
+        controller.getMergeCellList(controller.getCurrentSheetId()),
+      ).toHaveLength(0);
+      expect(controller.canRedo()).toEqual(true);
+      controller.redo();
+      expect(
+        controller.getMergeCellList(controller.getCurrentSheetId()),
+      ).toHaveLength(1);
+    });
+  });
 });

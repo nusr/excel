@@ -4,7 +4,7 @@ import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';
 
 function isInputEvent(event: any): boolean {
-  const name = (event?.target?.tagName || '').toLowerCase();
+  const name = (event?.target?.tagName ?? '').toLowerCase();
   return name === 'input' || name === 'textarea';
 }
 

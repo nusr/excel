@@ -29,19 +29,19 @@ describe('style.test.ts', () => {
   describe('parseText', () => {
     test('ok \n', () => {
       expect(parseText('=SUM(1,2)\t2\ntest\ttrue')).toEqual([
-        ['=SUM(1,2)', 2],
-        ['test', true],
+        ['=SUM(1,2)', '2'],
+        ['test', 'true'],
       ]);
     });
     test('ok \r\n', () => {
       expect(parseText('=SUM(1,2)\t2\r\ntest\ttrue')).toEqual([
-        ['=SUM(1,2)', 2],
-        ['test', true],
+        ['=SUM(1,2)', '2'],
+        ['test', 'true'],
       ]);
     });
     test('filter empty', () => {
       expect(parseText('\t \n \t ')).toEqual([]);
-      expect(parseText('1 \t 2 \n \t ')).toEqual([[1, 2]]);
+      expect(parseText('1 \t 2 \n \t ')).toEqual([['1', '2']]);
     });
   });
   describe('makeFont', () => {
@@ -143,10 +143,10 @@ describe('style.test.ts', () => {
         rowMap: new Map(),
         textList: [
           [
-            1,
+            '1',
             'large text',
             'This is a very long text that needs to be wrapped',
-            2,
+            '2',
             '',
           ],
         ],
@@ -302,8 +302,8 @@ describe('style.test.ts', () => {
           [1, 46],
         ]),
         textList: [
-          [1, 2],
-          ['test', 4],
+          ['1', '2'],
+          ['test', '4'],
         ],
         styleList: [
           [

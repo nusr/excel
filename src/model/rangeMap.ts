@@ -17,8 +17,14 @@ export class RangeMap implements IRangeMap {
     if (
       range.row < 0 ||
       range.col < 0 ||
+      range.colCount < 0 ||
+      range.rowCount < 0 ||
       range.row >= sheetInfo.rowCount ||
-      range.col >= sheetInfo.colCount
+      range.col >= sheetInfo.colCount ||
+      range.colCount > sheetInfo.colCount ||
+      range.rowCount > sheetInfo.rowCount ||
+      range.row + range.rowCount > sheetInfo.rowCount ||
+      range.col + range.colCount > sheetInfo.colCount
     ) {
       return false;
     }
@@ -26,7 +32,7 @@ export class RangeMap implements IRangeMap {
   }
   toJSON() {
     return {
-      rangeMap: this.rangeMap,
+      rangeMap: { ...this.rangeMap },
     };
   }
   fromJSON(json: WorkBookJSON): void {

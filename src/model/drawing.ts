@@ -42,7 +42,7 @@ export class Drawing implements IDrawings {
   }
   toJSON() {
     return {
-      drawings: this.drawings,
+      drawings: { ...this.drawings },
     };
   }
   fromJSON(json: WorkBookJSON): void {

@@ -19,6 +19,15 @@
   flex: 1;
   border-radius: unset;
 }
+.toolbar-wrapper .number-format {
+  height: unset;
+  width: 150px;
+}
+.number-format-value {
+  text-align: center;
+  width: 100%;
+  margin-right: 20px;
+}
 .fontFamily {
   font-size: var(--largeFont);
   max-width: 200px;

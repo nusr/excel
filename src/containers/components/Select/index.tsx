@@ -130,7 +130,7 @@ export const SelectPopup: FunctionComponent<SelectPopupProps> = memo(
             </span>
             <span
               className={classnames(styles['popup-item-icon'], {
-                [styles.active]: v.value === value,
+                [styles.active]: v.value == value,
               })}
             >
               <Icon name="confirm" />

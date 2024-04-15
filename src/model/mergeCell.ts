@@ -17,7 +17,7 @@ export class MergeCell implements IMergeCell {
   }
   toJSON() {
     return {
-      mergeCells: this.mergeCells,
+      mergeCells: { ...this.mergeCells },
     };
   }
   fromJSON(json: WorkBookJSON): void {
@@ -25,6 +25,7 @@ export class MergeCell implements IMergeCell {
     const oldValue = { ...this.mergeCells };
     this.mergeCells = {};
     for (const range of Object.values(data)) {
+      range.sheetId = range.sheetId || this.model.getCurrentSheetId();
       if (!this.model.validateRange(range)) {
         continue;
       }

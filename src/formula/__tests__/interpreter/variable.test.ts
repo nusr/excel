@@ -4,22 +4,22 @@ describe('parseFormula variable', () => {
   it('should evaluate default variables', () => {
     expect(parseFormula('TRUE')).toEqual({
       result: true,
-      error: null,
+      isError: false,
       expressionStr: 'TRUE',
     });
     expect(parseFormula('FALSE')).toEqual({
       result: false,
-      error: null,
+      isError: false,
       expressionStr: 'FALSE',
     });
   });
-  // it('not found', () => {
-  //   expect(parseFormula("foo")).toEqual({
-  //     result: null,
-  //     error: "#NAME?",
-  //     expressionStr: ''
-  //   });
-  // })
+  it('not found', () => {
+    expect(parseFormula('foo')).toEqual({
+      result: "#REF!",
+      isError: true,
+      expressionStr: '',
+    });
+  });
   it('should evaluate custom variables', () => {
     const temp = new VariableMapImpl();
     const cellDataMap = new CellDataMapImpl();
@@ -35,7 +35,7 @@ describe('parseFormula variable', () => {
     });
     expect(parseFormula('foo', cellDataMap, temp)).toEqual({
       result: '222',
-      error: null,
+      isError: false,
       expressionStr: 'foo',
     });
   });

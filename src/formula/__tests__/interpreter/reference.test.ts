@@ -7,12 +7,12 @@ describe('parseFormula reference', () => {
       [0],
     ]);
     expect(parseFormula('A1', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: 0,
       expressionStr: 'A1',
     });
     expect(parseFormula('sum(A1)', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: 0,
       expressionStr: 'SUM(A1)',
     });
@@ -21,7 +21,7 @@ describe('parseFormula reference', () => {
       ['22'],
     ]);
     expect(parseFormula('A1', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: '22',
       expressionStr: 'A1',
     });
@@ -29,7 +29,7 @@ describe('parseFormula reference', () => {
       ['test'],
     ]);
     expect(parseFormula('A1', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: 'test',
       expressionStr: 'A1',
     });
@@ -37,7 +37,7 @@ describe('parseFormula reference', () => {
       [3],
     ]);
     expect(parseFormula('A1', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: 3,
       expressionStr: 'A1',
     });
@@ -48,33 +48,33 @@ describe('parseFormula reference', () => {
       [2, 3],
     ]);
     expect(parseFormula('A1 *  B1', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: 6,
       expressionStr: 'A1*B1',
     });
     expect(parseFormula('A1 +  B1', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: 5,
       expressionStr: 'A1+B1',
     });
     expect(parseFormula('B1 -  A1', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: 1,
       expressionStr: 'B1-A1',
     });
 
     expect(parseFormula('B1 /  A1', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: 1.5,
       expressionStr: 'B1/A1',
     });
     expect(parseFormula('B1 &  A1', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: '32',
       expressionStr: 'B1&A1',
     });
     expect(parseFormula('A1 & B1 ', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: '23',
       expressionStr: 'A1&B1',
     });
@@ -85,7 +85,7 @@ describe('parseFormula reference', () => {
       [1, 2, 3],
     ]);
     expect(parseFormula('sum(A1:C1)', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: 6,
       expressionStr: 'SUM(A1:C1)',
     });
@@ -96,12 +96,13 @@ describe('parseFormula reference', () => {
       [1, 2, 3, 4, 5],
     ]);
     expect(parseFormula('sum(A1:C1, D1:E1)', cellDataMap)).toEqual({
-      error: null,
+      isError: false,
       result: 15,
       expressionStr: 'SUM(A1:C1,D1:E1)',
     });
   });
-  it('sheet cell', () => {
+
+  it('sheet name not found', () => {
     const cellDataMap = new CellDataMapImpl();
     cellDataMap.set(
       { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' },
@@ -110,10 +111,95 @@ describe('parseFormula reference', () => {
     cellDataMap.setSheetNameMap({
       Sheet1: '1',
     });
-    expect(parseFormula('=Sheet1!A1', cellDataMap)).toEqual({
-      error: null,
-      result: 1,
-      expressionStr: 'Sheet1!A1',
+    expect(parseFormula('=Sheet2!A1', cellDataMap)).toEqual({
+      isError: true,
+      result: '#NAME?',
+      expressionStr: '',
+    });
+  });
+  describe('reference', () => {
+    test('relative', () => {
+      const cellDataMap = new CellDataMapImpl();
+      cellDataMap.set(
+        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
+        [[0]],
+      );
+      expect(parseFormula('A1', cellDataMap)).toEqual({
+        isError: false,
+        result: 0,
+        expressionStr: 'A1',
+      });
+    });
+    test('absolute', () => {
+      const cellDataMap = new CellDataMapImpl();
+      cellDataMap.set(
+        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
+        [[0]],
+      );
+      expect(parseFormula('$A$1', cellDataMap)).toEqual({
+        isError: false,
+        result: 0,
+        expressionStr: '$A$1',
+      });
+    });
+    test('mixed', () => {
+      const cellDataMap = new CellDataMapImpl();
+      cellDataMap.set(
+        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
+        [[0]],
+      );
+      expect(parseFormula('A$1', cellDataMap)).toEqual({
+        isError: false,
+        result: 0,
+        expressionStr: 'A$1',
+      });
+    });
+  });
+  describe('sheetId reference', () => {
+    it('relative', () => {
+      const cellDataMap = new CellDataMapImpl();
+      cellDataMap.set(
+        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' },
+        [[1, 2, 3, 4, 5]],
+      );
+      cellDataMap.setSheetNameMap({
+        Sheet1: '1',
+      });
+      expect(parseFormula('=Sheet1!A1', cellDataMap)).toEqual({
+        isError: false,
+        result: 1,
+        expressionStr: 'Sheet1!A1',
+      });
+    });
+    test('absolute', () => {
+      const cellDataMap = new CellDataMapImpl();
+      cellDataMap.set(
+        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' },
+        [[1, 2, 3, 4, 5]],
+      );
+      cellDataMap.setSheetNameMap({
+        Sheet1: '1',
+      });
+      expect(parseFormula('=Sheet1!$A$1', cellDataMap)).toEqual({
+        isError: false,
+        result: 1,
+        expressionStr: 'Sheet1!$A$1',
+      });
+    });
+    test('mixed', () => {
+      const cellDataMap = new CellDataMapImpl();
+      cellDataMap.set(
+        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' },
+        [[1, 2, 3, 4, 5]],
+      );
+      cellDataMap.setSheetNameMap({
+        Sheet1: '1',
+      });
+      expect(parseFormula('=Sheet1!$A1', cellDataMap)).toEqual({
+        isError: false,
+        result: 1,
+        expressionStr: 'Sheet1!$A1',
+      });
     });
   });
 });

@@ -1,4 +1,4 @@
-import { SheetRange, mergeRange, parseReference } from '@/util';
+import { SheetRange, isNumber, mergeRange, parseReference } from '@/util';
 import {
   TokenType,
   CellDataMap,
@@ -128,14 +128,14 @@ export class Interpreter implements Visitor {
         throw new CustomError('#NAME?');
       }
     }
-    const t = parseReference(data.value.value);
-    if (t === null) {
+    const range = parseReference(data.value.value);
+    if (range === null) {
       throw new CustomError('#NAME?');
     }
     if (sheetId) {
-      t.sheetId = sheetId;
+      range.sheetId = sheetId;
     }
-    return t;
+    return range;
   }
   visitLiteralExpression(expr: LiteralExpression) {
     const { type, value } = expr.value;
@@ -143,11 +143,10 @@ export class Interpreter implements Visitor {
       case TokenType.STRING:
         return value;
       case TokenType.NUMBER: {
-        const t = parseFloat(value);
-        if (isNaN(t)) {
-          throw new CustomError('#VALUE!');
+        if (isNumber(value)) {
+          return Number(value);
         }
-        return t;
+        throw new CustomError('#VALUE!');
       }
       case TokenType.TRUE:
         return true;
@@ -192,8 +191,10 @@ export class Interpreter implements Visitor {
     const value = this.evaluate(data.right);
     switch (data.operator.type) {
       case TokenType.MINUS:
+        assert(typeof value === 'number');
         return -value;
       case TokenType.PLUS:
+        assert(typeof value === 'number');
         return value;
       default:
         throw new CustomError('#VALUE!');

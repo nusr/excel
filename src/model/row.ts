@@ -15,7 +15,7 @@ export class RowManager implements IRow {
   }
   toJSON() {
     return {
-      customHeight: this.customHeight,
+      customHeight: { ...this.customHeight },
     };
   }
   fromJSON(json: WorkBookJSON): void {
