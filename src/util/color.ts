@@ -1,4 +1,4 @@
-const colorMap: Record<string, string> = {
+export const colorMap: Record<string, string> = {
   maroon: '#800000',
   red: '#ff0000',
   orange: '#ffA500',
@@ -17,6 +17,8 @@ const colorMap: Record<string, string> = {
   silver: '#c0c0c0',
   gray: '#808080',
   transparent: '#0000',
+  cyan: '#F00',
+  magenta: '#00F'
 };
 
 const hexStr = '(?:#([a-f0-9]{3,8}))';

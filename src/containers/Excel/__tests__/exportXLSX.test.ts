@@ -189,7 +189,7 @@ describe('exportXLSX.test.ts', () => {
         xmlns:x16r2="http://schemas.microsoft.com/office/spreadsheetml/2015/02/main"
         xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision">
         <numFmts count="1">
-          <numFmt numFmtId="0" formatCode="general"/>
+          <numFmt numFmtId="0" formatCode="General"/>
         </numFmts>
         <fonts count="2">
           <font>

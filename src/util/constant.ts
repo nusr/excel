@@ -34,31 +34,31 @@ export const CHART_TYPE_LIST: Array<{
   value: ChartType;
   label: string;
 }> = [
-  {
-    value: 'line',
-    label: $('line-chart'),
-  },
-  {
-    value: 'bar',
-    label: $('bar-chart'),
-  },
-  {
-    value: 'pie',
-    label: $('pie-chart'),
-  },
-  {
-    value: 'scatter',
-    label: $('scatter-chart'),
-  },
-  {
-    value: 'radar',
-    label: $('radar-chart'),
-  },
-  {
-    value: 'polarArea',
-    label: $('polar-area-chart'),
-  },
-];
+    {
+      value: 'line',
+      label: $('line-chart'),
+    },
+    {
+      value: 'bar',
+      label: $('bar-chart'),
+    },
+    {
+      value: 'pie',
+      label: $('pie-chart'),
+    },
+    {
+      value: 'scatter',
+      label: $('scatter-chart'),
+    },
+    {
+      value: 'radar',
+      label: $('radar-chart'),
+    },
+    {
+      value: 'polarArea',
+      label: $('polar-area-chart'),
+    },
+  ];
 
 export const ERROR_SET = new Set<ErrorTypes>([
   '#ERROR!',
@@ -71,8 +71,11 @@ export const ERROR_SET = new Set<ErrorTypes>([
   '#NAME?',
 ]);
 
+export const TEXT_FORMAT = '@'
+export const DEFAULT_FORMAT = 0;
+export const DEFAULT_DATE_FORMAT = 14;
 export const NUMBER_FORMAT_LIST: NumberFormatItem[] = [
-  { formatCode: 'general', label: '', id: 0 },
+  { formatCode: 'General', label: '', id: DEFAULT_FORMAT },
   { formatCode: '0', label: '', id: 1 },
   { formatCode: '0.00', label: '', id: 2 },
   { formatCode: '#,##0', label: '', id: 3 },
@@ -82,7 +85,7 @@ export const NUMBER_FORMAT_LIST: NumberFormatItem[] = [
   { formatCode: '0.00E+00', label: '', id: 11 },
   { formatCode: '# ?/?', label: '', id: 12 },
   { formatCode: '# ??/??', label: '', id: 13 },
-  { formatCode: 'mm-dd-yy', label: '', id: 14 },
+  { formatCode: 'm/d/yy', label: '', id: 14 },
   { formatCode: 'd-mmm-yy', label: '', id: 15 },
   { formatCode: 'd-mmm', label: '', id: 16 },
   { formatCode: 'mmm-yy', label: '', id: 17 },
@@ -95,31 +98,14 @@ export const NUMBER_FORMAT_LIST: NumberFormatItem[] = [
   { formatCode: '#,##0 ;[red](#,##0)', label: '', id: 38 },
   { formatCode: '#,##0.00 ;(#,##0.00)', label: '', id: 39 },
   { formatCode: '#,##0.00 ;[red](#,##0.00)', label: '', id: 40 },
-  {
-    formatCode: '_(* #,##0_);_(* \\(#,##0\\);_(* "-"_);_(@_)',
-    label: '',
-    id: 41,
-  },
-  {
-    formatCode: '_("$"* #,##0_);_("$"* \\(#,##0\\);_("$"* "-"_);_(@_)',
-    label: '',
-    id: 42,
-  },
-  {
-    formatCode: '_(* #,##0.00_);_(* \\(#,##0.00\\);_(* "-"??_);_(@_)',
-    label: '',
-    id: 43,
-  },
-  {
-    formatCode: '_("$"* #,##0.00_);_("$"* \\(#,##0.00\\);_("$"* "-"??_);_(@_)',
-    label: '',
-    id: 44,
-  },
   { formatCode: 'mm:ss', label: '', id: 45 },
   { formatCode: '[h]:mm:ss', label: '', id: 46 },
   { formatCode: 'mm:ss.0', label: '', id: 47 },
   { formatCode: '##0.0E+0', label: '', id: 48 },
-  { formatCode: '@', label: '', id: 49 },
+  { formatCode: TEXT_FORMAT, label: '', id: 49 },
+  {
+    formatCode: '"上午/下午 "hh"時"mm"分"ss"秒 "', label: '', id: 56
+  }
 ];
 
 export const numberFormatOptionList: OptionItem[] = [
