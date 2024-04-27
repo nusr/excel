@@ -20,7 +20,6 @@ import {
   MERGE_CELL_LINE_BREAK,
   LINE_BREAK,
   DEFAULT_FORMAT,
-  isNumber,
 } from '@/util';
 import {
   coreStore,
@@ -133,7 +132,7 @@ function updateActiveCell(controller: IController) {
     verticalAlign = EVerticalAlign.CENTER,
   } = cell?.style || {};
 
-  const isRight = numberFormat === DEFAULT_FORMAT && isNumber(cell?.value);
+  const isRight = numberFormat === DEFAULT_FORMAT && typeof cell?.value === 'number';
   const horAlign = isRight ? EHorizontalAlign.RIGHT : horizontalAlign;
 
   let displayValue = numberFormatUtil(numberFormat, cell?.value);

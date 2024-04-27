@@ -71,11 +71,22 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     if (!position) {
       return;
     }
+    const { range, isMerged } = controller.getActiveRange({
+      row: position.row,
+      col: position.col,
+      colCount: 1,
+      rowCount: 1,
+      sheetId: '',
+    });
     const activeCell = controller.getActiveRange().range;
-    if (activeCell.row === position.row && activeCell.col === position.col) {
+    if (activeCell.row === range.row && activeCell.col === range.col) {
       return;
     }
     if (x > headerSize.width && y > headerSize.height) {
+      if (isMerged) {
+        controller.setActiveRange(range);
+        return;
+      }
       const colCount = Math.abs(position.col - activeCell.col) + 1;
       const rowCount = Math.abs(position.row - activeCell.row) + 1;
       controller.setActiveRange({
@@ -158,11 +169,18 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       });
       return;
     }
+    const { range } = controller.getActiveRange({
+      row: position.row,
+      col: position.col,
+      colCount: 1,
+      rowCount: 1,
+      sheetId: '',
+    });
     const activeCell = controller.getActiveRange().range;
     const check =
       activeCell.row >= 0 &&
-      activeCell.row === position.row &&
-      activeCell.col === position.col;
+      activeCell.row === range.row &&
+      activeCell.col === range.col;
     if (!check) {
       if (checkFocus()) {
         setActiveCellValue(controller);

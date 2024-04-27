@@ -1,8 +1,6 @@
 import { ErrorTypes, OptionItem } from '@/types';
 import type { ChartType } from 'chart.js';
 import { $ } from '@/i18n';
-// Number.MAX_SAFE_INTEGER 16
-export const MAX_NUMBER_LENGTH = 16;
 export const DEFAULT_FONT_SIZE = 12;
 export const MUST_FONT_FAMILY = 'sans-serif';
 export const SHEET_NAME_PREFIX = 'Sheet';

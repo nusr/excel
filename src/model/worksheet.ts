@@ -19,8 +19,8 @@ import {
   isEmpty,
   deepEqual,
   stringToCoordinate,
-  convertStringToResultType,
   MERGE_CELL_LINE_BREAK,
+  convertStringToResultType,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { parseFormula, CustomError } from '@/formula';
@@ -546,7 +546,7 @@ export class Worksheet implements IWorksheet {
       return;
     }
     const oldValue = oldData.value;
-    const newValue = convertStringToResultType(value);
+    const newValue = convertStringToResultType(value ?? '')
 
     sheetData[key].value = newValue;
 
@@ -637,7 +637,7 @@ export class Worksheet implements IWorksheet {
       if (isEmpty(cell)) {
         continue;
       }
-      const value = convertStringToResultType(cell.value);
+      const value = convertStringToResultType(cell.value ?? '')
       result[key] = {
         value,
       };

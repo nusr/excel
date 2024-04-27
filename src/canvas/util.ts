@@ -11,7 +11,6 @@ import {
   getThemeColor,
   MERGE_CELL_LINE_BREAK,
   DEFAULT_FORMAT,
-  isNumber,
 } from '@/util';
 import {
   ModelCellType,
@@ -181,7 +180,7 @@ export function renderCell(
   const { left, top, width, height } = cellInfo;
   const result: IRenderCellResult = { height: 0, width: 0 };
   const format = style?.numberFormat ?? DEFAULT_FORMAT;
-  const isRight = format === DEFAULT_FORMAT && isNumber(value);
+  const isRight = format === DEFAULT_FORMAT && typeof value === 'number';
   const text = numberFormat(format, value);
   if (!text && isEmpty(style)) {
     return result;

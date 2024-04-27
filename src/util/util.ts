@@ -1,4 +1,4 @@
-import { SHEET_NAME_PREFIX, SPLITTER, MAX_NUMBER_LENGTH } from './constant';
+import { SHEET_NAME_PREFIX, SPLITTER } from './constant';
 import type {
   WorksheetType,
   ChangeEventType,
@@ -17,7 +17,7 @@ export function isNumber(value: any): boolean {
   if (!value) {
     return false;
   }
-  if (value.length > MAX_NUMBER_LENGTH) {
+  if (value.length > 12) {
     return false;
   }
   const temp = Number(value);
@@ -78,24 +78,6 @@ export function splitToWords(str: string): string[] {
   const arr = [...list];
   return arr.map((x) => x.segment);
 }
-
-export function convertResultTypeToString(value: any): string {
-  if (typeof value === 'string') {
-    if (['TRUE', 'FALSE'].includes(value.toUpperCase())) {
-      return value.toUpperCase();
-    }
-    return value;
-  }
-  if (typeof value === 'number') {
-    return '' + value;
-  }
-  if (typeof value === 'boolean') {
-    return value ? 'TRUE' : 'FALSE';
-  }
-
-  return '';
-}
-
 export function convertStringToResultType(value: any): ResultType {
   if (isNumber(value)) {
     return Number(value);

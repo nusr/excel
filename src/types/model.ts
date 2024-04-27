@@ -164,7 +164,7 @@ export type ActiveRange = {
 export interface IRangeMap extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'rangeMap'>;
   setActiveRange(range: IRange): void;
-  getActiveRange(): ActiveRange;
+  getActiveRange(range?: IRange): ActiveRange;
   validateRange(range: IRange): boolean;
 }
 

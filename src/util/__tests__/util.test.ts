@@ -4,7 +4,6 @@ import {
   parseNumber,
   getDefaultSheetInfo,
   splitToWords,
-  convertResultTypeToString,
   convertStringToResultType,
   stringToCoordinate,
 } from '../util';
@@ -17,23 +16,6 @@ describe('util.test.ts', () => {
     });
     test('ok', () => {
       expect(stringToCoordinate('10_10')).toEqual({ row: 10, col: 10 });
-    });
-  });
-  describe('convertResultTypeToString', () => {
-    test('string', () => {
-      expect(convertResultTypeToString('test')).toEqual('test');
-    });
-    test('number', () => {
-      expect(convertResultTypeToString('1')).toEqual('1');
-      expect(convertResultTypeToString(1)).toEqual('1');
-    });
-    test('boolean string', () => {
-      expect(convertResultTypeToString('tRue')).toEqual('TRUE');
-      expect(convertResultTypeToString('False')).toEqual('FALSE');
-    });
-    test('boolean', () => {
-      expect(convertResultTypeToString(true)).toEqual('TRUE');
-      expect(convertResultTypeToString(false)).toEqual('FALSE');
     });
   });
   describe('convertStringToResultType', () => {

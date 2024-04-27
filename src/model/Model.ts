@@ -102,8 +102,8 @@ export class Model implements IModel {
   getSheetList(): WorksheetType[] {
     return this.workbookManager.getSheetList();
   }
-  getActiveRange() {
-    const range = this.rangeMapManager.getActiveRange().range;
+  getActiveRange(r?: IRange) {
+    const range = r || this.rangeMapManager.getActiveRange().range;
     const mergeCells = this.getMergeCellList(range.sheetId);
 
     for (const item of mergeCells) {
@@ -334,13 +334,13 @@ export class Model implements IModel {
       return;
     }
     if (colCount === 0 && rowCount > 0) {
-      for (let r = row, endRow = row + sheetInfo.rowCount; r < endRow; r++) {
+      for (let r = row, endRow = row + sheetInfo.rowCount;r < endRow;r++) {
         if (fn(r, col)) {
           break;
         }
       }
     } else if (rowCount === 0 && colCount > 0) {
-      for (let c = col, endCol = col + sheetInfo.colCount; c < endCol; c++) {
+      for (let c = col, endCol = col + sheetInfo.colCount;c < endCol;c++) {
         if (fn(row, c)) {
           break;
         }
@@ -437,10 +437,10 @@ export class Model implements IModel {
       return;
     }
     let { width, height } = headerSize;
-    for (let i = 0; i < sheetInfo.colCount; i++) {
+    for (let i = 0;i < sheetInfo.colCount;i++) {
       width += this.getColWidth(i).len;
     }
-    for (let i = 0; i < sheetInfo.rowCount; i++) {
+    for (let i = 0;i < sheetInfo.rowCount;i++) {
       height += this.getRowHeight(i).len;
     }
     sheetViewSizeSet.set({ width, height });

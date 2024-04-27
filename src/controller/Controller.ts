@@ -82,8 +82,8 @@ export class Controller implements IController {
     this.model.emitChange(this.changeSet);
     this.changeSet = new Set<ChangeEventType>();
   }
-  getActiveRange() {
-    return this.model.getActiveRange();
+  getActiveRange(r?: IRange) {
+    return this.model.getActiveRange(r);
   }
   setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up') {
     const { range, isMerged } = this.getActiveRange();
