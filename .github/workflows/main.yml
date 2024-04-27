@@ -16,7 +16,8 @@ jobs:
           node-version: latest
       - name: Test
         run: |
-          npm install
+          npm i -g pnpm
+          pnpm i
           npm run lint
           npx tsc
           npm run coverage
