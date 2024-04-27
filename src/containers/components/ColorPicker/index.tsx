@@ -1,9 +1,4 @@
-import React, {
-  FunctionComponent,
-  useState,
-  memo,
-  useCallback,
-} from 'react';
+import React, { FunctionComponent, useState, memo, useCallback } from 'react';
 import { classnames, COLOR_PICKER_COLOR_LIST } from '@/util';
 import styles from './index.module.css';
 import { ColorPickerPanel } from './ColorPickerPanel';
@@ -62,41 +57,43 @@ export const ColorPicker: FunctionComponent<
       >
         {children}
       </div>
-      <div
-        className={classnames(styles['color-picker-wrapper'], {
-          [styles['show']]: visible,
-        })}
-      >
-        <div
-          className={styles['color-picker-list']}
-          onClick={handleClick}
-          data-testid={`${testId}-list`}
-        >
-          {COLOR_PICKER_COLOR_LIST.map((item) => {
-            return (
-              <div
-                key={item}
-                className={styles['color-picker-item']}
-                style={{ backgroundColor: item }}
-                data-value={item}
-              />
-            );
-          })}
-        </div>
-        <div>
-          <ColorPickerPanel color={color} onChange={onChange} testId={testId} />
-        </div>
-        <div>
-          <Button
-            type="normal"
-            className={styles.reset}
-            onClick={reset}
-            testId={`${testId}-reset`}
+      {visible && (
+        <div className={classnames(styles['color-picker-wrapper'])}>
+          <div
+            className={styles['color-picker-list']}
+            onClick={handleClick}
+            data-testid={`${testId}-list`}
           >
-            {$('reset')}
-          </Button>
+            {COLOR_PICKER_COLOR_LIST.map((item) => {
+              return (
+                <div
+                  key={item}
+                  className={styles['color-picker-item']}
+                  style={{ backgroundColor: item }}
+                  data-value={item}
+                />
+              );
+            })}
+          </div>
+          <div>
+            <ColorPickerPanel
+              color={color}
+              onChange={onChange}
+              testId={testId}
+            />
+          </div>
+          <div>
+            <Button
+              type="normal"
+              className={styles.reset}
+              onClick={reset}
+              testId={`${testId}-reset`}
+            >
+              {$('reset')}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 });

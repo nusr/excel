@@ -20,7 +20,7 @@ describe('Canvas.test.ts', () => {
         render(<App controller={initController()} />);
       });
       expect(screen.getByTestId('canvas-container')!.childNodes).toHaveLength(
-        5,
+        4,
       );
       expect(
         screen.getByTestId('canvas-container')!.firstChild!.nodeName,

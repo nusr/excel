@@ -7,7 +7,6 @@
   position: absolute;
   top: 22px;
   left: 0;
-  display: none;
   z-index: var(--highestZIndex);
   padding: var(--padding);
   background-color: var(--white);
@@ -17,9 +16,6 @@
 .color-picker.top .color-picker-wrapper {
   transform: translate(0, -100%);
   left: 100%;
-}
-.color-picker-wrapper.show {
-  display: block;
 }
 
 .color-picker-list {

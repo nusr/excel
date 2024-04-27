@@ -86,41 +86,6 @@ function buildUMD(filePath) {
  */
 function buildBrowserConfig(options) {
   const minify = !!options.outfile?.includes('.min.');
-  const namespace = 'external-package';
-  /** @type Record<string,string> */
-  const externals = {
-    react: 'window.React',
-    'react-dom': 'window.ReactDOM',
-  };
-
-  /** @type {import('esbuild').Plugin} */
-  const externalPlugin = {
-    name: namespace,
-    setup(build) {
-      build.onResolve(
-        {
-          filter: new RegExp('^(' + Object.keys(externals).join('|') + ')$'),
-        },
-        (args) => ({
-          path: args.path,
-          namespace: namespace,
-        }),
-      );
-
-      build.onLoad(
-        {
-          filter: /.*/,
-          namespace,
-        },
-        (args) => {
-          const contents = `module.exports = ${externals[args.path]}`;
-          return {
-            contents,
-          };
-        },
-      );
-    },
-  };
   /** @type {import('esbuild').BuildOptions} */
   const realOptions = {
     bundle: true,
@@ -138,7 +103,6 @@ function buildBrowserConfig(options) {
     minify,
     metafile: minify,
     logLevel: 'error',
-    plugins: [externalPlugin],
   };
   Object.assign(realOptions, options);
 
@@ -153,19 +117,6 @@ function buildHtml() {
   fs.writeFileSync(
     path.join(distDir, 'index.html'),
     data.replace('process.env.NODE_ENV', JSON.stringify(nodeEnv)),
-  );
-  const version = isDev ? 'development' : 'production.min';
-  fs.copyFileSync(
-    path.join(__dirname, '..', `node_modules/react/umd/react.${version}.js`),
-    path.join(distDir, 'react.js'),
-  );
-  fs.copyFileSync(
-    path.join(
-      __dirname,
-      '..',
-      `node_modules/react-dom/umd/react-dom.${version}.js`,
-    ),
-    path.join(distDir, 'react-dom.js'),
   );
   const iconDir = path.join(__dirname, './icon');
   const resultDir = path.join(distDir, 'icon');
