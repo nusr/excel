@@ -1,15 +1,15 @@
-import { IController, ResultType } from '@/types';
+import { IController } from '@/types';
 import {
   coordinateToString,
-  convertResultTypeToString,
   CSV_SPLITTER,
   LINE_BREAK,
 } from '@/util';
+import { numberFormat } from '@/model'
 
 const DELIMITER = CSV_SPLITTER;
 const RECORD_DELIMITER = LINE_BREAK;
 
-function processRow(row: ResultType[]) {
+function processRow(row: string[]) {
   const quote = '"';
   const escape_formulas = false;
   const quoted_string = false;
@@ -17,9 +17,9 @@ function processRow(row: ResultType[]) {
   const quoted = false;
 
   let csvRecord = '';
-  for (let j = 0; j < row.length; j++) {
+  for (let j = 0;j < row.length;j++) {
     const field = row[j];
-    let value = convertResultTypeToString(field);
+    let value = row[j];
     if ('' === value) {
       csvRecord += value;
     } else if (value) {
@@ -77,11 +77,13 @@ export function exportToCsv(controller: IController) {
   const csvList: string[] = [];
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
   if (sheetData) {
-    for (let row = 0; row < sheetInfo.rowCount; row++) {
-      const list: ResultType[] = [];
-      for (let col = 0; col < sheetInfo.colCount; col++) {
+    for (let row = 0;row < sheetInfo.rowCount;row++) {
+      const list: string[] = [];
+      for (let col = 0;col < sheetInfo.colCount;col++) {
         const key = coordinateToString(row, col);
-        list.push(sheetData[key]?.value);
+        const value = sheetData[key]?.value;
+        const style = sheetData[key]?.style;
+        list.push(numberFormat(style?.numberFormat ?? '', value));
       }
       csvList.push(processRow(list));
     }

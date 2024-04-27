@@ -21,10 +21,10 @@ import {
   stringToCoordinate,
   convertStringToResultType,
   MERGE_CELL_LINE_BREAK,
-  convertResultTypeToString,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { parseFormula, CustomError } from '@/formula';
+import { numberFormat } from '@/model'
 
 export class Worksheet implements IWorksheet {
   private worksheets: WorkBookJSON['worksheets'] = {};
@@ -47,25 +47,7 @@ export class Worksheet implements IWorksheet {
       if (isEmpty(sheetData)) {
         continue;
       }
-      for (const [key, cell] of Object.entries(sheetData)) {
-        if (isEmpty(cell)) {
-          continue;
-        }
-        this.worksheets[sheetId][key] = {
-          value: convertStringToResultType(cell.value),
-        };
-        if (!isEmpty(cell.style)) {
-          this.worksheets[sheetId][key].style = { ...cell.style };
-        }
-        if (cell.formula) {
-          if (cell.formula.startsWith(FORMULA_PREFIX)) {
-            this.worksheets[sheetId][key].formula = cell.formula;
-          } else {
-            this.worksheets[sheetId][key].formula =
-              FORMULA_PREFIX + cell.formula;
-          }
-        }
-      }
+      this.worksheets[sheetId] = this.validateSheetData(sheetData)
     }
 
     this.model.push({
@@ -135,7 +117,7 @@ export class Worksheet implements IWorksheet {
         style: list[0].style,
       };
       newCellData.value = list
-        .map((v) => convertResultTypeToString(v.value))
+        .map((v) => numberFormat(v.style?.numberFormat ?? '', v.value))
         .join(MERGE_CELL_LINE_BREAK);
     } else {
       newCellData = list[0];
@@ -178,7 +160,7 @@ export class Worksheet implements IWorksheet {
     );
     list.sort((a, b) => a.row - b.row);
     const endIndex = isAbove ? rowIndex : rowIndex + 1;
-    for (let i = list.length - 1; i >= 0; i--) {
+    for (let i = list.length - 1;i >= 0;i--) {
       const item = list[i];
       if (item.row < endIndex) {
         continue;
@@ -218,7 +200,7 @@ export class Worksheet implements IWorksheet {
       stringToCoordinate(key),
     );
     list.sort((a, b) => a.row - b.row);
-    for (let i = 0; i < list.length; i++) {
+    for (let i = 0;i < list.length;i++) {
       const item = list[i];
       if (item.row < rowIndex) {
         continue;
@@ -261,7 +243,7 @@ export class Worksheet implements IWorksheet {
     );
     list.sort((a, b) => a.col - b.col);
     const endIndex = isRight ? colIndex + 1 : colIndex;
-    for (let i = list.length - 1; i >= 0; i--) {
+    for (let i = list.length - 1;i >= 0;i--) {
       const item = list[i];
       if (item.col < endIndex) {
         continue;
@@ -300,7 +282,7 @@ export class Worksheet implements IWorksheet {
       stringToCoordinate(key),
     );
     list.sort((a, b) => a.col - b.col);
-    for (let i = 0; i < list.length; i++) {
+    for (let i = 0;i < list.length;i++) {
       const item = list[i];
       if (item.col < colIndex) {
         continue;
@@ -369,7 +351,7 @@ export class Worksheet implements IWorksheet {
       return;
     }
     const oldData = this.worksheets[id] ? { ...this.worksheets[id] } : {};
-    this.worksheets[id] = data;
+    this.worksheets[id] = this.validateSheetData(data)
     this.model.push({
       type: 'worksheets',
       key: id,
@@ -404,8 +386,8 @@ export class Worksheet implements IWorksheet {
   ): void {
     const id = range.sheetId || this.model.getCurrentSheetId();
     const { row, col } = range;
-    for (let r = 0; r < value.length; r++) {
-      for (let c = 0; c < value[r].length; c++) {
+    for (let r = 0;r < value.length;r++) {
+      for (let c = 0;c < value[r].length;c++) {
         const t = value[r][c];
         const temp: Coordinate = {
           row: row + r,
@@ -433,8 +415,8 @@ export class Worksheet implements IWorksheet {
       return;
     }
     const { row, col, rowCount, colCount } = range;
-    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
-      for (let c = col, endCol = col + colCount; c < endCol; c++) {
+    for (let r = row, endRow = row + rowCount;r < endRow;r++) {
+      for (let c = col, endCol = col + colCount;c < endCol;c++) {
         this.updateStyle(style, { row: r, col: c });
       }
     }
@@ -574,6 +556,7 @@ export class Worksheet implements IWorksheet {
       newValue: newValue,
       oldValue: oldValue === undefined ? DELETE_FLAG : oldValue,
     });
+
   }
   private setCellFormula(formula: string, range: Coordinate): void {
     const { row, col } = range;
@@ -648,4 +631,28 @@ export class Worksheet implements IWorksheet {
     const item = this.model.getSheetList().find((v) => v.name === sheetName);
     return item?.sheetId || '';
   };
+  private validateSheetData(sheetData: WorksheetData) {
+    const result: WorksheetData = {}
+    for (const [key, cell] of Object.entries(sheetData)) {
+      if (isEmpty(cell)) {
+        continue;
+      }
+      const value = convertStringToResultType(cell.value);
+      result[key] = {
+        value,
+      };
+      if (!isEmpty(cell.style)) {
+        result[key].style = { ...cell.style };
+      }
+      if (cell.formula) {
+        if (cell.formula.startsWith(FORMULA_PREFIX)) {
+          result[key].formula = cell.formula;
+        } else {
+          result[key].formula =
+            FORMULA_PREFIX + cell.formula;
+        }
+      }
+    }
+    return result;
+  }
 }

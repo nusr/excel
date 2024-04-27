@@ -12,7 +12,6 @@ import {
   convertToReference,
   isEmpty,
   stringToCoordinate,
-  convertResultTypeToString,
   convertColorToHex,
   getCustomWidthOrHeightKey,
   NUMBER_FORMAT_LIST,
@@ -20,6 +19,7 @@ import {
   widthOrHeightKeyToData,
 } from '@/util';
 import { XfItem, chartTypeList, convertToPt } from './importXLSX';
+import { numberFormat } from '@/model'
 interface StyleData {
   cellXfs: string[];
   numFmts: string[];
@@ -143,11 +143,10 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
     }
   }
 
-  const t = `<xf numFmtId="${result.numFmtId}" fontId="${
-    result.fontId
-  }" fillId="${result.fillId}" borderId="0" xfId="0" ${extraList.join(
-    ' ',
-  )}>\n${alignment}\n</xf>`;
+  const t = `<xf numFmtId="${result.numFmtId}" fontId="${result.fontId
+    }" fillId="${result.fillId}" borderId="0" xfId="0" ${extraList.join(
+      ' ',
+    )}>\n${alignment}\n</xf>`;
   styles.cellXfs.push(t);
 }
 function compileTemplate(template: string, target: Partial<CommonData> = {}) {
@@ -193,8 +192,7 @@ function getCustomWidth(
     const t = col + 1;
     const w = convertToPt(value.len);
     list.push(
-      `<col min="${t}" max="${t}" width="${w}" customWidth="1" ${
-        value.isHide ? 'hidden="1"' : ''
+      `<col min="${t}" max="${t}" width="${w}" customWidth="1" ${value.isHide ? 'hidden="1"' : ''
       }/>`,
     );
   }
@@ -227,7 +225,7 @@ export function convertToXMLData(controller: IController) {
     string,
     { rid: string; target: string; name: string }
   > = {};
-  for (let i = 0; i < sheetList.length; i++) {
+  for (let i = 0;i < sheetList.length;i++) {
     const t = sheetList[i];
     const a = i + 1;
     sheetRelMap[t.sheetId] = {
@@ -309,10 +307,10 @@ export function convertToXMLData(controller: IController) {
       for (const drawing of list) {
         let endCol = drawing.fromCol;
         let endRow = drawing.fromRow;
-        for (let i = 0; i < drawing.width; i++) {
+        for (let i = 0;i < drawing.width;i++) {
           i += controller.getColWidth(endCol++).len;
         }
-        for (let i = 0; i < drawing.height; i++) {
+        for (let i = 0;i < drawing.height;i++) {
           i += controller.getRowHeight(endRow++).len;
         }
         const position = `<xdr:from>
@@ -350,7 +348,7 @@ export function convertToXMLData(controller: IController) {
           );
           const children: string[] = [];
           const range = drawing.chartRange!;
-          for (let i = 0; i < range.colCount; i++) {
+          for (let i = 0;i < range.colCount;i++) {
             const start = convertToReference(
               {
                 row: range.row,
@@ -390,8 +388,8 @@ export function convertToXMLData(controller: IController) {
             <c:val>
               <c:numRef>
                 <c:f>${convertSheetIdToSheetName(
-                  range.sheetId,
-                )}!${start}:${end}</c:f>
+              range.sheetId,
+            )}!${start}:${end}</c:f>
                 <c:numCache>
                   <c:formatCode>General</c:formatCode>
                   <c:ptCount val="${range.rowCount}"/>
@@ -434,8 +432,7 @@ export function convertToXMLData(controller: IController) {
         } else if (drawing.type === 'floating-picture') {
           const data = extractImageType(drawing.imageSrc!);
           contentTypeList.unshift(
-            `<Default Extension="${data.ext.slice(1)}" ContentType="${
-              data.type
+            `<Default Extension="${data.ext.slice(1)}" ContentType="${data.type
             }"/>`,
           );
           const imageName = `image${imageIndex}${data.ext}`;
@@ -557,14 +554,13 @@ export function convertToXMLData(controller: IController) {
     const targetData: Partial<CommonData> = {
       children: '<sheetData/>',
       size: getCustomWidth(model.customWidth, item.sheetId),
-      large: `<sheetView ${
-        item.sheetId === model.currentSheetId ? 'tabSelected="1"' : ''
-      } workbookViewId="0">
+      large: `<sheetView ${item.sheetId === model.currentSheetId ? 'tabSelected="1"' : ''
+        } workbookViewId="0">
     <selection activeCell="${convertToReference({
-      ...range,
-      rowCount: 1,
-      colCount: 1,
-    })}" sqref="${convertToReference(range)}"/>
+          ...range,
+          rowCount: 1,
+          colCount: 1,
+        })}" sqref="${convertToReference(range)}"/>
   </sheetView>`,
     };
     const rowMap = new Map<number, string[]>();
@@ -579,7 +575,7 @@ export function convertToXMLData(controller: IController) {
       });
       const list = rowMap.get(range.row) || [];
       const f = v.formula ? `<f>${v.formula.slice(1)}</f>` : '';
-      const val = `<v>${convertResultTypeToString(v.value)}</v>`;
+      const val = `<v>${numberFormat(v.style?.numberFormat ?? '', v.value)}</v>`;
       let s = '';
       if (v.style && !isEmpty(v.style)) {
         s = `s="${styles.cellXfs.length}"`;
@@ -596,9 +592,8 @@ export function convertToXMLData(controller: IController) {
         model.customHeight[getCustomWidthOrHeightKey(item.sheetId, row)];
       let ht = '';
       if (customHeight) {
-        ht = `ht="${customHeight.len}" customHeight="1" ${
-          customHeight.isHide ? 'hidden="1"' : ''
-        }`;
+        ht = `ht="${customHeight.len}" customHeight="1" ${customHeight.isHide ? 'hidden="1"' : ''
+          }`;
       }
       const cols = rowMap.get(row)!;
       rowList.push(
@@ -611,9 +606,8 @@ export function convertToXMLData(controller: IController) {
       targetData.children = `<sheetData>\n${rowList.join('\n')}\n</sheetData>`;
     }
     if (mergeCells.length > 0) {
-      targetData.children += `<mergeCells count="${
-        mergeCells.length
-      }">\n${mergeCells.join('\n')}\n</mergeCells>`;
+      targetData.children += `<mergeCells count="${mergeCells.length
+        }">\n${mergeCells.join('\n')}\n</mergeCells>`;
     }
 
     result[`xl/worksheets/${v.target}`] = compileTemplate(
@@ -636,7 +630,7 @@ export async function exportXLSX(fileName: string, controller: IController) {
     if (list.length === 0) {
       return;
     }
-    for (let i = 0; i < list.length; i++) {
+    for (let i = 0;i < list.length;i++) {
       if (i === 0) {
         if (!folderMap.has(list[i])) {
           folderMap.set(list[i], zip.folder(list[i])!);

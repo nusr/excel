@@ -183,7 +183,6 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
 
     state.current.timeStamp = timeStamp;
   };
-
   return (
     <Fragment>
       <div

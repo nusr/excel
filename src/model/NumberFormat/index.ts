@@ -69,6 +69,89 @@ function formatNumber(value: number | string, format: string, _options: FormatOp
   return String(value)
 }
 
+function isExponent(char: string) {
+  return char === 'E' || char === 'e';
+}
+
+export function trimZero(str: string): string {
+  const list = [...str];
+  const expIndex = list.findIndex(isExponent)
+  const end = expIndex >= 0 ? expIndex - 1 : list.length - 1;
+  if (list[end] === '0') {
+    let count = 1;
+    // trim  1.1000 or 1.1000E-10
+    for (let i = end - 1;i >= 0;i--) {
+      if (list[i] === '0') {
+        count++;
+      } else {
+        break;
+      }
+    }
+    list.splice(end - count + 1, count)
+  }
+  const newExpIndex = list.findIndex(isExponent)
+  if (newExpIndex >= 0) {
+    const start = (list[newExpIndex + 1] === '-' || list[newExpIndex + 1] === '+') ? newExpIndex + 2 : newExpIndex + 1;
+    if (list[start] === '0') {
+      // trim 1.1E-0001
+      let count = 0;
+      for (let i = start + 1;i < list.length;i++) {
+        if (list[i] === '0') {
+          count++;
+        } else {
+          break;
+        }
+      }
+      if (count >= 1) {
+        list.splice(start, count)
+      }
+    } else if (start === list.length - 1) {
+      // convert 1.1E-7 to 1.1E-07
+      list.splice(start, 0, '0')
+    }
+  }
+
+  if (list[list.length - 1] === '.') {
+    list.pop()
+  }
+  if (list.length >= 3 && list[1] === '.' && (isExponent(list[2]))) {
+    list.splice(1, 1)
+  }
+
+  return list.join('')
+}
+
+
+function formatFloat(value: number): string {
+  let res = ''
+  const maxSize = value < 0 ? 12 : 11;
+  const exp = Math.floor(Math.log(Math.abs(value)) * Math.LOG10E);
+  if (exp >= -4 && exp <= -1) {
+    res = value.toPrecision(exp + 10);
+  } else if (Math.abs(exp) <= 9) {
+    let t = trimZero(value.toFixed(12));
+    if (t.length <= maxSize) {
+      res = t;
+    } else {
+      t = value.toPrecision(10);
+      if (t.length <= maxSize) {
+        res = t;
+      } else {
+        res = value.toExponential(5)
+      }
+    }
+  } else if (exp === 10) {
+    res = value.toFixed(10).slice(0, 12)
+  } else {
+    const t = trimZero(value.toFixed(11));
+    if (t.length > maxSize || t === '0' || t === '-0') {
+      res = value.toPrecision(6)
+    } else {
+      res = t;
+    }
+  }
+  return trimZero(res).toUpperCase()
+}
 function formatGeneral(
   value: NumberFormatValue,
   options: FormatOptions
@@ -86,8 +169,7 @@ function formatGeneral(
     if ((value | 0) === value) {
       return value.toString(10)
     }
-    // TODO float
-    return value.toPrecision(10);
+    return formatFloat(value);
   }
   if (typeof value === 'undefined') {
     return ''
@@ -97,7 +179,8 @@ function formatGeneral(
       return ''
     }
     if (value instanceof Date) {
-      return numberFormat(DEFAULT_DATE_FORMAT, convertDateToNumber(value, options.date1904), options)
+      const date = convertDateToNumber(value, options.date1904);
+      return numberFormat(DEFAULT_DATE_FORMAT, date, options)
     }
   }
 

@@ -21,7 +21,7 @@ const { values: envConfig } = parseArgs({
   allowPositionals: true,
 });
 
-const nodeEnv = envConfig.nodeEnv || 'production';
+const nodeEnv = envConfig.nodeEnv || 'development';
 const isDev = nodeEnv === 'development';
 
 const licenseText = fs.readFileSync(
@@ -195,6 +195,7 @@ async function buildProd() {
   const options = buildESM('');
   const distOptions = {
     ...options,
+    entryPoints: [path.join(__dirname, 'demo.tsx')],
     outdir: distDir,
     splitting: true,
     minify: true,
@@ -234,6 +235,7 @@ async function buildDev() {
   const options = buildESM('');
   const ctx = await context({
     ...options,
+    entryPoints: [path.join(__dirname, 'demo.tsx')],
     outfile: undefined,
     outdir: distDir,
     splitting: true,

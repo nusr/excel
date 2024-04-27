@@ -1,4 +1,4 @@
-import { ErrorTypes, NumberFormatItem, OptionItem } from '@/types';
+import { ErrorTypes, OptionItem } from '@/types';
 import type { ChartType } from 'chart.js';
 import { $ } from '@/i18n';
 // Number.MAX_SAFE_INTEGER 16
@@ -74,39 +74,45 @@ export const ERROR_SET = new Set<ErrorTypes>([
 export const TEXT_FORMAT = '@'
 export const DEFAULT_FORMAT = 0;
 export const DEFAULT_DATE_FORMAT = 14;
-export const NUMBER_FORMAT_LIST: NumberFormatItem[] = [
-  { formatCode: 'General', label: '', id: DEFAULT_FORMAT },
-  { formatCode: '0', label: '', id: 1 },
-  { formatCode: '0.00', label: '', id: 2 },
-  { formatCode: '#,##0', label: '', id: 3 },
-  { formatCode: '#,##0.00', label: '', id: 4 },
-  { formatCode: '0%', label: '', id: 9 },
-  { formatCode: '0.00%', label: '', id: 10 },
-  { formatCode: '0.00E+00', label: '', id: 11 },
-  { formatCode: '# ?/?', label: '', id: 12 },
-  { formatCode: '# ??/??', label: '', id: 13 },
-  { formatCode: 'm/d/yy', label: '', id: 14 },
-  { formatCode: 'd-mmm-yy', label: '', id: 15 },
-  { formatCode: 'd-mmm', label: '', id: 16 },
-  { formatCode: 'mmm-yy', label: '', id: 17 },
-  { formatCode: 'h:mm AM/PM', label: '', id: 18 },
-  { formatCode: 'h:mm:ss AM/PM', label: '', id: 19 },
-  { formatCode: 'hh:mm', label: '', id: 20 },
-  { formatCode: 'hh:mm:ss', label: '', id: 21 },
-  { formatCode: 'm/d/yy hh:mm', label: '', id: 22 },
-  { formatCode: '#,##0 ;(#,##0)', label: '', id: 37 },
-  { formatCode: '#,##0 ;[red](#,##0)', label: '', id: 38 },
-  { formatCode: '#,##0.00 ;(#,##0.00)', label: '', id: 39 },
-  { formatCode: '#,##0.00 ;[red](#,##0.00)', label: '', id: 40 },
-  { formatCode: 'mm:ss', label: '', id: 45 },
-  { formatCode: '[h]:mm:ss', label: '', id: 46 },
-  { formatCode: 'mm:ss.0', label: '', id: 47 },
-  { formatCode: '##0.0E+0', label: '', id: 48 },
-  { formatCode: TEXT_FORMAT, label: '', id: 49 },
-  {
-    formatCode: '"上午/下午 "hh"時"mm"分"ss"秒 "', label: '', id: 56
-  }
-];
+export const NUMBER_FORMAT_LIST: Array<{
+  formatCode: string;
+  id: number;
+}> = [
+    { formatCode: 'General', id: DEFAULT_FORMAT },
+    { formatCode: '0', id: 1 },
+    { formatCode: '0.00', id: 2 },
+    { formatCode: '#,##0', id: 3 },
+    { formatCode: '#,##0.00', id: 4 },
+    { formatCode: '0%', id: 9 },
+    { formatCode: '0.00%', id: 10 },
+    { formatCode: '0.00E+00', id: 11 },
+    { formatCode: '# ?/?', id: 12 },
+    { formatCode: '# ??/??', id: 13 },
+    { formatCode: 'mm-dd-yy', id: 14 },
+    { formatCode: 'd-mmm-yy', id: 15 },
+    { formatCode: 'd-mmm', id: 16 },
+    { formatCode: 'mmm-yy', id: 17 },
+    { formatCode: 'h:mm AM/PM', id: 18 },
+    { formatCode: 'h:mm:ss AM/PM', id: 19 },
+    { formatCode: 'h:mm', id: 20 },
+    { formatCode: 'h:mm:ss', id: 21 },
+    { formatCode: 'm/d/yy h:mm', id: 22 },
+    {
+      formatCode: 'yyyy"年"m"月"', id: 27,
+    },
+    { formatCode: '#,##0 ;(#,##0)', id: 37 },
+    { formatCode: '#,##0 ;[Red](#,##0)', id: 38 },
+    { formatCode: '#,##0.00 ;(#,##0.00)', id: 39 },
+    { formatCode: '#,##0.00 ;[Red](#,##0.00)', id: 40 },
+    { formatCode: 'mm:ss', id: 45 },
+    { formatCode: '[h]:mm:ss', id: 46 },
+    { formatCode: 'mmss.0', id: 47 },
+    { formatCode: '##0.0E+0', id: 48 },
+    { formatCode: TEXT_FORMAT, id: 49 },
+    {
+      formatCode: '上午/下午 h"时"mm"分"ss"秒"', id: 56
+    }
+  ];
 
 export const numberFormatOptionList: OptionItem[] = [
   {

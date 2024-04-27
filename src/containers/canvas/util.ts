@@ -4,13 +4,14 @@ import {
   EUnderLine,
   IRange,
   EMergeCellType,
+  EHorizontalAlign,
+  EVerticalAlign,
 } from '@/types';
 import {
   DEFAULT_FONT_SIZE,
   parseNumber,
   HIDE_CELL,
   getThemeColor,
-  convertResultTypeToString,
   eventEmitter,
   initFontFamilyList,
   reactLog,
@@ -18,6 +19,8 @@ import {
   canvasSizeSet,
   MERGE_CELL_LINE_BREAK,
   LINE_BREAK,
+  DEFAULT_FORMAT,
+  isNumber,
 } from '@/util';
 import {
   coreStore,
@@ -36,6 +39,7 @@ import {
   Content,
   scrollSheetToView,
 } from '@/canvas';
+import { numberFormat as numberFormatUtil } from '@/model';
 
 function createCanvas() {
   const canvas = document.createElement('canvas');
@@ -63,7 +67,7 @@ function getChartData(
       continue;
     }
     const list = [];
-    for (let c = col, endCol = col + colCount; c < endCol; c++) {
+    for (let c = col, endCol = col + colCount;c < endCol;c++) {
       const t = controller.getCell({
         row: r,
         col: c,
@@ -124,10 +128,15 @@ function updateActiveCell(controller: IController) {
     fillColor = '',
     isWrapText = false,
     underline = EUnderLine.NONE,
-    numberFormat = 0,
+    numberFormat = DEFAULT_FORMAT,
+    horizontalAlign = EHorizontalAlign.LEFT,
+    verticalAlign = EVerticalAlign.CENTER,
   } = cell?.style || {};
 
-  let displayValue = convertResultTypeToString(cell?.value);
+  const isRight = numberFormat === DEFAULT_FORMAT && isNumber(cell?.value);
+  const horAlign = isRight ? EHorizontalAlign.RIGHT : horizontalAlign;
+
+  let displayValue = numberFormatUtil(numberFormat, cell?.value);
   let mergeType = '';
   if (isMerged) {
     if (displayValue.includes(MERGE_CELL_LINE_BREAK)) {
@@ -164,6 +173,8 @@ function updateActiveCell(controller: IController) {
     numberFormat,
     isMergeCell: isMerged,
     mergeType,
+    horizontalAlign: horAlign,
+    verticalAlign,
   });
 }
 

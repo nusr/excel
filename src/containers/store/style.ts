@@ -4,7 +4,7 @@ import {
   EHorizontalAlign,
   EVerticalAlign,
 } from '@/types';
-import { NUMBER_FORMAT_LIST, DEFAULT_FONT_SIZE, getThemeColor } from '@/util';
+import { DEFAULT_FONT_SIZE, getThemeColor, DEFAULT_FORMAT } from '@/util';
 import { BaseStore } from './base';
 
 export type StyleStoreType = StyleType & {
@@ -24,7 +24,7 @@ const cellData: StyleStoreType = {
   underline: EUnderLine.NONE,
   verticalAlign: EVerticalAlign.TOP,
   horizontalAlign: EHorizontalAlign.LEFT,
-  numberFormat: NUMBER_FORMAT_LIST[0].id,
+  numberFormat: DEFAULT_FORMAT,
   isMergeCell: false,
   mergeType: '',
 };

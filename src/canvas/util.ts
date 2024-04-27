@@ -1,17 +1,17 @@
 import {
   npx,
   DEFAULT_FONT_CONFIG,
-  isNumber,
   DEFAULT_FONT_SIZE,
   makeFont,
   ERROR_SET,
   dpr,
   isEmpty,
   splitToWords,
-  convertResultTypeToString,
   sizeConfig,
   getThemeColor,
   MERGE_CELL_LINE_BREAK,
+  DEFAULT_FORMAT,
+  isNumber,
 } from '@/util';
 import {
   ModelCellType,
@@ -26,6 +26,7 @@ import {
   StyleType,
   EHorizontalAlign,
 } from '@/types';
+import { numberFormat } from '@/model'
 
 const measureTextMap = new Map<string, IWindowSize>();
 
@@ -179,11 +180,12 @@ export function renderCell(
 ): IRenderCellResult {
   const { left, top, width, height } = cellInfo;
   const result: IRenderCellResult = { height: 0, width: 0 };
-  const text = convertResultTypeToString(value);
+  const format = style?.numberFormat ?? DEFAULT_FORMAT;
+  const isRight = format === DEFAULT_FORMAT && isNumber(value);
+  const text = numberFormat(format, value);
   if (!text && isEmpty(style)) {
     return result;
   }
-  const isNum = isNumber(text);
   let font = DEFAULT_FONT_CONFIG;
   let fillStyle: string = getThemeColor('contentColor');
   const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
@@ -204,18 +206,19 @@ export function renderCell(
     fillStyle = getThemeColor('errorFormulaColor');
   }
 
-  ctx.textAlign = isNum ? 'right' : 'left';
   const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
-  let offsetX = isNum ? width - lineGap : lineGap;
-  if (style?.horizontalAlign === EHorizontalAlign.CENTER) {
+  let offsetX = 0;
+
+  const align = isRight ? EHorizontalAlign.RIGHT : style?.horizontalAlign;
+  if (align === EHorizontalAlign.CENTER) {
     ctx.textAlign = 'center';
     offsetX = Math.ceil(width / 2 + lineGap);
-  } else if (style?.horizontalAlign === EHorizontalAlign.LEFT) {
-    ctx.textAlign = 'left';
-    offsetX = lineGap;
-  } else if (style?.horizontalAlign === EHorizontalAlign.RIGHT) {
+  } else if (align === EHorizontalAlign.RIGHT) {
     ctx.textAlign = 'right';
     offsetX = width - lineGap;
+  } else {
+    ctx.textAlign = 'left';
+    offsetX = lineGap;
   }
 
   ctx.font = font;
@@ -234,13 +237,13 @@ export function renderCell(
       result.height = lineGap * 2;
       let y = top + result.height;
       const texts = text.split(MERGE_CELL_LINE_BREAK);
-      for (let i = 0; i < texts.length; i++) {
+      for (let i = 0;i < texts.length;i++) {
         y += lineGap;
         const item = texts[i];
         const size = measureText(ctx, item);
         result.width = Math.max(result.width, size.width);
         fillText(ctx, item, x, y);
-        drawUnderlineData(ctx, isNum, style, size.height, x, y, size.width);
+        drawUnderlineData(ctx, isRight, style, size.height, x, y, size.width);
         y += size.height + lineGap;
         result.height += size.height + lineGap * 2;
       }
@@ -251,7 +254,7 @@ export function renderCell(
       let line = '';
       let textWidth = 0;
       let h = 0;
-      for (let i = 0; i < texts.length; i++) {
+      for (let i = 0;i < texts.length;i++) {
         const testLine = line + texts[i];
         const size = measureText(ctx, testLine);
         if (size.width > width) {
@@ -265,7 +268,7 @@ export function renderCell(
             fillText(ctx, line, x, y);
             line = texts[i];
           }
-          drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
+          drawUnderlineData(ctx, isRight, style, h, x, y, textWidth);
           y += h + lineGap;
           result.height += h + lineGap * 2;
           result.width = Math.max(textWidth, result.width);
@@ -279,7 +282,7 @@ export function renderCell(
         result.height += h + lineGap;
         result.width = Math.max(textWidth, result.width);
         fillText(ctx, line, x, y);
-        drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
+        drawUnderlineData(ctx, isRight, style, h, x, y, textWidth);
       }
       result.width += lineGap * 2;
     }
@@ -291,7 +294,7 @@ export function renderCell(
     let textWidth = 0;
     let h = 0;
 
-    for (let i = 0; i < texts.length; i++) {
+    for (let i = 0;i < texts.length;i++) {
       const testLine = line + texts[i];
       const size = measureText(ctx, testLine);
       if (size.width > width) {
@@ -311,7 +314,7 @@ export function renderCell(
     const y = top + t / 2;
     result.height = h;
     fillText(ctx, line, x, y);
-    drawUnderlineData(ctx, isNum, style, h, x, y, textWidth);
+    drawUnderlineData(ctx, isRight, style, h, x, y, textWidth);
     result.width = textWidth + lineGap * 2;
   }
   result.height = Math.ceil(result.height);
@@ -327,7 +330,7 @@ export function drawLines(
     return;
   }
   ctx.beginPath();
-  for (let i = 0; i < pointList.length; i += 2) {
+  for (let i = 0;i < pointList.length;i += 2) {
     const first = pointList[i];
     const second = pointList[i + 1];
     ctx.moveTo(npx(first[0]), npx(first[1]));

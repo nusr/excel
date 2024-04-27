@@ -30,9 +30,9 @@ import {
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
   controllerLog,
-  convertResultTypeToString,
   convertPxToPt,
 } from '@/util';
+import { numberFormat } from '@/model'
 
 const defaultScrollValue: ScrollValue = {
   top: 0,
@@ -266,10 +266,10 @@ export class Controller implements IController {
 
     let width = 0;
     let height = 0;
-    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+    for (let r = row, endRow = row + rowCount;r < endRow;r++) {
       height += this.getRowHeight(r, sheetId).len;
     }
-    for (let c = col, endCol = col + colCount; c < endCol; c++) {
+    for (let c = col, endCol = col + colCount;c < endCol;c++) {
       width += this.getColWidth(c, sheetId).len;
     }
     return { width, height };
@@ -410,11 +410,11 @@ export class Controller implements IController {
     const classList: string[] = [];
     const currentSheetId = this.model.getCurrentSheetId();
     const colSet = new Set<string>();
-    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+    for (let r = row, endRow = row + rowCount;r < endRow;r++) {
       const temp: ResultType[] = [];
       const t: string[] = [];
       const h = convertPxToPt(this.getRowHeight(r).len, '');
-      for (let c = col, endCol = col + colCount; c < endCol; c++) {
+      for (let c = col, endCol = col + colCount;c < endCol;c++) {
         const a = this.model.getCell({
           row: r,
           col: c,
@@ -425,7 +425,7 @@ export class Controller implements IController {
         if (!a) {
           continue;
         }
-        const str = convertResultTypeToString(a.value);
+        const str = numberFormat(a.style?.numberFormat ?? '', a.value);
         temp.push(str);
         const w = convertPxToPt(this.getColWidth(c).len, '');
         const style = `height=${h} width=${w} style='height:${h}pt;width:${w}pt;'`;
