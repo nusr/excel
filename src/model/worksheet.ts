@@ -18,9 +18,11 @@ import {
   FORMULA_PREFIX,
   isEmpty,
   deepEqual,
+  DEFAULT_FORMAT,
   stringToCoordinate,
   MERGE_CELL_LINE_BREAK,
   convertStringToResultType,
+
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { parseFormula, CustomError } from '@/formula';
@@ -117,7 +119,7 @@ export class Worksheet implements IWorksheet {
         style: list[0].style,
       };
       newCellData.value = list
-        .map((v) => numberFormat(v.style?.numberFormat ?? '', v.value))
+        .map((v) => numberFormat(v.style?.numberFormat ?? DEFAULT_FORMAT, v.value))
         .join(MERGE_CELL_LINE_BREAK);
     } else {
       newCellData = list[0];

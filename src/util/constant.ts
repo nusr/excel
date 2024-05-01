@@ -69,9 +69,8 @@ export const ERROR_SET = new Set<ErrorTypes>([
   '#NAME?',
 ]);
 
-export const TEXT_FORMAT = '@'
 export const DEFAULT_FORMAT = 0;
-export const DEFAULT_DATE_FORMAT = 14;
+export const DEFAULT_TEXT_FORMAT = 49;
 export const NUMBER_FORMAT_LIST: Array<{
   formatCode: string;
   id: number;
@@ -81,6 +80,7 @@ export const NUMBER_FORMAT_LIST: Array<{
     { formatCode: '0.00', id: 2 },
     { formatCode: '#,##0', id: 3 },
     { formatCode: '#,##0.00', id: 4 },
+    { formatCode: "\"$\"#,##0.00_);[Red](\"$\"#,##0.00)", id: 8 },
     { formatCode: '0%', id: 9 },
     { formatCode: '0.00%', id: 10 },
     { formatCode: '0.00E+00', id: 11 },
@@ -102,16 +102,17 @@ export const NUMBER_FORMAT_LIST: Array<{
     { formatCode: '#,##0 ;[Red](#,##0)', id: 38 },
     { formatCode: '#,##0.00 ;(#,##0.00)', id: 39 },
     { formatCode: '#,##0.00 ;[Red](#,##0.00)', id: 40 },
+    { formatCode: "_(\"$\"* #,##0.00_);_(\"$\"* (#,##0.00);_(\"$\"* \"-\"??_);_(@_)", id: 44 },
     { formatCode: 'mm:ss', id: 45 },
     { formatCode: '[h]:mm:ss', id: 46 },
     { formatCode: 'mmss.0', id: 47 },
     { formatCode: '##0.0E+0', id: 48 },
-    { formatCode: TEXT_FORMAT, id: 49 },
+    { formatCode: '@', id: DEFAULT_TEXT_FORMAT },
     {
       formatCode: '上午/下午 h"时"mm"分"ss"秒"', id: 56
-    }
+    },
   ];
-
+export const specialFormatList = [14, 15, 19, 10];
 export const numberFormatOptionList: OptionItem[] = [
   {
     value: 0,
@@ -124,25 +125,25 @@ export const numberFormatOptionList: OptionItem[] = [
     disabled: false,
   },
   {
-    value: 42,
+    value: 8,
     label: 'Currency',
     disabled: false,
   },
-  // {
-  //   value: 44,
-  //   label: 'Accounting',
-  //   disabled: false,
-  // },
+  {
+    value: 44,
+    label: 'Accounting',
+    disabled: false,
+  },
   {
     value: 14,
     label: 'Short Date',
     disabled: false,
   },
-  // {
-  //   value: 14,
-  //   label: 'Long Date',
-  //   disabled: false,
-  // },
+  {
+    value: 15,
+    label: 'Long Date',
+    disabled: false,
+  },
   {
     value: 19,
     label: 'Time',

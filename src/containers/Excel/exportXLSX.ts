@@ -14,9 +14,9 @@ import {
   stringToCoordinate,
   convertColorToHex,
   getCustomWidthOrHeightKey,
-  NUMBER_FORMAT_LIST,
   extractImageType,
   widthOrHeightKeyToData,
+  DEFAULT_FORMAT,
 } from '@/util';
 import { XfItem, chartTypeList, convertToPt } from './importXLSX';
 import { numberFormat } from '@/model'
@@ -101,13 +101,9 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
     );
   }
 
-  const item = NUMBER_FORMAT_LIST.find((v) => v.id === style.numberFormat);
-  if (item) {
+  if (typeof style.numberFormat === 'number') {
     extraList.push('applyNumberFormat="1"');
     result.numFmtId = String(style.numberFormat);
-    styles.numFmts.push(
-      `<numFmt numFmtId="${style.numberFormat}" formatCode="${item.formatCode}"/>`,
-    );
   }
   let alignment = '<alignment vertical="center"/>';
   if (
@@ -575,7 +571,7 @@ export function convertToXMLData(controller: IController) {
       });
       const list = rowMap.get(range.row) || [];
       const f = v.formula ? `<f>${v.formula.slice(1)}</f>` : '';
-      const val = `<v>${numberFormat(v.style?.numberFormat ?? '', v.value)}</v>`;
+      const val = `<v>${numberFormat(v.style?.numberFormat ?? DEFAULT_FORMAT, v.value)}</v>`;
       let s = '';
       if (v.style && !isEmpty(v.style)) {
         s = `s="${styles.cellXfs.length}"`;

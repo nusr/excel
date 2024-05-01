@@ -12,7 +12,6 @@ import {
 import {
   get,
   parseReference,
-  NUMBER_FORMAT_LIST,
   CELL_HEIGHT,
   CELL_WIDTH,
   XLSX_MAX_ROW_COUNT,
@@ -252,6 +251,7 @@ export function convertXMLToJSON(xmlStr: string) {
   const json = xmlToJson(xml);
   return json;
 }
+
 function convertRGB(c?: string) {
   if (!c) {
     return '';
@@ -355,9 +355,7 @@ function getCellStyle(
   }
   if (xf.applyNumberFormat && xf.numFmtId) {
     const id = parseInt(xf.numFmtId, 10);
-    if (NUMBER_FORMAT_LIST.some((v) => v.id === id)) {
-      result.numberFormat = id;
-    }
+    result.numberFormat = id;
   }
   if (xf.applyFill && xf.fillId) {
     const list = get<FillItem[]>(xml, 'styleSheet.fills.fill', []);
@@ -541,10 +539,10 @@ export function convertXMLDataToModel(
             start++
           ) {
             result.customWidth[getCustomWidthOrHeightKey(item.sheetId, start)] =
-              {
-                len: w,
-                isHide,
-              };
+            {
+              len: w,
+              isHide,
+            };
           }
         }
       }
@@ -568,10 +566,10 @@ export function convertXMLDataToModel(
       if (row.customHeight && row.ht) {
         const isDefault = defaultWOrH.defaultRowHeight === row.ht;
         result.customHeight[getCustomWidthOrHeightKey(item.sheetId, realRow)] =
-          {
-            len: isDefault ? CELL_HEIGHT : Math.floor(parseInt(row.ht, 10)),
-            isHide: Boolean(row.hidden),
-          };
+        {
+          len: isDefault ? CELL_HEIGHT : Math.floor(parseInt(row.ht, 10)),
+          isHide: Boolean(row.hidden),
+        };
       }
       const colList = Array.isArray(row.c) ? row.c : [row.c];
       for (const col of colList) {
@@ -635,7 +633,7 @@ export function convertXMLDataToModel(
       result.definedNames[item.name.toLowerCase()] = range.toIRange();
     }
   }
-  for (let drawingId = 1; drawingId <= drawingCount; drawingId++) {
+  for (let drawingId = 1;drawingId <= drawingCount;drawingId++) {
     const basePath = `drawing${drawingId}.xml`;
     const key = `${DRAWING_PREFIX_KEY}${basePath}`;
     const ref = `${DRAWING_PREFIX_KEY}_rels/${basePath}.rels`;

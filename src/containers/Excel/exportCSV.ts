@@ -3,6 +3,7 @@ import {
   coordinateToString,
   CSV_SPLITTER,
   LINE_BREAK,
+  DEFAULT_FORMAT,
 } from '@/util';
 import { numberFormat } from '@/model'
 
@@ -83,7 +84,7 @@ export function exportToCsv(controller: IController) {
         const key = coordinateToString(row, col);
         const value = sheetData[key]?.value;
         const style = sheetData[key]?.style;
-        list.push(numberFormat(style?.numberFormat ?? '', value));
+        list.push(numberFormat(style?.numberFormat ?? DEFAULT_FORMAT, value));
       }
       csvList.push(processRow(list));
     }

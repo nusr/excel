@@ -127,14 +127,14 @@ function updateActiveCell(controller: IController) {
     fillColor = '',
     isWrapText = false,
     underline = EUnderLine.NONE,
-    numberFormat = DEFAULT_FORMAT,
     horizontalAlign = EHorizontalAlign.LEFT,
     verticalAlign = EVerticalAlign.CENTER,
   } = cell?.style || {};
 
+  const numberFormat = cell?.style?.numberFormat ?? DEFAULT_FORMAT;
+
   const isRight = numberFormat === DEFAULT_FORMAT && typeof cell?.value === 'number';
   const horAlign = isRight ? EHorizontalAlign.RIGHT : horizontalAlign;
-
   let displayValue = numberFormatUtil(numberFormat, cell?.value);
   let mergeType = '';
   if (isMerged) {

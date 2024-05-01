@@ -1,3 +1,3 @@
 export * from './Model';
 export { MOCK_MODEL } from './mockModel';
-export { numberFormat } from './NumberFormat';
+export { numberFormat } from './numberFormat';

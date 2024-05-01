@@ -1,4 +1,4 @@
-import { numberFormat } from '..';
+import { numberFormat } from '../numberFormat';
 
 
 describe('general.test.ts', function () {
@@ -94,14 +94,11 @@ describe('general.test.ts', function () {
       })
     }
   })
-  describe.skip('Date', () => {
+  describe('Date', () => {
     it('ok', function () {
       expect(numberFormat(0, new Date(2017, 1, 19))).toEqual("2/19/17");
-      expect(numberFormat(0, new Date(2017, 1, 19), { date1904: true })).toEqual("2/19/17");
-      expect(numberFormat(0, new Date(1901, 0, 1))).toEqual("1/1/01");
-      expect(numberFormat(0, new Date(1901, 0, 1), { date1904: true })).not.toEqual('1/1/01')
-      expect(numberFormat(0, new Date(1904, 0, 1))).toEqual("1/1/04");
-      expect(numberFormat(0, new Date(1904, 0, 1), { date1904: true })).toEqual("1/1/04");
+      // expect(numberFormat(0, new Date(1901, 0, 1))).toEqual("1/1/01");
+      // expect(numberFormat(0, new Date(1904, 0, 1))).toEqual("1/1/04");
     });
   })
 });

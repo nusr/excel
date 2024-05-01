@@ -29,8 +29,8 @@ import {
   headerSizeSet,
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
-  controllerLog,
   convertPxToPt,
+  DEFAULT_FORMAT,
 } from '@/util';
 import { numberFormat } from '@/model'
 
@@ -78,7 +78,6 @@ export class Controller implements IController {
     if (this.isNoChange) {
       return;
     }
-    controllerLog(this.changeSet);
     this.model.emitChange(this.changeSet);
     this.changeSet = new Set<ChangeEventType>();
   }
@@ -425,7 +424,7 @@ export class Controller implements IController {
         if (!a) {
           continue;
         }
-        const str = numberFormat(a.style?.numberFormat ?? '', a.value);
+        const str = numberFormat(a.style?.numberFormat ?? DEFAULT_FORMAT, a.value);
         temp.push(str);
         const w = convertPxToPt(this.getColWidth(c).len, '');
         const style = `height=${h} width=${w} style='height:${h}pt;width:${w}pt;'`;
