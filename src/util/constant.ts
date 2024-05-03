@@ -111,8 +111,6 @@ export const NUMBER_FORMAT_LIST: Array<{
       formatCode: '上午/下午 h"时"mm"分"ss"秒"', id: 56
     },
   ];
-export const specialFormatList = [14, 15, 19, 10];
-
 
 const getValue = (id: number): string => NUMBER_FORMAT_LIST.find(v => v.id === id)!.formatCode;
 export const numberFormatOptionList: OptionItem[] = [
@@ -142,7 +140,7 @@ export const numberFormatOptionList: OptionItem[] = [
     disabled: false,
   },
   {
-    value: '[$-409]dddd\,mmmm\ d\,yyyy;@',
+    value: '[$-409]dddd,mmmm d,yyyy;@',
     label: 'Long Date',
     disabled: false,
   },
@@ -171,11 +169,11 @@ export const numberFormatOptionList: OptionItem[] = [
     label: 'Text',
     disabled: false,
   },
-  // {
-  //   value: -1,
-  //   label: 'More Number Formats',
-  //   disabled: false,
-  // },
+  {
+    value: "",
+    label: 'More Number Formats',
+    disabled: false,
+  },
 ];
 
 export const COLOR_PICKER_COLOR_LIST = [

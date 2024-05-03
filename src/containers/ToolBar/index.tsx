@@ -82,11 +82,19 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
     const fontStyle = useMemo(() => {
       return { color: cellStyle.fontColor };
     }, [cellStyle.fontColor]);
-    const numberFormatValue = useMemo(() => {
-      const item = numberFormatOptionList.find(
-        (v) => v.value === cellStyle.numberFormat,
-      );
-      return item?.label || numberFormatOptionList[0].label;
+    const [numberFormatLabel, numberFormatValue] = useMemo(() => {
+      let item: OptionItem = numberFormatOptionList[0];
+      if (cellStyle.numberFormat) {
+        const t = numberFormatOptionList.find(
+          (v) => v.value === cellStyle.numberFormat,
+        );
+        if (t) {
+          item = t;
+        } else {
+          item = numberFormatOptionList[numberFormatOptionList.length - 1];
+        }
+      }
+      return [item.label, String(item.value)];
     }, [cellStyle.numberFormat]);
     const getItemStyle = useCallback(
       (value: string | number): React.CSSProperties => {
@@ -349,13 +357,13 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         </SelectList>
         <SelectList
           data={numberFormatOptionList}
-          value={String(cellStyle.numberFormat)}
+          value={numberFormatValue}
           onChange={handleNumberFormat}
           className={styles['number-format']}
           testId="toolbar-number-format-select"
         >
           <div className={styles['number-format-value']}>
-            {numberFormatValue}
+            {numberFormatLabel}
           </div>
         </SelectList>
         <InsertFloatingPicture controller={controller} />

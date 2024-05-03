@@ -53,6 +53,7 @@ src
 - [x] Font Color
 - [x] Fill Color
 - [x] Text Wrapping
+- [x] Number Format
 - [x] Merge Cells
 - [x] Chart
 - [x] Floating Picture
