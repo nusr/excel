@@ -35,7 +35,7 @@ describe('getEditorStyle', () => {
           underline: EUnderLine.NONE,
           verticalAlign: EVerticalAlign.TOP,
           horizontalAlign: EHorizontalAlign.LEFT,
-          numberFormat: 0,
+          numberFormat: '',
           isMergeCell: false,
           mergeType: ''
         },
@@ -79,7 +79,7 @@ describe('getEditorStyle', () => {
           underline: EUnderLine.NONE,
           verticalAlign: EVerticalAlign.TOP,
           horizontalAlign: EHorizontalAlign.LEFT,
-          numberFormat: 0,
+          numberFormat: '',
           isMergeCell: false,
           mergeType: ''
         },
@@ -128,7 +128,7 @@ describe('getEditorStyle', () => {
           underline: EUnderLine.NONE,
           verticalAlign: EVerticalAlign.TOP,
           horizontalAlign: EHorizontalAlign.LEFT,
-          numberFormat: 0,
+          numberFormat: '',
           isMergeCell: false,
           mergeType: ''
         },

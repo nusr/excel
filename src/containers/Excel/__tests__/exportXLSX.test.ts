@@ -67,7 +67,7 @@ describe('exportXLSX.test.ts', () => {
               fillColor: '#fff',
               fontFamily: 'simsun',
               underline: EUnderLine.DOUBLE,
-              numberFormat: 0,
+              numberFormat: 'General',
               horizontalAlign: EHorizontalAlign.LEFT,
               verticalAlign: EVerticalAlign.TOP,
             },

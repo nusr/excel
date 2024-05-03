@@ -220,12 +220,11 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       }
     }, []);
     const handleNumberFormat = useCallback((value: string) => {
-      const v = parseInt(value, 10);
-      if (isNaN(v) || v < 0) {
+      if (!value) {
         return;
       }
       controller.updateCellStyle(
-        { numberFormat: v },
+        { numberFormat: value },
         controller.getActiveRange().range,
       );
     }, []);

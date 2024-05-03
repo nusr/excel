@@ -206,6 +206,9 @@ export class Model implements IModel {
   ): void {
     this.worksheetManager.setCell(value, style, range);
   }
+  setCellValue(value: ResultType, range: IRange,) {
+    this.worksheetManager.setCellValue(value, range);
+  }
 
   updateCellStyle(style: Partial<StyleType>, range: IRange): void {
     return this.worksheetManager.updateCellStyle(style, range);

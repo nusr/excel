@@ -4,24 +4,24 @@ import { numberFormat } from '../numberFormat';
 describe('general.test.ts', function () {
   describe('boolean', () => {
     test('ok', () => {
-      expect(numberFormat(0, true)).toEqual("TRUE");
-      expect(numberFormat(0, false)).toEqual("FALSE");
+      expect(numberFormat(true)).toEqual("TRUE");
+      expect(numberFormat(false)).toEqual("FALSE");
     })
   })
   describe('null', () => {
     test('ok', () => {
-      expect(numberFormat(0, null)).toEqual("");
+      expect(numberFormat(null)).toEqual("");
     })
   })
   describe('undefined', () => {
     test('ok', () => {
-      expect(numberFormat(0, undefined)).toEqual("");
+      expect(numberFormat(undefined)).toEqual("");
     })
   })
   describe('string', () => {
     test('ok', () => {
-      expect(numberFormat(0, '')).toEqual("");
-      expect(numberFormat(0, 'test')).toEqual("test");
+      expect(numberFormat('')).toEqual("");
+      expect(numberFormat('test')).toEqual("test");
     })
   })
   describe('integer', () => {
@@ -90,15 +90,15 @@ describe('general.test.ts', function () {
     ]
     for (const item of list) {
       test(`actual:${item[0]}, expected:${item[1]}`, () => {
-        expect(numberFormat(0, item[0])).toEqual(item[1])
+        expect(numberFormat(item[0])).toEqual(item[1])
       })
     }
   })
   describe('Date', () => {
     it('ok', function () {
-      expect(numberFormat(0, new Date(2017, 1, 19))).toEqual("2/19/17");
-      // expect(numberFormat(0, new Date(1901, 0, 1))).toEqual("1/1/01");
-      // expect(numberFormat(0, new Date(1904, 0, 1))).toEqual("1/1/04");
+      expect(numberFormat(new Date(2017, 1, 19))).toEqual("2/19/17");
+      expect(numberFormat(new Date(1901, 0, 1))).toEqual("1/1/01");
+      expect(numberFormat(new Date(1904, 0, 1))).toEqual("1/1/04");
     });
   })
 });

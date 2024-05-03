@@ -19,7 +19,7 @@ import {
   canvasSizeSet,
   MERGE_CELL_LINE_BREAK,
   LINE_BREAK,
-  DEFAULT_FORMAT,
+  DEFAULT_FORMAT_CODE,
 } from '@/util';
 import {
   coreStore,
@@ -38,7 +38,7 @@ import {
   Content,
   scrollSheetToView,
 } from '@/canvas';
-import { numberFormat as numberFormatUtil } from '@/model';
+import { numberFormat as numberFormatUtil, isDateFormat } from '@/model';
 
 function createCanvas() {
   const canvas = document.createElement('canvas');
@@ -131,11 +131,16 @@ function updateActiveCell(controller: IController) {
     verticalAlign = EVerticalAlign.CENTER,
   } = cell?.style || {};
 
-  const numberFormat = cell?.style?.numberFormat ?? DEFAULT_FORMAT;
-
-  const isRight = numberFormat === DEFAULT_FORMAT && typeof cell?.value === 'number';
+  const numberFormat = cell?.style?.numberFormat || DEFAULT_FORMAT_CODE;
+  const isRight = numberFormat === DEFAULT_FORMAT_CODE && typeof cell?.value === 'number';
   const horAlign = isRight ? EHorizontalAlign.RIGHT : horizontalAlign;
-  let displayValue = numberFormatUtil(numberFormat, cell?.value);
+  let displayValue = ''
+  if (isDateFormat(numberFormat)) {
+    displayValue = numberFormatUtil(cell?.value, numberFormat);
+  } else {
+    displayValue = numberFormatUtil(cell?.value, DEFAULT_FORMAT_CODE);
+  }
+
   let mergeType = '';
   if (isMerged) {
     if (displayValue.includes(MERGE_CELL_LINE_BREAK)) {

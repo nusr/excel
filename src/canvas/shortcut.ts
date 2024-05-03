@@ -280,7 +280,7 @@ export function setActiveCellValue(controller: IController) {
   ) {
     value = value.replaceAll(LINE_BREAK, MERGE_CELL_LINE_BREAK);
   }
-  controller.setCell([[value]], [], range);
+  controller.setCellValue(value, range);
   inputDom.value = '';
   inputDom.blur();
   coreStore.mergeState({

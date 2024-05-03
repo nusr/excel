@@ -10,7 +10,7 @@ import {
   sizeConfig,
   getThemeColor,
   MERGE_CELL_LINE_BREAK,
-  DEFAULT_FORMAT,
+  DEFAULT_FORMAT_CODE,
 } from '@/util';
 import {
   ModelCellType,
@@ -179,9 +179,9 @@ export function renderCell(
 ): IRenderCellResult {
   const { left, top, width, height } = cellInfo;
   const result: IRenderCellResult = { height: 0, width: 0 };
-  const format = style?.numberFormat ?? DEFAULT_FORMAT;
-  const isRight = format === DEFAULT_FORMAT && typeof value === 'number';
-  const text = numberFormat(format, value);
+  const format = style?.numberFormat || DEFAULT_FORMAT_CODE;
+  const isRight = format === DEFAULT_FORMAT_CODE && typeof value === 'number';
+  const text = numberFormat(value, format);
   if (!text && isEmpty(style)) {
     return result;
   }

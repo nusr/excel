@@ -69,13 +69,12 @@ export const ERROR_SET = new Set<ErrorTypes>([
   '#NAME?',
 ]);
 
-export const DEFAULT_FORMAT = 0;
-export const DEFAULT_TEXT_FORMAT = 49;
+export const DEFAULT_FORMAT_CODE = 'General';
 export const NUMBER_FORMAT_LIST: Array<{
   formatCode: string;
   id: number;
 }> = [
-    { formatCode: 'General', id: DEFAULT_FORMAT },
+    { formatCode: DEFAULT_FORMAT_CODE, id: 0 },
     { formatCode: '0', id: 1 },
     { formatCode: '0.00', id: 2 },
     { formatCode: '#,##0', id: 3 },
@@ -107,65 +106,68 @@ export const NUMBER_FORMAT_LIST: Array<{
     { formatCode: '[h]:mm:ss', id: 46 },
     { formatCode: 'mmss.0', id: 47 },
     { formatCode: '##0.0E+0', id: 48 },
-    { formatCode: '@', id: DEFAULT_TEXT_FORMAT },
+    { formatCode: '@', id: 49 },
     {
       formatCode: '上午/下午 h"时"mm"分"ss"秒"', id: 56
     },
   ];
 export const specialFormatList = [14, 15, 19, 10];
+
+
+const getValue = (id: number): string => NUMBER_FORMAT_LIST.find(v => v.id === id)!.formatCode;
 export const numberFormatOptionList: OptionItem[] = [
   {
-    value: 0,
+    value: getValue(0),
     label: 'General',
     disabled: false,
   },
   {
-    value: 2,
+    value: getValue(2),
     label: 'Number',
     disabled: false,
   },
   {
-    value: 8,
+    value: getValue(8),
     label: 'Currency',
     disabled: false,
   },
   {
-    value: 44,
+    value: getValue(44),
     label: 'Accounting',
     disabled: false,
   },
   {
-    value: 14,
+    value: 'm/d/yyyy;@',
     label: 'Short Date',
     disabled: false,
   },
   {
-    value: 15,
+    value: '[$-409]dddd\,mmmm\ d\,yyyy;@',
     label: 'Long Date',
     disabled: false,
   },
   {
-    value: 19,
+    value: getValue(19),
     label: 'Time',
     disabled: false,
   },
   {
-    value: 10,
+    value: getValue(10),
     label: 'Percentage',
     disabled: false,
   },
   {
-    value: 12,
+    value: getValue(12),
     label: 'Fraction',
     disabled: false,
   },
   {
-    value: 11,
+    value: getValue(11),
     label: 'Scientific',
     disabled: false,
   },
   {
-    value: 49,
+    value: getValue(49),
     label: 'Text',
     disabled: false,
   },

@@ -44,7 +44,7 @@ export interface StyleType {
   isItalic: boolean;
   isBold: boolean;
   isStrike: boolean;
-  numberFormat: number; // NUMBER_FORMAT_LIST id
+  numberFormat: string;
 }
 export interface WorksheetType {
   sheetId: string;
@@ -226,6 +226,7 @@ export interface IWorksheet extends IBaseManager {
     range: IRange,
   ): void;
   updateCellStyle(style: Partial<StyleType>, range: IRange): void;
+  setCellValue(value: ResultType, range: IRange): void;
   computeFormulas(): void;
   addMergeCell(range: IRange, type?: EMergeCellType): void;
 }
@@ -272,6 +273,7 @@ export interface IBaseModel
     | 'updateCellStyle'
     | 'getWorksheet'
     | 'setWorksheet'
+    | 'setCellValue'
   > {
   toJSON(): WorkBookJSON;
   canRedo(): boolean;

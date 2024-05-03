@@ -78,7 +78,7 @@ describe('style.test.ts', () => {
           isBold: true,
           underline: EUnderLine.DOUBLE,
           isStrike: true,
-          numberFormat: 1,
+          numberFormat: '',
         }),
       ).toEqual(result.join(';') + ';');
     });

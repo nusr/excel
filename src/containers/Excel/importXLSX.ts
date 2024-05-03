@@ -24,6 +24,7 @@ import {
   isEmpty,
   FORMULA_PREFIX,
   getImageSize,
+  NUMBER_FORMAT_LIST,
 } from '@/util';
 
 const COMMON_PREFIX = 'xl';
@@ -191,6 +192,11 @@ interface FontItem {
     val: string;
   };
 }
+
+interface NumFmtItem {
+  numFmtId: string;
+  formatCode: string;
+}
 interface FillItem {
   patternFill?: {
     patternType: string;
@@ -354,8 +360,17 @@ function getCellStyle(
     }
   }
   if (xf.applyNumberFormat && xf.numFmtId) {
-    const id = parseInt(xf.numFmtId, 10);
-    result.numberFormat = id;
+    const list = get<NumFmtItem[]>(xml, 'styleSheet.numFmts.numFmt', []);
+    const item = list.find(v => v.numFmtId === xf.numFmtId);
+    if (item) {
+      result.numberFormat = item.formatCode;
+    } else {
+      const id = parseInt(xf.numFmtId, 10);
+      const item = NUMBER_FORMAT_LIST.find(v => v.id === id);
+      if (item) {
+        result.numberFormat = item.formatCode;
+      }
+    }
   }
   if (xf.applyFill && xf.fillId) {
     const list = get<FillItem[]>(xml, 'styleSheet.fills.fill', []);

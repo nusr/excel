@@ -18,7 +18,6 @@ import {
   FORMULA_PREFIX,
   isEmpty,
   deepEqual,
-  DEFAULT_FORMAT,
   stringToCoordinate,
   MERGE_CELL_LINE_BREAK,
   convertStringToResultType,
@@ -119,7 +118,7 @@ export class Worksheet implements IWorksheet {
         style: list[0].style,
       };
       newCellData.value = list
-        .map((v) => numberFormat(v.style?.numberFormat ?? DEFAULT_FORMAT, v.value))
+        .map((v) => numberFormat(v.value, v.style?.numberFormat))
         .join(MERGE_CELL_LINE_BREAK);
     } else {
       newCellData = list[0];
@@ -386,11 +385,9 @@ export class Worksheet implements IWorksheet {
     style: Array<Array<Partial<StyleType>>>,
     range: IRange,
   ): void {
-    const id = range.sheetId || this.model.getCurrentSheetId();
     const { row, col } = range;
     for (let r = 0;r < value.length;r++) {
       for (let c = 0;c < value[r].length;c++) {
-        const t = value[r][c];
         const temp: Coordinate = {
           row: row + r,
           col: col + c,
@@ -398,17 +395,22 @@ export class Worksheet implements IWorksheet {
         if (style[r] && style[r][c]) {
           this.setStyle(style[r][c], temp);
         }
-        if (t && typeof t === 'string' && t.startsWith(FORMULA_PREFIX)) {
-          this.setCellFormula(t, temp);
-        } else {
-          const old =
-            this.worksheets?.[id]?.[coordinateToString(temp.row, temp.col)];
-          if (old?.formula) {
-            this.setCellFormula('', temp);
-          }
-          this.setCellValue(t, temp);
-        }
+        this.setCellValue(value[r][c], { ...range, ...temp })
       }
+    }
+  }
+
+  setCellValue(value: ResultType, range: IRange): void {
+    const id = range.sheetId || this.model.getCurrentSheetId();
+    if (value && typeof value === 'string' && value.startsWith(FORMULA_PREFIX)) {
+      this.setCellFormula(value, range);
+    } else {
+      const old =
+        this.worksheets?.[id]?.[coordinateToString(range.row, range.col)];
+      if (old?.formula) {
+        this.setCellFormula('', range);
+      }
+      this.setValue(value, range);
     }
   }
 
@@ -535,7 +537,7 @@ export class Worksheet implements IWorksheet {
       oldValue: isEmpty(oldStyle) ? DELETE_FLAG : oldStyle,
     });
   }
-  private setCellValue(value: ResultType, range: Coordinate): void {
+  private setValue(value: ResultType, range: Coordinate): void {
     const { row, col } = range;
     const id = this.model.getCurrentSheetId();
 

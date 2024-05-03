@@ -26,9 +26,9 @@
   "devDependencies": {
     "@playwright/test": "1.43.1",
     "@testing-library/jest-dom": "6.4.2",
-    "@testing-library/react": "15.0.5",
+    "@testing-library/react": "15.0.6",
     "@types/jest": "29.5.12",
-    "@types/node": "20.12.7",
+    "@types/node": "20.12.8",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",
     "canvas": "2.11.2",
@@ -43,7 +43,7 @@
     "node": ">=16"
   },
   "dependencies": {
-    "@sentry/react": "7.112.2",
+    "@sentry/react": "7.113.0",
     "chart.js": "4.4.2",
     "jszip": "3.10.1",
     "react": "18.3.1",

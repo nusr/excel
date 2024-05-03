@@ -30,9 +30,8 @@ import {
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
   convertPxToPt,
-  DEFAULT_FORMAT,
 } from '@/util';
-import { numberFormat } from '@/model'
+import { numberFormat, isDateFormat, convertDateToNumber } from '@/model'
 
 const defaultScrollValue: ScrollValue = {
   top: 0,
@@ -207,6 +206,16 @@ export class Controller implements IController {
     range: IRange,
   ): void {
     this.model.setCell(value, style, range);
+    this.emitChange();
+  }
+  setCellValue(value: ResultType, range: IRange) {
+    const cell = this.getCell(range);
+    if (isDateFormat(cell?.style?.numberFormat) && typeof value === 'string' && !isNaN(Date.parse(value))) {
+      const v = convertDateToNumber(new Date(value));
+      this.model.setCellValue(v, range);
+    } else {
+      this.model.setCellValue(value, range);
+    }
     this.emitChange();
   }
   updateCellStyle(style: Partial<StyleType>, range: IRange): void {
@@ -424,7 +433,7 @@ export class Controller implements IController {
         if (!a) {
           continue;
         }
-        const str = numberFormat(a.style?.numberFormat ?? DEFAULT_FORMAT, a.value);
+        const str = numberFormat(a.value, a.style?.numberFormat);
         temp.push(str);
         const w = convertPxToPt(this.getColWidth(c).len, '');
         const style = `height=${h} width=${w} style='height:${h}pt;width:${w}pt;'`;
