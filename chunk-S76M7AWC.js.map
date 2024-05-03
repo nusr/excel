@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["external-package:react"],
-  "sourcesContent": ["module.exports = window.React"],
-  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;wCAAA,IAAAA,EAAAC,EAAA,CAAAC,EAAAC,IAAA,cAAAA,EAAO,QAAU,OAAO",
-  "names": ["require_react", "__commonJSMin", "exports", "module"]
-}

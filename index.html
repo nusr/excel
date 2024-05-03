@@ -36,20 +36,12 @@
   <link rel="alternate" href="https://github.com/nusr/excel" hreflang="x-default" />
 
   <title>Web Excel</title>
-  <link rel="stylesheet" href="./index.css" />
+  <link rel="stylesheet" href="./demo.css" />
 </head>
 
 <body>
   <div id="root" class="root-container"></div>
-  <script src="./react.js" defer></script>
-  <script src="./react-dom.js" defer></script>
-  <script src="./index.js" type="module" defer></script>
-  <script type="module">
-    import excel from './index.js';
-    const controller = excel.initExcel('root');
-    controller.fromJSON(excel.defaultModel)
-    excel.initSentry()
-  </script>
+  <script src="./demo.js" type="module" defer></script>
   <script>
     window.onload = function () {
       if ("production" === 'development') {
