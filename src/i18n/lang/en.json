@@ -68,5 +68,20 @@
   "merge-content": "Merge Content",
   "none": "none",
   "single-underline": "single underline",
-  "double-underline": "double underline"
+  "double-underline": "double underline",
+  "general": "General",
+  "number": "Number",
+  "currency": "Currency",
+  "accounting": "Accounting",
+  "short-date": "Short Date",
+  "long-date": "Long Date",
+  "time": "Time",
+  "percentage": "Percentage",
+  "fraction": "Fraction",
+  "scientific": "Scientific",
+  "text": "Text",
+  "more-number-formats": "More Number Formats",
+  "short-date-format": "m/d/yyyy;@",
+  "long-date-format": "[$-409]dddd,mmmm d,yyyy;@",
+  "time-format": "h:mm:ss AM/PM"
 }

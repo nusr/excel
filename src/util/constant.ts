@@ -112,66 +112,66 @@ export const NUMBER_FORMAT_LIST: Array<{
     },
   ];
 
-const getValue = (id: number): string => NUMBER_FORMAT_LIST.find(v => v.id === id)!.formatCode;
+export const getFormatCode = (id: number): string => NUMBER_FORMAT_LIST.find(v => v.id === id)!.formatCode;
 export const numberFormatOptionList: OptionItem[] = [
   {
-    value: getValue(0),
-    label: 'General',
+    value: getFormatCode(0),
+    label: $('general'),
     disabled: false,
   },
   {
-    value: getValue(2),
-    label: 'Number',
+    value: getFormatCode(2),
+    label: $('number'),
     disabled: false,
   },
   {
-    value: getValue(8),
-    label: 'Currency',
+    value: getFormatCode(8),
+    label: $('currency'),
     disabled: false,
   },
   {
-    value: getValue(44),
-    label: 'Accounting',
+    value: getFormatCode(44),
+    label: $('accounting'),
     disabled: false,
   },
   {
-    value: 'm/d/yyyy;@',
-    label: 'Short Date',
+    value: $('short-date-format'),
+    label: $('short-date'),
     disabled: false,
   },
   {
-    value: '[$-409]dddd,mmmm d,yyyy;@',
-    label: 'Long Date',
+    value: $('long-date-format'),
+    label: $('long-date'),
     disabled: false,
   },
   {
-    value: getValue(19),
-    label: 'Time',
+    value: $('time-format'),
+    label: $('time'),
     disabled: false,
   },
   {
-    value: getValue(10),
-    label: 'Percentage',
+    value: getFormatCode(10),
+    label: $('percentage'),
     disabled: false,
   },
   {
-    value: getValue(12),
-    label: 'Fraction',
+    value: getFormatCode(12),
+    label: $('fraction'),
     disabled: false,
   },
   {
-    value: getValue(11),
-    label: 'Scientific',
+    value: getFormatCode(11),
+    label: $('scientific'),
     disabled: false,
   },
   {
-    value: getValue(49),
-    label: 'Text',
+    value: getFormatCode(49),
+    label: $('text'),
     disabled: false,
   },
   {
     value: "",
-    label: 'More Number Formats',
+    label: $('more-number-formats'),
     disabled: false,
   },
 ];

@@ -68,5 +68,20 @@
   "merge-content": "合并内容",
   "none": "无",
   "single-underline": "单层下划线",
-  "double-underline": "双层下划线"
+  "double-underline": "双层下划线",
+  "general": "常规",
+  "number": "数值",
+  "currency": "货币",
+  "accounting": "会计专用",
+  "short-date": "短日期",
+  "long-date": "长日期",
+  "time": "时间",
+  "percentage": "百分比",
+  "fraction": "分数",
+  "scientific": "科学计数",
+  "text": "文本",
+  "more-number-formats": "其他数字格式",
+  "short-date-format": "yyyy/m/d;@",
+  "long-date-format": "yyyy\"年\"m\"月\"d\"日\"",
+  "time-format": "h:mm:ss"
 }

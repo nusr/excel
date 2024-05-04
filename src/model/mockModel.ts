@@ -5,6 +5,8 @@ import {
   generateUUID,
   isMobile,
   MERGE_CELL_LINE_BREAK,
+  numberFormatOptionList,
+  coordinateToString,
 } from '@/util';
 import { mockImage } from './mockData';
 import { $ } from '@/i18n';
@@ -49,6 +51,7 @@ const MOCK_MODEL: WorkBookJSON = {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       sort: 1,
+      tabColor: "#A2B3F6"
     },
     '2': {
       sheetId: '2',
@@ -110,6 +113,16 @@ const MOCK_MODEL: WorkBookJSON = {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
       sort: 8,
+      tabColor: '#C1026B'
+    },
+    '9': {
+      sheetId: '9',
+      name: 'number format',
+      isHide: false,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      sort: 9,
+      tabColor: "#F9D700"
     },
   },
   worksheets: {
@@ -298,6 +311,9 @@ const MOCK_MODEL: WorkBookJSON = {
         },
       },
     },
+    '9': {
+
+    }
   },
 
   mergeCells: {
@@ -408,7 +424,7 @@ const maxSheetId = Math.max(
   }),
 );
 
-for (let i = maxSheetId + 1; i < 20; i++) {
+for (let i = maxSheetId + 1;i < 20;i++) {
   const id = String(i);
   MOCK_MODEL.workbook[id] = {
     sheetId: id,
@@ -418,6 +434,16 @@ for (let i = maxSheetId + 1; i < 20; i++) {
     rowCount: DEFAULT_ROW_COUNT,
     sort: i,
   };
+}
+for (let i = 0;i < numberFormatOptionList.length;i++) {
+  const item = numberFormatOptionList[i];
+  const key = coordinateToString(i, 0);
+  MOCK_MODEL.worksheets['9'][key] = {
+    value: i + 1,
+    style: {
+      numberFormat: String(item.value)
+    }
+  }
 }
 
 export { MOCK_MODEL };

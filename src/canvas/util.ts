@@ -25,7 +25,7 @@ import {
   StyleType,
   EHorizontalAlign,
 } from '@/types';
-import { numberFormat } from '@/model'
+import { numberFormat, isDateFormat } from '@/model'
 
 const measureTextMap = new Map<string, IWindowSize>();
 
@@ -185,6 +185,7 @@ export function renderCell(
   if (!text && isEmpty(style)) {
     return result;
   }
+
   let font = DEFAULT_FONT_CONFIG;
   let fillStyle: string = getThemeColor('contentColor');
   const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
@@ -318,6 +319,11 @@ export function renderCell(
   }
   result.height = Math.ceil(result.height);
   result.width = Math.ceil(result.width);
+  if (!style?.isWrapText && isDateFormat(format)) {
+    // show all date info
+    const size = measureText(ctx, text);
+    result.width = Math.max(Math.ceil(size.width), result.width)
+  }
   return result;
 }
 
