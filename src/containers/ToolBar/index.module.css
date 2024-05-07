@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  font-size: var(--font);
+  font-size: var(--largeFont);
 }
 .toolbar-wrapper > * {
   margin-right: 8px;
@@ -13,7 +13,7 @@
 }
 .toolbar-wrapper .merge-cell {
   height: unset;
-  width: 130px;
+  width: 150px;
 }
 .toolbar-wrapper .merge-cell-button {
   margin-right: 20px;

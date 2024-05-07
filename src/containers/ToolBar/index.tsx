@@ -286,7 +286,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           disabled={!coreData.canUndo}
           onClick={undo}
           testId="toolbar-undo"
-          title="undo"
+          title="Undo"
           className={styles['icon-center']}>
           <Icon name="undo" />
         </Button>
@@ -294,17 +294,17 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           disabled={!coreData.canRedo}
           onClick={redo}
           testId="toolbar-redo"
-          title="redo"
+          title="Redo"
           className={styles['icon-center']}>
           <Icon name="redo" />
         </Button>
-        <Button onClick={copy} testId="toolbar-copy">
+        <Button onClick={copy} testId="toolbar-copy" title="Copy">
           {$('copy')}
         </Button>
-        <Button onClick={cut} testId="toolbar-cut">
+        <Button onClick={cut} testId="toolbar-cut" title="Cut">
           {$('cut')}
         </Button>
-        <Button onClick={paste} testId="toolbar-paste">
+        <Button onClick={paste} testId="toolbar-paste" title="Paste">
           {$('paste')}
         </Button>
 
@@ -358,7 +358,8 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           <Button
             style={fillStyle}
             testId="toolbar-fill-color"
-            className={styles['icon-center']}>
+            className={styles['icon-center']}
+            title="Fill Color">
             <FillColorIcon />
           </Button>
         </ColorPicker>
@@ -371,7 +372,8 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           <Button
             style={fontStyle}
             testId="toolbar-font-color"
-            className={styles['icon-center']}>
+            className={styles['icon-center']}
+            title="Font Color">
             <Icon name="fontColor" />
           </Button>
         </ColorPicker>
@@ -379,21 +381,24 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           active={cellStyle.verticalAlign === EVerticalAlign.TOP}
           onClick={verticalTop}
           testId="toolbar-vertical-top"
-          className={styles['icon-center']}>
+          className={styles['icon-center']}
+          title="Top Align">
           <Icon name="verticalTop" />
         </Button>
         <Button
           active={cellStyle.verticalAlign === EVerticalAlign.MIDDLE}
           onClick={verticalMiddle}
           testId="toolbar-vertical-middle"
-          className={styles['icon-center']}>
+          className={styles['icon-center']}
+          title="Middle Align">
           <Icon name="verticalMiddle" />
         </Button>
         <Button
           active={cellStyle.verticalAlign === EVerticalAlign.BOTTOM}
           onClick={verticalBottom}
           testId="toolbar-vertical-bottom"
-          className={styles['icon-center']}>
+          className={styles['icon-center']}
+          title="Bottom Align">
           <Icon name="verticalBottom" />
         </Button>
         <Button
@@ -407,21 +412,24 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           active={cellStyle.horizontalAlign === EHorizontalAlign.CENTER}
           onClick={horizontalCenter}
           testId="toolbar-horizontal-center"
-          className={styles['icon-center']}>
+          className={styles['icon-center']}
+          title="Align Text Left">
           <Icon name="horizontalCenter" />
         </Button>
         <Button
           active={cellStyle.horizontalAlign === EHorizontalAlign.RIGHT}
           onClick={horizontalRight}
           testId="toolbar-horizontal-right"
-          className={styles['icon-center']}>
+          className={styles['icon-center']}
+          title="Align Text Center">
           <Icon name="horizontalRight" />
         </Button>
         <Button
           active={cellStyle.isWrapText}
           onClick={toggleWrapText}
           testId="toolbar-wrap-text"
-          className={styles['wrap-text']}>
+          className={styles['wrap-text']}
+          title="Align Text Right">
           {$('wrap-text')}
         </Button>
         <SelectList
@@ -435,8 +443,9 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
             onClick={toggleMergeCell}
             testId="toolbar-merge-cell"
             className={styles['merge-cell-button']}
-            type="plain">
-            {$('merge-cell')}
+            type="plain"
+            title="Merge And Center">
+            {$('merge-and-center')}
           </Button>
         </SelectList>
         <SelectList

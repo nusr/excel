@@ -7,12 +7,9 @@ import {
   canvasLog,
   thinLineWidth,
   intToColumnName,
-  containRange,
   getThemeColor,
   headerSizeSet,
   canvasSizeSet,
-  isSameRange,
-  MERGE_CELL_LINE_BREAK,
 } from '@/util';
 import {
   EventType,
@@ -31,8 +28,6 @@ import {
   drawAntLine,
   resizeCanvas,
   fillText,
-  renderCellData,
-  renderCell,
 } from './util';
 import {getHeaderStyle} from './constant';
 
@@ -85,7 +80,6 @@ export class MainCanvas {
     if (checkContent) {
       this.content.render(params);
     }
-    this.ctx.drawImage(this.content.getCanvas(), 0, 0);
 
     const {width, height} = canvasSizeSet.get();
     const headerSize = headerSizeSet.get();
@@ -94,15 +88,10 @@ export class MainCanvas {
     this.renderGrid(width - headerSize.width, height - headerSize.height);
 
     this.renderTriangle();
-
     const result = this.renderSelection(realContentWidth, realContentHeight);
-    const {range, isMerged} = this.controller.getActiveRange();
-    const copyRange = this.controller.getCopyRange();
-    const check = isMerged && copyRange && isSameRange(range, copyRange);
-    if (!check) {
-      this.renderAntLine(result);
-    }
     this.renderMergeCell();
+    this.renderAntLine(result);
+    this.ctx.drawImage(this.content.getCanvas(), 0, 0);
 
     this.isRendering = false;
     this.content.check();
@@ -110,14 +99,13 @@ export class MainCanvas {
 
   private renderMergeCell() {
     const {controller} = this;
-    const copyRange = controller.getCopyRange();
-    const activeCell = controller.getActiveRange().range;
     const mergeCells = controller.getMergeCellList(
       controller.getCurrentSheetId()
     );
     if (mergeCells.length === 0) {
       return;
     }
+    const lineWidth = thinLineWidth();
     for (const range of mergeCells) {
       const position = controller.computeCellPosition(range);
       const size = controller.getCellSize(range);
@@ -125,53 +113,13 @@ export class MainCanvas {
         continue;
       }
       // clear merge cell area
-      clearRect(this.ctx, position.left, position.top, size.width, size.height);
-      const cellInfo = controller.getCell(range);
-      if (!cellInfo) {
-        continue;
-      }
-      const value = cellInfo.value;
-      const isMergeContent =
-        typeof value === 'string' && value.includes(MERGE_CELL_LINE_BREAK);
-      renderCell(
+      clearRect(
         this.ctx,
-        {
-          top: position.top,
-          left: position.left,
-          width: size.width,
-          height: size.height,
-        },
-        value,
-        cellInfo.style,
-        isMergeContent
+        position.left + lineWidth,
+        position.top + lineWidth,
+        size.width - lineWidth * 2,
+        size.height - lineWidth * 2
       );
-      if (isSheet(activeCell) || isRow(activeCell) || isCol(activeCell)) {
-        continue;
-      }
-      if (containRange(activeCell.row, activeCell.col, range)) {
-        this.ctx.strokeStyle = getThemeColor('primaryColor');
-        this.ctx.lineWidth = dpr();
-        // highlight line
-        strokeRect(
-          this.ctx,
-          position.left,
-          position.top,
-          size.width,
-          size.height
-        );
-      }
-      if (copyRange && isSameRange(copyRange, range)) {
-        this.ctx.strokeStyle = getThemeColor('primaryColor');
-        this.ctx.lineWidth = dpr();
-        // highlight line
-        drawAntLine(
-          this.ctx,
-          position.left,
-          position.top,
-          size.width,
-          size.height
-        );
-      }
     }
   }
 
@@ -435,14 +383,14 @@ export class MainCanvas {
     };
     const activeCell = controller.computeCellPosition(temp);
     const cellSize = controller.getCellSize(temp);
+    const lineWidth = thinLineWidth();
     clearRect(
       this.ctx,
-      activeCell.left,
-      activeCell.top,
-      cellSize.width,
-      cellSize.height
+      activeCell.left + lineWidth,
+      activeCell.top + lineWidth,
+      cellSize.width - lineWidth * 2,
+      cellSize.height - lineWidth * 2
     );
-    renderCellData(controller, this.ctx, temp);
   }
   private renderSelectRange() {
     const {controller} = this;

@@ -52,6 +52,8 @@ src
 - [x] Font Underline
 - [x] Font Color
 - [x] Fill Color
+- [x] Text Vertical Align
+- [x] Text Horizontal Align
 - [x] Text Wrapping
 - [x] Number Format
 - [x] Merge Cells
