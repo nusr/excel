@@ -332,7 +332,7 @@ function getCellStyle(
     if (xf.alignment.vertical) {
       const alignMap = {
         top: EVerticalAlign.TOP,
-        center: EVerticalAlign.CENTER,
+        center: EVerticalAlign.MIDDLE,
         bottom: EVerticalAlign.BOTTOM,
       };
       result.verticalAlign = alignMap[xf.alignment.vertical];

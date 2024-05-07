@@ -3,7 +3,6 @@
   color: var(--black);
 }
 .selectItem {
-  font-size: var(--font);
   text-wrap: nowrap;
 }
 .selectItem.disabled {

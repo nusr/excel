@@ -1,4 +1,4 @@
-import React, { useSyncExternalStore, useMemo, memo, useCallback } from 'react';
+import React, {useSyncExternalStore, useMemo, memo, useCallback} from 'react';
 import {
   Icon,
   Button,
@@ -15,11 +15,18 @@ import {
   isSupportFontFamily,
   numberFormatOptionList,
 } from '@/util';
-import { EUnderLine, OptionItem, IController, EMergeCellType } from '@/types';
+import {
+  EUnderLine,
+  OptionItem,
+  IController,
+  EMergeCellType,
+  EHorizontalAlign,
+  EVerticalAlign,
+} from '@/types';
 import styles from './index.module.css';
-import { fontFamilyStore, styleStore, coreStore } from '@/containers/store';
-import { InsertFloatingPicture, InsertChart } from '../FloatElement';
-import { $ } from '@/i18n';
+import {fontFamilyStore, styleStore, coreStore} from '@/containers/store';
+import {InsertFloatingPicture, InsertChart} from '../FloatElement';
+import {$} from '@/i18n';
 
 interface Props {
   controller: IController;
@@ -62,31 +69,31 @@ const mergeOptionList: OptionItem[] = [
 ];
 
 export const ToolbarContainer: React.FunctionComponent<Props> = memo(
-  ({ controller }) => {
+  ({controller}) => {
     const coreData = useSyncExternalStore(
       coreStore.subscribe,
-      coreStore.getSnapshot,
+      coreStore.getSnapshot
     );
     const cellStyle = useSyncExternalStore(
       styleStore.subscribe,
-      styleStore.getSnapshot,
+      styleStore.getSnapshot
     );
     const fontFamilyList = useSyncExternalStore(
       fontFamilyStore.subscribe,
-      fontFamilyStore.getSnapshot,
+      fontFamilyStore.getSnapshot
     );
 
     const fillStyle = useMemo(() => {
-      return { color: cellStyle.fillColor };
+      return {color: cellStyle.fillColor};
     }, [cellStyle.fillColor]);
     const fontStyle = useMemo(() => {
-      return { color: cellStyle.fontColor };
+      return {color: cellStyle.fontColor};
     }, [cellStyle.fontColor]);
     const [numberFormatLabel, numberFormatValue] = useMemo(() => {
       let item: OptionItem = numberFormatOptionList[0];
       if (cellStyle.numberFormat) {
         const t = numberFormatOptionList.find(
-          (v) => v.value === cellStyle.numberFormat,
+          v => v.value === cellStyle.numberFormat
         );
         if (t) {
           item = t;
@@ -102,20 +109,20 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           fontFamily: String(value),
         };
       },
-      [],
+      []
     );
     const handleFontFamilyChange = useCallback((value: string | number) => {
       if (
         String(value) === QUERY_ALL_LOCAL_FONT &&
         typeof window.queryLocalFonts === 'function'
       ) {
-        window.queryLocalFonts().then((list) => {
-          let fontList = list.map((v) => v.fullName);
-          fontList = Array.from(new Set(fontList)).filter((v) =>
-            isSupportFontFamily(v),
+        window.queryLocalFonts().then(list => {
+          let fontList = list.map(v => v.fullName);
+          fontList = Array.from(new Set(fontList)).filter(v =>
+            isSupportFontFamily(v)
           );
           fontList.sort((a, b) => a.localeCompare(b));
-          const l = fontList.map((v) => ({
+          const l = fontList.map(v => ({
             label: v,
             value: v,
             disabled: false,
@@ -127,14 +134,14 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
             fontFamilyStore.setState(
               fontFamilyStore
                 .getSnapshot()
-                .filter((v) => v.value !== QUERY_ALL_LOCAL_FONT),
+                .filter(v => v.value !== QUERY_ALL_LOCAL_FONT)
             );
           }
         });
       } else {
         controller.updateCellStyle(
-          { fontFamily: String(value) },
-          controller.getActiveRange().range,
+          {fontFamily: String(value)},
+          controller.getActiveRange().range
         );
       }
     }, []);
@@ -155,26 +162,26 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
     }, []);
     const setFontSize = useCallback((value: string | number) => {
       controller.updateCellStyle(
-        { fontSize: Number(value) },
-        controller.getActiveRange().range,
+        {fontSize: Number(value)},
+        controller.getActiveRange().range
       );
     }, []);
     const toggleBold = useCallback(() => {
       controller.updateCellStyle(
-        { isBold: !cellStyle.isBold },
-        controller.getActiveRange().range,
+        {isBold: !cellStyle.isBold},
+        controller.getActiveRange().range
       );
     }, [cellStyle.isBold]);
     const toggleItalic = useCallback(() => {
       controller.updateCellStyle(
-        { isItalic: !cellStyle.isItalic },
-        controller.getActiveRange().range,
+        {isItalic: !cellStyle.isItalic},
+        controller.getActiveRange().range
       );
     }, [cellStyle.isItalic]);
     const toggleStrike = useCallback(() => {
       controller.updateCellStyle(
-        { isStrike: !cellStyle.isStrike },
-        controller.getActiveRange().range,
+        {isStrike: !cellStyle.isStrike},
+        controller.getActiveRange().range
       );
     }, [cellStyle.isStrike]);
     const setUnderline = useCallback((value: string | number) => {
@@ -186,30 +193,30 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         underline = EUnderLine.DOUBLE;
       }
       controller.updateCellStyle(
-        { underline },
-        controller.getActiveRange().range,
+        {underline},
+        controller.getActiveRange().range
       );
     }, []);
     const setFillColor = useCallback((value: string) => {
       controller.updateCellStyle(
-        { fillColor: value },
-        controller.getActiveRange().range,
+        {fillColor: value},
+        controller.getActiveRange().range
       );
     }, []);
     const setFontColor = useCallback((value: string) => {
       controller.updateCellStyle(
-        { fontColor: value },
-        controller.getActiveRange().range,
+        {fontColor: value},
+        controller.getActiveRange().range
       );
     }, []);
     const toggleWrapText = useCallback(() => {
       controller.updateCellStyle(
-        { isWrapText: !cellStyle.isWrapText },
-        controller.getActiveRange().range,
+        {isWrapText: !cellStyle.isWrapText},
+        controller.getActiveRange().range
       );
     }, [cellStyle.isWrapText]);
     const toggleMergeCell = useCallback(() => {
-      const { range, isMerged } = controller.getActiveRange();
+      const {range, isMerged} = controller.getActiveRange();
       if (isMerged) {
         controller.deleteMergeCell(range);
       } else {
@@ -220,7 +227,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       if (!value) {
         return;
       }
-      const { range, isMerged } = controller.getActiveRange();
+      const {range, isMerged} = controller.getActiveRange();
       if (isMerged) {
         controller.deleteMergeCell(range);
       } else {
@@ -232,8 +239,45 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         return;
       }
       controller.updateCellStyle(
-        { numberFormat: value },
-        controller.getActiveRange().range,
+        {numberFormat: value},
+        controller.getActiveRange().range
+      );
+    }, []);
+    const horizontalLeft = useCallback(() => {
+      controller.updateCellStyle(
+        {horizontalAlign: EHorizontalAlign.LEFT},
+        controller.getActiveRange().range
+      );
+    }, []);
+    const horizontalCenter = useCallback(() => {
+      controller.updateCellStyle(
+        {horizontalAlign: EHorizontalAlign.CENTER},
+        controller.getActiveRange().range
+      );
+    }, []);
+    const horizontalRight = useCallback(() => {
+      controller.updateCellStyle(
+        {horizontalAlign: EHorizontalAlign.RIGHT},
+        controller.getActiveRange().range
+      );
+    }, []);
+
+    const verticalTop = useCallback(() => {
+      controller.updateCellStyle(
+        {verticalAlign: EVerticalAlign.TOP},
+        controller.getActiveRange().range
+      );
+    }, []);
+    const verticalMiddle = useCallback(() => {
+      controller.updateCellStyle(
+        {verticalAlign: EVerticalAlign.MIDDLE},
+        controller.getActiveRange().range
+      );
+    }, []);
+    const verticalBottom = useCallback(() => {
+      controller.updateCellStyle(
+        {verticalAlign: EVerticalAlign.BOTTOM},
+        controller.getActiveRange().range
       );
     }, []);
     return (
@@ -243,7 +287,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           onClick={undo}
           testId="toolbar-undo"
           title="undo"
-        >
+          className={styles['icon-center']}>
           <Icon name="undo" />
         </Button>
         <Button
@@ -251,7 +295,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           onClick={redo}
           testId="toolbar-redo"
           title="redo"
-        >
+          className={styles['icon-center']}>
           <Icon name="redo" />
         </Button>
         <Button onClick={copy} testId="toolbar-copy">
@@ -282,24 +326,21 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           active={cellStyle.isBold}
           onClick={toggleBold}
           testId="toolbar-bold"
-          title="Bold"
-        >
+          title="Bold">
           <span className={styles.bold}>B</span>
         </Button>
         <Button
           active={cellStyle.isItalic}
           onClick={toggleItalic}
           testId="toolbar-italic"
-          title="Italic"
-        >
+          title="Italic">
           <span className={styles.italic}>I</span>
         </Button>
         <Button
           active={cellStyle.isStrike}
           onClick={toggleStrike}
           testId="toolbar-strike"
-          title="Strike"
-        >
+          title="Strike">
           <span className={styles.strike}>A</span>
         </Button>
         <Select
@@ -313,9 +354,11 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           key="fill-color"
           color={cellStyle.fillColor}
           onChange={setFillColor}
-          testId="toolbar-fill-color"
-        >
-          <Button style={fillStyle} testId="toolbar-fill-color">
+          testId="toolbar-fill-color">
+          <Button
+            style={fillStyle}
+            testId="toolbar-fill-color"
+            className={styles['icon-center']}>
             <FillColorIcon />
           </Button>
         </ColorPicker>
@@ -324,18 +367,61 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           key="font-color"
           color={cellStyle.fontColor}
           onChange={setFontColor}
-          testId="toolbar-font-color"
-        >
-          <Button style={fontStyle} testId="toolbar-font-color">
+          testId="toolbar-font-color">
+          <Button
+            style={fontStyle}
+            testId="toolbar-font-color"
+            className={styles['icon-center']}>
             <Icon name="fontColor" />
           </Button>
         </ColorPicker>
         <Button
+          active={cellStyle.verticalAlign === EVerticalAlign.TOP}
+          onClick={verticalTop}
+          testId="toolbar-vertical-top"
+          className={styles['icon-center']}>
+          <Icon name="verticalTop" />
+        </Button>
+        <Button
+          active={cellStyle.verticalAlign === EVerticalAlign.MIDDLE}
+          onClick={verticalMiddle}
+          testId="toolbar-vertical-middle"
+          className={styles['icon-center']}>
+          <Icon name="verticalMiddle" />
+        </Button>
+        <Button
+          active={cellStyle.verticalAlign === EVerticalAlign.BOTTOM}
+          onClick={verticalBottom}
+          testId="toolbar-vertical-bottom"
+          className={styles['icon-center']}>
+          <Icon name="verticalBottom" />
+        </Button>
+        <Button
+          active={cellStyle.horizontalAlign === EHorizontalAlign.LEFT}
+          onClick={horizontalLeft}
+          testId="toolbar-horizontal-left"
+          className={styles['icon-center']}>
+          <Icon name="horizontalLeft" />
+        </Button>
+        <Button
+          active={cellStyle.horizontalAlign === EHorizontalAlign.CENTER}
+          onClick={horizontalCenter}
+          testId="toolbar-horizontal-center"
+          className={styles['icon-center']}>
+          <Icon name="horizontalCenter" />
+        </Button>
+        <Button
+          active={cellStyle.horizontalAlign === EHorizontalAlign.RIGHT}
+          onClick={horizontalRight}
+          testId="toolbar-horizontal-right"
+          className={styles['icon-center']}>
+          <Icon name="horizontalRight" />
+        </Button>
+        <Button
           active={cellStyle.isWrapText}
           onClick={toggleWrapText}
           testId="toolbar-wrap-text"
-          className={styles['wrap-text']}
-        >
+          className={styles['wrap-text']}>
           {$('wrap-text')}
         </Button>
         <SelectList
@@ -343,15 +429,13 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           value={cellStyle.mergeType}
           onChange={handleMergeCell}
           className={styles['merge-cell']}
-          testId="toolbar-merge-cell-select"
-        >
+          testId="toolbar-merge-cell-select">
           <Button
             active={cellStyle.isMergeCell}
             onClick={toggleMergeCell}
             testId="toolbar-merge-cell"
             className={styles['merge-cell-button']}
-            type="plain"
-          >
+            type="plain">
             {$('merge-cell')}
           </Button>
         </SelectList>
@@ -360,8 +444,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           value={numberFormatValue}
           onChange={handleNumberFormat}
           className={styles['number-format']}
-          testId="toolbar-number-format-select"
-        >
+          testId="toolbar-number-format-select">
           <div className={styles['number-format-value']}>
             {numberFormatLabel}
           </div>
@@ -371,7 +454,7 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         <Github />
       </div>
     );
-  },
+  }
 );
 
 ToolbarContainer.displayName = 'ToolbarContainer';

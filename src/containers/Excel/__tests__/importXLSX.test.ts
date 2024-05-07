@@ -153,7 +153,7 @@ describe('importXLSX.test.ts', () => {
           '2': {
             '0_0': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
                 fontSize: 11,
                 isBold: false,
@@ -167,7 +167,7 @@ describe('importXLSX.test.ts', () => {
             },
             '0_1': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
                 fontSize: 26,
                 isBold: false,
@@ -180,12 +180,12 @@ describe('importXLSX.test.ts', () => {
               value: '',
             },
             '0_2': {
-              style: { verticalAlign: EVerticalAlign.CENTER, isWrapText: true },
+              style: { verticalAlign: EVerticalAlign.MIDDLE, isWrapText: true },
               value: '1a',
             },
             '0_3': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
                 fontSize: 36,
                 isBold: false,
@@ -199,63 +199,63 @@ describe('importXLSX.test.ts', () => {
             },
             '1_0': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: 15,
             },
             '1_1': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',
             },
             '1_2': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',
             },
             '1_3': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',
             },
             '2_0': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',
             },
             '2_1': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',
             },
             '2_2': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',
             },
             '2_3': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',
             },
             '3_0': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
                 fillColor: '#FF0000',
               },
@@ -263,7 +263,7 @@ describe('importXLSX.test.ts', () => {
             },
             '3_1': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
                 fillColor: '#FF0000',
               },
@@ -271,21 +271,21 @@ describe('importXLSX.test.ts', () => {
             },
             '3_2': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',
             },
             '3_3': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',
             },
             '4_0': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
                 fillColor: '#FF0000',
               },
@@ -293,7 +293,7 @@ describe('importXLSX.test.ts', () => {
             },
             '4_1': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
                 fillColor: '#FF0000',
               },
@@ -301,14 +301,14 @@ describe('importXLSX.test.ts', () => {
             },
             '4_2': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',
             },
             '4_3': {
               style: {
-                verticalAlign: EVerticalAlign.CENTER,
+                verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
               },
               value: '',

@@ -130,7 +130,7 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
     if (style.verticalAlign !== undefined) {
       const alignMap = {
         [EVerticalAlign.TOP]: 'top',
-        [EVerticalAlign.CENTER]: 'center',
+        [EVerticalAlign.MIDDLE]: 'center',
         [EVerticalAlign.BOTTOM]: 'bottom',
       };
       if (style.verticalAlign !== EVerticalAlign.BOTTOM) {

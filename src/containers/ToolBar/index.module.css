@@ -5,6 +5,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  font-size: var(--font);
 }
 .toolbar-wrapper > * {
   margin-right: 8px;
@@ -44,4 +45,10 @@
 
 .wrap-text {
   text-wrap: nowrap;
+}
+
+.icon-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

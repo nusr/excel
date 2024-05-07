@@ -5,13 +5,13 @@ html {
 }
 html {
   font-size: var(--font);
-  color: var(--contentColor);
   line-height: var(--lineHeight);
 }
 body {
   font-family: 'Microsoft Yahei UI', 'PingFang SC', 'Arial', sans-serif;
   background-color: var(--white);
   color: var(--black);
+  font-size: var(--font);
 }
 .root-container {
   height: 100vh;
@@ -26,7 +26,7 @@ span {
 input {
   color: var(--black);
 }
-html[data-theme='dark'] input{
+html[data-theme='dark'] input {
   background-color: var(--white);
 }
 input[type='number'] {

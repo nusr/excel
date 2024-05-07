@@ -504,8 +504,10 @@ export class Worksheet implements IWorksheet {
     const keyList = Object.keys(style) as Array<keyof Partial<StyleType>>;
     for (const k of keyList) {
       const oldValue = sheetData[key]?.style?.[k];
-
       const newValue = style[k];
+      if (oldValue === newValue) {
+        continue;
+      }
       // @ts-ignore
       sheetData[key].style[k] = newValue;
 

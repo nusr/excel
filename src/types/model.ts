@@ -5,7 +5,7 @@ import type { ICommandItem } from './history';
 
 export enum EVerticalAlign {
   TOP,
-  CENTER,
+  MIDDLE,
   BOTTOM,
 }
 export enum EHorizontalAlign {

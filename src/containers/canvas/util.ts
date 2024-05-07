@@ -5,7 +5,6 @@ import {
   IRange,
   EMergeCellType,
   EHorizontalAlign,
-  EVerticalAlign,
 } from '@/types';
 import {
   DEFAULT_FONT_SIZE,
@@ -127,13 +126,16 @@ function updateActiveCell(controller: IController) {
     fillColor = '',
     isWrapText = false,
     underline = EUnderLine.NONE,
-    horizontalAlign = EHorizontalAlign.LEFT,
-    verticalAlign = EVerticalAlign.CENTER,
+    horizontalAlign,
+    verticalAlign,
   } = cell?.style || {};
 
   const numberFormat = cell?.style?.numberFormat || DEFAULT_FORMAT_CODE;
   const isRight = numberFormat === DEFAULT_FORMAT_CODE && typeof cell?.value === 'number';
-  const horAlign = isRight ? EHorizontalAlign.RIGHT : horizontalAlign;
+  let horAlign = horizontalAlign;
+  if (horizontalAlign === undefined && isRight) {
+    horAlign = EHorizontalAlign.RIGHT
+  }
   let displayValue = ''
   if (isDateFormat(numberFormat)) {
     displayValue = numberFormatUtil(cell?.value, numberFormat);
