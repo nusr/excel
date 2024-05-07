@@ -1,6 +1,6 @@
 import {npx, dpr, canvasLog, headerSizeSet, canvasSizeSet} from '@/util';
 import {resizeCanvas, renderCell} from './util';
-import {ContentView, IController, IRange} from '@/types';
+import {ContentView, IController, IRange, ContentParams} from '@/types';
 
 export class Content implements ContentView {
   private ctx: CanvasRenderingContext2D;
@@ -21,10 +21,10 @@ export class Content implements ContentView {
     const {width, height} = canvasSizeSet.get();
     resizeCanvas(this.ctx.canvas, width, height);
   }
-  render() {
+  render(params: ContentParams) {
     canvasLog('render canvas content');
     this.clear();
-    this.renderContent();
+    this.renderContent(params);
   }
   check() {
     const {controller} = this;
@@ -53,7 +53,13 @@ export class Content implements ContentView {
     this.ctx.clearRect(0, 0, npx(width), npx(height));
   }
 
-  private renderCell(row: number, col: number, mergeCell: IRange | undefined) {
+  private renderCell(
+    row: number,
+    col: number,
+    mergeCell: IRange | undefined,
+    maxWidth: number,
+    maxHeight: number
+  ) {
     const {controller, ctx} = this;
     const range: IRange = {
       row: row,
@@ -76,8 +82,8 @@ export class Content implements ContentView {
       {
         top: position.top,
         left: position.left,
-        width: cellSize.width,
-        height: cellSize.height,
+        width: Math.min(cellSize.width, maxWidth),
+        height: Math.min(cellSize.height, maxHeight),
       },
       cellInfo.value,
       cellInfo.style
@@ -92,28 +98,18 @@ export class Content implements ContentView {
     }
   }
 
-  private renderContent() {
+  private renderContent({
+    endCol,
+    endRow,
+    contentHeight,
+    contentWidth,
+  }: ContentParams) {
     const {controller, ctx} = this;
-    const {width, height} = canvasSizeSet.get();
     const headerSize = headerSizeSet.get();
     const {row, col} = controller.getScroll();
 
-    let x = headerSize.width;
-    let c = col;
-    let y = headerSize.height;
-    let r = row;
-
-    while (x + controller.getColWidth(c).len < width) {
-      x += controller.getColWidth(c).len;
-      c++;
-    }
-
-    while (y + controller.getRowHeight(r).len < height) {
-      y += controller.getRowHeight(r).len;
-      r++;
-    }
-    const endRow = r;
-    const endCol = c;
+    const maxWidth = Math.floor(contentWidth - headerSize.width);
+    const maxHeight = Math.floor(contentHeight - headerSize.height);
     ctx.save();
 
     this.rowMap = new Map<number, number>();
@@ -127,7 +123,7 @@ export class Content implements ContentView {
         const cell = mergeCells.find(
           v => v.row === rowIndex && v.col === colIndex
         );
-        this.renderCell(rowIndex, colIndex, cell);
+        this.renderCell(rowIndex, colIndex, cell, maxWidth, maxHeight);
       }
     }
     ctx.restore();

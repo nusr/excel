@@ -17,9 +17,7 @@ import {
   ErrorTypes,
   Point,
   EUnderLine,
-  IController,
   IWindowSize,
-  IRange,
   ResultType,
   StyleType,
   EHorizontalAlign,
@@ -161,38 +159,6 @@ export function resizeCanvas(
   const realHeight = npx(height);
   canvas.width = realWidth;
   canvas.height = realHeight;
-}
-
-export function renderCellData(
-  controller: IController,
-  ctx: CanvasRenderingContext2D,
-  range: IRange
-): IWindowSize {
-  let cellInfo = controller.getCell(range);
-  const result: IWindowSize = {
-    width: 0,
-    height: 0,
-  };
-  if (!cellInfo) {
-    return result;
-  }
-  const cellSize = controller.getCellSize(range);
-  if (cellSize.width <= 0 || cellSize.height <= 0) {
-    return result;
-  }
-  const position = controller.computeCellPosition(range);
-  const newSize = renderCell(
-    ctx,
-    {
-      top: position.top,
-      left: position.left,
-      width: cellSize.width,
-      height: cellSize.height,
-    },
-    cellInfo.value,
-    cellInfo.style
-  );
-  return newSize;
 }
 
 function splitWords(
@@ -411,8 +377,10 @@ function computeCell(
     });
   }
   textHeight = Math.max(textHeight, fontSize * sizeConfig.lineHeight);
+  textWidth += lineGap;
+  textHeight += lineGap;
   if (textWidth <= width && textHeight <= height) {
-    let x = left;
+    let x = left + lineGap;
     let y = top + (height - textHeight) / 2 + lineGap;
     if (verticalAlign === EVerticalAlign.TOP) {
       y = top + lineGap;
@@ -422,7 +390,7 @@ function computeCell(
     if (style?.horizontalAlign === EHorizontalAlign.CENTER) {
       x = left + (width - textWidth) / 2;
     } else if (style?.horizontalAlign === EHorizontalAlign.RIGHT) {
-      x = left + (width - textWidth);
+      x = left + (width - textWidth) - lineGap;
     }
     for (const item of textList) {
       item.x = item.x + x;

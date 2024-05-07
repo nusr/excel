@@ -1,4 +1,4 @@
-import { IRange } from '@/types';
+import {IRange} from '@/types';
 
 export function isSheet(range: IRange): boolean {
   return isRow(range) && isCol(range);
@@ -20,13 +20,24 @@ export function isSameRange(oldRange: IRange, newRange: IRange): boolean {
   );
 }
 
-export function containRange(row: number, col: number, range: IRange): boolean {
-  return (
-    row >= range.row &&
-    row < range.row + range.rowCount &&
-    col >= range.col &&
-    col < range.col + range.colCount
+export function containRange(range: IRange, target: IRange): boolean {
+  const {row, col} = range;
+  const check = (
+    row >= target.row &&
+    row < target.row + target.rowCount &&
+    col >= target.col &&
+    col < target.col + target.colCount
   );
+  if (check) {
+    return true;
+  }
+  if (target.colCount === 0 && target.row === range.row) {
+    return true;
+  }
+  if (target.rowCount === 0 && target.col === range.col) {
+    return true;
+  }
+  return false;
 }
 
 export class SheetRange implements IRange {
@@ -40,7 +51,7 @@ export class SheetRange implements IRange {
     col: number,
     rowCount: number,
     colCount: number,
-    sheetId: string,
+    sheetId: string
   ) {
     this.row = row;
     this.col = col;
@@ -60,7 +71,7 @@ export class SheetRange implements IRange {
       range.col,
       range.rowCount,
       range.colCount,
-      range.sheetId,
+      range.sheetId
     );
   }
   toIRange(): IRange {

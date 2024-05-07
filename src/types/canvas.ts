@@ -1,5 +1,4 @@
-import type { EventType } from './model';
-import { IController } from './controller';
+import {IController} from './controller';
 
 export type ModifierKeyType = 'alt' | 'shift' | 'ctrl' | 'meta';
 export interface KeyboardEventItem {
@@ -8,9 +7,16 @@ export interface KeyboardEventItem {
   handler: (controller: IController) => void;
 }
 
+export type ContentParams = {
+  endRow: number;
+  endCol: number;
+  contentHeight: number;
+  contentWidth: number;
+};
+
 export interface ContentView {
   getCanvas: () => HTMLCanvasElement;
   resize: () => void;
-  render: (value: EventType) => void;
+  render: (params: ContentParams) => void;
   check(): void;
 }

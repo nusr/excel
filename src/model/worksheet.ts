@@ -21,11 +21,10 @@ import {
   stringToCoordinate,
   MERGE_CELL_LINE_BREAK,
   convertStringToResultType,
-
 } from '@/util';
-import { DELETE_FLAG, transformData } from './History';
-import { parseFormula, CustomError } from '@/formula';
-import { numberFormat } from '@/model'
+import {DELETE_FLAG, transformData} from './History';
+import {parseFormula, CustomError} from '@/formula';
+import {numberFormat} from '@/model';
 
 export class Worksheet implements IWorksheet {
   private worksheets: WorkBookJSON['worksheets'] = {};
@@ -35,20 +34,20 @@ export class Worksheet implements IWorksheet {
   }
   toJSON() {
     return {
-      worksheets: { ...this.worksheets },
+      worksheets: {...this.worksheets},
     };
   }
   fromJSON(json: WorkBookJSON): void {
     const data = json.worksheets || {};
     this.worksheets = this.worksheets || {};
-    const oldValue = { ...this.worksheets };
+    const oldValue = {...this.worksheets};
     this.worksheets = {};
     for (const [sheetId, sheetData] of Object.entries(data)) {
       this.worksheets[sheetId] = {};
       if (isEmpty(sheetData)) {
         continue;
       }
-      this.worksheets[sheetId] = this.validateSheetData(sheetData)
+      this.worksheets[sheetId] = this.validateSheetData(sheetData);
     }
 
     this.model.push({
@@ -69,86 +68,92 @@ export class Worksheet implements IWorksheet {
     }
   }
   addMergeCell(range: IRange, type?: EMergeCellType): void {
+    const sheetId = range.sheetId || this.model.getCurrentSheetId();
     const isMergeContent = type === EMergeCellType.MERGE_CONTENT;
-    let list: ModelCellType[] = [];
+    const dataList: Array<{value: ModelCellType; row: number; col: number}> =
+      [];
     this.model.iterateRange(range, (row, col) => {
       const cellInfo = this.model.getCell({
         row,
         col,
         rowCount: 1,
         colCount: 1,
-        sheetId: range.sheetId,
+        sheetId,
       });
-      if (!cellInfo) {
-        return false;
-      }
-
-      if (isMergeContent) {
-        list.push({ ...cellInfo });
-      } else {
-        if (list.length === 0) {
-          list.push({ ...cellInfo });
-        }
-      }
-      if (row !== range.row || col !== range.col) {
-        const oldValue = { ...cellInfo };
-        const key = coordinateToString(row, col);
-        delete this.worksheets[range.sheetId][key];
-        this.model.push({
-          type: 'worksheets',
-          key: `${range.sheetId}.${key}`,
-          newValue: DELETE_FLAG,
-          oldValue,
-        });
+      if (cellInfo) {
+        dataList.push({value: {...cellInfo}, row, col});
       }
       return false;
     });
-    if (list.length === 0) {
+    if (dataList.length === 0) {
       return;
     }
-    // If it exists formula, only use the first cell data
-    if (list.some((v) => v.formula)) {
-      list = [list[0]];
-    }
-    const key = coordinateToString(range.row, range.col);
-    let newCellData: ModelCellType | null = null;
-    if (list.length > 1) {
-      newCellData = {
-        value: '',
-        style: list[0].style,
-      };
-      newCellData.value = list
-        .map((v) => numberFormat(v.value, v.style?.numberFormat))
-        .join(MERGE_CELL_LINE_BREAK);
-    } else {
-      newCellData = list[0];
-    }
-    if (newCellData) {
-      const oldValue = this.worksheets[range.sheetId][key]
-        ? { ...this.worksheets[range.sheetId][key] }
-        : undefined;
-      if (
-        type === EMergeCellType.MERGE_CELL ||
-        type === EMergeCellType.MERGE_CENTER
-      ) {
-        if (!newCellData.style) {
-          newCellData.style = {};
-        }
-        newCellData.style.horizontalAlign = EHorizontalAlign.CENTER;
-      } else if (type === EMergeCellType.MERGE_CONTENT) {
-        if (!newCellData.style) {
-          newCellData.style = {};
-        }
-        newCellData.style.isWrapText = true;
+    let list: string[] = [
+      numberFormat(
+        dataList[0].value.value,
+        dataList[0].value.style?.numberFormat
+      ),
+    ];
+    for (let i = 1; i < dataList.length; i++) {
+      const item = dataList[i];
+      const key = coordinateToString(item.row, item.col);
+      const oldValue = {...item.value};
+      if (isMergeContent) {
+        list.push(numberFormat(oldValue.value, oldValue.style?.numberFormat));
       }
-      this.worksheets[range.sheetId][key] = newCellData;
+      delete this.worksheets[sheetId][key];
       this.model.push({
         type: 'worksheets',
-        key: `${range.sheetId}.${key}`,
-        newValue: newCellData,
-        oldValue: oldValue ? oldValue : DELETE_FLAG,
+        key: `${sheetId}.${key}`,
+        newValue: DELETE_FLAG,
+        oldValue,
       });
     }
+    // If it exists formula, only use the first cell data
+    if (dataList.some(v => v.value.formula)) {
+      list = [list[0]];
+    }
+    let realStyle: Partial<StyleType> = {};
+    let value: ResultType = dataList[0].value.value;
+    if (dataList[0].value.style) {
+      realStyle = {...dataList[0].value.style};
+    }
+    if (
+      type === EMergeCellType.MERGE_CELL ||
+      type === EMergeCellType.MERGE_CENTER
+    ) {
+      realStyle.horizontalAlign = EHorizontalAlign.CENTER;
+    } else if (type === EMergeCellType.MERGE_CONTENT) {
+      realStyle.isWrapText = true;
+    }
+    const newRange: IRange = {
+      row: range.row,
+      col: range.col,
+      rowCount: 1,
+      colCount: 1,
+      sheetId,
+    };
+    if (isMergeContent) {
+      value = list.join(MERGE_CELL_LINE_BREAK);
+    } else {
+      value = list[0];
+    }
+    if (range.row === dataList[0].row && range.col === dataList[0].col) {
+      if (isMergeContent) {
+        this.setCellValue(value, newRange);
+      }
+    } else {
+      const key = coordinateToString(dataList[0].row, dataList[0].col);
+      delete this.worksheets[sheetId][key];
+      this.model.push({
+        type: 'worksheets',
+        key: `${sheetId}.${key}`,
+        newValue: DELETE_FLAG,
+        oldValue: {...dataList[0].value},
+      });
+      this.setCellValue(value, newRange);
+    }
+    this.updateCellStyle(realStyle, newRange);
   }
   addRow(rowIndex: number, count: number, isAbove = false): void {
     const id = this.model.getCurrentSheetId();
@@ -156,12 +161,12 @@ export class Worksheet implements IWorksheet {
     if (isEmpty(sheetData)) {
       return;
     }
-    const list = Array.from(Object.keys(sheetData)).map((key) =>
-      stringToCoordinate(key),
+    const list = Array.from(Object.keys(sheetData)).map(key =>
+      stringToCoordinate(key)
     );
     list.sort((a, b) => a.row - b.row);
     const endIndex = isAbove ? rowIndex : rowIndex + 1;
-    for (let i = list.length - 1;i >= 0;i--) {
+    for (let i = list.length - 1; i >= 0; i--) {
       const item = list[i];
       if (item.row < endIndex) {
         continue;
@@ -169,10 +174,8 @@ export class Worksheet implements IWorksheet {
       const key = coordinateToString(item.row, item.col);
       const newKey = coordinateToString(item.row + count, item.col);
 
-      const newValue = sheetData[key] ? { ...sheetData[key] } : { value: '' };
-      const oldData = sheetData[newKey]
-        ? { ...sheetData[newKey] }
-        : { value: '' };
+      const newValue = sheetData[key] ? {...sheetData[key]} : {value: ''};
+      const oldData = sheetData[newKey] ? {...sheetData[newKey]} : {value: ''};
 
       delete sheetData[key];
       this.model.push({
@@ -181,7 +184,7 @@ export class Worksheet implements IWorksheet {
         newValue: DELETE_FLAG,
         oldValue: newValue,
       });
-      sheetData[newKey] = { ...newValue };
+      sheetData[newKey] = {...newValue};
       this.model.push({
         type: 'worksheets',
         key: `${id}.${newKey}`,
@@ -197,24 +200,24 @@ export class Worksheet implements IWorksheet {
       return;
     }
 
-    const list = Array.from(Object.keys(sheetData)).map((key) =>
-      stringToCoordinate(key),
+    const list = Array.from(Object.keys(sheetData)).map(key =>
+      stringToCoordinate(key)
     );
     list.sort((a, b) => a.row - b.row);
-    for (let i = 0;i < list.length;i++) {
+    for (let i = 0; i < list.length; i++) {
       const item = list[i];
       if (item.row < rowIndex) {
         continue;
       }
       const key = coordinateToString(item.row, item.col);
-      const newValue = sheetData[key] ? { ...sheetData[key] } : { value: '' };
+      const newValue = sheetData[key] ? {...sheetData[key]} : {value: ''};
       if (item.row >= rowIndex + count) {
         const newKey = coordinateToString(item.row - count, item.col);
         const oldValue = sheetData[newKey]
-          ? { ...sheetData[newKey] }
-          : { value: '' };
+          ? {...sheetData[newKey]}
+          : {value: ''};
 
-        sheetData[newKey] = { ...newValue };
+        sheetData[newKey] = {...newValue};
         this.model.push({
           type: 'worksheets',
           key: `${id}.${newKey}`,
@@ -239,12 +242,12 @@ export class Worksheet implements IWorksheet {
       return;
     }
 
-    const list = Array.from(Object.keys(sheetData)).map((key) =>
-      stringToCoordinate(key),
+    const list = Array.from(Object.keys(sheetData)).map(key =>
+      stringToCoordinate(key)
     );
     list.sort((a, b) => a.col - b.col);
     const endIndex = isRight ? colIndex + 1 : colIndex;
-    for (let i = list.length - 1;i >= 0;i--) {
+    for (let i = list.length - 1; i >= 0; i--) {
       const item = list[i];
       if (item.col < endIndex) {
         continue;
@@ -252,10 +255,8 @@ export class Worksheet implements IWorksheet {
 
       const key = coordinateToString(item.row, item.col);
       const newKey = coordinateToString(item.row, item.col + count);
-      const newValue = sheetData[key] ? { ...sheetData[key] } : { value: '' };
-      const oldValue = sheetData[newKey]
-        ? { ...sheetData[newKey] }
-        : { value: '' };
+      const newValue = sheetData[key] ? {...sheetData[key]} : {value: ''};
+      const oldValue = sheetData[newKey] ? {...sheetData[newKey]} : {value: ''};
       delete sheetData[key];
       this.model.push({
         type: 'worksheets',
@@ -279,24 +280,24 @@ export class Worksheet implements IWorksheet {
     if (isEmpty(sheetData)) {
       return;
     }
-    const list = Array.from(Object.keys(sheetData)).map((key) =>
-      stringToCoordinate(key),
+    const list = Array.from(Object.keys(sheetData)).map(key =>
+      stringToCoordinate(key)
     );
     list.sort((a, b) => a.col - b.col);
-    for (let i = 0;i < list.length;i++) {
+    for (let i = 0; i < list.length; i++) {
       const item = list[i];
       if (item.col < colIndex) {
         continue;
       }
       const key = coordinateToString(item.row, item.col);
-      const newValue = sheetData[key] ? { ...sheetData[key] } : { value: '' };
+      const newValue = sheetData[key] ? {...sheetData[key]} : {value: ''};
       if (item.col >= colIndex + count) {
         const newKey = coordinateToString(item.row, item.col - count);
         const oldValue = sheetData[newKey]
-          ? { ...sheetData[newKey] }
-          : { value: '' };
+          ? {...sheetData[newKey]}
+          : {value: ''};
 
-        sheetData[newKey] = { ...newValue };
+        sheetData[newKey] = {...newValue};
         this.model.push({
           type: 'worksheets',
           key: `${id}.${newKey}`,
@@ -351,8 +352,8 @@ export class Worksheet implements IWorksheet {
     if (deepEqual(data, this.worksheets[id])) {
       return;
     }
-    const oldData = this.worksheets[id] ? { ...this.worksheets[id] } : {};
-    this.worksheets[id] = this.validateSheetData(data)
+    const oldData = this.worksheets[id] ? {...this.worksheets[id]} : {};
+    this.worksheets[id] = this.validateSheetData(data);
     this.model.push({
       type: 'worksheets',
       key: id,
@@ -361,7 +362,7 @@ export class Worksheet implements IWorksheet {
     });
   }
   getCell(range: IRange): ModelCellType | null {
-    const { row, col, sheetId } = range;
+    const {row, col, sheetId} = range;
     const id = sheetId || this.model.getCurrentSheetId();
     if (
       this.model.getRowHeight(row, id).len === HIDE_CELL ||
@@ -383,11 +384,11 @@ export class Worksheet implements IWorksheet {
   setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
-    range: IRange,
+    range: IRange
   ): void {
-    const { row, col } = range;
-    for (let r = 0;r < value.length;r++) {
-      for (let c = 0;c < value[r].length;c++) {
+    const {row, col} = range;
+    for (let r = 0; r < value.length; r++) {
+      for (let c = 0; c < value[r].length; c++) {
         const temp: Coordinate = {
           row: row + r,
           col: col + c,
@@ -395,14 +396,18 @@ export class Worksheet implements IWorksheet {
         if (style[r] && style[r][c]) {
           this.setStyle(style[r][c], temp);
         }
-        this.setCellValue(value[r][c], { ...range, ...temp })
+        this.setCellValue(value[r][c], {...range, ...temp});
       }
     }
   }
 
   setCellValue(value: ResultType, range: IRange): void {
     const id = range.sheetId || this.model.getCurrentSheetId();
-    if (value && typeof value === 'string' && value.startsWith(FORMULA_PREFIX)) {
+    if (
+      value &&
+      typeof value === 'string' &&
+      value.startsWith(FORMULA_PREFIX)
+    ) {
       this.setCellFormula(value, range);
     } else {
       const old =
@@ -418,10 +423,10 @@ export class Worksheet implements IWorksheet {
     if (isEmpty(style)) {
       return;
     }
-    const { row, col, rowCount, colCount } = range;
-    for (let r = row, endRow = row + rowCount;r < endRow;r++) {
-      for (let c = col, endCol = col + colCount;c < endCol;c++) {
-        this.updateStyle(style, { row: r, col: c });
+    const {row, col, rowCount, colCount} = range;
+    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+      for (let c = col, endCol = col + colCount; c < endCol; c++) {
+        this.updateStyle(style, {row: r, col: c});
       }
     }
   }
@@ -429,7 +434,7 @@ export class Worksheet implements IWorksheet {
     const id = this.model.getCurrentSheetId();
     const activeCell = this.model.getActiveRange().range;
 
-    const { row, col, rowCount, colCount, sheetId } = fromRange;
+    const {row, col, rowCount, colCount, sheetId} = fromRange;
     const realSheetId = sheetId || id;
     const fromSheetData = this.getWorksheet(realSheetId);
 
@@ -447,15 +452,15 @@ export class Worksheet implements IWorksheet {
     this.model.iterateRange(fromRange, (r, c) => {
       const oldPath = coordinateToString(r, c);
       const newValue = fromSheetData[oldPath]
-        ? { ...fromSheetData[oldPath] }
-        : { value: '' };
+        ? {...fromSheetData[oldPath]}
+        : {value: ''};
       const realRow = activeCell.row + (r - row);
       const realCol = activeCell.col + (c - col);
       const path = coordinateToString(realRow, realCol);
       const oldValue = currentSheetData[path]
-        ? { ...currentSheetData[path] }
-        : { value: '' };
-      currentSheetData[path] = { ...newValue };
+        ? {...currentSheetData[path]}
+        : {value: ''};
+      currentSheetData[path] = {...newValue};
       this.model.push({
         type: 'worksheets',
         key: `${id}.${path}`,
@@ -482,13 +487,13 @@ export class Worksheet implements IWorksheet {
     if (isEmpty(this.worksheets[id])) {
       return;
     }
-    const oldSheetData = this.worksheets[id] ? { ...this.worksheets[id] } : {};
+    const oldSheetData = this.worksheets[id] ? {...this.worksheets[id]} : {};
     delete this.worksheets[id];
     this.model.push({
       type: 'worksheets',
       key: id,
       newValue: DELETE_FLAG,
-      oldValue: { ...oldSheetData },
+      oldValue: {...oldSheetData},
     });
   }
   private updateStyle(style: Partial<StyleType>, range: Coordinate) {
@@ -529,7 +534,7 @@ export class Worksheet implements IWorksheet {
     const cellData = sheetData[key];
     const styleData = cellData.style || {};
 
-    const oldStyle = { ...styleData };
+    const oldStyle = {...styleData};
     sheetData[key].style = style;
 
     this.model.push({
@@ -540,7 +545,7 @@ export class Worksheet implements IWorksheet {
     });
   }
   private setValue(value: ResultType, range: Coordinate): void {
-    const { row, col } = range;
+    const {row, col} = range;
     const id = this.model.getCurrentSheetId();
 
     const key = coordinateToString(row, col);
@@ -552,7 +557,7 @@ export class Worksheet implements IWorksheet {
       return;
     }
     const oldValue = oldData.value;
-    const newValue = convertStringToResultType(value ?? '')
+    const newValue = convertStringToResultType(value ?? '');
 
     sheetData[key].value = newValue;
 
@@ -562,10 +567,9 @@ export class Worksheet implements IWorksheet {
       newValue: newValue,
       oldValue: oldValue === undefined ? DELETE_FLAG : oldValue,
     });
-
   }
   private setCellFormula(formula: string, range: Coordinate): void {
-    const { row, col } = range;
+    const {row, col} = range;
     const id = this.model.getCurrentSheetId();
     const key = coordinateToString(row, col);
     this.worksheets[id] = this.worksheets[id] || {};
@@ -590,7 +594,7 @@ export class Worksheet implements IWorksheet {
       formula,
       {
         get: (range: IRange) => {
-          const { row, col, sheetId } = range;
+          const {row, col, sheetId} = range;
           const result: ResultType[] = [];
           const sheetInfo = this.model.getSheetInfo(sheetId);
           if (
@@ -629,33 +633,32 @@ export class Worksheet implements IWorksheet {
           const t = this.model.checkDefineName(name);
           return Boolean(t);
         },
-      },
+      }
     );
     return result;
   }
   private convertSheetNameToSheetId = (sheetName: string): string => {
-    const item = this.model.getSheetList().find((v) => v.name === sheetName);
+    const item = this.model.getSheetList().find(v => v.name === sheetName);
     return item?.sheetId || '';
   };
   private validateSheetData(sheetData: WorksheetData) {
-    const result: WorksheetData = {}
+    const result: WorksheetData = {};
     for (const [key, cell] of Object.entries(sheetData)) {
       if (isEmpty(cell)) {
         continue;
       }
-      const value = convertStringToResultType(cell.value ?? '')
+      const value = convertStringToResultType(cell.value ?? '');
       result[key] = {
         value,
       };
       if (!isEmpty(cell.style)) {
-        result[key].style = { ...cell.style };
+        result[key].style = {...cell.style};
       }
       if (cell.formula) {
         if (cell.formula.startsWith(FORMULA_PREFIX)) {
           result[key].formula = cell.formula;
         } else {
-          result[key].formula =
-            FORMULA_PREFIX + cell.formula;
+          result[key].formula = FORMULA_PREFIX + cell.formula;
         }
       }
     }

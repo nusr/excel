@@ -1,4 +1,4 @@
-import { SheetRange, isCol, isRow, isSheet, containRange } from '../range';
+import {SheetRange, isCol, isRow, isSheet, containRange} from '../range';
 
 describe('range.test.ts', () => {
   const mockSheetName = 'test';
@@ -26,81 +26,102 @@ describe('range.test.ts', () => {
           rowCount: 0,
           colCount: 0,
           sheetId: mockSheetName,
-        }),
+        })
       ).toBeInstanceOf(SheetRange);
     });
   });
   describe('containRange', () => {
     it('should be true', () => {
       expect(
-        containRange(1, 1, {
-          row: 0,
-          col: 0,
-          rowCount: 2,
-          colCount: 2,
-          sheetId: '',
-        }),
+        containRange(
+          {row: 1, col: 1, rowCount: 1, colCount: 1, sheetId: ''},
+          {
+            row: 0,
+            col: 0,
+            rowCount: 2,
+            colCount: 2,
+            sheetId: '',
+          }
+        )
       ).toBeTruthy();
 
       expect(
-        containRange(0, 0, {
-          row: 0,
-          col: 0,
-          rowCount: 2,
-          colCount: 2,
-          sheetId: '',
-        }),
+        containRange(
+          {row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: ''},
+          {
+            row: 0,
+            col: 0,
+            rowCount: 2,
+            colCount: 2,
+            sheetId: '',
+          }
+        )
       ).toBeTruthy();
 
       expect(
-        containRange(0, 1, {
-          row: 0,
-          col: 0,
-          rowCount: 2,
-          colCount: 2,
-          sheetId: '',
-        }),
+        containRange(
+          {row: 0, col: 1, rowCount: 1, colCount: 1, sheetId: ''},
+          {
+            row: 0,
+            col: 0,
+            rowCount: 2,
+            colCount: 2,
+            sheetId: '',
+          }
+        )
       ).toBeTruthy();
 
       expect(
-        containRange(1, 1, {
-          row: 0,
-          col: 0,
-          rowCount: 2,
-          colCount: 2,
-          sheetId: '',
-        }),
+        containRange(
+          {row: 1, col: 1, rowCount: 1, colCount: 1, sheetId: ''},
+          {
+            row: 0,
+            col: 0,
+            rowCount: 2,
+            colCount: 2,
+            sheetId: '',
+          }
+        )
       ).toBeTruthy();
     });
     it('should be false', () => {
       expect(
-        containRange(2, 1, {
-          row: 0,
-          col: 0,
-          rowCount: 2,
-          colCount: 2,
-          sheetId: '',
-        }),
+        containRange(
+          {row: 2, col: 1, rowCount: 1, colCount: 1, sheetId: ''},
+          {
+            row: 0,
+            col: 0,
+            rowCount: 2,
+            colCount: 2,
+            sheetId: '',
+          }
+        )
       ).toBeFalsy();
 
       expect(
-        containRange(2, 0, {
-          row: 0,
-          col: 0,
-          rowCount: 2,
-          colCount: 2,
-          sheetId: '',
-        }),
+        containRange(
+          {row: 2, col: 0, rowCount: 1, colCount: 1, sheetId: ''},
+          {
+            row: 0,
+            col: 0,
+            rowCount: 2,
+            colCount: 2,
+            sheetId: '',
+          }
+        )
       ).toBeFalsy();
 
       expect(
-        containRange(3, 3, {
-          row: 0,
-          col: 0,
-          rowCount: 2,
-          colCount: 2,
-          sheetId: '',
-        }),
+        containRange(
+          {row: 3, col: 3, rowCount: 1, colCount: 1, sheetId: ''},
+          {
+            row: 0,
+            col: 0,
+            rowCount: 2,
+            colCount: 2,
+            sheetId: '',
+          }
+        )
       ).toBeFalsy();
     });
   });

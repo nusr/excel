@@ -24,15 +24,15 @@ import {
   headerSizeSet,
   containRange,
 } from '@/util';
-import { History, HistoryChangeType } from './History';
-import { Workbook } from './workbook';
-import { RangeMap } from './rangeMap';
-import { Drawing } from './drawing';
-import { DefinedName } from './definedName';
-import { Worksheet } from './worksheet';
-import { MergeCell } from './mergeCell';
-import { RowManager } from './row';
-import { ColManager } from './col';
+import {History, HistoryChangeType} from './History';
+import {Workbook} from './workbook';
+import {RangeMap} from './rangeMap';
+import {Drawing} from './drawing';
+import {DefinedName} from './definedName';
+import {Worksheet} from './worksheet';
+import {MergeCell} from './mergeCell';
+import {RowManager} from './row';
+import {ColManager} from './col';
 
 export class Model implements IModel {
   private history: History;
@@ -105,9 +105,8 @@ export class Model implements IModel {
   getActiveRange(r?: IRange) {
     const range = r || this.rangeMapManager.getActiveRange().range;
     const mergeCells = this.getMergeCellList(range.sheetId);
-
     for (const item of mergeCells) {
-      if (containRange(range.row, range.col, item)) {
+      if (containRange(range, item)) {
         const newRange = {
           ...item,
           sheetId: item.sheetId || this.getCurrentSheetId(),
@@ -125,16 +124,7 @@ export class Model implements IModel {
   }
   setActiveRange(range: IRange): void {
     range.sheetId = range.sheetId || this.getCurrentSheetId();
-    const mergeCells = this.getMergeCellList(range.sheetId);
-    let newRange = range;
-    for (const item of mergeCells) {
-      if (containRange(range.row, range.col, item)) {
-        newRange = {
-          ...item,
-          sheetId: item.sheetId || this.getCurrentSheetId(),
-        };
-      }
-    }
+    const {range: newRange} = this.getActiveRange(range);
     this.rangeMapManager.setActiveRange(newRange);
   }
   addSheet() {
@@ -202,11 +192,11 @@ export class Model implements IModel {
   setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
-    range: IRange,
+    range: IRange
   ): void {
     this.worksheetManager.setCell(value, style, range);
   }
-  setCellValue(value: ResultType, range: IRange,) {
+  setCellValue(value: ResultType, range: IRange) {
     this.worksheetManager.setCellValue(value, range);
   }
 
@@ -233,7 +223,7 @@ export class Model implements IModel {
 
     const id = this.getCurrentSheetId();
     const newCount = sheetInfo.colCount + count;
-    this.workbookManager.updateSheetInfo({ colCount: newCount }, id);
+    this.workbookManager.updateSheetInfo({colCount: newCount}, id);
     this.drawingsManager.addCol(colIndex, count, isRight);
     this.worksheetManager.addCol(colIndex, count, isRight);
   }
@@ -244,7 +234,7 @@ export class Model implements IModel {
     const sheetInfo = this.getSheetInfo()!;
     const id = this.getCurrentSheetId();
     const newCount = sheetInfo.colCount - count;
-    this.workbookManager.updateSheetInfo({ colCount: newCount }, id);
+    this.workbookManager.updateSheetInfo({colCount: newCount}, id);
     this.drawingsManager.deleteCol(colIndex, count);
     this.worksheetManager.deleteCol(colIndex, count);
   }
@@ -269,7 +259,7 @@ export class Model implements IModel {
     }
 
     const newCount = sheetInfo.rowCount + count;
-    this.workbookManager.updateSheetInfo({ rowCount: newCount });
+    this.workbookManager.updateSheetInfo({rowCount: newCount});
     this.drawingsManager.addRow(rowIndex, count, isAbove);
     this.worksheetManager.addRow(rowIndex, count, isAbove);
   }
@@ -279,7 +269,7 @@ export class Model implements IModel {
     }
     const sheetInfo = this.getSheetInfo()!;
     const newCount = sheetInfo.rowCount - count;
-    this.workbookManager.updateSheetInfo({ rowCount: newCount });
+    this.workbookManager.updateSheetInfo({rowCount: newCount});
     this.drawingsManager.deleteRow(rowIndex, count);
     this.worksheetManager.deleteRow(rowIndex, count);
   }
@@ -331,34 +321,28 @@ export class Model implements IModel {
   }
 
   iterateRange(range: IRange, fn: (row: number, col: number) => boolean) {
-    const { row, col, rowCount, colCount, sheetId } = range;
+    const {row, col, rowCount, colCount, sheetId} = range;
     const sheetInfo = this.getSheetInfo(sheetId);
     if (!sheetInfo) {
       return;
     }
     if (colCount === 0 && rowCount > 0) {
-      for (let r = row, endRow = row + sheetInfo.rowCount;r < endRow;r++) {
-        if (fn(r, col)) {
+      for (let i = col; i < sheetInfo.colCount; i++) {
+        if (fn(row, i)) {
           break;
         }
       }
     } else if (rowCount === 0 && colCount > 0) {
-      for (let c = col, endCol = col + sheetInfo.colCount;c < endCol;c++) {
-        if (fn(row, c)) {
+      for (let i = row; i < sheetInfo.rowCount; i++) {
+        if (fn(i, col)) {
           break;
         }
       }
     } else {
-      for (
-        let r = row, endRow = row + (rowCount || sheetInfo.rowCount);
-        r < endRow;
-        r++
-      ) {
-        for (
-          let c = col, endCol = col + (colCount || sheetInfo.colCount);
-          c < endCol;
-          c++
-        ) {
+      const endRow = rowCount === 0 ? sheetInfo.rowCount : row + rowCount;
+      const endCol = colCount === 0 ? sheetInfo.colCount : col + colCount;
+      for (let r = row; r < endRow; r++) {
+        for (let c = col; c < endCol; c++) {
           if (fn(r, c)) {
             return;
           }
@@ -411,7 +395,7 @@ export class Model implements IModel {
       this.computeViewSize();
     }
     modelLog(changeSet);
-    eventEmitter.emit('modelChange', { changeSet });
+    eventEmitter.emit('modelChange', {changeSet});
   };
   private historyRedo = (item: ICommandItem) => {
     this.workbookManager.redo(item);
@@ -439,19 +423,19 @@ export class Model implements IModel {
     if (!sheetInfo) {
       return;
     }
-    let { width, height } = headerSize;
-    for (let i = 0;i < sheetInfo.colCount;i++) {
+    let {width, height} = headerSize;
+    for (let i = 0; i < sheetInfo.colCount; i++) {
       width += this.getColWidth(i).len;
     }
-    for (let i = 0;i < sheetInfo.rowCount;i++) {
+    for (let i = 0; i < sheetInfo.rowCount; i++) {
       height += this.getRowHeight(i).len;
     }
-    sheetViewSizeSet.set({ width, height });
+    sheetViewSizeSet.set({width, height});
   }
   private getNextSheetId(sheetId?: string) {
     const id = sheetId || this.getCurrentSheetId();
     const list = this.getSheetList();
-    const index = list.findIndex((item) => item.sheetId === id);
+    const index = list.findIndex(item => item.sheetId === id);
     assert(index >= 0, 'not found next sheet');
     const isLast = index === list.length - 1;
     let lastIndex = isLast

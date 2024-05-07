@@ -77,20 +77,21 @@ export class MainCanvas {
 
     this.isRendering = true;
     this.clear();
-    if (checkContent) {
-      this.content.render(params);
-    }
 
     const {width, height} = canvasSizeSet.get();
     const headerSize = headerSizeSet.get();
-    const realContentHeight = this.renderRowsHeader(height);
-    const realContentWidth = this.renderColsHeader(width);
+    const {endRow, contentHeight} = this.renderRowsHeader(height);
+    const {endCol, contentWidth} = this.renderColsHeader(width);
     this.renderGrid(width - headerSize.width, height - headerSize.height);
 
     this.renderTriangle();
-    const result = this.renderSelection(realContentWidth, realContentHeight);
     this.renderMergeCell();
+    const result = this.renderSelection(contentWidth, contentHeight);
     this.renderAntLine(result);
+
+    if (checkContent) {
+      this.content.render({endRow, endCol, contentHeight, contentWidth});
+    }
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
 
     this.isRendering = false;
@@ -260,7 +261,9 @@ export class MainCanvas {
     pointList.push([0, 0], [0, y]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
-    return i >= rowCount ? y : height;
+    const contentHeight = i >= rowCount ? y : height;
+
+    return {endRow: i, contentHeight: Math.floor(contentHeight)};
   }
   private renderColsHeader(width: number) {
     const {controller} = this;
@@ -305,7 +308,11 @@ export class MainCanvas {
     pointList.push([0, 0], [x, 0]);
     drawLines(this.ctx, pointList);
     this.ctx.restore();
-    return i >= colCount ? x : width;
+    const contentWidth = i >= colCount ? x : width;
+    return {
+      endCol: i,
+      contentWidth: Math.floor(contentWidth),
+    };
   }
   private renderTriangle(): void {
     const headerSize = headerSizeSet.get();
