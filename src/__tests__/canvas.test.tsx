@@ -259,9 +259,9 @@ describe('Canvas.test.ts', () => {
       });
       fireEvent.click(screen.getByTestId('context-menu-paste'));
       await waitFor(() => {
-        expect(controller.getCell(controller.getActiveRange().range)?.value).toEqual(
-          'test',
-        );
+        expect(
+          controller.getCell(controller.getActiveRange().range)?.value,
+        ).toEqual('test');
       });
     });
     test('cut', async () => {
@@ -284,14 +284,16 @@ describe('Canvas.test.ts', () => {
       fireEvent.click(screen.getByTestId('context-menu-paste'));
 
       await waitFor(() => {
-        expect(controller.getCell(controller.getActiveRange().range)?.value).toEqual(
-          'test',
-        );
+        expect(
+          controller.getCell(controller.getActiveRange().range)?.value,
+        ).toEqual('test');
       });
 
       fireEvent.keyDown(document.body, { key: 'ArrowUp' });
       await waitFor(() => {
-        expect(controller.getCell(controller.getActiveRange().range)).toBeNull();
+        expect(
+          controller.getCell(controller.getActiveRange().range),
+        ).toBeNull();
       });
     });
 

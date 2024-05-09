@@ -13,7 +13,8 @@
     "e2e": "npx playwright test",
     "lint": "npx oxlint@latest --fix",
     "update-md": "node ./scripts/update-md.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" ./src -r html -m strict -l 7"
   },
   "repository": {
     "type": "git",

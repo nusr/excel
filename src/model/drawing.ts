@@ -220,9 +220,6 @@ export class Drawing implements IDrawings {
     }
   }
   deleteCol(colIndex: number, count: number): void {
-    if (count <= 0) {
-      return;
-    }
     for (const [uuid, item] of Object.entries(this.drawings)) {
       const result: Partial<DrawingElement> = {};
       if (item.fromCol >= colIndex) {
@@ -247,9 +244,6 @@ export class Drawing implements IDrawings {
     }
   }
   deleteRow(rowIndex: number, count: number): void {
-    if (count <= 0) {
-      return;
-    }
     for (const [uuid, item] of Object.entries(this.drawings)) {
       const result: Partial<DrawingElement> = {};
       if (item.fromRow >= rowIndex) {

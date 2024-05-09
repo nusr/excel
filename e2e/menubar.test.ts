@@ -18,5 +18,4 @@ test.describe('menubar.test', () => {
     await expect(page.getByTestId('menubar-export-xlsx')).toBeVisible();
     await expect(page.getByTestId('menubar-export-csv')).toBeVisible();
   });
-
 });

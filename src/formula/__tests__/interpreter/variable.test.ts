@@ -15,7 +15,7 @@ describe('parseFormula variable', () => {
   });
   it('not found', () => {
     expect(parseFormula('foo')).toEqual({
-      result: "#REF!",
+      result: '#REF!',
       isError: true,
       expressionStr: '',
     });

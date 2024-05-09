@@ -31,7 +31,7 @@ import {
   COL_TITLE_WIDTH,
   convertPxToPt,
 } from '@/util';
-import {numberFormat, isDateFormat, convertDateToNumber} from '@/model';
+import { numberFormat, isDateFormat, convertDateToNumber } from '@/model';
 
 const defaultScrollValue: ScrollValue = {
   top: 0,
@@ -84,7 +84,7 @@ export class Controller implements IController {
     return this.model.getActiveRange(r);
   }
   setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up') {
-    const {range, isMerged} = this.getActiveRange();
+    const { range, isMerged } = this.getActiveRange();
     let startCol = range.col;
     let startRow = range.row;
     const sheetInfo = this.getSheetInfo(range.sheetId)!;
@@ -155,14 +155,7 @@ export class Controller implements IController {
   }
   addSheet() {
     const result = this.model.addSheet();
-    this.setScroll({
-      top: 0,
-      left: 0,
-      row: 0,
-      col: 0,
-      scrollLeft: 0,
-      scrollTop: 0,
-    });
+    this.setScroll({ ...defaultScrollValue });
     return result;
   }
   deleteSheet = (sheetId?: string): void => {
@@ -187,14 +180,7 @@ export class Controller implements IController {
   }
   fromJSON(json: WorkBookJSON): void {
     this.model.fromJSON(json);
-    this.setScroll({
-      top: 0,
-      left: 0,
-      row: 0,
-      col: 0,
-      scrollLeft: 0,
-      scrollTop: 0,
-    });
+    this.setScroll({ ...defaultScrollValue });
   }
   toJSON(): WorkBookJSON {
     return this.model.toJSON();
@@ -203,7 +189,7 @@ export class Controller implements IController {
   setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
-    range: IRange
+    range: IRange,
   ): void {
     this.model.setCell(value, style, range);
     this.emitChange();
@@ -267,7 +253,7 @@ export class Controller implements IController {
     return this.getRangeSize(range);
   }
   private getRangeSize(range: IRange) {
-    let {row, col, colCount, rowCount} = range;
+    let { row, col, colCount, rowCount } = range;
     const sheetId = range.sheetId || this.getCurrentSheetId();
     if (colCount === 0 || rowCount === 0) {
       const sheetInfo = this.getSheetInfo(sheetId);
@@ -288,10 +274,10 @@ export class Controller implements IController {
     for (let c = col, endCol = col + colCount; c < endCol; c++) {
       width += this.getColWidth(c, sheetId).len;
     }
-    return {width, height};
+    return { width, height };
   }
   computeCellPosition(range: IRange): IPosition {
-    const {row, col} = range;
+    const { row, col } = range;
     const sheetId = range.sheetId || this.model.getCurrentSheetId();
     const size = headerSizeSet.get();
     const scroll = this.getScroll(sheetId);
@@ -356,8 +342,8 @@ export class Controller implements IController {
   }
   getScroll(sheetId?: string): ScrollValue {
     const id = sheetId || this.model.getCurrentSheetId();
-    const result = this.scrollValue[id] || {...defaultScrollValue};
-    return {...result};
+    const result = this.scrollValue[id] || { ...defaultScrollValue };
+    return { ...result };
   }
   setScroll(data: ScrollValue): void {
     const sheetId = this.model.getCurrentSheetId();
@@ -378,16 +364,19 @@ export class Controller implements IController {
     this.changeSet.add('scroll');
     this.emitChange();
   }
-  private parseText(text: string) {
-    const textList = parseText(text);
+  private getPasteRange(textList: Array<Array<ResultType>>): IRange {
     const rowCount = textList.length;
     const activeCell = this.getActiveRange().range;
-    const colCount = Math.max(...textList.map(v => v.length));
-    const range = {
+    const colCount = Math.max(...textList.map((v) => v.length));
+    return {
       ...activeCell,
       rowCount,
       colCount,
     };
+  }
+  private parseText(text: string) {
+    const textList = parseText(text);
+    const range = this.getPasteRange(textList);
     if (textList.length > 0) {
       this.model.setCell(textList, [], range);
       return range;
@@ -395,15 +384,8 @@ export class Controller implements IController {
     return null;
   }
   private parseHTML(htmlString: string) {
-    const {textList, styleList, rowMap, colMap} = parseHTML(htmlString);
-    const rowCount = textList.length;
-    const activeCell = this.getActiveRange().range;
-    const colCount = Math.max(...textList.map(v => v.length));
-    const range = {
-      ...activeCell,
-      rowCount,
-      colCount,
-    };
+    const { textList, styleList, rowMap, colMap } = parseHTML(htmlString);
+    const range = this.getPasteRange(textList);
     for (const [row, height] of rowMap.entries()) {
       this.model.setRowHeight(row, height);
     }
@@ -418,8 +400,8 @@ export class Controller implements IController {
     return null;
   }
   private getCopyData(): ClipboardData {
-    const {range: activeCell, isMerged} = this.getActiveRange();
-    const {row, col, rowCount, colCount} = activeCell;
+    const { range: activeCell, isMerged } = this.getActiveRange();
+    const { row, col, rowCount, colCount } = activeCell;
     const result: ResultType[][] = [];
     const html: string[] = [];
     let index = 1;
@@ -470,9 +452,9 @@ export class Controller implements IController {
     }
     const htmlData = generateHTML(
       classList.join('\n'),
-      Array.from(colSet).join('\n') + '\n' + html.join('\n')
+      Array.from(colSet).join('\n') + '\n' + html.join('\n'),
     );
-    const text = `${result.map(item => item.join('\t')).join('\r\n')}\r\n`;
+    const text = `${result.map((item) => item.join('\t')).join('\r\n')}\r\n`;
     return {
       [PLAIN_FORMAT]: text,
       [HTML_FORMAT]: htmlData,
@@ -497,7 +479,7 @@ export class Controller implements IController {
         return;
       }
       const list = this.getDrawingList(this.getCurrentSheetId());
-      const item = list.find(v => v.uuid === this.floatElementUuid);
+      const item = list.find((v) => v.uuid === this.floatElementUuid);
       if (item) {
         const size = this.getCellSize({
           row: item.fromRow,
@@ -506,7 +488,7 @@ export class Controller implements IController {
           colCount: 1,
           sheetId: item.sheetId,
         });
-        let {marginX, marginY} = item;
+        let { marginX, marginY } = item;
         const offset = 14;
         if (marginX + offset < size.width) {
           marginX += offset;
@@ -570,7 +552,7 @@ export class Controller implements IController {
           [PLAIN_FORMAT]: '',
           [HTML_FORMAT]: '',
         },
-        'copy'
+        'copy',
       );
     }
     this.setActiveRange(activeCell);
@@ -604,7 +586,7 @@ export class Controller implements IController {
       return null;
     }
     if (this.copyRange) {
-      return {...this.copyRange};
+      return { ...this.copyRange };
     }
     return null;
   }

@@ -1,5 +1,10 @@
 import { buildTree } from './util';
-import { BinaryExpression, GroupExpression, LiteralExpression, PostUnaryExpression } from '../../expression';
+import {
+  BinaryExpression,
+  GroupExpression,
+  LiteralExpression,
+  PostUnaryExpression,
+} from '../../expression';
 import { Token } from '../../token';
 import { TokenType } from '../../../types';
 

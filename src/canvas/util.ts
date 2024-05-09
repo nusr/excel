@@ -23,25 +23,25 @@ import {
   EHorizontalAlign,
   EVerticalAlign,
 } from '@/types';
-import {numberFormat, isDateFormat} from '@/model';
+import { numberFormat, isDateFormat } from '@/model';
 
 const measureTextMap = new Map<string, IWindowSize>();
 
 export function measureText(
   ctx: CanvasRenderingContext2D,
-  char: string
+  char: string,
 ): IWindowSize {
   const mapKey = `${char}__${ctx.font}`;
   if (measureTextMap.has(mapKey)) {
     return measureTextMap.get(mapKey)!;
   }
   const text = ctx.measureText(char);
-  const {actualBoundingBoxAscent, actualBoundingBoxDescent} = text;
+  const { actualBoundingBoxAscent, actualBoundingBoxDescent } = text;
   const h = actualBoundingBoxAscent + actualBoundingBoxDescent;
   const w = text.width;
   const width = Math.ceil(w / dpr());
   const height = Math.ceil(h / dpr());
-  const result = {width, height};
+  const result = { width, height };
   measureTextMap.set(mapKey, result);
   return result;
 }
@@ -51,7 +51,7 @@ export function fillRect(
   x: number,
   y: number,
   width: number,
-  height: number
+  height: number,
 ): void {
   ctx.fillRect(npx(x), npx(y), npx(width), npx(height));
 }
@@ -60,7 +60,7 @@ export function strokeRect(
   x: number,
   y: number,
   width: number,
-  height: number
+  height: number,
 ): void {
   ctx.strokeRect(npx(x), npx(y), npx(width), npx(height));
 }
@@ -70,7 +70,7 @@ export function clearRect(
   x: number,
   y: number,
   width: number,
-  height: number
+  height: number,
 ): void {
   ctx.clearRect(npx(x), npx(y), npx(width), npx(height));
 }
@@ -79,14 +79,14 @@ export function fillText(
   ctx: CanvasRenderingContext2D,
   text: string,
   x: number,
-  y: number
+  y: number,
 ) {
   ctx.fillText(text, npx(x), npx(y));
 }
 
 export function drawLines(
   ctx: CanvasRenderingContext2D,
-  pointList: Point[]
+  pointList: Point[],
 ): void {
   if (pointList.length === 0) {
     return;
@@ -105,7 +105,7 @@ export function drawTriangle(
   ctx: CanvasRenderingContext2D,
   point1: Point,
   point2: Point,
-  point3: Point
+  point3: Point,
 ) {
   ctx.beginPath();
   ctx.moveTo(npx(point1[0]), npx(point1[1]));
@@ -119,7 +119,7 @@ export function drawAntLine(
   x: number,
   y: number,
   width: number,
-  height: number
+  height: number,
 ) {
   const oldDash = ctx.getLineDash();
   ctx.setLineDash([npx(8), npx(6)]);
@@ -129,7 +129,7 @@ export function drawAntLine(
     x + offset,
     y + offset,
     width - offset * 2,
-    height - offset * 2
+    height - offset * 2,
   );
   ctx.setLineDash(oldDash);
 }
@@ -151,7 +151,7 @@ export function getPointList(pointList: Point[], isExtra: boolean) {
 export function resizeCanvas(
   canvas: HTMLCanvasElement,
   width: number,
-  height: number
+  height: number,
 ): void {
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;
@@ -164,7 +164,7 @@ export function resizeCanvas(
 function splitWords(
   text: string,
   isWrapText?: boolean,
-  isMergeContent?: boolean
+  isMergeContent?: boolean,
 ): string[] {
   if (isWrapText && isMergeContent) {
     return text.split(MERGE_CELL_LINE_BREAK);
@@ -173,19 +173,19 @@ function splitWords(
     return splitToWords(text);
   }
   return splitToWords(
-    isMergeContent ? text.replaceAll(MERGE_CELL_LINE_BREAK, '') : text
+    isMergeContent ? text.replaceAll(MERGE_CELL_LINE_BREAK, '') : text,
   );
 }
 
-type TextItem = {str: string; width: number; height: number};
+type TextItem = { str: string; width: number; height: number };
 export function renderCell(
   ctx: CanvasRenderingContext2D,
   cellInfo: CanvasOverlayPosition,
   value: ResultType,
   style?: Partial<StyleType>,
-  isMergeContent?: boolean
+  isMergeContent?: boolean,
 ): IWindowSize {
-  const result: IWindowSize = {height: 0, width: 0};
+  const result: IWindowSize = { height: 0, width: 0 };
   if (value === '' && isEmpty(style)) {
     return result;
   }
@@ -200,7 +200,7 @@ export function renderCell(
       style?.isItalic ? 'italic' : 'normal',
       style?.isBold ? 'bold' : '500',
       npx(fontSize),
-      style?.fontFamily
+      style?.fontFamily,
     );
     fillStyle = style?.fontColor || getThemeColor('contentColor');
     if (style?.fillColor) {
@@ -211,26 +211,26 @@ export function renderCell(
         cellInfo.left,
         cellInfo.top,
         cellInfo.width,
-        cellInfo.height
+        cellInfo.height,
       );
     }
   }
   if (ERROR_SET.has(text as ErrorTypes)) {
     fillStyle = getThemeColor('errorFormulaColor');
   }
-  const realStyle = style ? {...style} : {};
+
+  ctx.font = font;
+  ctx.fillStyle = fillStyle;
+
+  const realStyle = style ? { ...style } : {};
   let align = realStyle?.horizontalAlign;
   if (realStyle?.horizontalAlign === undefined && isRight) {
     align = EHorizontalAlign.RIGHT;
   }
   realStyle.horizontalAlign = align;
-  ctx.textAlign = 'left';
-  ctx.font = font;
-  ctx.fillStyle = fillStyle;
-  ctx.textBaseline = 'top';
 
   const texts = splitWords(text);
-  const textList: TextItem[] = texts.map(item => {
+  const textList: TextItem[] = texts.map((item) => {
     const size = measureText(ctx, item);
     return {
       str: item,
@@ -238,44 +238,42 @@ export function renderCell(
       height: size.height === 0 ? fontSize : size.height,
     };
   });
-  const {width, height, resultList} = computeCell(
+  const { width, height, resultList } = computeCell(
     textList,
     cellInfo,
     realStyle,
-    isMergeContent
+    isMergeContent,
   );
   const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
+  let list: Point[] = [];
   for (const item of resultList) {
     fillText(ctx, item.text, item.x, item.y);
-    let list: Point[] = [];
     if (realStyle?.underline) {
       ctx.strokeStyle = fillStyle;
       const t = item.y + item.height + lineGap / 2;
-      list = list.concat(
-        getPointList(
-          [
-            [item.x, t],
-            [item.x + item.width, t],
-          ],
-          realStyle?.underline === EUnderLine.DOUBLE
-        )
+      const p = getPointList(
+        [
+          [item.x, t],
+          [item.x + item.width, t],
+        ],
+        realStyle?.underline === EUnderLine.DOUBLE,
       );
+      list = list.concat(p);
     }
     if (realStyle?.isStrike) {
       ctx.strokeStyle = fillStyle;
       const t = item.y + item.height / 2 + lineGap / 2;
-      list = list.concat(
-        getPointList(
-          [
-            [item.x, t],
-            [item.x + item.width, t],
-          ],
-          false
-        )
+      const p = getPointList(
+        [
+          [item.x, t],
+          [item.x + item.width, t],
+        ],
+        false,
       );
+      list = list.concat(p);
     }
-    drawLines(ctx, list);
   }
+  drawLines(ctx, list);
   result.height = Math.ceil(height);
   result.width = Math.ceil(width);
   if (!realStyle?.isWrapText && isDateFormat(format)) {
@@ -289,13 +287,13 @@ function computeCell(
   texts: TextItem[],
   cellInfo: CanvasOverlayPosition,
   style?: Partial<StyleType>,
-  isMergeContent?: boolean
+  isMergeContent?: boolean,
 ) {
   const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
   const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
   const verticalAlign = style?.verticalAlign ?? EVerticalAlign.MIDDLE;
-  const {left, top, height} = cellInfo;
-  const width = Math.max(cellInfo.width, ...texts.map(v => v.width));
+  const { left, top, height } = cellInfo;
+  const width = Math.max(cellInfo.width, ...texts.map((v) => v.width));
   const textList: Array<{
     text: string;
     x: number;

@@ -1,4 +1,4 @@
-import {IController} from './controller';
+import { IController } from './controller';
 
 export type ModifierKeyType = 'alt' | 'shift' | 'ctrl' | 'meta';
 export interface KeyboardEventItem {

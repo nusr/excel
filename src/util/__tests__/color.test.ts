@@ -2,10 +2,10 @@ import { convertColorToHex } from '../color';
 
 describe('color.test.ts', () => {
   describe('convertColorToHex', () => {
-    test('invalid', ()=> {
+    test('invalid', () => {
       expect(convertColorToHex('#g00')).toEqual('');
       expect(convertColorToHex('')).toEqual('');
-    })
+    });
     it('convert white to Hex', () => {
       expect(convertColorToHex('black')).toEqual('#000000FF');
       expect(convertColorToHex('white')).toEqual('#FFFFFFFF');

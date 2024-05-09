@@ -203,12 +203,11 @@ function recalculateScroll(controller: IController) {
     computeScrollPosition(oldScroll.left, oldScroll.top);
   if (position.left + cellSize.width + buff > domRect.width) {
     if (oldScroll.col <= sheetInfo.colCount - 2) {
-      const col = oldScroll.col + 1;
       const left = oldScroll.left + controller.getColWidth(oldScroll.col).len;
       const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
       controller.setScroll({
         ...oldScroll,
-        col,
+        col: oldScroll.col + 1,
         left,
         scrollLeft,
       });
@@ -217,12 +216,11 @@ function recalculateScroll(controller: IController) {
 
   if (position.left - headerSize.width < domRect.left + buff) {
     if (oldScroll.col >= 1) {
-      const col = oldScroll.col - 1;
       const left = oldScroll.left - controller.getColWidth(oldScroll.col).len;
       const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
       controller.setScroll({
         ...oldScroll,
-        col,
+        col: oldScroll.col - 1,
         left,
         scrollLeft,
       });
@@ -230,12 +228,11 @@ function recalculateScroll(controller: IController) {
   }
   if (position.top + cellSize.height + buff > domRect.height) {
     if (oldScroll.row <= sheetInfo.rowCount - 2) {
-      const row = oldScroll.row + 1;
       const top = oldScroll.top + controller.getRowHeight(oldScroll.row).len;
       const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
       controller.setScroll({
         ...oldScroll,
-        row,
+        row: oldScroll.row + 1,
         top,
         scrollTop,
       });
@@ -244,12 +241,11 @@ function recalculateScroll(controller: IController) {
 
   if (position.top - headerSize.height < domRect.top + buff) {
     if (oldScroll.row >= 1) {
-      const row = oldScroll.row - 1;
       const top = oldScroll.top - controller.getRowHeight(oldScroll.row).len;
       const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
       controller.setScroll({
         ...oldScroll,
-        row,
+        row: oldScroll.row - 1,
         top,
         scrollTop,
       });
@@ -294,7 +290,7 @@ function checkActiveElement(controller: IController) {
   }
   setActiveCellValue(controller);
 }
-
+/* jscpd:ignore-start */
 export const keyboardEventList: KeyboardEventItem[] = [
   {
     key: 'Enter',
@@ -489,3 +485,4 @@ export const keyboardEventList: KeyboardEventItem[] = [
     },
   },
 ];
+/* jscpd:ignore-end */

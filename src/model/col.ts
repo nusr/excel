@@ -8,8 +8,8 @@ import {
 import { DELETE_FLAG, transformData } from './History';
 
 export class ColManager implements ICol {
-  private customWidth: WorkBookJSON['customWidth'] = {};
   private model: IModel;
+  private customWidth: WorkBookJSON['customWidth'] = {};
   constructor(model: IModel) {
     this.model = model;
   }
@@ -82,14 +82,7 @@ export class ColManager implements ICol {
         isHide: false,
       };
     }
-    if (temp.isHide) {
-      return {
-        isHide: true,
-        len: HIDE_CELL,
-      };
-    } else {
-      return { ...temp };
-    }
+    return temp.isHide ? { isHide: true, len: HIDE_CELL } : { ...temp };
   }
   setColWidth(col: number, width: number, sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();

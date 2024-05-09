@@ -5,6 +5,7 @@ import {
   DEFAULT_POSITION,
   headerSizeSet,
   canvasSizeSet,
+  isSameRange,
 } from '@/util';
 import styles from './index.module.css';
 import { coreStore } from '@/containers/store';
@@ -82,46 +83,31 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     if (activeCell.row === range.row && activeCell.col === range.col) {
       return;
     }
+    let rowCount = 0;
+    let colCount = 0;
     if (x > headerSize.width && y > headerSize.height) {
       if (isMerged) {
         controller.setActiveRange(range);
         return;
       }
-      const colCount = Math.abs(position.col - activeCell.col) + 1;
-      const rowCount = Math.abs(position.row - activeCell.row) + 1;
-      controller.setActiveRange({
-        row: Math.min(position.row, activeCell.row),
-        col: Math.min(position.col, activeCell.col),
-        rowCount,
-        colCount,
-        sheetId: '',
-      });
-      return;
+      colCount = Math.abs(position.col - activeCell.col) + 1;
+      rowCount = Math.abs(position.row - activeCell.row) + 1;
     }
     // select row
     if (headerSize.width > x && headerSize.height <= y) {
-      const rowCount = Math.abs(position.row - activeCell.row) + 1;
-      controller.setActiveRange({
-        row: Math.min(position.row, activeCell.row),
-        col: Math.min(position.col, activeCell.col),
-        rowCount,
-        colCount: 0,
-        sheetId: '',
-      });
-      return;
+      rowCount = Math.abs(position.row - activeCell.row) + 1;
     }
     // select col
     if (headerSize.width <= x && headerSize.height > y) {
-      const colCount = Math.abs(position.col - activeCell.col) + 1;
-      controller.setActiveRange({
-        row: Math.min(position.row, activeCell.row),
-        col: Math.min(position.col, activeCell.col),
-        rowCount: 0,
-        colCount,
-        sheetId: '',
-      });
-      return;
+      colCount = Math.abs(position.col - activeCell.col) + 1;
     }
+    controller.setActiveRange({
+      row: Math.min(position.row, activeCell.row),
+      col: Math.min(position.col, activeCell.col),
+      rowCount,
+      colCount,
+      sheetId: '',
+    });
   };
   const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
     if (event.buttons <= 0) {
@@ -174,14 +160,15 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       col: position.col,
       colCount: 1,
       rowCount: 1,
-      sheetId: '',
+      sheetId: controller.getCurrentSheetId(),
     });
     const activeCell = controller.getActiveRange().range;
-    const check =
-      activeCell.row >= 0 &&
-      activeCell.row === range.row &&
-      activeCell.col === range.col;
-    if (!check) {
+    if (isSameRange(activeCell, range)) {
+      const delay = timeStamp - state.current.timeStamp;
+      if (delay < DOUBLE_CLICK_TIME) {
+        coreStore.mergeState({ editorStatus: EditorStatus.EDIT_CELL });
+      }
+    } else {
       if (checkFocus()) {
         setActiveCellValue(controller);
       }
@@ -192,13 +179,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
         colCount: 1,
         sheetId: '',
       });
-    } else {
-      const delay = timeStamp - state.current.timeStamp;
-      if (delay < DOUBLE_CLICK_TIME) {
-        coreStore.mergeState({ editorStatus: EditorStatus.EDIT_CELL });
-      }
     }
-
     state.current.timeStamp = timeStamp;
   };
   return (

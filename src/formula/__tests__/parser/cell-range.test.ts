@@ -1,5 +1,9 @@
 import { buildTree } from './util';
-import { CellRangeExpression, TokenExpression, LiteralExpression } from '../../expression';
+import {
+  CellRangeExpression,
+  TokenExpression,
+  LiteralExpression,
+} from '../../expression';
 import { TokenType } from '../../../types';
 import { Token } from '../../token';
 
@@ -7,30 +11,40 @@ describe('cell ranges', () => {
   it('A1', () => {
     const tree = buildTree('A1');
 
-    expect(tree).toEqual(new TokenExpression(new Token(TokenType.IDENTIFIER, 'A1')));
+    expect(tree).toEqual(
+      new TokenExpression(new Token(TokenType.IDENTIFIER, 'A1')),
+    );
   });
 
   it('A$1', () => {
     const tree = buildTree('A$1');
 
-    expect(tree).toEqual(new TokenExpression(new Token(TokenType.IDENTIFIER, 'A$1')));
+    expect(tree).toEqual(
+      new TokenExpression(new Token(TokenType.IDENTIFIER, 'A$1')),
+    );
   });
 
   it('$A1', () => {
     const tree = buildTree('$A1');
 
-    expect(tree).toEqual(new TokenExpression(new Token(TokenType.IDENTIFIER, '$A1')));
+    expect(tree).toEqual(
+      new TokenExpression(new Token(TokenType.IDENTIFIER, '$A1')),
+    );
   });
 
   it('$a1', () => {
     const tree = buildTree('$a1');
 
-    expect(tree).toEqual(new TokenExpression(new Token(TokenType.IDENTIFIER, '$a1')));
+    expect(tree).toEqual(
+      new TokenExpression(new Token(TokenType.IDENTIFIER, '$a1')),
+    );
   });
 
   it('$A$1', () => {
     const tree = buildTree('$A$1');
-    expect(tree).toEqual(new TokenExpression(new Token(TokenType.IDENTIFIER, '$A$1')));
+    expect(tree).toEqual(
+      new TokenExpression(new Token(TokenType.IDENTIFIER, '$A$1')),
+    );
   });
 
   it('A1:A4', () => {

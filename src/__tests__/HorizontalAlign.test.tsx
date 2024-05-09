@@ -1,9 +1,9 @@
-import {App} from '@/containers';
+import { App } from '@/containers';
 import * as React from 'react';
-import {render, screen, act, fireEvent} from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {type} from './util';
-import {initController} from '@/controller';
+import { type } from './util';
+import { initController } from '@/controller';
 import './global.mock';
 
 describe('HorizontalAlign.test.tsx', () => {
@@ -14,7 +14,9 @@ describe('HorizontalAlign.test.tsx', () => {
       });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-horizontal-left'));
-      expect(screen.getByTestId('toolbar-horizontal-left')).toHaveClass('active');
+      expect(screen.getByTestId('toolbar-horizontal-left')).toHaveClass(
+        'active',
+      );
     });
   });
   describe('center', () => {
@@ -24,7 +26,9 @@ describe('HorizontalAlign.test.tsx', () => {
       });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-horizontal-center'));
-      expect(screen.getByTestId('toolbar-horizontal-center')).toHaveClass('active');
+      expect(screen.getByTestId('toolbar-horizontal-center')).toHaveClass(
+        'active',
+      );
     });
   });
   describe('right', () => {
@@ -34,7 +38,9 @@ describe('HorizontalAlign.test.tsx', () => {
       });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-horizontal-right'));
-      expect(screen.getByTestId('toolbar-horizontal-right')).toHaveClass('active');
+      expect(screen.getByTestId('toolbar-horizontal-right')).toHaveClass(
+        'active',
+      );
     });
   });
 });

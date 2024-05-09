@@ -1,4 +1,4 @@
-import {IRange} from '@/types';
+import { IRange } from '@/types';
 
 export function isSheet(range: IRange): boolean {
   return isRow(range) && isCol(range);
@@ -20,23 +20,32 @@ export function isSameRange(oldRange: IRange, newRange: IRange): boolean {
   );
 }
 
-export function containRange(range: IRange, target: IRange): boolean {
-  const {row, col} = range;
-  const check = (
-    row >= target.row &&
-    row < target.row + target.rowCount &&
-    col >= target.col &&
-    col < target.col + target.colCount
-  );
+export function containRange(
+  sourceRange: IRange,
+  targetRange: IRange,
+): boolean {
+  if (sourceRange.colCount === 0 && targetRange.colCount !== 0) {
+    return false;
+  }
+  if (sourceRange.rowCount === 0 && targetRange.rowCount !== 0) {
+    return false;
+  }
+  if (targetRange.colCount === 0 && targetRange.row === sourceRange.row) {
+    return true;
+  }
+  if (targetRange.rowCount === 0 && targetRange.col === sourceRange.col) {
+    return true;
+  }
+  const { row, col } = sourceRange;
+  const check =
+    row >= targetRange.row &&
+    row < targetRange.row + targetRange.rowCount &&
+    col >= targetRange.col &&
+    col < targetRange.col + targetRange.colCount;
   if (check) {
     return true;
   }
-  if (target.colCount === 0 && target.row === range.row) {
-    return true;
-  }
-  if (target.rowCount === 0 && target.col === range.col) {
-    return true;
-  }
+
   return false;
 }
 
@@ -51,7 +60,7 @@ export class SheetRange implements IRange {
     col: number,
     rowCount: number,
     colCount: number,
-    sheetId: string
+    sheetId: string,
   ) {
     this.row = row;
     this.col = col;
@@ -71,7 +80,7 @@ export class SheetRange implements IRange {
       range.col,
       range.rowCount,
       range.colCount,
-      range.sheetId
+      range.sheetId,
     );
   }
   toIRange(): IRange {

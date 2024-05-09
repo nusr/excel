@@ -1,11 +1,12 @@
 'use strict';
 /** @type {import("prettier").Config} */
 const config = {
-  bracketSpacing: false,
+  bracketSpacing: true,
   singleQuote: true,
-  bracketSameLine: true,
-  trailingComma: 'es5',
+  bracketSameLine: false,
+  trailingComma: 'all',
   printWidth: 80,
-  arrowParens: 'avoid',
+  arrowParens: 'always',
+  semi: true,
 };
 module.exports = config;

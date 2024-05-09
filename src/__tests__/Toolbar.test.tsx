@@ -33,7 +33,9 @@ describe('Toolbar.test.ts', () => {
       fireEvent.change(screen.getByTestId('toolbar-font-size'), {
         target: { value: '72' },
       });
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual({
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({
         fontSize: 72,
       });
     });
@@ -290,7 +292,9 @@ describe('Toolbar.test.ts', () => {
       });
       type('This is a very long text that needs to be wrapped');
       fireEvent.click(screen.getByTestId('toolbar-wrap-text'));
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual({
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({
         isWrapText: true,
       });
     });
@@ -309,7 +313,9 @@ describe('Toolbar.test.ts', () => {
         textDecorationLine: 'underline',
       });
 
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual({
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({
         isWrapText: true,
         underline: EUnderLine.SINGLE,
       });
@@ -329,7 +335,9 @@ describe('Toolbar.test.ts', () => {
         textDecorationLine: 'underline',
       });
 
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual({
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({
         isWrapText: true,
         underline: EUnderLine.DOUBLE,
       });
@@ -346,7 +354,9 @@ describe('Toolbar.test.ts', () => {
       const dom = screen.getByTestId('toolbar-fill-color-list');
       dom.setAttribute('data-value', '#B2B2B2');
       fireEvent.click(dom);
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual({
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({
         fillColor: '#B2B2B2',
       });
     });
@@ -368,7 +378,9 @@ describe('Toolbar.test.ts', () => {
       });
       fireEvent.pointerUp(document.body);
 
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual({
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({
         fillColor: '#804949',
       });
     });
@@ -384,7 +396,9 @@ describe('Toolbar.test.ts', () => {
       const dom = screen.getByTestId('toolbar-font-color-list');
       dom.setAttribute('data-value', '#B2B2B2');
       fireEvent.click(dom);
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual({
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({
         fontColor: '#B2B2B2',
       });
     });
@@ -406,7 +420,9 @@ describe('Toolbar.test.ts', () => {
       });
       fireEvent.pointerUp(document.body);
 
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual({
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({
         fontColor: '#bf9696',
       });
     });
@@ -434,7 +450,9 @@ describe('Toolbar.test.ts', () => {
       });
       fireEvent.pointerUp(document.body);
 
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual({
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({
         fontColor: '#b4bf96',
       });
     });
@@ -448,13 +466,13 @@ describe('Toolbar.test.ts', () => {
       const dom = screen.getByTestId('toolbar-font-color-list');
       dom.setAttribute('data-value', '#B2B2B2');
       fireEvent.click(dom);
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual(
-        { fontColor: '#B2B2B2' },
-      );
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({ fontColor: '#B2B2B2' });
       fireEvent.click(screen.getByTestId('toolbar-font-color-reset'));
-      expect(controller.getCell(controller.getActiveRange().range)?.style).toEqual(
-        { fontColor: '' },
-      );
+      expect(
+        controller.getCell(controller.getActiveRange().range)?.style,
+      ).toEqual({ fontColor: '' });
     });
   });
 });

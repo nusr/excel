@@ -10,7 +10,7 @@ type Options = {
   undo: (item: ICommandItem) => void;
 };
 
-export const DELETE_FLAG = Symbol('delete');
+export const DELETE_FLAG = Symbol.for('delete');
 
 export function transformData(
   obj: Record<string, any>,
@@ -112,10 +112,8 @@ export class History implements IHistory {
       return;
     }
     const list = this.commandList[index];
-    if (list.length > 0) {
-      for (const item of list) {
-        this.options.redo(item as ICommandItem);
-      }
+    for (const item of list) {
+      this.options.redo(item as ICommandItem);
     }
     this.position = index;
     this.change(list, 'undoRedo');
@@ -126,10 +124,8 @@ export class History implements IHistory {
       return;
     }
     const list = this.commandList[index];
-    if (list.length > 0) {
-      for (const item of list) {
-        this.options.undo(item as ICommandItem);
-      }
+    for (const item of list) {
+      this.options.undo(item as ICommandItem);
     }
     this.position = index - 1;
     this.change(list, 'undoRedo');

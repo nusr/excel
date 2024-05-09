@@ -1,8 +1,8 @@
-import React, {useRef, memo, useCallback} from 'react';
-import {IController} from '@/types';
-import {Button} from '../components';
-import {generateUUID, getImageSize} from '@/util';
-import {$} from '@/i18n';
+import React, { useRef, memo, useCallback } from 'react';
+import { IController } from '@/types';
+import { Button } from '../components';
+import { generateUUID, getImageSize } from '@/util';
+import { $ } from '@/i18n';
 
 interface Props {
   controller: IController;
@@ -28,12 +28,11 @@ function convertToBase64(file: File): Promise<string> {
 }
 
 export const InsertFloatingPicture: React.FunctionComponent<Props> = memo(
-  ({controller}) => {
+  ({ controller }) => {
     const ref = useRef<HTMLInputElement>(null);
 
     const handleImport = useCallback(
       async (event: React.ChangeEvent<HTMLInputElement>) => {
-        event.stopPropagation();
         const file = event.target.files?.[0];
         if (!file) {
           return;
@@ -68,7 +67,7 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = memo(
           marginY: 0,
         });
       },
-      []
+      [],
     );
     return (
       <Button testId="toolbar-floating-picture" title="Floating Picture">
@@ -84,12 +83,12 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = memo(
         <label htmlFor="upload_float_image">{$('floating-picture')}</label>
       </Button>
     );
-  }
+  },
 );
 InsertFloatingPicture.displayName = 'InsertFloatingPicture';
 
 export const InsertChart: React.FunctionComponent<Props> = memo(
-  ({controller}) => {
+  ({ controller }) => {
     const handleClick = useCallback(async () => {
       const range = controller.getActiveRange().range;
       await controller.addDrawing({
@@ -115,7 +114,7 @@ export const InsertChart: React.FunctionComponent<Props> = memo(
         {$('chart')}
       </Button>
     );
-  }
+  },
 );
 
 InsertChart.displayName = 'InsertChart';

@@ -8,8 +8,8 @@ import {
 import { DELETE_FLAG, transformData } from './History';
 
 export class RowManager implements IRow {
-  private customHeight: WorkBookJSON['customHeight'] = {};
   private model: IModel;
+  private customHeight: WorkBookJSON['customHeight'] = {};
   constructor(model: IModel) {
     this.model = model;
   }
@@ -82,16 +82,9 @@ export class RowManager implements IRow {
         isHide: false,
       };
     }
-
-    if (temp.isHide) {
-      return {
-        isHide: true,
-        len: HIDE_CELL,
-      };
-    } else {
-      return { ...temp };
-    }
+    return temp.isHide ? { isHide: true, len: HIDE_CELL } : { ...temp };
   }
+  /* jscpd:ignore-start */
   setRowHeight(row: number, height: number, sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
     const key = getCustomWidthOrHeightKey(id, row);
@@ -127,4 +120,5 @@ export class RowManager implements IRow {
       }
     }
   }
+  /* jscpd:ignore-end */
 }

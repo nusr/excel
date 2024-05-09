@@ -10,8 +10,8 @@ import { DELETE_FLAG, transformData } from './History';
 import { $ } from '@/i18n';
 
 export class MergeCell implements IMergeCell {
-  private mergeCells: WorkBookJSON['mergeCells'] = {};
   private model: IModel;
+  private mergeCells: WorkBookJSON['mergeCells'] = {};
   constructor(model: IModel) {
     this.model = model;
   }

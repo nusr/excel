@@ -72,4 +72,5 @@
 
 .formula-editor.edit-cell {
   position: fixed;
+  min-height: unset;
 }

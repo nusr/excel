@@ -361,12 +361,12 @@ function getCellStyle(
   }
   if (xf.applyNumberFormat && xf.numFmtId) {
     const list = get<NumFmtItem[]>(xml, 'styleSheet.numFmts.numFmt', []);
-    const item = list.find(v => v.numFmtId === xf.numFmtId);
+    const item = list.find((v) => v.numFmtId === xf.numFmtId);
     if (item) {
       result.numberFormat = item.formatCode;
     } else {
       const id = parseInt(xf.numFmtId, 10);
-      const item = NUMBER_FORMAT_LIST.find(v => v.id === id);
+      const item = NUMBER_FORMAT_LIST.find((v) => v.id === id);
       if (item) {
         result.numberFormat = item.formatCode;
       }
@@ -554,10 +554,10 @@ export function convertXMLDataToModel(
             start++
           ) {
             result.customWidth[getCustomWidthOrHeightKey(item.sheetId, start)] =
-            {
-              len: w,
-              isHide,
-            };
+              {
+                len: w,
+                isHide,
+              };
           }
         }
       }
@@ -581,10 +581,10 @@ export function convertXMLDataToModel(
       if (row.customHeight && row.ht) {
         const isDefault = defaultWOrH.defaultRowHeight === row.ht;
         result.customHeight[getCustomWidthOrHeightKey(item.sheetId, realRow)] =
-        {
-          len: isDefault ? CELL_HEIGHT : Math.floor(parseInt(row.ht, 10)),
-          isHide: Boolean(row.hidden),
-        };
+          {
+            len: isDefault ? CELL_HEIGHT : Math.floor(parseInt(row.ht, 10)),
+            isHide: Boolean(row.hidden),
+          };
       }
       const colList = Array.isArray(row.c) ? row.c : [row.c];
       for (const col of colList) {
@@ -648,7 +648,7 @@ export function convertXMLDataToModel(
       result.definedNames[item.name.toLowerCase()] = range.toIRange();
     }
   }
-  for (let drawingId = 1;drawingId <= drawingCount;drawingId++) {
+  for (let drawingId = 1; drawingId <= drawingCount; drawingId++) {
     const basePath = `drawing${drawingId}.xml`;
     const key = `${DRAWING_PREFIX_KEY}${basePath}`;
     const ref = `${DRAWING_PREFIX_KEY}_rels/${basePath}.rels`;

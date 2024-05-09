@@ -1,6 +1,6 @@
-import {npx, dpr, canvasLog, headerSizeSet, canvasSizeSet} from '@/util';
-import {resizeCanvas, renderCell} from './util';
-import {ContentView, IController, IRange, ContentParams} from '@/types';
+import { dpr, canvasLog, headerSizeSet, canvasSizeSet } from '@/util';
+import { resizeCanvas, renderCell, clearRect } from './util';
+import { ContentView, IController, IRange, ContentParams } from '@/types';
 
 export class Content implements ContentView {
   private ctx: CanvasRenderingContext2D;
@@ -10,6 +10,7 @@ export class Content implements ContentView {
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     const ctx = canvas.getContext('2d')!;
+
     this.ctx = ctx;
     const size = dpr();
     this.ctx.scale(size, size);
@@ -18,16 +19,18 @@ export class Content implements ContentView {
     return this.ctx.canvas;
   }
   resize() {
-    const {width, height} = canvasSizeSet.get();
+    const { width, height } = canvasSizeSet.get();
     resizeCanvas(this.ctx.canvas, width, height);
   }
   render(params: ContentParams) {
+    this.ctx.textAlign = 'left';
+    this.ctx.textBaseline = 'top';
     canvasLog('render canvas content');
     this.clear();
     this.renderContent(params);
   }
   check() {
-    const {controller} = this;
+    const { controller } = this;
     if (this.rowMap.size === 0 && this.colMap.size === 0) {
       return;
     }
@@ -49,8 +52,8 @@ export class Content implements ContentView {
   }
 
   private clear() {
-    const {width, height} = canvasSizeSet.get();
-    this.ctx.clearRect(0, 0, npx(width), npx(height));
+    const { width, height } = canvasSizeSet.get();
+    clearRect(this.ctx, 0, 0, width, height);
   }
 
   private renderCell(
@@ -58,9 +61,9 @@ export class Content implements ContentView {
     col: number,
     mergeCell: IRange | undefined,
     maxWidth: number,
-    maxHeight: number
+    maxHeight: number,
   ) {
-    const {controller, ctx} = this;
+    const { controller, ctx } = this;
     const range: IRange = {
       row: row,
       col: col,
@@ -86,7 +89,7 @@ export class Content implements ContentView {
         height: Math.min(cellSize.height, maxHeight),
       },
       cellInfo.value,
-      cellInfo.style
+      cellInfo.style,
     );
     const height = Math.max(this.rowMap.get(row) ?? 0, size.height);
     const width = Math.max(this.colMap.get(col) ?? 0, size.width);
@@ -104,9 +107,9 @@ export class Content implements ContentView {
     contentHeight,
     contentWidth,
   }: ContentParams) {
-    const {controller, ctx} = this;
+    const { controller, ctx } = this;
     const headerSize = headerSizeSet.get();
-    const {row, col} = controller.getScroll();
+    const { row, col } = controller.getScroll();
 
     const maxWidth = Math.floor(contentWidth - headerSize.width);
     const maxHeight = Math.floor(contentHeight - headerSize.height);
@@ -116,12 +119,12 @@ export class Content implements ContentView {
     this.colMap = new Map<number, number>();
 
     const mergeCells = controller.getMergeCellList(
-      controller.getCurrentSheetId()
+      controller.getCurrentSheetId(),
     );
     for (let rowIndex = row; rowIndex < endRow; rowIndex++) {
       for (let colIndex = col; colIndex < endCol; colIndex++) {
         const cell = mergeCells.find(
-          v => v.row === rowIndex && v.col === colIndex
+          (v) => v.row === rowIndex && v.col === colIndex,
         );
         this.renderCell(rowIndex, colIndex, cell, maxWidth, maxHeight);
       }

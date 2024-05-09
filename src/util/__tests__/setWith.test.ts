@@ -18,7 +18,13 @@ describe('setWith.test.ts', () => {
     });
 
     it("should get { worksheets: { 1: { 2: { value: '2' } }} }", () => {
-      expect(setWith({ worksheets: { 1: { 2: { value: '1' } } } }, 'worksheets.1.2.value', '2')).toStrictEqual({
+      expect(
+        setWith(
+          { worksheets: { 1: { 2: { value: '1' } } } },
+          'worksheets.1.2.value',
+          '2',
+        ),
+      ).toStrictEqual({
         worksheets: { 1: { 2: { value: '2' } } },
       });
     });

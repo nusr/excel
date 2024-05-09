@@ -129,6 +129,8 @@ export class CallExpression implements Expression {
       .join(',')})`;
   }
 }
+
+/* jscpd:ignore-start */
 export class CellRangeExpression implements Expression {
   readonly left: Expression;
   readonly right: Expression;
@@ -147,6 +149,7 @@ export class CellRangeExpression implements Expression {
     );
   }
 }
+/* jscpd:ignore-end */
 
 export class GroupExpression implements Expression {
   readonly value: Expression;

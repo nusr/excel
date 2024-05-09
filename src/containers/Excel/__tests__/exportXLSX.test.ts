@@ -115,7 +115,7 @@ describe('exportXLSX.test.ts', () => {
           sheetId: controller.getCurrentSheetId(),
         },
       });
-     
+
       controller.addSheet();
       controller.addDrawing({
         title: 'icon',

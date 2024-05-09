@@ -12,8 +12,7 @@ import {
   CellRangeExpression,
 } from './expression';
 import { CustomError } from './formula';
-
-export const errorSet = new Set<ErrorTypes>(['#ERROR!', '#DIV/0!', '#NULL!', '#NUM!', '#REF!', '#VALUE!', '#N/A', '#NAME?']);
+import { ERROR_SET } from '@/util';
 
 export class Parser {
   private readonly tokens: Token[];
@@ -143,14 +142,21 @@ export class Parser {
       this.expect(TokenType.RIGHT_BRACKET);
       return new GroupExpression(value);
     }
-    if (this.match(TokenType.NUMBER, TokenType.STRING, TokenType.TRUE, TokenType.FALSE)) {
+    if (
+      this.match(
+        TokenType.NUMBER,
+        TokenType.STRING,
+        TokenType.TRUE,
+        TokenType.FALSE,
+      )
+    ) {
       return new LiteralExpression(this.previous());
     }
 
     if (this.match(TokenType.IDENTIFIER)) {
       const name = this.previous();
       const realValue = name.value.toUpperCase();
-      if (errorSet.has(realValue as ErrorTypes)) {
+      if (ERROR_SET.has(realValue as ErrorTypes)) {
         throw new CustomError(realValue as ErrorTypes);
       }
       return new TokenExpression(name);

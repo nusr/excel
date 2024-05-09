@@ -115,7 +115,7 @@ describe('workbook.test.ts', () => {
     });
     test('ok', () => {
       model.addSheet();
-      const oldData = model.getSheetInfo()
+      const oldData = model.getSheetInfo();
       model.updateSheetInfo(
         { colCount: 10, rowCount: 10 },
         model.getCurrentSheetId(),

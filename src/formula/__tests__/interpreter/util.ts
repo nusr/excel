@@ -1,6 +1,6 @@
-import { ResultType } from '@/types';
+import { ResultType, ErrorTypes } from '@/types';
 import { parseFormula } from '../..';
-import { errorSet } from '../../parser';
+import { ERROR_SET } from '@/util';
 
 export function expectResult(
   str: string,
@@ -9,7 +9,7 @@ export function expectResult(
 ) {
   const result = parseFormula(str);
   expect(result).toEqual({
-    isError: errorSet.has(result.result as any),
+    isError: ERROR_SET.has(result.result as ErrorTypes),
     result: expected,
     expressionStr,
   });

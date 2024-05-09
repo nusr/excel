@@ -11,9 +11,30 @@ describe('arithmetic expressions', () => {
     ['1E10', [getToken(TokenType.NUMBER, '1E10')]],
     ['1.5E-10', [getToken(TokenType.NUMBER, '1.5E-10')]],
     ['1.55E+100', [getToken(TokenType.NUMBER, '1.55E+100')]],
-    ['1+2', [getToken(TokenType.NUMBER, '1'), getToken(TokenType.PLUS, '+'), getToken(TokenType.NUMBER, '2')]],
-    ['1+2', [getToken(TokenType.NUMBER, '1'), getToken(TokenType.PLUS, '+'), getToken(TokenType.NUMBER, '2')]],
-    ['1.1+2.2', [getToken(TokenType.NUMBER, '1.1'), getToken(TokenType.PLUS, '+'), getToken(TokenType.NUMBER, '2.2')]],
+    [
+      '1+2',
+      [
+        getToken(TokenType.NUMBER, '1'),
+        getToken(TokenType.PLUS, '+'),
+        getToken(TokenType.NUMBER, '2'),
+      ],
+    ],
+    [
+      '1+2',
+      [
+        getToken(TokenType.NUMBER, '1'),
+        getToken(TokenType.PLUS, '+'),
+        getToken(TokenType.NUMBER, '2'),
+      ],
+    ],
+    [
+      '1.1+2.2',
+      [
+        getToken(TokenType.NUMBER, '1.1'),
+        getToken(TokenType.PLUS, '+'),
+        getToken(TokenType.NUMBER, '2.2'),
+      ],
+    ],
     [
       '(1+2)-3',
       [

@@ -10,8 +10,8 @@ import { DELETE_FLAG, transformData } from './History';
 import { MAX_PARAMS_COUNT, parseReference } from '@/util';
 
 export class DefinedName implements IDefinedName {
-  private definedNames: WorkBookJSON['definedNames'] = {};
   private model: IModel;
+  private definedNames: WorkBookJSON['definedNames'] = {};
   constructor(model: IModel) {
     this.model = model;
   }

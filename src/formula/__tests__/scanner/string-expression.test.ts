@@ -6,7 +6,11 @@ describe('string expressions', () => {
     ['"cat"', [getToken(TokenType.STRING, 'cat')]],
     [
       '"con"&"cat"',
-      [getToken(TokenType.STRING, 'con'), getToken(TokenType.CONCATENATE, '&'), getToken(TokenType.STRING, 'cat')],
+      [
+        getToken(TokenType.STRING, 'con'),
+        getToken(TokenType.CONCATENATE, '&'),
+        getToken(TokenType.STRING, 'cat'),
+      ],
     ],
     [
       '"con"&"cat"&"enate"',

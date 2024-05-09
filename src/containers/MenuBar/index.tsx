@@ -27,7 +27,6 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
     }, []);
     const handleImportXLSX = useCallback(
       async (event: React.ChangeEvent<HTMLInputElement>) => {
-        event.stopPropagation();
         const file = event.target.files?.[0];
         if (!file) {
           return;
@@ -41,7 +40,6 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
     );
     const handleImportCSV = useCallback(
       async (event: React.ChangeEvent<HTMLInputElement>) => {
-        event.stopPropagation();
         const file = event.target.files?.[0];
         if (!file) {
           return;

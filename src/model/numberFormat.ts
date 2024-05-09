@@ -1,21 +1,25 @@
 import SSF from 'ssf';
 import { NumberFormatValue } from '@/types';
-import { DEFAULT_FORMAT_CODE } from '@/util'
+import { DEFAULT_FORMAT_CODE } from '@/util';
 
 type FormatOptions = {
   dateNF?: string;
   date1904?: boolean;
-}
+};
 
-export function numberFormat(value: NumberFormatValue, pattern?: string, options: FormatOptions = {}) {
-  return SSF.format(pattern || DEFAULT_FORMAT_CODE, value, options)
+export function numberFormat(
+  value: NumberFormatValue,
+  pattern?: string,
+  options: FormatOptions = {},
+) {
+  return SSF.format(pattern || DEFAULT_FORMAT_CODE, value, options);
 }
 
 export function isDateFormat(format?: string) {
   if (!format) {
     return false;
   }
-  return SSF.is_date(format)
+  return SSF.is_date(format);
 }
 
 export function convertDateToNumber(v: Date, date1904?: boolean): number {

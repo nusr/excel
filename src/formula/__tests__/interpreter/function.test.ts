@@ -20,7 +20,7 @@ describe('parseFormula function', () => {
   });
   it('function ABS', () => {
     expect(parseFormula('ABS()')).toEqual({
-      result: "#VALUE!",
+      result: '#VALUE!',
       isError: true,
       expressionStr: '',
     });

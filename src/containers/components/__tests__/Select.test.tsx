@@ -20,7 +20,7 @@ describe('Select.test.ts', () => {
           <div>test</div>
         </SelectList>,
       );
-      fireEvent.click(screen.getByTestId('select-list-trigger'))
+      fireEvent.click(screen.getByTestId('select-list-trigger'));
       const dom = screen.getByTestId('select-list-popup');
       dom.setAttribute('data-value', '');
       fireEvent.click(dom);
@@ -41,7 +41,7 @@ describe('Select.test.ts', () => {
           <div>test</div>
         </SelectList>,
       );
-      fireEvent.click(screen.getByTestId('select-list-trigger'))
+      fireEvent.click(screen.getByTestId('select-list-trigger'));
       const dom = screen.getByTestId('select-list-popup');
       dom.setAttribute('data-value', '1');
       fireEvent.click(dom);
@@ -63,7 +63,7 @@ describe('Select.test.ts', () => {
           <div>test</div>
         </SelectList>,
       );
-      fireEvent.click(screen.getByTestId('select-list-trigger'))
+      fireEvent.click(screen.getByTestId('select-list-trigger'));
       const dom = screen.getByTestId('select-list-popup');
       dom.setAttribute('data-value', '2');
       fireEvent.click(dom);
@@ -73,7 +73,7 @@ describe('Select.test.ts', () => {
     test('click outside', () => {
       const onChange = jest.fn();
       render(
-        <div >
+        <div>
           <div data-testid="outside">outside</div>
           <SelectList
             data={[
@@ -88,7 +88,7 @@ describe('Select.test.ts', () => {
           </SelectList>
         </div>,
       );
-      fireEvent.click(screen.getByTestId('select-list-trigger'))
+      fireEvent.click(screen.getByTestId('select-list-trigger'));
       fireEvent.pointerDown(screen.getByTestId('outside'));
       expect(onChange).not.toHaveBeenCalled();
     });

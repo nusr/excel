@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 describe('BaseIcon.test.ts', () => {
   afterEach(cleanup);
   test('normal', () => {
-    const dom = render(<Toast type="success" message="test" testId='test' />);
+    const dom = render(<Toast type="success" message="test" testId="test" />);
     expect(dom.container.childNodes.length).toEqual(1);
   });
   test('close', () => {

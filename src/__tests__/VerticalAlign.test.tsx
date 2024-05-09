@@ -1,9 +1,9 @@
-import {App} from '@/containers';
+import { App } from '@/containers';
 import * as React from 'react';
-import {render, screen, act, fireEvent} from '@testing-library/react';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {type} from './util';
-import {initController} from '@/controller';
+import { type } from './util';
+import { initController } from '@/controller';
 import './global.mock';
 
 describe('VerticalAlign.test.tsx', () => {
@@ -24,7 +24,9 @@ describe('VerticalAlign.test.tsx', () => {
       });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-vertical-middle'));
-      expect(screen.getByTestId('toolbar-vertical-middle')).toHaveClass('active');
+      expect(screen.getByTestId('toolbar-vertical-middle')).toHaveClass(
+        'active',
+      );
     });
   });
   describe('bottom', () => {
@@ -34,7 +36,9 @@ describe('VerticalAlign.test.tsx', () => {
       });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-vertical-bottom'));
-      expect(screen.getByTestId('toolbar-vertical-bottom')).toHaveClass('active');
+      expect(screen.getByTestId('toolbar-vertical-bottom')).toHaveClass(
+        'active',
+      );
     });
   });
 });

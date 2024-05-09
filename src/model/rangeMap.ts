@@ -3,8 +3,8 @@ import { isSameRange } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 
 export class RangeMap implements IRangeMap {
-  private rangeMap: WorkBookJSON['rangeMap'] = {};
   private model: IModel;
+  private rangeMap: WorkBookJSON['rangeMap'] = {};
   constructor(model: IModel) {
     this.model = model;
   }

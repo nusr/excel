@@ -1,4 +1,4 @@
-import { throttle,camelCase } from '../lodash';
+import { throttle, camelCase } from '../lodash';
 
 describe('lodash.test.ts', () => {
   describe('throttle', () => {
@@ -21,11 +21,11 @@ describe('lodash.test.ts', () => {
       expect(mockFunction).toHaveBeenCalledTimes(2);
     });
   });
-  describe('camelCase', ()=> {
-    test('ok', ()=> {
-      expect(camelCase('TEST_a')).toEqual('testA')
-      expect(camelCase('test.a')).toEqual('testA')
-      expect(camelCase('test-a')).toEqual('testA')
-    })
-  })
+  describe('camelCase', () => {
+    test('ok', () => {
+      expect(camelCase('TEST_a')).toEqual('testA');
+      expect(camelCase('test.a')).toEqual('testA');
+      expect(camelCase('test-a')).toEqual('testA');
+    });
+  });
 });

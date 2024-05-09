@@ -166,36 +166,23 @@ export class Workbook implements IWorkbook {
 
   deleteSheet(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
-    if (!this.workbook[id]) {
-      return;
+    if (this.checkSheetSize(sheetId)) {
+      const oldSheet = { ...this.workbook[id] };
+      delete this.workbook[id];
+      this.model.push({
+        type: 'workbook',
+        key: id,
+        newValue: DELETE_FLAG,
+        oldValue: oldSheet,
+      });
     }
-    const sheetList = this.getSheetList();
-    const list = sheetList.filter((v) => !v.isHide);
-    assert(
-      list.length >= 2,
-      $('a-workbook-must-contains-at-least-one-visible-worksheet'),
-    );
-    const oldSheet = this.workbook[id];
-    delete this.workbook[id];
-
-    this.model.push({
-      type: 'workbook',
-      key: id,
-      newValue: DELETE_FLAG,
-      oldValue: oldSheet,
-    });
   }
   hideSheet(sheetId?: string): void {
-    const sheetList = this.getSheetList();
-    const list = sheetList.filter((v) => !v.isHide);
-    assert(
-      list.length >= 2,
-      $('a-workbook-must-contains-at-least-one-visible-worksheet'),
-    );
-    this.updateSheetInfo({ isHide: true }, sheetId);
+    if (this.checkSheetSize(sheetId)) {
+      this.updateSheetInfo({ isHide: true }, sheetId);
+    }
   }
   unhideSheet(sheetId: string): void {
-    
     this.updateSheetInfo({ isHide: false }, sheetId);
   }
   renameSheet(sheetName: string, sheetId?: string): void {
@@ -247,4 +234,17 @@ export class Workbook implements IWorkbook {
     return result[0]?.sheetId;
   }
   deleteAll(): void {}
+  private checkSheetSize(sheetId?: string) {
+    const id = sheetId || this.currentSheetId;
+    if (!this.workbook[id]) {
+      return false;
+    }
+    const sheetList = this.getSheetList();
+    const list = sheetList.filter((v) => !v.isHide);
+    assert(
+      list.length >= 2,
+      $('a-workbook-must-contains-at-least-one-visible-worksheet'),
+    );
+    return true;
+  }
 }

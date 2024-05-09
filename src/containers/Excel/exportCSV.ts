@@ -1,10 +1,6 @@
 import { IController } from '@/types';
-import {
-  coordinateToString,
-  CSV_SPLITTER,
-  LINE_BREAK,
-} from '@/util';
-import { numberFormat } from '@/model'
+import { coordinateToString, CSV_SPLITTER, LINE_BREAK } from '@/util';
+import { numberFormat } from '@/model';
 
 const DELIMITER = CSV_SPLITTER;
 const RECORD_DELIMITER = LINE_BREAK;
@@ -17,7 +13,7 @@ function processRow(row: string[]) {
   const quoted = false;
 
   let csvRecord = '';
-  for (let j = 0;j < row.length;j++) {
+  for (let j = 0; j < row.length; j++) {
     const field = row[j];
     let value = row[j];
     if ('' === value) {
@@ -77,9 +73,9 @@ export function exportToCsv(controller: IController) {
   const csvList: string[] = [];
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
   if (sheetData) {
-    for (let row = 0;row < sheetInfo.rowCount;row++) {
+    for (let row = 0; row < sheetInfo.rowCount; row++) {
       const list: string[] = [];
-      for (let col = 0;col < sheetInfo.colCount;col++) {
+      for (let col = 0; col < sheetInfo.colCount; col++) {
         const key = coordinateToString(row, col);
         const value = sheetData[key]?.value;
         const style = sheetData[key]?.style;

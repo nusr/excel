@@ -1,8 +1,8 @@
 import { parseFormula } from '../..';
 
 describe('parseFormula math', () => {
-  describe('operator +', ()=> {
-    test('invalid', ()=> {
+  describe('operator +', () => {
+    test('invalid', () => {
       expect(parseFormula('"foo" + 4.333')).toEqual({
         result: '#VALUE!',
         isError: true,
@@ -13,14 +13,14 @@ describe('parseFormula math', () => {
         isError: true,
         expressionStr: '',
       });
-    })
+    });
     test('ok', () => {
       expect(parseFormula('10+10')).toEqual({
         isError: false,
         result: 20,
         expressionStr: '10+10',
       });
-  
+
       expect(parseFormula('1e2 + 1e1')).toEqual({
         isError: false,
         result: 110,
@@ -31,7 +31,7 @@ describe('parseFormula math', () => {
         result: 10.01,
         expressionStr: '1e-2+1e1',
       });
-  
+
       expect(parseFormula('10 + 10')).toEqual({
         isError: false,
         result: 20,
@@ -47,15 +47,14 @@ describe('parseFormula math', () => {
         result: 5.7755,
         expressionStr: '1.4425+4.333',
       });
-    
+
       expect(parseFormula('+ 10')).toEqual({
         isError: false,
         result: 10,
         expressionStr: '+10',
       });
     });
-  })
-
+  });
 
   it('operator -', () => {
     expect(parseFormula('10-10')).toEqual({

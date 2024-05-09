@@ -51,10 +51,6 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           return controller.getSheetInfo(sheetId)?.name || '';
         },
       );
-      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        value = event.target.value;
-        event.stopPropagation();
-      };
       info({
         visible: true,
         title: $('edit-data-source'),
@@ -65,14 +61,16 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             spellCheck
             style={{ width: '400px' }}
             defaultValue={value}
-            onChange={handleChange}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              value = event.target.value.trim();
+              event.stopPropagation();
+            }}
             maxLength={MAX_NAME_LENGTH * 2}
             data-testid="dialog-select-data-input"
           />
         ),
         onOk: () => {
-          const realValue = value.trim();
-          if (!realValue) {
+          if (!value) {
             toast({
               type: 'error',
               message: $('reference-is-empty'),
@@ -81,7 +79,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             return;
           }
           const sheetList = controller.getSheetList();
-          const range = parseReference(realValue, (sheetName: string) => {
+          const range = parseReference(value, (sheetName: string) => {
             return sheetList.find((v) => v.name === sheetName)?.sheetId || '';
           });
           if (
@@ -106,11 +104,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       });
     };
     const changeChartTitle = () => {
-      let value = title;
-      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        value = event.target.value;
-        event.stopPropagation();
-      };
+      let value = title.trim();
       info({
         visible: true,
         title: $('change-chart-title'),
@@ -121,14 +115,16 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             spellCheck
             style={{ width: '200px' }}
             defaultValue={value}
-            onChange={handleChange}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              value = event.target.value.trim();
+              event.stopPropagation();
+            }}
             maxLength={MAX_NAME_LENGTH}
             data-testid="dialog-change-chart-title-input"
           />
         ),
         onOk: () => {
-          const realValue = value.trim();
-          if (!realValue) {
+          if (!value) {
             toast({
               type: 'error',
               message: $('the-value-cannot-be-empty'),
@@ -136,7 +132,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             });
             return;
           }
-          controller.updateDrawing(uuid, { title: realValue });
+          controller.updateDrawing(uuid, { title: value });
           hideContextMenu();
         },
         onCancel: () => {

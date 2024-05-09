@@ -13,5 +13,5 @@ export const coreStore = new BaseStore<CoreStore>({
   canRedo: false,
   canUndo: false,
   activeUuid: '',
-  currentSheetId: ''
+  currentSheetId: '',
 });

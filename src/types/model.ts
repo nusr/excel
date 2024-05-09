@@ -233,48 +233,48 @@ export interface IWorksheet extends IBaseManager {
 
 export interface IBaseModel
   extends Pick<
-    IWorkbook,
-    | 'setCurrentSheetId'
-    | 'getCurrentSheetId'
-    | 'addSheet'
-    | 'deleteSheet'
-    | 'hideSheet'
-    | 'unhideSheet'
-    | 'renameSheet'
-    | 'getSheetInfo'
-    | 'updateSheetInfo'
-    | 'getSheetList'
-    | 'deleteAll'
-    | 'fromJSON'
-  >,
-  Pick<IRangeMap, 'setActiveRange' | 'getActiveRange'>,
-  Pick<
-    IDrawings,
-    'getDrawingList' | 'addDrawing' | 'updateDrawing' | 'deleteDrawing'
-  >,
-  Pick<
-    IDefinedName,
-    | 'getDefineName'
-    | 'setDefineName'
-    | 'checkDefineName'
-    | 'getDefineNameList'
-  >,
-  Pick<IMergeCell, 'getMergeCellList' | 'addMergeCell' | 'deleteMergeCell'>,
-  Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight'>,
-  Pick<ICol, 'hideCol' | 'getColWidth' | 'setColWidth'>,
-  Pick<
-    IWorksheet,
-    | 'addRow'
-    | 'deleteRow'
-    | 'addCol'
-    | 'deleteCol'
-    | 'getCell'
-    | 'setCell'
-    | 'updateCellStyle'
-    | 'getWorksheet'
-    | 'setWorksheet'
-    | 'setCellValue'
-  > {
+      IWorkbook,
+      | 'setCurrentSheetId'
+      | 'getCurrentSheetId'
+      | 'addSheet'
+      | 'deleteSheet'
+      | 'hideSheet'
+      | 'unhideSheet'
+      | 'renameSheet'
+      | 'getSheetInfo'
+      | 'updateSheetInfo'
+      | 'getSheetList'
+      | 'deleteAll'
+      | 'fromJSON'
+    >,
+    Pick<IRangeMap, 'setActiveRange' | 'getActiveRange'>,
+    Pick<
+      IDrawings,
+      'getDrawingList' | 'addDrawing' | 'updateDrawing' | 'deleteDrawing'
+    >,
+    Pick<
+      IDefinedName,
+      | 'getDefineName'
+      | 'setDefineName'
+      | 'checkDefineName'
+      | 'getDefineNameList'
+    >,
+    Pick<IMergeCell, 'getMergeCellList' | 'addMergeCell' | 'deleteMergeCell'>,
+    Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight'>,
+    Pick<ICol, 'hideCol' | 'getColWidth' | 'setColWidth'>,
+    Pick<
+      IWorksheet,
+      | 'addRow'
+      | 'deleteRow'
+      | 'addCol'
+      | 'deleteCol'
+      | 'getCell'
+      | 'setCell'
+      | 'updateCellStyle'
+      | 'getWorksheet'
+      | 'setWorksheet'
+      | 'setCellValue'
+    > {
   toJSON(): WorkBookJSON;
   canRedo(): boolean;
   canUndo(): boolean;
@@ -284,14 +284,19 @@ export interface IBaseModel
 
 export interface IModel
   extends IBaseModel,
-  Pick<IRangeMap, 'validateRange'>,
-  Pick<IDefinedName, 'validateDefinedName'>,
-  Pick<IDrawings, 'validateDrawing'> {
+    Pick<IRangeMap, 'validateRange'>,
+    Pick<IDefinedName, 'validateDefinedName'>,
+    Pick<IDrawings, 'validateDrawing'> {
   pasteRange(range: IRange, isCut: boolean): IRange;
   emitChange(dataset: Set<ChangeEventType>): void;
   push(command: ICommandItem): void;
   iterateRange(range: IRange, fn: (row: number, col: number) => boolean): void;
 }
 
-
-export type NumberFormatValue = number | string | boolean | Date | null | undefined;
+export type NumberFormatValue =
+  | number
+  | string
+  | boolean
+  | Date
+  | null
+  | undefined;

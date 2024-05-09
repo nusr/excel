@@ -111,7 +111,7 @@ describe('rangeMap.test.ts', () => {
         sheetId: '',
       });
       controller.hideRow(3, 2);
-      controller.setNextActiveCell('up')
+      controller.setNextActiveCell('up');
       expect(controller.getActiveRange().range).toEqual({
         row: 2,
         col: 5,

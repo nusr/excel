@@ -65,7 +65,7 @@ function getChartData(
       continue;
     }
     const list = [];
-    for (let c = col, endCol = col + colCount;c < endCol;c++) {
+    for (let c = col, endCol = col + colCount; c < endCol; c++) {
       const t = controller.getCell({
         row: r,
         col: c,
@@ -131,12 +131,13 @@ function updateActiveCell(controller: IController) {
   } = cell?.style || {};
 
   const numberFormat = cell?.style?.numberFormat || DEFAULT_FORMAT_CODE;
-  const isRight = numberFormat === DEFAULT_FORMAT_CODE && typeof cell?.value === 'number';
+  const isRight =
+    numberFormat === DEFAULT_FORMAT_CODE && typeof cell?.value === 'number';
   let horAlign = horizontalAlign;
   if (horizontalAlign === undefined && isRight) {
-    horAlign = EHorizontalAlign.RIGHT
+    horAlign = EHorizontalAlign.RIGHT;
   }
-  let displayValue = ''
+  let displayValue = '';
   if (isDateFormat(numberFormat)) {
     displayValue = numberFormatUtil(cell?.value, numberFormat);
   } else {

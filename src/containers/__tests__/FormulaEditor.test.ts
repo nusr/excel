@@ -37,7 +37,7 @@ describe('getEditorStyle', () => {
           horizontalAlign: EHorizontalAlign.LEFT,
           numberFormat: '',
           isMergeCell: false,
-          mergeType: ''
+          mergeType: '',
         },
       ),
     ).toBeUndefined();
@@ -81,7 +81,7 @@ describe('getEditorStyle', () => {
           horizontalAlign: EHorizontalAlign.LEFT,
           numberFormat: '',
           isMergeCell: false,
-          mergeType: ''
+          mergeType: '',
         },
       ),
     ).toEqual(result);
@@ -124,13 +124,13 @@ describe('getEditorStyle', () => {
           fontFamily: 'serif',
           fillColor: 'red',
           isWrapText: false,
-          
+
           underline: EUnderLine.NONE,
           verticalAlign: EVerticalAlign.TOP,
           horizontalAlign: EHorizontalAlign.LEFT,
           numberFormat: '',
           isMergeCell: false,
-          mergeType: ''
+          mergeType: '',
         },
       ),
     ).toEqual(result);
