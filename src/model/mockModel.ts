@@ -12,7 +12,7 @@ import { mockImage } from './mockData';
 import { $ } from '@/i18n';
 
 const MOCK_MODEL: WorkBookJSON = {
-  currentSheetId: '',
+  currentSheetId: '10',
   rangeMap: {
     '1': {
       row: 2,
@@ -123,6 +123,14 @@ const MOCK_MODEL: WorkBookJSON = {
       rowCount: DEFAULT_ROW_COUNT,
       sort: 9,
       tabColor: '#F9D700',
+    },
+    '10': {
+      sheetId: '10',
+      name: 'border',
+      isHide: false,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      sort: 10,
     },
   },
   worksheets: {
@@ -306,6 +314,19 @@ const MOCK_MODEL: WorkBookJSON = {
       },
     },
     '9': {},
+    '10': {
+      '1_1': {
+        value: 'test',
+        style: {
+          border: {
+            left: {},
+            right: {},
+            top: {},
+            bottom: {},
+          },
+        },
+      },
+    },
   },
 
   mergeCells: {

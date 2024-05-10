@@ -10,6 +10,7 @@ import {
   getThemeColor,
   headerSizeSet,
   canvasSizeSet,
+  activeLineWidth,
 } from '@/util';
 import {
   EventType,
@@ -80,7 +81,7 @@ export class MainCanvas {
     this.clear();
 
     this.ctx.strokeStyle = getThemeColor('primaryColor');
-    this.ctx.lineWidth = dpr();
+    this.ctx.lineWidth = activeLineWidth();
 
     const { width, height } = canvasSizeSet.get();
     const headerSize = headerSizeSet.get();
@@ -89,6 +90,7 @@ export class MainCanvas {
     const { endRow, contentHeight } = this.renderRowsHeader(height);
     const { endCol, contentWidth } = this.renderColsHeader(width);
     this.renderGrid(width - headerSize.width, height - headerSize.height);
+    this.ctx.lineWidth = activeLineWidth();
     this.renderTriangle();
 
     this.renderMergeCell();
@@ -106,6 +108,7 @@ export class MainCanvas {
       this.content.render({ endRow, endCol, contentHeight, contentWidth });
     }
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
+    strokeRect(this.ctx, result.left, result.top, result.width, result.height);
 
     this.isRendering = false;
     this.content.check();
@@ -439,7 +442,7 @@ export class MainCanvas {
       this.renderActiveCell();
     }
     // highlight line
-    strokeRect(this.ctx, activeCell.left, activeCell.top, width, height);
+    // strokeRect(this.ctx, activeCell.left, activeCell.top, width, height);
     return {
       left: activeCell.left,
       top: activeCell.top,
@@ -456,7 +459,7 @@ export class MainCanvas {
     const width = contentWidth - headerSize.width;
     const height = contentHeight - headerSize.height;
     // highlight line
-    strokeRect(this.ctx, headerSize.width, headerSize.height, width, height);
+    // strokeRect(this.ctx, headerSize.width, headerSize.height, width, height);
     return {
       left: headerSize.width,
       top: headerSize.height,
@@ -494,13 +497,13 @@ export class MainCanvas {
     drawLines(this.ctx, list);
     this.renderActiveCell();
     // highlight line
-    strokeRect(
-      this.ctx,
-      activeCell.left,
-      headerSize.height,
-      strokeWidth,
-      realHeight,
-    );
+    // strokeRect(
+    //   this.ctx,
+    //   activeCell.left,
+    //   headerSize.height,
+    //   strokeWidth,
+    //   realHeight,
+    // );
     return {
       left: activeCell.left,
       top: headerSize.height,
@@ -536,13 +539,13 @@ export class MainCanvas {
     drawLines(this.ctx, list);
     this.renderActiveCell();
     // highlight line
-    strokeRect(
-      this.ctx,
-      headerSize.width,
-      activeCell.top,
-      realWidth,
-      strokeHeight,
-    );
+    // strokeRect(
+    //   this.ctx,
+    //   headerSize.width,
+    //   activeCell.top,
+    //   realWidth,
+    //   strokeHeight,
+    // );
     return {
       left: headerSize.width,
       top: activeCell.top,

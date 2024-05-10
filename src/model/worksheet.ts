@@ -427,7 +427,7 @@ export class Worksheet implements IWorksheet {
     for (const k of keyList) {
       const oldValue = cellModel.style?.[k];
       const newValue = style[k];
-      if (oldValue === newValue) {
+      if (deepEqual(oldValue, newValue)) {
         continue;
       }
       // @ts-ignore
@@ -439,7 +439,7 @@ export class Worksheet implements IWorksheet {
           range.row,
           range.col,
         )}.style.${k}`,
-        newValue: newValue,
+        newValue: newValue === undefined ? DELETE_FLAG : newValue,
         oldValue: oldValue === undefined ? DELETE_FLAG : oldValue,
       });
     }
@@ -613,6 +613,6 @@ export class Worksheet implements IWorksheet {
     const key = coordinateToString(row, col);
     this.worksheets[id] = this.worksheets[id] || {};
     this.worksheets[id][key] = this.worksheets[id][key] || {};
-    return this.worksheets[id][key]
+    return this.worksheets[id][key];
   }
 }

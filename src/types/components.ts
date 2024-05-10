@@ -65,3 +65,8 @@ export interface ChartProps<
 export type ThemeType = 'dark' | 'light';
 
 export type LanguageType = 'en' | 'zh';
+
+export enum BorderType {
+  NO_BORDER = 'NO_BORDER',
+  ALL_BORDERS = 'ALL_BORDERS',
+}

@@ -1,6 +1,5 @@
 import {
   npx,
-  DEFAULT_FONT_CONFIG,
   DEFAULT_FONT_SIZE,
   makeFont,
   ERROR_SET,
@@ -11,10 +10,12 @@ import {
   getThemeColor,
   MERGE_CELL_LINE_BREAK,
   DEFAULT_FORMAT_CODE,
+  activeLineWidth,
 } from '@/util';
 import {
   CanvasOverlayPosition,
   ErrorTypes,
+  BorderItem,
   Point,
   EUnderLine,
   IWindowSize,
@@ -177,6 +178,61 @@ function splitWords(
   );
 }
 
+function getBorderStyle(border: BorderItem): {
+  lineWidth: number;
+  strokeStyle: string;
+} {
+  let strokeStyle = border.color || getThemeColor('black');
+  let lineWidth = activeLineWidth();
+  return {
+    lineWidth,
+    strokeStyle,
+  };
+}
+
+export function renderBorder(
+  ctx: CanvasRenderingContext2D,
+  cellInfo: CanvasOverlayPosition,
+  border: StyleType['border'],
+) {
+  const { top, left, width, height } = cellInfo;
+  // top
+  let borderStyle = getBorderStyle(border.top);
+  ctx.lineWidth = borderStyle.lineWidth;
+  ctx.strokeStyle = borderStyle.strokeStyle;
+  drawLines(ctx, [
+    [left, top],
+    [left + width, top],
+  ]);
+
+  // bottom
+  borderStyle = getBorderStyle(border.bottom);
+  ctx.lineWidth = borderStyle.lineWidth;
+  ctx.strokeStyle = borderStyle.strokeStyle;
+  drawLines(ctx, [
+    [left, top + height],
+    [left + width, top + height],
+  ]);
+
+  // left
+  borderStyle = getBorderStyle(border.left);
+  ctx.lineWidth = borderStyle.lineWidth;
+  ctx.strokeStyle = borderStyle.strokeStyle;
+  drawLines(ctx, [
+    [left, top],
+    [left, top + height],
+  ]);
+
+  // right
+  borderStyle = getBorderStyle(border.right);
+  ctx.lineWidth = borderStyle.lineWidth;
+  ctx.strokeStyle = borderStyle.strokeStyle;
+  drawLines(ctx, [
+    [left + width, top],
+    [left + width, top + height],
+  ]);
+}
+
 type TextItem = { str: string; width: number; height: number };
 export function renderCell(
   ctx: CanvasRenderingContext2D,
@@ -192,29 +248,21 @@ export function renderCell(
   const format = style?.numberFormat || DEFAULT_FORMAT_CODE;
   const isRight = format === DEFAULT_FORMAT_CODE && typeof value === 'number';
   const text = numberFormat(value, format);
-  let font = DEFAULT_FONT_CONFIG;
-  let fillStyle: string = getThemeColor('contentColor');
   const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
-  if (!isEmpty(style)) {
-    font = makeFont(
-      style?.isItalic ? 'italic' : 'normal',
-      style?.isBold ? 'bold' : '500',
-      npx(fontSize),
-      style?.fontFamily,
-    );
-    fillStyle = style?.fontColor || getThemeColor('contentColor');
-    if (style?.fillColor) {
-      // draw background color
-      ctx.fillStyle = style?.fillColor;
-      fillRect(
-        ctx,
-        cellInfo.left,
-        cellInfo.top,
-        cellInfo.width,
-        cellInfo.height,
-      );
-    }
+  const font = makeFont(
+    style?.isItalic ? 'italic' : 'normal',
+    style?.isBold ? 'bold' : '500',
+    npx(fontSize),
+    style?.fontFamily,
+  );
+
+  // draw background color
+  if (style?.fillColor) {
+    ctx.fillStyle = style?.fillColor;
+    fillRect(ctx, cellInfo.left, cellInfo.top, cellInfo.width, cellInfo.height);
   }
+  // error text
+  let fillStyle = style?.fontColor || getThemeColor('contentColor');
   if (ERROR_SET.has(text as ErrorTypes)) {
     fillStyle = getThemeColor('errorFormulaColor');
   }
@@ -238,6 +286,8 @@ export function renderCell(
       height: size.height === 0 ? fontSize : size.height,
     };
   });
+
+  // fill text
   const { width, height, resultList } = computeCell(
     textList,
     cellInfo,
@@ -274,6 +324,7 @@ export function renderCell(
     }
   }
   drawLines(ctx, list);
+
   result.height = Math.ceil(height);
   result.width = Math.ceil(width);
   if (!realStyle?.isWrapText && isDateFormat(format)) {
@@ -281,6 +332,7 @@ export function renderCell(
     const temp = textList.reduce((prev, cur) => prev + cur.width, 0);
     result.width = Math.max(Math.ceil(temp), result.width);
   }
+
   return result;
 }
 function computeCell(

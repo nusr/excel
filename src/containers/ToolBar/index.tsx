@@ -22,6 +22,7 @@ import {
   EMergeCellType,
   EHorizontalAlign,
   EVerticalAlign,
+  BorderType,
 } from '@/types';
 import styles from './index.module.css';
 import { fontFamilyStore, styleStore, coreStore } from '@/containers/store';
@@ -64,6 +65,19 @@ const mergeOptionList: OptionItem[] = [
   {
     value: EMergeCellType.MERGE_CONTENT,
     label: $('merge-content'),
+    disabled: false,
+  },
+];
+
+const borderOptionList: OptionItem[] = [
+  {
+    value: BorderType.NO_BORDER,
+    label: 'No Border',
+    disabled: false,
+  },
+  {
+    value: BorderType.ALL_BORDERS,
+    label: 'All Borders',
     disabled: false,
   },
 ];
@@ -280,6 +294,42 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         controller.getActiveRange().range,
       );
     }, []);
+    const addAllBorders = useCallback(() => {
+      controller.updateCellStyle(
+        {
+          border: {
+            left: {},
+            right: {},
+            top: {},
+            bottom: {},
+          },
+        },
+        controller.getActiveRange().range,
+      );
+    }, []);
+    const handleBorders = useCallback((value: string) => {
+      const range = controller.getActiveRange().range;
+      if (value === BorderType.NO_BORDER) {
+        controller.updateCellStyle(
+          {
+            border: undefined,
+          },
+          range,
+        );
+      } else if (value === BorderType.ALL_BORDERS) {
+        controller.updateCellStyle(
+          {
+            border: {
+              left: {},
+              right: {},
+              top: {},
+              bottom: {},
+            },
+          },
+          range,
+        );
+      }
+    }, []);
     return (
       <div className={styles['toolbar-wrapper']} data-testid="toolbar">
         <Button
@@ -355,6 +405,25 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           onChange={setUnderline}
           testId="toolbar-underline"
         />
+
+        <SelectList
+          data={borderOptionList}
+          value=""
+          onChange={handleBorders}
+          className={styles['border']}
+          testId="toolbar-border-select"
+        >
+          <Button
+            active={cellStyle.isMergeCell}
+            onClick={addAllBorders}
+            testId="toolbar-border"
+            className={styles['merge-cell-button']}
+            type="plain"
+            title="All Borders"
+          >
+            All Borders
+          </Button>
+        </SelectList>
         <ColorPicker
           key="fill-color"
           color={cellStyle.fillColor}

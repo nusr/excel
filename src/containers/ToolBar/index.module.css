@@ -15,6 +15,10 @@
   height: unset;
   width: 150px;
 }
+.toolbar-wrapper .border {
+  height: unset;
+  width: 150px;
+}
 .toolbar-wrapper .merge-cell-button {
   margin-right: 20px;
   flex: 1;

@@ -7,7 +7,7 @@ import {
 import { DEFAULT_FONT_SIZE, getThemeColor, DEFAULT_FORMAT_CODE } from '@/util';
 import { BaseStore } from './base';
 
-export type StyleStoreType = StyleType & {
+export type StyleStoreType = Omit<StyleType, 'border'> & {
   isMergeCell: boolean;
   mergeType: string;
 };

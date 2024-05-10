@@ -18,6 +18,11 @@ export enum EUnderLine {
   SINGLE,
   DOUBLE,
 }
+
+export type BorderItem = {
+  color?: string;
+  type?: 'thin' | 'mediumDashDotDot';
+};
 /**
  * XML to model
  * 1. styleId = worksheets_*.xml worksheet.sheetData.row.c.s
@@ -45,6 +50,12 @@ export interface StyleType {
   isBold: boolean;
   isStrike: boolean;
   numberFormat: string;
+  border: {
+    left: BorderItem;
+    right: BorderItem;
+    top: BorderItem;
+    bottom: BorderItem;
+  };
 }
 export interface WorksheetType {
   sheetId: string;

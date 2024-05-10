@@ -10,6 +10,10 @@ export function thinLineWidth(): number {
   return 1;
 }
 
+export function activeLineWidth(): number {
+  return thinLineWidth() * 3;
+}
+
 export function isMac() {
   return navigator.userAgent.indexOf('Mac OS X') > -1;
 }

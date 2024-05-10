@@ -1,5 +1,5 @@
 import { dpr, canvasLog, headerSizeSet, canvasSizeSet } from '@/util';
-import { resizeCanvas, renderCell, clearRect } from './util';
+import { resizeCanvas, renderCell, clearRect, renderBorder } from './util';
 import { ContentView, IController, IRange, ContentParams } from '@/types';
 
 export class Content implements ContentView {
@@ -93,11 +93,25 @@ export class Content implements ContentView {
     );
     const height = Math.max(this.rowMap.get(row) ?? 0, size.height);
     const width = Math.max(this.colMap.get(col) ?? 0, size.width);
-    if (height > controller.getRowHeight(row).len) {
-      this.rowMap.set(row, height);
+    if (!mergeCell) {
+      if (height > controller.getRowHeight(row).len) {
+        this.rowMap.set(row, height);
+      }
+      if (width > controller.getColWidth(col).len) {
+        this.colMap.set(col, width);
+      }
     }
-    if (width > controller.getColWidth(col).len) {
-      this.colMap.set(col, width);
+    if (cellInfo.style?.border) {
+      renderBorder(
+        ctx,
+        {
+          top: position.top,
+          left: position.left,
+          height: Math.max(height, cellSize.height),
+          width: Math.max(width, cellSize.width),
+        },
+        cellInfo.style?.border,
+      );
     }
   }
 
@@ -123,10 +137,11 @@ export class Content implements ContentView {
     );
     for (let rowIndex = row; rowIndex < endRow; rowIndex++) {
       for (let colIndex = col; colIndex < endCol; colIndex++) {
-        const cell = mergeCells.find(
+        const mergeCell = mergeCells.find(
           (v) => v.row === rowIndex && v.col === colIndex,
         );
-        this.renderCell(rowIndex, colIndex, cell, maxWidth, maxHeight);
+
+        this.renderCell(rowIndex, colIndex, mergeCell, maxWidth, maxHeight);
       }
     }
     ctx.restore();
