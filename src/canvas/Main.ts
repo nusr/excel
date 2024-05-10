@@ -119,21 +119,12 @@ export class MainCanvas {
     if (mergeCells.length === 0) {
       return;
     }
-    const lineWidth = thinLineWidth();
+    const activeCell = controller.getActiveRange().range;
     for (const range of mergeCells) {
-      const position = controller.computeCellPosition(range);
-      const size = controller.getCellSize(range);
-      if (size.width <= 0 || size.height <= 0) {
+      if (activeCell.row === range.row && activeCell.col === range.col) {
         continue;
       }
-      // clear merge cell area
-      clearRect(
-        this.ctx,
-        position.left + lineWidth,
-        position.top + lineWidth,
-        size.width - lineWidth * 2,
-        size.height - lineWidth * 2,
-      );
+      this.clearRect(range);
     }
   }
 
@@ -379,8 +370,16 @@ export class MainCanvas {
       colCount: 1,
       sheetId: range.sheetId,
     }).range;
-    const activeCell = controller.computeCellPosition(temp);
-    const cellSize = controller.getCellSize(temp);
+    this.clearRect(temp);
+  }
+
+  private clearRect(range: IRange) {
+    const { controller } = this;
+    const cellSize = controller.getCellSize(range);
+    if (cellSize.width <= 0 || cellSize.height <= 0) {
+      return;
+    }
+    const activeCell = controller.computeCellPosition(range);
     const lineWidth = thinLineWidth();
     clearRect(
       this.ctx,

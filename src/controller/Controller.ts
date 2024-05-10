@@ -30,6 +30,9 @@ import {
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
   convertPxToPt,
+  isSheet,
+  isRow,
+  isCol,
 } from '@/util';
 import { numberFormat, isDateFormat, convertDateToNumber } from '@/model';
 
@@ -254,24 +257,33 @@ export class Controller implements IController {
   }
   private getRangeSize(range: IRange) {
     let { row, col, colCount, rowCount } = range;
+    let r = row;
+    let c = col;
+    let endRow = row + rowCount;
+    let endCol = col + colCount;
     const sheetId = range.sheetId || this.getCurrentSheetId();
-    if (colCount === 0 || rowCount === 0) {
-      const sheetInfo = this.getSheetInfo(sheetId);
-      if (sheetInfo) {
-        if (colCount === 0) {
-          colCount = sheetInfo.colCount;
-        }
-        if (rowCount === 0) {
-          rowCount = sheetInfo.rowCount;
-        }
-      }
+    const sheetInfo = this.getSheetInfo(sheetId);
+    if (!sheetInfo) {
+      return { width: 0, height: 0 };
+    }
+    if (isSheet(range)) {
+      c = 0;
+      endCol = sheetInfo.colCount;
+      r = 0;
+      endRow = sheetInfo.rowCount;
+    } else if (isCol(range)) {
+      r = 0;
+      endRow = sheetInfo.rowCount;
+    } else if (isRow(range)) {
+      c = 0;
+      endCol = sheetInfo.colCount;
     }
     let width = 0;
     let height = 0;
-    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
+    for (; r < endRow; r++) {
       height += this.getRowHeight(r, sheetId).len;
     }
-    for (let c = col, endCol = col + colCount; c < endCol; c++) {
+    for (; c < endCol; c++) {
       width += this.getColWidth(c, sheetId).len;
     }
     return { width, height };

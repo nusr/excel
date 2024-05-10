@@ -610,11 +610,9 @@ export class Worksheet implements IWorksheet {
   private getCellModel(range: Coordinate) {
     const { row, col } = range;
     const id = this.model.getCurrentSheetId();
-
     const key = coordinateToString(row, col);
     this.worksheets[id] = this.worksheets[id] || {};
     this.worksheets[id][key] = this.worksheets[id][key] || {};
-    const sheetData = this.worksheets[id];
-    return sheetData[key];
+    return this.worksheets[id][key]
   }
 }
