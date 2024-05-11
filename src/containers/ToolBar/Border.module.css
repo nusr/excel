@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  border: 1px solid var(--borderColor);
+  box-sizing: border-box;
+  width: 150px;
+}
+
+.container .trigger {
+  border-left: 1px solid var(--borderColor);
+  height: 100%;
+  width: 20px;
+}
+.container .main {
+  flex: 1;
+  text-align: center;
+}
+
+.container .menu {
+  height: 100%;
+  border-left: 1px solid var(--borderColor);
+}

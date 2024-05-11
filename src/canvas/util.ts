@@ -10,12 +10,12 @@ import {
   getThemeColor,
   MERGE_CELL_LINE_BREAK,
   DEFAULT_FORMAT_CODE,
-  activeLineWidth,
+  DEFAULT_LINE_WIDTH,
+  BORDER_TYPE_MAP,
 } from '@/util';
 import {
   CanvasOverlayPosition,
   ErrorTypes,
-  BorderItem,
   Point,
   EUnderLine,
   IWindowSize,
@@ -23,6 +23,7 @@ import {
   StyleType,
   EHorizontalAlign,
   EVerticalAlign,
+  BorderType,
 } from '@/types';
 import { numberFormat, isDateFormat } from '@/model';
 
@@ -115,38 +116,25 @@ export function drawTriangle(
   ctx.fill();
 }
 
-export function drawAntLine(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
+export function getDoubleLine(
+  pointList: Point[],
+  position: 'top' | 'bottom' | 'left' | 'right' = 'bottom',
+  isShort: boolean = false,
 ) {
-  const oldDash = ctx.getLineDash();
-  ctx.setLineDash([npx(8), npx(6)]);
-  const offset = dpr() / 2;
-  strokeRect(
-    ctx,
-    x + offset,
-    y + offset,
-    width - offset * 2,
-    height - offset * 2,
-  );
-  ctx.setLineDash(oldDash);
-}
-
-export function getPointList(pointList: Point[], isExtra: boolean) {
+  const result = pointList.slice();
   const [start, end] = pointList;
-  const offset = dpr();
-  const list: Point[] = [
-    [start[0], start[1] - offset],
-    [end[0], end[1] - offset],
-  ];
-  if (isExtra) {
-    const t = offset * 2;
-    list.push([start[0], start[1] - t], [end[0], end[1] - t]);
+  const t = DEFAULT_LINE_WIDTH * 2;
+  const other = isShort ? t : 0;
+  if (position === 'bottom') {
+    result.push([start[0] + other, start[1] - t], [end[0] - other, end[1] - t]);
+  } else if (position === 'top') {
+    result.push([start[0] + other, start[1] + t], [end[0] - other, end[1] + t]);
+  } else if (position === 'left') {
+    result.push([start[0] + t, start[1] + other], [end[0] + t, end[1] - other]);
+  } else if (position === 'right') {
+    result.push([start[0] - t, start[1] + other], [end[0] - t, end[1] - other]);
   }
-  return list;
+  return result;
 }
 
 export function resizeCanvas(
@@ -178,59 +166,101 @@ function splitWords(
   );
 }
 
-function getBorderStyle(border: BorderItem): {
-  lineWidth: number;
-  strokeStyle: string;
-} {
-  let strokeStyle = border.color || getThemeColor('black');
-  let lineWidth = activeLineWidth();
-  return {
-    lineWidth,
-    strokeStyle,
-  };
+export function drawAntLine(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  ctx.setLineDash([npx(8), npx(6)]);
+  const offset = DEFAULT_LINE_WIDTH;
+  strokeRect(
+    ctx,
+    x + offset,
+    y + offset,
+    width - offset * 2,
+    height - offset * 2,
+  );
+  ctx.setLineDash([]);
 }
 
-export function renderBorder(
+function getLineDash(type?: BorderType) {
+  let dash: number[] = [];
+  if (type === 'hair') {
+    dash = [DEFAULT_LINE_WIDTH, DEFAULT_LINE_WIDTH];
+  } else if (type === 'dotted' || type === 'mediumDashed') {
+    dash = [DEFAULT_LINE_WIDTH * 2, DEFAULT_LINE_WIDTH * 2];
+  } else if (type === 'dashed') {
+    dash = [DEFAULT_LINE_WIDTH * 4, DEFAULT_LINE_WIDTH * 4];
+  } else if (type === 'dashDot' || type === 'mediumDashDot') {
+    dash = [
+      DEFAULT_LINE_WIDTH * 4,
+      DEFAULT_LINE_WIDTH * 4,
+      DEFAULT_LINE_WIDTH * 8,
+      DEFAULT_LINE_WIDTH * 4,
+    ];
+  } else if (type === 'dashDotDot' || type === 'mediumDashDotDot') {
+    dash = [
+      DEFAULT_LINE_WIDTH * 4,
+      DEFAULT_LINE_WIDTH * 4,
+      DEFAULT_LINE_WIDTH * 8,
+      DEFAULT_LINE_WIDTH * 4,
+      DEFAULT_LINE_WIDTH * 4,
+      DEFAULT_LINE_WIDTH * 4,
+    ];
+  }
+  return dash;
+}
+
+export function renderBorderItem(
   ctx: CanvasRenderingContext2D,
   cellInfo: CanvasOverlayPosition,
   border: StyleType['border'],
+  position: keyof StyleType['border'],
 ) {
+  const borderItem = border[position];
+  if (!borderItem) {
+    return;
+  }
   const { top, left, width, height } = cellInfo;
-  // top
-  let borderStyle = getBorderStyle(border.top);
-  ctx.lineWidth = borderStyle.lineWidth;
-  ctx.strokeStyle = borderStyle.strokeStyle;
-  drawLines(ctx, [
-    [left, top],
-    [left + width, top],
-  ]);
 
-  // bottom
-  borderStyle = getBorderStyle(border.bottom);
-  ctx.lineWidth = borderStyle.lineWidth;
-  ctx.strokeStyle = borderStyle.strokeStyle;
-  drawLines(ctx, [
-    [left, top + height],
-    [left + width, top + height],
-  ]);
-
-  // left
-  borderStyle = getBorderStyle(border.left);
-  ctx.lineWidth = borderStyle.lineWidth;
-  ctx.strokeStyle = borderStyle.strokeStyle;
-  drawLines(ctx, [
-    [left, top],
-    [left, top + height],
-  ]);
-
-  // right
-  borderStyle = getBorderStyle(border.right);
-  ctx.lineWidth = borderStyle.lineWidth;
-  ctx.strokeStyle = borderStyle.strokeStyle;
-  drawLines(ctx, [
-    [left + width, top],
-    [left + width, top + height],
-  ]);
+  let list: Point[] = [];
+  if (position === 'top') {
+    list = [
+      [left, top],
+      [left + width, top],
+    ];
+  } else if (position === 'bottom') {
+    list = [
+      [left, top + height],
+      [left + width, top + height],
+    ];
+  } else if (position === 'left') {
+    list = [
+      [left, top],
+      [left, top + height],
+    ];
+  } else if (position === 'right') {
+    list = [
+      [left + width, top],
+      [left + width, top + height],
+    ];
+  }
+  const { type, color } = borderItem;
+  ctx.lineWidth = BORDER_TYPE_MAP[type];
+  ctx.strokeStyle = color || getThemeColor('black');
+  const lineDash = getLineDash(type);
+  if (type === 'double') {
+    list = getDoubleLine(list, position, true);
+  }
+  if (lineDash.length > 0) {
+    ctx.setLineDash(lineDash.map((v) => npx(v)));
+  }
+  drawLines(ctx, list);
+  if (lineDash.length > 0) {
+    ctx.setLineDash([]);
+  }
 }
 
 type TextItem = { str: string; width: number; height: number };
@@ -301,26 +331,23 @@ export function renderCell(
     if (realStyle?.underline) {
       ctx.strokeStyle = fillStyle;
       const t = item.y + item.height + lineGap / 2;
-      const p = getPointList(
-        [
-          [item.x, t],
-          [item.x + item.width, t],
-        ],
-        realStyle?.underline === EUnderLine.DOUBLE,
-      );
-      list = list.concat(p);
+      const point: Point[] = [
+        [item.x, t],
+        [item.x + item.width, t],
+      ];
+      if (realStyle?.underline === EUnderLine.DOUBLE) {
+        list = list.concat(getDoubleLine(point, 'bottom', false));
+      } else {
+        list = list.concat(point);
+      }
     }
     if (realStyle?.isStrike) {
       ctx.strokeStyle = fillStyle;
       const t = item.y + item.height / 2 + lineGap / 2;
-      const p = getPointList(
-        [
-          [item.x, t],
-          [item.x + item.width, t],
-        ],
-        false,
-      );
-      list = list.concat(p);
+      list = list.concat([
+        [item.x, t],
+        [item.x + item.width, t],
+      ]);
     }
   }
   drawLines(ctx, list);

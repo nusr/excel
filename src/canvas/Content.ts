@@ -1,5 +1,5 @@
 import { dpr, canvasLog, headerSizeSet, canvasSizeSet } from '@/util';
-import { resizeCanvas, renderCell, clearRect, renderBorder } from './util';
+import { resizeCanvas, renderCell, clearRect, renderBorderItem } from './util';
 import { ContentView, IController, IRange, ContentParams } from '@/types';
 
 export class Content implements ContentView {
@@ -101,18 +101,19 @@ export class Content implements ContentView {
         this.colMap.set(col, width);
       }
     }
-    if (cellInfo.style?.border) {
-      renderBorder(
-        ctx,
-        {
-          top: position.top,
-          left: position.left,
-          height: Math.max(height, cellSize.height),
-          width: Math.max(width, cellSize.width),
-        },
-        cellInfo.style?.border,
-      );
+    if (!cellInfo.style?.border) {
+      return;
     }
+    const cellPosition = {
+      top: position.top,
+      left: position.left,
+      height: Math.max(height, cellSize.height),
+      width: Math.max(width, cellSize.width),
+    };
+    renderBorderItem(ctx, cellPosition, cellInfo.style?.border, 'top');
+    renderBorderItem(ctx, cellPosition, cellInfo.style?.border, 'bottom');
+    renderBorderItem(ctx, cellPosition, cellInfo.style?.border, 'left');
+    renderBorderItem(ctx, cellPosition, cellInfo.style?.border, 'right');
   }
 
   private renderContent({

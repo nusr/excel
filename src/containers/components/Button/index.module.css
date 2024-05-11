@@ -25,6 +25,7 @@
 }
 .buttonWrapper.plain {
   border: none;
+  border-radius: unset;
 }
 .buttonWrapper.primary {
   background-color: var(--primaryColor);

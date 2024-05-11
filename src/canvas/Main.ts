@@ -5,12 +5,11 @@ import {
   isRow,
   isSheet,
   canvasLog,
-  thinLineWidth,
   intToColumnName,
   getThemeColor,
   headerSizeSet,
   canvasSizeSet,
-  activeLineWidth,
+  DEFAULT_LINE_WIDTH,
 } from '@/util';
 import {
   EventType,
@@ -81,7 +80,7 @@ export class MainCanvas {
     this.clear();
 
     this.ctx.strokeStyle = getThemeColor('primaryColor');
-    this.ctx.lineWidth = activeLineWidth();
+    this.ctx.lineWidth = DEFAULT_LINE_WIDTH * 2;
 
     const { width, height } = canvasSizeSet.get();
     const headerSize = headerSizeSet.get();
@@ -90,7 +89,7 @@ export class MainCanvas {
     const { endRow, contentHeight } = this.renderRowsHeader(height);
     const { endCol, contentWidth } = this.renderColsHeader(width);
     this.renderGrid(width - headerSize.width, height - headerSize.height);
-    this.ctx.lineWidth = activeLineWidth();
+   
     this.renderTriangle();
 
     this.renderMergeCell();
@@ -108,6 +107,7 @@ export class MainCanvas {
       this.content.render({ endRow, endCol, contentHeight, contentWidth });
     }
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
+    this.ctx.lineWidth = DEFAULT_LINE_WIDTH * 2;
     strokeRect(this.ctx, result.left, result.top, result.width, result.height);
 
     this.isRendering = false;
@@ -139,7 +139,7 @@ export class MainCanvas {
       this.controller.getCurrentSheetId(),
     )!;
     this.ctx.save();
-    this.ctx.lineWidth = thinLineWidth();
+    this.ctx.lineWidth = DEFAULT_LINE_WIDTH;
     this.ctx.strokeStyle = getThemeColor('borderColor');
     this.ctx.translate(npx(headerSize.width), npx(headerSize.height));
     const pointList: Point[] = [];
@@ -234,7 +234,7 @@ export class MainCanvas {
       const rowHeight = controller.getRowHeight(i).len;
       let temp = y;
       if (i === rowIndex) {
-        temp += thinLineWidth() / 2;
+        temp += DEFAULT_LINE_WIDTH / 2;
       }
       pointList.push([0, temp], [headerSize.width, temp]);
       if (rowHeight > 0) {
@@ -280,7 +280,7 @@ export class MainCanvas {
       const colWidth = controller.getColWidth(i).len;
       let temp = x;
       if (i === colIndex) {
-        temp += thinLineWidth() / 2;
+        temp += DEFAULT_LINE_WIDTH / 2;
       }
       pointList.push([temp, 0], [temp, headerSize.height]);
       if (colWidth > 0) {
@@ -327,13 +327,11 @@ export class MainCanvas {
   private renderAntLine(position: CanvasOverlayPosition) {
     const { controller } = this;
     const range = controller.getCopyRange();
-    if (!range) {
-      return;
-    }
-    if (range.sheetId !== controller.getCurrentSheetId()) {
+    if (!range || range.sheetId !== controller.getCurrentSheetId()) {
       return;
     }
     canvasLog('render canvas ant line');
+    this.ctx.lineWidth = DEFAULT_LINE_WIDTH * 2;
     this.ctx.strokeStyle = getThemeColor('primaryColor');
     drawAntLine(
       this.ctx,
@@ -383,7 +381,7 @@ export class MainCanvas {
       return;
     }
     const activeCell = controller.computeCellPosition(range);
-    const lineWidth = thinLineWidth();
+    const lineWidth = DEFAULT_LINE_WIDTH;
     clearRect(
       this.ctx,
       activeCell.left + lineWidth,
@@ -441,8 +439,6 @@ export class MainCanvas {
     if (check) {
       this.renderActiveCell();
     }
-    // highlight line
-    // strokeRect(this.ctx, activeCell.left, activeCell.top, width, height);
     return {
       left: activeCell.left,
       top: activeCell.top,
@@ -458,8 +454,6 @@ export class MainCanvas {
     this.renderActiveCell();
     const width = contentWidth - headerSize.width;
     const height = contentHeight - headerSize.height;
-    // highlight line
-    // strokeRect(this.ctx, headerSize.width, headerSize.height, width, height);
     return {
       left: headerSize.width,
       top: headerSize.height,
@@ -496,14 +490,6 @@ export class MainCanvas {
     // row header highlight line
     drawLines(this.ctx, list);
     this.renderActiveCell();
-    // highlight line
-    // strokeRect(
-    //   this.ctx,
-    //   activeCell.left,
-    //   headerSize.height,
-    //   strokeWidth,
-    //   realHeight,
-    // );
     return {
       left: activeCell.left,
       top: headerSize.height,
@@ -524,7 +510,7 @@ export class MainCanvas {
     ) {
       strokeHeight += controller.getRowHeight(i).len;
     }
-    const realWidth = contentWidth - headerSize.width - thinLineWidth();
+    const realWidth = contentWidth - headerSize.width - DEFAULT_LINE_WIDTH;
     // col header
     fillRect(this.ctx, activeCell.left, 0, realWidth, headerSize.height);
 
@@ -538,14 +524,6 @@ export class MainCanvas {
     // col header highlight line
     drawLines(this.ctx, list);
     this.renderActiveCell();
-    // highlight line
-    // strokeRect(
-    //   this.ctx,
-    //   headerSize.width,
-    //   activeCell.top,
-    //   realWidth,
-    //   strokeHeight,
-    // );
     return {
       left: headerSize.width,
       top: activeCell.top,

@@ -1,4 +1,4 @@
-import { ErrorTypes, OptionItem } from '@/types';
+import { ErrorTypes, OptionItem, BorderType } from '@/types';
 import type { ChartType } from 'chart.js';
 import { $ } from '@/i18n';
 export const DEFAULT_FONT_SIZE = 12;
@@ -68,6 +68,23 @@ export const ERROR_SET = new Set<ErrorTypes>([
   '#N/A',
   '#NAME?',
 ]);
+
+export const DEFAULT_LINE_WIDTH = 1;
+
+export const BORDER_TYPE_MAP: Record<BorderType, number> = {
+  thin: DEFAULT_LINE_WIDTH * 2,
+  hair: DEFAULT_LINE_WIDTH * 2,
+  dotted: DEFAULT_LINE_WIDTH * 2,
+  dashed: DEFAULT_LINE_WIDTH * 2,
+  dashDot: DEFAULT_LINE_WIDTH * 2,
+  dashDotDot: DEFAULT_LINE_WIDTH * 2,
+  double: DEFAULT_LINE_WIDTH * 2,
+  medium: DEFAULT_LINE_WIDTH * 4,
+  mediumDashed: DEFAULT_LINE_WIDTH * 4,
+  mediumDashDot: DEFAULT_LINE_WIDTH * 4,
+  mediumDashDotDot: DEFAULT_LINE_WIDTH * 4,
+  thick: DEFAULT_LINE_WIDTH * 6,
+};
 
 export const DEFAULT_FORMAT_CODE = 'General';
 export const NUMBER_FORMAT_LIST: Array<{

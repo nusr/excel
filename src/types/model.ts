@@ -19,9 +19,24 @@ export enum EUnderLine {
   DOUBLE,
 }
 
+export type BorderType =
+  | 'thin'
+  | 'hair'
+  | 'dotted'
+  | 'dashed'
+  | 'dashDot'
+  | 'dashDotDot'
+  | 'double'
+  | 'medium'
+  | 'mediumDashed'
+  | 'mediumDashDot'
+  | 'mediumDashDotDot'
+  | 'thick';
+// | 'slantDashDot'
+
 export type BorderItem = {
-  color?: string;
-  type?: 'thin' | 'mediumDashDotDot';
+  color: string;
+  type: BorderType;
 };
 /**
  * XML to model
@@ -51,10 +66,10 @@ export interface StyleType {
   isStrike: boolean;
   numberFormat: string;
   border: {
-    left: BorderItem;
-    right: BorderItem;
-    top: BorderItem;
-    bottom: BorderItem;
+    left?: BorderItem;
+    right?: BorderItem;
+    top?: BorderItem;
+    bottom?: BorderItem;
   };
 }
 export interface WorksheetType {

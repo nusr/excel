@@ -12,6 +12,10 @@
 .menuContainer {
   left: 0;
 }
+.menuContainer.bottom {
+  left: unset;
+  right: 0;
+}
 
 .subMenuContainer {
   top: 0;
@@ -42,4 +46,10 @@
 
 .menuItem:hover {
   background-color: var(--hoverColor);
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

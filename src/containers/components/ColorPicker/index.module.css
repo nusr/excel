@@ -17,6 +17,11 @@
   transform: translate(0, -100%);
   left: 100%;
 }
+.color-picker.right .color-picker-wrapper {
+  transform: translate(16px, 0);
+  left: 100%;
+  top: 0px;
+}
 
 .color-picker-list {
   display: grid;

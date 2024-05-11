@@ -1,5 +1,4 @@
 import { Menu, SubMenu, MenuItem } from '../Menu';
-import { Button } from '../Button';
 import React from 'react';
 import {
   cleanup,
@@ -9,11 +8,11 @@ import {
   act,
 } from '@testing-library/react';
 
-describe('BaseIcon.test.ts', () => {
+describe('Menu.test.ts', () => {
   afterEach(cleanup);
   test('normal', () => {
     const dom = render(
-      <Menu menuButton={<Button>trigger</Button>}>
+      <Menu label="trigger">
         <MenuItem>33</MenuItem>
         <MenuItem>44</MenuItem>
         <SubMenu label="test">
@@ -27,7 +26,7 @@ describe('BaseIcon.test.ts', () => {
   test('subMenu', () => {
     act(() => {
       render(
-        <Menu testId="menu" menuButton={<Button testId="test">trigger</Button>}>
+        <Menu testId="menu" label="trigger">
           <MenuItem>33</MenuItem>
           <MenuItem>44</MenuItem>
           <SubMenu label="test" testId="subMenu">
@@ -37,7 +36,7 @@ describe('BaseIcon.test.ts', () => {
         </Menu>,
       );
     });
-    fireEvent.click(screen.getByTestId('menu'));
+    fireEvent.click(screen.getByTestId('menu-trigger'));
     fireEvent.click(screen.getByTestId('subMenu'));
     expect(screen.getByTestId('subMenu').childNodes.length).toEqual(2);
   });
@@ -48,7 +47,7 @@ describe('BaseIcon.test.ts', () => {
           <div data-testid="outside">outside</div>
           <Menu
             testId="menu"
-            menuButton={<Button testId="test">trigger</Button>}
+            label="trigger"
           >
             <MenuItem>33</MenuItem>
             <MenuItem>44</MenuItem>
@@ -61,7 +60,7 @@ describe('BaseIcon.test.ts', () => {
         </div>,
       );
     });
-    fireEvent.click(screen.getByTestId('menu'));
+    fireEvent.click(screen.getByTestId('menu-trigger'));
     fireEvent.click(screen.getByTestId('subMenu'));
     expect(screen.getByTestId('subMenu').childNodes.length).toEqual(2);
     fireEvent.pointerDown(screen.getByTestId('outside'));

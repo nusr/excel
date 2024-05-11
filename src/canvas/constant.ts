@@ -1,4 +1,4 @@
-import { thinLineWidth, DEFAULT_FONT_CONFIG, getThemeColor } from '@/util';
+import { DEFAULT_LINE_WIDTH, DEFAULT_FONT_CONFIG, getThemeColor } from '@/util';
 
 export function getHeaderStyle(): Pick<
   CanvasRenderingContext2D,
@@ -14,7 +14,7 @@ export function getHeaderStyle(): Pick<
     textBaseline: 'middle',
     font: DEFAULT_FONT_CONFIG,
     fillStyle: getThemeColor('black'),
-    lineWidth: thinLineWidth(),
+    lineWidth: DEFAULT_LINE_WIDTH,
     strokeStyle: getThemeColor('borderColor'),
   };
 }

@@ -11,7 +11,7 @@ test.describe('menubar.test', () => {
   });
 
   test(`test menubar click`, async ({ page }) => {
-    await page.getByTestId('menubar-excel').click();
+    await page.getByTestId('menubar-excel-trigger').click();
 
     await expect(page.getByTestId('menubar-import-xlsx')).toBeVisible();
     await expect(page.getByTestId('menubar-import-csv')).toBeVisible();

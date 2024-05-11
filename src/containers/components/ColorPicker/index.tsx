@@ -10,7 +10,7 @@ export interface ColorPickerProps {
   color: string;
   onChange: (value: string) => void;
   className?: string;
-  position?: 'top' | 'bottom';
+  position?: 'top' | 'bottom' | 'right';
   testId?: string;
 }
 
@@ -43,18 +43,13 @@ export const ColorPicker: FunctionComponent<
   }, []);
   return (
     <div
-      className={classnames(
-        styles['color-picker'],
-        className,
-        position === 'top' ? styles['top'] : '',
-      )}
+      className={classnames(styles['color-picker'], className, {
+        [styles.top]: position === 'top',
+        [styles.right]: position === 'right',
+      })}
       ref={ref}
     >
-      <div
-        className={styles['color-picker-trigger']}
-        style={{ color }}
-        onClick={openColorPicker}
-      >
+      <div className={styles['color-picker-trigger']} onClick={openColorPicker}>
         {children}
       </div>
       {visible && (

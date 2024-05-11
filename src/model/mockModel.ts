@@ -1,4 +1,10 @@
-import { WorkBookJSON, EUnderLine, EHorizontalAlign } from '@/types';
+import {
+  WorkBookJSON,
+  EUnderLine,
+  EHorizontalAlign,
+  BorderItem,
+  BorderType,
+} from '@/types';
 import {
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
@@ -7,6 +13,7 @@ import {
   MERGE_CELL_LINE_BREAK,
   numberFormatOptionList,
   coordinateToString,
+  BORDER_TYPE_MAP,
 } from '@/util';
 import { mockImage } from './mockData';
 import { $ } from '@/i18n';
@@ -314,19 +321,7 @@ const MOCK_MODEL: WorkBookJSON = {
       },
     },
     '9': {},
-    '10': {
-      '1_1': {
-        value: 'test',
-        style: {
-          border: {
-            left: {},
-            right: {},
-            top: {},
-            bottom: {},
-          },
-        },
-      },
-    },
+    '10': {},
   },
 
   mergeCells: {
@@ -455,6 +450,26 @@ for (let i = 0; i < numberFormatOptionList.length; i++) {
     value: i + 1,
     style: {
       numberFormat: String(item.value),
+    },
+  };
+}
+
+const typeList = Object.keys(BORDER_TYPE_MAP) as BorderType[];
+for (let i = 0; i < typeList.length; i++) {
+  const key = coordinateToString(i, i);
+  const item: BorderItem = {
+    type: typeList[i],
+    color: '',
+  };
+  MOCK_MODEL.worksheets['10'][key] = {
+    value: i,
+    style: {
+      border: {
+        left: item,
+        right: item,
+        top: item,
+        bottom: item,
+      },
     },
   };
 }

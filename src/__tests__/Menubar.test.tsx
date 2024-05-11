@@ -25,7 +25,7 @@ describe('Menubar.test.ts', () => {
       act(() => {
         render(<App controller={initController()} />);
       });
-      fireEvent.click(screen.getByTestId('menubar-excel'));
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       expect(
         screen.getByTestId('menubar-excel-portal')!.querySelectorAll('li')
           .length,

@@ -69,7 +69,7 @@ describe('Export.test.ts', () => {
         render(<App controller={initController()} />);
       });
       type('test');
-      fireEvent.click(screen.getByTestId('menubar-excel'));
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       fireEvent.click(screen.getByTestId('menubar-export-xlsx'));
       expect(Util.saveAs).toHaveBeenCalled();
     });
@@ -80,7 +80,7 @@ describe('Export.test.ts', () => {
         render(<App controller={initController()} />);
       });
       type('test');
-      fireEvent.click(screen.getByTestId('menubar-excel'));
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       fireEvent.click(screen.getByTestId('menubar-export-csv'));
       expect(Util.saveAs).toHaveBeenCalled();
     });

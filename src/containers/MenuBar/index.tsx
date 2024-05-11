@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { IController } from '@/types';
-import { Menu, MenuItem, Button } from '../components';
+import { Menu, MenuItem } from '../components';
 import { importXLSX, exportToXLSX, exportToCsv, importCSV } from '../Excel';
 import styles from './index.module.css';
 import { Theme } from './Theme';
@@ -54,7 +54,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       <div className={styles['menubar-container']} data-testid="menubar">
         <div className={styles['menubar-menu']}>
           <Menu
-            menuButton={<Button>{$('menu')}</Button>}
+            label={$('menu')}
             className={styles.menu}
             testId="menubar-excel"
           >

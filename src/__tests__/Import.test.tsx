@@ -47,7 +47,7 @@ describe('Import.test.tsx', () => {
       act(() => {
         render(<App controller={initController()} />);
       });
-      fireEvent.click(screen.getByTestId('menubar-excel'));
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       const file = new File([''], 'test.png', {
         type: 'image/png',
       });
@@ -64,7 +64,7 @@ describe('Import.test.tsx', () => {
       act(() => {
         render(<App controller={initController()} />);
       });
-      fireEvent.click(screen.getByTestId('menubar-excel'));
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       const file = new File(['test,1\n2,3'], 'test.csv', {
         type: 'text/csv',
       });
@@ -83,7 +83,7 @@ describe('Import.test.tsx', () => {
       act(() => {
         render(<App controller={initController()} />);
       });
-      fireEvent.click(screen.getByTestId('menubar-excel'));
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       const file = new File([''], 'test.csv', {
         type: 'text/csv',
       });
@@ -104,7 +104,7 @@ describe('Import.test.tsx', () => {
       act(() => {
         render(<App controller={initController()} />);
       });
-      fireEvent.click(screen.getByTestId('menubar-excel'));
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       const fileData = await fs.readFile(path.join(__dirname, './origin.xlsx'));
       act(() => {
         fireEvent.change(screen.getByTestId('menubar-import-xlsx-input'), {
@@ -122,7 +122,7 @@ describe('Import.test.tsx', () => {
       act(() => {
         render(<App controller={initController()} />);
       });
-      fireEvent.click(screen.getByTestId('menubar-excel'));
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       act(() => {
         fireEvent.change(screen.getByTestId('menubar-import-xlsx-input'), {
           target: { files: [] },
