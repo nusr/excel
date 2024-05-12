@@ -128,11 +128,11 @@ describe('workbook.test.ts', () => {
       model.addSheet();
       model.addSheet();
       model.addSheet();
-      expect(() => model.deleteSheet('aaa')).toThrow();
-    });
-    test('throw error', () => {
-      model.addSheet();
-      expect(() => model.deleteSheet(model.getCurrentSheetId())).toThrow();
+
+      const len = model.getSheetList().length;
+      model.deleteSheet('aaa')
+      expect(model.getSheetList()).toHaveLength(len)
+
     });
   });
   describe('hideSheet', () => {

@@ -14,9 +14,6 @@ import {
   EMergeCellType,
 } from '@/types';
 import {
-  assert,
-  isSheet,
-  isRow,
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
   modelLog,
@@ -25,7 +22,6 @@ import {
   sheetViewSizeSet,
   headerSizeSet,
   containRange,
-  isCol,
 } from '@/util';
 import { History, HistoryChangeType } from './History';
 import { Workbook } from './workbook';
@@ -47,7 +43,6 @@ export class Model implements IModel {
   private mergeCellManager: MergeCell;
   private rowManager: RowManager;
   private colManager: ColManager;
-
   constructor() {
     this.history = new History({
       undo: this.historyUndo,
@@ -139,6 +134,9 @@ export class Model implements IModel {
   }
   deleteSheet(sheetId?: string): void {
     const newSheetId = this.getNextSheetId(sheetId);
+    if (!newSheetId) {
+      return;
+    }
     this.workbookManager.deleteSheet(sheetId);
     this.worksheetManager.setWorksheet({}, sheetId);
     this.workbookManager.setCurrentSheetId(newSheetId);
@@ -148,11 +146,16 @@ export class Model implements IModel {
   }
   hideSheet(sheetId?: string): void {
     const newSheetId = this.getNextSheetId(sheetId);
+    if (!newSheetId) {
+      return;
+    }
     this.workbookManager.hideSheet(sheetId);
     this.workbookManager.setCurrentSheetId(newSheetId);
   }
   unhideSheet(sheetId: string): void {
-    assert(!!sheetId, 'The sheetId can not be empty');
+    if (!sheetId) {
+      return;
+    }
     this.workbookManager.unhideSheet(sheetId);
     this.workbookManager.setCurrentSheetId(sheetId);
   }
@@ -323,50 +326,6 @@ export class Model implements IModel {
     return this.definedNameManager.checkDefineName(name);
   }
 
-  iterateRange(range: IRange, fn: (row: number, col: number) => boolean) {
-    const { row, col, rowCount, colCount, sheetId } = range;
-    const sheetInfo = this.getSheetInfo(sheetId);
-    if (!sheetInfo) {
-      return;
-    }
-    if (isSheet(range)) {
-      for (let r = 0; r < sheetInfo.rowCount; r++) {
-        for (let c = 0; c < sheetInfo.colCount; c++) {
-          if (fn(r, c)) {
-            return;
-          }
-        }
-      }
-      return;
-    }
-    if (isRow(range)) {
-      for (let i = 0; i < sheetInfo.colCount; i++) {
-        if (fn(row, i)) {
-          return;
-        }
-      }
-      return;
-    }
-    if (isCol(range)) {
-      for (let i = 0; i < sheetInfo.rowCount; i++) {
-        if (fn(i, col)) {
-          return;
-        }
-      }
-      return;
-    }
-
-    const endRow = row + rowCount;
-    const endCol = col + colCount;
-    for (let r = row; r < endRow; r++) {
-      for (let c = col; c < endCol; c++) {
-        if (fn(r, c)) {
-          return;
-        }
-      }
-    }
-  }
-
   getDrawingList(sheetId?: string): DrawingElement[] {
     return this.drawingsManager.getDrawingList(sheetId);
   }
@@ -452,7 +411,9 @@ export class Model implements IModel {
     const id = sheetId || this.getCurrentSheetId();
     const list = this.getSheetList();
     const index = list.findIndex((item) => item.sheetId === id);
-    assert(index >= 0, 'not found next sheet');
+    if (index < 0) {
+      return '';
+    }
     const isLast = index === list.length - 1;
     let lastIndex = isLast
       ? (index - 1 + list.length) % list.length

@@ -10,6 +10,7 @@ import {
   headerSizeSet,
   canvasSizeSet,
   DEFAULT_LINE_WIDTH,
+  BORDER_TYPE_MAP,
 } from '@/util';
 import {
   EventType,
@@ -89,7 +90,7 @@ export class MainCanvas {
     const { endRow, contentHeight } = this.renderRowsHeader(height);
     const { endCol, contentWidth } = this.renderColsHeader(width);
     this.renderGrid(width - headerSize.width, height - headerSize.height);
-   
+
     this.renderTriangle();
 
     this.renderMergeCell();
@@ -107,7 +108,7 @@ export class MainCanvas {
       this.content.render({ endRow, endCol, contentHeight, contentWidth });
     }
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
-    this.ctx.lineWidth = DEFAULT_LINE_WIDTH * 2;
+    this.ctx.lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
     strokeRect(this.ctx, result.left, result.top, result.width, result.height);
 
     this.isRendering = false;

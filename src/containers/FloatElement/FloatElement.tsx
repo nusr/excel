@@ -4,7 +4,7 @@ import { FloatElementItem } from '@/containers/store';
 import { FloatElementContextMenu } from './ContextMenu';
 import { DEFAULT_POSITION, classnames } from '@/util';
 import { ResizePosition } from './util';
-import { Icon } from '../components';
+import { Icon } from '../../components';
 import { IController, IWindowSize } from '@/types';
 import Chart from './Chart';
 

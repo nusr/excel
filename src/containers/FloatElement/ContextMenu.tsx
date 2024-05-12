@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Button, info, Select, toast } from '../components';
+import { Button, info, Select, toast } from '../../components';
 import { IController } from '@/types';
 import styles from './FloatElement.module.css';
 import { useClickOutside } from '../hooks';
@@ -71,12 +71,10 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         ),
         onOk: () => {
           if (!value) {
-            toast({
-              type: 'error',
-              message: $('reference-is-empty'),
-              testId: 'select-data-empty-toast',
-            });
-            return;
+            return toast.error(
+              $('reference-is-empty'),
+              'select-data-empty-toast',
+            );
           }
           const sheetList = controller.getSheetList();
           const range = parseReference(value, (sheetName: string) => {
@@ -87,12 +85,10 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             !range.isValid() ||
             (props.chartRange && isSameRange(range, props.chartRange))
           ) {
-            toast({
-              type: 'error',
-              message: $('reference-is-not-valid'),
-              testId: 'select-data-invalid-toast',
-            });
-            return;
+            return toast.error(
+              $('reference-is-not-valid'),
+              'select-data-invalid-toast',
+            );
           }
           range.sheetId = range.sheetId || controller.getCurrentSheetId();
           controller.updateDrawing(uuid, { chartRange: range });
@@ -125,12 +121,10 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         ),
         onOk: () => {
           if (!value) {
-            toast({
-              type: 'error',
-              message: $('the-value-cannot-be-empty'),
-              testId: 'change-chart-title-toast',
-            });
-            return;
+            return toast.error(
+              $('the-value-cannot-be-empty'),
+              'change-chart-title-toast',
+            );
           }
           controller.updateDrawing(uuid, { title: value });
           hideContextMenu();

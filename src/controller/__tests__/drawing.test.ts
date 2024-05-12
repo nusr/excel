@@ -75,24 +75,23 @@ describe('drawing.test.ts', () => {
       expect(controller.getDrawingList()).toHaveLength(0);
     });
     test('chartRange not data', () => {
-      expect(() =>
-        controller.addDrawing({
-          title: 'chart',
-          type: 'chart',
-          chartType: 'line',
-          chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
-          sheetId: controller.getCurrentSheetId(),
-          width: 300,
-          height: 300,
-          marginX: 0,
-          marginY: 0,
-          originHeight: 300,
-          originWidth: 300,
-          uuid: '1',
-          fromCol: 4,
-          fromRow: 4,
-        }),
-      ).toThrow();
+      controller.addDrawing({
+        title: 'chart',
+        type: 'chart',
+        chartType: 'line',
+        chartRange: { row: 0, col: 0, rowCount: 4, colCount: 4, sheetId: '' },
+        sheetId: controller.getCurrentSheetId(),
+        width: 300,
+        height: 300,
+        marginX: 0,
+        marginY: 0,
+        originHeight: 300,
+        originWidth: 300,
+        uuid: '1',
+        fromCol: 4,
+        fromRow: 4,
+      });
+      expect(controller.getDrawingList()).toHaveLength(0);
     });
     test('ok', () => {
       controller.setCell(

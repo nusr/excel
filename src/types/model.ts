@@ -65,12 +65,10 @@ export interface StyleType {
   isBold: boolean;
   isStrike: boolean;
   numberFormat: string;
-  border: {
-    left?: BorderItem;
-    right?: BorderItem;
-    top?: BorderItem;
-    bottom?: BorderItem;
-  };
+  borderLeft?: BorderItem;
+  borderRight?: BorderItem;
+  borderTop?: BorderItem;
+  borderBottom?: BorderItem;
 }
 export interface WorksheetType {
   sheetId: string;
@@ -316,7 +314,6 @@ export interface IModel
   pasteRange(range: IRange, isCut: boolean): IRange;
   emitChange(dataset: Set<ChangeEventType>): void;
   push(command: ICommandItem): void;
-  iterateRange(range: IRange, fn: (row: number, col: number) => boolean): void;
 }
 
 export type NumberFormatValue =

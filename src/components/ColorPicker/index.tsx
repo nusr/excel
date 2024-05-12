@@ -3,7 +3,7 @@ import { classnames, COLOR_PICKER_COLOR_LIST } from '@/util';
 import styles from './index.module.css';
 import { ColorPickerPanel } from './ColorPickerPanel';
 import { Button } from '../Button';
-import { useClickOutside } from '../../hooks';
+import { useClickOutside } from '../../containers/hooks';
 import { $ } from '@/i18n';
 
 export interface ColorPickerProps {

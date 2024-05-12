@@ -72,18 +72,18 @@ export const ERROR_SET = new Set<ErrorTypes>([
 export const DEFAULT_LINE_WIDTH = 1;
 
 export const BORDER_TYPE_MAP: Record<BorderType, number> = {
-  thin: DEFAULT_LINE_WIDTH * 2,
-  hair: DEFAULT_LINE_WIDTH * 2,
-  dotted: DEFAULT_LINE_WIDTH * 2,
-  dashed: DEFAULT_LINE_WIDTH * 2,
-  dashDot: DEFAULT_LINE_WIDTH * 2,
-  dashDotDot: DEFAULT_LINE_WIDTH * 2,
-  double: DEFAULT_LINE_WIDTH * 2,
-  medium: DEFAULT_LINE_WIDTH * 4,
-  mediumDashed: DEFAULT_LINE_WIDTH * 4,
-  mediumDashDot: DEFAULT_LINE_WIDTH * 4,
-  mediumDashDotDot: DEFAULT_LINE_WIDTH * 4,
-  thick: DEFAULT_LINE_WIDTH * 6,
+  thin: DEFAULT_LINE_WIDTH,
+  hair: DEFAULT_LINE_WIDTH,
+  dotted: DEFAULT_LINE_WIDTH,
+  dashed: DEFAULT_LINE_WIDTH,
+  dashDot: DEFAULT_LINE_WIDTH,
+  dashDotDot: DEFAULT_LINE_WIDTH,
+  double: DEFAULT_LINE_WIDTH,
+  medium: DEFAULT_LINE_WIDTH * 2,
+  mediumDashed: DEFAULT_LINE_WIDTH * 2,
+  mediumDashDot: DEFAULT_LINE_WIDTH * 2,
+  mediumDashDotDot: DEFAULT_LINE_WIDTH * 2,
+  thick: DEFAULT_LINE_WIDTH * 4,
 };
 
 export const DEFAULT_FORMAT_CODE = 'General';

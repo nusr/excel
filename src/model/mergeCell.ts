@@ -5,9 +5,10 @@ import {
   IMergeCell,
   IModel,
 } from '@/types';
-import { convertToReference, assert } from '@/util';
+import { convertToReference } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { $ } from '@/i18n';
+import { toast } from '@/components';
 
 export class MergeCell implements IMergeCell {
   private model: IModel;
@@ -63,7 +64,10 @@ export class MergeCell implements IMergeCell {
       'absolute',
       this.convertSheetIdToName,
     );
-    assert(!this.mergeCells[ref], $('merging-cell-is-duplicate'));
+    if (this.mergeCells[ref]) {
+      toast.error($('merging-cell-is-duplicate'));
+      return;
+    }
     this.mergeCells[ref] = range;
     this.model.push({
       type: 'mergeCells',

@@ -15,6 +15,7 @@ import {
 import {
   coordinateToString,
   HIDE_CELL,
+  iterateRange,
   FORMULA_PREFIX,
   isEmpty,
   deepEqual,
@@ -72,7 +73,7 @@ export class Worksheet implements IWorksheet {
     const isMergeContent = type === EMergeCellType.MERGE_CONTENT;
     const dataList: Array<{ value: ModelCellType; row: number; col: number }> =
       [];
-    this.model.iterateRange(range, (row, col) => {
+    iterateRange(range, this.model.getSheetInfo(range.sheetId), (row, col) => {
       const cellInfo = this.model.getCell({
         row,
         col,
@@ -344,12 +345,10 @@ export class Worksheet implements IWorksheet {
     if (isEmpty(style)) {
       return;
     }
-    const { row, col, rowCount, colCount } = range;
-    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
-      for (let c = col, endCol = col + colCount; c < endCol; c++) {
-        this.updateStyle(style, { row: r, col: c });
-      }
-    }
+    iterateRange(range, this.model.getSheetInfo(range.sheetId), (row, col) => {
+      this.updateStyle(style, { row, col });
+      return false;
+    });
   }
   pasteRange(fromRange: IRange, isCut: boolean): IRange {
     const id = this.model.getCurrentSheetId();
@@ -370,36 +369,40 @@ export class Worksheet implements IWorksheet {
     }
     this.worksheets[id] = this.worksheets[id] || {};
     const currentSheetData = this.worksheets[id];
-    this.model.iterateRange(fromRange, (r, c) => {
-      const oldPath = coordinateToString(r, c);
-      const newValue = fromSheetData[oldPath]
-        ? { ...fromSheetData[oldPath] }
-        : { value: '' };
-      const realRow = activeCell.row + (r - row);
-      const realCol = activeCell.col + (c - col);
-      const path = coordinateToString(realRow, realCol);
-      const oldValue = currentSheetData[path]
-        ? { ...currentSheetData[path] }
-        : { value: '' };
-      currentSheetData[path] = { ...newValue };
-      this.model.push({
-        type: 'worksheets',
-        key: `${id}.${path}`,
-        newValue: newValue,
-        oldValue: oldValue,
-      });
-
-      if (isCut) {
-        delete fromSheetData[oldPath];
+    iterateRange(
+      fromRange,
+      this.model.getSheetInfo(fromRange.sheetId),
+      (r, c) => {
+        const oldPath = coordinateToString(r, c);
+        const newValue = fromSheetData[oldPath]
+          ? { ...fromSheetData[oldPath] }
+          : { value: '' };
+        const realRow = activeCell.row + (r - row);
+        const realCol = activeCell.col + (c - col);
+        const path = coordinateToString(realRow, realCol);
+        const oldValue = currentSheetData[path]
+          ? { ...currentSheetData[path] }
+          : { value: '' };
+        currentSheetData[path] = { ...newValue };
         this.model.push({
           type: 'worksheets',
-          key: `${realSheetId}.${oldPath}`,
-          newValue: DELETE_FLAG,
-          oldValue: newValue,
+          key: `${id}.${path}`,
+          newValue: newValue,
+          oldValue: oldValue,
         });
-      }
-      return false;
-    });
+
+        if (isCut) {
+          delete fromSheetData[oldPath];
+          this.model.push({
+            type: 'worksheets',
+            key: `${realSheetId}.${oldPath}`,
+            newValue: DELETE_FLAG,
+            oldValue: newValue,
+          });
+        }
+        return false;
+      },
+    );
 
     return realRange;
   }
@@ -511,19 +514,23 @@ export class Worksheet implements IWorksheet {
           ) {
             throw new CustomError('#REF!');
           }
-          this.model.iterateRange(range, (r, c) => {
-            const temp = this.getCell({
-              sheetId,
-              row: r,
-              col: c,
-              rowCount: 1,
-              colCount: 1,
-            });
-            if (temp) {
-              result.push(temp.value);
-            }
-            return false;
-          });
+          iterateRange(
+            range,
+            this.model.getSheetInfo(range.sheetId),
+            (r, c) => {
+              const temp = this.getCell({
+                sheetId,
+                row: r,
+                col: c,
+                rowCount: 1,
+                colCount: 1,
+              });
+              if (temp) {
+                result.push(temp.value);
+              }
+              return false;
+            },
+          );
           return result;
         },
         set: () => {

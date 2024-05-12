@@ -83,5 +83,16 @@
   "more-number-formats": "More Number Formats",
   "short-date-format": "m/d/yyyy;@",
   "long-date-format": "[$-409]dddd,mmmm d,yyyy;@",
-  "time-format": "h:mm:ss AM/PM"
+  "time-format": "h:mm:ss AM/PM",
+  "sheet-id-can-not-be-empty": "The sheetId can not be empty",
+  "no-border": "No Border",
+  "all-borders": "All Borders",
+  "outside-borders": "OutSide Borders",
+  "thick-box-border": "Thick Box Border",
+  "bottom-border": "Bottom Border",
+  "top-border": "Top Border",
+  "left-border": "Left Border",
+  "right-border": "Right Border",
+  "line-color": "Line Color",
+  "line-style": "Line Style"
 }

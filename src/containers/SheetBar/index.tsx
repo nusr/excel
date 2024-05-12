@@ -12,7 +12,7 @@ import {
   MAX_NAME_LENGTH,
   SHEET_ITEM_TEST_ID_PREFIX,
 } from '@/util';
-import { Button, Icon, SelectPopup } from '../components';
+import { Button, Icon, SelectPopup } from '../../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
 import { IController } from '@/types';

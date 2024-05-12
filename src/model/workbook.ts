@@ -7,7 +7,6 @@ import {
 } from '@/types';
 import {
   getDefaultSheetInfo,
-  assert,
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
   XLSX_MAX_COL_COUNT,
@@ -15,6 +14,7 @@ import {
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { $ } from '@/i18n';
+import { toast } from '@/components';
 
 export class Workbook implements IWorkbook {
   private currentSheetId = '';
@@ -186,7 +186,10 @@ export class Workbook implements IWorkbook {
     this.updateSheetInfo({ isHide: false }, sheetId);
   }
   renameSheet(sheetName: string, sheetId?: string): void {
-    assert(!!sheetName, $('the-value-cannot-be-empty'));
+    if (!sheetName) {
+      toast.error($('the-value-cannot-be-empty'));
+      return;
+    }
     const id = sheetId || this.currentSheetId;
     const sheetList = this.getSheetList();
     const item = sheetList.find((v) => v.name === sheetName);
@@ -194,7 +197,8 @@ export class Workbook implements IWorkbook {
       if (item.sheetId === id) {
         return;
       }
-      assert(false, $('sheet-name-is-duplicate'));
+      toast.error($('sheet-name-is-duplicate'));
+      return;
     }
     this.updateSheetInfo({ name: sheetName }, id);
   }
@@ -241,10 +245,10 @@ export class Workbook implements IWorkbook {
     }
     const sheetList = this.getSheetList();
     const list = sheetList.filter((v) => !v.isHide);
-    assert(
-      list.length >= 2,
-      $('a-workbook-must-contains-at-least-one-visible-worksheet'),
-    );
+    if (list.length < 2) {
+      toast.error($('a-workbook-must-contains-at-least-one-visible-worksheet'));
+      return false;
+    }
     return true;
   }
 }

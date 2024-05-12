@@ -46,12 +46,13 @@ src
 - [x] Formulas
 - [x] Font Family
 - [x] Font Size
-- [x] Font Bold
-- [x] Font Italic
-- [x] Font Strike
-- [x] Font Underline
 - [x] Font Color
 - [x] Fill Color
+- [x] Bold
+- [x] Italic
+- [x] Strike
+- [x] Underline
+- [x] Border
 - [x] Text Vertical Align
 - [x] Text Horizontal Align
 - [x] Text Wrapping

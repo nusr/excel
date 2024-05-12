@@ -11,7 +11,7 @@ import { IController } from '@/types';
 import styles from './index.module.css';
 import { parseReference, MAX_NAME_LENGTH, MAX_PARAMS_COUNT } from '@/util';
 import { scrollToView } from '@/canvas';
-import { SelectList } from '../components';
+import { SelectList } from '../../components';
 import { defineNameStore } from '../store';
 
 interface Props {

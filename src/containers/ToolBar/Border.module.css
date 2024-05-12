@@ -3,7 +3,6 @@
   align-items: center;
   position: relative;
   border: 1px solid var(--borderColor);
-  box-sizing: border-box;
   width: 150px;
 }
 
@@ -20,4 +19,8 @@
 .container .menu {
   height: 100%;
   border-left: 1px solid var(--borderColor);
+}
+
+.container .menu .portal {
+  width: 150px;
 }

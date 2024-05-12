@@ -9,7 +9,7 @@ import { classnames } from '@/util';
 import { OptionItem } from '@/types';
 import styles from './index.module.css';
 import { Icon } from '../BaseIcon';
-import { useClickOutside } from '../../hooks';
+import { useClickOutside } from '../../containers/hooks';
 import { Button } from '../Button';
 
 export interface SelectProps {

@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { IController } from '@/types';
-import { Menu, MenuItem } from '../components';
+import { Menu, MenuItem } from '../../components';
 import { importXLSX, exportToXLSX, exportToCsv, importCSV } from '../Excel';
 import styles from './index.module.css';
 import { Theme } from './Theme';

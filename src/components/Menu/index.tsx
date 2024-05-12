@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useState, memo, useCallback } from 'react';
 import styles from './index.module.css';
 import { classnames } from '@/util';
-import { useClickOutside } from '../../hooks';
+import { useClickOutside } from '../../containers/hooks';
 import { Button } from '../Button';
 
 type MenuItemProps = {
@@ -15,7 +15,14 @@ type MenuProps = {
   testId?: string;
   className?: string;
   position?: 'right' | 'bottom';
+  size?: 'normal' | 'small';
+  portalClassName?: string;
 };
+
+type SubMenuProps = Pick<
+  MenuProps,
+  'label' | 'testId' | 'className' | 'portalClassName'
+>;
 export const MenuItem: FunctionComponent<
   React.PropsWithChildren<MenuItemProps>
 > = ({ onClick, children, testId }) => {
@@ -26,12 +33,9 @@ export const MenuItem: FunctionComponent<
   );
 };
 
-export const SubMenu: FunctionComponent<React.PropsWithChildren<MenuProps>> = ({
-  label,
-  children,
-  testId,
-  className,
-}) => {
+export const SubMenu: FunctionComponent<
+  React.PropsWithChildren<SubMenuProps>
+> = ({ label, children, testId, className, portalClassName }) => {
   const [open, setOpen] = useState(false);
   const handleClick = useCallback(() => {
     setOpen((v) => !v);
@@ -45,7 +49,13 @@ export const SubMenu: FunctionComponent<React.PropsWithChildren<MenuProps>> = ({
     >
       <div>{label}</div>
       {open && (
-        <div className={classnames(styles.subMenuContainer, styles.portal)}>
+        <div
+          className={classnames(
+            styles.subMenuContainer,
+            styles.portal,
+            portalClassName,
+          )}
+        >
           <ul className={styles.menu}>{children}</ul>
         </div>
       )}
@@ -61,6 +71,8 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = memo(
     className,
     isPlain = false,
     position = 'right',
+    size = 'normal',
+    portalClassName,
   }) => {
     const buttonType = isPlain ? 'plain' : undefined;
     const [open, setOpen] = useState(false);
@@ -70,7 +82,9 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = memo(
     const [ref] = useClickOutside(() => setOpen(false));
     return (
       <div
-        className={classnames(styles.container, className)}
+        className={classnames(styles.container, className, {
+          [styles.small]: size === 'small',
+        })}
         ref={ref}
         data-testid={testId}
       >
@@ -84,9 +98,14 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = memo(
         </Button>
         {open && (
           <div
-            className={classnames(styles.menuContainer, styles.portal, {
-              [styles.bottom]: position === 'bottom',
-            })}
+            className={classnames(
+              styles.menuContainer,
+              styles.portal,
+              portalClassName,
+              {
+                [styles.bottom]: position === 'bottom',
+              },
+            )}
             data-testid={`${testId}-portal`}
           >
             <ul className={styles.menu}>{children}</ul>

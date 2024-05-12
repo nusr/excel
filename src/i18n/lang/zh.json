@@ -83,5 +83,16 @@
   "more-number-formats": "其他数字格式",
   "short-date-format": "yyyy/m/d;@",
   "long-date-format": "yyyy\"年\"m\"月\"d\"日\"",
-  "time-format": "h:mm:ss"
+  "time-format": "h:mm:ss",
+  "sheet-id-can-not-be-empty": "SheetId 不能为空",
+  "no-border": "无边框",
+  "all-borders": "全边框",
+  "outside-borders": "外边框",
+  "thick-box-border": "厚框边框",
+  "bottom-border": "底边框",
+  "top-border": "顶边框",
+  "left-border": "左边框",
+  "right-border": "右边框",
+  "line-color": "线条颜色",
+  "line-style": "线条样式"
 }

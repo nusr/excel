@@ -1,6 +1,6 @@
 import React, { useRef, memo, useCallback } from 'react';
 import { IController } from '@/types';
-import { Button } from '../components';
+import { Button } from '../../components';
 import { generateUUID, getImageSize } from '@/util';
 import { $ } from '@/i18n';
 

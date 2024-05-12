@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ColorModel, AnyColor, HsvaColor } from './types';
-import { useEventCallback } from '../../hooks/useEventCallback';
+import { useEventCallback } from '../../containers/hooks/useEventCallback';
 import { deepEqual } from '@/util';
 
 export function useColorManipulation<T extends AnyColor>(

@@ -1,5 +1,5 @@
 import React, { useState, memo, useSyncExternalStore } from 'react';
-import { Button } from '../components';
+import { Button } from '../../components';
 import { IController } from '@/types';
 import styles from './index.module.css';
 import { scrollBar } from '@/canvas';

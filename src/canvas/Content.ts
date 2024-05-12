@@ -101,19 +101,16 @@ export class Content implements ContentView {
         this.colMap.set(col, width);
       }
     }
-    if (!cellInfo.style?.border) {
-      return;
-    }
     const cellPosition = {
       top: position.top,
       left: position.left,
       height: Math.max(height, cellSize.height),
       width: Math.max(width, cellSize.width),
     };
-    renderBorderItem(ctx, cellPosition, cellInfo.style?.border, 'top');
-    renderBorderItem(ctx, cellPosition, cellInfo.style?.border, 'bottom');
-    renderBorderItem(ctx, cellPosition, cellInfo.style?.border, 'left');
-    renderBorderItem(ctx, cellPosition, cellInfo.style?.border, 'right');
+    renderBorderItem(ctx, cellPosition, cellInfo.style?.borderTop, 'top');
+    renderBorderItem(ctx, cellPosition, cellInfo.style?.borderBottom, 'bottom');
+    renderBorderItem(ctx, cellPosition, cellInfo.style?.borderLeft, 'left');
+    renderBorderItem(ctx, cellPosition, cellInfo.style?.borderRight, 'right');
   }
 
   private renderContent({

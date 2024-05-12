@@ -5,9 +5,10 @@ import {
   DrawingElement,
   IModel,
 } from '@/types';
-import { assert, CHART_TYPE_LIST, isEmpty } from '@/util';
+import { CHART_TYPE_LIST, isEmpty, iterateRange } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { $ } from '@/i18n';
+import { toast } from '@/components';
 
 export class Drawing implements IDrawings {
   private drawings: WorkBookJSON['drawings'] = {};
@@ -82,29 +83,37 @@ export class Drawing implements IDrawings {
   }
   addDrawing(data: DrawingElement) {
     const oldData = this.drawings[data.uuid];
-    assert(!oldData, $('uuid-is-duplicate'));
+    if (oldData) {
+      return toast.error($('uuid-is-duplicate'));
+    }
     if (!this.validateDrawing(data)) {
       return;
     }
     if (data.type === 'chart') {
       const range = data.chartRange!;
       let check = false;
-      this.model.iterateRange(range, (row: number, col: number) => {
-        const data = this.model.getCell({
-          row,
-          col,
-          rowCount: 1,
-          colCount: 1,
-          sheetId: '',
-        });
-        if (data?.value) {
-          check = true;
-          return true;
-        } else {
-          return false;
-        }
-      });
-      assert(check, $('cells-must-contain-data'));
+      iterateRange(
+        range,
+        this.model.getSheetInfo(range.sheetId),
+        (row: number, col: number) => {
+          const data = this.model.getCell({
+            row,
+            col,
+            rowCount: 1,
+            colCount: 1,
+            sheetId: '',
+          });
+          if (data?.value) {
+            check = true;
+            return true;
+          } else {
+            return false;
+          }
+        },
+      );
+      if (!check) {
+        return toast.error($('cells-must-contain-data'));
+      }
     } else if (data.type === 'floating-picture') {
       if (typeof data.imageAngle !== 'number') {
         data.imageAngle = 0;
@@ -127,11 +136,17 @@ export class Drawing implements IDrawings {
     for (const key of keyList) {
       if (item[key] !== value[key]) {
         if (key === 'chartType') {
-          assert(
-            CHART_TYPE_LIST.findIndex((v) => v.value === value.chartType!) >= 0,
-            $('unsupported-chart-types'),
+          const index = CHART_TYPE_LIST.findIndex(
+            (v) => v.value === value.chartType!,
           );
+          if (index < 0) {
+            return toast.error($('unsupported-chart-types'));
+          }
         }
+      }
+    }
+    for (const key of keyList) {
+      if (item[key] !== value[key]) {
         const oldValue =
           typeof item[key] === 'object' && item[key]
             ? // @ts-ignore

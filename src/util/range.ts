@@ -1,4 +1,4 @@
-import { IRange } from '@/types';
+import { IRange, WorksheetType } from '@/types';
 
 export function isSheet(range: IRange): boolean {
   return isRow(range) && isCol(range);
@@ -91,5 +91,52 @@ export class SheetRange implements IRange {
       colCount: this.colCount,
       sheetId: this.sheetId,
     };
+  }
+}
+
+export function iterateRange(
+  range: IRange,
+  sheetInfo: WorksheetType | null,
+  fn: (row: number, col: number) => boolean,
+) {
+  const { row, col, rowCount, colCount } = range;
+  if (!sheetInfo) {
+    return;
+  }
+  if (isSheet(range)) {
+    for (let r = 0; r < sheetInfo.rowCount; r++) {
+      for (let c = 0; c < sheetInfo.colCount; c++) {
+        if (fn(r, c)) {
+          return;
+        }
+      }
+    }
+    return;
+  }
+  if (isRow(range)) {
+    for (let i = 0; i < sheetInfo.colCount; i++) {
+      if (fn(row, i)) {
+        return;
+      }
+    }
+    return;
+  }
+  if (isCol(range)) {
+    for (let i = 0; i < sheetInfo.rowCount; i++) {
+      if (fn(i, col)) {
+        return;
+      }
+    }
+    return;
+  }
+
+  const endRow = row + rowCount;
+  const endCol = col + colCount;
+  for (let r = row; r < endRow; r++) {
+    for (let c = col; c < endCol; c++) {
+      if (fn(r, c)) {
+        return;
+      }
+    }
   }
 }

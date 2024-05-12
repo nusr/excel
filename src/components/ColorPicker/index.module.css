@@ -30,8 +30,8 @@
   gap: 4px;
 }
 .color-picker-item {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   cursor: pointer;
   border-radius: var(--borderRadius);
   border: 1px solid var(--borderColor);

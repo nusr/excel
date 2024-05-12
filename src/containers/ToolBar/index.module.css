@@ -5,7 +5,6 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  font-size: var(--largeFont);
 }
 .toolbar-wrapper > * {
   margin-right: 8px;
@@ -34,7 +33,6 @@
   margin-right: 20px;
 }
 .fontFamily {
-  font-size: var(--largeFont);
   max-width: 200px;
 }
 .bold {

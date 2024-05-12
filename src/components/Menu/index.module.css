@@ -1,6 +1,7 @@
 .container {
   position: relative;
 }
+
 .portal {
   border-radius: var(--borderRadius);
   position: absolute;
@@ -30,6 +31,11 @@
   box-sizing: border-box;
   text-align: center;
 }
+
+.small .menuItem {
+  padding: 3px 8px;
+}
+
 .menuItem {
   padding: 6px 16px;
   position: relative;

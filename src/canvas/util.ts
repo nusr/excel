@@ -24,6 +24,7 @@ import {
   EHorizontalAlign,
   EVerticalAlign,
   BorderType,
+  BorderItem,
 } from '@/types';
 import { numberFormat, isDateFormat } from '@/model';
 
@@ -216,10 +217,9 @@ function getLineDash(type?: BorderType) {
 export function renderBorderItem(
   ctx: CanvasRenderingContext2D,
   cellInfo: CanvasOverlayPosition,
-  border: StyleType['border'],
-  position: keyof StyleType['border'],
+  borderItem: BorderItem | undefined,
+  position: 'top' | 'bottom' | 'left' | 'right',
 ) {
-  const borderItem = border[position];
   if (!borderItem) {
     return;
   }

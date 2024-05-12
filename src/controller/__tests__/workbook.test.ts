@@ -28,11 +28,14 @@ describe('workbook.test.ts', () => {
       expect(controller.getSheetInfo()?.name).toEqual('Sheet1');
     });
     test('empty', () => {
-      expect(() => controller.renameSheet('')).toThrow();
+      const oldName = controller.getSheetInfo()?.name;
+      controller.renameSheet('');
+      expect(controller.getSheetInfo()?.name).toEqual(oldName);
     });
     test('exist', () => {
       controller.addSheet();
-      expect(() => controller.renameSheet('Sheet1')).toThrow();
+      controller.renameSheet('Sheet1');
+      expect(controller.getSheetInfo()?.name).not.toEqual('Sheet1');
     });
   });
   describe('delete sheet', () => {
@@ -46,7 +49,9 @@ describe('workbook.test.ts', () => {
     });
     test('no exist', () => {
       controller.addSheet();
-      expect(() => controller.deleteSheet('test43434')).toThrow();
+      const len = controller.getSheetList().length;
+      controller.deleteSheet('test43434');
+      expect(controller.getSheetList()).toHaveLength(len);
     });
   });
   describe('sheet', () => {

@@ -51,3 +51,18 @@ export function toast(props: Props) {
   setTimeout(close, duration * 1000);
   return close;
 }
+
+toast.error = function (message: string, testId = 'error-toast') {
+  return toast({ message, type: 'error', testId });
+};
+
+toast.info = function (message: string, testId = 'info-toast') {
+  return toast({ message, type: 'info', testId });
+};
+
+toast.warning = function (message: string, testId = 'warning-toast') {
+  return toast({ message, type: 'warning', testId });
+};
+toast.success = function (message: string, testId = 'success-toast') {
+  return toast({ message, type: 'success', testId });
+};

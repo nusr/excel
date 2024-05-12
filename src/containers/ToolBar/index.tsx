@@ -7,7 +7,7 @@ import {
   FillColorIcon,
   ColorPicker,
   SelectList,
-} from '../components';
+} from '../../components';
 import {
   FONT_SIZE_LIST,
   QUERY_ALL_LOCAL_FONT,

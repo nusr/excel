@@ -1,5 +1,5 @@
 import React, { Fragment, memo, useMemo, useSyncExternalStore } from 'react';
-import { Button, info, toast } from '../components';
+import { Button, info, toast } from '../../components';
 import { IController } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
@@ -109,12 +109,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
       ),
       onOk: () => {
         if (value < 0) {
-          toast({
-            type: 'error',
-            message: $('greater-than-zero'),
-            testId: 'context-menu-width-height-toast',
-          });
-          return;
+          return toast.error($('greater-than-zero'));
         }
         if (isRow) {
           controller.batchUpdate(() => {

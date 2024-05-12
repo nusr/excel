@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect } from 'react';
 
-import { useEventCallback } from '../../hooks';
+import { useEventCallback } from '../../containers/hooks';
 import { clamp } from './clamp';
 import styles from './panel.module.css';
 

@@ -462,14 +462,12 @@ for (let i = 0; i < typeList.length; i++) {
     color: '',
   };
   MOCK_MODEL.worksheets['10'][key] = {
-    value: i,
+    value: '',
     style: {
-      border: {
-        left: item,
-        right: item,
-        top: item,
-        bottom: item,
-      },
+      borderLeft: item,
+      borderRight: item,
+      borderTop: item,
+      borderBottom: item,
     },
   };
 }

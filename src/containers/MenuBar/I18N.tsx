@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { Select } from '../components';
+import { Select } from '../../components';
 import { OptionItem, LanguageType } from '@/types';
 import styles from './index.module.css';
 import { getLanguage, setLanguage, LANGUAGE_LIST } from '@/i18n';

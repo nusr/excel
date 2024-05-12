@@ -1,5 +1,5 @@
 import React, { useMemo, memo } from 'react';
-import { Button, Select, info, ColorPicker } from '../components';
+import { Button, Select, info, ColorPicker, toast } from '../../components';
 import { IController, OptionItem } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
@@ -58,6 +58,9 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
         ),
         onCancel: hideMenu,
         onOk() {
+          if (!value) {
+            return toast.error($('sheet-id-can-not-be-empty'));
+          }
           controller.unhideSheet(value);
           hideMenu();
         },
