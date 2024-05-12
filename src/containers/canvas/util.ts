@@ -8,7 +8,6 @@ import {
 } from '@/types';
 import {
   DEFAULT_FONT_SIZE,
-  parseNumber,
   HIDE_CELL,
   getThemeColor,
   eventEmitter,
@@ -20,6 +19,7 @@ import {
   LINE_BREAK,
   DEFAULT_FORMAT_CODE,
   getFormatCode,
+  parseNumber,
 } from '@/util';
 import {
   coreStore,
@@ -77,7 +77,7 @@ function getChartData(
       if (!t) {
         continue;
       }
-      list.push(parseNumber(t.value));
+      list.push(parseNumber(t.value)[1]);
     }
     if (list.length > 0) {
       result.datasets.push({ label: `Series${index}`, data: list });
@@ -140,10 +140,12 @@ function updateActiveCell(controller: IController) {
   }
   let displayValue = numberFormatUtil(cell?.value, numberFormat);
   let realValue = '';
-  if (isDateFormat(numberFormat) || getFormatCode(10)) {
+  if (isDateFormat(numberFormat) || numberFormat === getFormatCode(10)) {
     realValue = displayValue;
   } else {
-    realValue = numberFormatUtil(cell?.value, DEFAULT_FORMAT_CODE);
+    const t = cell?.value ?? '';
+    realValue = typeof t === 'boolean' ? t.toString().toUpperCase() : String(t);
+    displayValue = realValue;
   }
 
   let mergeType = '';

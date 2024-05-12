@@ -7,36 +7,32 @@ import type {
   ResultType,
 } from '@/types';
 
-export function isNumber(value: any): boolean {
+export function parseNumber(value: any): [boolean, number] {
+  if (typeof value === 'boolean') {
+    return [true, Number(value)];
+  }
   if (typeof value === 'number' && !window.isNaN(value)) {
-    return true;
+    return [true, value];
   }
   if (typeof value !== 'string') {
-    return false;
-  }
-  if (!value) {
-    return false;
+    return [false, 0];
   }
   if (value.length > 12) {
-    return false;
+    return [false, 0];
   }
   const temp = Number(value);
-  return !window.isNaN(temp);
-}
-
-export function parseNumber(value: any): number {
-  if (isNumber(value)) {
-    return Number(value);
+  if (window.isNaN(temp)) {
+    return [false, 0];
   }
-  return 0;
+  return [true, temp];
 }
 
 export function parseNumberArray(list: any[]): number[] {
   const result: number[] = [];
   for (let i = 0; i < list.length; i++) {
-    const temp = Number(list[i]);
-    if (!window.isNaN(temp)) {
-      result.push(temp);
+    const [check, num] = parseNumber(list[i]);
+    if (check) {
+      result.push(num);
     }
   }
   return result;
@@ -45,10 +41,7 @@ export function parseNumberArray(list: any[]): number[] {
 export function getListMaxNum(list: string[] = []): number {
   const idList: number[] = list
     .map((item) => {
-      if (isNumber(item)) {
-        return parseInt(item, 10);
-      }
-      return 0;
+      return parseNumber(item)[1];
     })
     .filter((v) => !isNaN(v));
   return Math.max(Math.max(...idList), 0);
@@ -57,7 +50,8 @@ export function getListMaxNum(list: string[] = []): number {
 export function getDefaultSheetInfo(
   list: WorksheetType[] = [],
 ): Pick<WorksheetType, 'name' | 'sheetId' | 'sort'> {
-  const sheetId = getListMaxNum(list.map((item) => item.sheetId)) + 1;
+  const sheetId =
+    Math.ceil(getListMaxNum(list.map((item) => item.sheetId))) + 1;
   return {
     name: `${SHEET_NAME_PREFIX}${sheetId}`,
     sheetId: String(sheetId),
@@ -79,9 +73,6 @@ export function splitToWords(str: string): string[] {
   return arr.map((x) => x.segment);
 }
 export function convertStringToResultType(value: any): ResultType {
-  if (isNumber(value)) {
-    return Number(value);
-  }
   if (typeof value === 'string') {
     const temp = value.toUpperCase();
     if (['TRUE', 'FALSE'].includes(temp)) {
@@ -90,6 +81,13 @@ export function convertStringToResultType(value: any): ResultType {
   }
   if (typeof value === 'boolean') {
     return value;
+  }
+  if (value === '') {
+    return '';
+  }
+  const [check, num] = parseNumber(value);
+  if (check) {
+    return num;
   }
   return value;
 }

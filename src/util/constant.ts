@@ -87,6 +87,7 @@ export const BORDER_TYPE_MAP: Record<BorderType, number> = {
 };
 
 export const DEFAULT_FORMAT_CODE = 'General';
+export const DEFAULT_TEXT_FORMAT_CODE = '@';
 export const NUMBER_FORMAT_LIST: Array<{
   formatCode: string;
   id: number;
@@ -127,7 +128,7 @@ export const NUMBER_FORMAT_LIST: Array<{
   { formatCode: '[h]:mm:ss', id: 46 },
   { formatCode: 'mmss.0', id: 47 },
   { formatCode: '##0.0E+0', id: 48 },
-  { formatCode: '@', id: 49 },
+  { formatCode: DEFAULT_TEXT_FORMAT_CODE, id: 49 },
   {
     formatCode: '上午/下午 h"时"mm"分"ss"秒"',
     id: 56,
@@ -192,11 +193,11 @@ export const numberFormatOptionList = [
     label: $('text'),
     disabled: false,
   },
-  {
-    value: '',
-    label: $('more-number-formats'),
-    disabled: false,
-  },
+  // {
+  //   value: '',
+  //   label: $('more-number-formats'),
+  //   disabled: false,
+  // },
 ];
 
 export const COLOR_PICKER_COLOR_LIST = [

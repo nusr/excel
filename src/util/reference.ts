@@ -1,7 +1,6 @@
 import { columnNameToInt, rowLabelToInt, intToColumnName } from './convert';
 import { IRange, ReferenceType } from '@/types';
 import { SheetRange } from './range';
-import { DEFAULT_ROW_COUNT, DEFAULT_COL_COUNT } from './constant';
 
 const isCharacter = (char: string) =>
   (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z');
@@ -30,13 +29,13 @@ function parseCell(
   if (other[i] === '$') {
     i++;
   }
-  while (isCharacter(other[i])) {
+  while (i < other.length && isCharacter(other[i])) {
     colText += other[i++];
   }
   if (other[i] === '$') {
     i++;
   }
-  while (isNum(other[i])) {
+  while (i < other.length && isNum(other[i])) {
     rowText += other[i++];
   }
   if (i !== other.length) {
@@ -48,17 +47,17 @@ function parseCell(
 
   let rowCount = 1;
   let colCount = 1;
-  let row = 0;
-  let col = 0;
+  let row = -1;
+  let col = -1;
   if (rowText === '') {
-    colCount = 0;
-    rowCount = DEFAULT_ROW_COUNT;
+    rowCount = 0;
+    row = 0;
   } else {
     row = rowLabelToInt(rowText);
   }
   if (colText === '') {
-    colCount = DEFAULT_COL_COUNT;
-    rowCount = 0;
+    colCount = 0;
+    col = 0;
   } else {
     col = columnNameToInt(colText);
   }

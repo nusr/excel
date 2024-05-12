@@ -1,4 +1,4 @@
-import { SheetRange, isNumber, mergeRange, parseReference } from '@/util';
+import { SheetRange, parseNumber, mergeRange, parseReference } from '@/util';
 import {
   TokenType,
   CellDataMap,
@@ -143,8 +143,9 @@ export class Interpreter implements Visitor {
       case TokenType.STRING:
         return value;
       case TokenType.NUMBER: {
-        if (isNumber(value)) {
-          return Number(value);
+        const [check, num] = parseNumber(value);
+        if (check) {
+          return num;
         }
         throw new CustomError('#VALUE!');
       }

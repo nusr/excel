@@ -1,5 +1,5 @@
 import type { ErrorTypes } from '@/types';
-import { isNumber } from '@/util';
+import { parseNumber } from '@/util';
 
 export class CustomError extends Error {
   readonly value: ErrorTypes;
@@ -32,8 +32,9 @@ export function mustOneString(list: any[]): string {
 
 export function mustOneNumber(list: any[]): number {
   const value = mustOne(list);
-  assert(isNumber(value));
-  return Number(value);
+  const [check, num] = parseNumber(value);
+  assert(check);
+  return num;
 }
 
 export function mustEmpty(list: any[]) {

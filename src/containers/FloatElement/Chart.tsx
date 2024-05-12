@@ -222,7 +222,7 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
       datasets: datasets.map((v, i) => {
         return {
           label: v.label,
-          data: v.data.map((t, i) => ({ y: t, x: parseNumber(labels[i]) })),
+          data: v.data.map((t, i) => ({ y: t, x: parseNumber(labels[i])[1] })),
           backgroundColor: getColor(i * colorOffset),
         };
       }),

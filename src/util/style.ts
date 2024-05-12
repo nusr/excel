@@ -11,7 +11,7 @@ import { npx } from './dpr';
 import { EUnderLine, StyleType, ResultType } from '@/types';
 import { DEFAULT_FONT_SIZE, MUST_FONT_FAMILY } from './constant';
 import { camelCase } from './lodash';
-import { isNumber } from './util';
+import { parseNumber } from './util';
 
 export const FONT_SIZE_LIST = [
   6,
@@ -196,7 +196,8 @@ function convertToCssStyleDeclaration(cssStr: string) {
         continue;
       }
       const realKey = camelCase(n);
-      const value = isNumber(v) ? Number(v) : v;
+      const [check, num] = parseNumber(v);
+      const value = check ? num : v;
       matches[name][realKey] = value;
     }
   }

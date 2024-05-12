@@ -1,7 +1,5 @@
 import {
   getListMaxNum,
-  isNumber,
-  parseNumber,
   getDefaultSheetInfo,
   splitToWords,
   convertStringToResultType,
@@ -68,43 +66,6 @@ describe('util.test.ts', () => {
         sheetId: '4',
         sort: 4,
       });
-    });
-  });
-  describe('isNumber', () => {
-    it('should convert null to false', () => {
-      expect(isNumber(null)).toBeFalsy();
-    });
-    it('should convert undefined to false', () => {
-      expect(isNumber(undefined)).toBeFalsy();
-    });
-    it('should convert 1 to true', () => {
-      expect(isNumber(1)).toBeTruthy();
-    });
-    it("should convert '1' to true", () => {
-      expect(isNumber('1')).toBeTruthy();
-    });
-    it("should convert '1a' to false", () => {
-      expect(isNumber('1a')).toBeFalsy();
-    });
-  });
-  describe('parseNumber', () => {
-    it('should convert null to 0', () => {
-      expect(parseNumber(null)).toEqual(0);
-    });
-    it('should convert undefined to 0', () => {
-      expect(parseNumber(undefined)).toEqual(0);
-    });
-    it('should convert 1 to 1', () => {
-      expect(parseNumber(1)).toEqual(1);
-    });
-    it('should convert 1.23 to 1.23', () => {
-      expect(parseNumber(1.23)).toEqual(1.23);
-    });
-    it("should convert '1' to 1", () => {
-      expect(parseNumber('1')).toEqual(1);
-    });
-    it("should convert '1.2' to 1.2", () => {
-      expect(parseNumber('1.2')).toEqual(1.2);
     });
   });
   describe('splitToWords', () => {

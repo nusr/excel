@@ -19,8 +19,11 @@ describe('NumberFormat.test.tsx', () => {
     });
   });
   describe('active status', () => {
-    for (let i = 0; i < numberFormatOptionList.length - 1; i++) {
+    for (let i = 0; i < numberFormatOptionList.length; i++) {
       const item = numberFormatOptionList[i];
+      if (!item.value) {
+        continue;
+      }
       test(item.label, () => {
         act(() => {
           render(<App controller={initController()} />);

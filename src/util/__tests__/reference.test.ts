@@ -81,6 +81,13 @@ describe('reference.test.ts', () => {
         new SheetRange(0, 3, 1, 2, 'aa'),
       );
     });
+
+    it('F:F', () => {
+      expect(parseReference('F:F')).toEqual(new SheetRange(0, 5, 0, 1, ''));
+    });
+    it('1:1', () => {
+      expect(parseReference('1:1')).toEqual(new SheetRange(0, 0, 1, 0, ''));
+    });
   });
   describe('parseCell', () => {
     it('should convert a1 to { row:0,col:0,rowCount:1,colCount: 1 } ', () => {
@@ -96,23 +103,23 @@ describe('reference.test.ts', () => {
     it('should convert aa!B2', () => {
       expect(parseReference('aa!B2')).toEqual(new SheetRange(1, 1, 1, 1, 'aa'));
     });
-    it('should convert A to { row:0,col:0,rowCount:200,colCount: 0 } ', () => {
-      expect(parseReference('A')).toEqual(new SheetRange(0, 0, 200, 0, ''));
+    it('should convert A', () => {
+      expect(parseReference('A')).toEqual(new SheetRange(0, 0, 0, 1, ''));
     });
-    it('should convert 1 to { row:0,col:0,rowCount:0,colCount: 30 } ', () => {
-      expect(parseReference('1')).toEqual(new SheetRange(0, 0, 0, 30, ''));
+    it('should convert 1', () => {
+      expect(parseReference('1')).toEqual(new SheetRange(0, 0, 1, 0, ''));
     });
-    it('should convert Sheet1!1 to { row:0,col:0,rowCount:0,colCount: 30, sheetId: Sheet1 } ', () => {
+    it('should convert Sheet1!1', () => {
       expect(parseReference('Sheet1!1')).toEqual(
-        new SheetRange(0, 0, 0, 30, 'Sheet1'),
+        new SheetRange(0, 0, 1, 0, 'Sheet1'),
       );
     });
-    it('should convert Sheet1!A to { row:0,col:0,rowCount:200,colCount: 0, sheetId: Sheet1 } ', () => {
+    it('should convert Sheet1!A ', () => {
       expect(parseReference('Sheet1!A')).toEqual(
-        new SheetRange(0, 0, 200, 0, 'Sheet1'),
+        new SheetRange(0, 0, 0, 1, 'Sheet1'),
       );
     });
-    it('should convert Sheet1!A1 to { row:0,col:0,rowCount:1,colCount: 1, sheetId: Sheet1 } ', () => {
+    it('should convert Sheet1!A1', () => {
       expect(parseReference('Sheet1!A1')).toEqual(
         new SheetRange(0, 0, 1, 1, 'Sheet1'),
       );

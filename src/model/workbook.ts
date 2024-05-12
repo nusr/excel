@@ -39,7 +39,9 @@ export class Workbook implements IWorkbook {
     }
     if (
       data.rowCount > XLSX_MAX_ROW_COUNT ||
-      data.colCount > XLSX_MAX_COL_COUNT
+      data.colCount > XLSX_MAX_COL_COUNT ||
+      data.rowCount <= 0 ||
+      data.colCount <= 0
     ) {
       return false;
     }
