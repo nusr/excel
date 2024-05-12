@@ -75,13 +75,13 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
             className={classnames(styles['formula-bar-value'], {
               [styles['show']]: editorStatus !== EditorStatus.EDIT_FORMULA_BAR,
               [styles['wrap']]:
-                cellStyle.isMergeCell && activeCell.value.includes(LINE_BREAK),
+                cellStyle.isMergeCell && activeCell.displayValue.includes(LINE_BREAK),
             })}
             style={style}
             onClick={handleClick}
             data-testid="formula-editor-trigger"
           >
-            {activeCell.value}
+            {activeCell.displayValue}
           </div>
         </div>
       </div>

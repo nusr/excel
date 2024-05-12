@@ -49,7 +49,7 @@ export const ColorPicker: FunctionComponent<
       })}
       ref={ref}
     >
-      <div className={styles['color-picker-trigger']} onClick={openColorPicker}>
+      <div className={styles['color-picker-trigger']} onClick={openColorPicker} data-testid={`${testId}-trigger`}>
         {children}
       </div>
       {visible && (

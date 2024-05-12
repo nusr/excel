@@ -155,7 +155,6 @@ export const BorderToolBar: FunctionComponent<BorderToolBarProps> = memo(
       setType('outside-borders');
     };
     const handleThickBoxBorder = () => {
-   
       const oldType = state.current.borderType;
       state.current.borderType = 'medium';
       handleOutSideBorders();
@@ -195,32 +194,53 @@ export const BorderToolBar: FunctionComponent<BorderToolBarProps> = memo(
           size="small"
           portalClassName={styles.portal}
         >
-          <MenuItem onClick={handleNoBorder}>{$('no-border')}</MenuItem>
-          <MenuItem onClick={handleAllBorders}>{$('all-borders')}</MenuItem>
-          <MenuItem onClick={handleOutSideBorders}>
+          <MenuItem onClick={handleNoBorder} testId="toolbar-no-border">
+            {$('no-border')}
+          </MenuItem>
+          <MenuItem onClick={handleAllBorders} testId="toolbar-all-borders">
+            {$('all-borders')}
+          </MenuItem>
+          <MenuItem
+            onClick={handleOutSideBorders}
+            testId="toolbar-outside-borders"
+          >
             {$('outside-borders')}
           </MenuItem>
-          <MenuItem onClick={handleThickBoxBorder}>
+          <MenuItem
+            onClick={handleThickBoxBorder}
+            testId="toolbar-thick-box-border"
+          >
             {$('thick-box-border')}
           </MenuItem>
-          <MenuItem onClick={handleBottomBorder}>{$('bottom-border')}</MenuItem>
-          <MenuItem onClick={handleTopBorder}>{$('top-border')}</MenuItem>
-          <MenuItem onClick={handleLeftBorder}>{$('left-border')}</MenuItem>
-          <MenuItem onClick={handleRightBorder}>{$('right-border')}</MenuItem>
+          <MenuItem onClick={handleBottomBorder} testId="toolbar-bottom-border">
+            {$('bottom-border')}
+          </MenuItem>
+          <MenuItem onClick={handleTopBorder} testId="toolbar-top-border">
+            {$('top-border')}
+          </MenuItem>
+          <MenuItem onClick={handleLeftBorder} testId="toolbar-left-border">
+            {$('left-border')}
+          </MenuItem>
+          <MenuItem onClick={handleRightBorder} testId="toolbar-right-border">
+            {$('right-border')}
+          </MenuItem>
           <MenuItem>
             <ColorPicker
               color={color}
               onChange={handleColorChange}
               position="right"
+              testId="toolbar-border-color"
             >
               <span style={{ color }}>{$('line-color')} &gt;</span>
             </ColorPicker>
           </MenuItem>
-          <SubMenu label={`${$('line-style')} >`}>
+          <SubMenu label={`${$('line-style')} >`} testId="toolbar-border-style">
             {Object.keys(BORDER_TYPE_MAP).map((border) => (
               <MenuItem
                 key={border}
                 onClick={() => handleBorderStyle(border as BorderType)}
+                testId={`toolbar-border-style-${border}`}
+                active={borderType === border}
               >
                 {border}
               </MenuItem>

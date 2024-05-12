@@ -50,7 +50,7 @@
   border-top: 1px solid var(--borderColor);
 }
 
-.menuItem:hover {
+.menuItem:hover,.menuItem.active {
   background-color: var(--hoverColor);
 }
 

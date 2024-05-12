@@ -19,6 +19,7 @@ import {
   MERGE_CELL_LINE_BREAK,
   LINE_BREAK,
   DEFAULT_FORMAT_CODE,
+  getFormatCode,
 } from '@/util';
 import {
   coreStore,
@@ -137,11 +138,12 @@ function updateActiveCell(controller: IController) {
   if (horizontalAlign === undefined && isRight) {
     horAlign = EHorizontalAlign.RIGHT;
   }
-  let displayValue = '';
-  if (isDateFormat(numberFormat)) {
-    displayValue = numberFormatUtil(cell?.value, numberFormat);
+  let displayValue = numberFormatUtil(cell?.value, numberFormat);
+  let realValue = '';
+  if (isDateFormat(numberFormat) || getFormatCode(10)) {
+    realValue = displayValue;
   } else {
-    displayValue = numberFormatUtil(cell?.value, DEFAULT_FORMAT_CODE);
+    realValue = numberFormatUtil(cell?.value, DEFAULT_FORMAT_CODE);
   }
 
   let mergeType = '';
@@ -153,7 +155,7 @@ function updateActiveCell(controller: IController) {
       mergeType = String(EMergeCellType.MERGE_CENTER);
     }
   }
-  const textValue = cell?.formula ? cell.formula : displayValue;
+
   activeCellStore.setState({
     top: cellPosition.top,
     left: cellPosition.left,
@@ -163,8 +165,9 @@ function updateActiveCell(controller: IController) {
     col: activeCell.col,
     rowCount: activeCell.rowCount,
     colCount: activeCell.colCount,
-    value: textValue,
+    value: cell?.formula || realValue,
     defineName,
+    displayValue: cell?.formula || displayValue,
   });
 
   styleStore.mergeState({

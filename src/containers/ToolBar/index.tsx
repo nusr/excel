@@ -474,9 +474,12 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
           value={numberFormatValue}
           onChange={handleNumberFormat}
           className={styles['number-format']}
-          testId="toolbar-number-format-select"
+          testId="toolbar-number-format"
         >
-          <div className={styles['number-format-value']}>
+          <div
+            className={styles['number-format-value']}
+            data-testid="toolbar-number-format-value"
+          >
             {numberFormatLabel}
           </div>
         </SelectList>

@@ -128,13 +128,11 @@ export const SelectPopup: FunctionComponent<SelectPopupProps> = memo(
             <span className={styles['popup-item-content']} data-value={v.value}>
               {v.label}
             </span>
-            <span
-              className={classnames(styles['popup-item-icon'], {
-                [styles.active]: v.value == value,
-              })}
-            >
-              <Icon name="confirm" />
-            </span>
+            {v.value == value && (
+              <span className={styles['popup-item-icon']}>
+                <Icon name="confirm" />
+              </span>
+            )}
           </div>
         ))}
       </div>

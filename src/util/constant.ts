@@ -1,4 +1,4 @@
-import { ErrorTypes, OptionItem, BorderType } from '@/types';
+import { ErrorTypes, BorderType } from '@/types';
 import type { ChartType } from 'chart.js';
 import { $ } from '@/i18n';
 export const DEFAULT_FONT_SIZE = 12;
@@ -136,7 +136,7 @@ export const NUMBER_FORMAT_LIST: Array<{
 
 export const getFormatCode = (id: number): string =>
   NUMBER_FORMAT_LIST.find((v) => v.id === id)!.formatCode;
-export const numberFormatOptionList: OptionItem[] = [
+export const numberFormatOptionList = [
   {
     value: getFormatCode(0),
     label: $('general'),

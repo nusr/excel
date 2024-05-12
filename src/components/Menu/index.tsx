@@ -7,6 +7,7 @@ import { Button } from '../Button';
 type MenuItemProps = {
   onClick?: () => void;
   testId?: string;
+  active?: boolean;
 };
 
 type MenuProps = {
@@ -25,9 +26,13 @@ type SubMenuProps = Pick<
 >;
 export const MenuItem: FunctionComponent<
   React.PropsWithChildren<MenuItemProps>
-> = ({ onClick, children, testId }) => {
+> = ({ onClick, children, testId, active = false }) => {
   return (
-    <li className={styles.menuItem} onClick={onClick} data-testid={testId}>
+    <li
+      className={classnames(styles.menuItem, { [styles.active]: active })}
+      onClick={onClick}
+      data-testid={testId}
+    >
       {children}
     </li>
   );
@@ -40,7 +45,6 @@ export const SubMenu: FunctionComponent<
   const handleClick = useCallback(() => {
     setOpen((v) => !v);
   }, []);
-
   return (
     <li
       className={classnames(styles.menuItem, className)}
@@ -79,7 +83,10 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = memo(
     const handleClick = useCallback(() => {
       setOpen((v) => !v);
     }, []);
-    const [ref] = useClickOutside(() => setOpen(false));
+    const closeMenu = useCallback(() => {
+      setOpen(false);
+    }, []);
+    const [ref] = useClickOutside(closeMenu);
     return (
       <div
         className={classnames(styles.container, className, {
