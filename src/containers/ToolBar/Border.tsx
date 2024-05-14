@@ -8,7 +8,7 @@ import {
   SubMenu,
   ColorPicker,
 } from '../../components';
-import { IController, BorderType, BorderItem } from '@/types';
+import { IController, BorderType, BorderItem, IRange } from '@/types';
 import { BORDER_TYPE_MAP, isRow, isCol } from '@/util';
 import { $ } from '@/i18n';
 
@@ -98,17 +98,18 @@ export const BorderToolBar: FunctionComponent<BorderToolBarProps> = memo(
       const range = controller.getActiveRange().range;
       const item = getBorderItem();
       const { row, col, colCount } = range;
+      const cell: IRange = {
+        row,
+        rowCount: 1,
+        colCount,
+        col: isRow(range) ? 0 : col,
+        sheetId: '',
+      };
       controller.updateCellStyle(
         {
           borderTop: item,
         },
-        {
-          row,
-          rowCount: 1,
-          colCount,
-          col: isRow(range) ? 0 : col,
-          sheetId: '',
-        },
+        cell,
       );
     };
     const handleLeftBorder = () => {

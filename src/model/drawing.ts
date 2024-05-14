@@ -5,7 +5,7 @@ import {
   DrawingElement,
   IModel,
 } from '@/types';
-import { CHART_TYPE_LIST, isEmpty, iterateRange } from '@/util';
+import { CHART_TYPE_LIST, iterateRange } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { $ } from '@/i18n';
 import { toast } from '@/components';
@@ -48,9 +48,6 @@ export class Drawing implements IDrawings {
   }
   fromJSON(json: WorkBookJSON): void {
     const data = json.drawings || {};
-    if (isEmpty(data)) {
-      return;
-    }
     const oldValue = { ...this.drawings };
     this.drawings = {};
     for (const [uuid, value] of Object.entries(data)) {

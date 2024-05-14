@@ -16,8 +16,9 @@ jobs:
           node-version: 20
       - name: Test
         run: |
-          npm i -g pnpm
+          npm i -g pnpm jscpd
           pnpm i
+          npm run repeat
           npm run lint
           npx tsc
           npm run coverage

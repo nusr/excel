@@ -1197,6 +1197,7 @@ xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" meth="cycle" id=
       xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
       xmlns:xr2="http://schemas.microsoft.com/office/spreadsheetml/2015/revision2"
       xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" xr:uid="{9B2CBB7B-9BFB-4EF9-A18C-0B0DED5460D3}">
+      {larger}
       <dimension ref="A1:D5"/>
       <sheetViews>
         {large}
@@ -1224,15 +1225,6 @@ xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" meth="cycle" id=
       xmlns:x16r2="http://schemas.microsoft.com/office/spreadsheetml/2015/02/main"
       xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision">
       {children}
-      <borders count="1">
-        <border>
-          <left/>
-          <right/>
-          <top/>
-          <bottom/>
-          <diagonal/>
-        </border>
-      </borders>
       <cellStyleXfs count="1">
         <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0">
           <alignment vertical="center"/>

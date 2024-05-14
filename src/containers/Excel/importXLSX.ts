@@ -8,6 +8,8 @@ import {
   EUnderLine,
   DrawingElement,
   IWindowSize,
+  BorderItem,
+  BorderType,
 } from '@/types';
 import {
   get,
@@ -25,6 +27,7 @@ import {
   FORMULA_PREFIX,
   getImageSize,
   NUMBER_FORMAT_LIST,
+  BORDER_TYPE_MAP,
 } from '@/util';
 
 const COMMON_PREFIX = 'xl';
@@ -160,10 +163,12 @@ export interface XfItem {
   fontId: string;
   fillId: string;
   numFmtId: string;
+  borderId: string;
   applyFill?: string;
   applyFont?: string;
   applyNumberFormat?: string;
   applyAlignment?: string;
+  applyBorder?: string;
   alignment?: {
     vertical?: 'top' | 'center' | 'bottom';
     horizontal?: 'left' | 'center' | 'right';
@@ -206,6 +211,18 @@ interface FillItem {
   gradientFill?: {
     stop: Array<{ color: ColorItem }>;
   };
+}
+
+type BorderDataItem = {
+  style?: string;
+  color?: ColorItem;
+};
+interface StyleBorderItem {
+  left: BorderDataItem;
+  right: BorderDataItem;
+  top: BorderDataItem;
+  bottom: BorderDataItem;
+  diagonal: {};
 }
 
 interface DefineNameItem {
@@ -301,6 +318,24 @@ function convertColor(themeData: ThemeData, color?: ColorItem) {
   return convertRGB(color.rgb);
 }
 
+function getBorder(
+  data: BorderDataItem,
+  themeData: ThemeData,
+): BorderItem | undefined {
+  if (!data.style) {
+    return undefined;
+  }
+  const type = data.style as BorderType;
+  if (typeof BORDER_TYPE_MAP[type] !== 'number') {
+    return undefined;
+  }
+  const color = convertColor(themeData, data.color);
+  return {
+    type,
+    color,
+  };
+}
+
 function getCellStyle(
   xml: ObjectItem,
   styleId: number,
@@ -344,7 +379,7 @@ function getCellStyle(
   if (xf.applyFont && xf.fontId) {
     const fontList = get<FontItem[]>(xml, 'styleSheet.fonts.font', []);
     const fontId = parseInt(xf.fontId, 10);
-    if (!isNaN(fontId) && fontList.length > 0 && fontList[fontId]) {
+    if (fontList[fontId]) {
       const font = fontList[fontId];
       const fz = font?.sz?.val ? parseInt(font?.sz?.val, 10) : undefined;
       result.fontSize = fz ? fz : undefined;
@@ -375,7 +410,7 @@ function getCellStyle(
   if (xf.applyFill && xf.fillId) {
     const list = get<FillItem[]>(xml, 'styleSheet.fills.fill', []);
     const i = parseInt(xf.fillId, 10);
-    if (list.length > 0 && !isNaN(i) && list[i]) {
+    if (list[i]) {
       const g = list[i].gradientFill;
       const p = list[i].patternFill;
       if (g && g.stop[0]) {
@@ -390,6 +425,17 @@ function getCellStyle(
           result.fillColor = color;
         }
       }
+    }
+  }
+  if (xf.applyBorder && xf.borderId) {
+    const list = get<StyleBorderItem[]>(xml, 'styleSheet.borders.border', []);
+    const i = parseInt(xf.borderId, 10);
+    if (list[i]) {
+      const item = list[i];
+      result.borderLeft = getBorder(item.left, themeData);
+      result.borderRight = getBorder(item.right, themeData);
+      result.borderTop = getBorder(item.top, themeData);
+      result.borderBottom = getBorder(item.bottom, themeData);
     }
   }
   return result;
@@ -481,16 +527,23 @@ export function convertXMLDataToModel(
       'worksheet.sheetViews.sheetView.tabSelected',
       '',
     );
+    const tabColor = convertColor(
+      themeData,
+      get<ColorItem>(xmlData[sheetPath], 'worksheet.sheetPr.tabColor', {
+        rgb: '',
+      }),
+    );
     if (tabSelected === '1') {
       result.currentSheetId = item.sheetId;
     }
-    const sheetData = {
+    const sheetData: WorksheetType = {
       sheetId: item.sheetId,
       name: item.name,
       isHide: item.state === 'hidden',
       rowCount: 200,
       colCount: 200,
       sort: sheetSort++,
+      tabColor: tabColor === '' ? undefined : tabColor,
     };
     result.workbook[sheetData.sheetId] = sheetData;
     if (range) {
@@ -622,6 +675,9 @@ export function convertXMLDataToModel(
             const data = sharedStrings[i];
             t.value = data?.t?.[textKey] ?? '';
           }
+        }
+        if (col.t === 'b') {
+          t.value = val === '1';
         }
 
         result.worksheets[item.sheetId] = result.worksheets[item.sheetId] || {};

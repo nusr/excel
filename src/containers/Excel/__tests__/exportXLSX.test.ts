@@ -35,6 +35,7 @@ describe('exportXLSX.test.ts', () => {
           xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
           xmlns:xr2="http://schemas.microsoft.com/office/spreadsheetml/2015/revision2"
           xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" xr:uid="{9B2CBB7B-9BFB-4EF9-A18C-0B0DED5460D3}">
+          <sheetPr/>
           <dimension ref="A1:D5"/>
           <sheetViews>
             <sheetView tabSelected="1" workbookViewId="0">
@@ -50,6 +51,7 @@ describe('exportXLSX.test.ts', () => {
     });
     test('normal', () => {
       const controller = initController();
+      controller.updateSheetInfo({ tabColor: 'red' });
       controller.setCell(
         [
           [true, false, 'true', 'false', 'ab'],
@@ -70,6 +72,14 @@ describe('exportXLSX.test.ts', () => {
               numberFormat: 'General',
               horizontalAlign: EHorizontalAlign.LEFT,
               verticalAlign: EVerticalAlign.TOP,
+              borderTop: {
+                type: 'dashDot',
+                color: '',
+              },
+              borderBottom: {
+                type: 'dashed',
+                color: 'red',
+              },
             },
           ],
         ],
@@ -153,6 +163,9 @@ describe('exportXLSX.test.ts', () => {
           xmlns:xr="http://schemas.microsoft.com/office/spreadsheetml/2014/revision"
           xmlns:xr2="http://schemas.microsoft.com/office/spreadsheetml/2015/revision2"
           xmlns:xr3="http://schemas.microsoft.com/office/spreadsheetml/2016/revision3" xr:uid="{9B2CBB7B-9BFB-4EF9-A18C-0B0DED5460D3}">
+          <sheetPr>
+            <tabColor rgb="FFFF0000"/>
+          </sheetPr>
           <dimension ref="A1:D5"/>
           <sheetViews>
             <sheetView  workbookViewId="0">
@@ -163,10 +176,10 @@ describe('exportXLSX.test.ts', () => {
           <cols><col min="2" max="2" width="10" customWidth="1" hidden="1"/></cols>
           <sheetData>
             <row r="1"  x14ac:dyDescent="0.4">
-              <c r="A1" s="1"><v>TRUE</v></c>
-              <c r="B1" ><v>FALSE</v></c>
-              <c r="C1" ><v>TRUE</v></c>
-              <c r="D1" ><v>FALSE</v></c>
+              <c r="A1" s="1" t="b"><v>1</v></c>
+              <c r="B1" t="b"><v>0</v></c>
+              <c r="C1" t="b"><v>1</v></c>
+              <c r="D1" t="b"><v>0</v></c>
               <c r="E1" ><v>ab</v></c>
             </row>
             <row r="2"  x14ac:dyDescent="0.4">
@@ -223,16 +236,27 @@ describe('exportXLSX.test.ts', () => {
           <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0">
             <alignment vertical="center"/>
           </xf>
-          <xf numFmtId="0" fontId="1" fillId="1" borderId="0" xfId="0" applyFill="1" applyFont="1" applyNumberFormat="1" applyAlignment="1">
+          <xf numFmtId="0" fontId="1" fillId="1" borderId="1" xfId="0" applyFill="1" applyFont="1" applyNumberFormat="1" applyAlignment="1" applyBorder="1">
             <alignment wrapText="1" horizontal="left" vertical="top"/>
           </xf>
         </cellXfs>
-        <borders count="1">
+        <borders count="2">
           <border>
             <left/>
             <right/>
             <top/>
             <bottom/>
+            <diagonal/>
+          </border>
+          <border>
+            <left/>
+            <right/>
+            <top style="dashDot">
+            <color auto="1"/>
+            </top>
+            <bottom style="dashed">
+            <color rgb="FFFF0000"/>
+            </bottom>
             <diagonal/>
           </border>
         </borders>

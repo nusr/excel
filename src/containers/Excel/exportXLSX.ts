@@ -5,6 +5,7 @@ import {
   StyleType,
   EVerticalAlign,
   EHorizontalAlign,
+  BorderItem,
 } from '@/types';
 import { CONFIG } from './exportConfig';
 import {
@@ -17,6 +18,7 @@ import {
   extractImageType,
   widthOrHeightKeyToData,
   NUMBER_FORMAT_LIST,
+  getThemeColor,
 } from '@/util';
 import { XfItem, chartTypeList, convertToPt } from './importXLSX';
 import { numberFormat } from '@/model';
@@ -25,6 +27,7 @@ interface StyleData {
   numFmts: string[];
   fonts: string[];
   fills: string[];
+  borders: string[];
 }
 
 const SPLITTER = '/';
@@ -41,6 +44,25 @@ function convertColorToRGB(val: string) {
   return `FF${t.slice(1, -2)}`;
 }
 
+function convertBorderItem(
+  style?: BorderItem,
+  position: 'left' | 'right' | 'top' | 'bottom' = 'left',
+): string {
+  if (!style) {
+    return `<${position}/>`;
+  }
+  const color = style.color || getThemeColor('black');
+  let extra = '';
+  if (color === getThemeColor('black')) {
+    extra = 'auto="1"';
+  } else {
+    extra = `rgb="${convertColorToRGB(color)}"`;
+  }
+  return `<${position} style="${style.type}">
+  <color ${extra}/>
+</${position}>`;
+}
+
 function convertStyle(styles: StyleData, style: Partial<StyleType>) {
   if (!style || isEmpty(style)) {
     return;
@@ -54,6 +76,8 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
     applyFill: '',
     applyFont: '',
     applyNumberFormat: '',
+    applyBorder: '',
+    borderId: '0',
   };
   if (style.fillColor) {
     result.fillId = String(styles.fills.length);
@@ -111,44 +135,55 @@ function convertStyle(styles: StyleData, style: Partial<StyleType>) {
     }
   }
   let alignment = '<alignment vertical="center"/>';
+
+  const list: string[] = [];
+  extraList.push('applyAlignment="1"');
+  if (style.isWrapText) {
+    list.push('wrapText="1"');
+  }
+  if (style.horizontalAlign !== undefined) {
+    const alignMap = {
+      [EHorizontalAlign.LEFT]: 'left',
+      [EHorizontalAlign.CENTER]: 'center',
+      [EHorizontalAlign.RIGHT]: 'right',
+    };
+    list.push(`horizontal="${alignMap[style.horizontalAlign]}"`);
+  }
+  if (style.verticalAlign !== undefined) {
+    const alignMap = {
+      [EVerticalAlign.TOP]: 'top',
+      [EVerticalAlign.MIDDLE]: 'center',
+      [EVerticalAlign.BOTTOM]: 'bottom',
+    };
+    if (style.verticalAlign !== EVerticalAlign.BOTTOM) {
+      list.push(`vertical="${alignMap[style.verticalAlign]}"`);
+    }
+  }
+  if (list.length > 0) {
+    alignment = `<alignment ${list.join(' ')}/>`;
+  }
   if (
-    style.isWrapText ||
-    style.horizontalAlign !== undefined ||
-    style.verticalAlign !== undefined
+    style.borderBottom ||
+    style.borderLeft ||
+    style.borderTop ||
+    style.borderRight
   ) {
-    const list: string[] = [];
-    extraList.push('applyAlignment="1"');
-    if (style.isWrapText) {
-      list.push('wrapText="1"');
-    }
-    if (style.horizontalAlign !== undefined) {
-      const alignMap = {
-        [EHorizontalAlign.LEFT]: 'left',
-        [EHorizontalAlign.CENTER]: 'center',
-        [EHorizontalAlign.RIGHT]: 'right',
-      };
-      list.push(`horizontal="${alignMap[style.horizontalAlign]}"`);
-    }
-    if (style.verticalAlign !== undefined) {
-      const alignMap = {
-        [EVerticalAlign.TOP]: 'top',
-        [EVerticalAlign.MIDDLE]: 'center',
-        [EVerticalAlign.BOTTOM]: 'bottom',
-      };
-      if (style.verticalAlign !== EVerticalAlign.BOTTOM) {
-        list.push(`vertical="${alignMap[style.verticalAlign]}"`);
-      }
-    }
-    if (list.length > 0) {
-      alignment = `<alignment ${list.join(' ')}/>`;
-    }
+    result.borderId = String(styles.borders.length);
+    extraList.push('applyBorder="1"');
+    styles.borders.push(`<border>
+    ${convertBorderItem(style.borderLeft, 'left')}
+    ${convertBorderItem(style.borderRight, 'right')}
+    ${convertBorderItem(style.borderTop, 'top')}
+    ${convertBorderItem(style.borderBottom, 'bottom')}
+    <diagonal/>
+  </border>`);
   }
 
   const t = `<xf numFmtId="${result.numFmtId}" fontId="${
     result.fontId
-  }" fillId="${result.fillId}" borderId="0" xfId="0" ${extraList.join(
-    ' ',
-  )}>\n${alignment}\n</xf>`;
+  }" fillId="${result.fillId}" borderId="${
+    result.borderId
+  }" xfId="0" ${extraList.join(' ')}>\n${alignment}\n</xf>`;
   styles.cellXfs.push(t);
 }
 function compileTemplate(template: string, target: Partial<CommonData> = {}) {
@@ -533,6 +568,15 @@ export function convertToXMLData(controller: IController) {
     <alignment vertical="center"/>
   </xf>`,
     ],
+    borders: [
+      `<border>
+      <left/>
+      <right/>
+      <top/>
+      <bottom/>
+      <diagonal/>
+    </border>`,
+    ],
   };
   for (const item of sheetList) {
     const mergeCells = Object.values(model.mergeCells)
@@ -580,11 +624,16 @@ export function convertToXMLData(controller: IController) {
       });
       const list = rowMap.get(range.row) || [];
       const f = v.formula ? `<f>${v.formula.slice(1)}</f>` : '';
-      const val = `<v>${numberFormat(v.value, v.style?.numberFormat)}</v>`;
+      let val = `<v>${numberFormat(v.value, v.style?.numberFormat)}</v>`;
       let s = '';
+
       if (v.style && !isEmpty(v.style)) {
         s = `s="${styles.cellXfs.length}"`;
         convertStyle(styles, v.style);
+      }
+      if (typeof v.value === 'boolean') {
+        val = `<v>${Number(v.value)}</v>`;
+        s += ` t="b"`;
       }
       list.push(`<c r="${ref}" ${s}>${f}${val}</c>`);
       rowMap.set(range.row, list);
@@ -615,6 +664,13 @@ export function convertToXMLData(controller: IController) {
       targetData.children += `<mergeCells count="${
         mergeCells.length
       }">\n${mergeCells.join('\n')}\n</mergeCells>`;
+    }
+    if (item.tabColor) {
+      targetData.larger = `<sheetPr>
+      <tabColor rgb="${convertColorToRGB(item.tabColor)}"/>
+    </sheetPr>`;
+    } else {
+      targetData.larger = '<sheetPr/>';
     }
 
     result[`xl/worksheets/${v.target}`] = compileTemplate(
