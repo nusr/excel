@@ -129,7 +129,7 @@ export class Interpreter implements Visitor {
       }
     }
     const range = parseReference(data.value.value);
-    if (range === null) {
+    if (!range) {
       throw new CustomError('#NAME?');
     }
     if (sheetId) {
@@ -177,13 +177,13 @@ export class Interpreter implements Visitor {
       /^\$[A-Z]+$/.test(realValue) ||
       /^\$\d+$/.test(realValue)
     ) {
-      return this.addCellExpression(newToken, 'absolute', null);
+      return this.addCellExpression(newToken, 'absolute', undefined);
     }
     if (/^\$[A-Z]+\d+$/.test(realValue) || /^[A-Z]+\$\d+$/.test(realValue)) {
-      return this.addCellExpression(newToken, 'mixed', null);
+      return this.addCellExpression(newToken, 'mixed', undefined);
     }
     if (/^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue)) {
-      return this.addCellExpression(newToken, 'relative', null);
+      return this.addCellExpression(newToken, 'relative', undefined);
     }
 
     throw new CustomError('#NAME?');
@@ -207,11 +207,11 @@ export class Interpreter implements Visitor {
       case TokenType.COLON: {
         const left = this.convertToCellExpression(expr.left);
         const right = this.convertToCellExpression(expr.right);
-        if (left !== null && right !== null) {
+        if (left && right) {
           const a = this.visitCellExpression(left);
           const b = this.visitCellExpression(right);
           const result = mergeRange(a, b);
-          if (result === null) {
+          if (!result) {
             throw new CustomError('#NAME?');
           }
           return result;
@@ -221,7 +221,7 @@ export class Interpreter implements Visitor {
       }
       case TokenType.EXCLAMATION: {
         const right = this.convertToCellExpression(expr.right);
-        if (right === null) {
+        if (!right) {
           throw new CustomError('#REF!');
         }
         if (expr.left instanceof TokenExpression) {
@@ -251,7 +251,7 @@ export class Interpreter implements Visitor {
   private evaluate(expr: Expression) {
     return expr.accept(this);
   }
-  private convertToCellExpression(expr: Expression): CellExpression | null {
+  private convertToCellExpression(expr: Expression): CellExpression | undefined {
     if (expr instanceof CellExpression) {
       return expr;
     }
@@ -259,7 +259,7 @@ export class Interpreter implements Visitor {
       return new CellExpression(
         new Token(TokenType.IDENTIFIER, expr.value.value.toUpperCase()),
         'relative',
-        null,
+        undefined,
       );
     }
     if (expr instanceof LiteralExpression) {
@@ -270,16 +270,16 @@ export class Interpreter implements Visitor {
         return new CellExpression(
           new Token(TokenType.IDENTIFIER, expr.value.value),
           'relative',
-          null,
+          undefined,
         );
       }
     }
-    return null;
+    return undefined;
   }
   private addCellExpression(
     value: Token,
     type: ReferenceType,
-    sheetName: Token | null,
+    sheetName: Token | undefined,
   ) {
     value.value = value.value.toUpperCase();
     const result = new CellExpression(value, type, sheetName);

@@ -1,7 +1,7 @@
 import { IWindowSize } from '@/types';
 
 export function saveAs(blob: Blob | string, fileName: string): void {
-  let link: HTMLAnchorElement | null = document.createElement('a');
+  let link: HTMLAnchorElement | undefined = document.createElement('a');
   link.download = fileName || 'download';
   link.rel = 'noopener';
   link.target = '_blank';
@@ -12,7 +12,7 @@ export function saveAs(blob: Blob | string, fileName: string): void {
     link.href = URL.createObjectURL(blob);
   }
   link.dispatchEvent(new MouseEvent('click'));
-  link = null;
+  link = undefined;
 }
 
 export function getImageSize(src: string): Promise<IWindowSize> {

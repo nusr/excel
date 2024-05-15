@@ -233,7 +233,7 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
       toggleEvents(false);
     }, [toggleEvents]);
     if (floatElementList.length === 0) {
-      return null;
+      return undefined;
     }
     return (
       <Fragment>

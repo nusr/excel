@@ -140,12 +140,12 @@ export class DefinedName implements IDefinedName {
       });
     }
   }
-  checkDefineName(name: string): IRange | null {
+  checkDefineName(name: string): IRange | undefined {
     const range = this.definedNames[name];
     if (range) {
       return { ...this.definedNames[name] };
     }
-    return null;
+    return undefined;
   }
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();

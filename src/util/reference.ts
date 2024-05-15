@@ -13,9 +13,9 @@ function convertSheetNameToSheetId(value: string) {
 function parseCell(
   ref: string,
   convertSheetName: typeof convertSheetNameToSheetId,
-): SheetRange | null {
+): SheetRange | undefined {
   if (!ref) {
-    return null;
+    return undefined;
   }
   const realRef = ref.trim();
   let [sheetName, other = ''] = realRef.split('!');
@@ -39,10 +39,10 @@ function parseCell(
     rowText += other[i++];
   }
   if (i !== other.length) {
-    return null;
+    return undefined;
   }
   if (!rowText && !colText) {
-    return null;
+    return undefined;
   }
 
   let rowCount = 1;
@@ -62,7 +62,7 @@ function parseCell(
     col = columnNameToInt(colText);
   }
   if (row < 0 || col < 0) {
-    return null;
+    return undefined;
   }
   const range = new SheetRange(
     row,
@@ -77,11 +77,11 @@ function parseCell(
 export function parseReference(
   text: string,
   convertSheetName = convertSheetNameToSheetId,
-): SheetRange | null {
+): SheetRange | undefined {
   const [cell1, cell2] = text.split(':');
   const startCell = parseCell(cell1, convertSheetName);
   if (!startCell) {
-    return null;
+    return undefined;
   }
   const endCell = parseCell(cell2, convertSheetName);
   if (!endCell) {
@@ -94,9 +94,9 @@ export function parseReference(
 export function mergeRange(
   start: SheetRange,
   end: SheetRange,
-): SheetRange | null {
+): SheetRange | undefined {
   if (start.sheetId !== end.sheetId) {
-    return null;
+    return undefined;
   }
   if (
     start.row === end.row &&
@@ -107,16 +107,16 @@ export function mergeRange(
     return start;
   }
   if (start.rowCount === 0 && end.rowCount !== 0) {
-    return null;
+    return undefined;
   }
   if (start.rowCount !== 0 && end.rowCount === 0) {
-    return null;
+    return undefined;
   }
   if (start.colCount === 0 && end.colCount !== 0) {
-    return null;
+    return undefined;
   }
   if (start.colCount !== 0 && end.colCount === 0) {
-    return null;
+    return undefined;
   }
 
   const rowCount = Math.abs(start.row - end.row) + 1;

@@ -204,11 +204,11 @@ export class Workbook implements IWorkbook {
     }
     this.updateSheetInfo({ name: sheetName }, id);
   }
-  getSheetInfo(id?: string): WorksheetType | null {
+  getSheetInfo(id?: string): WorksheetType | undefined {
     const sheetId = id || this.currentSheetId;
     const item = this.workbook[sheetId];
     if (!item) {
-      return null;
+      return undefined;
     }
     if (item) {
       item.sheetId = sheetId;

@@ -49,7 +49,7 @@ export class Controller implements IController {
   private scrollValue: Record<string, ScrollValue> = {};
   private model: IModel;
   private changeSet = new Set<ChangeEventType>();
-  private copyRange: IRange | null = null; // cut or copy ranges
+  private copyRange: IRange | undefined = undefined; // cut or copy ranges
   private isCut = false; // cut or copy
   private floatElementUuid = '';
   private isNoChange = false;
@@ -149,7 +149,7 @@ export class Controller implements IController {
     this.model.setCurrentSheetId(id);
     this.setScroll(this.getScroll());
   }
-  getWorksheet(sheetId?: string): WorksheetData | null {
+  getWorksheet(sheetId?: string): WorksheetData | undefined {
     return this.model.getWorksheet(sheetId);
   }
   setWorksheet(data: WorksheetData, sheetId?: string): void {
@@ -393,7 +393,7 @@ export class Controller implements IController {
       this.model.setCell(textList, [], range);
       return range;
     }
-    return null;
+    return undefined;
   }
   private parseHTML(htmlString: string) {
     const { textList, styleList, rowMap, colMap } = parseHTML(htmlString);
@@ -409,7 +409,7 @@ export class Controller implements IController {
       return range;
     }
 
-    return null;
+    return undefined;
   }
   private getCopyData(): ClipboardData {
     const { range: activeCell, isMerged } = this.getActiveRange();
@@ -484,7 +484,7 @@ export class Controller implements IController {
           marginY: 0,
         });
 
-        this.copyRange = null;
+        this.copyRange = undefined;
         this.isCut = false;
         this.floatElementUuid = '';
         this.emitChange();
@@ -557,7 +557,7 @@ export class Controller implements IController {
       activeCell = this.model.pasteRange(this.copyRange, this.isCut);
     }
     if (this.isCut) {
-      this.copyRange = null;
+      this.copyRange = undefined;
       this.isCut = false;
       this.hooks.copyOrCut(
         {
@@ -595,12 +595,12 @@ export class Controller implements IController {
   }
   getCopyRange() {
     if (this.floatElementUuid) {
-      return null;
+      return undefined;
     }
     if (this.copyRange) {
       return { ...this.copyRange };
     }
-    return null;
+    return undefined;
   }
   deleteAll(sheetId?: string): void {
     this.model.deleteAll(sheetId);
@@ -616,7 +616,7 @@ export class Controller implements IController {
     this.model.setDefineName(range, name);
     this.emitChange();
   }
-  checkDefineName(name: string): IRange | null {
+  checkDefineName(name: string): IRange | undefined {
     return this.model.checkDefineName(name);
   }
   getDrawingList(sheetId?: string): DrawingElement[] {
@@ -647,7 +647,7 @@ export class Controller implements IController {
   }
   setFloatElementUuid(uuid: string) {
     if (this.floatElementUuid && !uuid) {
-      this.copyRange = null;
+      this.copyRange = undefined;
     }
     this.floatElementUuid = uuid;
   }

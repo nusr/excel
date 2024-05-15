@@ -12,13 +12,13 @@ export function getHitInfo(
   controller: IController,
   x: number,
   y: number,
-): HitInfoResult | null {
+): HitInfoResult | undefined {
   if (x < 0 || y < 0) {
-    return null;
+    return undefined;
   }
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
   if (!sheetInfo) {
-    return null;
+    return undefined;
   }
   const scroll = controller.getScroll();
   const headerSize = headerSizeSet.get();
@@ -40,7 +40,7 @@ export function getHitInfo(
     row++;
   }
   if (row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
-    return null;
+    return undefined;
   }
   return { row, col, marginX, marginY };
 }

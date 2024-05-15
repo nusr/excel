@@ -12,7 +12,7 @@ describe('model.test.ts', () => {
   test('setCellValue', () => {
     const model = new Model();
     model.addSheet();
-    expect(model.getCell(new SheetRange(0, 0, 1, 1, ''))).toBeNull();
+    expect(model.getCell(new SheetRange(0, 0, 1, 1, ''))).toBeUndefined();
     model.setCell(
       [['test']],
       [],

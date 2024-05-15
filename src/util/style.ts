@@ -246,7 +246,7 @@ export function parseText(text: string, splitter = '\t') {
 }
 
 export function parseHTML(html: string) {
-  let template: HTMLTemplateElement | null = document.createElement('template');
+  let template: HTMLTemplateElement | undefined = document.createElement('template');
   template.innerHTML = html;
   const doc = template.content;
   const styleMap: Record<string, CSSStyleDeclaration> = {};
@@ -301,7 +301,7 @@ export function parseHTML(html: string) {
     textList.push(texts);
     styleList.push(list);
   }
-  template = null;
+  template = undefined;
   return {
     textList,
     styleList,

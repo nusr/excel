@@ -33,7 +33,7 @@ export const Toast: React.FunctionComponent<Omit<Props, 'duration'>> = ({
 
 export function toast(props: Props) {
   const { duration = 3, ...rest } = props;
-  let container: HTMLDivElement | null = document.createElement('div');
+  let container: HTMLDivElement | undefined = document.createElement('div');
   container.className = styles['container'];
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -45,7 +45,7 @@ export function toast(props: Props) {
     }
     root.unmount();
     document.body.removeChild(container!);
-    container = null;
+    container = undefined;
   }
 
   setTimeout(close, duration * 1000);

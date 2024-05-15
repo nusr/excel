@@ -185,7 +185,7 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
       },
     },
   };
-  let node = null;
+  let node: React.ReactNode = undefined;
   if (chartType === 'line') {
     node = <Line {...extra} data={commonData} />;
   } else if (chartType === 'bar') {
@@ -247,5 +247,7 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
   }
   return node;
 });
+
 Chart.displayName = 'Chart';
+
 export default Chart;

@@ -55,9 +55,9 @@ describe('reference.test.ts', () => {
   });
   describe('parseReference', () => {
     test('invalid', () => {
-      expect(parseReference(':')).toBeNull();
-      expect(parseReference('A-1')).toBeNull();
-      expect(parseReference('-1')).toBeNull();
+      expect(parseReference(':')).toBeUndefined();
+      expect(parseReference('A-1')).toBeUndefined();
+      expect(parseReference('-1')).toBeUndefined();
     });
     it('should convert a1 to { row:0,col:0,rowCount:1,colCount: 1 } ', () => {
       expect(parseReference('a1')).toEqual(new SheetRange(0, 0, 1, 1, ''));
@@ -132,7 +132,7 @@ describe('reference.test.ts', () => {
           new SheetRange(0, 0, 1, 1, 'a'),
           new SheetRange(1, 1, 1, 1, '2'),
         ),
-      ).toBeNull();
+      ).toBeUndefined();
     });
     test('start.rowCount === 0 && end.rowCount !== 0', () => {
       expect(
@@ -140,7 +140,7 @@ describe('reference.test.ts', () => {
           new SheetRange(0, 0, 0, 1, ''),
           new SheetRange(1, 1, 1, 1, ''),
         ),
-      ).toBeNull();
+      ).toBeUndefined();
     });
     test('start.rowCount !== 0 && end.rowCount === 0', () => {
       expect(
@@ -148,7 +148,7 @@ describe('reference.test.ts', () => {
           new SheetRange(0, 0, 1, 1, ''),
           new SheetRange(1, 1, 0, 1, ''),
         ),
-      ).toBeNull();
+      ).toBeUndefined();
     });
     test('start.colCount === 0 && end.colCount !== 0', () => {
       expect(
@@ -156,7 +156,7 @@ describe('reference.test.ts', () => {
           new SheetRange(0, 0, 1, 0, ''),
           new SheetRange(1, 1, 1, 1, ''),
         ),
-      ).toBeNull();
+      ).toBeUndefined();
     });
     test('start.colCount !== 0 && end.colCount === 0', () => {
       expect(
@@ -164,7 +164,7 @@ describe('reference.test.ts', () => {
           new SheetRange(0, 0, 1, 1, ''),
           new SheetRange(1, 1, 1, 0, ''),
         ),
-      ).toBeNull();
+      ).toBeUndefined();
     });
     it('A1:B2', () => {
       expect(
@@ -188,7 +188,7 @@ describe('reference.test.ts', () => {
           new SheetRange(0, 1, 200, 0, ''),
           new SheetRange(1, 1, 1, 1, ''),
         ),
-      ).toBeNull();
+      ).toBeUndefined();
     });
 
     it('A1:C1', () => {

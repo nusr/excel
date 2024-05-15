@@ -94,9 +94,9 @@ export class LiteralExpression implements Expression {
 
 export class CellExpression implements Expression {
   readonly value: Token;
-  readonly sheetName: Token | null;
+  readonly sheetName: Token | undefined;
   readonly type: ReferenceType;
-  constructor(value: Token, type: ReferenceType, sheetName: Token | null) {
+  constructor(value: Token, type: ReferenceType, sheetName: Token | undefined) {
     this.value = value;
     this.sheetName = sheetName;
     this.type = type;

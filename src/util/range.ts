@@ -96,7 +96,7 @@ export class SheetRange implements IRange {
 
 export function iterateRange(
   range: IRange,
-  sheetInfo: WorksheetType | null,
+  sheetInfo: WorksheetType | undefined,
   fn: (row: number, col: number) => boolean,
 ) {
   const { row, col, rowCount, colCount } = range;

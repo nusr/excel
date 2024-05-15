@@ -50,7 +50,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
       });
     }, []);
 
-    let children = null;
+    let children: React.ReactNode = undefined;
     if (type === 'floating-picture') {
       children = (
         <img
@@ -65,7 +65,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
       children = <Chart {...props} />;
     }
     if (!children) {
-      return null;
+      return children;
     }
     return (
       <React.Fragment>

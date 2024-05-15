@@ -171,12 +171,12 @@ export interface IWorkbook extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'currentSheetId' | 'workbook'>;
   setCurrentSheetId(id: string): void;
   getCurrentSheetId(): string;
-  addSheet(): WorksheetType | null;
+  addSheet(): WorksheetType | undefined;
   deleteSheet(sheetId?: string): void;
   hideSheet(sheetId?: string): void;
   unhideSheet(sheetId: string): void;
   renameSheet(sheetName: string, sheetId?: string): void;
-  getSheetInfo(sheetId?: string): WorksheetType | null;
+  getSheetInfo(sheetId?: string): WorksheetType | undefined;
   updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string): void;
   getSheetList(): WorksheetType[];
   validateSheet(data: WorksheetType): boolean;
@@ -209,7 +209,7 @@ export interface IDefinedName extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'definedNames'>;
   getDefineName(range: IRange): string;
   setDefineName(range: IRange, name: string): void;
-  checkDefineName(name: string): IRange | null;
+  checkDefineName(name: string): IRange | undefined;
   getDefineNameList(): DefinedNameItem[];
   validateDefinedName(name: string): boolean;
 }
@@ -241,9 +241,9 @@ export interface IWorksheet extends IBaseManager {
   deleteCol(colIndex: number, count: number): void;
   deleteRow(rowIndex: number, count: number): void;
   pasteRange(fromRange: IRange, isCut: boolean): IRange;
-  getWorksheet(sheetId?: string): WorksheetData | null;
+  getWorksheet(sheetId?: string): WorksheetData | undefined;
   setWorksheet(data: WorksheetData, sheetId?: string): void;
-  getCell(range: IRange): ModelCellType | null;
+  getCell(range: IRange): ModelCellType | undefined;
   setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,

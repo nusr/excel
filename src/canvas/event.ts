@@ -18,7 +18,7 @@ export function registerGlobalEvent(
     }
     const list = keyboardEventList.filter((v) => v.key === event.key);
     list.sort((a, b) => b.modifierKey.length - a.modifierKey.length);
-    let temp: KeyboardEventItem | null = null;
+    let temp: KeyboardEventItem | undefined = undefined;
     for (const item of list) {
       if (item.modifierKey.length > 0) {
         if (item.modifierKey.some((v) => event[`${v}Key`])) {

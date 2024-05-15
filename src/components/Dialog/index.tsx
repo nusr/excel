@@ -29,7 +29,7 @@ export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
     testId,
   } = props;
   if (!visible) {
-    return null;
+    return undefined;
   }
   const cancelTestId = testId ? `${testId}-cancel` : undefined;
   const confirmTestId = testId ? `${testId}-confirm` : undefined;
@@ -60,10 +60,10 @@ Dialog.displayName = 'Dialog';
 
 export function info(props: DialogProps) {
   const container = document.createDocumentFragment();
-  let root: Root | null = null;
+  let root: Root | undefined = undefined;
   function close() {
     root?.unmount();
-    root = null;
+    root = undefined;
   }
 
   function render(modalProps: DialogProps) {

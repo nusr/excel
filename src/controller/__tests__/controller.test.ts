@@ -282,7 +282,7 @@ describe('controller.test.ts', () => {
         marginY: 0,
       });
       controller.deleteAll();
-      expect(controller.checkDefineName('foo')).toBeNull();
+      expect(controller.checkDefineName('foo')).toBeUndefined();
       expect(controller.getDrawingList()).toHaveLength(0);
       expect(controller.getColWidth(40).len).not.toEqual(100);
       expect(controller.getRowHeight(40).len).not.toEqual(200);
@@ -295,7 +295,7 @@ describe('controller.test.ts', () => {
           rowCount: 1,
           colCount: 1,
         }),
-      ).toBeNull();
+      ).toBeUndefined();
     });
   });
   describe('json', () => {

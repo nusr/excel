@@ -822,7 +822,7 @@ export function convertXMLDataToModel(
           );
           return data?.sheetId || '';
         };
-        let chartRange: SheetRange | null = null;
+        let chartRange: SheetRange | undefined = undefined;
         for (const item of refList) {
           const t = parseReference(item, convertSheetNameToSheetId);
           if (t) {

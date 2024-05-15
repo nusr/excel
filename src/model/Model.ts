@@ -162,7 +162,7 @@ export class Model implements IModel {
   renameSheet(sheetName: string, sheetId?: string): void {
     this.workbookManager.renameSheet(sheetName, sheetId);
   }
-  getSheetInfo(sheetId?: string): WorksheetType | null {
+  getSheetInfo(sheetId?: string): WorksheetType | undefined {
     return this.workbookManager.getSheetInfo(sheetId);
   }
   setCurrentSheetId(sheetId: string): void {
@@ -212,7 +212,7 @@ export class Model implements IModel {
   getCell = (range: IRange) => {
     return this.worksheetManager.getCell(range);
   };
-  getWorksheet(sheetId?: string): WorksheetData | null {
+  getWorksheet(sheetId?: string): WorksheetData | undefined {
     return this.worksheetManager.getWorksheet(sheetId);
   }
   setWorksheet(data: WorksheetData, sheetId?: string): void {
@@ -322,7 +322,7 @@ export class Model implements IModel {
   setDefineName(range: IRange, name: string): void {
     this.definedNameManager.setDefineName(range, name);
   }
-  checkDefineName(name: string): IRange | null {
+  checkDefineName(name: string): IRange | undefined {
     return this.definedNameManager.checkDefineName(name);
   }
 

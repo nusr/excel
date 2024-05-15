@@ -2,7 +2,7 @@ type Params = any[];
 
 export function throttle(fn: (...params: Params) => void, wait: number) {
   let check = false;
-  let lastArgs: Params | null = null;
+  let lastArgs: Params | undefined = undefined;
   return function (...args: Params) {
     if (check) {
       lastArgs = args;
@@ -43,29 +43,6 @@ export function isEmpty(value: unknown): boolean {
   return (
     [Object, Array].includes(temp.constructor) && !Object.entries(temp).length
   );
-}
-
-export function setWith<ValueType>(
-  obj: Record<string, any> | null | undefined,
-  path: string,
-  value: ValueType,
-): Record<string, any> | null | undefined {
-  if (obj == null || typeof obj !== 'object') {
-    return obj;
-  }
-  path
-    .replace(/\[/g, '.')
-    .replace(/\]/g, '')
-    .split('.')
-    .reduce((res, key, index, arr) => {
-      if (index === arr.length - 1) {
-        res[key] = value;
-      } else if (res[key] === null || res[key] === undefined) {
-        res[key] = {};
-      }
-      return res[key];
-    }, obj);
-  return obj;
 }
 
 export function deepEqual(x: any, y: any) {

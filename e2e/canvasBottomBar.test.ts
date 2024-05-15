@@ -10,12 +10,11 @@ test.describe('canvasBottomBar.test', () => {
     await expect(page.getByTestId('canvas-bottom-bar')).toBeHidden();
   });
 
-  test.skip('test menubar exist', async ({ page }) => {
+  test('test menubar exist', async ({ page }) => {
+    await page.getByTestId('canvas-main').click();
     await page.keyboard.down('Control');
     await page.keyboard.down('Meta');
     await page.keyboard.press('ArrowDown');
-    await page.waitForSelector('canvas-bottom-bar');
-    const dom = page.getByTestId('canvas-bottom-bar');
-    await expect(dom).toBeVisible();
+    await expect(page.getByTestId('canvas-bottom-bar')).toBeVisible();
   });
 });

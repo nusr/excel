@@ -13,7 +13,7 @@
     "e2e": "npx playwright test",
     "lint": "npx oxlint@latest --fix",
     "update-md": "node ./scripts/update-md.js",
-    "prepare": "husky",
+    "prepare": "husky && npx playwright install --with-deps",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" -r html -m strict -l 7 -b -g --exitCode 1 ."
   },
   "repository": {
@@ -25,15 +25,15 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
-    "@playwright/test": "1.43.1",
+    "@playwright/test": "1.44.0",
     "@testing-library/jest-dom": "6.4.5",
-    "@testing-library/react": "15.0.6",
+    "@testing-library/react": "15.0.7",
     "@types/jest": "29.5.12",
-    "@types/node": "20.12.8",
-    "@types/react": "18.3.1",
+    "@types/node": "20.12.12",
+    "@types/react": "18.3.2",
     "@types/react-dom": "18.3.0",
     "canvas": "2.11.2",
-    "esbuild": "0.20.2",
+    "esbuild": "0.21.2",
     "husky": "9.0.11",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
@@ -44,7 +44,7 @@
     "node": ">=16"
   },
   "dependencies": {
-    "@sentry/react": "7.113.0",
+    "@sentry/react": "8.0.0",
     "chart.js": "4.4.2",
     "jszip": "3.10.1",
     "react": "18.3.1",

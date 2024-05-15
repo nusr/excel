@@ -237,13 +237,13 @@ export class Worksheet implements IWorksheet {
       /* jscpd:ignore-end */
     }
   }
-  getWorksheet(sheetId?: string): WorksheetData | null {
+  getWorksheet(sheetId?: string): WorksheetData | undefined {
     const id = sheetId || this.model.getCurrentSheetId();
     const item = this.worksheets[id];
     if (item) {
       return item;
     }
-    return null;
+    return undefined;
   }
   computeFormulas() {
     const id = this.model.getCurrentSheetId();
@@ -283,21 +283,21 @@ export class Worksheet implements IWorksheet {
       oldValue: oldData,
     });
   }
-  getCell(range: IRange): ModelCellType | null {
+  getCell(range: IRange): ModelCellType | undefined {
     const { row, col, sheetId } = range;
     const id = sheetId || this.model.getCurrentSheetId();
     if (
       this.model.getRowHeight(row, id).len === HIDE_CELL ||
       this.model.getColWidth(col, id).len === HIDE_CELL
     ) {
-      return null;
+      return undefined;
     }
     const key = coordinateToString(row, col);
     this.worksheets[id] = this.worksheets[id] || {};
     const sheetData = this.worksheets[id];
     const cellData = sheetData?.[key];
     if (isEmpty(cellData)) {
-      return null;
+      return undefined;
     }
     return {
       ...cellData,

@@ -29,7 +29,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toBeNull();
+      ).toBeUndefined();
     });
     test('set value', () => {
       controller.setCell([[1]], [], {
@@ -185,7 +185,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toBeNull();
+      ).toBeUndefined();
     });
     test('undo redo', () => {
       controller.setCell([[1]], [], {
@@ -213,7 +213,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toBeNull();
+      ).toBeUndefined();
       controller.redo();
       expect(
         controller.getCell({
@@ -236,7 +236,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toBeNull();
+      ).toBeUndefined();
     });
     test('set', () => {
       controller.setCell([[1]], [[{ isBold: true }]], {
@@ -323,7 +323,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toBeNull();
+      ).toBeUndefined();
       controller.redo();
       expect(
         controller.getCell({

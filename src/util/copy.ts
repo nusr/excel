@@ -76,14 +76,14 @@ const fakeCopyAction = (
   container: HTMLElement,
   type: 'copy' | 'cut',
 ) => {
-  let fakeElement: HTMLTextAreaElement | null = createFakeElement(value);
+  let fakeElement: HTMLTextAreaElement | undefined = createFakeElement(value);
   container.appendChild(fakeElement);
   const selectedText = select(fakeElement);
   if (typeof document.execCommand === 'function') {
     document.execCommand(type);
   }
   fakeElement.remove();
-  fakeElement = null;
+  fakeElement = undefined;
   return selectedText;
 };
 

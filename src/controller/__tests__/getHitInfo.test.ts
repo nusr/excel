@@ -33,7 +33,7 @@ describe('getHitInfo.test.ts', () => {
       },
     });
     const range = getHitInfo(controller, 10, 10);
-    expect(range).toBeNull();
+    expect(range).toBeUndefined();
   });
   test('x is negative', () => {
     const controller = new Controller(new Model(), {
@@ -49,7 +49,7 @@ describe('getHitInfo.test.ts', () => {
     });
     controller.addSheet();
     const range = getHitInfo(controller, -1, -1);
-    expect(range).toBeNull();
+    expect(range).toBeUndefined();
   });
   test('over threshold', () => {
     const controller = new Controller(new Model(), {
@@ -65,6 +65,6 @@ describe('getHitInfo.test.ts', () => {
     });
     controller.addSheet();
     const range = getHitInfo(controller, 100 * 60, 100 * 60);
-    expect(range).toBeNull();
+    expect(range).toBeUndefined();
   });
 });

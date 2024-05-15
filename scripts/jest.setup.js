@@ -34,7 +34,7 @@ class LocalStorageMock {
    * @returns
    */
   getItem(key) {
-    return this.store[key] || null;
+    return this.store[key];
   }
   /**
    *
@@ -54,14 +54,11 @@ class LocalStorageMock {
   /**
    *
    * @param {number} index
-   * @returns {string| null}
+   * @returns {string}
    */
   key(index) {
-    const list = Object(this.store);
-    if (list[index]) {
-      return list[index];
-    }
-    return null;
+    const list = Object.keys(this.store);
+    return list[index];
   }
 }
 class ImageMock {

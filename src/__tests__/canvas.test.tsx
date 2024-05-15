@@ -293,7 +293,7 @@ describe('Canvas.test.ts', () => {
       await waitFor(() => {
         expect(
           controller.getCell(controller.getActiveRange().range),
-        ).toBeNull();
+        ).toBeUndefined();
       });
     });
 

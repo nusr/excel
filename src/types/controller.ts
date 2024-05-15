@@ -33,7 +33,7 @@ export interface IController extends IBaseModel {
   paste(event?: ClipboardEvent): void;
   copy(event?: ClipboardEvent): void;
   cut(event?: ClipboardEvent): void;
-  getCopyRange(): IRange | null;
+  getCopyRange(): IRange | undefined;
   setScroll(scroll: ScrollValue): void;
   getScroll(sheetId?: string): ScrollValue;
   setFloatElementUuid(uuid: string): void;
