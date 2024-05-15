@@ -7,13 +7,16 @@
 
 [online demo](https://nusr.github.io/excel/)
 
+![demo](./scripts/demo.png)
+
 ## Start
 
 ```bash
 git clone https://github.com/nusr/excel.git
 cd excel
 
-npm install
+npm i -g pnpm
+pnpm i
 npm run start
 ```
 
@@ -22,13 +25,13 @@ npm run start
 ```bash
 src
 ├── canvas         # two layer canvas
+├── components     # basic components
 ├── containers     # spreadsheet view
 │   ├── Excel      # Excel export and import
-│   ├── components # basic components
 │   ├── hooks      # common React hooks
-│   └── store      # React store by useSyncExternalStore
+│   └── store      # global state management
 ├── controller     # spreadsheet controller
-├── formula        # Recursive descent parser parsing Excel formulas
+├── formula        # Recursive descent parser parse Excel formulas
 ├── i18n           # i18n
 ├── model          # spreadsheet model
 ├── types          # TypeScript types
