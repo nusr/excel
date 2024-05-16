@@ -20,7 +20,7 @@ pnpm i
 npm run start
 ```
 
-## directory description
+## Directory Description
 
 ```bash
 src
@@ -39,12 +39,13 @@ src
     └── theme      # dark mode
 ```
 
-## dependencies
+## All Dependencies
 
-- [react](https://github.com/facebook/react) Spreadsheet view
-- [jszip](https://github.com/Stuk/jszip) unzip and zip xlsx file
-- [chart.js](https://github.com/chartjs/Chart.js) Spreadsheet Chart
-- [ssf](https://git.sheetjs.com/sheetjs/sheetjs/src/branch/master/packages/ssf) Spreadsheet Number Formatter
+- [esbulid](https://github.com/evanw/esbuild)
+- [react](https://github.com/facebook/react)
+- [jszip](https://github.com/Stuk/jszip)
+- [chart.js](https://github.com/chartjs/Chart.js)
+- [ssf](https://git.sheetjs.com/sheetjs/sheetjs/src/branch/master/packages/ssf)
 
 ## Supported Features
 

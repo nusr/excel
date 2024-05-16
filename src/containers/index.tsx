@@ -7,11 +7,11 @@ import React, { memo } from 'react';
 import type { IController } from '@/types';
 import { MenuBarContainer } from './MenuBar';
 
-interface Props {
+export interface AppProps {
   controller: IController;
 }
 
-export const App: React.FunctionComponent<Props> = memo(({ controller }) => {
+export const App: React.FunctionComponent<AppProps> = memo(({ controller }) => {
   return (
     <div className={styles['app-container']} data-testid="app-container">
       <MenuBarContainer controller={controller} />

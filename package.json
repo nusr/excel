@@ -14,7 +14,8 @@
     "lint": "npx oxlint@latest --fix",
     "update-md": "node ./scripts/update-md.js",
     "prepare": "husky && npx playwright install --with-deps",
-    "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" -r html -m strict -l 7 -b -g --exitCode 1 ."
+    "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" -r html -m strict -l 7 -b -g --exitCode 1 .",
+    "typedoc": "npx typedoc"
   },
   "repository": {
     "type": "git",
@@ -40,13 +41,13 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "ts-jest": "29.1.2",
+    "typedoc": "^0.25.13",
     "typescript": "5.4.5"
   },
   "engines": {
     "node": ">=16"
   },
   "dependencies": {
-    "@sentry/react": "8.0.0",
     "chart.js": "4.4.2",
     "jszip": "3.10.1",
     "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz"
@@ -54,5 +55,8 @@
   "peerDependencies": {
     "react": "18.3.1",
     "react-dom": "18.3.1"
+  },
+  "optionalDependencies": {
+    "@sentry/react": "8.0.0"
   }
 }

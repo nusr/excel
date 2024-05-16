@@ -96,7 +96,7 @@ function buildBrowserConfig(options) {
   /** @type {import('esbuild').BuildOptions} */
   const realOptions = {
     bundle: true,
-    entryPoints: ['src/index.tsx'],
+    entryPoints: ['src/index.ts'],
     tsconfig: 'tsconfig.json',
     define: {
       'process.env.NODE_ENV': JSON.stringify(nodeEnv),

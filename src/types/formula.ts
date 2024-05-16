@@ -1,6 +1,6 @@
 import { ResultType } from './parser';
 
-type FormulaFunction = (
+export type FormulaFunction = (
   ...data: ResultType[]
 ) => number | string | boolean | string[];
 

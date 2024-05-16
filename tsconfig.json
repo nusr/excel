@@ -35,6 +35,7 @@
     "lib",
     "playwright-report",
     "test-results",
-    "report"
+    "report",
+    "docs",
   ]
 }
