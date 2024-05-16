@@ -39,6 +39,13 @@ src
     └── theme      # dark mode
 ```
 
+## dependencies
+
+- [react](https://github.com/facebook/react) Spreadsheet view
+- [jszip](https://github.com/Stuk/jszip) unzip and zip xlsx file
+- [chart.js](https://github.com/chartjs/Chart.js) Spreadsheet Chart
+- [ssf](https://git.sheetjs.com/sheetjs/sheetjs/src/branch/master/packages/ssf) Spreadsheet Number Formatter
+
 ## Supported Features
 
 - [x] Undo
