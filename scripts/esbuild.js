@@ -30,20 +30,11 @@ const licenseText = fs.readFileSync(
 );
 const globalName = '__export__';
 const distDir = path.join(process.cwd(), 'dist');
+const workPath = './src/worker.ts';
 
 function umdWrapper() {
-  const header = `(function (global, factory) {
-            typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-            typeof define === 'function' && define.amd ? define(['exports'], factory) :
-              (global = global || self, factory(global.${packageJson.name} = {}));
-       })(this, (function (exports) { 'use strict';`;
-
-  const footer = `
-    for(var key in ${globalName}) {
-            exports[key] = ${globalName}[key]
-        }
-    }));`;
-
+  const header = `(function (global, factory) { typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) : typeof define === 'function' && define.amd ? define(['exports'], factory) : (global = global || self, factory(global.${packageJson.name} = {}));})(this, (function (exports) { 'use strict';`;
+  const footer = `for(var key in ${globalName}) { exports[key] = ${globalName}[key] } }));`;
   return { header, footer };
 }
 
@@ -199,9 +190,14 @@ function deleteDir(dir) {
  * @param { import('esbuild').BuildOptions } options
  */
 async function buildProd(options) {
+  const workerOptions = buildUMD('./lib/worker.js');
+  const workerMinifyOptions = buildUMD('./lib/worker.min.js');
+  workerMinifyOptions.entryPoints = workerOptions.entryPoints = [workPath];
   const list = await Promise.all(
     [
       options,
+      workerOptions,
+      workerMinifyOptions,
       buildESM(packageJson.module),
       buildUMD(packageJson.main),
       buildESM(packageJson.module.replace('.js', '.min.js')),
@@ -232,7 +228,8 @@ function getIp() {
 
 async function buildWorker() {
   const options = buildUMD(path.join(distDir, 'worker.js'));
-  options.entryPoints = ['./src/worker'];
+  options.entryPoints = [workPath];
+  options.minify = !isDev;
   await build(options);
 }
 
@@ -275,7 +272,3 @@ async function init() {
   buildHtml();
 }
 init();
-
-module.exports = {
-  buildUMD,
-};
