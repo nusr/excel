@@ -4,5 +4,4 @@ module.exports = {
   out: 'docs',
   name: 'Excel Docs',
   tsconfig: './tsconfig.json',
-  excludePrivate: true,
 };

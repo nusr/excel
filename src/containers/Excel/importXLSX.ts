@@ -230,6 +230,19 @@ interface DefineNameItem {
   [textKey]: string;
 }
 
+function getArray<T>(
+  obj: Record<string, any> | null | undefined,
+  path: string,
+  defaultValue?: T,
+): T {
+  const value = get<T>(obj, path, defaultValue);
+  if (Array.isArray(value)) {
+    return value;
+  }
+  // @ts-ignore
+  return [value];
+}
+
 function xmlToJson(xml: any) {
   // Create the return object
   let obj: ObjectItem = {};
@@ -342,14 +355,8 @@ function getCellStyle(
   themeData: ThemeData,
 ): Partial<StyleType> {
   const result: Partial<StyleType> = {};
-  let xfList: XfItem[] = get(xml, 'styleSheet.cellXfs.xf', []);
-  if (!Array.isArray(xfList)) {
-    xfList = [xfList];
-  }
-  let cellStyles: XfItem[] = get(xml, 'styleSheet.cellStyles.xf', []);
-  if (!Array.isArray(cellStyles)) {
-    cellStyles = [cellStyles];
-  }
+  const xfList = getArray<XfItem[]>(xml, 'styleSheet.cellXfs.xf', []);
+  const cellStyles = getArray<XfItem[]>(xml, 'styleSheet.cellStyles.xf', []);
   const list = xfList.length > 0 ? xfList : cellStyles;
   if (!styleId || list.length === 0 || !list[styleId]) {
     return result;
@@ -377,7 +384,7 @@ function getCellStyle(
     result.isWrapText = Boolean(xf.alignment.wrapText);
   }
   if (xf.applyFont && xf.fontId) {
-    const fontList = get<FontItem[]>(xml, 'styleSheet.fonts.font', []);
+    const fontList = getArray<FontItem[]>(xml, 'styleSheet.fonts.font', []);
     const fontId = parseInt(xf.fontId, 10);
     if (fontList[fontId]) {
       const font = fontList[fontId];
@@ -395,7 +402,7 @@ function getCellStyle(
     }
   }
   if (xf.applyNumberFormat && xf.numFmtId) {
-    const list = get<NumFmtItem[]>(xml, 'styleSheet.numFmts.numFmt', []);
+    const list = getArray<NumFmtItem[]>(xml, 'styleSheet.numFmts.numFmt', []);
     const item = list.find((v) => v.numFmtId === xf.numFmtId);
     if (item) {
       result.numberFormat = item.formatCode;
@@ -408,7 +415,7 @@ function getCellStyle(
     }
   }
   if (xf.applyFill && xf.fillId) {
-    const list = get<FillItem[]>(xml, 'styleSheet.fills.fill', []);
+    const list = getArray<FillItem[]>(xml, 'styleSheet.fills.fill', []);
     const i = parseInt(xf.fillId, 10);
     if (list[i]) {
       const g = list[i].gradientFill;
@@ -428,7 +435,11 @@ function getCellStyle(
     }
   }
   if (xf.applyBorder && xf.borderId) {
-    const list = get<StyleBorderItem[]>(xml, 'styleSheet.borders.border', []);
+    const list = getArray<StyleBorderItem[]>(
+      xml,
+      'styleSheet.borders.border',
+      [],
+    );
     const i = parseInt(xf.borderId, 10);
     if (list[i]) {
       const item = list[i];
@@ -447,14 +458,11 @@ export function convertXMLDataToModel(
 ): WorkBookJSON {
   const workbook = xmlData[WORKBOOK_PATH];
 
-  let sharedStrings: SharedStringItem[] = get(
+  const sharedStrings: SharedStringItem[] = getArray(
     xmlData[SHARED_STRINGS],
     'sst.si',
     [],
   );
-  if (!Array.isArray(sharedStrings)) {
-    sharedStrings = [sharedStrings];
-  }
   const themeData = get<ThemeData>(
     xmlData[THEME_PATH],
     'a:theme.a:themeElements.a:clrScheme',
@@ -472,7 +480,7 @@ export function convertXMLDataToModel(
     rangeMap: {},
     worksheets: {},
   };
-  const relationList = get<RelationItem[]>(
+  const relationList = getArray<RelationItem[]>(
     xmlData[WORKBOOK_RELATION_PATH],
     'Relationships.Relationship',
     [],
@@ -480,10 +488,11 @@ export function convertXMLDataToModel(
   const sheetPathMap: Record<string, string> = {};
   const drawingMap: Record<string, string[]> = {};
   let drawingCount = 0;
-  let sheetList: SheetItem[] = get(workbook, 'workbook.sheets.sheet', []);
-  if (!Array.isArray(sheetList)) {
-    sheetList = [sheetList];
-  }
+  const sheetList: SheetItem[] = getArray(
+    workbook,
+    'workbook.sheets.sheet',
+    [],
+  );
   let sheetSort = 0;
   for (const item of sheetList) {
     if (!item) {
@@ -495,14 +504,11 @@ export function convertXMLDataToModel(
     const baseSheet = sheetTarget.slice(worksheetPrefix.length);
     const refPath = `${COMMON_PREFIX}/${worksheetPrefix}_rels/${baseSheet}.rels`;
     if (xmlData[refPath]) {
-      let list: RelationItem[] = get(
+      const list: RelationItem[] = getArray(
         xmlData[refPath],
         'Relationships.Relationship',
         [],
       );
-      if (!Array.isArray(list)) {
-        list = [list];
-      }
       for (const v of list) {
         if (!drawingMap[item.sheetId]) {
           drawingMap[item.sheetId] = [];
@@ -560,22 +566,16 @@ export function convertXMLDataToModel(
   };
   for (const item of sheets) {
     const sheetPath = sheetPathMap[item.sheetId];
-    let sheetData: SheetDataRowItem[] = get(
+    const sheetData: SheetDataRowItem[] = getArray(
       xmlData[sheetPath],
       'worksheet.sheetData.row',
       [],
     );
-    if (!Array.isArray(sheetData)) {
-      sheetData = [sheetData];
-    }
-    let mergeCellData: Array<{ ref: string }> = get(
+    const mergeCellData: Array<{ ref: string }> = getArray(
       xmlData[sheetPath],
       'worksheet.mergeCells.mergeCell',
       [],
     );
-    if (!Array.isArray(mergeCellData)) {
-      mergeCellData = [mergeCellData];
-    }
     for (const mergeCell of mergeCellData) {
       const range = parseReference(mergeCell.ref, convertSheetName);
       if (range) {
@@ -584,12 +584,11 @@ export function convertXMLDataToModel(
         result.mergeCells[ref] = range.toIRange();
       }
     }
-    let customWidth: CustomColItem[] = get(
+    const customWidth: CustomColItem[] = getArray(
       xmlData[sheetPath],
       'worksheet.cols.col',
       [],
     );
-    customWidth = Array.isArray(customWidth) ? customWidth : [customWidth];
     const defaultWOrH = get(xmlData[sheetPath], 'worksheet.sheetFormatPr', {
       defaultColWidth: '',
       defaultRowHeight: '',
@@ -691,12 +690,11 @@ export function convertXMLDataToModel(
     item.colCount = Math.max(item.colCount, colCount);
   }
 
-  let definedNames: DefineNameItem[] = get(
+  const definedNames: DefineNameItem[] = getArray(
     workbook,
     'workbook.definedNames.definedName',
     [],
   );
-  definedNames = Array.isArray(definedNames) ? definedNames : [definedNames];
 
   for (const item of definedNames) {
     const range = parseReference(item[textKey], convertSheetName);
@@ -712,14 +710,11 @@ export function convertXMLDataToModel(
       break;
     }
 
-    let relations: RelationItem[] = get(
+    const relations: RelationItem[] = getArray(
       xmlData[ref],
       'Relationships.Relationship',
       [],
     );
-    if (!Array.isArray(relations)) {
-      relations = [relations];
-    }
     let sheetId = '';
     for (const [id, list] of Object.entries(drawingMap)) {
       if (list.some((v) => v === DRAWING_FLAG + basePath)) {
@@ -728,14 +723,11 @@ export function convertXMLDataToModel(
       }
     }
 
-    let floatElementList: ChartData[] = get(
+    const floatElementList: ChartData[] = getArray(
       xmlData[key],
       'xdr:wsDr.xdr:twoCellAnchor',
       [],
     );
-    if (!Array.isArray(floatElementList)) {
-      floatElementList = [floatElementList];
-    }
     for (const float of floatElementList) {
       const chartId = get(
         float,
@@ -802,10 +794,7 @@ export function convertXMLDataToModel(
           );
           if (chartData) {
             floatElementData.chartType = chartType;
-            let list = get(chartData, 'c:ser', []);
-            if (!Array.isArray(list)) {
-              list = [list];
-            }
+            const list = getArray(chartData, 'c:ser', []);
             refList = list
               .map((v) => get(v, `c:val.c:numRef.c:f.${textKey}`, ''))
               .filter((v) => v);
