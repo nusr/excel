@@ -30,7 +30,7 @@ export function intToColumnName(temp: number): string {
 
 export function rowLabelToInt(label: string): number {
   let result = parseInt(label, 10);
-  if (window.isNaN(result)) {
+  if (isNaN(result)) {
     result = -1;
   } else {
     result = Math.max(result - 1, -1);

@@ -108,7 +108,4 @@ export class DefinedNamesMapImpl implements DefinedNamesMap {
   get(name: string): IRange | undefined {
     return this.map.get(name)!;
   }
-  has(name: string): boolean {
-    return this.map.has(name);
-  }
 }

@@ -43,7 +43,7 @@ export class Model implements IModel {
   private mergeCellManager: MergeCell;
   private rowManager: RowManager;
   private colManager: ColManager;
-  constructor() {
+  constructor(workerPath = './worker.js') {
     this.history = new History({
       undo: this.historyUndo,
       redo: this.historyRedo,
@@ -54,7 +54,7 @@ export class Model implements IModel {
     this.rangeMapManager = new RangeMap(this);
     this.drawingsManager = new Drawing(this);
     this.definedNameManager = new DefinedName(this);
-    this.worksheetManager = new Worksheet(this);
+    this.worksheetManager = new Worksheet(this, workerPath);
     this.mergeCellManager = new MergeCell(this);
     this.rowManager = new RowManager(this);
     this.colManager = new ColManager(this);
@@ -64,13 +64,6 @@ export class Model implements IModel {
   }
   emitChange(set: Set<ChangeEventType>) {
     const changeSet = modelToChangeSet(this.history.get());
-    if (
-      changeSet.has('cellValue') ||
-      changeSet.has('definedNames') ||
-      changeSet.has('currentSheetId')
-    ) {
-      this.worksheetManager.computeFormulas();
-    }
     if (set.has('scroll')) {
       this.push({
         type: 'scroll',
@@ -87,6 +80,25 @@ export class Model implements IModel {
         oldValue: '',
       });
     }
+    if (
+      changeSet.has('cellValue') ||
+      changeSet.has('definedNames') ||
+      changeSet.has('currentSheetId')
+    ) {
+      const result = this.worksheetManager.computeFormulas();
+      if (result && result instanceof Promise) {
+        result.then(() => {
+          this.commitHistory(set);
+        });
+      } else {
+        this.commitHistory(set);
+      }
+    } else {
+      this.commitHistory(set);
+    }
+  }
+
+  private commitHistory(set: Set<ChangeEventType>) {
     if (set.has('noHistory')) {
       this.historyChange(this.history.get(), 'commit');
     } else {

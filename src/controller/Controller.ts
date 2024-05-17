@@ -76,7 +76,7 @@ export class Controller implements IController {
     this.isNoChange = false;
     this.emitChange();
   }
-  emitChange(): void {
+  emitChange() {
     if (this.isNoChange) {
       return;
     }

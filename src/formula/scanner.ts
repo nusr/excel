@@ -1,7 +1,7 @@
 import { TokenType } from '@/types';
 import { Token } from './token';
 import { CustomError } from './formula';
-import { FORMULA_PREFIX } from '@/util';
+import { FORMULA_PREFIX } from '@/util/constant';
 
 const emptyData = '';
 const identifierMap = new Map<string, TokenType>([

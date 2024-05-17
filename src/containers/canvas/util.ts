@@ -33,19 +33,11 @@ import {
   styleStore,
 } from '@/containers/store';
 import {
-  MainCanvas,
+  initRenderCanvas,
   registerGlobalEvent,
-  Content,
   scrollSheetToView,
 } from '@/canvas';
 import { numberFormat as numberFormatUtil, isDateFormat } from '@/model';
-
-function createCanvas() {
-  const canvas = document.createElement('canvas');
-  canvas.style.display = 'none';
-  document.body.appendChild(canvas);
-  return canvas;
-}
 
 function getChartData(
   range: IRange,
@@ -322,8 +314,7 @@ export function initCanvas(
 ): () => void {
   const familyList = initFontFamilyList();
   fontFamilyStore.setState(familyList);
-  const content = new Content(controller, createCanvas());
-  const mainCanvas = new MainCanvas(controller, canvas, content);
+  const mainCanvas = initRenderCanvas(controller, canvas);
   const resize = () => {
     computeCanvasSize(canvas);
     mainCanvas.resize();

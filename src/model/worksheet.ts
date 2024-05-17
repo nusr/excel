@@ -11,6 +11,8 @@ import {
   EMergeCellType,
   ModelCellType,
   EHorizontalAlign,
+  RequestMessageType,
+  ResponseMessageType,
 } from '@/types';
 import {
   coordinateToString,
@@ -22,17 +24,24 @@ import {
   stringToCoordinate,
   MERGE_CELL_LINE_BREAK,
   convertStringToResultType,
+  isTestEnv,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
-import { parseFormula, CustomError } from '@/formula';
 import { numberFormat } from '@/model';
+import { parseFormula, CustomError } from '@/formula';
 
 export class Worksheet implements IWorksheet {
   private worksheets: WorkBookJSON['worksheets'] = {};
   private model: IModel;
-  constructor(model: IModel) {
+  private worker: Worker | null = null;
+  private parseFormulaResolve: (value: unknown) => void = () => {};
+  constructor(model: IModel, workerPath: string) {
     this.model = model;
+    if (!isTestEnv() && typeof Worker !== 'undefined') {
+      this.initWorker(workerPath);
+    }
   }
+
   toJSON() {
     return {
       worksheets: { ...this.worksheets },
@@ -251,23 +260,39 @@ export class Worksheet implements IWorksheet {
     if (isEmpty(sheetData)) {
       return;
     }
-
-    for (const [k, data] of Object.entries(sheetData)) {
-      if (data?.formula) {
-        const result = this.parseFormula(data.formula);
-        const newValue = result.result;
-        const oldValue = data.value;
-        if (newValue !== oldValue) {
-          data.value = newValue;
-          this.model.push({
-            type: 'worksheets',
-            key: `${id}.${k}.value`,
-            newValue: newValue,
-            oldValue: oldValue,
-          });
+    if (!this.worker) {
+      for (const [k, data] of Object.entries(sheetData)) {
+        if (data?.formula) {
+          const result = this.parseFormula(data.formula);
+          const newValue = result.result;
+          const oldValue = data.value;
+          if (newValue !== oldValue) {
+            data.value = newValue;
+            this.model.push({
+              type: 'worksheets',
+              key: `${id}.${k}.value`,
+              newValue: newValue,
+              oldValue: oldValue,
+            });
+          }
         }
       }
+      return;
     }
+    return new Promise((resolve) => {
+      const definedNames: RequestMessageType['definedNames'] = {};
+      for (const item of this.model.getDefineNameList()) {
+        definedNames[item.name] = item.range;
+      }
+      const data: RequestMessageType = {
+        worksheets: this.worksheets,
+        definedNames,
+        currentSheetId: id,
+        workbook: this.model.getSheetList(),
+      };
+      this.worker!.postMessage(data);
+      this.parseFormulaResolve = resolve;
+    });
   }
   setWorksheet(data: WorksheetData, sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
@@ -499,62 +524,6 @@ export class Worksheet implements IWorksheet {
       oldValue: oldFormula ? oldFormula : DELETE_FLAG,
     });
   }
-  private parseFormula(formula: string) {
-    const result = parseFormula(
-      formula,
-      {
-        get: (range: IRange) => {
-          const { row, col, sheetId } = range;
-          const result: ResultType[] = [];
-          const sheetInfo = this.model.getSheetInfo(sheetId);
-          if (
-            !sheetInfo ||
-            row >= sheetInfo.rowCount ||
-            col >= sheetInfo.colCount
-          ) {
-            throw new CustomError('#REF!');
-          }
-          iterateRange(
-            range,
-            this.model.getSheetInfo(range.sheetId),
-            (r, c) => {
-              const temp = this.getCell({
-                sheetId,
-                row: r,
-                col: c,
-                rowCount: 1,
-                colCount: 1,
-              });
-              if (temp) {
-                result.push(temp.value);
-              }
-              return false;
-            },
-          );
-          return result;
-        },
-        set: () => {
-          throw new CustomError('#REF!');
-        },
-        convertSheetNameToSheetId: this.convertSheetNameToSheetId,
-      },
-      {
-        set: () => {
-          throw new CustomError('#REF!');
-        },
-        get: (name: string) => this.model.checkDefineName(name),
-        has: (name: string) => {
-          const t = this.model.checkDefineName(name);
-          return Boolean(t);
-        },
-      },
-    );
-    return result;
-  }
-  private convertSheetNameToSheetId = (sheetName: string): string => {
-    const item = this.model.getSheetList().find((v) => v.name === sheetName);
-    return item?.sheetId || '';
-  };
   private validateSheetData(sheetData: WorksheetData) {
     const result: WorksheetData = {};
     for (const [key, cell] of Object.entries(sheetData)) {
@@ -621,5 +590,84 @@ export class Worksheet implements IWorksheet {
     this.worksheets[id] = this.worksheets[id] || {};
     this.worksheets[id][key] = this.worksheets[id][key] || {};
     return this.worksheets[id][key];
+  }
+  private parseFormula(formula: string) {
+    const result = parseFormula(
+      formula,
+      {
+        get: (range: IRange) => {
+          const { row, col, sheetId } = range;
+          const result: ResultType[] = [];
+          const sheetInfo = this.model.getSheetInfo(sheetId);
+          if (
+            !sheetInfo ||
+            row >= sheetInfo.rowCount ||
+            col >= sheetInfo.colCount
+          ) {
+            throw new CustomError('#REF!');
+          }
+          iterateRange(
+            range,
+            this.model.getSheetInfo(range.sheetId),
+            (r, c) => {
+              const temp = this.getCell({
+                sheetId,
+                row: r,
+                col: c,
+                rowCount: 1,
+                colCount: 1,
+              });
+              if (temp) {
+                result.push(temp.value);
+              }
+              return false;
+            },
+          );
+          return result;
+        },
+        set: () => {
+          throw new CustomError('#REF!');
+        },
+        convertSheetNameToSheetId: this.convertSheetNameToSheetId,
+      },
+      {
+        set: () => {
+          throw new CustomError('#REF!');
+        },
+        get: (name: string) => this.model.checkDefineName(name),
+      },
+    );
+    return result;
+  }
+  private convertSheetNameToSheetId = (sheetName: string): string => {
+    const item = this.model.getSheetList().find((v) => v.name === sheetName);
+    return item?.sheetId || '';
+  };
+  private initWorker(workerPath: string) {
+    this.worker = new Worker(workerPath);
+    this.worker.addEventListener(
+      'message',
+      (event: MessageEvent<ResponseMessageType>) => {
+        const { list, sheetId } = event.data;
+        const realSheetId = sheetId || this.model.getCurrentSheetId();
+        this.worksheets[realSheetId] = this.worksheets[realSheetId] || {};
+        const sheetData = this.worksheets[realSheetId];
+        if (list.length === 0) {
+          this.parseFormulaResolve([]);
+          return;
+        }
+        for (const item of list) {
+          const oldValue = sheetData[item.key].value;
+          sheetData[item.key].value = item.newValue;
+          this.model.push({
+            type: 'worksheets',
+            key: `${realSheetId}.${item.key}.value`,
+            newValue: item.newValue,
+            oldValue: oldValue,
+          });
+        }
+        this.parseFormulaResolve([]);
+      },
+    );
   }
 }

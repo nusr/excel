@@ -19,3 +19,4 @@ export * from './color';
 export * from './EventEmitter';
 export * from './set';
 export * from './image';
+export * from './i18n-constant';

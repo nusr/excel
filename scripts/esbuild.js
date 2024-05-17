@@ -143,7 +143,6 @@ function buildBrowserConfig(options) {
     ],
   };
   Object.assign(realOptions, options);
-
   return realOptions;
 }
 
@@ -195,18 +194,14 @@ function deleteDir(dir) {
   }
 }
 
-async function buildProd() {
-  const options = buildESM('');
-  const distOptions = {
-    ...options,
-    entryPoints: [path.join(__dirname, 'demo.tsx')],
-    outdir: distDir,
-    splitting: true,
-    minify: true,
-  };
+/**
+ *
+ * @param { import('esbuild').BuildOptions } options
+ */
+async function buildProd(options) {
   const list = await Promise.all(
     [
-      distOptions,
+      options,
       buildESM(packageJson.module),
       buildUMD(packageJson.main),
       buildESM(packageJson.module.replace('.js', '.min.js')),
@@ -235,15 +230,18 @@ function getIp() {
   return '';
 }
 
-async function buildDev() {
-  const options = buildESM('');
-  const ctx = await context({
-    ...options,
-    entryPoints: [path.join(__dirname, 'demo.tsx')],
-    outfile: undefined,
-    outdir: distDir,
-    splitting: true,
-  });
+async function buildWorker() {
+  const options = buildUMD(path.join(distDir, 'worker.js'));
+  options.entryPoints = ['./src/worker'];
+  await build(options);
+}
+
+/**
+ *
+ * @param { import('esbuild').BuildOptions } options
+ */
+async function buildDev(options) {
+  const ctx = await context(options);
 
   await ctx.watch();
   const { port } = await ctx.serve({
@@ -258,11 +256,26 @@ async function buildDev() {
 async function init() {
   deleteDir('lib');
   deleteDir('dist');
+  await buildWorker();
+  const options = buildESM('');
+  /** @type {import('esbuild').BuildOptions} */
+  const distOptions = {
+    ...options,
+    entryPoints: [path.join(__dirname, 'demo.tsx')],
+    outdir: distDir,
+    outfile: undefined,
+    splitting: true,
+  };
   if (isDev) {
-    await buildDev();
+    await buildDev(distOptions);
   } else {
-    await buildProd();
+    distOptions.minify = true;
+    await buildProd(distOptions);
   }
   buildHtml();
 }
 init();
+
+module.exports = {
+  buildUMD,
+};

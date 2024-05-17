@@ -32,7 +32,7 @@ export class Debug {
   enable() {
     return this.checkEnable();
   }
-  checkEnable(storage = window.localStorage) {
+  checkEnable(storage = localStorage) {
     return storage.getItem('debug') === '*';
   }
   setColor() {

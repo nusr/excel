@@ -1,5 +1,5 @@
 import type { TextFormulaType, ResultType } from '@/types';
-import { MAX_PARAMS_COUNT } from '@/util';
+import { MAX_PARAMS_COUNT } from '@/util/constant';
 import { assert, mustOneString, mustOneNumber, mustOne } from './error';
 
 export const T = (...list: ResultType[]): string => {

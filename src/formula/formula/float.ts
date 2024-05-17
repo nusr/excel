@@ -1,4 +1,4 @@
-import { FORMULA_MAX_PRECISION } from '@/util';
+import { FORMULA_MAX_PRECISION } from '@/util/constant';
 
 export function roundNumber(a: number) {
   const temp = String(a);

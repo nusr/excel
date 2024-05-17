@@ -20,8 +20,8 @@ export function getTheme(): ThemeType {
   if (l && (l === 'dark' || l === 'light')) {
     return l as ThemeType;
   }
-  if (typeof window.matchMedia === 'function') {
-    const result = window.matchMedia('(prefers-color-scheme: dark)').matches
+  if (typeof matchMedia === 'function') {
+    const result = matchMedia('(prefers-color-scheme: dark)').matches
       ? 'dark'
       : 'light';
     return result;

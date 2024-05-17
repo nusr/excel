@@ -1,5 +1,5 @@
 import type { ErrorTypes } from '@/types';
-import { parseNumber } from '@/util';
+import { parseNumber } from '@/util/util';
 
 export class CustomError extends Error {
   readonly value: ErrorTypes;

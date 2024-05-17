@@ -11,7 +11,7 @@ export function parseNumber(value: any): [boolean, number] {
   if (typeof value === 'boolean') {
     return [true, Number(value)];
   }
-  if (typeof value === 'number' && !window.isNaN(value)) {
+  if (typeof value === 'number' && !isNaN(value)) {
     return [true, value];
   }
   if (typeof value !== 'string') {
@@ -21,21 +21,10 @@ export function parseNumber(value: any): [boolean, number] {
     return [false, 0];
   }
   const temp = Number(value);
-  if (window.isNaN(temp)) {
+  if (isNaN(temp)) {
     return [false, 0];
   }
   return [true, temp];
-}
-
-export function parseNumberArray(list: any[]): number[] {
-  const result: number[] = [];
-  for (let i = 0; i < list.length; i++) {
-    const [check, num] = parseNumber(list[i]);
-    if (check) {
-      result.push(num);
-    }
-  }
-  return result;
 }
 
 export function getListMaxNum(list: string[] = []): number {

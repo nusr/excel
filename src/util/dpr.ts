@@ -1,4 +1,4 @@
-export function dpr(data = window.devicePixelRatio): number {
+export function dpr(data = devicePixelRatio): number {
   return Math.max(Math.floor(data || 1), 1);
 }
 

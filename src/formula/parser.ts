@@ -12,7 +12,7 @@ import {
   CellRangeExpression,
 } from './expression';
 import { CustomError } from './formula';
-import { ERROR_SET } from '@/util';
+import { ERROR_SET } from '@/util/constant';
 
 export class Parser {
   private readonly tokens: Token[];

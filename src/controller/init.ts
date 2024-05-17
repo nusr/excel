@@ -16,8 +16,9 @@ export function initController(
       };
     },
   },
+  workerPath = './worker.js',
 ): IController {
-  const model = new Model();
+  const model = new Model(workerPath);
   const controller = new Controller(model, hooks);
   controller.batchUpdate(() => {
     controller.addSheet();

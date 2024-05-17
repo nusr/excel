@@ -10,7 +10,6 @@ export class Content implements ContentView {
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     const ctx = canvas.getContext('2d')!;
-
     this.ctx = ctx;
     const size = dpr();
     this.ctx.scale(size, size);

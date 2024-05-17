@@ -1,6 +1,18 @@
-import { parseNumberArray, MAX_PARAMS_COUNT } from '@/util';
+import { MAX_PARAMS_COUNT } from '@/util/constant';
 import type { MathFormulaType, ResultType } from '../../types';
 import { assert, mustOneNumber, mustEmpty } from './error';
+import { parseNumber } from '@/util/util';
+
+function parseNumberArray(list: any[]): number[] {
+  const result: number[] = [];
+  for (let i = 0; i < list.length; i++) {
+    const [check, num] = parseNumber(list[i]);
+    if (check) {
+      result.push(num);
+    }
+  }
+  return result;
+}
 
 export const ABS = (...list: ResultType[]): number => {
   const data = mustOneNumber(list);

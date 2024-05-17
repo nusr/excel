@@ -1,4 +1,6 @@
-import { SheetRange, parseNumber, mergeRange, parseReference } from '@/util';
+import { SheetRange } from '@/util/range';
+import { mergeRange, parseReference } from '@/util/reference';
+import { parseNumber } from '@/util/util';
 import {
   TokenType,
   CellDataMap,
@@ -161,7 +163,7 @@ export class Interpreter implements Visitor {
   visitTokenExpression(expr: TokenExpression) {
     const { value, type } = expr.value;
     const defineName = value.toLowerCase();
-    if (this.definedNamesMap.has(defineName)) {
+    if (this.definedNamesMap.get(defineName)) {
       const temp = this.definedNamesMap.get(defineName)!;
       return this.cellDataMap.get(temp)[0];
     }
@@ -251,7 +253,9 @@ export class Interpreter implements Visitor {
   private evaluate(expr: Expression) {
     return expr.accept(this);
   }
-  private convertToCellExpression(expr: Expression): CellExpression | undefined {
+  private convertToCellExpression(
+    expr: Expression,
+  ): CellExpression | undefined {
     if (expr instanceof CellExpression) {
       return expr;
     }
