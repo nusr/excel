@@ -24,7 +24,6 @@ import {
   stringToCoordinate,
   MERGE_CELL_LINE_BREAK,
   convertStringToResultType,
-  isTestEnv,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { numberFormat } from '@/model';
@@ -33,13 +32,12 @@ import { parseFormula, CustomError } from '@/formula';
 export class Worksheet implements IWorksheet {
   private worksheets: WorkBookJSON['worksheets'] = {};
   private model: IModel;
-  private worker: Worker | null = null;
+  private worker: Worker | undefined = undefined;
   private parseFormulaResolve: (value: unknown) => void = () => {};
-  constructor(model: IModel, workerPath: string) {
+  constructor(model: IModel, worker?: Worker) {
     this.model = model;
-    if (!isTestEnv() && typeof Worker !== 'undefined') {
-      this.initWorker(workerPath);
-    }
+    this.worker = worker;
+    this.initWorker();
   }
 
   toJSON() {
@@ -643,8 +641,10 @@ export class Worksheet implements IWorksheet {
     const item = this.model.getSheetList().find((v) => v.name === sheetName);
     return item?.sheetId || '';
   };
-  private initWorker(workerPath: string) {
-    this.worker = new Worker(workerPath);
+  private initWorker() {
+    if (!this.worker) {
+      return;
+    }
     this.worker.addEventListener(
       'message',
       (event: MessageEvent<ResponseMessageType>) => {

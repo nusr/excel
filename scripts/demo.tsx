@@ -28,7 +28,11 @@ if (location.hostname !== 'localhost') {
 }
 
 const domNode = document.getElementById('root')!;
-const controller = initController(true, { copyOrCut, paste });
+let worker: Worker | undefined = undefined;
+if (typeof Worker === 'function') {
+  worker = new Worker('./worker.js');
+}
+const controller = initController(true, { copyOrCut, paste }, worker);
 (window as any).controller = controller;
 createRoot(domNode).render(
   <StrictMode>
