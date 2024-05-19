@@ -19,7 +19,7 @@ import { mockImage } from './mockData';
 import { $ } from '@/i18n';
 
 const MOCK_MODEL: WorkBookJSON = {
-  currentSheetId: '1',
+  currentSheetId: '',
   rangeMap: {
     '1': {
       row: 2,
@@ -303,6 +303,10 @@ const MOCK_MODEL: WorkBookJSON = {
       '2_0': { value: '', formula: '=E()' },
       '3_0': { value: '', formula: '=E()*PI()' },
       '4_0': { value: '', formula: '=SUM(1, SIN(PI()/2),3)' },
+      '5_0': {
+        value: '',
+        formula: '=R1C3',
+      },
     },
     '8': {
       '2_2': {

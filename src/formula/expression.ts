@@ -8,6 +8,7 @@ export interface Visitor {
   visitPostUnaryExpression: (expr: PostUnaryExpression) => any;
   visitLiteralExpression: (expr: LiteralExpression) => any;
   visitCellExpression: (expr: CellExpression) => any;
+  visitR1C1Expression: (expr: R1C1Expression) => any;
   visitCellRangeExpression: (expr: CellRangeExpression) => any;
   visitCallExpression: (expr: CallExpression) => any;
   visitGroupExpression: (expr: GroupExpression) => any;
@@ -92,6 +93,18 @@ export class LiteralExpression implements Expression {
   }
 }
 
+export class R1C1Expression implements Expression {
+  readonly value: Token;
+  constructor(value: Token) {
+    this.value = value;
+  }
+  accept(visitor: Visitor) {
+    return visitor.visitR1C1Expression(this);
+  }
+  toString(): string {
+    return this.value.toString();
+  }
+}
 export class CellExpression implements Expression {
   readonly value: Token;
   readonly sheetName: Token | undefined;

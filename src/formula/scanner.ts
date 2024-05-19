@@ -71,6 +71,19 @@ export class Scanner {
       this.next();
     }
   }
+  private matchR1C1() {
+    if (this.match('[')) {
+      this.match('-');
+      this.allDigit();
+      if (this.peek() !== ']') {
+        throw new CustomError('#VALUE!');
+      } else {
+        this.next();
+      }
+    } else {
+      this.allDigit();
+    }
+  }
   private matchScientificCounting() {
     if (this.match('E') || this.match('e')) {
       // 1E-10 1E+10
@@ -106,10 +119,7 @@ export class Scanner {
   private isDigit(char: string) {
     return char >= '0' && char <= '9';
   }
-  private identifier() {
-    while (!this.isAtEnd() && this.anyChar(this.peek())) {
-      this.next();
-    }
+  private addIdentifier() {
     let text = this.list.slice(this.start, this.current).join('');
     const temp = identifierMap.get(text.toUpperCase());
     let type: TokenType = TokenType.IDENTIFIER;
@@ -122,6 +132,21 @@ export class Scanner {
   private scanToken() {
     const c = this.next();
     switch (c) {
+      case 'r':
+      case 'R': {
+        this.matchR1C1();
+        if (this.match('C') || this.match('c')) {
+          this.matchR1C1();
+          const text = this.list
+            .slice(this.start, this.current)
+            .join('')
+            .toUpperCase();
+          this.tokens.push(new Token(TokenType.R1C1, text));
+        } else {
+          this.addIdentifier();
+        }
+        break;
+      }
       case '(':
         this.addToken(TokenType.LEFT_BRACKET);
         break;
@@ -189,6 +214,7 @@ export class Scanner {
       case '}':
         this.addToken(TokenType.RIGHT_BRACE);
         break;
+
       case ' ':
         // while (!this.isAtEnd() && this.peek() === ' ') {
         // this.next();
@@ -203,7 +229,10 @@ export class Scanner {
         if (this.isDigit(c)) {
           this.number();
         } else if (this.anyChar(c)) {
-          this.identifier();
+          while (!this.isAtEnd() && this.anyChar(this.peek())) {
+            this.next();
+          }
+          this.addIdentifier();
         } else {
           throw new CustomError('#ERROR!');
         }

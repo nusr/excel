@@ -10,6 +10,7 @@ import {
   CallExpression,
   LiteralExpression,
   CellRangeExpression,
+  R1C1Expression,
 } from './expression';
 import { CustomError } from './formula';
 import { ERROR_SET } from '@/util/constant';
@@ -160,6 +161,9 @@ export class Parser {
         throw new CustomError(realValue as ErrorTypes);
       }
       return new TokenExpression(name);
+    }
+    if (this.match(TokenType.R1C1)) {
+      return new R1C1Expression(this.previous());
     }
 
     throw new CustomError('#ERROR!');

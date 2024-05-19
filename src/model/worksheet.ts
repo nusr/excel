@@ -279,15 +279,18 @@ export class Worksheet implements IWorksheet {
       }
       return check;
     }
+
     return new Promise((resolve) => {
       const definedNames: RequestMessageType['definedNames'] = {};
       for (const item of this.model.getDefineNameList()) {
         definedNames[item.name] = item.range;
       }
+      const activeCell = this.model.getActiveCell();
+      activeCell.sheetId = activeCell.sheetId || this.model.getCurrentSheetId();
       const data: RequestMessageType = {
         worksheets: this.worksheets,
         definedNames,
-        currentSheetId: id,
+        activeCell,
         workbook: this.model.getSheetList(),
       };
       this.worker!.postMessage(data);
@@ -595,6 +598,10 @@ export class Worksheet implements IWorksheet {
     const result = parseFormula(
       formula,
       {
+        getActiveRange: () => {
+          const range = this.model.getActiveCell();
+          return range;
+        },
         get: (range: IRange) => {
           const { row, col, sheetId } = range;
           const result: ResultType[] = [];
@@ -651,19 +658,17 @@ export class Worksheet implements IWorksheet {
       'message',
       (event: MessageEvent<ResponseMessageType>) => {
         const { list, sheetId } = event.data;
-        const realSheetId = sheetId || this.model.getCurrentSheetId();
-        this.worksheets[realSheetId] = this.worksheets[realSheetId] || {};
-        const sheetData = this.worksheets[realSheetId];
+        this.worksheets[sheetId] = this.worksheets[sheetId] || {};
         if (list.length === 0) {
           this.parseFormulaResolve(false);
           return;
         }
         for (const item of list) {
-          const oldValue = sheetData[item.key].value;
-          sheetData[item.key].value = item.newValue;
+          const oldValue = this.worksheets[sheetId][item.key].value;
+          this.worksheets[sheetId][item.key].value = item.newValue;
           this.model.push({
             type: 'worksheets',
-            key: `${realSheetId}.${item.key}.value`,
+            key: `${sheetId}.${item.key}.value`,
             newValue: item.newValue,
             oldValue: oldValue,
           });

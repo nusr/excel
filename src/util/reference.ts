@@ -1,5 +1,5 @@
 import { columnNameToInt, rowLabelToInt, intToColumnName } from './convert';
-import { IRange, ReferenceType } from '@/types';
+import { Coordinate, IRange, ReferenceType } from '@/types';
 import { SheetRange } from './range';
 
 const isCharacter = (char: string) =>
@@ -152,4 +152,50 @@ export function convertToReference(
     result = `${result}:${end}`;
   }
   return sheetName + result;
+}
+
+export const R1C1_REG = /^R(\[\-\d+\]|\[\d+\]|\d+)?C(\[\-\d+\]|\[\d+\]|\d+)?$/i;
+
+function parseNumber(text: string, num: number) {
+  let result = -1;
+  if (text.startsWith('[')) {
+    const t = parseInt(text.slice(1, -1), 10);
+    if (!isNaN(t)) {
+      result = num + t;
+    }
+  } else {
+    const t = parseInt(text, 10);
+    if (!isNaN(t)) {
+      result = t - 1;
+    }
+  }
+  return isNaN(result) ? -1 : result;
+}
+
+export function parseR1C1(
+  name: string,
+  activeCell: Coordinate = { row: -1, col: -1 },
+): SheetRange | undefined {
+  const result = name.match(R1C1_REG);
+  if (!result) {
+    return undefined;
+  }
+  const [, rowText, colText] = result;
+  let row = -1;
+  let col = -1;
+  if (!rowText) {
+    row = activeCell.row;
+  } else {
+    row = parseNumber(rowText, activeCell.row);
+  }
+  if (!colText) {
+    col = activeCell.col;
+  } else {
+    col = parseNumber(colText, activeCell.col);
+  }
+  if (row < 0 || col < 0) {
+    return undefined;
+  }
+  const range = new SheetRange(row, col, 1, 1, '');
+  return range;
 }

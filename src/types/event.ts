@@ -14,7 +14,7 @@ export interface IPosition {
 export type RequestMessageType = {
   worksheets: WorkBookJSON['worksheets'];
   definedNames: Record<string, IRange>;
-  currentSheetId: string;
+  activeCell: IRange;
   workbook: WorksheetType[];
 };
 

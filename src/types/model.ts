@@ -314,6 +314,7 @@ export interface IModel
   pasteRange(range: IRange, isCut: boolean): IRange;
   emitChange(dataset: Set<ChangeEventType>): void;
   push(command: ICommandItem): void;
+  getActiveCell(): IRange;
 }
 
 export type NumberFormatValue =

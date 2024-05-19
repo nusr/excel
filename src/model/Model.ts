@@ -87,6 +87,7 @@ export class Model implements IModel {
       changeSet.has('definedNames') ||
       changeSet.has('currentSheetId')
     ) {
+      changeSet.add('cellValue');
       const result = this.worksheetManager.computeFormulas();
       if (result && result instanceof Promise) {
         result.then(() => {
@@ -98,14 +99,14 @@ export class Model implements IModel {
     this.commitHistory(changeSet);
   }
 
-  private commitHistory(set: Set<ChangeEventType>) {
-    if (set.has('noHistory')) {
-      if (set.has('row') || set.has('col')) {
+  private commitHistory(changeSet: Set<ChangeEventType>) {
+    if (changeSet.has('noHistory')) {
+      if (changeSet.has('row') || changeSet.has('col')) {
         this.computeViewSize();
       }
-      eventEmitter.emit('modelChange', { changeSet: set });
+      eventEmitter.emit('modelChange', { changeSet });
     } else {
-      if (!set.has('undoRedo')) {
+      if (!changeSet.has('undoRedo')) {
         this.history.commit();
       }
     }
@@ -124,6 +125,9 @@ export class Model implements IModel {
 
   getSheetList(): WorksheetType[] {
     return this.workbookManager.getSheetList();
+  }
+  getActiveCell() {
+    return this.rangeMapManager.getActiveRange().range;
   }
   getActiveRange(r?: IRange) {
     const range = r || this.rangeMapManager.getActiveRange().range;

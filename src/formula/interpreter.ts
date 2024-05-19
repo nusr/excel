@@ -1,5 +1,5 @@
 import { SheetRange } from '@/util/range';
-import { mergeRange, parseReference } from '@/util/reference';
+import { mergeRange, parseReference, parseR1C1 } from '@/util/reference';
 import { parseNumber } from '@/util/util';
 import {
   TokenType,
@@ -15,6 +15,7 @@ import type {
   Expression,
   CellRangeExpression,
   PostUnaryExpression,
+  R1C1Expression,
 } from './expression';
 import {
   BinaryExpression,
@@ -119,6 +120,16 @@ export class Interpreter implements Visitor {
       return callee(...params);
     }
     throw new CustomError('#NAME?');
+  }
+  visitR1C1Expression(data: R1C1Expression) {
+    const range = parseR1C1(
+      data.value.value,
+      this.cellDataMap.getActiveRange(),
+    );
+    if (!range) {
+      throw new CustomError('#NAME?');
+    }
+    return range;
   }
   visitCellExpression(data: CellExpression) {
     let sheetId = '';

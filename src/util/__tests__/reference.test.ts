@@ -1,4 +1,9 @@
-import { parseReference, mergeRange, convertToReference } from '../reference';
+import {
+  parseReference,
+  mergeRange,
+  convertToReference,
+  parseR1C1,
+} from '../reference';
 import { SheetRange } from '../range';
 
 describe('reference.test.ts', () => {
@@ -198,6 +203,43 @@ describe('reference.test.ts', () => {
           new SheetRange(0, 2, 1, 1, ''),
         ),
       ).toEqual(new SheetRange(0, 0, 1, 3, ''));
+    });
+  });
+  describe('R1C1', () => {
+    test('R1C1', () => {
+      expect(parseR1C1('r1c1')).toEqual(new SheetRange(0, 0, 1, 1, ''));
+      expect(parseR1C1('R1C1')).toEqual(new SheetRange(0, 0, 1, 1, ''));
+    });
+    test('R10C10', () => {
+      expect(parseR1C1('R10C10')).toEqual(new SheetRange(9, 9, 1, 1, ''));
+    });
+
+    test('RC10', () => {
+      expect(parseR1C1('RC10', { row: 0, col: 0 })).toEqual(
+        new SheetRange(0, 9, 1, 1, ''),
+      );
+    });
+
+    test('R10C', () => {
+      expect(parseR1C1('R10C', { row: 0, col: 0 })).toEqual(
+        new SheetRange(9, 0, 1, 1, ''),
+      );
+    });
+
+    test('R[-2]C', () => {
+      expect(parseR1C1('R[-2]C', { row: 10, col: 10 })).toEqual(
+        new SheetRange(8, 10, 1, 1, ''),
+      );
+    });
+    test('R[1]C10', () => {
+      expect(parseR1C1('R[1]C10', { row: 0, col: 0 })).toEqual(
+        new SheetRange(1, 9, 1, 1, ''),
+      );
+    });
+    test('R[2]C[2]', () => {
+      expect(parseR1C1('R[2]C[2]', { row: 0, col: 0 })).toEqual(
+        new SheetRange(2, 2, 1, 1, ''),
+      );
     });
   });
 });

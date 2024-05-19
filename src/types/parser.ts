@@ -1,4 +1,4 @@
-import { IRange } from '@/types';
+import { Coordinate, IRange } from '@/types';
 
 export type ResultType = boolean | string | number;
 export type ErrorTypes =
@@ -38,12 +38,14 @@ export enum TokenType {
   RIGHT_BRACE, // }
   SEMICOLON, // ;
   EXCLAMATION, // !
+  R1C1, // R1C1 reference
   EOF,
 }
 
 export interface CellDataMap {
   set: (range: IRange, value: ResultType[][]) => void;
   get: (range: IRange) => ResultType[];
+  getActiveRange: () => Coordinate;
   convertSheetNameToSheetId: (sheetName: string) => string;
 }
 

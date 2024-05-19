@@ -98,6 +98,9 @@ export class CellDataMapImpl implements CellDataMap {
     }
     return this.sheetNameMap[sheetName] || '';
   }
+  getActiveRange() {
+    return { row: 0, col: 0 };
+  }
 }
 
 export class DefinedNamesMapImpl implements DefinedNamesMap {

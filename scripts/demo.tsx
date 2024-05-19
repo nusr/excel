@@ -28,10 +28,9 @@ if (location.hostname !== 'localhost') {
 }
 
 const domNode = document.getElementById('root')!;
-let worker: Worker | undefined = undefined;
-if (typeof Worker === 'function') {
-  worker = new Worker('./worker.js');
-}
+const worker: Worker | undefined =
+  typeof Worker === 'function' ? new Worker('./worker.js') : undefined;
+
 const controller = initController(true, { copyOrCut, paste }, worker);
 (window as any).controller = controller;
 createRoot(domNode).render(

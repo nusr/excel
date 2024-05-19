@@ -3,24 +3,31 @@ import {
   IRange,
   ResultType,
   ResponseMessageType,
+  InterpreterResult,
 } from './types';
 import { parseFormula, CustomError } from './formula';
 import { iterateRange } from '@/util/range';
 import { coordinateToString } from '@/util/util';
 
 self.addEventListener('message', (event: MessageEvent<RequestMessageType>) => {
-  const { currentSheetId, worksheets, definedNames, workbook } = event.data;
-  const sheetData = worksheets[currentSheetId] || {};
+  const { activeCell } = event.data;
+  const list = parseAllFormulas(event.data);
+
+  const data: ResponseMessageType = {
+    list,
+    sheetId: activeCell.sheetId,
+  };
+  self.postMessage(data);
+});
+
+function parseAllFormulas(eventData: RequestMessageType) {
+  const { activeCell, worksheets } = eventData;
+  const formulaCache = new Map<string, InterpreterResult>();
+  const sheetData = worksheets[activeCell.sheetId] || {};
   const list: ResponseMessageType['list'] = [];
   for (const [k, data] of Object.entries(sheetData)) {
     if (data?.formula) {
-      const result = parse(
-        data.formula,
-        worksheets,
-        definedNames,
-        workbook,
-        currentSheetId,
-      );
+      const result = parse(data.formula, eventData, formulaCache);
       const newValue = result.result;
       const oldValue = data.value;
       if (newValue !== oldValue) {
@@ -31,27 +38,28 @@ self.addEventListener('message', (event: MessageEvent<RequestMessageType>) => {
       }
     }
   }
-
-  const data: ResponseMessageType = {
-    list,
-    sheetId: currentSheetId,
-  };
-  self.postMessage(data);
-});
+  return list;
+}
 
 function parse(
   formula: string,
-  worksheets: RequestMessageType['worksheets'],
-  definedNames: RequestMessageType['definedNames'],
-  workbook: RequestMessageType['workbook'],
-  currentSheetId: string,
-) {
+  eventData: RequestMessageType,
+  cache: Map<string, InterpreterResult>,
+): InterpreterResult {
+  const temp = cache.get(formula);
+  if (temp) {
+    return temp;
+  }
+  const { activeCell, worksheets, definedNames, workbook } = eventData;
   const result = parseFormula(
     formula,
     {
+      getActiveRange: () => {
+        return activeCell;
+      },
       get: (range: IRange) => {
         const { row, col, sheetId } = range;
-        const realSheetId = sheetId || currentSheetId;
+        const realSheetId = sheetId || activeCell.sheetId;
         const result: ResultType[] = [];
         const sheetInfo = workbook.find((v) => v.sheetId === realSheetId);
         if (
@@ -65,7 +73,13 @@ function parse(
         iterateRange(range, sheetInfo, (r, c) => {
           const key = coordinateToString(r, c);
           if (sheetData[key]) {
-            result.push(sheetData[key].value);
+            const f = sheetData[key].formula;
+            if (f) {
+              const r = parse(f, eventData, cache);
+              result.push(r?.result);
+            } else {
+              result.push(sheetData[key].value);
+            }
           }
           return false;
         });
@@ -87,5 +101,6 @@ function parse(
       },
     },
   );
+  cache.set(formula, result);
   return result;
 }

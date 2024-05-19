@@ -314,9 +314,12 @@ export function initCanvas(
   fontFamilyStore.setState(familyList);
   const mainCanvas = initRenderCanvas(controller, canvas);
   const resize = () => {
+    renderCanvas(new Set<ChangeEventType>(['row']));
+  };
+  const renderCanvas = (changeSet: Set<ChangeEventType>) => {
     computeCanvasSize(canvas);
     mainCanvas.resize();
-    mainCanvas.render({ changeSet: new Set<ChangeEventType>(['row']) });
+    mainCanvas.render({ changeSet });
   };
   const offEvent = eventEmitter.on('modelChange', ({ changeSet }) => {
     handleStateChange(changeSet, controller);
@@ -342,7 +345,10 @@ export function initCanvas(
     'antLine',
   ]);
   handleStateChange(changeSet, controller);
-  queueMicrotask(resize);
+  renderCanvas(changeSet);
+  queueMicrotask(() => {
+    renderCanvas(changeSet);
+  });
 
   return () => {
     removeEvent();

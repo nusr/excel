@@ -1,4 +1,10 @@
-import { dpr, headerSizeSet, canvasSizeSet } from '@/util';
+import {
+  dpr,
+  headerSizeSet,
+  canvasSizeSet,
+  CELL_WIDTH,
+  CELL_HEIGHT,
+} from '@/util';
 import { resizeCanvas, renderCell, clearRect, renderBorderItem } from './util';
 import { ContentView, IController, IRange, ContentParams } from '@/types';
 
@@ -36,18 +42,16 @@ export class Content implements ContentView {
     controller.batchUpdate(() => {
       const sheetId = controller.getCurrentSheetId();
       for (const [r, h] of this.rowMap.entries()) {
-        if (h <= 0 || controller.getRowHeight(r, sheetId).len === h) {
-          continue;
+        if (h > 0 && controller.getRowHeight(r, sheetId).len !== h) {
+          check = true;
+          controller.setRowHeight(r, h);
         }
-        check = true;
-        controller.setRowHeight(r, h);
       }
       for (const [c, w] of this.colMap.entries()) {
-        if (w <= 0 || controller.getColWidth(c, sheetId).len === w) {
-          continue;
+        if (w > 0 && controller.getColWidth(c, sheetId).len !== w) {
+          check = true;
+          controller.setColWidth(c, w);
         }
-        check = true;
-        controller.setColWidth(c, w);
       }
       return check;
     }, true);
@@ -96,13 +100,9 @@ export class Content implements ContentView {
     const height = Math.max(
       this.rowMap.get(row) ?? 0,
       size.height,
-      controller.getRowHeight(row).len,
+      CELL_HEIGHT,
     );
-    const width = Math.max(
-      this.colMap.get(col) ?? 0,
-      size.width,
-      controller.getColWidth(col).len,
-    );
+    const width = Math.max(this.colMap.get(col) ?? 0, size.width, CELL_WIDTH);
     if (!mergeCell) {
       if (height > controller.getRowHeight(row).len) {
         this.rowMap.set(row, height);
