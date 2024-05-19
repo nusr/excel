@@ -37,5 +37,6 @@ export async function importCSV(file: File, controller: IController) {
   controller.batchUpdate(() => {
     controller.deleteAll(sheetId);
     controller.setWorksheet(sheetData, sheetId);
+    return true;
   });
 }

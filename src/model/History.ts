@@ -172,7 +172,7 @@ export class History implements IHistory {
     this.options.change(_list, type);
   }
   get(): ICommandItem[] {
-    return this.commands;
+    return [...this.commands];
   }
   getLength(): number {
     return Math.min(this.commandList.length, this.options.maxLength);

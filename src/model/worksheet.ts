@@ -33,7 +33,7 @@ export class Worksheet implements IWorksheet {
   private worksheets: WorkBookJSON['worksheets'] = {};
   private model: IModel;
   private worker: Worker | undefined = undefined;
-  private parseFormulaResolve: (value: unknown) => void = () => {};
+  private parseFormulaResolve: (value: boolean) => void = () => {};
   constructor(model: IModel, worker?: Worker) {
     this.model = model;
     this.worker = worker;
@@ -252,11 +252,12 @@ export class Worksheet implements IWorksheet {
     }
     return undefined;
   }
-  computeFormulas() {
+  computeFormulas(): boolean | Promise<boolean> {
     const id = this.model.getCurrentSheetId();
     const sheetData = this.worksheets[id];
+    let check = false;
     if (isEmpty(sheetData)) {
-      return;
+      return check;
     }
     if (!this.worker) {
       for (const [k, data] of Object.entries(sheetData)) {
@@ -266,6 +267,7 @@ export class Worksheet implements IWorksheet {
           const oldValue = data.value;
           if (newValue !== oldValue) {
             data.value = newValue;
+            check = true;
             this.model.push({
               type: 'worksheets',
               key: `${id}.${k}.value`,
@@ -275,7 +277,7 @@ export class Worksheet implements IWorksheet {
           }
         }
       }
-      return;
+      return check;
     }
     return new Promise((resolve) => {
       const definedNames: RequestMessageType['definedNames'] = {};
@@ -653,7 +655,7 @@ export class Worksheet implements IWorksheet {
         this.worksheets[realSheetId] = this.worksheets[realSheetId] || {};
         const sheetData = this.worksheets[realSheetId];
         if (list.length === 0) {
-          this.parseFormulaResolve([]);
+          this.parseFormulaResolve(false);
           return;
         }
         for (const item of list) {
@@ -666,7 +668,7 @@ export class Worksheet implements IWorksheet {
             oldValue: oldValue,
           });
         }
-        this.parseFormulaResolve([]);
+        this.parseFormulaResolve(true);
       },
     );
   }

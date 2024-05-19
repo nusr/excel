@@ -12,7 +12,6 @@ import {
   getThemeColor,
   eventEmitter,
   initFontFamilyList,
-  reactLog,
   sizeConfig,
   canvasSizeSet,
   MERGE_CELL_LINE_BREAK,
@@ -186,7 +185,6 @@ const handleStateChange = (
   changeSet: Set<ChangeEventType>,
   controller: IController,
 ) => {
-  reactLog('handleStateChange', changeSet);
   if (
     changeSet.has('rangeMap') ||
     changeSet.has('cellStyle') ||
@@ -343,11 +341,7 @@ export function initCanvas(
     'undoRedo',
     'antLine',
   ]);
-
   handleStateChange(changeSet, controller);
-  computeCanvasSize(canvas);
-  mainCanvas.resize();
-  mainCanvas.render({ changeSet });
   queueMicrotask(resize);
 
   return () => {

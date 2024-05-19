@@ -22,6 +22,7 @@ export function initController(
   const controller = new Controller(model, hooks);
   controller.batchUpdate(() => {
     controller.addSheet();
+    return true;
   }, isNoHistory);
   return controller;
 }

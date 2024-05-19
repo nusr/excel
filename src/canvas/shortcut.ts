@@ -25,6 +25,7 @@ export function handleTabClick(controller: IController) {
     checkActiveElement(controller);
     controller.setNextActiveCell('right');
     recalculateScroll(controller);
+    return true;
   });
 }
 
@@ -33,6 +34,7 @@ export function handleEnterClick(controller: IController) {
     checkActiveElement(controller);
     controller.setNextActiveCell('down');
     recalculateScroll(controller);
+    return true;
   });
 }
 
@@ -90,7 +92,7 @@ export function scrollToView(controller: IController, range: IRange) {
     }
     const sheetInfo = controller.getSheetInfo(sheetId);
     if (!sheetInfo) {
-      return;
+      return true;
     }
     if (
       range.row < 0 ||
@@ -98,7 +100,7 @@ export function scrollToView(controller: IController, range: IRange) {
       range.row >= sheetInfo.rowCount ||
       range.col >= sheetInfo.colCount
     ) {
-      return;
+      return true;
     }
     const scroll = controller.getScroll(sheetId);
     const old = controller.computeCellPosition({
@@ -117,7 +119,7 @@ export function scrollToView(controller: IController, range: IRange) {
     const maxLeft = old.left + size.width - headerSize.width;
     if (top >= minTop && top < maxTop && left >= minLeft && left <= maxLeft) {
       controller.setActiveRange(range);
-      return;
+      return true;
     }
     const oldPosition = controller.computeCellPosition(
       controller.getActiveRange().range,
@@ -125,6 +127,7 @@ export function scrollToView(controller: IController, range: IRange) {
 
     scrollBar(controller, left - oldPosition.left, top - oldPosition.top);
     controller.setActiveRange(range);
+    return true;
   });
 }
 
@@ -313,6 +316,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         checkActiveElement(controller);
         const viewSize = sheetViewSizeSet.get();
         scrollBar(controller, 0, viewSize.height);
+        return true;
       });
     },
   },
@@ -327,6 +331,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         checkActiveElement(controller);
         const viewSize = sheetViewSizeSet.get();
         scrollBar(controller, 0, -viewSize.height);
+        return true;
       });
     },
   },
@@ -341,6 +346,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         checkActiveElement(controller);
         const viewSize = sheetViewSizeSet.get();
         scrollBar(controller, viewSize.width, 0);
+        return true;
       });
     },
   },
@@ -355,6 +361,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         checkActiveElement(controller);
         const viewSize = sheetViewSizeSet.get();
         scrollBar(controller, -viewSize.width, 0);
+        return true;
       });
     },
   },
@@ -379,6 +386,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         checkActiveElement(controller);
         controller.setNextActiveCell('up');
         recalculateScroll(controller);
+        return true;
       });
     },
   },
@@ -403,6 +411,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         checkActiveElement(controller);
         controller.setNextActiveCell('left');
         recalculateScroll(controller);
+        return true;
       });
     },
   },

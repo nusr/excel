@@ -67,14 +67,16 @@ export class Controller implements IController {
   getSheetInfo(sheetId?: string) {
     return this.model.getSheetInfo(sheetId);
   }
-  batchUpdate(fn: () => void, isNoHistory = false): void {
+  batchUpdate(fn: () => boolean, isNoHistory = false): void {
     this.isNoChange = true;
-    fn();
+    const result = fn();
     if (isNoHistory) {
       this.changeSet.add('noHistory');
     }
     this.isNoChange = false;
-    this.emitChange();
+    if (result) {
+      this.emitChange();
+    }
   }
   emitChange() {
     if (this.isNoChange) {

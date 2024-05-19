@@ -1,6 +1,6 @@
 import { COLOR_PICKER_COLOR_LIST } from './constant';
 
-type NameSpaceType = 'react' | 'controller' | 'canvas' | 'model' | 'test';
+type NameSpaceType = 'react' | 'model' | 'test';
 
 export class Debug {
   namespace: NameSpaceType;
@@ -30,10 +30,7 @@ export class Debug {
     return COLOR_PICKER_COLOR_LIST[index];
   };
   enable() {
-    return this.checkEnable();
-  }
-  checkEnable(storage = localStorage) {
-    return storage.getItem('debug') === '*';
+    return  window.localStorage.getItem('debug') === '*';
   }
   setColor() {
     if (!Debug.colorMap.has(this.namespace)) {
@@ -42,7 +39,5 @@ export class Debug {
   }
 }
 
-export const controllerLog = new Debug('controller').init();
-export const canvasLog = new Debug('canvas').init();
 export const modelLog = new Debug('model').init();
 export const reactLog = new Debug('react').init();

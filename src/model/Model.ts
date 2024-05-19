@@ -16,7 +16,6 @@ import {
 import {
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
-  modelLog,
   modelToChangeSet,
   eventEmitter,
   sheetViewSizeSet,
@@ -64,6 +63,9 @@ export class Model implements IModel {
   }
   emitChange(set: Set<ChangeEventType>) {
     const changeSet = modelToChangeSet(this.history.get());
+    for (const key of set.keys()) {
+      changeSet.add(key);
+    }
     if (set.has('scroll')) {
       this.push({
         type: 'scroll',
@@ -88,19 +90,20 @@ export class Model implements IModel {
       const result = this.worksheetManager.computeFormulas();
       if (result && result instanceof Promise) {
         result.then(() => {
-          this.commitHistory(set);
+          this.commitHistory(changeSet);
         });
-      } else {
-        this.commitHistory(set);
+        return;
       }
-    } else {
-      this.commitHistory(set);
     }
+    this.commitHistory(changeSet);
   }
 
   private commitHistory(set: Set<ChangeEventType>) {
     if (set.has('noHistory')) {
-      this.historyChange(this.history.get(), 'commit');
+      if (set.has('row') || set.has('col')) {
+        this.computeViewSize();
+      }
+      eventEmitter.emit('modelChange', { changeSet: set });
     } else {
       if (!set.has('undoRedo')) {
         this.history.commit();
@@ -108,6 +111,16 @@ export class Model implements IModel {
     }
     this.history.clear(false);
   }
+  private historyChange = (list: ICommandItem[], type: HistoryChangeType) => {
+    const changeSet = modelToChangeSet(list);
+    if (type === 'undoRedo') {
+      changeSet.add(type);
+    }
+    if (changeSet.has('row') || changeSet.has('col')) {
+      this.computeViewSize();
+    }
+    eventEmitter.emit('modelChange', { changeSet });
+  };
 
   getSheetList(): WorksheetType[] {
     return this.workbookManager.getSheetList();
@@ -373,17 +386,7 @@ export class Model implements IModel {
   validateDefinedName(name: string) {
     return this.definedNameManager.validateDefinedName(name);
   }
-  private historyChange = (list: ICommandItem[], type: HistoryChangeType) => {
-    const changeSet = modelToChangeSet(list);
-    if (type === 'undoRedo') {
-      changeSet.add(type);
-    }
-    if (changeSet.has('row') || changeSet.has('col')) {
-      this.computeViewSize();
-    }
-    modelLog(changeSet);
-    eventEmitter.emit('modelChange', { changeSet });
-  };
+
   private historyRedo = (item: ICommandItem) => {
     this.workbookManager.redo(item);
     this.rangeMapManager.redo(item);

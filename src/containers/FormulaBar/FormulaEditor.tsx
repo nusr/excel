@@ -126,6 +126,7 @@ export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps
             } else {
               controller.setNextActiveCell('right');
             }
+            return true;
           });
           coreStore.mergeState({
             editorStatus: EditorStatus.NONE,

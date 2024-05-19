@@ -4,7 +4,6 @@ import {
   isCol,
   isRow,
   isSheet,
-  canvasLog,
   intToColumnName,
   getThemeColor,
   headerSizeSet,
@@ -32,6 +31,8 @@ import {
   fillText,
 } from './util';
 import { getHeaderStyle } from './constant';
+
+const lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
 
 export class MainCanvas {
   private ctx: CanvasRenderingContext2D;
@@ -64,9 +65,9 @@ export class MainCanvas {
       return;
     }
     if (this.isRendering) {
-      canvasLog('It is rendering');
       return;
     }
+    this.isRendering = true;
     const { changeSet } = params;
     const checkContent =
       changeSet.has('row') ||
@@ -76,8 +77,6 @@ export class MainCanvas {
       changeSet.has('cellStyle') ||
       changeSet.has('cellValue') ||
       changeSet.has('scroll');
-
-    this.isRendering = true;
     this.clear();
 
     this.ctx.strokeStyle = getThemeColor('primaryColor');
@@ -108,7 +107,7 @@ export class MainCanvas {
       this.content.render({ endRow, endCol, contentHeight, contentWidth });
     }
     this.ctx.drawImage(this.content.getCanvas(), 0, 0);
-    this.ctx.lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
+    this.ctx.lineWidth = lineWidth;
     strokeRect(this.ctx, result.left, result.top, result.width, result.height);
 
     this.isRendering = false;
@@ -331,8 +330,7 @@ export class MainCanvas {
     if (!range || range.sheetId !== controller.getCurrentSheetId()) {
       return;
     }
-    canvasLog('render canvas ant line');
-    this.ctx.lineWidth = DEFAULT_LINE_WIDTH * 2;
+    this.ctx.lineWidth = lineWidth;
     this.ctx.strokeStyle = getThemeColor('primaryColor');
     drawAntLine(
       this.ctx,
@@ -346,7 +344,6 @@ export class MainCanvas {
   private renderSelection(params: ContentParams): CanvasOverlayPosition {
     const { controller } = this;
     const range = controller.getActiveRange().range;
-    canvasLog('render canvas selection');
     if (isSheet(range)) {
       const result = this.renderSelectAll(params);
       return result;

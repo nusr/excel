@@ -324,33 +324,36 @@ export function renderCell(
     realStyle,
     isMergeContent,
   );
-  const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
-  let list: Point[] = [];
-  for (const item of resultList) {
-    fillText(ctx, item.text, item.x, item.y);
-    if (realStyle?.underline) {
-      ctx.strokeStyle = fillStyle;
-      const t = item.y + item.height + lineGap / 2;
-      const point: Point[] = [
-        [item.x, t],
-        [item.x + item.width, t],
-      ];
-      if (realStyle?.underline === EUnderLine.DOUBLE) {
-        list = list.concat(getDoubleLine(point, 'bottom', false));
-      } else {
-        list = list.concat(point);
+  if (width > 0 && height > 0) {
+    const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
+    let list: Point[] = [];
+    for (const item of resultList) {
+      fillText(ctx, item.text, item.x, item.y);
+      if (realStyle?.underline) {
+        ctx.strokeStyle = fillStyle;
+        const t = item.y + item.height + lineGap / 2;
+        const point: Point[] = [
+          [item.x, t],
+          [item.x + item.width, t],
+        ];
+        if (realStyle?.underline === EUnderLine.DOUBLE) {
+          list = list.concat(getDoubleLine(point, 'bottom', false));
+        } else {
+          list = list.concat(point);
+        }
+      }
+      if (realStyle?.isStrike) {
+        ctx.strokeStyle = fillStyle;
+        const t = item.y + item.height / 2 + lineGap / 2;
+        list = list.concat([
+          [item.x, t],
+          [item.x + item.width, t],
+        ]);
       }
     }
-    if (realStyle?.isStrike) {
-      ctx.strokeStyle = fillStyle;
-      const t = item.y + item.height / 2 + lineGap / 2;
-      list = list.concat([
-        [item.x, t],
-        [item.x + item.width, t],
-      ]);
-    }
+    // underline strike
+    drawLines(ctx, list);
   }
-  drawLines(ctx, list);
 
   result.height = Math.ceil(height);
   result.width = Math.ceil(width);

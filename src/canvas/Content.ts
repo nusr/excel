@@ -1,4 +1,4 @@
-import { dpr, canvasLog, headerSizeSet, canvasSizeSet } from '@/util';
+import { dpr, headerSizeSet, canvasSizeSet } from '@/util';
 import { resizeCanvas, renderCell, clearRect, renderBorderItem } from './util';
 import { ContentView, IController, IRange, ContentParams } from '@/types';
 
@@ -24,7 +24,6 @@ export class Content implements ContentView {
   render(params: ContentParams) {
     this.ctx.textAlign = 'left';
     this.ctx.textBaseline = 'top';
-    canvasLog('render canvas content');
     this.clear();
     this.renderContent(params);
   }
@@ -33,20 +32,24 @@ export class Content implements ContentView {
     if (this.rowMap.size === 0 && this.colMap.size === 0) {
       return;
     }
-    canvasLog('render again');
+    let check = false;
     controller.batchUpdate(() => {
+      const sheetId = controller.getCurrentSheetId();
       for (const [r, h] of this.rowMap.entries()) {
-        if (h <= 0 || controller.getRowHeight(r).len === h) {
+        if (h <= 0 || controller.getRowHeight(r, sheetId).len === h) {
           continue;
         }
+        check = true;
         controller.setRowHeight(r, h);
       }
       for (const [c, w] of this.colMap.entries()) {
-        if (w <= 0 || controller.getColWidth(c).len === w) {
+        if (w <= 0 || controller.getColWidth(c, sheetId).len === w) {
           continue;
         }
+        check = true;
         controller.setColWidth(c, w);
       }
+      return check;
     }, true);
   }
 
@@ -90,8 +93,16 @@ export class Content implements ContentView {
       cellInfo.value,
       cellInfo.style,
     );
-    const height = Math.max(this.rowMap.get(row) ?? 0, size.height);
-    const width = Math.max(this.colMap.get(col) ?? 0, size.width);
+    const height = Math.max(
+      this.rowMap.get(row) ?? 0,
+      size.height,
+      controller.getRowHeight(row).len,
+    );
+    const width = Math.max(
+      this.colMap.get(col) ?? 0,
+      size.width,
+      controller.getColWidth(col).len,
+    );
     if (!mergeCell) {
       if (height > controller.getRowHeight(row).len) {
         this.rowMap.set(row, height);
