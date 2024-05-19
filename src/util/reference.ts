@@ -154,7 +154,7 @@ export function convertToReference(
   return sheetName + result;
 }
 
-export const R1C1_REG = /^R(\[\-\d+\]|\[\d+\]|\d+)?C(\[\-\d+\]|\[\d+\]|\d+)?$/i;
+export const R1C1_REG = /^R(\[-\d+\]|\[\d+\]|\d+)?C(\[-\d+\]|\[\d+\]|\d+)?$/i;
 
 function parseNumber(text: string, num: number) {
   let result = -1;

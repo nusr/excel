@@ -28,8 +28,13 @@ if (location.hostname !== 'localhost') {
 }
 
 const domNode = document.getElementById('root')!;
+
+const isUseWorker = true;
+
 const worker: Worker | undefined =
-  typeof Worker === 'function' ? new Worker('./worker.js') : undefined;
+  isUseWorker && typeof Worker === 'function'
+    ? new Worker('./worker.js')
+    : undefined;
 
 const controller = initController(true, { copyOrCut, paste }, worker);
 (window as any).controller = controller;

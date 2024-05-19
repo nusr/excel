@@ -13,6 +13,7 @@ import {
   EHorizontalAlign,
   RequestMessageType,
   ResponseMessageType,
+  InterpreterResult,
 } from '@/types';
 import {
   coordinateToString,
@@ -260,9 +261,10 @@ export class Worksheet implements IWorksheet {
       return check;
     }
     if (!this.worker) {
+      const cache = new Map<string, InterpreterResult>();
       for (const [k, data] of Object.entries(sheetData)) {
         if (data?.formula) {
-          const result = this.parseFormula(data.formula);
+          const result = this.parseFormula(data.formula, cache);
           const newValue = result.result;
           const oldValue = data.value;
           if (newValue !== oldValue) {
@@ -594,7 +596,11 @@ export class Worksheet implements IWorksheet {
     this.worksheets[id][key] = this.worksheets[id][key] || {};
     return this.worksheets[id][key];
   }
-  private parseFormula(formula: string) {
+  private parseFormula(formula: string, cache: Map<string, InterpreterResult>) {
+    const r = cache.get(formula);
+    if (r) {
+      return r;
+    }
     const result = parseFormula(
       formula,
       {
@@ -625,7 +631,12 @@ export class Worksheet implements IWorksheet {
                 colCount: 1,
               });
               if (temp) {
-                result.push(temp.value);
+                if (temp.formula) {
+                  const t = this.parseFormula(temp.formula, cache);
+                  result.push(t.result);
+                } else {
+                  result.push(temp.value);
+                }
               }
               return false;
             },
@@ -644,6 +655,7 @@ export class Worksheet implements IWorksheet {
         get: (name: string) => this.model.checkDefineName(name),
       },
     );
+    cache.set(formula, result);
     return result;
   }
   private convertSheetNameToSheetId = (sheetName: string): string => {
