@@ -264,7 +264,8 @@ export class Worksheet implements IWorksheet {
       const cache = new Map<string, InterpreterResult>();
       for (const [k, data] of Object.entries(sheetData)) {
         if (data?.formula) {
-          const result = this.parseFormula(data.formula, cache);
+          const coord = stringToCoordinate(k);
+          const result = this.parseFormula(data.formula, coord, cache);
           const newValue = result.result;
           const oldValue = data.value;
           if (newValue !== oldValue) {
@@ -287,12 +288,10 @@ export class Worksheet implements IWorksheet {
       for (const item of this.model.getDefineNameList()) {
         definedNames[item.name] = item.range;
       }
-      const activeCell = this.model.getActiveCell();
-      activeCell.sheetId = activeCell.sheetId || this.model.getCurrentSheetId();
       const data: RequestMessageType = {
         worksheets: this.worksheets,
         definedNames,
-        activeCell,
+        currentSheetId: this.model.getCurrentSheetId(),
         workbook: this.model.getSheetList(),
       };
       this.worker!.postMessage(data);
@@ -596,7 +595,11 @@ export class Worksheet implements IWorksheet {
     this.worksheets[id][key] = this.worksheets[id][key] || {};
     return this.worksheets[id][key];
   }
-  private parseFormula(formula: string, cache: Map<string, InterpreterResult>) {
+  private parseFormula(
+    formula: string,
+    coord: Coordinate,
+    cache: Map<string, InterpreterResult>,
+  ) {
     const r = cache.get(formula);
     if (r) {
       return r;
@@ -604,9 +607,8 @@ export class Worksheet implements IWorksheet {
     const result = parseFormula(
       formula,
       {
-        getActiveRange: () => {
-          const range = this.model.getActiveCell();
-          return range;
+        getCurrentCell: () => {
+          return coord;
         },
         get: (range: IRange) => {
           const { row, col, sheetId } = range;
@@ -632,7 +634,11 @@ export class Worksheet implements IWorksheet {
               });
               if (temp) {
                 if (temp.formula) {
-                  const t = this.parseFormula(temp.formula, cache);
+                  const t = this.parseFormula(
+                    temp.formula,
+                    { row: r, col: c },
+                    cache,
+                  );
                   result.push(t.result);
                 } else {
                   result.push(temp.value);

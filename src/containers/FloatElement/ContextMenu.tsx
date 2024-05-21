@@ -82,7 +82,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           });
           if (
             !range ||
-            !range.isValid() ||
+            !controller.validateRange(range) ||
             (props.chartRange && isSameRange(range, props.chartRange))
           ) {
             return toast.error(

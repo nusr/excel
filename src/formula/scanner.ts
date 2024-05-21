@@ -2,6 +2,7 @@ import { TokenType } from '@/types';
 import { Token } from './token';
 import { CustomError } from './formula';
 import { FORMULA_PREFIX } from '@/util/constant';
+import { isDigit } from '@/util/reference';
 
 const emptyData = '';
 const identifierMap = new Map<string, TokenType>([
@@ -66,34 +67,34 @@ export class Scanner {
     const text = this.list.slice(this.start + 1, this.current - 1).join('');
     this.tokens.push(new Token(TokenType.STRING, text));
   }
-  private allDigit() {
-    while (!this.isAtEnd() && this.isDigit(this.peek())) {
+  private getDigits() {
+    while (!this.isAtEnd() && isDigit(this.peek())) {
       this.next();
     }
   }
   private matchR1C1() {
     if (this.match('[')) {
       this.match('-');
-      this.allDigit();
+      this.getDigits();
       if (this.peek() !== ']') {
         throw new CustomError('#VALUE!');
       } else {
         this.next();
       }
     } else {
-      this.allDigit();
+      this.getDigits();
     }
   }
   private matchScientificCounting() {
     if (this.match('E') || this.match('e')) {
       // 1E-10 1E+10
       if (this.match('+') || this.match('-')) {
-        this.allDigit();
+        this.getDigits();
         this.addToken(TokenType.NUMBER);
         return true;
       }
-      if (this.isDigit(this.peek())) {
-        this.allDigit();
+      if (isDigit(this.peek())) {
+        this.getDigits();
         this.addToken(TokenType.NUMBER);
         return true;
       }
@@ -102,22 +103,19 @@ export class Scanner {
     return false;
   }
   private number() {
-    this.allDigit();
+    this.getDigits();
     const check1 = this.matchScientificCounting();
     if (check1) {
       return;
     }
     if (this.match('.')) {
-      this.allDigit();
+      this.getDigits();
     }
     const check2 = this.matchScientificCounting();
     if (check2) {
       return;
     }
     this.addToken(TokenType.NUMBER);
-  }
-  private isDigit(char: string) {
-    return char >= '0' && char <= '9';
   }
   private addIdentifier() {
     let text = this.list.slice(this.start, this.current).join('');
@@ -226,7 +224,7 @@ export class Scanner {
       case '\n':
         break;
       default:
-        if (this.isDigit(c)) {
+        if (isDigit(c)) {
           this.number();
         } else if (this.anyChar(c)) {
           while (!this.isAtEnd() && this.anyChar(this.peek())) {

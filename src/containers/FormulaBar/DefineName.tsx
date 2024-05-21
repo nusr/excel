@@ -9,7 +9,12 @@ import React, {
 } from 'react';
 import { IController } from '@/types';
 import styles from './index.module.css';
-import { parseReference, MAX_NAME_LENGTH, MAX_PARAMS_COUNT } from '@/util';
+import {
+  parseReference,
+  MAX_NAME_LENGTH,
+  MAX_PARAMS_COUNT,
+  DEFINED_NAME_REG_EXP,
+} from '@/util';
 import { scrollToView } from '@/canvas';
 import { SelectList } from '../../components';
 import { defineNameStore } from '../store';
@@ -70,10 +75,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(
             scrollToView(controller, r);
             return;
           }
-          if (
-            /^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(t) &&
-            t.length <= MAX_PARAMS_COUNT
-          ) {
+          if (DEFINED_NAME_REG_EXP.test(t) && t.length <= MAX_PARAMS_COUNT) {
             controller.setDefineName(controller.getActiveRange().range, t);
           } else {
             setValue(displayName);

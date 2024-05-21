@@ -9,6 +9,7 @@ import {
   IRange,
   FormulaType,
   ResultType,
+  Coordinate,
 } from '@/types';
 
 export function parseFormula(
@@ -61,9 +62,16 @@ export function parseFormula(
 export class CellDataMapImpl implements CellDataMap {
   private readonly map = new Map<string, ResultType>();
   private sheetNameMap: Record<string, string> = {};
+  private cell: Coordinate = {
+    row: 0,
+    col: 0,
+  };
   private getKey(row: number, col: number, sheetId: string) {
     const key = `${row}_${col}_${sheetId}`;
     return key;
+  }
+  setCurrentCell(cell: Coordinate) {
+    this.cell = cell;
   }
   setSheetNameMap(sheetNameMap: Record<string, string>) {
     this.sheetNameMap = sheetNameMap;
@@ -98,8 +106,8 @@ export class CellDataMapImpl implements CellDataMap {
     }
     return this.sheetNameMap[sheetName] || '';
   }
-  getActiveRange() {
-    return { row: 0, col: 0 };
+  getCurrentCell() {
+    return { ...this.cell };
   }
 }
 

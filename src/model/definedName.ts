@@ -7,7 +7,7 @@ import {
   IDefinedName,
 } from '@/types';
 import { DELETE_FLAG, transformData } from './History';
-import { MAX_PARAMS_COUNT, parseReference } from '@/util';
+import { MAX_PARAMS_COUNT, parseReference, DEFINED_NAME_REG_EXP } from '@/util';
 
 export class DefinedName implements IDefinedName {
   private model: IModel;
@@ -39,10 +39,7 @@ export class DefinedName implements IDefinedName {
         return false;
       }
     }
-    if (
-      /^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(name) &&
-      name.length <= MAX_PARAMS_COUNT
-    ) {
+    if (DEFINED_NAME_REG_EXP.test(name) && name.length <= MAX_PARAMS_COUNT) {
       return true;
     }
     return false;
@@ -52,10 +49,7 @@ export class DefinedName implements IDefinedName {
     const oldValue = { ...this.definedNames };
     this.definedNames = {};
     for (const [key, value] of Object.entries(data)) {
-      if (!this.model.validateRange(value)) {
-        continue;
-      }
-      if (!this.validateDefinedName(key)) {
+      if (!this.model.validateRange(value) || !this.validateDefinedName(key)) {
         continue;
       }
       this.definedNames[key] = value;
@@ -96,13 +90,13 @@ export class DefinedName implements IDefinedName {
     }
     return '';
   }
-  setDefineName(range: IRange, name: string): void {
+  setDefineName(range: IRange, name: string) {
     if (!name) {
-      return;
+      return false;
     }
     const oldName = this.getDefineName(range);
     if (oldName === name) {
-      return;
+      return false;
     }
 
     const result: IRange = {
@@ -139,6 +133,7 @@ export class DefinedName implements IDefinedName {
         oldValue: DELETE_FLAG,
       });
     }
+    return true;
   }
   checkDefineName(name: string): IRange | undefined {
     const range = this.definedNames[name];

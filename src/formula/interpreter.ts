@@ -124,7 +124,7 @@ export class Interpreter implements Visitor {
   visitR1C1Expression(data: R1C1Expression) {
     const range = parseR1C1(
       data.value.value,
-      this.cellDataMap.getActiveRange(),
+      this.cellDataMap.getCurrentCell(),
     );
     if (!range) {
       throw new CustomError('#NAME?');

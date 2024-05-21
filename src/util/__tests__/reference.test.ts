@@ -241,5 +241,12 @@ describe('reference.test.ts', () => {
         new SheetRange(2, 2, 1, 1, ''),
       );
     });
+
+
+    test('RC', () => {
+      expect(parseR1C1('RC', { row: 0, col: 0 })).toEqual(
+        new SheetRange(0, 0, 1, 1, ''),
+      );
+    });
   });
 });

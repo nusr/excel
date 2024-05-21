@@ -24,6 +24,7 @@ export const FORMULA_PREFIX = '=';
 export const SPLITTER = '_';
 export const MAX_NAME_LENGTH = 35;
 export const MAX_PARAMS_COUNT = 256;
+export const DEFINED_NAME_REG_EXP = /^[a-zA-Z_][a-zA-Z0-9_.]*$/;
 export const FORMULA_MAX_PRECISION = 9;
 export const FORMULA_EDITOR_ROLE = '__FORMULA_EDITOR_ROLE__';
 

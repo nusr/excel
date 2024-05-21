@@ -2,9 +2,9 @@ import { columnNameToInt, rowLabelToInt, intToColumnName } from './convert';
 import { Coordinate, IRange, ReferenceType } from '@/types';
 import { SheetRange } from './range';
 
-const isCharacter = (char: string) =>
+export const isAlpha = (char: string) =>
   (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z');
-const isNum = (char: string) => char >= '0' && char <= '9';
+export const isDigit = (char: string) => char >= '0' && char <= '9';
 
 function convertSheetNameToSheetId(value: string) {
   return value;
@@ -29,13 +29,13 @@ function parseCell(
   if (other[i] === '$') {
     i++;
   }
-  while (i < other.length && isCharacter(other[i])) {
+  while (i < other.length && isAlpha(other[i])) {
     colText += other[i++];
   }
   if (other[i] === '$') {
     i++;
   }
-  while (i < other.length && isNum(other[i])) {
+  while (i < other.length && isDigit(other[i])) {
     rowText += other[i++];
   }
   if (i !== other.length) {
@@ -176,11 +176,15 @@ export function parseR1C1(
   name: string,
   activeCell: Coordinate = { row: -1, col: -1 },
 ): SheetRange | undefined {
-  const result = name.match(R1C1_REG);
-  if (!result) {
+  const text = name.toUpperCase();
+  if (text[0] !== 'R') {
     return undefined;
   }
-  const [, rowText, colText] = result;
+  const list = text.slice(1).split('C');
+  if (list.length !== 2) {
+    return undefined;
+  }
+  const [rowText, colText] = list;
   let row = -1;
   let col = -1;
   if (!rowText) {

@@ -121,9 +121,7 @@ export type DrawingElement = {
 export type WorksheetData = Record<string, ModelCellType>; // key: row + col worksheets_*.xml_worksheet_sheetData
 
 export type ChangeEventType =
-  | keyof WorkBookJSON
-  | 'antLine'
-  | 'scroll'
+  | ICommandItem['type']
   | 'row'
   | 'col'
   | 'cellValue'
@@ -208,7 +206,7 @@ export interface IDrawings extends IBaseManager {
 export interface IDefinedName extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'definedNames'>;
   getDefineName(range: IRange): string;
-  setDefineName(range: IRange, name: string): void;
+  setDefineName(range: IRange, name: string): boolean;
   checkDefineName(name: string): IRange | undefined;
   getDefineNameList(): DefinedNameItem[];
   validateDefinedName(name: string): boolean;
@@ -271,10 +269,14 @@ export interface IBaseModel
       | 'deleteAll'
       | 'fromJSON'
     >,
-    Pick<IRangeMap, 'setActiveRange' | 'getActiveRange'>,
+    Pick<IRangeMap, 'setActiveRange' | 'getActiveRange' | 'validateRange'>,
     Pick<
       IDrawings,
-      'getDrawingList' | 'addDrawing' | 'updateDrawing' | 'deleteDrawing'
+      | 'getDrawingList'
+      | 'addDrawing'
+      | 'updateDrawing'
+      | 'deleteDrawing'
+      | 'validateDrawing'
     >,
     Pick<
       IDefinedName,
@@ -282,6 +284,7 @@ export interface IBaseModel
       | 'setDefineName'
       | 'checkDefineName'
       | 'getDefineNameList'
+      | 'validateDefinedName'
     >,
     Pick<IMergeCell, 'getMergeCellList' | 'addMergeCell' | 'deleteMergeCell'>,
     Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight'>,
@@ -306,15 +309,10 @@ export interface IBaseModel
   redo(): void;
 }
 
-export interface IModel
-  extends IBaseModel,
-    Pick<IRangeMap, 'validateRange'>,
-    Pick<IDefinedName, 'validateDefinedName'>,
-    Pick<IDrawings, 'validateDrawing'> {
+export interface IModel extends IBaseModel {
   pasteRange(range: IRange, isCut: boolean): IRange;
   emitChange(dataset: Set<ChangeEventType>): void;
   push(command: ICommandItem): void;
-  getActiveCell(): IRange;
 }
 
 export type NumberFormatValue =

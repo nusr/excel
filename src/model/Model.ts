@@ -126,9 +126,6 @@ export class Model implements IModel {
   getSheetList(): WorksheetType[] {
     return this.workbookManager.getSheetList();
   }
-  getActiveCell() {
-    return this.rangeMapManager.getActiveRange().range;
-  }
   getActiveRange(r?: IRange) {
     const range = r || this.rangeMapManager.getActiveRange().range;
     const mergeCells = this.getMergeCellList(range.sheetId);
@@ -348,8 +345,8 @@ export class Model implements IModel {
   getDefineName(range: IRange): string {
     return this.definedNameManager.getDefineName(range);
   }
-  setDefineName(range: IRange, name: string): void {
-    this.definedNameManager.setDefineName(range, name);
+  setDefineName(range: IRange, name: string) {
+    return this.definedNameManager.setDefineName(range, name);
   }
   checkDefineName(name: string): IRange | undefined {
     return this.definedNameManager.checkDefineName(name);

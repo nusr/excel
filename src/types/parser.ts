@@ -45,7 +45,7 @@ export enum TokenType {
 export interface CellDataMap {
   set: (range: IRange, value: ResultType[][]) => void;
   get: (range: IRange) => ResultType[];
-  getActiveRange: () => Coordinate;
+  getCurrentCell: () => Coordinate;
   convertSheetNameToSheetId: (sheetName: string) => string;
 }
 

@@ -58,6 +58,15 @@ export class Controller implements IController {
     this.model = model;
     this.hooks = hooks;
   }
+  validateDefinedName(name: string): boolean {
+    return this.model.validateDefinedName(name);
+  }
+  validateDrawing(item: DrawingElement): boolean {
+    return this.model.validateDrawing(item);
+  }
+  validateRange(range: IRange): boolean {
+    return this.model.validateRange(range);
+  }
   getCurrentSheetId(): string {
     return this.model.getCurrentSheetId();
   }
@@ -614,9 +623,10 @@ export class Controller implements IController {
   getDefineNameList(): DefinedNameItem[] {
     return this.model.getDefineNameList();
   }
-  setDefineName(range: IRange, name: string): void {
-    this.model.setDefineName(range, name);
+  setDefineName(range: IRange, name: string) {
+    const r = this.model.setDefineName(range, name);
     this.emitChange();
+    return r;
   }
   checkDefineName(name: string): IRange | undefined {
     return this.model.checkDefineName(name);
