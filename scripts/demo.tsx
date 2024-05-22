@@ -29,7 +29,7 @@ if (location.hostname !== 'localhost') {
 
 const domNode = document.getElementById('root')!;
 
-const isUseWorker = false;
+const isUseWorker = true;
 
 const worker: Worker | undefined =
   isUseWorker && typeof Worker === 'function'

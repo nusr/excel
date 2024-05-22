@@ -25,7 +25,7 @@ function parseAllFormulas(eventData: RequestMessageType) {
   const list: ResponseMessageType['list'] = [];
   for (const [k, data] of Object.entries(sheetData)) {
     if (data?.formula) {
-      const result = parse(
+      const result = parseFormulaItem(
         data.formula,
         eventData,
         formulaCache,
@@ -44,7 +44,7 @@ function parseAllFormulas(eventData: RequestMessageType) {
   return list;
 }
 
-function parse(
+function parseFormulaItem(
   formula: string,
   eventData: RequestMessageType,
   cache: Map<string, InterpreterResult>,
@@ -81,7 +81,7 @@ function parse(
             const f = sheetData[key].formula;
             const oldValue = sheetData[key].value;
             if (f) {
-              const t = parse(f, eventData, cache, { row: r, col: c }, list);
+              const t = parseFormulaItem(f, eventData, cache, { row: r, col: c }, list);
               if (t.result !== oldValue) {
                 list.push({ key, newValue: t.result, sheetId: realSheetId });
               }
