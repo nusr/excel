@@ -612,8 +612,9 @@ export class Worksheet implements IWorksheet {
         },
         get: (range: IRange) => {
           const { row, col, sheetId } = range;
+          const id = sheetId || this.model.getCurrentSheetId();
           const result: ResultType[] = [];
-          const sheetInfo = this.model.getSheetInfo(sheetId);
+          const sheetInfo = this.model.getSheetInfo(id);
           if (
             !sheetInfo ||
             row >= sheetInfo.rowCount ||
@@ -621,32 +622,39 @@ export class Worksheet implements IWorksheet {
           ) {
             throw new CustomError('#REF!');
           }
-          iterateRange(
-            range,
-            this.model.getSheetInfo(range.sheetId),
-            (r, c) => {
-              const temp = this.getCell({
-                sheetId,
-                row: r,
-                col: c,
-                rowCount: 1,
-                colCount: 1,
-              });
-              if (temp) {
-                if (temp.formula) {
-                  const t = this.parseFormula(
-                    temp.formula,
-                    { row: r, col: c },
-                    cache,
-                  );
-                  result.push(t.result);
-                } else {
-                  result.push(temp.value);
+          iterateRange(range, sheetInfo, (r, c) => {
+            const temp = this.getCell({
+              sheetId: id,
+              row: r,
+              col: c,
+              rowCount: 1,
+              colCount: 1,
+            });
+            if (temp) {
+              if (temp.formula) {
+                const t = this.parseFormula(
+                  temp.formula,
+                  { row: r, col: c },
+                  cache,
+                );
+                if (t.result !== temp.value) {
+                  const key = coordinateToString(r, c);
+                  this.worksheets[id] = this.worksheets[id] || {};
+                  this.worksheets[id][key].value = t.result;
+                  this.model.push({
+                    type: 'worksheets',
+                    key: `${id}.${key}.value`,
+                    newValue: t.result,
+                    oldValue: temp.value,
+                  });
                 }
+                result.push(t.result);
+              } else {
+                result.push(temp.value);
               }
-              return false;
-            },
-          );
+            }
+            return false;
+          });
           return result;
         },
         set: () => {
@@ -675,18 +683,15 @@ export class Worksheet implements IWorksheet {
     this.worker.addEventListener(
       'message',
       (event: MessageEvent<ResponseMessageType>) => {
-        const { list, sheetId } = event.data;
-        this.worksheets[sheetId] = this.worksheets[sheetId] || {};
-        if (list.length === 0) {
-          this.parseFormulaResolve(false);
-          return;
-        }
+        const { list } = event.data;
         for (const item of list) {
-          const oldValue = this.worksheets[sheetId][item.key].value;
-          this.worksheets[sheetId][item.key].value = item.newValue;
+          const id = item.sheetId;
+          this.worksheets[id] = this.worksheets[id] || {};
+          const oldValue = this.worksheets[id][item.key].value;
+          this.worksheets[id][item.key].value = item.newValue;
           this.model.push({
             type: 'worksheets',
-            key: `${sheetId}.${item.key}.value`,
+            key: `${id}.${item.key}.value`,
             newValue: item.newValue,
             oldValue: oldValue,
           });

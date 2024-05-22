@@ -13,14 +13,14 @@ describe('basic expressions', () => {
     const tree = buildTree('1');
 
     expect(tree).toEqual(
-      new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+      new LiteralExpression(new Token(TokenType.INTEGER, '1')),
     );
   });
 
   it('1E-2', () => {
     const tree = buildTree('1E-2');
     expect(tree).toEqual(
-      new LiteralExpression(new Token(TokenType.NUMBER, '1E-2')),
+      new LiteralExpression(new Token(TokenType.INTEGER, '1E-2')),
     );
   });
 
@@ -29,7 +29,7 @@ describe('basic expressions', () => {
     expect(tree).toEqual(
       new PostUnaryExpression(
         new Token(TokenType.PERCENT, '%'),
-        new LiteralExpression(new Token(TokenType.NUMBER, '10')),
+        new LiteralExpression(new Token(TokenType.INTEGER, '10')),
       ),
     );
   });
@@ -39,7 +39,7 @@ describe('basic expressions', () => {
     expect(tree).toEqual(
       new UnaryExpression(
         new Token(TokenType.MINUS, '-'),
-        new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+        new LiteralExpression(new Token(TokenType.INTEGER, '1')),
       ),
     );
   });
@@ -54,7 +54,7 @@ describe('basic expressions', () => {
           new Token(TokenType.MINUS, '-'),
           new UnaryExpression(
             new Token(TokenType.MINUS, '-'),
-            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
           ),
         ),
       ),
@@ -88,9 +88,9 @@ describe('basic expressions', () => {
 
     expect(tree).toEqual(
       new BinaryExpression(
-        new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+        new LiteralExpression(new Token(TokenType.INTEGER, '1')),
         new Token(TokenType.PLUS, '+'),
-        new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+        new LiteralExpression(new Token(TokenType.INTEGER, '2')),
       ),
     );
   });
@@ -101,10 +101,10 @@ describe('basic expressions', () => {
       new BinaryExpression(
         new UnaryExpression(
           new Token(TokenType.MINUS, '-'),
-          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+          new LiteralExpression(new Token(TokenType.INTEGER, '1')),
         ),
         new Token(TokenType.PLUS, '+'),
-        new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+        new LiteralExpression(new Token(TokenType.INTEGER, '2')),
       ),
     );
   });
@@ -126,7 +126,7 @@ describe('basic expressions', () => {
 
     expect(tree).toEqual(
       new BinaryExpression(
-        new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+        new LiteralExpression(new Token(TokenType.INTEGER, '1')),
         new Token(TokenType.NOT_EQUAL, '<>'),
         new LiteralExpression(new Token(TokenType.STRING, 'b')),
       ),

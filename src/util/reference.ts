@@ -23,6 +23,13 @@ function parseCell(
     sheetName = '';
     other = realRef;
   }
+  if (
+    sheetName &&
+    sheetName[0] === "'" &&
+    sheetName[sheetName.length - 1] === "'"
+  ) {
+    sheetName = sheetName.slice(1, -1);
+  }
   let i = 0;
   let rowText = '';
   let colText = '';

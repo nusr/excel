@@ -5,7 +5,7 @@ import {
   LiteralExpression,
   TokenExpression,
   UnaryExpression,
-  CellRangeExpression,
+  CellExpression,
 } from '../../expression';
 import { Token } from '../../token';
 import { TokenType } from '../../../types';
@@ -52,7 +52,7 @@ describe('function calls', () => {
     expect(tree).toEqual(
       new CallExpression(
         new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-        [new LiteralExpression(new Token(TokenType.NUMBER, '1'))],
+        [new LiteralExpression(new Token(TokenType.INTEGER, '1'))],
       ),
     );
   });
@@ -63,8 +63,8 @@ describe('function calls', () => {
       new CallExpression(
         new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
         [
-          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
-          new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+          new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+          new LiteralExpression(new Token(TokenType.INTEGER, '2')),
         ],
       ),
     );
@@ -77,12 +77,12 @@ describe('function calls', () => {
       new CallExpression(
         new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
         [
-          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+          new LiteralExpression(new Token(TokenType.INTEGER, '1')),
           new CallExpression(
             new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
             [
-              new LiteralExpression(new Token(TokenType.NUMBER, '2')),
-              new LiteralExpression(new Token(TokenType.NUMBER, '3')),
+              new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+              new LiteralExpression(new Token(TokenType.INTEGER, '3')),
             ],
           ),
         ],
@@ -97,15 +97,15 @@ describe('function calls', () => {
         new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
         [
           new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.NUMBER, '10')),
+            new LiteralExpression(new Token(TokenType.INTEGER, '10')),
             new Token(TokenType.SLASH, '/'),
-            new LiteralExpression(new Token(TokenType.NUMBER, '4')),
+            new LiteralExpression(new Token(TokenType.INTEGER, '4')),
           ),
           new CallExpression(
             new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
             [
-              new LiteralExpression(new Token(TokenType.NUMBER, '2')),
-              new LiteralExpression(new Token(TokenType.NUMBER, '3')),
+              new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+              new LiteralExpression(new Token(TokenType.INTEGER, '3')),
             ],
           ),
         ],
@@ -118,11 +118,11 @@ describe('function calls', () => {
 
     expect(tree).toEqual(
       new BinaryExpression(
-        new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+        new LiteralExpression(new Token(TokenType.INTEGER, '2')),
         new Token(TokenType.PLUS, '+'),
         new CallExpression(
           new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-          [new LiteralExpression(new Token(TokenType.NUMBER, '1'))],
+          [new LiteralExpression(new Token(TokenType.INTEGER, '1'))],
         ),
       ),
     );
@@ -132,15 +132,15 @@ describe('function calls', () => {
     const tree = buildTree('2 + SUM(1, 2, 3, 4)');
     expect(tree).toEqual(
       new BinaryExpression(
-        new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+        new LiteralExpression(new Token(TokenType.INTEGER, '2')),
         new Token(TokenType.PLUS, '+'),
         new CallExpression(
           new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
           [
-            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
-            new LiteralExpression(new Token(TokenType.NUMBER, '2')),
-            new LiteralExpression(new Token(TokenType.NUMBER, '3')),
-            new LiteralExpression(new Token(TokenType.NUMBER, '4')),
+            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+            new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+            new LiteralExpression(new Token(TokenType.INTEGER, '3')),
+            new LiteralExpression(new Token(TokenType.INTEGER, '4')),
           ],
         ),
       ),
@@ -154,12 +154,12 @@ describe('function calls', () => {
       new BinaryExpression(
         new CallExpression(
           new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-          [new LiteralExpression(new Token(TokenType.NUMBER, '2'))],
+          [new LiteralExpression(new Token(TokenType.INTEGER, '2'))],
         ),
         new Token(TokenType.PLUS, '+'),
         new CallExpression(
           new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-          [new LiteralExpression(new Token(TokenType.NUMBER, '1'))],
+          [new LiteralExpression(new Token(TokenType.INTEGER, '1'))],
         ),
       ),
     );
@@ -173,30 +173,34 @@ describe('function calls', () => {
         [
           new CallExpression(
             new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-            [new LiteralExpression(new Token(TokenType.NUMBER, '1'))],
+            [new LiteralExpression(new Token(TokenType.INTEGER, '1'))],
           ),
           new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+            new LiteralExpression(new Token(TokenType.INTEGER, '2')),
             new Token(TokenType.PLUS, '+'),
-            new LiteralExpression(new Token(TokenType.NUMBER, '3')),
+            new LiteralExpression(new Token(TokenType.INTEGER, '3')),
           ),
         ],
       ),
     );
   });
-  it('SUM(A1,B1)', () => {
+  it('SUM(Sheet1!A1,$B$1)', () => {
     const tree = buildTree('SUM(Sheet1!A1,$B$1)');
 
     expect(tree).toEqual(
       new CallExpression(
         new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
         [
-          new CellRangeExpression(
-            new TokenExpression(new Token(TokenType.IDENTIFIER, 'Sheet1')),
-            new Token(TokenType.EXCLAMATION, '!'),
-            new TokenExpression(new Token(TokenType.IDENTIFIER, 'A1')),
+          new CellExpression(
+            new Token(TokenType.IDENTIFIER, 'A1'),
+            'relative',
+            new Token(TokenType.IDENTIFIER, 'Sheet1'),
           ),
-          new TokenExpression(new Token(TokenType.IDENTIFIER, '$B$1')),
+          new CellExpression(
+            new Token(TokenType.ABSOLUTE_CELL, '$B$1'),
+            'absolute',
+            undefined,
+          ),
         ],
       ),
     );

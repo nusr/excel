@@ -9,7 +9,7 @@ describe('primary', () => {
       expect(() => new Scanner('1E').scan()).toThrow();
     });
     const list: BlockType[] = [
-      ['\r \t \n 1', [getToken(TokenType.NUMBER, '1')]],
+      ['\r \t \n 1', [getToken(TokenType.INTEGER, '1')]],
     ];
     itBlock(list);
   });

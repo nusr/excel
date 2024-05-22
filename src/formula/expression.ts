@@ -118,10 +118,15 @@ export class CellExpression implements Expression {
     return visitor.visitCellExpression(this);
   }
   toString(): string {
+    const t = this.value.toString().toUpperCase();
     if (this.sheetName) {
-      return `${this.sheetName.toString()}!${this.value.toString()}`;
+      let name = this.sheetName.toString();
+      if (name.includes(' ')) {
+        name = `'${name}'`;
+      }
+      return `${name}!${t}`;
     } else {
-      return this.value.toString();
+      return t;
     }
   }
 }
@@ -145,10 +150,10 @@ export class CallExpression implements Expression {
 
 /* jscpd:ignore-start */
 export class CellRangeExpression implements Expression {
-  readonly left: Expression;
-  readonly right: Expression;
+  readonly left: CellExpression;
+  readonly right: CellExpression;
   readonly operator: Token;
-  constructor(left: Expression, operator: Token, right: Expression) {
+  constructor(left: CellExpression, operator: Token, right: CellExpression) {
     this.left = left;
     this.operator = operator;
     this.right = right;

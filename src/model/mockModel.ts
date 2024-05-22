@@ -299,6 +299,7 @@ const MOCK_MODEL: WorkBookJSON = {
       },
       '0_2': { value: '', formula: '=CONCATENATE(A1,B1)' },
       '0_3': { value: '', formula: '=UNICODE("测试")' },
+      '0_4': { value: '', formula: "='merge cell'!A1" },
       '1_0': { value: '', formula: '=PI()' },
       '2_0': { value: '', formula: '=E()' },
       '3_0': { value: '', formula: '=E()*PI()' },
@@ -309,6 +310,10 @@ const MOCK_MODEL: WorkBookJSON = {
       },
     },
     '8': {
+      '0_0': {
+        value: '',
+        formula: '=SUM(1,2)',
+      },
       '2_2': {
         value: 1,
         style: {

@@ -93,6 +93,16 @@ describe('reference.test.ts', () => {
     it('1:1', () => {
       expect(parseReference('1:1')).toEqual(new SheetRange(0, 0, 1, 0, ''));
     });
+    test("'merge cell'!A1", () => {
+      expect(
+        parseReference("'merge cell'!A1", (name: string) => {
+          if (name === 'merge cell') {
+            return '7';
+          }
+          return '';
+        }),
+      ).toEqual(new SheetRange(0, 0, 1, 1, '7'));
+    });
   });
   describe('parseCell', () => {
     it('should convert a1 to { row:0,col:0,rowCount:1,colCount: 1 } ', () => {
@@ -241,7 +251,6 @@ describe('reference.test.ts', () => {
         new SheetRange(2, 2, 1, 1, ''),
       );
     });
-
 
     test('RC', () => {
       expect(parseR1C1('RC', { row: 0, col: 0 })).toEqual(

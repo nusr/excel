@@ -28,10 +28,11 @@ export enum TokenType {
   LESS, // <
   LESS_EQUAL, // <=
   IDENTIFIER, //
-  STRING,
-  NUMBER,
-  TRUE,
-  FALSE,
+  STRING, // string
+  FLOAT, // float
+  INTEGER, // int
+  TRUE, // true
+  FALSE, // false
   LEFT_BRACKET, // (
   RIGHT_BRACKET, // )
   lEFT_BRACE, // {
@@ -39,6 +40,8 @@ export enum TokenType {
   SEMICOLON, // ;
   EXCLAMATION, // !
   R1C1, // R1C1 reference
+  MIXED_CELL, // mixed reference
+  ABSOLUTE_CELL, // absolute reference
   EOF,
 }
 

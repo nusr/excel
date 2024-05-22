@@ -1,4 +1,4 @@
-import { parseFormula, VariableMapImpl, CellDataMapImpl } from '../..';
+import { parseFormula, DefinedNamesMapImpl, CellDataMapImpl } from '../..';
 
 describe('parseFormula variable', () => {
   it('should evaluate default variables', () => {
@@ -21,7 +21,7 @@ describe('parseFormula variable', () => {
     });
   });
   it('should evaluate custom variables', () => {
-    const temp = new VariableMapImpl();
+    const temp = new DefinedNamesMapImpl();
     const cellDataMap = new CellDataMapImpl();
     cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [
       ['222'],

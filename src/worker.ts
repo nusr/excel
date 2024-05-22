@@ -14,7 +14,6 @@ self.addEventListener('message', (event: MessageEvent<RequestMessageType>) => {
   const list = parseAllFormulas(event.data);
   const data: ResponseMessageType = {
     list,
-    sheetId: event.data.currentSheetId,
   };
   self.postMessage(data);
 });
@@ -31,13 +30,13 @@ function parseAllFormulas(eventData: RequestMessageType) {
         eventData,
         formulaCache,
         stringToCoordinate(k),
+        list,
       );
-      const newValue = result.result;
-      const oldValue = data.value;
-      if (newValue !== oldValue) {
+      if (result.result !== data.value) {
         list.push({
           key: k,
-          newValue,
+          newValue: result.result,
+          sheetId: currentSheetId,
         });
       }
     }
@@ -50,6 +49,7 @@ function parse(
   eventData: RequestMessageType,
   cache: Map<string, InterpreterResult>,
   coord: Coordinate,
+  list: ResponseMessageType['list'],
 ): InterpreterResult {
   const temp = cache.get(formula);
   if (temp) {
@@ -64,7 +64,7 @@ function parse(
       },
       get: (range: IRange) => {
         const { row, col, sheetId } = range;
-        const realSheetId = sheetId || currentSheetId
+        const realSheetId = sheetId || currentSheetId;
         const result: ResultType[] = [];
         const sheetInfo = workbook.find((v) => v.sheetId === realSheetId);
         if (
@@ -79,11 +79,15 @@ function parse(
           const key = coordinateToString(r, c);
           if (sheetData[key]) {
             const f = sheetData[key].formula;
+            const oldValue = sheetData[key].value;
             if (f) {
-              const t = parse(f, eventData, cache, { row: r, col: c });
+              const t = parse(f, eventData, cache, { row: r, col: c }, list);
+              if (t.result !== oldValue) {
+                list.push({ key, newValue: t.result, sheetId: realSheetId });
+              }
               result.push(t?.result);
             } else {
-              result.push(sheetData[key].value);
+              result.push(oldValue);
             }
           }
           return false;

@@ -2,7 +2,7 @@ import { TokenType } from '@/types';
 import { Token } from './token';
 import { CustomError } from './formula';
 import { FORMULA_PREFIX } from '@/util/constant';
-import { isDigit } from '@/util/reference';
+import { isDigit, isAlpha } from '@/util/reference';
 
 const emptyData = '';
 const identifierMap = new Map<string, TokenType>([
@@ -72,6 +72,11 @@ export class Scanner {
       this.next();
     }
   }
+  private getAlphas() {
+    while (!this.isAtEnd() && isAlpha(this.peek())) {
+      this.next();
+    }
+  }
   private matchR1C1() {
     if (this.match('[')) {
       this.match('-');
@@ -85,51 +90,88 @@ export class Scanner {
       this.getDigits();
     }
   }
-  private matchScientificCounting() {
+  private matchScientificCounting(isFloat: boolean) {
     if (this.match('E') || this.match('e')) {
       // 1E-10 1E+10
       if (this.match('+') || this.match('-')) {
         this.getDigits();
-        this.addToken(TokenType.NUMBER);
+        this.addToken(isFloat ? TokenType.FLOAT : TokenType.INTEGER);
         return true;
       }
       if (isDigit(this.peek())) {
         this.getDigits();
-        this.addToken(TokenType.NUMBER);
+        this.addToken(isFloat ? TokenType.FLOAT : TokenType.INTEGER);
         return true;
       }
+      // 1E or 1.1E not valid
       throw new CustomError('#VALUE!');
     }
     return false;
   }
   private number() {
     this.getDigits();
-    const check1 = this.matchScientificCounting();
+    const check1 = this.matchScientificCounting(false);
     if (check1) {
       return;
     }
+    let float = false;
     if (this.match('.')) {
+      float = true;
       this.getDigits();
     }
-    const check2 = this.matchScientificCounting();
+    const check2 = this.matchScientificCounting(true);
     if (check2) {
       return;
     }
-    this.addToken(TokenType.NUMBER);
+    this.addToken(float ? TokenType.FLOAT : TokenType.INTEGER);
   }
   private addIdentifier() {
     let text = this.list.slice(this.start, this.current).join('');
-    const temp = identifierMap.get(text.toUpperCase());
+    const t = text.toUpperCase();
+    const temp = identifierMap.get(t);
     let type: TokenType = TokenType.IDENTIFIER;
     if (temp) {
-      text = text.toUpperCase();
+      text = t;
       type = temp;
     }
+    if (/^[A-Z]+\$\d+$/.test(t)) {
+      text = t;
+      type = TokenType.MIXED_CELL;
+    }
+
     this.tokens.push(new Token(type, text));
   }
   private scanToken() {
     const c = this.next();
     switch (c) {
+      case '$': {
+        if (isAlpha(this.peek())) {
+          this.getAlphas();
+          if (this.match('$')) {
+            if (isDigit(this.peek())) {
+              // $A$1 absolute reference
+              this.getDigits();
+              this.addToken(TokenType.ABSOLUTE_CELL);
+            } else {
+              this.addToken(TokenType.IDENTIFIER);
+            }
+          } else if (isDigit(this.peek())) {
+            // $A1 mixed reference
+            this.getDigits();
+            this.addToken(TokenType.MIXED_CELL);
+          } else {
+            // $A
+            this.addToken(TokenType.ABSOLUTE_CELL);
+          }
+        } else if (isDigit(this.peek())) {
+          // $1 absolute reference
+          this.getDigits();
+          this.addToken(TokenType.ABSOLUTE_CELL);
+        } else {
+          this.addToken(TokenType.IDENTIFIER);
+        }
+        break;
+      }
       case 'r':
       case 'R': {
         this.matchR1C1();
@@ -200,6 +242,9 @@ export class Scanner {
       case '"':
         this.string(c);
         break;
+      case "'":
+        this.string(c);
+        break;
       case '!':
         this.addToken(TokenType.EXCLAMATION);
         break;
@@ -212,7 +257,6 @@ export class Scanner {
       case '}':
         this.addToken(TokenType.RIGHT_BRACE);
         break;
-
       case ' ':
         // while (!this.isAtEnd() && this.peek() === ' ') {
         // this.next();

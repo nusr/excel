@@ -5,9 +5,9 @@ describe('cell ranges', () => {
   describe('A1 style', () => {
     const list: BlockType[] = [
       ['A1', [getToken(TokenType.IDENTIFIER, 'A1')]],
-      ['$A$1', [getToken(TokenType.IDENTIFIER, '$A$1')]],
-      ['A$1', [getToken(TokenType.IDENTIFIER, 'A$1')]],
-      ['$A1', [getToken(TokenType.IDENTIFIER, '$A1')]],
+      ['$A$1', [getToken(TokenType.ABSOLUTE_CELL, '$A$1')]],
+      ['A$1', [getToken(TokenType.MIXED_CELL, 'A$1')]],
+      ['$A1', [getToken(TokenType.MIXED_CELL, '$A1')]],
       [
         'A10:A20',
         [
@@ -27,17 +27,17 @@ describe('cell ranges', () => {
       [
         '5:5',
         [
-          getToken(TokenType.NUMBER, '5'),
+          getToken(TokenType.INTEGER, '5'),
           getToken(TokenType.COLON, ':'),
-          getToken(TokenType.NUMBER, '5'),
+          getToken(TokenType.INTEGER, '5'),
         ],
       ],
       [
         '5:10',
         [
-          getToken(TokenType.NUMBER, '5'),
+          getToken(TokenType.INTEGER, '5'),
           getToken(TokenType.COLON, ':'),
-          getToken(TokenType.NUMBER, '10'),
+          getToken(TokenType.INTEGER, '10'),
         ],
       ],
       [

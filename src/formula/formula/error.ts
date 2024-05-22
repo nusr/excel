@@ -40,3 +40,9 @@ export function mustOneNumber(list: any[]): number {
 export function mustEmpty(list: any[]) {
   assert(list.length === 0);
 }
+
+export function isRelativeReference(value: string) {
+  const realValue = value.toUpperCase();
+  return /^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue);
+}
+

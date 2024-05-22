@@ -201,5 +201,20 @@ describe('parseFormula reference', () => {
         expressionStr: 'Sheet1!$A1',
       });
     });
+    test('space', () => {
+      const cellDataMap = new CellDataMapImpl();
+      cellDataMap.set(
+        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '7' },
+        [[1, 2, 3, 4, 5]],
+      );
+      cellDataMap.setSheetNameMap({
+        'merge cell': '7',
+      });
+      expect(parseFormula("='merge cell'!A1", cellDataMap)).toEqual({
+        isError: false,
+        result: 1,
+        expressionStr: "'merge cell'!A1",
+      });
+    });
   });
 });

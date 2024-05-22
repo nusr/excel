@@ -19,6 +19,5 @@ export type RequestMessageType = {
 };
 
 export type ResponseMessageType = {
-  sheetId: string;
-  list: Array<{ key: string; newValue: ResultType }>;
+  list: Array<{ key: string; newValue: ResultType; sheetId: string }>;
 };

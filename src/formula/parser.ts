@@ -11,8 +11,9 @@ import {
   LiteralExpression,
   CellRangeExpression,
   R1C1Expression,
+  CellExpression,
 } from './expression';
-import { CustomError } from './formula';
+import { CustomError, isRelativeReference } from './formula';
 import { ERROR_SET } from '@/util/constant';
 
 export class Parser {
@@ -103,11 +104,45 @@ export class Parser {
     return expr;
   }
   private cellRange(): Expression {
-    let expr = this.call();
-    while (this.match(TokenType.COLON, TokenType.EXCLAMATION)) {
+    let expr = this.sheetRange();
+    while (this.match(TokenType.COLON)) {
       const operator = this.previous();
+      const right = this.sheetRange();
+      const realRight = this.convertToCellExpression(right);
+      const realLeft = this.convertToCellExpression(expr);
+      expr = new CellRangeExpression(realLeft, operator, realRight);
+    }
+    return expr;
+  }
+  private convertToCellExpression(expr: Expression): CellExpression {
+    if (expr instanceof CellExpression) {
+      return expr;
+    }
+    if (
+      expr instanceof TokenExpression &&
+      isRelativeReference(expr.value.value)
+    ) {
+      return new CellExpression(expr.value, 'relative', undefined);
+    }
+    if (
+      expr instanceof LiteralExpression &&
+      expr.value.type === TokenType.INTEGER
+    ) {
+      return new CellExpression(expr.value, 'relative', undefined);
+    }
+    throw new CustomError('#NAME?');
+  }
+  private sheetRange(): Expression {
+    let expr = this.call();
+    if (this.match(TokenType.EXCLAMATION)) {
       const right = this.call();
-      expr = new CellRangeExpression(expr, operator, right);
+      if (
+        expr instanceof TokenExpression ||
+        expr instanceof LiteralExpression
+      ) {
+        const cell = this.convertToCellExpression(right);
+        return new CellExpression(cell.value, cell.type, expr.value);
+      }
     }
     return expr;
   }
@@ -145,13 +180,22 @@ export class Parser {
     }
     if (
       this.match(
-        TokenType.NUMBER,
+        TokenType.INTEGER,
+        TokenType.FLOAT,
         TokenType.STRING,
         TokenType.TRUE,
         TokenType.FALSE,
       )
     ) {
       return new LiteralExpression(this.previous());
+    }
+    if (this.match(TokenType.ABSOLUTE_CELL)) {
+      const token = this.previous();
+      return new CellExpression(token, 'absolute', undefined);
+    }
+    if (this.match(TokenType.MIXED_CELL)) {
+      const token = this.previous();
+      return new CellExpression(token, 'mixed', undefined);
     }
 
     if (this.match(TokenType.IDENTIFIER)) {

@@ -2,7 +2,7 @@ import allFormulas from './formula';
 export {
   parseFormula,
   CellDataMapImpl,
-  DefinedNamesMapImpl as VariableMapImpl,
+  DefinedNamesMapImpl,
 } from './eval';
 export { CustomError } from './formula';
 export { allFormulas };

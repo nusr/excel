@@ -6,7 +6,6 @@ import {
   CellDataMap,
   DefinedNamesMap,
   FormulaType,
-  ReferenceType,
   FormulaKeys,
   ResultType,
 } from '@/types';
@@ -26,8 +25,7 @@ import {
   TokenExpression,
   GroupExpression,
 } from './expression';
-import { CustomError, assert } from './formula';
-import { Token } from './token';
+import { CustomError, assert, isRelativeReference } from './formula';
 
 export class Interpreter implements Visitor {
   private readonly expressions: Expression[];
@@ -155,7 +153,8 @@ export class Interpreter implements Visitor {
     switch (type) {
       case TokenType.STRING:
         return value;
-      case TokenType.NUMBER: {
+      case TokenType.FLOAT:
+      case TokenType.INTEGER: {
         const [check, num] = parseNumber(value);
         if (check) {
           return num;
@@ -172,7 +171,7 @@ export class Interpreter implements Visitor {
   }
 
   visitTokenExpression(expr: TokenExpression) {
-    const { value, type } = expr.value;
+    const { value } = expr.value;
     const defineName = value.toLowerCase();
     if (this.definedNamesMap.get(defineName)) {
       const temp = this.definedNamesMap.get(defineName)!;
@@ -183,22 +182,11 @@ export class Interpreter implements Visitor {
     if (func) {
       return func;
     }
-    const realValue = funcName;
-    const newToken = new Token(type, realValue);
-    if (
-      /^\$[A-Z]+\$\d+$/.test(realValue) ||
-      /^\$[A-Z]+$/.test(realValue) ||
-      /^\$\d+$/.test(realValue)
-    ) {
-      return this.addCellExpression(newToken, 'absolute', undefined);
+    if (isRelativeReference(value)) {
+      return this.visitCellExpression(
+        new CellExpression(expr.value, 'relative', undefined),
+      );
     }
-    if (/^\$[A-Z]+\d+$/.test(realValue) || /^[A-Z]+\$\d+$/.test(realValue)) {
-      return this.addCellExpression(newToken, 'mixed', undefined);
-    }
-    if (/^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue)) {
-      return this.addCellExpression(newToken, 'relative', undefined);
-    }
-
     throw new CustomError('#NAME?');
   }
   visitUnaryExpression(data: UnaryExpression): any {
@@ -218,31 +206,13 @@ export class Interpreter implements Visitor {
   visitCellRangeExpression(expr: CellRangeExpression): any {
     switch (expr.operator.type) {
       case TokenType.COLON: {
-        const left = this.convertToCellExpression(expr.left);
-        const right = this.convertToCellExpression(expr.right);
-        if (left && right) {
-          const a = this.visitCellExpression(left);
-          const b = this.visitCellExpression(right);
-          const result = mergeRange(a, b);
-          if (!result) {
-            throw new CustomError('#NAME?');
-          }
-          return result;
-        } else {
+        const a = this.visitCellExpression(expr.left);
+        const b = this.visitCellExpression(expr.right);
+        const result = mergeRange(a, b);
+        if (!result) {
           throw new CustomError('#NAME?');
         }
-      }
-      case TokenType.EXCLAMATION: {
-        const right = this.convertToCellExpression(expr.right);
-        if (!right) {
-          throw new CustomError('#REF!');
-        }
-        if (expr.left instanceof TokenExpression) {
-          return this.visitCellExpression(
-            new CellExpression(right.value, right.type, expr.left.value),
-          );
-        }
-        throw new CustomError('#NAME?');
+        return result;
       }
       default:
         throw new CustomError('#NAME?');
@@ -263,42 +233,6 @@ export class Interpreter implements Visitor {
   }
   private evaluate(expr: Expression) {
     return expr.accept(this);
-  }
-  private convertToCellExpression(
-    expr: Expression,
-  ): CellExpression | undefined {
-    if (expr instanceof CellExpression) {
-      return expr;
-    }
-    if (expr instanceof TokenExpression) {
-      return new CellExpression(
-        new Token(TokenType.IDENTIFIER, expr.value.value.toUpperCase()),
-        'relative',
-        undefined,
-      );
-    }
-    if (expr instanceof LiteralExpression) {
-      if (
-        expr.value.type === TokenType.NUMBER &&
-        /^\d+$/.test(expr.value.value)
-      ) {
-        return new CellExpression(
-          new Token(TokenType.IDENTIFIER, expr.value.value),
-          'relative',
-          undefined,
-        );
-      }
-    }
-    return undefined;
-  }
-  private addCellExpression(
-    value: Token,
-    type: ReferenceType,
-    sheetName: Token | undefined,
-  ) {
-    value.value = value.value.toUpperCase();
-    const result = new CellExpression(value, type, sheetName);
-    return this.visitCellExpression(result);
   }
   private getRangeCellValue(value: any): ResultType {
     if (value instanceof SheetRange) {
