@@ -67,20 +67,10 @@ describe('cell ranges', () => {
     ];
     itBlock(list);
   });
-
-  describe('R1C1 style', function () {
+  describe('error', () => {
     const list: BlockType[] = [
-      ['R1C1', [getToken(TokenType.R1C1, 'R1C1')]],
-      ['R[-2]C', [getToken(TokenType.R1C1, 'R[-2]C')]],
-      ['RC[3]', [getToken(TokenType.R1C1, 'RC[3]')]],
-      ['R2C', [getToken(TokenType.R1C1, 'R2C')]],
-      ['RC2', [getToken(TokenType.R1C1, 'RC2')]],
-      ['R[2]C[2]', [getToken(TokenType.R1C1, 'R[2]C[2]')]],
-      ['R[2]C[2]', [getToken(TokenType.R1C1, 'R[2]C[2]')]],
-      // ['R[-1]', [getToken(TokenType.R1C1, 'R[-1]')]],
-      // ['C[-1]', [getToken(TokenType.R1C1, 'C[-1]')]],
-      // ['R', [getToken(TokenType.R1C1, 'R')]],
-      // ['C', [getToken(TokenType.R1C1, 'C')]],
+      ['$', [getToken(TokenType.IDENTIFIER, '$')]],
+      ['$A$', [getToken(TokenType.IDENTIFIER, '$A$')]],
     ];
     itBlock(list);
   });

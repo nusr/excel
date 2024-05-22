@@ -6,7 +6,7 @@ export type BlockType = [string, Token[]];
 export function itBlock(list: BlockType[]) {
   for (const item of list) {
     const [formula, expected] = item;
-    it(formula, () => {
+    test(formula, () => {
       const result = new Scanner(formula).scan();
       result.pop();
       expect(result).toEqual(expected);

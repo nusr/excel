@@ -80,7 +80,11 @@ export class Scanner {
   private matchR1C1() {
     if (this.match('[')) {
       this.match('-');
-      this.getDigits();
+      if (isDigit(this.peek())) {
+        this.getDigits();
+      } else {
+        throw new CustomError('#VALUE!');
+      }
       if (this.peek() !== ']') {
         throw new CustomError('#VALUE!');
       } else {
@@ -126,6 +130,9 @@ export class Scanner {
     this.addToken(float ? TokenType.FLOAT : TokenType.INTEGER);
   }
   private addIdentifier() {
+    while (!this.isAtEnd() && this.anyChar(this.peek())) {
+      this.next();
+    }
     let text = this.list.slice(this.start, this.current).join('');
     const t = text.toUpperCase();
     const temp = identifierMap.get(t);
@@ -153,7 +160,7 @@ export class Scanner {
               this.getDigits();
               this.addToken(TokenType.ABSOLUTE_CELL);
             } else {
-              this.addToken(TokenType.IDENTIFIER);
+              this.addIdentifier();
             }
           } else if (isDigit(this.peek())) {
             // $A1 mixed reference
@@ -168,7 +175,7 @@ export class Scanner {
           this.getDigits();
           this.addToken(TokenType.ABSOLUTE_CELL);
         } else {
-          this.addToken(TokenType.IDENTIFIER);
+          this.addIdentifier();
         }
         break;
       }
@@ -271,9 +278,6 @@ export class Scanner {
         if (isDigit(c)) {
           this.number();
         } else if (this.anyChar(c)) {
-          while (!this.isAtEnd() && this.anyChar(this.peek())) {
-            this.next();
-          }
           this.addIdentifier();
         } else {
           throw new CustomError('#ERROR!');

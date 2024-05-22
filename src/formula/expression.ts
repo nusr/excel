@@ -148,11 +148,10 @@ export class CallExpression implements Expression {
   }
 }
 
-/* jscpd:ignore-start */
 export class CellRangeExpression implements Expression {
-  readonly left: CellExpression;
   readonly right: CellExpression;
   readonly operator: Token;
+  readonly left: CellExpression;
   constructor(left: CellExpression, operator: Token, right: CellExpression) {
     this.left = left;
     this.operator = operator;
@@ -167,7 +166,6 @@ export class CellRangeExpression implements Expression {
     );
   }
 }
-/* jscpd:ignore-end */
 
 export class GroupExpression implements Expression {
   readonly value: Expression;

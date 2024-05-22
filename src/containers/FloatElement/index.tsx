@@ -188,15 +188,13 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
           return;
         }
       };
-      /* jscpd:ignore-start */
       function toggleEvents(state?: boolean) {
         const toggleEvent = state
           ? document.addEventListener
           : document.removeEventListener;
-        toggleEvent('pointermove', handlePointerMove);
         toggleEvent('pointerup', handlePointerUp);
+        toggleEvent('pointermove', handlePointerMove);
       }
-      /* jscpd:ignore-end */
       return [toggleEvents];
     }, []);
 

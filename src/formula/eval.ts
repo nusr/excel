@@ -101,9 +101,6 @@ export class CellDataMapImpl implements CellDataMap {
     return list;
   }
   convertSheetNameToSheetId(sheetName: string): string {
-    if (!sheetName) {
-      return '';
-    }
     return this.sheetNameMap[sheetName] || '';
   }
   getCurrentCell() {

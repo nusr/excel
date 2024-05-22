@@ -1,6 +1,7 @@
 import { columnNameToInt, rowLabelToInt, intToColumnName } from './convert';
 import { Coordinate, IRange, ReferenceType } from '@/types';
 import { SheetRange } from './range';
+import { XLSX_MAX_COL_COUNT, XLSX_MAX_ROW_COUNT } from './constant';
 
 export const isAlpha = (char: string) =>
   (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z');
@@ -68,7 +69,12 @@ function parseCell(
   } else {
     col = columnNameToInt(colText);
   }
-  if (row < 0 || col < 0) {
+  if (
+    row < 0 ||
+    col < 0 ||
+    col >= XLSX_MAX_COL_COUNT ||
+    row >= XLSX_MAX_ROW_COUNT
+  ) {
     return undefined;
   }
   const range = new SheetRange(
@@ -204,7 +210,12 @@ export function parseR1C1(
   } else {
     col = parseNumber(colText, activeCell.col);
   }
-  if (row < 0 || col < 0) {
+  if (
+    col >= XLSX_MAX_COL_COUNT ||
+    row >= XLSX_MAX_ROW_COUNT ||
+    row < 0 ||
+    col < 0
+  ) {
     return undefined;
   }
   const range = new SheetRange(row, col, 1, 1, '');
