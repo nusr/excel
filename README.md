@@ -34,9 +34,9 @@ src
 ├── formula        # Recursive descent parser parse Excel formulas
 ├── i18n           # i18n
 ├── model          # spreadsheet model
+├── theme          # dark mode
 ├── types          # TypeScript types
 └── util           # common methods
-    └── theme      # dark mode
 ```
 
 ## All Dependencies
@@ -49,6 +49,8 @@ src
 
 ## Supported Features
 
+- [x] Worker parse formulas
+- [x] OffScreenCanvas
 - [x] Undo
 - [x] Redo
 - [x] Copy

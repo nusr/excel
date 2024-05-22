@@ -28,6 +28,9 @@ export const DEFINED_NAME_REG_EXP = /^[a-zA-Z_][a-zA-Z0-9_.]*$/;
 export const FORMULA_MAX_PRECISION = 9;
 export const FORMULA_EDITOR_ROLE = '__FORMULA_EDITOR_ROLE__';
 
+export const DEFAULT_FORMAT_CODE = 'General';
+export const DEFAULT_TEXT_FORMAT_CODE = '@';
+
 export const ERROR_SET = new Set<ErrorTypes>([
   '#ERROR!',
   '#DIV/0!',

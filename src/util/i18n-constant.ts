@@ -1,5 +1,6 @@
 import type { ChartType } from 'chart.js';
 import { $ } from '@/i18n';
+import { DEFAULT_FORMAT_CODE, DEFAULT_TEXT_FORMAT_CODE } from './constant';
 
 export const CHART_TYPE_LIST: Array<{
   value: ChartType;
@@ -31,8 +32,6 @@ export const CHART_TYPE_LIST: Array<{
   },
 ];
 
-export const DEFAULT_FORMAT_CODE = 'General';
-export const DEFAULT_TEXT_FORMAT_CODE = '@';
 export const NUMBER_FORMAT_LIST: Array<{
   formatCode: string;
   id: number;

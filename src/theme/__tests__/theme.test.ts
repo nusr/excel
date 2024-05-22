@@ -1,4 +1,4 @@
-import { setTheme, getTheme, convertColorToDark } from '../theme';
+import { setTheme, getTheme, convertColorToDark } from '../';
 
 describe('theme.test.ts', () => {
   afterEach(() => {

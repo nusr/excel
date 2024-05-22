@@ -1,18 +1,16 @@
+import { splitToWords } from '@/util/split';
+import { getThemeColor, sizeConfig } from '@/theme';
+import { npx, dpr } from '@/util/dpr';
+import { isEmpty } from '@/util/lodash';
+import { makeFont } from '@/util/style';
 import {
-  npx,
   DEFAULT_FONT_SIZE,
-  makeFont,
   ERROR_SET,
-  dpr,
-  isEmpty,
-  splitToWords,
-  sizeConfig,
-  getThemeColor,
   MERGE_CELL_LINE_BREAK,
   DEFAULT_FORMAT_CODE,
   DEFAULT_LINE_WIDTH,
   BORDER_TYPE_MAP,
-} from '@/util';
+} from '@/util/constant';
 import {
   CanvasOverlayPosition,
   ErrorTypes,
@@ -25,13 +23,14 @@ import {
   EVerticalAlign,
   BorderType,
   BorderItem,
+  ThemeType,
 } from '@/types';
-import { numberFormat, isDateFormat } from '@/model';
+import { numberFormat, isDateFormat } from '@/model/numberFormat';
 
 const measureTextMap = new Map<string, IWindowSize>();
 
 export function measureText(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   char: string,
 ): IWindowSize {
   const mapKey = `${char}__${ctx.font}`;
@@ -50,7 +49,7 @@ export function measureText(
 }
 
 export function fillRect(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   x: number,
   y: number,
   width: number,
@@ -58,8 +57,9 @@ export function fillRect(
 ): void {
   ctx.fillRect(npx(x), npx(y), npx(width), npx(height));
 }
+/* jscpd:ignore-start */
 export function strokeRect(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   x: number,
   y: number,
   width: number,
@@ -69,7 +69,7 @@ export function strokeRect(
 }
 
 export function clearRect(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   x: number,
   y: number,
   width: number,
@@ -77,9 +77,10 @@ export function clearRect(
 ): void {
   ctx.clearRect(npx(x), npx(y), npx(width), npx(height));
 }
+/* jscpd:ignore-end */
 
 export function fillText(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   text: string,
   x: number,
   y: number,
@@ -88,7 +89,7 @@ export function fillText(
 }
 
 export function drawLines(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   pointList: Point[],
 ): void {
   if (pointList.length === 0) {
@@ -105,7 +106,7 @@ export function drawLines(
 }
 
 export function drawTriangle(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   point1: Point,
   point2: Point,
   point3: Point,
@@ -168,7 +169,7 @@ function splitWords(
 }
 
 export function drawAntLine(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   x: number,
   y: number,
   width: number,
@@ -215,10 +216,11 @@ function getLineDash(type?: BorderType) {
 }
 
 export function renderBorderItem(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   cellInfo: CanvasOverlayPosition,
   borderItem: BorderItem | undefined,
   position: 'top' | 'bottom' | 'left' | 'right',
+  theme?: ThemeType,
 ) {
   if (!borderItem) {
     return;
@@ -249,7 +251,7 @@ export function renderBorderItem(
   }
   const { type, color } = borderItem;
   ctx.lineWidth = BORDER_TYPE_MAP[type];
-  ctx.strokeStyle = color || getThemeColor('black');
+  ctx.strokeStyle = color || getThemeColor('black', theme);
   const lineDash = getLineDash(type);
   if (type === 'double') {
     list = getDoubleLine(list, position, true);
@@ -265,11 +267,12 @@ export function renderBorderItem(
 
 type TextItem = { str: string; width: number; height: number };
 export function renderCell(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   cellInfo: CanvasOverlayPosition,
   value: ResultType,
   style?: Partial<StyleType>,
   isMergeContent?: boolean,
+  theme?: ThemeType,
 ): IWindowSize {
   const result: IWindowSize = { height: 0, width: 0 };
   if (value === '' && isEmpty(style)) {
@@ -292,9 +295,9 @@ export function renderCell(
     fillRect(ctx, cellInfo.left, cellInfo.top, cellInfo.width, cellInfo.height);
   }
   // error text
-  let fillStyle = style?.fontColor || getThemeColor('contentColor');
+  let fillStyle = style?.fontColor || getThemeColor('contentColor', theme);
   if (ERROR_SET.has(text as ErrorTypes)) {
-    fillStyle = getThemeColor('errorFormulaColor');
+    fillStyle = getThemeColor('errorFormulaColor', theme);
   }
 
   ctx.font = font;

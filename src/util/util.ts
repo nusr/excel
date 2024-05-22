@@ -48,19 +48,6 @@ export function getDefaultSheetInfo(
   };
 }
 
-export function splitToWords(str: string): string[] {
-  if (!str) {
-    return [];
-  }
-  // unicode
-  if (typeof Intl === 'undefined' || typeof Intl.Segmenter !== 'function') {
-    // firefox
-    return [...str];
-  }
-  const list = new Intl.Segmenter([], { granularity: 'word' }).segment(str);
-  const arr = [...list];
-  return arr.map((x) => x.segment);
-}
 export function convertStringToResultType(value: any): ResultType {
   if (typeof value === 'string') {
     const temp = value.toUpperCase();
@@ -179,4 +166,8 @@ export function sleep(ms: number) {
 
 export function isTestEnv(): boolean {
   return process.env.NODE_ENV === 'test';
+}
+
+export function isMac() {
+  return navigator.userAgent.indexOf('Mac OS X') > -1;
 }

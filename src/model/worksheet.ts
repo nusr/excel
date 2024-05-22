@@ -11,9 +11,10 @@ import {
   EMergeCellType,
   ModelCellType,
   EHorizontalAlign,
-  RequestMessageType,
+  RequestFormula,
   ResponseMessageType,
   InterpreterResult,
+  ChangeEventType,
 } from '@/types';
 import {
   coordinateToString,
@@ -22,6 +23,7 @@ import {
   FORMULA_PREFIX,
   isEmpty,
   deepEqual,
+  workerSet,
   stringToCoordinate,
   MERGE_CELL_LINE_BREAK,
   convertStringToResultType,
@@ -33,11 +35,9 @@ import { parseFormula, CustomError } from '@/formula';
 export class Worksheet implements IWorksheet {
   private worksheets: WorkBookJSON['worksheets'] = {};
   private model: IModel;
-  private worker: Worker | undefined = undefined;
   private parseFormulaResolve: (value: boolean) => void = () => {};
-  constructor(model: IModel, worker?: Worker) {
+  constructor(model: IModel) {
     this.model = model;
-    this.worker = worker;
     this.initWorker();
   }
 
@@ -82,7 +82,7 @@ export class Worksheet implements IWorksheet {
     const dataList: Array<{ value: ModelCellType; row: number; col: number }> =
       [];
     iterateRange(range, this.model.getSheetInfo(range.sheetId), (row, col) => {
-      const cellInfo = this.model.getCell({
+      const cellInfo = this.getCell({
         row,
         col,
         rowCount: 1,
@@ -260,7 +260,8 @@ export class Worksheet implements IWorksheet {
     if (isEmpty(sheetData)) {
       return check;
     }
-    if (!this.worker) {
+    const worker = workerSet.get().worker;
+    if (!worker) {
       const cache = new Map<string, InterpreterResult>();
       for (const [k, data] of Object.entries(sheetData)) {
         if (data?.formula) {
@@ -284,17 +285,18 @@ export class Worksheet implements IWorksheet {
     }
 
     return new Promise((resolve) => {
-      const definedNames: RequestMessageType['definedNames'] = {};
+      const definedNames: RequestFormula['definedNames'] = {};
       for (const item of this.model.getDefineNameList()) {
         definedNames[item.name] = item.range;
       }
-      const data: RequestMessageType = {
+      const data: RequestFormula = {
         worksheets: this.worksheets,
         definedNames,
         currentSheetId: this.model.getCurrentSheetId(),
         workbook: this.model.getSheetList(),
+        status: 'formula',
       };
-      this.worker!.postMessage(data);
+      worker.postMessage(data);
       this.parseFormulaResolve = resolve;
     });
   }
@@ -676,27 +678,56 @@ export class Worksheet implements IWorksheet {
     const item = this.model.getSheetList().find((v) => v.name === sheetName);
     return item?.sheetId || '';
   };
-  private initWorker() {
-    if (!this.worker) {
+  private updateColAndRow(
+    rowMap: Record<string, number>,
+    colMap: Record<string, number>,
+  ) {
+    const rowKeys = Object.keys(rowMap);
+    const colKeys = Object.keys(colMap);
+    if (colKeys.length === 0 && rowKeys.length === 0) {
       return;
     }
-    this.worker.addEventListener(
+    for (const [row, h] of Object.entries(rowMap)) {
+      const r = parseInt(row, 10);
+      if (h > 0 && this.model.getRowHeight(r).len !== h) {
+        this.model.setRowHeight(r, h);
+      }
+    }
+    for (const [col, w] of Object.entries(colMap)) {
+      const c = parseInt(col, 10);
+      if (w > 0 && this.model.getColWidth(c).len !== w) {
+        this.model.setColWidth(c, w);
+      }
+    }
+    this.model.emitChange(new Set<ChangeEventType>(['noHistory']));
+  }
+  private initWorker() {
+    const worker = workerSet.get().worker;
+    if (!worker) {
+      return;
+    }
+    worker.addEventListener(
       'message',
       (event: MessageEvent<ResponseMessageType>) => {
-        const { list } = event.data;
-        for (const item of list) {
-          const id = item.sheetId;
-          this.worksheets[id] = this.worksheets[id] || {};
-          const oldValue = this.worksheets[id][item.key].value;
-          this.worksheets[id][item.key].value = item.newValue;
-          this.model.push({
-            type: 'worksheets',
-            key: `${id}.${item.key}.value`,
-            newValue: item.newValue,
-            oldValue: oldValue,
-          });
+        if (event.data.status === 'formula') {
+          const { list } = event.data;
+          for (const item of list) {
+            const id = item.sheetId;
+            this.worksheets[id] = this.worksheets[id] || {};
+            const oldValue = this.worksheets[id][item.key].value;
+            this.worksheets[id][item.key].value = item.newValue;
+            this.model.push({
+              type: 'worksheets',
+              key: `${id}.${item.key}.value`,
+              newValue: item.newValue,
+              oldValue: oldValue,
+            });
+          }
+          this.parseFormulaResolve(true);
+        } else if (event.data.status === 'render') {
+          const { rowMap, colMap } = event.data;
+          this.updateColAndRow(rowMap, colMap);
         }
-        this.parseFormulaResolve(true);
       },
     );
   }

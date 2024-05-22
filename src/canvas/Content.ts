@@ -1,11 +1,10 @@
 import {
-  dpr,
   headerSizeSet,
-  canvasSizeSet,
   CELL_WIDTH,
   CELL_HEIGHT,
+  DEFAULT_LINE_WIDTH,
 } from '@/util';
-import { resizeCanvas, renderCell, clearRect, renderBorderItem } from './util';
+import { renderCell, renderBorderItem } from './util';
 import { ContentView, IController, IRange, ContentParams } from '@/types';
 
 export class Content implements ContentView {
@@ -13,24 +12,14 @@ export class Content implements ContentView {
   private controller: IController;
   private rowMap = new Map<number, number>();
   private colMap = new Map<number, number>();
-  constructor(controller: IController, canvas: HTMLCanvasElement) {
+  constructor(controller: IController, ctx: CanvasRenderingContext2D) {
     this.controller = controller;
-    const ctx = canvas.getContext('2d')!;
     this.ctx = ctx;
-    const size = dpr();
-    this.ctx.scale(size, size);
-  }
-  getCanvas() {
-    return this.ctx.canvas;
-  }
-  resize() {
-    const { width, height } = canvasSizeSet.get();
-    resizeCanvas(this.ctx.canvas, width, height);
   }
   render(params: ContentParams) {
     this.ctx.textAlign = 'left';
     this.ctx.textBaseline = 'top';
-    this.clear();
+    this.ctx.lineWidth = DEFAULT_LINE_WIDTH * 2;
     this.renderContent(params);
   }
   check() {
@@ -55,11 +44,6 @@ export class Content implements ContentView {
       }
       return check;
     }, true);
-  }
-
-  private clear() {
-    const { width, height } = canvasSizeSet.get();
-    clearRect(this.ctx, 0, 0, width, height);
   }
 
   private renderCell(

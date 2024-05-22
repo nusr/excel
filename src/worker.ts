@@ -4,25 +4,47 @@ import {
   ResultType,
   ResponseMessageType,
   InterpreterResult,
+  ResponseFormula,
   Coordinate,
+  RequestFormula,
 } from './types';
 import { parseFormula, CustomError } from './formula';
 import { iterateRange } from '@/util/range';
 import { coordinateToString, stringToCoordinate } from '@/util/util';
+import { OffScreenWorker } from './canvas/offScreenWorker';
+import { setDpr } from '@/util/dpr';
 
+let offScreen: OffScreenWorker;
 self.addEventListener('message', (event: MessageEvent<RequestMessageType>) => {
-  const list = parseAllFormulas(event.data);
-  const data: ResponseMessageType = {
-    list,
-  };
-  self.postMessage(data);
+  if (event.data.status === 'formula') {
+    const list = parseAllFormulas(event.data);
+    const data: ResponseFormula = {
+      list,
+      status: 'formula',
+    };
+    self.postMessage(data);
+  } else if (event.data.status === 'init') {
+    offScreen = new OffScreenWorker(event.data.canvas);
+    setDpr(event.data.dpr);
+  } else if (event.data.status === 'render') {
+    const result = offScreen.render(event.data);
+    if (result) {
+      const data: ResponseMessageType = {
+        ...result,
+        status: 'render',
+      };
+      self.postMessage(data);
+    }
+  } else if (event.data.status === 'resize') {
+    offScreen.resize(event.data);
+  }
 });
 
-function parseAllFormulas(eventData: RequestMessageType) {
+function parseAllFormulas(eventData: RequestFormula) {
   const { currentSheetId, worksheets } = eventData;
   const formulaCache = new Map<string, InterpreterResult>();
   const sheetData = worksheets[currentSheetId] || {};
-  const list: ResponseMessageType['list'] = [];
+  const list: ResponseFormula['list'] = [];
   for (const [k, data] of Object.entries(sheetData)) {
     if (data?.formula) {
       const result = parseFormulaItem(
@@ -46,10 +68,10 @@ function parseAllFormulas(eventData: RequestMessageType) {
 
 function parseFormulaItem(
   formula: string,
-  eventData: RequestMessageType,
+  eventData: RequestFormula,
   cache: Map<string, InterpreterResult>,
   coord: Coordinate,
-  list: ResponseMessageType['list'],
+  list: ResponseFormula['list'],
 ): InterpreterResult {
   const temp = cache.get(formula);
   if (temp) {
@@ -81,7 +103,13 @@ function parseFormulaItem(
             const f = sheetData[key].formula;
             const oldValue = sheetData[key].value;
             if (f) {
-              const t = parseFormulaItem(f, eventData, cache, { row: r, col: c }, list);
+              const t = parseFormulaItem(
+                f,
+                eventData,
+                cache,
+                { row: r, col: c },
+                list,
+              );
               if (t.result !== oldValue) {
                 list.push({ key, newValue: t.result, sheetId: realSheetId });
               }

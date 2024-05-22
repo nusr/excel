@@ -227,10 +227,18 @@ function getIp() {
 }
 
 async function buildWorker() {
-  const options = buildUMD(path.join(distDir, 'worker.js'));
-  options.entryPoints = [workPath];
-  options.minify = !isDev;
-  await build(options);
+  if (isDev) {
+    const options = buildUMD(path.join(distDir, 'worker.js'));
+    options.entryPoints = [workPath];
+    options.minify = false;
+    const ctx = await context(options);
+    await ctx.watch();
+  } else {
+    const options = buildUMD(path.join(distDir, 'worker.js'));
+    options.entryPoints = [workPath];
+    options.minify = !isDev;
+    await build(options);
+  }
 }
 
 /**
@@ -239,7 +247,6 @@ async function buildWorker() {
  */
 async function buildDev(options) {
   const ctx = await context(options);
-
   await ctx.watch();
   const { port } = await ctx.serve({
     servedir: distDir,

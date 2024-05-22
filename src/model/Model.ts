@@ -42,7 +42,7 @@ export class Model implements IModel {
   private mergeCellManager: MergeCell;
   private rowManager: RowManager;
   private colManager: ColManager;
-  constructor(worker?: Worker) {
+  constructor() {
     this.history = new History({
       undo: this.historyUndo,
       redo: this.historyRedo,
@@ -53,7 +53,7 @@ export class Model implements IModel {
     this.rangeMapManager = new RangeMap(this);
     this.drawingsManager = new Drawing(this);
     this.definedNameManager = new DefinedName(this);
-    this.worksheetManager = new Worksheet(this, worker);
+    this.worksheetManager = new Worksheet(this);
     this.mergeCellManager = new MergeCell(this);
     this.rowManager = new RowManager(this);
     this.colManager = new ColManager(this);

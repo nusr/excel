@@ -29,7 +29,11 @@ if (location.hostname !== 'localhost') {
 
 const domNode = document.getElementById('root')!;
 
-const isUseWorker = true;
+let isUseWorker = true;
+
+if (process.env.NODE_ENV === 'production') {
+  isUseWorker = true;
+}
 
 const worker: Worker | undefined =
   isUseWorker && typeof Worker === 'function'

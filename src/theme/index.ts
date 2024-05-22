@@ -16,9 +16,11 @@ export function setTheme(value: ThemeType) {
   document.documentElement.setAttribute(themeKey, value);
 }
 export function getTheme(): ThemeType {
-  const l = sessionStorage.getItem(themeKey);
-  if (l && (l === 'dark' || l === 'light')) {
-    return l as ThemeType;
+  if (typeof sessionStorage !== 'undefined') {
+    const l = sessionStorage.getItem(themeKey);
+    if (l && (l === 'dark' || l === 'light')) {
+      return l as ThemeType;
+    }
   }
   if (typeof matchMedia === 'function') {
     const result = matchMedia('(prefers-color-scheme: dark)').matches
@@ -29,8 +31,8 @@ export function getTheme(): ThemeType {
   return 'light';
 }
 
-export function getThemeColor(key: keyof typeof lightColor) {
-  if (getTheme() === 'dark') {
+export function getThemeColor(key: keyof typeof lightColor, type?: ThemeType) {
+  if (type === 'dark' || getTheme() === 'dark') {
     return darkColor[key];
   } else {
     return lightColor[key];

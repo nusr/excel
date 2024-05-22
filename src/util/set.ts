@@ -30,3 +30,5 @@ export const headerSizeSet = new BaseSet<IWindowSize>({
   width: COL_TITLE_WIDTH,
   height: ROW_TITLE_HEIGHT,
 });
+
+export const workerSet = new BaseSet<{ worker?: Worker }>({});

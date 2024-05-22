@@ -11,7 +11,7 @@ export * from './debug';
 export * from './isSupportFontFamily';
 export * from './copy';
 export * from './lodash';
-export * from './theme';
+export * from '../theme';
 export * from './font';
 export * from './event';
 export * from './saveAs';

@@ -1,6 +1,6 @@
 import SSF from 'ssf';
 import { NumberFormatValue } from '@/types';
-import { DEFAULT_FORMAT_CODE } from '@/util';
+import { DEFAULT_FORMAT_CODE } from '@/util/constant';
 
 type FormatOptions = {
   dateNF?: string;

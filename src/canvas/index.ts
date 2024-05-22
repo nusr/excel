@@ -1,6 +1,7 @@
+import { MainView, IController } from '@/types';
+import { workerSet } from '@/util';
 import { MainCanvas } from './Main';
-import { Content } from './Content';
-import { IController } from '@/types';
+import { OffScreenCanvas } from './offScreenCanvas';
 
 export { registerGlobalEvent } from './event';
 export {
@@ -13,18 +14,19 @@ export {
   scrollSheetToView,
 } from './shortcut';
 
-function createCanvas() {
-  const canvas = document.createElement('canvas');
-  canvas.style.display = 'none';
-  document.body.appendChild(canvas);
-  return canvas;
-}
+let instance: OffScreenCanvas;
+
 export function initRenderCanvas(
   controller: IController,
   canvas: HTMLCanvasElement,
-) {
-  const contentCanvas = createCanvas();
-  const content = new Content(controller, contentCanvas);
-  const mainCanvas = new MainCanvas(controller, canvas, content);
-  return mainCanvas;
+): MainView {
+  const worker = workerSet.get().worker;
+  if (!worker) {
+    return new MainCanvas(controller, canvas);
+  }
+  if (instance) {
+    return instance;
+  }
+  instance = new OffScreenCanvas(controller, canvas);
+  return instance;
 }

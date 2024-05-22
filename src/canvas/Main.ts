@@ -13,11 +13,11 @@ import {
 } from '@/util';
 import {
   EventType,
-  ContentView,
   CanvasOverlayPosition,
   IController,
   Point,
   IRange,
+  MainView,
   ContentParams,
 } from '@/types';
 import {
@@ -31,30 +31,29 @@ import {
   fillText,
 } from './util';
 import { getHeaderStyle } from './constant';
+import { Content } from './Content'
 
 const lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
 
-export class MainCanvas {
+export class MainCanvas implements MainView {
   private ctx: CanvasRenderingContext2D;
-  private content: ContentView;
+  private content: Content;
   private controller: IController;
   private isRendering = false;
   constructor(
     controller: IController,
     canvas: HTMLCanvasElement,
-    content: ContentView,
   ) {
     this.controller = controller;
     this.ctx = canvas.getContext('2d')!;
-    this.content = content;
     const size = dpr();
     this.ctx.scale(size, size);
+    this.content = new Content(controller, this.ctx);
   }
   resize() {
     const size = canvasSizeSet.get();
     const { width, height } = size;
     resizeCanvas(this.ctx.canvas, width, height);
-    this.content.resize();
   }
   private clear() {
     const { width, height } = canvasSizeSet.get();
@@ -68,15 +67,6 @@ export class MainCanvas {
       return;
     }
     this.isRendering = true;
-    const { changeSet } = params;
-    const checkContent =
-      changeSet.has('row') ||
-      changeSet.has('col') ||
-      changeSet.has('workbook') ||
-      changeSet.has('currentSheetId') ||
-      changeSet.has('cellStyle') ||
-      changeSet.has('cellValue') ||
-      changeSet.has('scroll');
     this.clear();
 
     this.ctx.strokeStyle = getThemeColor('primaryColor');
@@ -102,11 +92,7 @@ export class MainCanvas {
       contentWidth,
     });
     this.renderAntLine(result);
-
-    if (checkContent) {
-      this.content.render({ endRow, endCol, contentHeight, contentWidth });
-    }
-    this.ctx.drawImage(this.content.getCanvas(), 0, 0);
+    this.content.render({ endRow, endCol, contentHeight, contentWidth });
     this.ctx.lineWidth = lineWidth;
     strokeRect(this.ctx, result.left, result.top, result.width, result.height);
 
