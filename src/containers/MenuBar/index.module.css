@@ -9,11 +9,8 @@
 
 .menubar-menu {
   flex: 1;
-}
-
-.menubar-menu .menu {
-  width: 150px;
-  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .theme-button {

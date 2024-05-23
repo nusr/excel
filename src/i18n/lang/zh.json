@@ -94,5 +94,7 @@
   "left-border": "左边框",
   "right-border": "右边框",
   "line-color": "线条颜色",
-  "line-style": "线条样式"
+  "line-style": "线条样式",
+  "open-worker": "打开 Worker",
+  "close-worker": "关闭 Worker"
 }

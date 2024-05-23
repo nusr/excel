@@ -5,7 +5,14 @@ import {
 } from '@sentry/react';
 import { createRoot } from 'react-dom/client';
 import React, { StrictMode } from 'react';
-import { App, initController, copyOrCut, paste, MOCK_MODEL } from '../src';
+import {
+  App,
+  initController,
+  copyOrCut,
+  paste,
+  MOCK_MODEL,
+  CLOSE_WORKER_KEY,
+} from '../src';
 
 if (location.hostname !== 'localhost') {
   init({
@@ -29,14 +36,10 @@ if (location.hostname !== 'localhost') {
 
 const domNode = document.getElementById('root')!;
 
-let isUseWorker = true;
-
-if (process.env.NODE_ENV === 'production') {
-  isUseWorker = true;
-}
+const isCloseWorker = !!localStorage.getItem(CLOSE_WORKER_KEY);
 
 const worker: Worker | undefined =
-  isUseWorker && typeof Worker === 'function'
+  !isCloseWorker && typeof Worker === 'function'
     ? new Worker('./worker.js')
     : undefined;
 

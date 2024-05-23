@@ -94,5 +94,7 @@
   "left-border": "Left Border",
   "right-border": "Right Border",
   "line-color": "Line Color",
-  "line-style": "Line Style"
+  "line-style": "Line Style",
+  "open-worker": "Open Worker",
+  "close-worker": "Close Worker"
 }
