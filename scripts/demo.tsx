@@ -5,14 +5,11 @@ import {
 } from '@sentry/react';
 import { createRoot } from 'react-dom/client';
 import React, { StrictMode } from 'react';
-import {
-  App,
-  initController,
-  copyOrCut,
-  paste,
-  MOCK_MODEL,
-  CLOSE_WORKER_KEY,
-} from '../src';
+import { App, initController, copyOrCut, paste, MOCK_MODEL } from '../src';
+
+if (typeof Worker !== 'function') {
+  throw new Error("Don't support Web Worker");
+}
 
 if (location.hostname !== 'localhost') {
   init({
@@ -36,14 +33,11 @@ if (location.hostname !== 'localhost') {
 
 const domNode = document.getElementById('root')!;
 
-const isCloseWorker = !!localStorage.getItem(CLOSE_WORKER_KEY);
-
-const worker: Worker | undefined =
-  !isCloseWorker && typeof Worker === 'function'
-    ? new Worker('./worker.js')
-    : undefined;
-
-const controller = initController(true, { copyOrCut, paste }, worker);
+const controller = initController(
+  true,
+  { copyOrCut, paste },
+  new Worker('./worker.js', { type: 'module', name: 'worker' }),
+);
 (window as any).controller = controller;
 createRoot(domNode).render(
   <StrictMode>

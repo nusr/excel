@@ -36,6 +36,12 @@ devDependencies:
   '@types/node':
     specifier: 20.12.12
     version: 20.12.12
+  '@types/pixelmatch':
+    specifier: ^5.2.6
+    version: 5.2.6
+  '@types/pngjs':
+    specifier: ^6.0.5
+    version: 6.0.5
   '@types/react':
     specifier: 18.3.2
     version: 18.3.2
@@ -57,6 +63,12 @@ devDependencies:
   jest-environment-jsdom:
     specifier: 29.7.0
     version: 29.7.0(canvas@2.11.2)
+  pixelmatch:
+    specifier: ^5.3.0
+    version: 5.3.0
+  pngjs:
+    specifier: ^7.0.0
+    version: 7.0.0
   react:
     specifier: 18.3.1
     version: 18.3.1
@@ -1185,6 +1197,18 @@ packages:
     resolution: {integrity: sha512-eWLDGF/FOSPtAvEqeRAQ4C8LSA7M1I7i0ky1I8U7kD1J5ITyW3AsRhQrKVoWf5pFKZ2kILsEGJhsI9r93PYnOw==}
     dependencies:
       undici-types: 5.26.5
+    dev: true
+
+  /@types/pixelmatch@5.2.6:
+    resolution: {integrity: sha512-wC83uexE5KGuUODn6zkm9gMzTwdY5L0chiK+VrKcDfEjzxh1uadlWTvOmAbCpnM9zx/Ww3f8uKlYQVnO/TrqVg==}
+    dependencies:
+      '@types/node': 20.12.12
+    dev: true
+
+  /@types/pngjs@6.0.5:
+    resolution: {integrity: sha512-0k5eKfrA83JOZPppLtS2C7OUtyNAl2wKNxfyYl9Q5g9lPkgBl/9hNyAu6HuEH2J4XmIv2znEpkDd0SaZVxW6iQ==}
+    dependencies:
+      '@types/node': 20.12.12
     dev: true
 
   /@types/prop-types@15.7.12:
@@ -3054,6 +3078,13 @@ packages:
     engines: {node: '>= 6'}
     dev: true
 
+  /pixelmatch@5.3.0:
+    resolution: {integrity: sha512-o8mkY4E/+LNUf6LzX96ht6k6CEDi65k9G2rjMtBe9Oo+VPKSvl+0GKHuH/AlG+GA5LPG/i5hrekkxUc3s2HU+Q==}
+    hasBin: true
+    dependencies:
+      pngjs: 6.0.0
+    dev: true
+
   /pkg-dir@4.2.0:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
     engines: {node: '>=8'}
@@ -3075,6 +3106,16 @@ packages:
       playwright-core: 1.44.0
     optionalDependencies:
       fsevents: 2.3.2
+    dev: true
+
+  /pngjs@6.0.0:
+    resolution: {integrity: sha512-TRzzuFRRmEoSW/p1KVAmiOgPco2Irlah+bGFCeNfJXxxYGwSw7YwAOAcd7X28K/m5bjBWKsC29KyoMfHbypayg==}
+    engines: {node: '>=12.13.0'}
+    dev: true
+
+  /pngjs@7.0.0:
+    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
+    engines: {node: '>=14.19.0'}
     dev: true
 
   /pretty-format@27.5.1:

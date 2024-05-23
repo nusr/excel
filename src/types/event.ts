@@ -60,3 +60,15 @@ export type ResponseMessageType =
       rowMap: Record<string, number>;
       colMap: Record<string, number>;
     };
+export interface WorkerMainView {
+  /**
+   * clear offScreenCanvas
+   * render offScreenCanvas
+   */
+  render(data: RequestRender): void;
+  /**
+   * resize canvas
+   * resize offScreenCanvas
+   */
+  resize(data: IWindowSize): void;
+}

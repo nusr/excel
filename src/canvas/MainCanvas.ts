@@ -1,15 +1,18 @@
 import { EventType, MainView, IController, RequestMessageType } from '@/types';
 import { workerSet, canvasSizeSet, dpr, getTheme, headerSizeSet } from '@/util';
 
-export class OffScreenCanvas implements MainView {
+export class MainCanvas implements MainView {
   private controller: IController;
   private canvas: HTMLCanvasElement;
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
-    const offscreen = canvas.transferControlToOffscreen();
+    let offscreen: OffscreenCanvas | undefined = undefined;
+    if (canvas && typeof canvas.transferControlToOffscreen === 'function') {
+      offscreen = canvas.transferControlToOffscreen();
+    }
     const worker = workerSet.get().worker;
-    if (worker) {
+    if (worker && offscreen) {
       const data: RequestMessageType = {
         status: 'init',
         canvas: offscreen,
@@ -53,8 +56,7 @@ export class OffScreenCanvas implements MainView {
       return;
     }
     const { canvas } = this;
-    const size = canvasSizeSet.get();
-    const { width, height } = size;
+    const { width, height } = canvasSizeSet.get();
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     const eventData: RequestMessageType = {

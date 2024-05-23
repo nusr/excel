@@ -18,9 +18,7 @@ export function initController(
   },
   worker?: Worker,
 ): IController {
-  if (worker) {
-    workerSet.set({ worker });
-  }
+  workerSet.set({ worker });
   const model = new Model();
   const controller = new Controller(model, hooks);
   controller.batchUpdate(() => {

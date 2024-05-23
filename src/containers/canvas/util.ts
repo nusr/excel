@@ -316,6 +316,7 @@ export function initCanvas(
   const resize = () => {
     renderCanvas(new Set<ChangeEventType>(['row']));
   };
+  // @ts-ignore
   const renderCanvas = (changeSet: Set<ChangeEventType>) => {
     computeCanvasSize(canvas);
     mainCanvas.resize();

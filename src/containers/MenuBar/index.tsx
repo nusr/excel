@@ -8,7 +8,6 @@ import { $ } from '@/i18n';
 import { I18N } from './I18N';
 import { FPS } from './FPS';
 import { saveAs } from '@/util';
-import { Worker } from './Worker';
 
 interface Props {
   controller: IController;
@@ -88,7 +87,6 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
               {$('export-csv')}
             </MenuItem>
           </Menu>
-          <Worker />
         </div>
         <I18N />
         <Theme />

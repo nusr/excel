@@ -100,3 +100,43 @@ global.location = {
 global.localStorage = new LocalStorageMock();
 // @ts-ignore
 global.Image = ImageMock;
+
+// type MessageHandler = (msg: string) => void;
+
+class WorkerMock {
+  url;
+  options;
+  /**
+   *
+   * @param {string | URL} url
+   * @param {WorkerOptions | undefined} options
+   */
+  constructor(url, options) {
+    this.url = url;
+    this.options = options;
+  }
+  /**
+   *
+   * @param {any} _data
+   */
+  onmessage(_data) {
+
+  }
+  /**
+   *
+   * @param {any} msg
+   */
+  postMessage(msg) {
+    this.onmessage(msg);
+  }
+  addEventListener() {}
+  removeEventListener() {}
+  terminate() {}
+  onmessageerror() {}
+  dispatchEvent() {
+    return false;
+  }
+  onerror() {}
+}
+
+global.Worker = WorkerMock;

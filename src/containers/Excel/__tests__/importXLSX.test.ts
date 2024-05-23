@@ -24,12 +24,25 @@ describe('importXLSX.test.ts', () => {
   });
   describe('importXLSX', () => {
     test('normal', async () => {
-      const filePath = path.join(__dirname, './origin.xlsx');
+      const filePath = path.join(process.cwd(), './scripts/origin.xlsx');
       const fileData = await fs.readFile(filePath);
       const model = await importXLSX(fileData);
       const controller = initController();
       controller.fromJSON(model);
       const result: WorkBookJSON = {
+        rangeMap: {
+          '2': { row: 0, col: 2, rowCount: 1, colCount: 1, sheetId: '2' },
+          '3': { row: 9, col: 8, rowCount: 2, colCount: 1, sheetId: '3' },
+          '4': { row: 19, col: 9, rowCount: 1, colCount: 1, sheetId: '4' },
+          '5': { row: 27, col: 5, rowCount: 1, colCount: 1, sheetId: '5' },
+          '6': {
+            col: 6,
+            colCount: 1,
+            row: 5,
+            rowCount: 1,
+            sheetId: '6',
+          },
+        },
         workbook: {
           '2': {
             sheetId: '2',
@@ -38,6 +51,7 @@ describe('importXLSX.test.ts', () => {
             rowCount: 200,
             colCount: 200,
             sort: 1,
+            tabColor: '#FFC000',
           },
           '3': {
             sheetId: '3',
@@ -46,6 +60,7 @@ describe('importXLSX.test.ts', () => {
             rowCount: 200,
             colCount: 200,
             sort: 2,
+            tabColor: undefined,
           },
           '4': {
             sheetId: '4',
@@ -54,6 +69,7 @@ describe('importXLSX.test.ts', () => {
             rowCount: 200,
             colCount: 200,
             sort: 3,
+            tabColor: undefined,
           },
           '5': {
             sheetId: '5',
@@ -62,6 +78,7 @@ describe('importXLSX.test.ts', () => {
             rowCount: 200,
             colCount: 200,
             sort: 0,
+            tabColor: '#ED7D31',
           },
           '6': {
             colCount: 200,
@@ -70,6 +87,7 @@ describe('importXLSX.test.ts', () => {
             rowCount: 200,
             sheetId: '6',
             sort: 4,
+            tabColor: '#70AD47',
           },
         },
         mergeCells: {
@@ -136,22 +154,11 @@ describe('importXLSX.test.ts', () => {
             },
           },
         },
-        rangeMap: {
-          '2': { row: 0, col: 2, rowCount: 1, colCount: 1, sheetId: '2' },
-          '3': { row: 9, col: 8, rowCount: 2, colCount: 1, sheetId: '3' },
-          '4': { row: 19, col: 9, rowCount: 1, colCount: 1, sheetId: '4' },
-          '5': { row: 0, col: 2, rowCount: 1, colCount: 1, sheetId: '5' },
-          '6': {
-            col: 7,
-            colCount: 1,
-            row: 6,
-            rowCount: 1,
-            sheetId: '6',
-          },
-        },
+
         worksheets: {
           '2': {
             '0_0': {
+              value: '1a',
               style: {
                 verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
@@ -160,12 +167,12 @@ describe('importXLSX.test.ts', () => {
                 isItalic: false,
                 isStrike: false,
                 underline: EUnderLine.NONE,
-                fontFamily: 'Calibri',
+                fontFamily: '等线',
                 fontColor: '#FF0000',
               },
-              value: '1a',
             },
             '0_1': {
+              value: '',
               style: {
                 verticalAlign: EVerticalAlign.MIDDLE,
                 isWrapText: true,
@@ -174,206 +181,270 @@ describe('importXLSX.test.ts', () => {
                 isItalic: false,
                 isStrike: false,
                 underline: EUnderLine.NONE,
-                fontFamily: 'Calibri',
+                fontFamily: '等线',
                 fontColor: '#000000',
               },
-              value: '',
             },
             '0_2': {
-              style: { verticalAlign: EVerticalAlign.MIDDLE, isWrapText: true },
               value: '1a',
+              style: { verticalAlign: 1, isWrapText: true },
             },
             '0_3': {
+              value: 'large text',
               style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
+                verticalAlign: 1,
                 isWrapText: true,
                 fontSize: 36,
                 isBold: false,
                 isItalic: false,
                 isStrike: false,
-                underline: EUnderLine.NONE,
-                fontFamily: 'Calibri',
+                underline: 0,
+                fontFamily: '等线',
                 fontColor: '#000000',
               },
-              value: 'large text',
             },
-            '1_0': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: 15,
-            },
-            '1_1': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
-            '1_2': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
-            '1_3': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
-            '2_0': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
-            '2_1': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
-            '2_2': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
-            '2_3': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
+            '1_0': { value: 15, style: { verticalAlign: 1, isWrapText: true } },
+            '1_1': { value: '', style: { verticalAlign: 1, isWrapText: true } },
+            '1_2': { value: '', style: { verticalAlign: 1, isWrapText: true } },
+            '1_3': { value: '', style: { verticalAlign: 1, isWrapText: true } },
+            '2_0': { value: '', style: { verticalAlign: 1, isWrapText: true } },
+            '2_1': { value: '', style: { verticalAlign: 1, isWrapText: true } },
+            '2_2': { value: '', style: { verticalAlign: 1, isWrapText: true } },
+            '2_3': { value: '', style: { verticalAlign: 1, isWrapText: true } },
             '3_0': {
+              value: '',
               style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
+                verticalAlign: 1,
                 isWrapText: true,
                 fillColor: '#FF0000',
               },
-              value: '',
             },
             '3_1': {
+              value: '',
               style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
+                verticalAlign: 1,
                 isWrapText: true,
                 fillColor: '#FF0000',
               },
-              value: '',
             },
-            '3_2': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
-            '3_3': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
+            '3_2': { value: '', style: { verticalAlign: 1, isWrapText: true } },
+            '3_3': { value: '', style: { verticalAlign: 1, isWrapText: true } },
             '4_0': {
+              value: '',
               style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
+                verticalAlign: 1,
                 isWrapText: true,
                 fillColor: '#FF0000',
               },
-              value: '',
             },
             '4_1': {
+              value: '',
               style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
+                verticalAlign: 1,
                 isWrapText: true,
                 fillColor: '#FF0000',
               },
-              value: '',
             },
-            '4_2': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
-            '4_3': {
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-              },
-              value: '',
-            },
+            '4_2': { value: '', style: { verticalAlign: 1, isWrapText: true } },
+            '4_3': { value: '', style: { verticalAlign: 1, isWrapText: true } },
           },
-          '4': {
-            '3_4': { value: 22 },
-            '6_4': { value: 33 },
-          },
+          '4': { '3_4': { value: 22 }, '6_4': { value: 33 } },
           '5': {
-            '0_0': {
-              value: 1,
+            '0_0': { value: 1 },
+            '0_1': { value: 2 },
+            '0_2': { value: 3, formula: '=SUM(A1,B1)' },
+            '1_0': {
+              value: 12,
+              style: { numberFormat: '0.00_);[Red]\\(0.00\\)' },
             },
-            '0_1': {
-              value: 2,
+            '2_0': {
+              value: 13,
+              style: { numberFormat: '"￥"#,##0.00_);[Red]\\("￥"#,##0.00\\)' },
             },
-            '0_2': {
-              formula: '=SUM(A1,B1)',
-              value: 3,
+            '3_0': {
+              value: 14,
+              style: {
+                numberFormat:
+                  '_ "￥"* #,##0.00_ ;_ "￥"* \\-#,##0.00_ ;_ "￥"* "-"??_ ;_ @_ ',
+              },
             },
+            '4_0': { value: 15, style: { numberFormat: 'yyyy/m/d;@' } },
+            '5_0': {
+              value: 16,
+              style: { numberFormat: 'yyyy"年"m"月"d"日";@' },
+            },
+            '6_0': { value: 17, style: { numberFormat: 'h:mm:ss;@' } },
+            '7_0': { value: 18, style: { numberFormat: '0.00%' } },
+            '8_0': { value: 0.33, style: { numberFormat: '#\\ ?/?' } },
+            '9_0': { value: 20, style: { numberFormat: '0.00E+00' } },
+            '10_0': { value: 21, style: { numberFormat: '@' } },
+            '11_0': { value: 22 },
+            '12_0': { value: 23 },
+            '13_0': { value: 24 },
+            '14_0': { value: 25 },
+            '15_0': { value: 26 },
+            '16_0': { value: 27 },
           },
           '6': {
-            '1_1': {
+            '0_8': {
+              value: '',
               style: {
-                isWrapText: true,
-                verticalAlign: 1,
+                borderLeft: { type: 'thin', color: '' },
+                borderRight: { type: 'thin', color: '' },
+                borderTop: { type: 'thin', color: '' },
+                borderBottom: { type: 'thin', color: '' },
               },
+            },
+            '1_1': {
               value: '1\n3\n2\n4',
+              style: { verticalAlign: 1, isWrapText: true },
+            },
+            '2_8': {
+              value: '',
+              style: {
+                borderLeft: { type: 'hair', color: '' },
+                borderRight: { type: 'hair', color: '' },
+                borderTop: { type: 'hair', color: '' },
+                borderBottom: { type: 'hair', color: '' },
+              },
+            },
+            '4_8': {
+              value: '',
+              style: {
+                borderLeft: { type: 'dotted', color: '' },
+                borderRight: { type: 'dotted', color: '' },
+                borderTop: { type: 'dotted', color: '' },
+                borderBottom: { type: 'dotted', color: '' },
+              },
             },
             '6_5': {
+              value: 2,
               style: {
                 horizontalAlign: 1,
-                isWrapText: false,
                 verticalAlign: 1,
+                isWrapText: false,
               },
-              value: 2,
             },
             '6_6': {
+              value: '',
               style: {
                 horizontalAlign: 1,
-                isWrapText: false,
                 verticalAlign: 1,
+                isWrapText: false,
               },
+            },
+            '6_8': {
               value: '',
+              style: {
+                borderLeft: { type: 'dashed', color: '' },
+                borderRight: { type: 'dashed', color: '' },
+                borderTop: { type: 'dashed', color: '' },
+                borderBottom: { type: 'dashed', color: '' },
+              },
             },
             '7_5': {
+              value: '',
               style: {
                 horizontalAlign: 1,
-                isWrapText: false,
                 verticalAlign: 1,
+                isWrapText: false,
               },
-              value: '',
             },
             '7_6': {
+              value: '',
               style: {
                 horizontalAlign: 1,
-                isWrapText: false,
                 verticalAlign: 1,
+                isWrapText: false,
               },
+            },
+            '8_8': {
               value: '',
+              style: {
+                borderLeft: { type: 'dashDot', color: '' },
+                borderRight: { type: 'dashDot', color: '' },
+                borderTop: { type: 'dashDot', color: '' },
+                borderBottom: { type: 'dashDot', color: '' },
+              },
+            },
+            '10_8': {
+              value: '',
+              style: {
+                borderLeft: { type: 'dashDotDot', color: '' },
+                borderRight: { type: 'dashDotDot', color: '' },
+                borderTop: { type: 'dashDotDot', color: '' },
+                borderBottom: { type: 'dashDotDot', color: '' },
+              },
+            },
+            '12_8': {
+              value: '',
+              style: {
+                borderLeft: { type: 'double', color: '' },
+                borderRight: { type: 'double', color: '' },
+                borderTop: { type: 'double', color: '' },
+                borderBottom: { type: 'double', color: '' },
+              },
+            },
+            '14_8': {
+              value: '',
+              style: {
+                borderLeft: { type: 'medium', color: '' },
+                borderRight: { type: 'medium', color: '' },
+                borderTop: { type: 'medium', color: '' },
+                borderBottom: { type: 'medium', color: '' },
+              },
+            },
+            '16_8': {
+              value: '',
+              style: {
+                borderLeft: { type: 'medium', color: '' },
+                borderRight: { type: 'medium', color: '' },
+                borderTop: { type: 'medium', color: '' },
+                borderBottom: { type: 'medium', color: '' },
+              },
+            },
+            '18_8': {
+              value: '',
+              style: {
+                borderLeft: { type: 'mediumDashed', color: '' },
+                borderRight: { type: 'mediumDashed', color: '' },
+                borderTop: { type: 'mediumDashed', color: '' },
+                borderBottom: { type: 'mediumDashed', color: '' },
+              },
+            },
+            '20_8': {
+              value: '',
+              style: {
+                borderLeft: { type: 'mediumDashDot', color: '' },
+                borderRight: { type: 'mediumDashDot', color: '' },
+                borderTop: { type: 'mediumDashDot', color: '' },
+                borderBottom: { type: 'mediumDashDot', color: '' },
+              },
+            },
+            '22_8': {
+              value: '',
+              style: {
+                borderLeft: { type: 'mediumDashDotDot', color: '' },
+                borderRight: { type: 'mediumDashDotDot', color: '' },
+                borderTop: { type: 'mediumDashDotDot', color: '' },
+                borderBottom: { type: 'mediumDashDotDot', color: '' },
+              },
+            },
+            '24_8': { value: '', style: {} },
+            '26_8': {
+              value: '',
+              style: {
+                borderLeft: { type: 'thick', color: '' },
+                borderRight: { type: 'thick', color: '' },
+                borderTop: { type: 'thick', color: '' },
+                borderBottom: { type: 'thick', color: '' },
+              },
             },
           },
         },
       };
-      expect(controller.toJSON()).toEqual(result);
+      const expectResult = controller.toJSON();
+      expect(expectResult).toEqual(result);
     });
   });
   describe('convertXMLToJSON', () => {

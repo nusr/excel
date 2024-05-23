@@ -7,7 +7,12 @@ module.exports = {
   transform: {
     '^.+\\.css$': '<rootDir>/scripts/css-transform.js',
   },
-  collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}'],
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx,js,jsx}',
+    'src/*.{ts,tsx,js,jsx}',
+    '!src/worker.ts',
+    '!src/canvas/offScreenCanvas.ts',
+  ],
   coverageReporters: ['clover', 'json', 'lcov', 'text', 'html'],
   moduleNameMapper: {
     '@/(.*)': '<rootDir>/src/$1',

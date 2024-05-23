@@ -7,14 +7,12 @@ const RECORD_DELIMITER = LINE_BREAK;
 
 function processRow(row: string[]) {
   const quote = '"';
-  const escape_formulas = false;
-  const quoted_string = false;
   const escape = '"';
-  const quoted = false;
+  const escapeReg = new RegExp(escape, 'g');
+  const quoteReg = new RegExp(quote, 'g');
 
   let csvRecord = '';
   for (let j = 0; j < row.length; j++) {
-    const field = row[j];
     let value = row[j];
     if ('' === value) {
       csvRecord += value;
@@ -22,41 +20,16 @@ function processRow(row: string[]) {
       const containDelimiter =
         DELIMITER.length && value.indexOf(DELIMITER) >= 0;
       const containsQuote = value.indexOf(quote) >= 0;
-      const containsEscape = value.indexOf(escape) >= 0 && escape !== quote;
       const containsRecordDelimiter = value.indexOf(RECORD_DELIMITER) >= 0;
-      const quotedString = quoted_string && typeof field === 'string';
-      if (escape_formulas) {
-        switch (value[0]) {
-          case '=':
-          case '+':
-          case '-':
-          case '@':
-          case '\t':
-          case '\r':
-          case '\uFF1D': // Unicode '='
-          case '\uFF0B': // Unicode '+'
-          case '\uFF0D': // Unicode '-'
-          case '\uFF20': // Unicode '@'
-            value = `'${value}`;
-            break;
-        }
-      }
       const shouldQuote =
-        containsQuote === true ||
-        containDelimiter ||
-        containsRecordDelimiter ||
-        quoted ||
-        quotedString;
-      if (shouldQuote === true && containsEscape === true) {
-        const regexp = new RegExp(escape, 'g');
-        // @ts-ignore
-        value = value.replace(regexp, escape + escape);
+        containsQuote || containDelimiter || containsRecordDelimiter;
+      if (shouldQuote) {
+        value = value.replace(escapeReg, escape + escape);
       }
-      if (containsQuote === true) {
-        const regexp = new RegExp(quote, 'g');
-        value = value.replace(regexp, escape + quote);
+      if (containsQuote) {
+        value = value.replace(quoteReg, escape + quote);
       }
-      if (shouldQuote === true) {
+      if (shouldQuote) {
         value = quote + value + quote;
       }
       csvRecord += value;

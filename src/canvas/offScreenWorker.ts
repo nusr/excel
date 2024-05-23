@@ -1,11 +1,11 @@
 import {
-  RequestResize,
   RequestRender,
   Point,
   IRange,
   CanvasOverlayPosition,
   IPosition,
   IWindowSize,
+  WorkerMainView,
   ContentParams,
 } from '@/types';
 import {
@@ -32,14 +32,17 @@ import { intToColumnName } from '@/util/convert';
 import { isSheet, isCol, isRow, containRange } from '@/util/range';
 import { npx, dpr } from '@/util/dpr';
 
-/* jscpd:ignore-start */
 const lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
 
-export class OffScreenWorker {
+/**
+ * run OffScreenWorker in Web Worker env
+ */
+export class OffScreenWorker implements WorkerMainView {
   private canvas: OffscreenCanvas;
   private ctx: OffscreenCanvasRenderingContext2D;
   private width: number = 0;
   private height: number = 0;
+  private isRendering = false;
   private rowMap: Record<string, number> = {};
   private colMap: Record<string, number> = {};
   private eventData: Omit<RequestRender, 'status' | 'changeSet'> = {
@@ -94,6 +97,10 @@ export class OffScreenWorker {
     if (data.changeSet.size === 0) {
       return;
     }
+    if (this.isRendering) {
+      return;
+    }
+    this.isRendering = true;
     this.eventData = data;
     this.clear();
     const { ctx } = this;
@@ -121,9 +128,10 @@ export class OffScreenWorker {
     this.renderContent({ endRow, endCol, contentHeight, contentWidth });
     this.ctx.lineWidth = lineWidth;
     strokeRect(this.ctx, result.left, result.top, result.width, result.height);
+    this.isRendering = false;
     return { rowMap: this.rowMap, colMap: this.colMap };
   }
-  resize(data: RequestResize) {
+  resize(data: IWindowSize) {
     this.width = data.width;
     this.height = data.height;
     this.canvas.width = npx(data.width);
@@ -364,6 +372,7 @@ export class OffScreenWorker {
       this.clearRect(range);
     }
   }
+  /* jscpd:ignore-start */
   private getCellSize(range: IRange): IWindowSize {
     let { row, col, colCount, rowCount } = range;
     let r = row;
@@ -431,6 +440,27 @@ export class OffScreenWorker {
       left: resultX,
     };
   }
+  private getActiveRange(r?: IRange) {
+    const range = r || this.eventData.range;
+    const mergeCells = this.eventData.currentMergeCells;
+    for (const item of mergeCells) {
+      if (containRange(range, item)) {
+        const newRange = {
+          ...item,
+          sheetId: item.sheetId,
+        };
+        return {
+          range: newRange,
+          isMerged: true,
+        };
+      }
+    }
+    return {
+      range,
+      isMerged: false,
+    };
+  }
+  /* jscpd:ignore-end */
   private clearRect(range: IRange) {
     const cellSize = this.getCellSize(range);
     if (cellSize.width <= 0 || cellSize.height <= 0) {
@@ -728,25 +758,5 @@ export class OffScreenWorker {
     this.clearRect(temp);
   }
 
-  private getActiveRange(r?: IRange) {
-    const range = r || this.eventData.range;
-    const mergeCells = this.eventData.currentMergeCells;
-    for (const item of mergeCells) {
-      if (containRange(range, item)) {
-        const newRange = {
-          ...item,
-          sheetId: item.sheetId,
-        };
-        return {
-          range: newRange,
-          isMerged: true,
-        };
-      }
-    }
-    return {
-      range,
-      isMerged: false,
-    };
-  }
+
 }
-/* jscpd:ignore-end */

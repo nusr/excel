@@ -190,8 +190,8 @@ function deleteDir(dir) {
  * @param { import('esbuild').BuildOptions } options
  */
 async function buildProd(options) {
-  const workerOptions = buildUMD('./lib/worker.js');
-  const workerMinifyOptions = buildUMD('./lib/worker.min.js');
+  const workerOptions = buildESM('./lib/worker.js');
+  const workerMinifyOptions = buildESM('./lib/worker.min.js');
   workerMinifyOptions.entryPoints = workerOptions.entryPoints = [workPath];
   const list = await Promise.all(
     [
@@ -227,18 +227,10 @@ function getIp() {
 }
 
 async function buildWorker() {
-  if (isDev) {
-    const options = buildUMD(path.join(distDir, 'worker.js'));
-    options.entryPoints = [workPath];
-    options.minify = false;
-    const ctx = await context(options);
-    await ctx.watch();
-  } else {
-    const options = buildUMD(path.join(distDir, 'worker.js'));
-    options.entryPoints = [workPath];
-    options.minify = !isDev;
-    await build(options);
-  }
+  const options = buildESM(path.join(distDir, 'worker.js'));
+  options.entryPoints = [workPath];
+  options.minify = !isDev;
+  await build(options);
 }
 
 /**

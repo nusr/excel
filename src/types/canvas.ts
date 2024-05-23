@@ -15,12 +15,9 @@ export type ContentParams = {
   contentWidth: number;
 };
 
-export interface ContentView {
-  render: (params: ContentParams) => void;
-  check(): void;
-}
-
 export interface MainView {
-  render: (data: EventType) => void;
+  render(data: EventType) : void;
   resize(): void;
 }
+
+

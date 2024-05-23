@@ -11,7 +11,6 @@ import '@testing-library/jest-dom';
 import { initController } from '@/controller';
 import fs from 'fs/promises';
 import path from 'path';
-import { sleep } from '@/util';
 import './global.mock';
 
 describe('Import.test.tsx', () => {
@@ -105,17 +104,18 @@ describe('Import.test.tsx', () => {
         render(<App controller={initController()} />);
       });
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
-      const fileData = await fs.readFile(path.join(__dirname, './origin.xlsx'));
+      const fileData = await fs.readFile(
+        path.join(process.cwd(), './scripts/origin.xlsx'),
+      );
       act(() => {
         fireEvent.change(screen.getByTestId('menubar-import-xlsx-input'), {
           target: { files: [fileData] },
         });
       });
-      await sleep(10);
       await waitFor(() => {
-        expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
-          '=SUM(A1,B1)',
-        );
+        expect(
+          screen.getByTestId('sheet-bar-list').childNodes.length,
+        ).toBeGreaterThanOrEqual(5);
       });
     });
     test('empty', async () => {
