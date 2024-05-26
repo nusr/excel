@@ -17,11 +17,7 @@ jobs:
         with:
           node-version: 20
       - name: Install Font
-        run: |
-          curl -o ./source_code_pro.zip https://fonts.google.com/download?family=Source%20Code%20Pro
-          unzip -d ./fonts ./source_code_pro.zip
-          mv ./fonts /usr/share/fonts/
-          fc-cache -fv
+        run: npm run install-font
       - name: Test
         run: |
           npm i -g pnpm

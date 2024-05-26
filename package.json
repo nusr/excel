@@ -15,7 +15,8 @@
     "update-md": "node ./scripts/update-md.js",
     "prepare": "husky && npx playwright install --with-deps",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" -r html -m strict -l 7 -b -g --exitCode 1 .",
-    "typedoc": "npx typedoc"
+    "typedoc": "npx typedoc",
+    "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv"
   },
   "repository": {
     "type": "git",
