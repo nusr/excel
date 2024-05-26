@@ -1,7 +1,8 @@
 import { getThemeColor } from '@/theme';
 import { ThemeType } from '@/types';
-import { DEFAULT_LINE_WIDTH } from '@/util/constant';
-import { DEFAULT_FONT_CONFIG } from '@/util/style';
+import { DEFAULT_LINE_WIDTH, DEFAULT_FONT_SIZE } from '@/util/constant';
+import { makeFont } from '@/util/style';
+import { npx } from '@/util/dpr';
 
 export function getHeaderStyle(
   theme?: ThemeType,
@@ -17,7 +18,7 @@ export function getHeaderStyle(
   return {
     textAlign: 'center',
     textBaseline: 'middle',
-    font: DEFAULT_FONT_CONFIG,
+    font: makeFont(undefined, '500', npx(DEFAULT_FONT_SIZE)),
     fillStyle: getThemeColor('black', theme),
     lineWidth: DEFAULT_LINE_WIDTH,
     strokeStyle: getThemeColor('borderColor', theme),

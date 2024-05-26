@@ -7,7 +7,7 @@
  * font-family
  * e.g italic bold 14px/16px sans-serif;
  */
-import { npx } from './dpr';
+
 import { EUnderLine, StyleType, ResultType } from '@/types';
 import { DEFAULT_FONT_SIZE, MUST_FONT_FAMILY } from './constant';
 import { camelCase } from './lodash';
@@ -44,12 +44,6 @@ export function makeFont(
   }
   return `${temp}${fontFamily},${MUST_FONT_FAMILY}`;
 }
-
-export const DEFAULT_FONT_CONFIG = makeFont(
-  undefined,
-  '500',
-  npx(DEFAULT_FONT_SIZE),
-);
 
 export function convertToCssString(style: Partial<StyleType>): string {
   let result = '';
@@ -246,7 +240,8 @@ export function parseText(text: string, splitter = '\t') {
 }
 
 export function parseHTML(html: string) {
-  let template: HTMLTemplateElement | undefined = document.createElement('template');
+  let template: HTMLTemplateElement | undefined =
+    document.createElement('template');
   template.innerHTML = html;
   const doc = template.content;
   const styleMap: Record<string, CSSStyleDeclaration> = {};

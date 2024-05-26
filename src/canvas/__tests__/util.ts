@@ -1,7 +1,12 @@
 import { OffScreenWorker } from '../offScreenWorker';
 import { createCanvas } from 'canvas';
-import { setDpr, getTheme, headerSizeSet } from '@/util';
-import { IController, RequestMessageType, ChangeEventType } from '@/types';
+import { setDpr, headerSizeSet } from '@/util';
+import {
+  IController,
+  RequestMessageType,
+  ChangeEventType,
+  ThemeType,
+} from '@/types';
 import fs from 'fs';
 import path from 'path';
 import pixelMatch from 'pixelmatch';
@@ -10,14 +15,21 @@ import PNG from 'pngjs';
 const defaultWidth = 200;
 const defaultHeight = 100;
 
-function getRenderData(controller: IController) {
+beforeAll(async () => {
+  const imageDir = path.join(__dirname, './static');
+  if (!fs.existsSync(imageDir)) {
+    await fs.promises.mkdir(imageDir);
+  }
+});
+
+function getRenderData(controller: IController, theme: ThemeType) {
   const jsonData = controller.toJSON();
   const currentId = controller.getCurrentSheetId();
   const sheetInfo = controller.getSheetInfo(currentId)!;
   const eventData: RequestMessageType = {
     status: 'render',
     changeSet: new Set<ChangeEventType>(['scroll', 'cellStyle', 'cellValue']),
-    theme: getTheme(),
+    theme,
     canvasSize: {
       top: 0,
       left: 0,
@@ -37,8 +49,11 @@ function getRenderData(controller: IController) {
   return eventData;
 }
 
-async function compareImage(basePath: string, newImageBuffer: Buffer) {
-  const baseBuffer = await fs.promises.readFile(basePath);
+async function compareImage(
+  basePath: string,
+  baseBuffer: Buffer,
+  newImageBuffer: Buffer,
+) {
   const baseImage = PNG.PNG.sync.read(baseBuffer);
   const newImage = PNG.PNG.sync.read(newImageBuffer);
   const { width, height } = baseImage;
@@ -60,12 +75,35 @@ async function compareImage(basePath: string, newImageBuffer: Buffer) {
   return result;
 }
 
-export async function snapshot(controller: IController) {
+export async function snapshot(
+  controller: IController,
+  theme: ThemeType = 'light',
+) {
   setDpr(2);
   const canvas = createCanvas(defaultWidth, defaultHeight);
   const instance = new OffScreenWorker(canvas as any);
   instance.resize({ width: defaultWidth, height: defaultHeight });
-  instance.render(getRenderData(controller));
+  const data = instance.render(getRenderData(controller, theme));
+  if (data) {
+    let check = false;
+    for (const [row, h] of Object.entries(data.rowMap)) {
+      const r = parseInt(row, 10);
+      if (h !== controller.getRowHeight(r).len) {
+        controller.setRowHeight(r, h);
+        check = true;
+      }
+    }
+    for (const [col, w] of Object.entries(data.colMap)) {
+      const c = parseInt(col, 10);
+      if (w !== controller.getColWidth(c).len) {
+        controller.setColWidth(c, w);
+        check = true;
+      }
+    }
+    if (check) {
+      instance.render(getRenderData(controller, theme));
+    }
+  }
 
   let imageName = (expect.getState().currentTestName || '').replaceAll(
     ' ',
@@ -73,15 +111,18 @@ export async function snapshot(controller: IController) {
   );
   imageName = encodeURIComponent(imageName) + '.png';
   const imageDir = path.join(__dirname, './static');
-  if (!fs.existsSync(imageDir)) {
-    await fs.promises.mkdir(imageDir);
-  }
   const imagePath = path.join(imageDir, imageName);
   const buffer = canvas.toBuffer('image/png');
-  const check = fs.existsSync(imagePath);
-  if (check) {
-    expect(await compareImage(imagePath, buffer)).toEqual(0);
-  } else {
-    await fs.promises.writeFile(imagePath, buffer);
+  let baseBuffer: Buffer;
+  try {
+    baseBuffer = await fs.promises.readFile(imagePath);
+  } catch (error) {
+    if ((error as any).code === 'ENOENT') {
+      await fs.promises.writeFile(imagePath, buffer);
+      return;
+    }
+    throw error;
   }
+  const result = await compareImage(imagePath, baseBuffer, buffer);
+  expect(result).toEqual(0);
 }

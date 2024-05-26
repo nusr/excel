@@ -687,19 +687,24 @@ export class Worksheet implements IWorksheet {
     if (colKeys.length === 0 && rowKeys.length === 0) {
       return;
     }
+    let check = false;
     for (const [row, h] of Object.entries(rowMap)) {
       const r = parseInt(row, 10);
-      if (h > 0 && this.model.getRowHeight(r).len !== h) {
+      if (h !== this.model.getRowHeight(r).len) {
         this.model.setRowHeight(r, h);
+        check = true;
       }
     }
     for (const [col, w] of Object.entries(colMap)) {
       const c = parseInt(col, 10);
-      if (w > 0 && this.model.getColWidth(c).len !== w) {
+      if (w !== this.model.getColWidth(c).len) {
         this.model.setColWidth(c, w);
+        check = true;
       }
     }
-    this.model.emitChange(new Set<ChangeEventType>(['noHistory']));
+    if (check) {
+      this.model.emitChange(new Set<ChangeEventType>(['noHistory']));
+    }
   }
   private initWorker() {
     const worker = workerSet.get().worker;

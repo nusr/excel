@@ -1,5 +1,5 @@
 import { MainView, IController } from '@/types';
-import { workerSet } from '@/util';
+import { workerSet, canvasSizeSet } from '@/util';
 import { MainCanvas } from './MainCanvas';
 
 export { registerGlobalEvent } from './event';
@@ -24,7 +24,11 @@ export function initRenderCanvas(
     // only run in test environment
     return {
       render() {},
-      resize() {},
+      resize() {
+        const { width, height } = canvasSizeSet.get();
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+      },
     };
   }
   if (instance) {

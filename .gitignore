@@ -17,3 +17,4 @@ port.txt
 /playwright/.cache/
 report
 docs
+*.diff.png

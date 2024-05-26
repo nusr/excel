@@ -10,8 +10,6 @@ module.exports = {
   collectCoverageFrom: [
     'src/**/*.{ts,tsx,js,jsx}',
     'src/*.{ts,tsx,js,jsx}',
-    '!src/worker.ts',
-    '!src/canvas/offScreenCanvas.ts',
   ],
   coverageReporters: ['clover', 'json', 'lcov', 'text', 'html'],
   moduleNameMapper: {
