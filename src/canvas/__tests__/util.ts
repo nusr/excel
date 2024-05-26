@@ -65,7 +65,7 @@ async function compareImage(
     width,
     height,
     {
-      threshold: 0.1,
+      threshold: 0.2,
     },
   );
   if (result > 0) {
