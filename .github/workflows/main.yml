@@ -16,14 +16,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Install Font
+        run: |
+          wget -O source_code_pro.zip https://fonts.google.com/download?family=Source%20Code%20Pro
+          unzip -d source_code_pro/ source_code_pro.zip
+          mv source_code_pro /usr/share/fonts/
+          fc-cache -fv
       - name: Test
         run: |
-          npm i -g pnpm jscpd
+          npm i -g pnpm
           pnpm i
-          npm run repeat
-          npm run lint
-          npx tsc
-          npm run coverage
+          npm run test
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:

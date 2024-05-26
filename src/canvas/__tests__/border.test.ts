@@ -20,7 +20,7 @@ describe('border.test.ts', () => {
           color: '',
         };
         controller.setCell(
-          [[1]],
+          [],
           [
             [
               {

@@ -11,7 +11,7 @@
 import { EUnderLine, StyleType, ResultType } from '@/types';
 import { DEFAULT_FONT_SIZE, MUST_FONT_FAMILY } from './constant';
 import { camelCase } from './lodash';
-import { parseNumber } from './util';
+import { parseNumber, isTestEnv } from './util';
 
 export const FONT_SIZE_LIST = [
   6,
@@ -39,10 +39,15 @@ export function makeFont(
   fontFamily = '',
 ): string {
   const temp = `${fontStyle} ${fontWeight} ${fontSize}px `;
-  if (!fontFamily) {
-    return temp + MUST_FONT_FAMILY;
+  const fontFamilyList: string[] = [MUST_FONT_FAMILY];
+  // just for test
+  if (isTestEnv()) {
+    fontFamilyList.unshift('Source Code Pro');
   }
-  return `${temp}${fontFamily},${MUST_FONT_FAMILY}`;
+  if (fontFamily) {
+    fontFamilyList.unshift(fontFamily);
+  }
+  return temp + fontFamilyList.join(',');
 }
 
 export function convertToCssString(style: Partial<StyleType>): string {

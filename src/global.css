@@ -8,7 +8,8 @@ html {
   line-height: var(--lineHeight);
 }
 body {
-  font-family: 'Microsoft Yahei UI', 'PingFang SC', 'Arial', sans-serif;
+  font-family: 'Microsoft Yahei UI', 'PingFang SC', 'Source Code Pro', 'Arial',
+    sans-serif;
   background-color: var(--white);
   color: var(--black);
   font-size: var(--font);

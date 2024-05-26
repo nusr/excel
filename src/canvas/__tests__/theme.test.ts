@@ -16,7 +16,7 @@ describe('theme.test.ts', () => {
       colCount: 1,
       sheetId: '',
     });
-    await snapshot(controller, 'light');
+    await snapshot(controller, { theme: 'light' });
   });
   test('dark', async () => {
     controller.setCell([[true]], [], {
@@ -26,6 +26,6 @@ describe('theme.test.ts', () => {
       colCount: 1,
       sheetId: '',
     });
-    await snapshot(controller, 'dark');
+    await snapshot(controller, { theme: 'dark' });
   });
 });

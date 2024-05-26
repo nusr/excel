@@ -1,6 +1,6 @@
 import { OffScreenWorker } from '../offScreenWorker';
-import { createCanvas } from 'canvas';
-import { setDpr, headerSizeSet } from '@/util';
+import { createCanvas, Canvas } from 'canvas';
+import { setDpr, headerSizeSet, npx, dpr } from '@/util';
 import {
   IController,
   RequestMessageType,
@@ -65,7 +65,7 @@ async function compareImage(
     width,
     height,
     {
-      threshold: 0.2,
+      threshold: 0,
     },
   );
   if (result > 0) {
@@ -75,12 +75,27 @@ async function compareImage(
   return result;
 }
 
-export async function snapshot(
-  controller: IController,
-  theme: ThemeType = 'light',
-) {
-  setDpr(2);
+function screenShot(canvas: Canvas) {
+  const size = dpr();
+  const ctx = canvas.getContext('2d');
+  const headerSize = headerSizeSet.get();
+  const x = headerSize.width;
+  const y = headerSize.height;
+  const width = defaultWidth - x;
+  const height = defaultHeight - y;
+  const realCanvas = createCanvas(width, height);
+  realCanvas.width = npx(width);
+  realCanvas.height = npx(height);
+  const imageData = ctx.getImageData(npx(x), npx(y), npx(width), npx(height));
+  const newCtx = realCanvas.getContext('2d');
+  newCtx.scale(size, size);
+  newCtx.putImageData(imageData, 0, 0);
+  return realCanvas.toBuffer('image/png');
+}
+
+function renderCanvas(controller: IController, theme: ThemeType) {
   const canvas = createCanvas(defaultWidth, defaultHeight);
+
   const instance = new OffScreenWorker(canvas as any);
   instance.resize({ width: defaultWidth, height: defaultHeight });
   const data = instance.render(getRenderData(controller, theme));
@@ -104,7 +119,17 @@ export async function snapshot(
       instance.render(getRenderData(controller, theme));
     }
   }
+  return canvas;
+}
 
+export async function snapshot(
+  controller: IController,
+  options?: { theme?: ThemeType; isScreenShot?: boolean },
+) {
+  const { theme = 'light', isScreenShot = true } = options || {};
+  setDpr(2);
+
+  const canvas = renderCanvas(controller, theme);
   let imageName = (expect.getState().currentTestName || '').replaceAll(
     ' ',
     '_',
@@ -112,7 +137,12 @@ export async function snapshot(
   imageName = encodeURIComponent(imageName) + '.png';
   const imageDir = path.join(__dirname, './static');
   const imagePath = path.join(imageDir, imageName);
-  const buffer = canvas.toBuffer('image/png');
+  let buffer: Buffer;
+  if (isScreenShot) {
+    buffer = buffer = screenShot(canvas);
+  } else {
+    buffer = canvas.toBuffer('image/png');
+  }
   let baseBuffer: Buffer;
   try {
     baseBuffer = await fs.promises.readFile(imagePath);
