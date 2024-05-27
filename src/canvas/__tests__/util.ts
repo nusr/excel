@@ -76,7 +76,7 @@ async function compareImage(
     },
   );
   const threshold = Math.sqrt(result / (width * height));
-  const maxThreshold = 0.06;
+  const maxThreshold = 0.052;
   if (threshold > 0) {
     console.log(threshold);
   }
