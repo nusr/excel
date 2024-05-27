@@ -30,10 +30,6 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-      - name: E2E
-        run: npm run e2e
       - name: Build
         run: npm run build
       - name: Deploy

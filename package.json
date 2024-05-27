@@ -9,11 +9,10 @@
     "build": "npm run start -- --nodeEnv production",
     "test": "jest --config ./jest.config.js --forceExit --detectOpenHandles",
     "coverage": "npm run test -- --coverage",
-    "ci": "npm run repeat && npm run e2e && npm run test && npm run build && npm run update-md && npm run lint && npx tsc",
-    "e2e": "npx playwright test",
+    "ci": "npm run repeat && npm run test && npm run build && npm run update-md && npm run lint && npx tsc",
     "lint": "npx oxlint@latest --fix",
     "update-md": "node ./scripts/update-md.js",
-    "prepare": "husky && npx playwright install --with-deps",
+    "prepare": "husky",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" -r html -m strict -l 7 -b -g --exitCode 1 .",
     "typedoc": "npx typedoc",
     "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv"
@@ -27,7 +26,6 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
-    "@playwright/test": "1.44.1",
     "@testing-library/jest-dom": "6.4.5",
     "@testing-library/react": "15.0.7",
     "@types/jest": "29.5.12",

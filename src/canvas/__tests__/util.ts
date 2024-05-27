@@ -14,12 +14,17 @@ import PNG from 'pngjs';
 
 const defaultWidth = 200;
 const defaultHeight = 100;
+let maxThresholdData = 0;
 
 beforeAll(async () => {
   const imageDir = path.join(__dirname, './static');
   if (!fs.existsSync(imageDir)) {
     await fs.promises.mkdir(imageDir);
   }
+});
+
+afterAll(() => {
+  console.log('maxThresholdData: ', maxThresholdData);
 });
 
 function getRenderData(controller: IController, theme: ThemeType) {
@@ -73,6 +78,7 @@ async function compareImage(
   if (threshold > 0) {
     console.log(threshold);
   }
+  maxThresholdData = Math.max(maxThresholdData, threshold);
   if (threshold > maxThreshold) {
     const diffPath = basePath.replace('.png', '.diff.png');
     await fs.promises.writeFile(diffPath, PNG.PNG.sync.write(diff));
