@@ -24,7 +24,9 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  console.log('maxThresholdData: ', maxThresholdData);
+  if (maxThresholdData) {
+    console.log('maxThresholdData: ', maxThresholdData);
+  }
 });
 
 function getRenderData(controller: IController, theme: ThemeType) {
