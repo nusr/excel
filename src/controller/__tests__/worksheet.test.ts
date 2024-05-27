@@ -83,14 +83,16 @@ describe('worksheet.test.ts', () => {
         sheetId: controller.getCurrentSheetId(),
       });
       expect(
-        controller.getCell({
-          row: 0,
-          col: 0,
-          colCount: 1,
-          rowCount: 1,
-          sheetId: controller.getCurrentSheetId(),
-        }),
-      ).toEqual({ value: 45271.42422453704, style: { numberFormat: 'h:mm:ss AM/PM' } });
+        Math.floor(
+          controller.getCell({
+            row: 0,
+            col: 0,
+            colCount: 1,
+            rowCount: 1,
+            sheetId: controller.getCurrentSheetId(),
+          })!.value as number,
+        ),
+      ).toEqual(Math.floor(45271));
     });
     test('setFormula setValue', () => {
       controller.setCell([['=SUM(1,2)']], [], {

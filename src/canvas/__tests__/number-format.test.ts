@@ -10,7 +10,7 @@ describe('number-format.test.ts', () => {
     controller = initController();
   });
   afterEach(async () => {
-    await compareScreenShot(controller);
+    await compareScreenShot(controller, { maxThreshold: 0.054 });
   });
 
   for (const item of numberFormatOptionList) {

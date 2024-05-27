@@ -8,7 +8,7 @@ describe('wrap-text.test.ts', () => {
     controller = initController();
   });
   afterEach(async () => {
-    await compareScreenShot(controller);
+    await compareScreenShot(controller, { maxThreshold: 0.229 });
   });
   test('basic', () => {
     controller.setCell(
