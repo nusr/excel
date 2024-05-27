@@ -157,15 +157,15 @@ function splitWords(
   isWrapText?: boolean,
   isMergeContent?: boolean,
 ): string[] {
-  if (isWrapText && isMergeContent) {
-    return text.split(MERGE_CELL_LINE_BREAK);
-  }
-  if (isWrapText) {
+  if (isMergeContent) {
+    if (isWrapText) {
+      return text.split(MERGE_CELL_LINE_BREAK);
+    } else {
+      return splitToWords(text.replaceAll(MERGE_CELL_LINE_BREAK, ''));
+    }
+  } else {
     return splitToWords(text);
   }
-  return splitToWords(
-    isMergeContent ? text.replaceAll(MERGE_CELL_LINE_BREAK, '') : text,
-  );
 }
 
 export function drawAntLine(
@@ -271,7 +271,7 @@ export function renderCell(
   cellInfo: CanvasOverlayPosition,
   value: ResultType,
   style?: Partial<StyleType>,
-  isMergeContent?: boolean,
+  isMergeCell?: boolean,
   theme?: ThemeType,
 ): IWindowSize {
   const result: IWindowSize = { height: 0, width: 0 };
@@ -310,7 +310,8 @@ export function renderCell(
   }
   realStyle.horizontalAlign = align;
 
-  const texts = splitWords(text);
+  const isMergeContent = isMergeCell && text.includes(MERGE_CELL_LINE_BREAK);
+  const texts = splitWords(text, style?.isWrapText, isMergeCell);
   const textList: TextItem[] = texts.map((item) => {
     const size = measureText(ctx, item);
     return {

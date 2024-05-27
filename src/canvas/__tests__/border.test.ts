@@ -12,7 +12,7 @@ describe('border.test.ts', () => {
     await snapshot(controller);
   });
   describe('border type', () => {
-    const keyList = Object.keys(BORDER_TYPE_MAP) as Array<BorderItem['type']>
+    const keyList = Object.keys(BORDER_TYPE_MAP) as Array<BorderItem['type']>;
     for (const key of keyList) {
       test(key, () => {
         const item: BorderItem = {
@@ -20,7 +20,7 @@ describe('border.test.ts', () => {
           color: '',
         };
         controller.setCell(
-          [],
+          [[1]],
           [
             [
               {

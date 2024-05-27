@@ -38,4 +38,13 @@ describe('cell-value.test.ts', () => {
       sheetId: '',
     });
   });
+  test('error', async () => {
+    controller.setCell([['#DIV/0!']], [], {
+      row: 0,
+      col: 0,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
+  });
 });

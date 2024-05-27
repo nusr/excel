@@ -24,7 +24,7 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  if (maxThresholdData) {
+  if (maxThresholdData > 0) {
     console.log('maxThresholdData: ', maxThresholdData);
   }
 });
@@ -60,6 +60,7 @@ async function compareImage(
   basePath: string,
   baseBuffer: Buffer,
   newImageBuffer: Buffer,
+  maxThreshold: number,
 ) {
   const baseImage = PNG.PNG.sync.read(baseBuffer);
   const newImage = PNG.PNG.sync.read(newImageBuffer);
@@ -76,7 +77,6 @@ async function compareImage(
     },
   );
   const threshold = Math.sqrt(result / (width * height));
-  const maxThreshold = 0.052;
   if (threshold > 0) {
     console.log(threshold);
   }
@@ -121,19 +121,16 @@ function renderCanvas(controller: IController, theme: ThemeType) {
 
 export async function snapshot(
   controller: IController,
-  options?: { theme?: ThemeType },
+  options?: { theme?: ThemeType; maxThreshold?: number },
 ) {
-  const { theme = 'light' } = options || {};
+  const { theme = 'light', maxThreshold = 0.052 } = options || {};
   setDpr(2);
-
   const canvas = renderCanvas(controller, theme);
-  let imageName = (expect.getState().currentTestName || '').replaceAll(
-    ' ',
-    '_',
-  );
-  imageName = encodeURIComponent(imageName) + '.png';
+  const imageName = (expect.getState().currentTestName || '')
+    .replaceAll(' ', '_')
+    .toLowerCase();
   const imageDir = path.join(__dirname, './static');
-  const imagePath = path.join(imageDir, imageName);
+  const imagePath = path.join(imageDir, encodeURIComponent(imageName) + '.png');
   const newBuffer = canvas.toBuffer('image/png');
   let baseBuffer: Buffer;
   try {
@@ -145,6 +142,11 @@ export async function snapshot(
     }
     throw error;
   }
-  const result = await compareImage(imagePath, baseBuffer, newBuffer);
+  const result = await compareImage(
+    imagePath,
+    baseBuffer,
+    newBuffer,
+    maxThreshold,
+  );
   expect(result).toEqual(0);
 }

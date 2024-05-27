@@ -541,18 +541,16 @@ export class OffScreenWorker implements WorkerMainView {
       },
       cellInfo.value,
       cellInfo.style,
-      false,
+      Boolean(mergeCell),
       theme,
     );
     const height = Math.max(this.rowMap[row] ?? 0, size.height);
     const width = Math.max(this.colMap[col] ?? 0, size.width);
-    if (!mergeCell) {
-      if (height >= CELL_HEIGHT) {
-        this.rowMap[row] = height;
-      }
-      if (width >= CELL_WIDTH) {
-        this.colMap[col] = width;
-      }
+    if (height >= CELL_HEIGHT) {
+      this.rowMap[row] = height;
+    }
+    if (width >= CELL_WIDTH) {
+      this.colMap[col] = width;
     }
     const cellPosition = {
       top: position.top,

@@ -41,13 +41,13 @@ describe('cell-style.test.ts', () => {
         },
       );
     });
-    test('fill color', () => {
+    test('double underline', () => {
       controller.setCell(
         [[1]],
         [
           [
             {
-              fillColor: 'red',
+              underline: EUnderLine.DOUBLE,
             },
           ],
         ],
@@ -60,13 +60,13 @@ describe('cell-style.test.ts', () => {
         },
       );
     });
-    test.skip('wrap text', () => {
+    test('fill color', () => {
       controller.setCell(
-        [['This is a very long text that needs to be wrapped']],
+        [[1]],
         [
           [
             {
-              isWrapText: true,
+              fillColor: 'red',
             },
           ],
         ],

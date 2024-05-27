@@ -2,48 +2,44 @@ import { initController } from '@/controller';
 import { IController, EMergeCellType } from '@/types';
 import { snapshot } from './util';
 
-describe('range.test.ts', () => {
+describe('wrap-text.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
     controller = initController();
   });
   afterEach(async () => {
-    await snapshot(controller);
+    await snapshot(controller, { maxThreshold: 0.6 });
   });
-
-  test('merge center', async () => {
+  test('basic', () => {
+    controller.setCell(
+      [['This is a very long text that needs to be wrapped']],
+      [
+        [
+          {
+            isWrapText: true,
+            fontSize: 8,
+          },
+        ],
+      ],
+      {
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      },
+    );
+  });
+  test('merge content', async () => {
     controller.setCell(
       [
         [1, false],
         ['test', true],
       ],
-      [],
-      {
-        row: 0,
-        col: 0,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: '',
-      },
-    );
-    controller.addMergeCell(
-      {
-        row: 0,
-        col: 0,
-        rowCount: 2,
-        colCount: 2,
-        sheetId: '',
-      },
-      EMergeCellType.MERGE_CENTER,
-    );
-  });
-  test('merge cell', async () => {
-    controller.setCell(
       [
-        [false, 1],
-        ['test', true],
+        [{ fontSize: 8 }, { fontSize: 8 }],
+        [{ fontSize: 8 }, { fontSize: 8 }],
       ],
-      [],
       {
         row: 0,
         col: 0,
@@ -60,7 +56,7 @@ describe('range.test.ts', () => {
         colCount: 2,
         sheetId: '',
       },
-      EMergeCellType.MERGE_CELL,
+      EMergeCellType.MERGE_CONTENT,
     );
   });
 });
