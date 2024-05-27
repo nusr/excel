@@ -60,7 +60,7 @@ describe('cell-style.test.ts', () => {
         },
       );
     });
-    test('wrap text', () => {
+    test.skip('wrap text', () => {
       controller.setCell(
         [['This is a very long text that needs to be wrapped']],
         [

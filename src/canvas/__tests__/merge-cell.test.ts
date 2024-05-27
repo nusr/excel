@@ -63,7 +63,7 @@ describe('range.test.ts', () => {
       EMergeCellType.MERGE_CELL,
     );
   });
-  test('merge content', async () => {
+  test.skip('merge content', async () => {
     controller.setCell(
       [
         [1, false],

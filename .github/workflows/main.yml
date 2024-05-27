@@ -20,9 +20,12 @@ jobs:
         run: npm run install-font
       - name: Test
         run: |
-          npm i -g pnpm
+          npm i -g pnpm jscpd
           pnpm i
-          npm run test
+          npm run repeat
+          npm run lint
+          npx tsc
+          npm run coverage
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
