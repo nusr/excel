@@ -277,10 +277,8 @@ export class Scanner {
       default:
         if (isDigit(c)) {
           this.number();
-        } else if (this.anyChar(c)) {
-          this.addIdentifier();
         } else {
-          throw new CustomError('#ERROR!');
+          this.addIdentifier();
         }
         break;
     }

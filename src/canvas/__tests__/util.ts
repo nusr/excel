@@ -84,7 +84,7 @@ async function compareImage(
   if (threshold > maxThreshold) {
     const diffPath = basePath.replace('.png', '.diff.png');
     await fs.promises.writeFile(diffPath, PNG.PNG.sync.write(diff));
-    return result;
+    return 1;
   } else {
     return 0;
   }
@@ -119,11 +119,11 @@ function renderCanvas(controller: IController, theme: ThemeType) {
   return canvas;
 }
 
-export async function snapshot(
+export async function compareScreenShot(
   controller: IController,
   options?: { theme?: ThemeType; maxThreshold?: number },
 ) {
-  const { theme = 'light', maxThreshold = 0.052 } = options || {};
+  const { theme = 'light', maxThreshold = 0.051 } = options || {};
   setDpr(2);
   const canvas = renderCanvas(controller, theme);
   const imageName = (expect.getState().currentTestName || '')

@@ -1,6 +1,6 @@
 import { initController } from '@/controller';
 import { IController } from '@/types';
-import { snapshot } from './util';
+import { compareScreenShot } from './util';
 
 describe('theme.test.ts', () => {
   let controller: IController;
@@ -16,7 +16,7 @@ describe('theme.test.ts', () => {
       colCount: 1,
       sheetId: '',
     });
-    await snapshot(controller, { theme: 'light' });
+    await compareScreenShot(controller, { theme: 'light' });
   });
   test('dark', async () => {
     controller.setCell([[true]], [], {
@@ -26,6 +26,6 @@ describe('theme.test.ts', () => {
       colCount: 1,
       sheetId: '',
     });
-    await snapshot(controller, { theme: 'dark' });
+    await compareScreenShot(controller, { theme: 'dark' });
   });
 });

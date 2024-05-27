@@ -237,44 +237,21 @@ export class OffScreenWorker implements WorkerMainView {
     const pointList: Point[] = [];
     let y = 0;
     let x = 0;
-    let maxX = 0;
-    for (let i = colIndex; i < colCount; i++) {
-      maxX += this.getColWidth(i);
-      if (maxX > width) {
-        break;
+    for (let i = rowIndex; i < rowCount && y <= height; i++) {
+      while (i < rowCount && this.getRowHeight(i) === 0) {
+        i++;
       }
-    }
-    const realWidth = Math.min(maxX, width);
-    let skip = false;
-    for (let i = rowIndex; i < rowCount; i++) {
-      if (!skip) {
-        pointList.push([0, y], [realWidth, y]);
-      } else {
-        skip = false;
-      }
+      pointList.push([0, y], [width, y]);
       const h = this.getRowHeight(i);
-      if (h === 0) {
-        skip = true;
-      }
       y += h;
-      if (y > height) {
-        break;
-      }
     }
-    for (let i = colIndex; i < colCount; i++) {
-      if (!skip) {
-        pointList.push([x, 0], [x, y]);
-      } else {
-        skip = false;
+    for (let i = colIndex; i < colCount && x <= width; i++) {
+      while (i < colCount && this.getColWidth(i) === 0) {
+        i++;
       }
+      pointList.push([x, 0], [x, y]);
       const w = this.getColWidth(i);
-      if (w === 0) {
-        skip = true;
-      }
       x += w;
-      if (x > realWidth) {
-        break;
-      }
     }
     pointList.push([0, y], [x, y]);
     pointList.push([x, 0], [x, y]);

@@ -1,6 +1,6 @@
 import { initController } from '@/controller';
 import { BorderItem, IController } from '@/types';
-import { snapshot } from './util';
+import { compareScreenShot } from './util';
 import { BORDER_TYPE_MAP } from '@/util';
 
 describe('border.test.ts', () => {
@@ -9,7 +9,7 @@ describe('border.test.ts', () => {
     controller = initController();
   });
   afterEach(async () => {
-    await snapshot(controller);
+    await compareScreenShot(controller);
   });
   describe('border type', () => {
     const keyList = Object.keys(BORDER_TYPE_MAP) as Array<BorderItem['type']>;

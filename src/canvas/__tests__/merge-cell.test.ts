@@ -1,14 +1,14 @@
 import { initController } from '@/controller';
 import { IController, EMergeCellType } from '@/types';
-import { snapshot } from './util';
+import { compareScreenShot } from './util';
 
-describe('range.test.ts', () => {
+describe('merge-cell.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
     controller = initController();
   });
   afterEach(async () => {
-    await snapshot(controller);
+    await compareScreenShot(controller);
   });
 
   test('merge center', async () => {

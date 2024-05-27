@@ -5,7 +5,7 @@ import {
   EVerticalAlign,
   EHorizontalAlign,
 } from '@/types';
-import { snapshot } from './util';
+import { compareScreenShot } from './util';
 
 describe('cell-style.test.ts', () => {
   let controller: IController;
@@ -13,7 +13,7 @@ describe('cell-style.test.ts', () => {
     controller = initController();
   });
   afterEach(async () => {
-    await snapshot(controller);
+    await compareScreenShot(controller);
   });
 
   describe('basic', () => {

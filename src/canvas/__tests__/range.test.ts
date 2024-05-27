@@ -1,6 +1,6 @@
 import { initController } from '@/controller';
 import { IController } from '@/types';
-import { snapshot } from './util';
+import { compareScreenShot } from './util';
 
 describe('range.test.ts', () => {
   let controller: IController;
@@ -8,7 +8,7 @@ describe('range.test.ts', () => {
     controller = initController();
   });
   afterEach(async () => {
-    await snapshot(controller);
+    await compareScreenShot(controller);
   });
 
   test('cell', async () => {

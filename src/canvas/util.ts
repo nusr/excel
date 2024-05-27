@@ -120,8 +120,8 @@ export function drawTriangle(
 
 export function getDoubleLine(
   pointList: Point[],
-  position: 'top' | 'bottom' | 'left' | 'right' = 'bottom',
-  isShort: boolean = false,
+  position: 'top' | 'bottom' | 'left' | 'right',
+  isShort: boolean,
 ) {
   const result = pointList.slice();
   const [start, end] = pointList;
@@ -137,19 +137,6 @@ export function getDoubleLine(
     result.push([start[0] - t, start[1] + other], [end[0] - t, end[1] - other]);
   }
   return result;
-}
-
-export function resizeCanvas(
-  canvas: HTMLCanvasElement,
-  width: number,
-  height: number,
-): void {
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  const realWidth = npx(width);
-  const realHeight = npx(height);
-  canvas.width = realWidth;
-  canvas.height = realHeight;
 }
 
 function splitWords(
@@ -311,7 +298,12 @@ export function renderCell(
   realStyle.horizontalAlign = align;
 
   const isMergeContent = isMergeCell && text.includes(MERGE_CELL_LINE_BREAK);
-  const texts = splitWords(text, style?.isWrapText, isMergeCell);
+
+  // show all date text
+  const isDate = !realStyle?.isWrapText && isDateFormat(format);
+  const texts = isDate
+    ? [text]
+    : splitWords(text, style?.isWrapText, isMergeCell);
   const textList: TextItem[] = texts.map((item) => {
     const size = measureText(ctx, item);
     return {
@@ -361,11 +353,6 @@ export function renderCell(
 
   result.height = Math.ceil(height);
   result.width = Math.ceil(width);
-  if (!realStyle?.isWrapText && isDateFormat(format)) {
-    // show all date info
-    const temp = textList.reduce((prev, cur) => prev + cur.width, 0);
-    result.width = Math.max(Math.ceil(temp), result.width);
-  }
 
   return result;
 }

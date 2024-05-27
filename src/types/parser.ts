@@ -21,7 +21,8 @@ export enum TokenType {
   GREATER, // >
   GREATER_EQUAL, // >=
   CONCATENATE, // &
-  COLON, // : 区域运算符，形成区域
+  // : 区域运算符，形成区域
+  COLON,
   COMMA, // , 联合运算符 求并集
   EMPTY_CHAR, // ' ' 交叉运算符 求交集
   PERCENT, // %

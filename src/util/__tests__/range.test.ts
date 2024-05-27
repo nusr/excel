@@ -1,4 +1,11 @@
-import { SheetRange, isCol, isRow, isSheet, containRange } from '../range';
+import {
+  SheetRange,
+  isCol,
+  isRow,
+  isSheet,
+  containRange,
+  iterateRange,
+} from '../range';
 
 describe('range.test.ts', () => {
   const mockSheetName = 'test';
@@ -123,6 +130,96 @@ describe('range.test.ts', () => {
           },
         ),
       ).toBeFalsy();
+    });
+  });
+  describe('iterateRange', () => {
+    test('all', () => {
+      let count = 0;
+      iterateRange(
+        { row: 0, col: 0, rowCount: 0, colCount: 0, sheetId: '' },
+        {
+          rowCount: 10,
+          colCount: 10,
+          sheetId: '',
+          name: '',
+          isHide: false,
+          sort: 1,
+        },
+        () => {
+          count++;
+          return false;
+        },
+      );
+      expect(count).toEqual(100);
+    });
+    test('row', () => {
+      let count = 0;
+      iterateRange(
+        { row: 0, col: 0, rowCount: 1, colCount: 0, sheetId: '' },
+        {
+          rowCount: 10,
+          colCount: 10,
+          sheetId: '',
+          name: '',
+          isHide: false,
+          sort: 1,
+        },
+        () => {
+          count++;
+          return false;
+        },
+      );
+      expect(count).toEqual(10);
+    });
+    test('col', () => {
+      let count = 0;
+      iterateRange(
+        { row: 0, col: 0, rowCount: 0, colCount: 1, sheetId: '' },
+        {
+          rowCount: 10,
+          colCount: 10,
+          sheetId: '',
+          name: '',
+          isHide: false,
+          sort: 1,
+        },
+        () => {
+          count++;
+          return false;
+        },
+      );
+      expect(count).toEqual(10);
+    });
+    test('cell', () => {
+      let count = 0;
+      iterateRange(
+        { row: 0, col: 0, rowCount: 2, colCount: 2, sheetId: '' },
+        {
+          rowCount: 10,
+          colCount: 10,
+          sheetId: '',
+          name: '',
+          isHide: false,
+          sort: 1,
+        },
+        () => {
+          count++;
+          return false;
+        },
+      );
+      expect(count).toEqual(4);
+    });
+    test('empty sheetInfo', () => {
+      let count = 0;
+      iterateRange(
+        { row: 0, col: 0, rowCount: 0, colCount: 0, sheetId: '' },
+        undefined,
+        () => {
+          count++;
+          return false;
+        },
+      );
+      expect(count).toEqual(0);
     });
   });
 });

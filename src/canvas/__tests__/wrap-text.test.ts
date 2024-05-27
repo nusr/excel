@@ -1,6 +1,6 @@
 import { initController } from '@/controller';
 import { IController, EMergeCellType } from '@/types';
-import { snapshot } from './util';
+import { compareScreenShot } from './util';
 
 describe('wrap-text.test.ts', () => {
   let controller: IController;
@@ -8,7 +8,7 @@ describe('wrap-text.test.ts', () => {
     controller = initController();
   });
   afterEach(async () => {
-    await snapshot(controller, { maxThreshold: 0.6 });
+    await compareScreenShot(controller);
   });
   test('basic', () => {
     controller.setCell(

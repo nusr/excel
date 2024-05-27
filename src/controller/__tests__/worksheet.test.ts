@@ -67,6 +67,31 @@ describe('worksheet.test.ts', () => {
         }),
       ).toEqual({ formula: '=SUM(1,2)', value: 3 });
     });
+    test('set date', () => {
+      controller.setCell([[1]], [[{ numberFormat: 'h:mm:ss AM/PM' }]], {
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      controller.setCellValue(new Date('2023-12-11 10:10:10').toString(), {
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ value: 45271.42422453704, style: { numberFormat: 'h:mm:ss AM/PM' } });
+    });
     test('setFormula setValue', () => {
       controller.setCell([['=SUM(1,2)']], [], {
         row: 0,

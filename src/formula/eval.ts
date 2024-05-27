@@ -51,12 +51,8 @@ export function parseFormula(
         expressionStr,
       };
     }
+    throw error;
   }
-  return {
-    result: '#ERROR!',
-    isError: true,
-    expressionStr,
-  };
 }
 
 export class CellDataMapImpl implements CellDataMap {
