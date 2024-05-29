@@ -15,6 +15,8 @@ import {
   ResponseMessageType,
   InterpreterResult,
   ChangeEventType,
+  CellDataMap,
+  FormulaKeys,
 } from '@/types';
 import {
   coordinateToString,
@@ -30,7 +32,7 @@ import {
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { numberFormat } from '@/model';
-import { parseFormula, CustomError } from '@/formula';
+import { parseFormula, CustomError, allFormulas } from '@/formula';
 
 export class Worksheet implements IWorksheet {
   private worksheets: WorkBookJSON['worksheets'] = {};
@@ -264,21 +266,25 @@ export class Worksheet implements IWorksheet {
     if (!worker) {
       const cache = new Map<string, InterpreterResult>();
       for (const [k, data] of Object.entries(sheetData)) {
-        if (data?.formula) {
-          const coord = stringToCoordinate(k);
-          const result = this.parseFormula(data.formula, coord, cache);
-          const newValue = result.result;
-          const oldValue = data.value;
-          if (newValue !== oldValue) {
-            data.value = newValue;
-            check = true;
-            this.model.push({
-              type: 'worksheets',
-              key: `${id}.${k}.value`,
-              newValue: newValue,
-              oldValue: oldValue,
-            });
-          }
+        if (!data?.formula) {
+          continue;
+        }
+        const coord = stringToCoordinate(k);
+        const result = this.parseFormula(data.formula, coord, cache);
+        if (!result) {
+          continue;
+        }
+        const newValue = result.result;
+        const oldValue = data.value;
+        if (newValue !== oldValue) {
+          data.value = newValue;
+          check = true;
+          this.model.push({
+            type: 'worksheets',
+            key: `${id}.${k}.value`,
+            newValue: newValue,
+            oldValue: oldValue,
+          });
         }
       }
       return check;
@@ -519,6 +525,15 @@ export class Worksheet implements IWorksheet {
     if (oldFormula === formula) {
       return;
     }
+
+    if (formula) {
+      const result = this.parseFormula(formula, range, new Map());
+      if (!result || result.isString) {
+        this.setValue(formula, range);
+        return;
+      }
+    }
+
     cellModel.formula = formula;
     this.model.push({
       type: 'worksheets',
@@ -602,82 +617,35 @@ export class Worksheet implements IWorksheet {
     coord: Coordinate,
     cache: Map<string, InterpreterResult>,
   ) {
-    const r = cache.get(formula);
-    if (r) {
-      return r;
-    }
-    const result = parseFormula(
-      formula,
-      {
-        getCurrentCell: () => {
-          return coord;
-        },
-        get: (range: IRange) => {
-          const { row, col, sheetId } = range;
-          const id = sheetId || this.model.getCurrentSheetId();
-          const result: ResultType[] = [];
-          const sheetInfo = this.model.getSheetInfo(id);
-          if (
-            !sheetInfo ||
-            row >= sheetInfo.rowCount ||
-            col >= sheetInfo.colCount
-          ) {
-            throw new CustomError('#REF!');
-          }
-          iterateRange(range, sheetInfo, (r, c) => {
-            const temp = this.getCell({
-              sheetId: id,
-              row: r,
-              col: c,
-              rowCount: 1,
-              colCount: 1,
-            });
-            if (temp) {
-              if (temp.formula) {
-                const t = this.parseFormula(
-                  temp.formula,
-                  { row: r, col: c },
-                  cache,
-                );
-                if (t.result !== temp.value) {
-                  const key = coordinateToString(r, c);
-                  this.worksheets[id] = this.worksheets[id] || {};
-                  this.worksheets[id][key].value = t.result;
-                  this.model.push({
-                    type: 'worksheets',
-                    key: `${id}.${key}.value`,
-                    newValue: t.result,
-                    oldValue: temp.value,
-                  });
-                }
-                result.push(t.result);
-              } else {
-                result.push(temp.value);
-              }
-            }
-            return false;
-          });
-          return result;
-        },
-        set: () => {
-          throw new CustomError('#REF!');
-        },
-        convertSheetNameToSheetId: this.convertSheetNameToSheetId,
+    const cellDataMap: CellDataMap = {
+      handleCell: () => {
+        return undefined;
       },
-      {
-        set: () => {
-          throw new CustomError('#REF!');
-        },
-        get: (name: string) => this.model.checkDefineName(name),
+      getFunction: (name: string) => {
+        return allFormulas[name as FormulaKeys];
       },
-    );
-    cache.set(formula, result);
+      getCell: (range) => {
+        return this.model.getCell(range);
+      },
+      set: () => {
+        throw new CustomError('#REF!');
+      },
+      getSheetInfo: (sheetId?: string, sheetName?: string) => {
+        if (sheetName) {
+          return this.model.getSheetList().find((v) => v.name === sheetName);
+        }
+        return this.model.getSheetInfo(
+          sheetId || this.model.getCurrentSheetId(),
+        );
+      },
+      setDefinedName: () => {
+        throw new CustomError('#REF!');
+      },
+      getDefinedName: (name: string) => this.model.checkDefineName(name),
+    };
+    const result = parseFormula(formula, coord, cellDataMap, cache);
     return result;
   }
-  private convertSheetNameToSheetId = (sheetName: string): string => {
-    const item = this.model.getSheetList().find((v) => v.name === sheetName);
-    return item?.sheetId || '';
-  };
   private updateColAndRow(
     rowMap: Record<string, number>,
     colMap: Record<string, number>,

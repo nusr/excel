@@ -1,15 +1,14 @@
 import {
   RequestMessageType,
   IRange,
-  ResultType,
   ResponseMessageType,
   InterpreterResult,
   ResponseFormula,
-  Coordinate,
   RequestFormula,
+  CellDataMap,
+  FormulaKeys,
 } from './types';
-import { parseFormula, CustomError } from './formula';
-import { iterateRange } from '@/util/range';
+import { parseFormula, CustomError, allFormulas } from './formula';
 import { coordinateToString, stringToCoordinate } from '@/util/util';
 import { OffScreenWorker } from './canvas/offScreenWorker';
 import { setDpr } from '@/util/dpr';
@@ -41,103 +40,61 @@ self.addEventListener('message', (event: MessageEvent<RequestMessageType>) => {
 });
 
 function parseAllFormulas(eventData: RequestFormula) {
-  const { currentSheetId, worksheets } = eventData;
+  const { currentSheetId, worksheets, workbook, definedNames } = eventData;
   const formulaCache = new Map<string, InterpreterResult>();
   const sheetData = worksheets[currentSheetId] || {};
   const list: ResponseFormula['list'] = [];
-  for (const [k, data] of Object.entries(sheetData)) {
-    if (data?.formula) {
-      const result = parseFormulaItem(
-        data.formula,
-        eventData,
-        formulaCache,
-        stringToCoordinate(k),
-        list,
-      );
-      if (result.result !== data.value) {
-        list.push({
-          key: k,
-          newValue: result.result,
-          sheetId: currentSheetId,
-        });
+  const cellDataMap: CellDataMap = {
+    handleCell: () => {
+      return undefined;
+    },
+    getFunction: (name: string) => {
+      return allFormulas[name as FormulaKeys];
+    },
+    getCell: (range: IRange) => {
+      const { row, col, sheetId } = range;
+      const realSheetId = sheetId || currentSheetId;
+      const sheetData = worksheets[realSheetId] || {};
+      const key = coordinateToString(row, col);
+      return sheetData[key];
+    },
+    set: () => {
+      throw new CustomError('#REF!');
+    },
+    getSheetInfo: (sheetId?: string, sheetName?: string) => {
+      if (sheetName) {
+        return workbook.find((v) => v.name === sheetName);
       }
+      const realSheetId = sheetId || currentSheetId;
+      return workbook.find((v) => v.sheetId === realSheetId);
+    },
+    setDefinedName: () => {
+      throw new CustomError('#REF!');
+    },
+    getDefinedName: (name: string) => {
+      return definedNames[name];
+    },
+  };
+  for (const [k, data] of Object.entries(sheetData)) {
+    if (!data?.formula) {
+      continue;
+    }
+    const result = parseFormula(
+      data?.formula,
+      stringToCoordinate(k),
+      cellDataMap,
+      formulaCache,
+    );
+    if (!result) {
+      continue;
+    }
+    if (result.result !== data.value) {
+      list.push({
+        key: k,
+        newValue: result.result,
+        sheetId: currentSheetId,
+      });
     }
   }
   return list;
-}
-
-function parseFormulaItem(
-  formula: string,
-  eventData: RequestFormula,
-  cache: Map<string, InterpreterResult>,
-  coord: Coordinate,
-  list: ResponseFormula['list'],
-): InterpreterResult {
-  const temp = cache.get(formula);
-  if (temp) {
-    return temp;
-  }
-  const { currentSheetId, worksheets, definedNames, workbook } = eventData;
-  const result = parseFormula(
-    formula,
-    {
-      getCurrentCell: () => {
-        return coord;
-      },
-      get: (range: IRange) => {
-        const { row, col, sheetId } = range;
-        const realSheetId = sheetId || currentSheetId;
-        const result: ResultType[] = [];
-        const sheetInfo = workbook.find((v) => v.sheetId === realSheetId);
-        if (
-          !sheetInfo ||
-          row >= sheetInfo.rowCount ||
-          col >= sheetInfo.colCount
-        ) {
-          throw new CustomError('#REF!');
-        }
-        const sheetData = worksheets[realSheetId] || {};
-        iterateRange(range, sheetInfo, (r, c) => {
-          const key = coordinateToString(r, c);
-          if (sheetData[key]) {
-            const f = sheetData[key].formula;
-            const oldValue = sheetData[key].value;
-            if (f) {
-              const t = parseFormulaItem(
-                f,
-                eventData,
-                cache,
-                { row: r, col: c },
-                list,
-              );
-              if (t.result !== oldValue) {
-                list.push({ key, newValue: t.result, sheetId: realSheetId });
-              }
-              result.push(t?.result);
-            } else {
-              result.push(oldValue);
-            }
-          }
-          return false;
-        });
-        return result;
-      },
-      set: () => {
-        throw new CustomError('#REF!');
-      },
-      convertSheetNameToSheetId: (sheetName: string) => {
-        return workbook.find((v) => v.name === sheetName)?.sheetId || '';
-      },
-    },
-    {
-      set: () => {
-        throw new CustomError('#REF!');
-      },
-      get: (name: string) => {
-        return definedNames[name];
-      },
-    },
-  );
-  cache.set(formula, result);
-  return result;
 }

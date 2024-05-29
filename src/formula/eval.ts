@@ -5,111 +5,143 @@ import { Interpreter } from './interpreter';
 import {
   CellDataMap,
   InterpreterResult,
-  DefinedNamesMap,
   IRange,
-  FormulaType,
   ResultType,
   Coordinate,
+  WorksheetType,
+  ModelCellType,
+  FormulaKeys,
 } from '@/types';
+import { isFormula } from '@/util/util';
 
 export function parseFormula(
-  source: string,
+  formula: string,
+  currentCoord: Coordinate = { row: 0, col: 0 },
   cellData: CellDataMap = new CellDataMapImpl(),
-  definedNamesMap: DefinedNamesMap = new DefinedNamesMapImpl(),
-  functionMap: FormulaType = allFormulas,
+  cache: Map<string, InterpreterResult> = new Map<string, InterpreterResult>(),
 ): InterpreterResult {
-  let expressionStr = '';
+  if (cache.has(formula)) {
+    return cache.get(formula)!;
+  }
   try {
-    const list = new Scanner(source).scan();
+    cellData.handleCell = (
+      value: ModelCellType | undefined,
+      coord: Coordinate,
+    ): ResultType | undefined => {
+      if (value) {
+        if (value.formula) {
+          const t = parseFormula(value.formula, coord, cellData, cache);
+          return t.result;
+        } else {
+          return value.value;
+        }
+      }
+      return undefined;
+    };
+    const result: InterpreterResult = {
+      result: '',
+      isError: false,
+      expressionStr: '',
+    };
+    cache.set(formula, result);
+    const list = new Scanner(formula).scan();
     const expressions = new Parser(list).parse();
-    const result = new Interpreter(
+    result.result = new Interpreter(
       expressions,
+      currentCoord,
       cellData,
-      definedNamesMap,
-      functionMap,
     ).interpret();
 
     const strList: string[] = [];
     for (const item of expressions) {
       strList.push(item.toString());
     }
-    expressionStr = strList.join('');
-    let value = result;
-    if (typeof value === 'number' && !isNaN(value)) {
-      value = roundNumber(value);
+    result.expressionStr = strList.join('');
+    if (typeof result.result === 'number' && !isNaN(result.result)) {
+      result.result = roundNumber(result.result);
     }
-    return {
-      result: value,
-      isError: false,
-      expressionStr,
-    };
+
+    return result;
   } catch (error) {
     if (error instanceof CustomError) {
-      return {
+      const result: InterpreterResult = {
         result: error.value,
         isError: true,
-        expressionStr,
+        expressionStr: '',
       };
+      if (error.value === 'string') {
+        result.isString = true;
+        result.isError = false;
+      }
+      cache.set(formula, result);
+      return result;
     }
     throw error;
   }
 }
 
+const defaultSheetId = '_test_';
 export class CellDataMapImpl implements CellDataMap {
-  private readonly map = new Map<string, ResultType>();
-  private sheetNameMap: Record<string, string> = {};
-  private cell: Coordinate = {
-    row: 0,
-    col: 0,
-  };
+  private readonly map = new Map<string, ModelCellType>();
+  private readonly definedNameMap = new Map<string, IRange>();
+  private readonly currentSheetId = defaultSheetId;
+  private sheetList: WorksheetType[] = [
+    {
+      sheetId: defaultSheetId,
+      name: '_test_',
+      rowCount: 200,
+      colCount: 30,
+      isHide: false,
+      sort: 1,
+    },
+  ];
   private getKey(row: number, col: number, sheetId: string) {
-    const key = `${row}_${col}_${sheetId}`;
+    const key = `${row}_${col}_${sheetId || defaultSheetId}`;
     return key;
   }
-  setCurrentCell(cell: Coordinate) {
-    this.cell = cell;
-  }
-  setSheetNameMap(sheetNameMap: Record<string, string>) {
-    this.sheetNameMap = sheetNameMap;
+  getFunction = (name: string) => {
+    return allFormulas[name as FormulaKeys];
+  };
+  setSheetList(list: WorksheetType[]) {
+    this.sheetList = list;
   }
   set(range: IRange, value: ResultType[][]): void {
     const { row, col, sheetId } = range;
     for (let i = 0; i < value.length; i++) {
       for (let j = 0; j < value[i].length; j++) {
         const key = this.getKey(row + i, col + j, sheetId);
-        this.map.set(key, value[i][j]);
-      }
-    }
-  }
-  get(range: IRange): ResultType[] {
-    const list: ResultType[] = [];
-    const { row, col, rowCount, colCount, sheetId } = range;
-    for (let r = row, endRow = row + rowCount; r < endRow; r++) {
-      for (let c = col, endCol = col + colCount; c < endCol; c++) {
-        const key = this.getKey(r, c, sheetId);
-        const value = this.map.get(key);
-        if (typeof value !== 'undefined') {
-          list.push(value);
+        const t = value[i][j];
+        if (typeof t === 'string' && isFormula(t)) {
+          this.map.set(key, { formula: t, value: '' });
+        } else {
+          this.map.set(key, { value: t });
         }
       }
     }
-
-    return list;
   }
-  convertSheetNameToSheetId(sheetName: string): string {
-    return this.sheetNameMap[sheetName] || '';
+  getCell(range: IRange) {
+    const { row, col, sheetId } = range;
+    const key = this.getKey(row, col, sheetId);
+    const item = this.map.get(key);
+    return item;
   }
-  getCurrentCell() {
-    return { ...this.cell };
+  getSheetInfo(sheetId?: string, sheetName?: string) {
+    if (sheetName) {
+      return this.sheetList.find((v) => v.name === sheetName);
+    }
+    const realSheetId = sheetId || this.currentSheetId;
+    return this.sheetList.find((v) => v.sheetId === realSheetId);
   }
-}
-
-export class DefinedNamesMapImpl implements DefinedNamesMap {
-  private readonly map = new Map<string, IRange>();
-  set(name: string, value: IRange): void {
-    this.map.set(name, value);
+  handleCell = (value: ModelCellType | undefined, _coord: Coordinate) => {
+    if (value) {
+      return value.value;
+    }
+    return undefined;
+  };
+  setDefinedName(name: string, value: IRange) {
+    this.definedNameMap.set(name, value);
   }
-  get(name: string): IRange | undefined {
-    return this.map.get(name)!;
+  getDefinedName(name: string) {
+    return this.definedNameMap.get(name);
   }
 }

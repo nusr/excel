@@ -1,4 +1,10 @@
-import { Coordinate, IRange } from '@/types';
+import {
+  Coordinate,
+  IRange,
+  WorksheetType,
+  ModelCellType,
+  FormulaFunction,
+} from '@/types';
 
 export type ResultType = boolean | string | number;
 export type ErrorTypes =
@@ -48,20 +54,25 @@ export enum TokenType {
 
 export interface CellDataMap {
   set: (range: IRange, value: ResultType[][]) => void;
-  get: (range: IRange) => ResultType[];
-  getCurrentCell: () => Coordinate;
-  convertSheetNameToSheetId: (sheetName: string) => string;
-}
-
-export interface DefinedNamesMap {
-  set: (name: string, value: IRange) => void;
-  get: (name: string) => IRange | undefined;
+  getCell: (range: IRange) => ModelCellType | undefined;
+  getSheetInfo: (
+    sheetId?: string,
+    sheetName?: string,
+  ) => WorksheetType | undefined;
+  setDefinedName: (name: string, value: IRange) => void;
+  getDefinedName: (name: string) => IRange | undefined;
+  handleCell: (
+    value: ModelCellType | undefined,
+    coord: Coordinate,
+  ) => ResultType | undefined;
+  getFunction: (name: string) => FormulaFunction | undefined;
 }
 
 export interface InterpreterResult {
   result: ResultType;
   isError: boolean;
   expressionStr: string;
+  isString?: boolean; // Whether it is a string
 }
 
 export type ReferenceType = 'absolute' | 'mixed' | 'relative';

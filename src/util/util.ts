@@ -1,4 +1,4 @@
-import { SHEET_NAME_PREFIX, SPLITTER } from './constant';
+import { SHEET_NAME_PREFIX, SPLITTER, FORMULA_PREFIX } from './constant';
 import type {
   WorksheetType,
   ChangeEventType,
@@ -170,4 +170,15 @@ export function isTestEnv(): boolean {
 
 export function isMac() {
   return navigator.userAgent.indexOf('Mac OS X') > -1;
+}
+
+export function isFormula(value: ResultType) {
+  if (
+    typeof value === 'string' &&
+    value.startsWith(FORMULA_PREFIX) &&
+    value.length > 1
+  ) {
+    return true;
+  }
+  return false;
 }

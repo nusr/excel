@@ -413,4 +413,33 @@ describe('worksheet.test.ts', () => {
       });
     });
   });
+  describe('cycle import', () => {
+    test('ok', () => {
+      controller.setCell([['=A2'], ['=A1']], [], {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        })?.value,
+      ).toEqual('')
+      expect(
+        controller.getCell({
+          row: 1,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        })?.value
+      ).toEqual('')
+    });
+  });
 });

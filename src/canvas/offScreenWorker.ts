@@ -31,6 +31,7 @@ import { getHeaderStyle } from './constant';
 import { intToColumnName } from '@/util/convert';
 import { isSheet, isCol, isRow, containRange } from '@/util/range';
 import { npx, dpr } from '@/util/dpr';
+import { getCustomWidthOrHeightKey,coordinateToString } from '@/util/util';
 
 const lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
 
@@ -279,7 +280,10 @@ export class OffScreenWorker implements WorkerMainView {
     this.ctx.restore();
   }
   private getRowHeight(row: number) {
-    const key = `${this.eventData.currentSheetInfo.sheetId}_${row}`;
+    const key = getCustomWidthOrHeightKey(
+      this.eventData.currentSheetInfo.sheetId,
+      row,
+    );
     const data = this.eventData.customHeight[key];
     if (!data) {
       return CELL_HEIGHT;
@@ -287,7 +291,10 @@ export class OffScreenWorker implements WorkerMainView {
     return data.isHide ? HIDE_CELL : data.len;
   }
   private getColWidth(col: number) {
-    const key = `${this.eventData.currentSheetInfo.sheetId}_${col}`;
+    const key = getCustomWidthOrHeightKey(
+      this.eventData.currentSheetInfo.sheetId,
+      col,
+    );
     const data = this.eventData.customWidth[key];
     if (!data) {
       return CELL_WIDTH;
@@ -496,7 +503,7 @@ export class OffScreenWorker implements WorkerMainView {
       colCount: 1,
       sheetId: '',
     };
-    const key = `${row}_${col}`;
+    const key = coordinateToString(row,col)
     const cellInfo = this.eventData.sheetData[key];
     if (!cellInfo) {
       return;

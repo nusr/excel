@@ -8,7 +8,7 @@ describe('R1C1.test.ts', () => {
         { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
         [[0]],
       );
-      expect(parseFormula('=R1C1', cellDataMap)).toEqual({
+      expect(parseFormula('=R1C1', { row: 0, col: 0 }, cellDataMap)).toEqual({
         isError: false,
         result: 0,
         expressionStr: 'R1C1',
@@ -20,7 +20,7 @@ describe('R1C1.test.ts', () => {
         { row: 9, col: 9, rowCount: 1, colCount: 1, sheetId: '' },
         [[10]],
       );
-      expect(parseFormula('=r10c10', cellDataMap)).toEqual({
+      expect(parseFormula('=r10c10', { row: 0, col: 0 }, cellDataMap)).toEqual({
         isError: false,
         result: 10,
         expressionStr: 'R10C10',
@@ -33,7 +33,7 @@ describe('R1C1.test.ts', () => {
         { row: 9, col: 9, rowCount: 1, colCount: 1, sheetId: '' },
         [[10]],
       );
-      expect(parseFormula('=r10c10', cellDataMap)).toEqual({
+      expect(parseFormula('=r10c10', { row: 0, col: 0 }, cellDataMap)).toEqual({
         isError: false,
         result: 10,
         expressionStr: 'R10C10',
@@ -46,8 +46,9 @@ describe('R1C1.test.ts', () => {
         { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
         [['test']],
       );
-      cellDataMap.setCurrentCell({ row: 2, col: 2 });
-      expect(parseFormula('=R[-2]C[-2]', cellDataMap)).toEqual({
+      expect(
+        parseFormula('=R[-2]C[-2]', { row: 2, col: 2 }, cellDataMap),
+      ).toEqual({
         isError: false,
         result: 'test',
         expressionStr: 'R[-2]C[-2]',
@@ -60,8 +61,7 @@ describe('R1C1.test.ts', () => {
         { row: 2, col: 2, rowCount: 1, colCount: 1, sheetId: '' },
         [[10]],
       );
-      cellDataMap.setCurrentCell({ row: 2, col: 2 });
-      expect(parseFormula('=RC', cellDataMap)).toEqual({
+      expect(parseFormula('=RC', { row: 2, col: 2 }, cellDataMap)).toEqual({
         isError: false,
         result: 10,
         expressionStr: 'RC',

@@ -2,8 +2,8 @@ import type { ErrorTypes } from '@/types';
 import { parseNumber } from '@/util/util';
 
 export class CustomError extends Error {
-  readonly value: ErrorTypes;
-  constructor(value: ErrorTypes) {
+  readonly value: ErrorTypes | 'string';
+  constructor(value: ErrorTypes | 'string') {
     super(value);
     this.value = value;
   }
@@ -45,4 +45,3 @@ export function isRelativeReference(value: string) {
   const realValue = value.toUpperCase();
   return /^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue);
 }
-
