@@ -46,7 +46,7 @@ function parseAllFormulas(eventData: RequestFormula) {
   const list: ResponseFormula['list'] = [];
   const cellDataMap: CellDataMap = {
     handleCell: () => {
-      return undefined;
+      return [];
     },
     getFunction: (name: string) => {
       return allFormulas[name as FormulaKeys];
@@ -88,10 +88,11 @@ function parseAllFormulas(eventData: RequestFormula) {
     if (!result) {
       continue;
     }
-    if (result.result !== data.value) {
+    const r = result.result[0];
+    if (r !== data.value) {
       list.push({
         key: k,
-        newValue: result.result,
+        newValue: r,
         sheetId: currentSheetId,
       });
     }

@@ -8,14 +8,15 @@ import {
 
 export type ResultType = boolean | string | number;
 export type ErrorTypes =
-  | '#ERROR!'
   | '#DIV/0!' // div zero
   | '#NAME?'
   | '#N/A' // not available
   | '#NULL!'
   | '#NUM!'
   | '#REF!'
-  | '#VALUE!';
+  | '#VALUE!'
+  | '#GETTING_DATA';
+
 export enum TokenType {
   EQUAL, // =
   NOT_EQUAL, // <>
@@ -64,15 +65,13 @@ export interface CellDataMap {
   handleCell: (
     value: ModelCellType | undefined,
     coord: Coordinate,
-  ) => ResultType | undefined;
+  ) => ResultType[];
   getFunction: (name: string) => FormulaFunction | undefined;
 }
 
 export interface InterpreterResult {
-  result: ResultType;
-  isError: boolean;
-  expressionStr: string;
-  isString?: boolean; // Whether it is a string
+  result: ResultType[];
+  expressionStr?: string;
 }
 
 export type ReferenceType = 'absolute' | 'mixed' | 'relative';

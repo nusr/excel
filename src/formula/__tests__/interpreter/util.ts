@@ -1,16 +1,22 @@
-import { ResultType, ErrorTypes } from '@/types';
-import { parseFormula } from '../..';
-import { ERROR_SET } from '@/util';
+import { Coordinate, ResultType } from '@/types';
+import { parseFormula, CellDataMapImpl } from '../..';
+import { isText } from '@/util';
 
-export function expectResult(
+export function expectFormula(
   str: string,
-  expected: ResultType,
-  expressionStr: string = '',
+  expected: ResultType[],
+  coord: Coordinate = { row: 0, col: 0 },
+  cellDataMap = new CellDataMapImpl(),
 ) {
-  const result = parseFormula(str);
-  expect(result).toEqual({
-    isError: ERROR_SET.has(result.result as ErrorTypes),
-    result: expected,
-    expressionStr,
-  });
+  const result = parseFormula(str, coord, cellDataMap);
+  expect(result.result).toEqual(expected);
+}
+
+export function expectText(
+  str: string,
+  coord: Coordinate = { row: 0, col: 0 },
+  cellDataMap = new CellDataMapImpl(),
+) {
+  const result = parseFormula(str, coord, cellDataMap);
+  expect(isText(result.result)).toEqual(true);
 }

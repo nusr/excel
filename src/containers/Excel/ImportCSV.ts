@@ -1,25 +1,13 @@
 import { IController, WorksheetData } from '@/types';
-import { parseText, coordinateToString, CSV_SPLITTER } from '@/util';
-function convertFileToText(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const text = event.target?.result;
-      if (text && typeof text === 'string') {
-        resolve(text);
-      } else {
-        resolve('');
-      }
-    };
-    reader.onerror = function (error) {
-      reject(error);
-    };
-    reader.readAsText(file);
-  });
-}
+import {
+  parseText,
+  coordinateToString,
+  CSV_SPLITTER,
+  convertFileToTextOrBase64,
+} from '@/util';
 
 export async function importCSV(file: File, controller: IController) {
-  const text = await convertFileToText(file);
+  const text = await convertFileToTextOrBase64(file, false);
   const list = parseText(text, CSV_SPLITTER);
   const sheetData: WorksheetData = {};
   let r = 0;

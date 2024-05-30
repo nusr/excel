@@ -24,8 +24,10 @@ import {
   iterateRange,
   FORMULA_PREFIX,
   isEmpty,
+  isFormula,
   deepEqual,
   workerSet,
+  isText,
   stringToCoordinate,
   MERGE_CELL_LINE_BREAK,
   convertStringToResultType,
@@ -274,7 +276,7 @@ export class Worksheet implements IWorksheet {
         if (!result) {
           continue;
         }
-        const newValue = result.result;
+        const newValue = result.result[0];
         const oldValue = data.value;
         if (newValue !== oldValue) {
           data.value = newValue;
@@ -362,11 +364,7 @@ export class Worksheet implements IWorksheet {
 
   setCellValue(value: ResultType, range: IRange): void {
     const id = range.sheetId || this.model.getCurrentSheetId();
-    if (
-      value &&
-      typeof value === 'string' &&
-      value.startsWith(FORMULA_PREFIX)
-    ) {
+    if (typeof value === 'string' && isFormula(value)) {
       this.setCellFormula(value, range);
     } else {
       const old =
@@ -528,7 +526,7 @@ export class Worksheet implements IWorksheet {
 
     if (formula) {
       const result = this.parseFormula(formula, range, new Map());
-      if (!result || result.isString) {
+      if (isText(result.result)) {
         this.setValue(formula, range);
         return;
       }
@@ -619,7 +617,7 @@ export class Worksheet implements IWorksheet {
   ) {
     const cellDataMap: CellDataMap = {
       handleCell: () => {
-        return undefined;
+        return [];
       },
       getFunction: (name: string) => {
         return allFormulas[name as FormulaKeys];

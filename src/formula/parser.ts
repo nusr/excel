@@ -12,6 +12,7 @@ import {
   CellRangeExpression,
   R1C1Expression,
   CellExpression,
+  ArrayExpression,
 } from './expression';
 import { CustomError, isRelativeReference } from './formula';
 import { ERROR_SET } from '@/util/constant';
@@ -173,6 +174,17 @@ export class Parser {
     return new CallExpression(name, params);
   }
   private primary(): Expression {
+    if (this.match(TokenType.lEFT_BRACE)) {
+      const list: Expression[] = [];
+      do {
+        if (this.peek().type == TokenType.RIGHT_BRACE) {
+          break;
+        }
+        list.push(this.expression());
+      } while (this.match(TokenType.COMMA));
+      this.expect(TokenType.RIGHT_BRACE);
+      return new ArrayExpression(list);
+    }
     if (this.match(TokenType.LEFT_BRACKET)) {
       const value = this.expression();
       this.expect(TokenType.RIGHT_BRACKET);
@@ -210,7 +222,7 @@ export class Parser {
       return new R1C1Expression(this.previous());
     }
 
-    throw new CustomError('#ERROR!');
+    throw new CustomError('#VALUE!');
   }
   private match(...types: TokenType[]): boolean {
     const { type } = this.peek();
@@ -231,7 +243,7 @@ export class Parser {
       this.next();
       return this.previous();
     } else {
-      throw new CustomError('#ERROR!');
+      throw new CustomError('#VALUE!');
     }
   }
   private next() {

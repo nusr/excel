@@ -430,7 +430,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         })?.value,
-      ).toEqual('')
+      ).toBeUndefined()
       expect(
         controller.getCell({
           row: 1,
@@ -439,7 +439,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         })?.value
-      ).toEqual('')
+      ).toBeUndefined()
     });
   });
 });

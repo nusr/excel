@@ -1,39 +1,30 @@
-import { expectResult } from './util';
-import { parseFormula } from '../..';
+import { expectFormula } from './util';
 
 describe('parseFormula function', () => {
   it('not defined function', () => {
-    expectResult('foo()', '#NAME?');
+    expectFormula('foo()', ['#NAME?']);
   });
   it('not support function', () => {
-    expectResult('BAHTTEXT()', '#NAME?');
+    expectFormula('BAHTTEXT()', ['#NAME?']);
   });
   it('function SUM', () => {
-    expectResult('SUM(1,2)', 3, 'SUM(1,2)');
-    expectResult('SUM(1,)', 1, 'SUM(1)');
-    expectResult('sUM(1,2)', 3, 'SUM(1,2)');
-    expectResult('sum(1,2)', 3, 'SUM(1,2)');
-    expectResult('SUM(1,SUM(2,3))', 6, 'SUM(1,SUM(2,3))');
+    expectFormula('SUM(1,2)', [3]);
+    expectFormula('SUM(1,)', [1]);
+    expectFormula('sUM(1,2)', [3]);
+    expectFormula('sum(1,2)', [3]);
+    expectFormula('SUM(1,SUM(2,3))', [6]);
   });
   it('@SUM', () => {
-    expectResult('@SUM(1)', '#NAME?');
+    expectFormula('@SUM(1)', ['#NAME?']);
   });
   it('function ABS', () => {
-    expect(parseFormula('ABS()')).toEqual({
-      result: '#VALUE!',
-      isError: true,
-      expressionStr: '',
-    });
-    expect(parseFormula('ABS("ff")')).toEqual({
-      result: '#VALUE!',
-      isError: true,
-      expressionStr: '',
-    });
+    expectFormula('ABS()', ['#VALUE!']);
+    expectFormula('ABS("ff")', ['#VALUE!']);
 
-    expectResult('ABS(1)', 1, 'ABS(1)');
-    expectResult('ABS(-1)', 1, 'ABS(-1)');
+    expectFormula('ABS(1)', [1]);
+    expectFormula('ABS(-1)', [1]);
   });
   it('function CONCAT', () => {
-    expectResult('CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")', '😊👨‍👨‍👧‍👧👦🏾', 'CONCAT(😊,👨‍👨‍👧‍👧,👦🏾)');
+    expectFormula('CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")', ['😊👨‍👨‍👧‍👧👦🏾']);
   });
 });

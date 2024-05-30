@@ -16,6 +16,7 @@ import {
   classnames,
   TEXTAREA_MAX_ROWS,
   LINE_BREAK,
+  isMergeContent,
 } from '@/util';
 
 interface MultipleLineEditorProps {
@@ -112,10 +113,8 @@ export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps
           const { range, isMerged } = controller.getActiveRange();
           const cellData = controller.getCell(range);
           if (
-            isMerged &&
-            cellData &&
-            typeof cellData.value === 'string' &&
-            cellData.value.includes(MERGE_CELL_LINE_BREAK)
+            typeof cellData?.value === 'string' &&
+            isMergeContent(isMerged, cellData?.value)
           ) {
             value = value.replaceAll(LINE_BREAK, MERGE_CELL_LINE_BREAK);
           }

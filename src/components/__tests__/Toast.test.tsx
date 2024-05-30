@@ -45,4 +45,31 @@ describe('BaseIcon.test.ts', () => {
     });
     expect(() => screen.getByTestId('toast-twice')).toThrow();
   });
+  for (const key of ['error', 'info', 'warning', 'success'] as const) {
+    const testId = `${key}-toast`;
+    test(testId, () => {
+      let close: any;
+      act(() => {
+        close = toast[key]('message');
+      });
+      expect(screen.getByTestId(testId).textContent).toEqual('message');
+      act(() => {
+        close();
+      });
+      expect(() => screen.getByTestId(testId)).toThrow();
+    });
+  }
+  for (const key of ['error', 'info', 'warning', 'success'] as const) {
+    test(key, () => {
+      let close: any;
+      act(() => {
+        close = toast[key]('message', key);
+      });
+      expect(screen.getByTestId(key).textContent).toEqual('message');
+      act(() => {
+        close();
+      });
+      expect(() => screen.getByTestId(key)).toThrow();
+    });
+  }
 });

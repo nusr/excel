@@ -1,4 +1,9 @@
-import { SHEET_NAME_PREFIX, SPLITTER, FORMULA_PREFIX } from './constant';
+import {
+  SHEET_NAME_PREFIX,
+  SPLITTER,
+  FORMULA_PREFIX,
+  MERGE_CELL_LINE_BREAK,
+} from './constant';
 import type {
   WorksheetType,
   ChangeEventType,
@@ -175,10 +180,19 @@ export function isMac() {
 export function isFormula(value: ResultType) {
   if (
     typeof value === 'string' &&
+    value &&
     value.startsWith(FORMULA_PREFIX) &&
     value.length > 1
   ) {
     return true;
   }
   return false;
+}
+
+export function isMergeContent(isMergeCell: boolean, text: string) {
+  return isMergeCell && text.includes(MERGE_CELL_LINE_BREAK);
+}
+
+export function isText(list: ResultType[]): boolean {
+  return list.length === 1 && list[0] === '#TEXT';
 }

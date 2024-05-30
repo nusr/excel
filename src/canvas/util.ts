@@ -26,6 +26,7 @@ import {
   ThemeType,
 } from '@/types';
 import { numberFormat, isDateFormat } from '@/model/numberFormat';
+import { isMergeContent } from '@/util/util';
 
 const measureTextMap = new Map<string, IWindowSize>();
 
@@ -297,8 +298,6 @@ export function renderCell(
   }
   realStyle.horizontalAlign = align;
 
-  const isMergeContent = isMergeCell && text.includes(MERGE_CELL_LINE_BREAK);
-
   // show all date text
   const isDate = !realStyle?.isWrapText && isDateFormat(format);
   const texts = isDate
@@ -318,7 +317,7 @@ export function renderCell(
     textList,
     cellInfo,
     realStyle,
-    isMergeContent,
+    isMergeContent(Boolean(isMergeCell), text),
   );
   if (width > 0 && height > 0) {
     const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);

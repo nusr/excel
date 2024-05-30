@@ -16,6 +16,7 @@ import {
   FORMULA_EDITOR_ROLE,
   MERGE_CELL_LINE_BREAK,
   LINE_BREAK,
+  isMergeContent,
 } from '@/util';
 import { coreStore } from '@/containers/store';
 export const BOTTOM_BUFF = 200;
@@ -271,12 +272,7 @@ export function setActiveCellValue(controller: IController) {
   const { range, isMerged } = controller.getActiveRange();
   const cellData = controller.getCell(range);
   let value = inputDom.value;
-  if (
-    isMerged &&
-    cellData &&
-    typeof cellData.value === 'string' &&
-    cellData.value.includes(MERGE_CELL_LINE_BREAK)
-  ) {
+  if (typeof cellData?.value === 'string' && isMergeContent(isMerged, cellData?.value)) {
     value = value.replaceAll(LINE_BREAK, MERGE_CELL_LINE_BREAK);
   }
   controller.setCellValue(value, range);

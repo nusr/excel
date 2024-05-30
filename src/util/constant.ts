@@ -32,7 +32,7 @@ export const DEFAULT_FORMAT_CODE = 'General';
 export const DEFAULT_TEXT_FORMAT_CODE = '@';
 
 export const ERROR_SET = new Set<ErrorTypes>([
-  '#ERROR!',
+  '#GETTING_DATA',
   '#DIV/0!',
   '#NULL!',
   '#NUM!',

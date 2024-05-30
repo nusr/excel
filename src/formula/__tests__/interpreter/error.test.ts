@@ -1,7 +1,6 @@
-import { expectResult } from './util';
 import { XLSX_MAX_COL_COUNT, XLSX_MAX_ROW_COUNT } from '@/util';
 import { Interpreter } from '../../interpreter';
-import { CellDataMapImpl, parseFormula } from '../../eval';
+import { CellDataMapImpl } from '../../eval';
 import {
   Expression,
   BinaryExpression,
@@ -13,6 +12,7 @@ import {
 } from '../../expression';
 import { Token } from '../../token';
 import { TokenType } from '@/types';
+import { expectFormula } from './util';
 
 function interpret(list: Expression[]) {
   return new Interpreter(
@@ -30,7 +30,7 @@ describe('error.test.ts', () => {
         throw new Error('test');
       };
       expect(() => {
-        parseFormula('=A1', { row: 0, col: 0 }, cellData);
+        expectFormula('=A1', [], undefined, cellData);
       }).toThrow();
     });
     test('BinaryExpression', () => {
@@ -116,30 +116,50 @@ describe('error.test.ts', () => {
         ]);
       }).toThrow();
     });
+    test('CellExpression', () => {
+      expect(() => {
+        interpret([
+          new CellExpression(
+            new Token(TokenType.IDENTIFIER, 'FFFFFFFFFFF1'),
+            'relative',
+            undefined,
+          ),
+        ]);
+      }).toThrow();
+      expect(() => {
+        interpret([
+          new CellExpression(
+            new Token(TokenType.IDENTIFIER, 'A1'),
+            'relative',
+            new Token(TokenType.IDENTIFIER, 'fe'),
+          ),
+        ]);
+      }).toThrow();
+    });
   });
   describe('R1C1', () => {
     it('row overflow', () => {
-      expectResult(`=R${XLSX_MAX_ROW_COUNT + 10}C`, '#NAME?');
+      expectFormula(`=R${XLSX_MAX_ROW_COUNT + 10}C`, ['#NAME?']);
     });
     it('col overflow', () => {
-      expectResult(`=RC${XLSX_MAX_COL_COUNT + 10}`, '#NAME?');
+      expectFormula(`=RC${XLSX_MAX_COL_COUNT + 10}`, ['#NAME?']);
     });
     it('all overflow', () => {
-      expectResult(
+      expectFormula(
         `=R${XLSX_MAX_ROW_COUNT + 10}C${XLSX_MAX_COL_COUNT + 10}`,
-        '#NAME?',
+        ['#NAME?'],
       );
     });
   });
   describe('A1', () => {
     it('col overflow', () => {
-      expectResult(`=XFF1`, '#NAME?');
+      expectFormula(`=XFF1`, ['#NAME?']);
     });
     it('row overflow', () => {
-      expectResult(`=A${XLSX_MAX_ROW_COUNT + 10}`, '#NAME?');
+      expectFormula(`=A${XLSX_MAX_ROW_COUNT + 10}`, ['#NAME?']);
     });
     it('all overflow', () => {
-      expectResult(`=XFF${XLSX_MAX_ROW_COUNT + 10}`, '#NAME?');
+      expectFormula(`=XFF${XLSX_MAX_ROW_COUNT + 10}`, ['#NAME?']);
     });
   });
 });

@@ -1,18 +1,10 @@
-import { parseFormula } from '../..';
+import { expectFormula } from './util';
 
 describe('primary', () => {
   describe('number', () => {
     test('invalid', () => {
-      expect(parseFormula('+"a"')).toEqual({
-        isError: true,
-        result: '#VALUE!',
-        expressionStr: '',
-      });
-      expect(parseFormula('-"a"')).toEqual({
-        isError: true,
-        result: '#VALUE!',
-        expressionStr: '',
-      });
+      expectFormula('+"a"', ['#VALUE!']);
+      expectFormula('-"a"', ['#VALUE!']);
     });
   });
 });

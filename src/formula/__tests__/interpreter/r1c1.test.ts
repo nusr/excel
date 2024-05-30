@@ -1,4 +1,5 @@
-import { parseFormula, CellDataMapImpl } from '../..';
+import { CellDataMapImpl } from '../..';
+import { expectFormula } from './util';
 
 describe('R1C1.test.ts', () => {
   describe('cell', () => {
@@ -8,11 +9,7 @@ describe('R1C1.test.ts', () => {
         { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
         [[0]],
       );
-      expect(parseFormula('=R1C1', { row: 0, col: 0 }, cellDataMap)).toEqual({
-        isError: false,
-        result: 0,
-        expressionStr: 'R1C1',
-      });
+      expectFormula('=R1C1', [0], undefined, cellDataMap);
     });
     test('R10C10', () => {
       const cellDataMap = new CellDataMapImpl();
@@ -20,11 +17,7 @@ describe('R1C1.test.ts', () => {
         { row: 9, col: 9, rowCount: 1, colCount: 1, sheetId: '' },
         [[10]],
       );
-      expect(parseFormula('=r10c10', { row: 0, col: 0 }, cellDataMap)).toEqual({
-        isError: false,
-        result: 10,
-        expressionStr: 'R10C10',
-      });
+      expectFormula('=r10c10', [10], undefined, cellDataMap);
     });
 
     test('R10C10', () => {
@@ -33,11 +26,7 @@ describe('R1C1.test.ts', () => {
         { row: 9, col: 9, rowCount: 1, colCount: 1, sheetId: '' },
         [[10]],
       );
-      expect(parseFormula('=r10c10', { row: 0, col: 0 }, cellDataMap)).toEqual({
-        isError: false,
-        result: 10,
-        expressionStr: 'R10C10',
-      });
+      expectFormula('=R10C10', [10], undefined, cellDataMap);
     });
 
     test('R[-2]C[-2]', () => {
@@ -46,13 +35,7 @@ describe('R1C1.test.ts', () => {
         { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
         [['test']],
       );
-      expect(
-        parseFormula('=R[-2]C[-2]', { row: 2, col: 2 }, cellDataMap),
-      ).toEqual({
-        isError: false,
-        result: 'test',
-        expressionStr: 'R[-2]C[-2]',
-      });
+      expectFormula('R[-2]C[-2]', ['test'], { row: 2, col: 2 }, cellDataMap);
     });
 
     test('RC', () => {
@@ -61,11 +44,7 @@ describe('R1C1.test.ts', () => {
         { row: 2, col: 2, rowCount: 1, colCount: 1, sheetId: '' },
         [[10]],
       );
-      expect(parseFormula('=RC', { row: 2, col: 2 }, cellDataMap)).toEqual({
-        isError: false,
-        result: 10,
-        expressionStr: 'RC',
-      });
+      expectFormula('=RC', [10], { row: 2, col: 2 }, cellDataMap);
     });
   });
 });

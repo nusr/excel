@@ -27,26 +27,25 @@ export function parseFormula(
     cellData.handleCell = (
       value: ModelCellType | undefined,
       coord: Coordinate,
-    ): ResultType | undefined => {
+    ): ResultType[] => {
       if (value) {
         if (value.formula) {
           const t = parseFormula(value.formula, coord, cellData, cache);
           return t.result;
         } else {
-          return value.value;
+          return [value.value];
         }
       }
-      return undefined;
+      return [];
     };
     const result: InterpreterResult = {
-      result: '',
-      isError: false,
+      result: [],
       expressionStr: '',
     };
     cache.set(formula, result);
     const list = new Scanner(formula).scan();
     const expressions = new Parser(list).parse();
-    result.result = new Interpreter(
+    const resultList = new Interpreter(
       expressions,
       currentCoord,
       cellData,
@@ -57,22 +56,19 @@ export function parseFormula(
       strList.push(item.toString());
     }
     result.expressionStr = strList.join('');
-    if (typeof result.result === 'number' && !isNaN(result.result)) {
-      result.result = roundNumber(result.result);
+    for (const item of resultList) {
+      if (typeof item === 'number' && !isNaN(item)) {
+        result.result.push(roundNumber(item));
+      } else {
+        result.result.push(item);
+      }
     }
-
     return result;
   } catch (error) {
     if (error instanceof CustomError) {
       const result: InterpreterResult = {
-        result: error.value,
-        isError: true,
-        expressionStr: '',
+        result: [error.value],
       };
-      if (error.value === 'string') {
-        result.isString = true;
-        result.isError = false;
-      }
       cache.set(formula, result);
       return result;
     }
@@ -134,9 +130,9 @@ export class CellDataMapImpl implements CellDataMap {
   }
   handleCell = (value: ModelCellType | undefined, _coord: Coordinate) => {
     if (value) {
-      return value.value;
+      return [value.value];
     }
-    return undefined;
+    return [];
   };
   setDefinedName(name: string, value: IRange) {
     this.definedNameMap.set(name, value);

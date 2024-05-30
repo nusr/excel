@@ -2,8 +2,8 @@ import type { ErrorTypes } from '@/types';
 import { parseNumber } from '@/util/util';
 
 export class CustomError extends Error {
-  readonly value: ErrorTypes | 'string';
-  constructor(value: ErrorTypes | 'string') {
+  readonly value: ErrorTypes | '#TEXT';
+  constructor(value: ErrorTypes | '#TEXT') {
     super(value);
     this.value = value;
   }

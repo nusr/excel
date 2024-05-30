@@ -1,30 +1,11 @@
 import React, { useRef, memo, useCallback } from 'react';
 import { IController } from '@/types';
 import { Button } from '../../components';
-import { generateUUID, getImageSize } from '@/util';
+import { generateUUID, getImageSize, convertFileToTextOrBase64 } from '@/util';
 import { $ } from '@/i18n';
 
 interface Props {
   controller: IController;
-}
-
-function convertToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const base64Image = event.target?.result;
-      if (!base64Image || typeof base64Image !== 'string') {
-        resolve('');
-      } else {
-        resolve(base64Image);
-      }
-    };
-    reader.onerror = function (error) {
-      reject(error);
-    };
-
-    reader.readAsDataURL(file);
-  });
 }
 
 export const InsertFloatingPicture: React.FunctionComponent<Props> = memo(
@@ -41,7 +22,7 @@ export const InsertFloatingPicture: React.FunctionComponent<Props> = memo(
         const fileType = file.type.slice('image/'.length);
         fileName = fileName.slice(0, -(fileType.length + 1));
 
-        const base64 = await convertToBase64(file);
+        const base64 = await convertFileToTextOrBase64(file, true);
         if (ref.current) {
           ref.current.value = '';
           ref.current.blur();

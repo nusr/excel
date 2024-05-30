@@ -7,7 +7,7 @@ describe('invalid expressions', () => {
   describe('error', () => {
     test('error type', () => {
       expect(() => {
-        new Parser([new Token(TokenType.IDENTIFIER, '#ERROR!')]).parse();
+        new Parser([new Token(TokenType.IDENTIFIER, '#VALUE!')]).parse();
       }).toThrow();
     });
     test('cell range', () => {
@@ -20,9 +20,9 @@ describe('invalid expressions', () => {
       }).toThrow();
     });
   });
-  it('#ERROR!', () => {
+  it('#VALUE!', () => {
     expect(() => {
-      buildTree('#ERROR!');
+      buildTree('#VALUE!');
     }).toThrow();
   });
 
@@ -54,6 +54,15 @@ describe('invalid expressions', () => {
   it('> b', () => {
     expect(() => {
       buildTree('> b');
+    }).toThrow();
+  });
+  test('(1}', () => {
+    expect(() => {
+      new Parser([
+        new Token(TokenType.LEFT_BRACKET, '('),
+        new Token(TokenType.INTEGER, '1'),
+        new Token(TokenType.RIGHT_BRACE, '}'),
+      ]).parse();
     }).toThrow();
   });
 });

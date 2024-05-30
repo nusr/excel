@@ -13,6 +13,7 @@ export interface Visitor {
   visitCallExpression: (expr: CallExpression) => any;
   visitGroupExpression: (expr: GroupExpression) => any;
   visitTokenExpression: (expr: TokenExpression) => any;
+  visitArrayExpression: (expr: ArrayExpression) => any;
 }
 
 export interface Expression {
@@ -190,5 +191,19 @@ export class TokenExpression implements Expression {
   }
   toString(): string {
     return this.value.toString();
+  }
+}
+
+export class ArrayExpression implements Expression {
+  readonly value: Expression[];
+  constructor(value: Expression[]) {
+    this.value = value;
+  }
+  accept(visitor: Visitor) {
+    return visitor.visitArrayExpression(this);
+  }
+  toString(): string {
+    const temp = this.value.map((v) => v.toString()).join(',');
+    return `{${temp}}`;
   }
 }
