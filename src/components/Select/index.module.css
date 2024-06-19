@@ -1,6 +1,7 @@
 .selectList {
   background-color: var(--white);
   color: var(--black);
+  border-radius: var(--borderRadius);
 }
 .selectItem {
   text-wrap: nowrap;

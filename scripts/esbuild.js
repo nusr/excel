@@ -242,6 +242,9 @@ async function buildDev(options) {
   await ctx.watch();
   const { port } = await ctx.serve({
     servedir: distDir,
+    onRequest: async () => {
+      await buildWorker();
+    },
   });
   fs.writeFileSync(path.join(process.cwd(), 'port.txt'), String(port), 'utf-8');
 
@@ -252,7 +255,6 @@ async function buildDev(options) {
 async function init() {
   deleteDir('lib');
   deleteDir('dist');
-  await buildWorker();
   const options = buildESM('');
   /** @type {import('esbuild').BuildOptions} */
   const distOptions = {
@@ -266,6 +268,7 @@ async function init() {
     await buildDev(distOptions);
   } else {
     distOptions.minify = true;
+    await buildWorker();
     await buildProd(distOptions);
   }
   buildHtml();

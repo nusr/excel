@@ -25,7 +25,6 @@ describe('FPS.test.tsx', () => {
       screen.getByTestId('menubar-fps-num').textContent || '',
       10,
     );
-    console.log(text);
     expect(text).toBeGreaterThan(20);
   });
 });

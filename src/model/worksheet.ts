@@ -527,6 +527,18 @@ export class Worksheet implements IWorksheet {
     if (formula) {
       const result = this.parseFormula(formula, range, new Map());
       if (isText(result.result)) {
+        if (oldFormula) {
+          delete cellModel.formula;
+          this.model.push({
+            type: 'worksheets',
+            key: `${this.model.getCurrentSheetId()}.${coordinateToString(
+              range.row,
+              range.col,
+            )}.formula`,
+            newValue: DELETE_FLAG,
+            oldValue: oldFormula,
+          });
+        }
         this.setValue(formula, range);
         return;
       }
