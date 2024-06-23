@@ -30,7 +30,7 @@ const licenseText = fs.readFileSync(
 );
 const globalName = '__export__';
 const distDir = path.join(process.cwd(), 'dist');
-const workPath = './src/worker.ts';
+const workPath = path.join(process.cwd(), './src/worker.ts');
 
 function umdWrapper() {
   const header = `(function (global, factory) { typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) : typeof define === 'function' && define.amd ? define(['exports'], factory) : (global = global || self, factory(global.${packageJson.name} = {}));})(this, (function (exports) { 'use strict';`;
@@ -77,13 +77,14 @@ function buildUMD(filePath) {
  */
 function buildBrowserConfig(options) {
   const minify = !!options.outfile?.includes('.min.');
+
   /** @type Record<string, string> */
   const externalMap = {
     react: 'window.React',
     'react-dom': 'window.ReactDOM',
     'react-dom/client': 'window.ReactDOM',
   };
-  const namespace = 'external';
+  const externalNamespace = 'external';
   /** @type {import('esbuild').BuildOptions} */
   const realOptions = {
     bundle: true,
@@ -103,7 +104,7 @@ function buildBrowserConfig(options) {
     logLevel: 'error',
     plugins: [
       {
-        name: namespace,
+        name: externalNamespace,
         setup(build) {
           build.onResolve(
             {
@@ -113,14 +114,14 @@ function buildBrowserConfig(options) {
             },
             (args) => ({
               path: args.path,
-              namespace: namespace,
+              namespace: externalNamespace,
             }),
           );
 
           build.onLoad(
             {
               filter: /.*/,
-              namespace,
+              namespace: externalNamespace,
             },
             (args) => {
               const contents = `module.exports = ${externalMap[args.path]}`;
@@ -226,13 +227,6 @@ function getIp() {
   return '';
 }
 
-async function buildWorker() {
-  const options = buildESM(path.join(distDir, 'worker.js'));
-  options.entryPoints = [workPath];
-  options.minify = !isDev;
-  await build(options);
-}
-
 /**
  *
  * @param { import('esbuild').BuildOptions } options
@@ -242,9 +236,6 @@ async function buildDev(options) {
   await ctx.watch();
   const { port } = await ctx.serve({
     servedir: distDir,
-    onRequest: async () => {
-      await buildWorker();
-    },
   });
   fs.writeFileSync(path.join(process.cwd(), 'port.txt'), String(port), 'utf-8');
 
@@ -259,7 +250,16 @@ async function init() {
   /** @type {import('esbuild').BuildOptions} */
   const distOptions = {
     ...options,
-    entryPoints: [path.join(__dirname, 'demo.tsx')],
+    entryPoints: [
+      {
+        in: path.join(__dirname, 'demo.tsx'),
+        out: path.join(distDir, 'demo'),
+      },
+      {
+        in: workPath,
+        out: path.join(distDir, 'worker'),
+      },
+    ],
     outdir: distDir,
     outfile: undefined,
     splitting: true,
@@ -268,7 +268,6 @@ async function init() {
     await buildDev(distOptions);
   } else {
     distOptions.minify = true;
-    await buildWorker();
     await buildProd(distOptions);
   }
   buildHtml();
