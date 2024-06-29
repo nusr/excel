@@ -294,7 +294,10 @@ const handleStateChange = (
 
 function computeCanvasSize(canvas: HTMLCanvasElement) {
   const scrollbarSize = parseInt(sizeConfig.largePadding, 10);
-  const dom = canvas.parentElement!;
+  const dom = canvas.parentElement;
+  if (!dom) {
+    return null;
+  }
   const size = dom.getBoundingClientRect();
   const result = {
     top: size.top,
@@ -303,7 +306,6 @@ function computeCanvasSize(canvas: HTMLCanvasElement) {
     height: dom.clientHeight - scrollbarSize,
   };
   canvasSizeSet.set(result);
-  return result;
 }
 
 export function initCanvas(

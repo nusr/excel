@@ -15,7 +15,7 @@
 git clone https://github.com/nusr/excel.git
 cd excel
 
-npm i -g pnpm
+npm i -g pnpm jscpd
 pnpm i
 npm run start
 ```
