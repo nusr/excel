@@ -119,9 +119,7 @@ class WorkerMock {
    *
    * @param {any} _data
    */
-  onmessage(_data) {
-
-  }
+  onmessage(_data) {}
   /**
    *
    * @param {any} msg
@@ -140,3 +138,15 @@ class WorkerMock {
 }
 
 global.Worker = WorkerMock;
+
+// @ts-ignore
+global.navigator.clipboard = {
+  write: Promise.resolve,
+  writeText: Promise.resolve,
+  read() {
+    return Promise.resolve([]);
+  },
+  readText() {
+    return Promise.resolve('');
+  },
+};

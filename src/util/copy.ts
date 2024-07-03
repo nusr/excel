@@ -71,7 +71,7 @@ async function readDataFromClipboard(): Promise<ClipboardData> {
   return result;
 }
 
-const fakeCopyAction = (
+export const fakeCopyAction = (
   value: string,
   container: HTMLElement,
   type: 'copy' | 'cut',

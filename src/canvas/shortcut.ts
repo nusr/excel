@@ -187,7 +187,7 @@ export function scrollBar(
   controller.setScroll(newValue);
 }
 
-function recalculateScroll(controller: IController) {
+export function recalculateScroll(controller: IController) {
   const activeCell = controller.getActiveRange().range;
   const temp = {
     row: activeCell.row,
