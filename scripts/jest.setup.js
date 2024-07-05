@@ -150,3 +150,7 @@ global.navigator.clipboard = {
     return Promise.resolve('');
   },
 };
+
+global.URL.createObjectURL = function () {
+  return 'blob:';
+};
