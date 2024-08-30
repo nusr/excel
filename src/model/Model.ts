@@ -163,6 +163,10 @@ export class Model implements IModel {
     if (!newSheetId) {
       return;
     }
+    const list = this.drawingsManager.getDrawingList(sheetId);
+    for (const item of list) {
+      this.drawingsManager.deleteDrawing(item.uuid);
+    }
     this.workbookManager.deleteSheet(sheetId);
     this.worksheetManager.setWorksheet({}, sheetId);
     this.workbookManager.setCurrentSheetId(newSheetId);
