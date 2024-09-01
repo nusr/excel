@@ -395,13 +395,13 @@ const MOCK_MODEL: WorkBookJSON = {
 if (!isMobile()) {
   const imageUuid = generateUUID();
   MOCK_MODEL.drawings[imageUuid] = {
-    title: $('floating-picture'),
+    title: 'Black Myth: Wukong',
     type: 'floating-picture',
     uuid: imageUuid,
     imageSrc: mockImage,
     width: 200,
-    height: 356,
-    originHeight: 356,
+    height: 125,
+    originHeight: 125,
     originWidth: 200,
     sheetId: '2',
     fromCol: 1,

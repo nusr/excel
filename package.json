@@ -26,32 +26,32 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
-    "@testing-library/jest-dom": "6.4.6",
-    "@testing-library/react": "16.0.0",
+    "@testing-library/jest-dom": "6.5.0",
+    "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.12",
-    "@types/node": "20.14.9",
+    "@types/node": "22.5.1",
     "@types/pixelmatch": "5.2.6",
     "@types/pngjs": "6.0.5",
-    "@types/react": "18.3.3",
+    "@types/react": "18.3.5",
     "@types/react-dom": "18.3.0",
     "canvas": "2.11.2",
-    "esbuild": "0.23.0",
-    "husky": "9.0.11",
+    "esbuild": "0.23.1",
+    "husky": "9.1.5",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
-    "pixelmatch": "5.3.0",
+    "pixelmatch": "6.0.0",
     "pngjs": "7.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "ts-jest": "29.1.5",
-    "typedoc": "0.26.3",
-    "typescript": "5.5.3"
+    "ts-jest": "29.2.5",
+    "typedoc": "0.26.6",
+    "typescript": "5.5.4"
   },
   "engines": {
     "node": ">=16"
   },
   "dependencies": {
-    "chart.js": "4.4.3",
+    "chart.js": "4.4.4",
     "jszip": "3.10.1",
     "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz"
   },
@@ -60,6 +60,6 @@
     "react-dom": "18.3.1"
   },
   "optionalDependencies": {
-    "@sentry/react": "8.15.0"
+    "@sentry/react": "8.27.0"
   }
 }
