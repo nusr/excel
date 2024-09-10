@@ -163,7 +163,7 @@ function updateActiveCell(controller: IController) {
     displayValue: cell?.formula || displayValue,
   });
 
-  styleStore.mergeState({
+  styleStore.setState({
     isBold,
     isItalic,
     isStrike,
@@ -205,14 +205,14 @@ const handleStateChange = (
   }
 
   if (changeSet.has('currentSheetId')) {
-    coreStore.mergeState({
+    coreStore.setState({
       canRedo: controller.canRedo(),
       canUndo: controller.canUndo(),
       activeUuid: '',
       currentSheetId: controller.getCurrentSheetId(),
     });
   } else {
-    coreStore.mergeState({
+    coreStore.setState({
       canRedo: controller.canRedo(),
       canUndo: controller.canUndo(),
     });
@@ -222,7 +222,7 @@ const handleStateChange = (
     const scroll = controller.getScroll();
     const canvasSize = canvasSizeSet.get();
     const showBottomBar = scroll.scrollTop / canvasSize.height >= 0.91;
-    scrollStore.mergeState({
+    scrollStore.setState({
       scrollLeft: scroll.scrollLeft,
       scrollTop: scroll.scrollTop,
       showBottomBar,

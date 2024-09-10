@@ -38,8 +38,13 @@ export function registerGlobalEvent(
     if (event.metaKey || event.ctrlKey) {
       return;
     }
-    coreStore.mergeState({
-      editorStatus: EditorStatus.EDIT_CELL,
+    coreStore.setState((state) => {
+      if (state.editorStatus === EditorStatus.EDIT_CELL) {
+        return state
+      }
+      return {
+        editorStatus: EditorStatus.EDIT_CELL,
+      }
     });
   }
 

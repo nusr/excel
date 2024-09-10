@@ -23,6 +23,7 @@ const { values: envConfig } = parseArgs({
 
 const nodeEnv = envConfig.nodeEnv || 'development';
 const isDev = nodeEnv === 'development';
+const isEnableExternal = !isDev
 
 const licenseText = fs.readFileSync(
   path.join(process.cwd(), 'LICENSE'),
@@ -102,38 +103,41 @@ function buildBrowserConfig(options) {
     minify,
     metafile: minify,
     logLevel: 'error',
-    plugins: [
-      {
-        name: externalNamespace,
-        setup(build) {
-          build.onResolve(
-            {
-              filter: new RegExp(
-                '^(' + Object.keys(externalMap).join('|') + ')$',
-              ),
-            },
-            (args) => ({
-              path: args.path,
-              namespace: externalNamespace,
-            }),
-          );
-
-          build.onLoad(
-            {
-              filter: /.*/,
-              namespace: externalNamespace,
-            },
-            (args) => {
-              const contents = `module.exports = ${externalMap[args.path]}`;
-              return {
-                contents,
-              };
-            },
-          );
-        },
-      },
-    ],
+    plugins: [],
   };
+  if (isEnableExternal) {
+    /** @type {import('esbuild').Plugin} */
+    const plugin = {
+      name: externalNamespace,
+      setup(build) {
+        build.onResolve(
+          {
+            filter: new RegExp(
+              '^(' + Object.keys(externalMap).join('|') + ')$',
+            ),
+          },
+          (args) => ({
+            path: args.path,
+            namespace: externalNamespace,
+          }),
+        );
+
+        build.onLoad(
+          {
+            filter: /.*/,
+            namespace: externalNamespace,
+          },
+          (args) => {
+            const contents = `module.exports = ${externalMap[args.path]}`;
+            return {
+              contents,
+            };
+          },
+        );
+      },
+    };
+    realOptions.plugins && realOptions.plugins.push(plugin);
+  }
   Object.assign(realOptions, options);
   return realOptions;
 }
@@ -142,24 +146,28 @@ function buildHtml() {
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir);
   }
-  const data = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf-8');
+  let htmlData = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf-8');
+
+  if (isEnableExternal) {
+    const version = isDev ? 'development' : 'production.min';
+    fs.copyFileSync(
+      path.join(__dirname, '..', `node_modules/react/umd/react.${version}.js`),
+      path.join(distDir, 'react.js'),
+    );
+    fs.copyFileSync(
+      path.join(
+        __dirname,
+        '..',
+        `node_modules/react-dom/umd/react-dom.${version}.js`,
+      ),
+      path.join(distDir, 'react-dom.js'),
+    );
+    htmlData = htmlData.replace('<!-- other script -->', `<script src="./react.js"></script>\n<script src="./react-dom.js"></script>`)
+  }
+
   fs.writeFileSync(
     path.join(distDir, 'index.html'),
-    data.replace('process.env.NODE_ENV', JSON.stringify(nodeEnv)),
-  );
-
-  const version = isDev ? 'development' : 'production.min';
-  fs.copyFileSync(
-    path.join(__dirname, '..', `node_modules/react/umd/react.${version}.js`),
-    path.join(distDir, 'react.js'),
-  );
-  fs.copyFileSync(
-    path.join(
-      __dirname,
-      '..',
-      `node_modules/react-dom/umd/react-dom.${version}.js`,
-    ),
-    path.join(distDir, 'react-dom.js'),
+    htmlData.replace('process.env.NODE_ENV', JSON.stringify(nodeEnv)),
   );
 
   const iconDir = path.join(__dirname, './icon');

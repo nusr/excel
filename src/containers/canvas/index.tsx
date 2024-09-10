@@ -166,7 +166,12 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
     if (isSameRange(activeCell, range)) {
       const delay = timeStamp - state.current.timeStamp;
       if (delay < DOUBLE_CLICK_TIME) {
-        coreStore.mergeState({ editorStatus: EditorStatus.EDIT_CELL });
+        coreStore.setState((state) => {
+          if (state.editorStatus === EditorStatus.EDIT_CELL) {
+            return state;
+          }
+          return { editorStatus: EditorStatus.EDIT_CELL };
+        });
       }
     } else {
       if (checkFocus()) {

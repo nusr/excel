@@ -127,8 +127,13 @@ export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps
             }
             return true;
           });
-          coreStore.mergeState({
-            editorStatus: EditorStatus.NONE,
+          coreStore.setState((state) => {
+            if (state.editorStatus === EditorStatus.NONE) {
+              return state;
+            }
+            return {
+              editorStatus: EditorStatus.NONE,
+            };
           });
           event.currentTarget.value = '';
           event.currentTarget.blur();

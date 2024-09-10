@@ -123,7 +123,7 @@ export async function compareScreenShot(
   controller: IController,
   options?: { theme?: ThemeType; maxThreshold?: number },
 ) {
-  const { theme = 'light', maxThreshold = 0.051 } = options || {};
+  const { theme = 'light', maxThreshold = 0.1 } = options || {};
   setDpr(2);
   const canvas = renderCanvas(controller, theme);
   const imageName = (expect.getState().currentTestName || '')

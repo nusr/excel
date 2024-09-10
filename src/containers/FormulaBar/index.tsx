@@ -41,8 +41,13 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
       );
     }, [activeCell.defineName, activeCell.col, activeCell.row]);
     const handleClick = useCallback(() => {
-      coreStore.mergeState({
-        editorStatus: EditorStatus.EDIT_FORMULA_BAR,
+      coreStore.setState((state) => {
+        if (state.editorStatus === EditorStatus.EDIT_FORMULA_BAR) {
+          return state;
+        }
+        return {
+          editorStatus: EditorStatus.EDIT_FORMULA_BAR,
+        };
       });
     }, []);
     const style = useMemo(() => {
@@ -75,7 +80,8 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
             className={classnames(styles['formula-bar-value'], {
               [styles['show']]: editorStatus !== EditorStatus.EDIT_FORMULA_BAR,
               [styles['wrap']]:
-                cellStyle.isMergeCell && activeCell.displayValue.includes(LINE_BREAK),
+                cellStyle.isMergeCell &&
+                activeCell.displayValue.includes(LINE_BREAK),
             })}
             style={style}
             onClick={handleClick}
