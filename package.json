@@ -14,7 +14,6 @@
     "update-md": "node ./scripts/update-md.js",
     "prepare": "husky",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" -r html -m strict -l 7 -b -g --exitCode 1 .",
-    "typedoc": "npx typedoc",
     "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv"
   },
   "repository": {
@@ -39,12 +38,11 @@
     "husky": "9.1.5",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
-    "pixelmatch": "6.0.0",
+    "pixelmatch": "5.3.0",
     "pngjs": "7.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "ts-jest": "29.2.5",
-    "typedoc": "0.26.7",
     "typescript": "5.6.2"
   },
   "engines": {
@@ -61,5 +59,6 @@
   },
   "optionalDependencies": {
     "@sentry/react": "8.29.0"
-  }
+  },
+  "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
 }
