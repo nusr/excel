@@ -106,6 +106,7 @@ global.Image = ImageMock;
 class WorkerMock {
   url;
   options;
+  listeners = new Map();
   /**
    *
    * @param {string | URL} url
@@ -122,13 +123,30 @@ class WorkerMock {
   onmessage(_data) {}
   /**
    *
-   * @param {any} msg
+   * @param {any} message
    */
-  postMessage(msg) {
-    this.onmessage(msg);
+  postMessage(message) {
+    this.onmessage(message);
+    Promise.resolve().then(() => {
+      const list = this.listeners.get('message') || [];
+      list.forEach((/** @type {(arg0: { data: any; }) => any} */ fn) =>
+        fn({ data: message }),
+      );
+    });
   }
-  addEventListener() {}
-  removeEventListener() {}
+  /**
+   *
+   * @param {string} type
+   * @param { (data:any) => void} fn
+   */
+  addEventListener(type, fn) {
+    const list = this.listeners.get(type) || [];
+    list.push(fn);
+    this.listeners.set(type, list);
+  }
+  removeEventListener() {
+    
+  }
   terminate() {}
   onmessageerror() {}
   dispatchEvent() {

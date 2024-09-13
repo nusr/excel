@@ -12,11 +12,11 @@ import {
   ModelCellType,
   EHorizontalAlign,
   RequestFormula,
-  ResponseMessageType,
   InterpreterResult,
-  ChangeEventType,
   CellDataMap,
   FormulaKeys,
+  WorkerMethod,
+  ResponseFormula
 } from '@/types';
 import {
   coordinateToString,
@@ -26,7 +26,6 @@ import {
   isEmpty,
   isFormula,
   deepEqual,
-  workerSet,
   isText,
   stringToCoordinate,
   MERGE_CELL_LINE_BREAK,
@@ -35,14 +34,17 @@ import {
 import { DELETE_FLAG, transformData } from './History';
 import { numberFormat } from '@/model';
 import { parseFormula, CustomError, allFormulas } from '@/formula';
+import * as  ComLink from 'comlink';
+
+export type WorkerType = ComLink.Remote<Pick<WorkerMethod, 'computeFormulas'>>
 
 export class Worksheet implements IWorksheet {
   private worksheets: WorkBookJSON['worksheets'] = {};
   private model: IModel;
-  private parseFormulaResolve: (value: boolean) => void = () => {};
-  constructor(model: IModel) {
+  private worker?: WorkerType;
+  constructor(model: IModel, worker?: WorkerType) {
     this.model = model;
-    this.initWorker();
+    this.worker = worker;
   }
 
   toJSON() {
@@ -257,57 +259,7 @@ export class Worksheet implements IWorksheet {
     }
     return undefined;
   }
-  computeFormulas(): boolean | Promise<boolean> {
-    const id = this.model.getCurrentSheetId();
-    const sheetData = this.worksheets[id];
-    let check = false;
-    if (isEmpty(sheetData)) {
-      return check;
-    }
-    const worker = workerSet.get().worker;
-    if (!worker) {
-      const cache = new Map<string, InterpreterResult>();
-      for (const [k, data] of Object.entries(sheetData)) {
-        if (!data?.formula) {
-          continue;
-        }
-        const coord = stringToCoordinate(k);
-        const result = this.parseFormula(data.formula, coord, cache);
-        if (!result) {
-          continue;
-        }
-        const newValue = result.result[0];
-        const oldValue = data.value;
-        if (newValue !== oldValue) {
-          data.value = newValue;
-          check = true;
-          this.model.push({
-            type: 'worksheets',
-            key: `${id}.${k}.value`,
-            newValue: newValue,
-            oldValue: oldValue,
-          });
-        }
-      }
-      return check;
-    }
-
-    return new Promise((resolve) => {
-      const definedNames: RequestFormula['definedNames'] = {};
-      for (const item of this.model.getDefineNameList()) {
-        definedNames[item.name] = item.range;
-      }
-      const data: RequestFormula = {
-        worksheets: this.worksheets,
-        definedNames,
-        currentSheetId: this.model.getCurrentSheetId(),
-        workbook: this.model.getSheetList(),
-        status: 'formula',
-      };
-      worker.postMessage(data);
-      this.parseFormulaResolve = resolve;
-    });
-  }
+ 
   setWorksheet(data: WorksheetData, sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
     if (deepEqual(data, this.worksheets[id])) {
@@ -656,62 +608,63 @@ export class Worksheet implements IWorksheet {
     const result = parseFormula(formula, coord, cellDataMap, cache);
     return result;
   }
-  private updateColAndRow(
-    rowMap: Record<string, number>,
-    colMap: Record<string, number>,
-  ) {
-    const rowKeys = Object.keys(rowMap);
-    const colKeys = Object.keys(colMap);
-    if (colKeys.length === 0 && rowKeys.length === 0) {
-      return;
-    }
-    let check = false;
-    for (const [row, h] of Object.entries(rowMap)) {
-      const r = parseInt(row, 10);
-      if (h !== this.model.getRowHeight(r).len) {
-        this.model.setRowHeight(r, h);
-        check = true;
+  private computeFormulasCallback = (result: ResponseFormula) => {
+    const { list } = result
+    let check = false
+    for (const item of list) {
+      const id = item.sheetId;
+      this.worksheets[id] = this.worksheets[id] || {};
+      const oldValue = this.worksheets[id][item.key].value;
+      if (oldValue === item.newValue) {
+        continue
       }
-    }
-    for (const [col, w] of Object.entries(colMap)) {
-      const c = parseInt(col, 10);
-      if (w !== this.model.getColWidth(c).len) {
-        this.model.setColWidth(c, w);
-        check = true;
-      }
+      check = true
+      this.worksheets[id][item.key].value = item.newValue;
     }
     if (check) {
-      this.model.emitChange(new Set<ChangeEventType>(['noHistory']));
+      this.model.render(new Set(['cellValue']))
     }
   }
-  private initWorker() {
-    const worker = workerSet.get().worker;
-    if (!worker) {
+  async computeFormulas() {
+    const id = this.model.getCurrentSheetId();
+    const sheetData = this.worksheets[id];
+    if (isEmpty(sheetData)) {
+      return
+    }
+    if (!this.worker) {
+      let check = false
+      const cache = new Map<string, InterpreterResult>();
+      for (const [k, data] of Object.entries(sheetData)) {
+        if (!data?.formula) {
+          continue;
+        }
+        const coord = stringToCoordinate(k);
+        const result = this.parseFormula(data.formula, coord, cache);
+        if (!result) {
+          continue;
+        }
+        const newValue = result.result[0];
+        const oldValue = data.value;
+        if (newValue !== oldValue) {
+          check = true
+          data.value = newValue;
+        }
+      }
+      if (check) {
+        this.model.render(new Set(['cellValue']))
+      }
       return;
     }
-    worker.addEventListener(
-      'message',
-      (event: MessageEvent<ResponseMessageType>) => {
-        if (event.data.status === 'formula') {
-          const { list } = event.data;
-          for (const item of list) {
-            const id = item.sheetId;
-            this.worksheets[id] = this.worksheets[id] || {};
-            const oldValue = this.worksheets[id][item.key].value;
-            this.worksheets[id][item.key].value = item.newValue;
-            this.model.push({
-              type: 'worksheets',
-              key: `${id}.${item.key}.value`,
-              newValue: item.newValue,
-              oldValue: oldValue,
-            });
-          }
-          this.parseFormulaResolve(true);
-        } else if (event.data.status === 'render') {
-          const { rowMap, colMap } = event.data;
-          this.updateColAndRow(rowMap, colMap);
-        }
-      },
-    );
+    const definedNames: RequestFormula['definedNames'] = {};
+    for (const item of this.model.getDefineNameList()) {
+      definedNames[item.name] = item.range;
+    }
+    const data: RequestFormula = {
+      worksheets: this.worksheets,
+      definedNames,
+      currentSheetId: this.model.getCurrentSheetId(),
+      workbook: this.model.getSheetList(),
+    };
+    this.worker.computeFormulas(data, ComLink.proxy(this.computeFormulasCallback))
   }
 }

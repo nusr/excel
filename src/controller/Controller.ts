@@ -58,6 +58,9 @@ export class Controller implements IController {
     this.model = model;
     this.hooks = hooks;
   }
+  getWorker() {
+    return this.hooks.worker
+  }
   validateDefinedName(name: string): boolean {
     return this.model.validateDefinedName(name);
   }

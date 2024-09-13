@@ -7,6 +7,7 @@ import {
   WorksheetData,
 } from './model';
 import { ThemeType, CanvasOverlayPosition, ScrollValue } from './components';
+import type { Remote } from 'comlink'
 export interface IWindowSize {
   width: number;
   height: number;
@@ -18,14 +19,12 @@ export interface IPosition {
 }
 
 export type RequestFormula = {
-  status: 'formula';
   worksheets: WorkBookJSON['worksheets'];
   definedNames: Record<string, IRange>;
   currentSheetId: string;
   workbook: WorksheetType[];
 };
 export type RequestRender = {
-  status: 'render';
   changeSet: Set<ChangeEventType>;
   theme: ThemeType;
   canvasSize: CanvasOverlayPosition;
@@ -39,27 +38,14 @@ export type RequestRender = {
   currentMergeCells: IRange[];
   sheetData: WorksheetData;
 };
-export type RequestResize = {
-  status: 'resize';
-  width: number;
-  height: number;
-};
-export type RequestMessageType =
-  | RequestFormula
-  | { status: 'init'; canvas: OffscreenCanvas; dpr: number }
-  | RequestRender
-  | RequestResize;
+export type RequestInit = { canvas: OffscreenCanvas; dpr: number }
 export type ResponseFormula = {
-  status: 'formula';
   list: Array<{ key: string; newValue: ResultType; sheetId: string }>;
 };
-export type ResponseMessageType =
-  | ResponseFormula
-  | {
-      status: 'render';
-      rowMap: Record<string, number>;
-      colMap: Record<string, number>;
-    };
+export type ResponseRender = {
+  rowMap: Record<string, number>;
+  colMap: Record<string, number>;
+};
 export interface WorkerMainView {
   /**
    * clear offScreenCanvas
@@ -72,3 +58,12 @@ export interface WorkerMainView {
    */
   resize(data: IWindowSize): void;
 }
+
+export type WorkerMethod = {
+  init(data: RequestInit): void
+  resize(data: IWindowSize): void
+  render(data: RequestRender, cb: (data: ResponseRender) => void): Promise<void>
+  computeFormulas(data: RequestFormula, cb: (data: ResponseFormula) => void): Promise<void>
+}
+
+export type RemoteWorkerMethod = Remote<WorkerMethod>

@@ -6,8 +6,8 @@ export type HistoryChangeType = 'undoRedo' | 'commit';
 type Options = {
   change: (list: ICommandItem[], type: HistoryChangeType) => void;
   maxLength: number;
-  redo: (item: ICommandItem) => void;
-  undo: (item: ICommandItem) => void;
+  redo: (item: ICommandItem[]) => void;
+  undo: (item: ICommandItem[]) => void;
 };
 
 export const DELETE_FLAG = Symbol.for('delete');
@@ -112,9 +112,7 @@ export class History implements IHistory {
       return;
     }
     const list = this.commandList[index];
-    for (const item of list) {
-      this.options.redo(item as ICommandItem);
-    }
+    this.options.redo([...list]);
     this.position = index;
     this.change(list, 'undoRedo');
   }
@@ -124,9 +122,7 @@ export class History implements IHistory {
       return;
     }
     const list = this.commandList[index];
-    for (const item of list) {
-      this.options.undo(item as ICommandItem);
-    }
+    this.options.undo([...list]);
     this.position = index - 1;
     this.change(list, 'undoRedo');
   }

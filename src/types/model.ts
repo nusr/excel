@@ -313,6 +313,7 @@ export interface IModel extends IBaseModel {
   pasteRange(range: IRange, isCut: boolean): IRange;
   emitChange(dataset: Set<ChangeEventType>): void;
   push(command: ICommandItem): void;
+  render(dataset: Set<ChangeEventType>): void
 }
 
 export type NumberFormatValue =

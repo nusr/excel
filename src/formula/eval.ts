@@ -11,8 +11,10 @@ import {
   WorksheetType,
   ModelCellType,
   FormulaKeys,
+  RequestFormula,
+  ResponseFormula
 } from '@/types';
-import { isFormula } from '@/util/util';
+import { isFormula, coordinateToString, stringToCoordinate } from '@/util/util';
 
 export function parseFormula(
   formula: string,
@@ -140,4 +142,66 @@ export class CellDataMapImpl implements CellDataMap {
   getDefinedName(name: string) {
     return this.definedNameMap.get(name);
   }
+}
+
+
+export function parseAllFormulas(eventData: RequestFormula) {
+  const { currentSheetId, worksheets, workbook, definedNames } = eventData;
+  const formulaCache = new Map<string, InterpreterResult>();
+  const sheetData = worksheets[currentSheetId] || {};
+  const list: ResponseFormula['list'] = [];
+  const cellDataMap: CellDataMap = {
+    handleCell: () => {
+      return [];
+    },
+    getFunction: (name: string) => {
+      return allFormulas[name as FormulaKeys];
+    },
+    getCell: (range: IRange) => {
+      const { row, col, sheetId } = range;
+      const realSheetId = sheetId || currentSheetId;
+      const sheetData = worksheets[realSheetId] || {};
+      const key = coordinateToString(row, col);
+      return sheetData[key];
+    },
+    set: () => {
+      throw new CustomError('#REF!');
+    },
+    getSheetInfo: (sheetId?: string, sheetName?: string) => {
+      if (sheetName) {
+        return workbook.find((v) => v.name === sheetName);
+      }
+      const realSheetId = sheetId || currentSheetId;
+      return workbook.find((v) => v.sheetId === realSheetId);
+    },
+    setDefinedName: () => {
+      throw new CustomError('#REF!');
+    },
+    getDefinedName: (name: string) => {
+      return definedNames[name];
+    },
+  };
+  for (const [k, data] of Object.entries(sheetData)) {
+    if (!data?.formula) {
+      continue;
+    }
+    const result = parseFormula(
+      data?.formula,
+      stringToCoordinate(k),
+      cellDataMap,
+      formulaCache,
+    );
+    if (!result) {
+      continue;
+    }
+    const r = result.result[0];
+    if (r !== data.value) {
+      list.push({
+        key: k,
+        newValue: r,
+        sheetId: currentSheetId,
+      });
+    }
+  }
+  return list;
 }

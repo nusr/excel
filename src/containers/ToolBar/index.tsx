@@ -132,11 +132,9 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
             fontFamilyStore.setState(l);
             localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(fontList));
           } else {
-            fontFamilyStore.setState([
-              ...fontFamilyStore
+            fontFamilyStore.setState(fontFamilyStore
                 .getSnapshot()
-                .filter((v) => v.value !== QUERY_ALL_LOCAL_FONT),
-            ]);
+                .filter((v) => v.value !== QUERY_ALL_LOCAL_FONT));
           }
         });
       } else {

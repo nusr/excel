@@ -1,22 +1,13 @@
 import { Controller } from '..';
 import { Model } from '@/model';
 import { EHorizontalAlign, EMergeCellType } from '@/types';
-import { HTML_FORMAT, MERGE_CELL_LINE_BREAK, PLAIN_FORMAT } from '@/util';
+import { MERGE_CELL_LINE_BREAK } from '@/util';
+import { mockHooks } from '../init'
 
 describe('mergeCell.test.ts', () => {
   let controller: Controller;
   beforeEach(() => {
-    controller = new Controller(new Model(), {
-      async copyOrCut() {
-        return '';
-      },
-      async paste() {
-        return {
-          [HTML_FORMAT]: '',
-          [PLAIN_FORMAT]: '',
-        };
-      },
-    });
+    controller = new Controller(new Model(), mockHooks);
     controller.addSheet();
   });
   describe('addMergeCell', () => {

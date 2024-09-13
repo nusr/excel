@@ -3,9 +3,9 @@ import { createCanvas } from 'canvas';
 import { setDpr, headerSizeSet } from '@/util';
 import {
   IController,
-  RequestMessageType,
   ChangeEventType,
   ThemeType,
+  RequestRender,
 } from '@/types';
 import fs from 'fs';
 import path from 'path';
@@ -33,8 +33,7 @@ function getRenderData(controller: IController, theme: ThemeType) {
   const jsonData = controller.toJSON();
   const currentId = controller.getCurrentSheetId();
   const sheetInfo = controller.getSheetInfo(currentId)!;
-  const eventData: RequestMessageType = {
-    status: 'render',
+  const eventData: RequestRender = {
     changeSet: new Set<ChangeEventType>(['scroll', 'cellStyle', 'cellValue']),
     theme,
     canvasSize: {

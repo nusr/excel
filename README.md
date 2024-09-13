@@ -46,6 +46,7 @@ src
 - [jszip](https://github.com/Stuk/jszip)
 - [chart.js](https://github.com/chartjs/Chart.js)
 - [ssf](https://git.sheetjs.com/sheetjs/sheetjs/src/branch/master/packages/ssf)
+- [comlink](https://github.com/GoogleChromeLabs/comlink)
 
 ## Supported Features
 

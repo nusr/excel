@@ -79,7 +79,7 @@ export const fakeCopyAction = (
   let fakeElement: HTMLTextAreaElement | undefined = createFakeElement(value);
   container.appendChild(fakeElement);
   const selectedText = select(fakeElement);
-  if (typeof document.execCommand === 'function') {
+  if (document.execCommand && typeof document.execCommand === 'function') {
     document.execCommand(type);
   }
   fakeElement.remove();

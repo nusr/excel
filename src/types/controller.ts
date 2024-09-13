@@ -1,7 +1,7 @@
 import { IBaseModel } from './model';
 import { CanvasOverlayPosition, ScrollValue } from './components';
 import { IRange } from './range';
-import { IWindowSize, IPosition } from './event';
+import { IWindowSize, IPosition, RemoteWorkerMethod } from './event';
 
 export enum EBorderLineType {
   MEDIUM,
@@ -21,11 +21,13 @@ export type ClipboardData = Record<ClipboardType, string>;
 export interface IHooks {
   copyOrCut: (textData: ClipboardData, type: 'cut' | 'copy') => Promise<string>;
   paste: () => Promise<ClipboardData>;
+  worker: RemoteWorkerMethod
 }
 
 export type ClipboardType = 'text/plain' | 'text/html';
 
 export interface IController extends IBaseModel {
+  getWorker(): RemoteWorkerMethod;
   emitChange(): void;
   setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up'): void;
   getCellSize(range: IRange): IWindowSize;

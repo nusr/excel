@@ -31,7 +31,7 @@ import { getHeaderStyle } from './constant';
 import { intToColumnName } from '@/util/convert';
 import { isSheet, isCol, isRow, containRange } from '@/util/range';
 import { npx, dpr } from '@/util/dpr';
-import { getCustomWidthOrHeightKey,coordinateToString } from '@/util/util';
+import { getCustomWidthOrHeightKey, coordinateToString } from '@/util/util';
 
 const lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
 
@@ -503,7 +503,7 @@ export class OffScreenWorker implements WorkerMainView {
       colCount: 1,
       sheetId: '',
     };
-    const key = coordinateToString(row,col)
+    const key = coordinateToString(row, col)
     const cellInfo = this.eventData.sheetData[key];
     if (!cellInfo) {
       return;

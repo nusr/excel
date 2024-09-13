@@ -1,25 +1,29 @@
 import { Model } from '@/model';
 import { IController, IHooks } from '@/types';
 import { Controller } from './Controller';
-import { HTML_FORMAT, PLAIN_FORMAT, workerSet } from '@/util';
+import { HTML_FORMAT, PLAIN_FORMAT } from '@/util';
+import method from '@/canvas/worker';
+
+const mockWorker: any = method;
+
+export const mockHooks: IHooks = {
+  async copyOrCut() {
+    return '';
+  },
+  async paste() {
+    return {
+      [HTML_FORMAT]: '',
+      [PLAIN_FORMAT]: '',
+    };
+  },
+  worker: mockWorker
+}
 
 export function initController(
   isNoHistory = false,
-  hooks: IHooks = {
-    async copyOrCut() {
-      return '';
-    },
-    async paste() {
-      return {
-        [HTML_FORMAT]: '',
-        [PLAIN_FORMAT]: '',
-      };
-    },
-  },
-  worker?: Worker,
+  hooks: IHooks = mockHooks
 ): IController {
-  workerSet.set({ worker });
-  const model = new Model();
+  const model = new Model(hooks.worker);
   const controller = new Controller(model, hooks);
   controller.batchUpdate(() => {
     controller.addSheet();

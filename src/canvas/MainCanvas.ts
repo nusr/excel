@@ -1,5 +1,7 @@
-import { EventType, MainView, IController, RequestMessageType } from '@/types';
-import { workerSet, canvasSizeSet, dpr, getTheme, headerSizeSet } from '@/util';
+import { EventType, MainView, IController, RequestInit, ResponseRender, RequestRender, IWindowSize } from '@/types';
+import { canvasSizeSet, dpr, getTheme, headerSizeSet } from '@/util';
+import * as ComLink from 'comlink'
+
 
 export class MainCanvas implements MainView {
   private controller: IController;
@@ -11,21 +13,39 @@ export class MainCanvas implements MainView {
     if (canvas && typeof canvas.transferControlToOffscreen === 'function') {
       offscreen = canvas.transferControlToOffscreen();
     }
-    const worker = workerSet.get().worker;
+    const worker = this.controller.getWorker();
     if (worker && offscreen) {
-      const data: RequestMessageType = {
-        status: 'init',
+      const data: RequestInit = {
         canvas: offscreen,
         dpr: dpr(),
       };
-      worker.postMessage(data, [offscreen]);
+      worker.init(ComLink.transfer(data, [data.canvas]));
     }
   }
-  render(data: EventType) {
-    const worker = workerSet.get().worker;
-    if (!worker) {
+  private renderCallback = (result: ResponseRender) => {
+    const { rowMap, colMap } = result
+    const rowKeys = Object.keys(rowMap);
+    const colKeys = Object.keys(colMap);
+    if (colKeys.length === 0 && rowKeys.length === 0) {
       return;
     }
+    this.controller.batchUpdate(() => {
+      for (const [row, h] of Object.entries(rowMap)) {
+        const r = parseInt(row, 10);
+        if (h !== this.controller.getRowHeight(r).len) {
+          this.controller.setRowHeight(r, h);
+        }
+      }
+      for (const [col, w] of Object.entries(colMap)) {
+        const c = parseInt(col, 10);
+        if (w !== this.controller.getColWidth(c).len) {
+          this.controller.setColWidth(c, w);
+        }
+      }
+      return true
+    }, true)
+  }
+  render(data: EventType) {
     const { controller } = this;
     const currentId = controller.getCurrentSheetId();
     const sheetInfo = controller.getSheetInfo(currentId);
@@ -33,8 +53,7 @@ export class MainCanvas implements MainView {
       return;
     }
     const jsonData = controller.toJSON();
-    const eventData: RequestMessageType = {
-      status: 'render',
+    const eventData: RequestRender = {
       changeSet: data.changeSet,
       theme: getTheme(),
       canvasSize: canvasSizeSet.get(),
@@ -48,22 +67,18 @@ export class MainCanvas implements MainView {
       customWidth: jsonData.customWidth,
       sheetData: jsonData.worksheets[currentId] || {},
     };
-    worker.postMessage(eventData);
+
+    this.controller.getWorker().render(eventData, ComLink.proxy(this.renderCallback));
   }
   resize() {
-    const worker = workerSet.get().worker;
-    if (!worker) {
-      return;
-    }
     const { canvas } = this;
     const { width, height } = canvasSizeSet.get();
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
-    const eventData: RequestMessageType = {
-      status: 'resize',
+    const eventData: IWindowSize = {
       width,
       height,
     };
-    worker.postMessage(eventData);
+    this.controller.getWorker().resize(eventData);
   }
 }

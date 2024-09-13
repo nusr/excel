@@ -27,7 +27,7 @@ import { Workbook } from './workbook';
 import { RangeMap } from './rangeMap';
 import { Drawing } from './drawing';
 import { DefinedName } from './definedName';
-import { Worksheet } from './worksheet';
+import { Worksheet, WorkerType } from './worksheet';
 import { MergeCell } from './mergeCell';
 import { RowManager } from './row';
 import { ColManager } from './col';
@@ -42,7 +42,7 @@ export class Model implements IModel {
   private mergeCellManager: MergeCell;
   private rowManager: RowManager;
   private colManager: ColManager;
-  constructor() {
+  constructor(worker?: WorkerType) {
     this.history = new History({
       undo: this.historyUndo,
       redo: this.historyRedo,
@@ -53,7 +53,7 @@ export class Model implements IModel {
     this.rangeMapManager = new RangeMap(this);
     this.drawingsManager = new Drawing(this);
     this.definedNameManager = new DefinedName(this);
-    this.worksheetManager = new Worksheet(this);
+    this.worksheetManager = new Worksheet(this, worker);
     this.mergeCellManager = new MergeCell(this);
     this.rowManager = new RowManager(this);
     this.colManager = new ColManager(this);
@@ -61,7 +61,21 @@ export class Model implements IModel {
   push(command: ICommandItem): void {
     this.history.push(command);
   }
-  emitChange(set: Set<ChangeEventType>) {
+  render(changeSet: Set<ChangeEventType>) {
+    eventEmitter.emit('modelChange', { changeSet });
+  }
+  private checkComputeFormulas(list: ICommandItem[]) {
+    const changeSet = modelToChangeSet(list);
+    if (
+      changeSet.has('cellValue') ||
+      changeSet.has('definedNames') ||
+      changeSet.has('currentSheetId')
+    ) {
+      this.worksheetManager.computeFormulas();
+    }
+    return changeSet
+  }
+  async emitChange(set: Set<ChangeEventType>) {
     const changeSet = modelToChangeSet(this.history.get());
     for (const key of set.keys()) {
       changeSet.add(key);
@@ -87,24 +101,13 @@ export class Model implements IModel {
       changeSet.has('definedNames') ||
       changeSet.has('currentSheetId')
     ) {
-      changeSet.add('cellValue');
-      const result = this.worksheetManager.computeFormulas();
-      if (result && result instanceof Promise) {
-        result.then(() => {
-          this.commitHistory(changeSet);
-        });
-        return;
-      }
+      this.worksheetManager.computeFormulas();
     }
-    this.commitHistory(changeSet);
-  }
-
-  private commitHistory(changeSet: Set<ChangeEventType>) {
     if (changeSet.has('noHistory')) {
       if (changeSet.has('row') || changeSet.has('col')) {
         this.computeViewSize();
       }
-      eventEmitter.emit('modelChange', { changeSet });
+      this.render(changeSet);
     } else {
       if (!changeSet.has('undoRedo')) {
         this.history.commit();
@@ -112,6 +115,7 @@ export class Model implements IModel {
     }
     this.history.clear(false);
   }
+
   private historyChange = (list: ICommandItem[], type: HistoryChangeType) => {
     const changeSet = modelToChangeSet(list);
     if (type === 'undoRedo') {
@@ -120,7 +124,7 @@ export class Model implements IModel {
     if (changeSet.has('row') || changeSet.has('col')) {
       this.computeViewSize();
     }
-    eventEmitter.emit('modelChange', { changeSet });
+    this.render(changeSet)
   };
 
   getSheetList(): WorksheetType[] {
@@ -392,25 +396,31 @@ export class Model implements IModel {
     return this.definedNameManager.validateDefinedName(name);
   }
 
-  private historyRedo = (item: ICommandItem) => {
-    this.workbookManager.redo(item);
-    this.rangeMapManager.redo(item);
-    this.drawingsManager.redo(item);
-    this.definedNameManager.redo(item);
-    this.worksheetManager.redo(item);
-    this.mergeCellManager.redo(item);
-    this.rowManager.redo(item);
-    this.colManager.redo(item);
+  private historyRedo = (list: ICommandItem[]) => {
+    for (const item of list) {
+      this.workbookManager.redo(item);
+      this.rangeMapManager.redo(item);
+      this.drawingsManager.redo(item);
+      this.definedNameManager.redo(item);
+      this.worksheetManager.redo(item);
+      this.mergeCellManager.redo(item);
+      this.rowManager.redo(item);
+      this.colManager.redo(item);
+    }
+    this.checkComputeFormulas(list)
   };
-  private historyUndo = (item: ICommandItem) => {
-    this.workbookManager.undo(item);
-    this.rangeMapManager.undo(item);
-    this.drawingsManager.undo(item);
-    this.definedNameManager.undo(item);
-    this.worksheetManager.undo(item);
-    this.mergeCellManager.undo(item);
-    this.rowManager.undo(item);
-    this.colManager.undo(item);
+  private historyUndo = (list: ICommandItem[]) => {
+    for (const item of list) {
+      this.workbookManager.undo(item);
+      this.rangeMapManager.undo(item);
+      this.drawingsManager.undo(item);
+      this.definedNameManager.undo(item);
+      this.worksheetManager.undo(item);
+      this.mergeCellManager.undo(item);
+      this.rowManager.undo(item);
+      this.colManager.undo(item);
+    }
+    this.checkComputeFormulas(list)
   };
   private computeViewSize() {
     const headerSize = headerSizeSet.get();

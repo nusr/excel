@@ -50,6 +50,7 @@
   },
   "dependencies": {
     "chart.js": "4.4.4",
+    "comlink": "4.4.1",
     "jszip": "3.10.1",
     "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz"
   },
