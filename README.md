@@ -50,8 +50,9 @@ src
 
 ## Supported Features
 
-- [x] Worker parse formulas
-- [x] OffScreenCanvas
+- [x] Web Worker parse formulas
+- [x] OffScreenCanvas Render
+- [x] Cross-tab Collaboration
 - [x] Undo
 - [x] Redo
 - [x] Copy

@@ -23,7 +23,7 @@ export type CommandType = ICommandItem;
 
 export interface IHistory {
   get(): ICommandItem[];
-  push(command: ICommandItem): void;
+  push(...commands: ICommandItem[]): void;
   commit(): void;
   undo(): void;
   redo(): void;
@@ -32,3 +32,5 @@ export interface IHistory {
   getLength(): number;
   clear(clearAll?: boolean): void;
 }
+
+export type HistoryChangeType = 'undo' | 'redo' | 'commit';

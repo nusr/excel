@@ -12,6 +12,8 @@ import {
   DefinedNameItem,
   WorksheetData,
   EMergeCellType,
+  EventEmitterType,
+  HistoryChangeType
 } from '@/types';
 import {
   XLSX_MAX_ROW_COUNT,
@@ -22,7 +24,7 @@ import {
   headerSizeSet,
   containRange,
 } from '@/util';
-import { History, HistoryChangeType } from './History';
+import { History } from './History';
 import { Workbook } from './workbook';
 import { RangeMap } from './rangeMap';
 import { Drawing } from './drawing';
@@ -58,11 +60,11 @@ export class Model implements IModel {
     this.rowManager = new RowManager(this);
     this.colManager = new ColManager(this);
   }
-  push(command: ICommandItem): void {
-    this.history.push(command);
+  push(...commands: ICommandItem[]): void {
+    this.history.push(...commands);
   }
-  render(changeSet: Set<ChangeEventType>) {
-    eventEmitter.emit('modelChange', { changeSet });
+  render(changeSet: Set<ChangeEventType>, list: ICommandItem[] = []) {
+    eventEmitter.emit('modelChange', { changeSet, commandList: list });
   }
   private checkComputeFormulas(list: ICommandItem[]) {
     const changeSet = modelToChangeSet(list);
@@ -96,6 +98,7 @@ export class Model implements IModel {
         oldValue: '',
       });
     }
+    /* jscpd:ignore-start */
     if (
       changeSet.has('cellValue') ||
       changeSet.has('definedNames') ||
@@ -103,13 +106,14 @@ export class Model implements IModel {
     ) {
       this.worksheetManager.computeFormulas();
     }
+    /* jscpd:ignore-end */
     if (changeSet.has('noHistory')) {
       if (changeSet.has('row') || changeSet.has('col')) {
         this.computeViewSize();
       }
       this.render(changeSet);
     } else {
-      if (!changeSet.has('undoRedo')) {
+      if (!changeSet.has('undo') && !changeSet.has('redo')) {
         this.history.commit();
       }
     }
@@ -118,13 +122,13 @@ export class Model implements IModel {
 
   private historyChange = (list: ICommandItem[], type: HistoryChangeType) => {
     const changeSet = modelToChangeSet(list);
-    if (type === 'undoRedo') {
+    if (type === 'undo' || type === 'redo') {
       changeSet.add(type);
     }
     if (changeSet.has('row') || changeSet.has('col')) {
       this.computeViewSize();
     }
-    this.render(changeSet)
+    this.render(changeSet, list)
   };
 
   getSheetList(): WorksheetType[] {
@@ -335,6 +339,17 @@ export class Model implements IModel {
   redo(): void {
     this.history.redo();
   }
+  applyCommandList(result: EventEmitterType['modelChange']) {
+    const { commandList = [], changeSet } = result;
+    if (commandList.length === 0) {
+      return;
+    }
+    if (changeSet.has('undo')) {
+      this.historyUndo(commandList)
+    } else {
+      this.historyRedo(commandList)
+    }
+  }
 
   pasteRange(fromRange: IRange, isCut: boolean): IRange {
     return this.worksheetManager.pasteRange(fromRange, isCut);
@@ -363,8 +378,10 @@ export class Model implements IModel {
   getDrawingList(sheetId?: string): DrawingElement[] {
     return this.drawingsManager.getDrawingList(sheetId);
   }
-  addDrawing(data: DrawingElement) {
-    this.drawingsManager.addDrawing(data);
+  addDrawing(...list: DrawingElement[]) {
+    for (const item of list) {
+      this.drawingsManager.addDrawing(item);
+    }
   }
   updateDrawing(uuid: string, value: Partial<DrawingElement>) {
     this.drawingsManager.updateDrawing(uuid, value);

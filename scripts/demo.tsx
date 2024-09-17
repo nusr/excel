@@ -12,6 +12,7 @@ import {
   paste,
   MOCK_MODEL,
   WorkerMethod,
+  initCollaboration,
 } from '../src';
 import * as Comlink from 'comlink';
 
@@ -55,3 +56,4 @@ createRoot(domNode).render(
   </StrictMode>,
 );
 controller.fromJSON(MOCK_MODEL);
+initCollaboration(controller)

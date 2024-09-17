@@ -59,12 +59,12 @@ describe('MainCanvas.test.ts', () => {
       } as HTMLCanvasElement);
       expect(mockWorker.init).toHaveBeenCalledWith({ "canvas": {}, "dpr": 1 });
     });
-    test('render ok', () => {
+    test('render ok', async () => {
       const instance = new MainCanvas(
         initController(false, hooks),
         {} as HTMLCanvasElement,
       );
-      instance.render({ changeSet: new Set(['cellStyle']) });
+      await instance.render({ changeSet: new Set(['cellStyle']) });
       const result: RequestRender = {
         ...resultData,
         changeSet: new Set(['cellStyle']),

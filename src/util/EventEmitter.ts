@@ -1,4 +1,4 @@
-import { ChangeEventType } from '@/types';
+import { EventEmitterType } from '@/types';
 
 export class EventEmitter<
   EventType extends Record<string, unknown> = Record<string, unknown>,
@@ -64,8 +64,5 @@ export class EventEmitter<
   }
 }
 
-type EventEmitterType = {
-  modelChange: { changeSet: Set<ChangeEventType> };
-};
 
 export const eventEmitter = new EventEmitter<EventEmitterType>();

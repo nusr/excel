@@ -1,61 +1,31 @@
-import type { ClipboardType, ClipboardData } from '@/types';
+import type { ClipboardData } from '@/types';
 
 export const PLAIN_FORMAT = 'text/plain';
 export const HTML_FORMAT = 'text/html';
+export const CUSTOM_FORMAT = 'custom/model';
 
-function select(element: HTMLTextAreaElement) {
-  const isReadOnly = element.hasAttribute('readonly');
-  if (!isReadOnly) {
-    element.setAttribute('readonly', '');
-  }
-  element.select();
-  element.setSelectionRange(0, element.value.length);
+const CUSTOM_START_FLAG = '<!-- __custom_clipboard__start'
+const CUSTOM_END_FLAG = '__custom_clipboard__end -->'
 
-  if (!isReadOnly) {
-    element.removeAttribute('readonly');
-  }
-  return element.value;
-}
-
-function createFakeElement(value: string) {
-  const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
-  const fakeElement = document.createElement('textarea');
-  // Prevent zooming on iOS
-  fakeElement.style.fontSize = '12pt';
-  // Reset box model
-  fakeElement.style.border = '0';
-  fakeElement.style.padding = '0';
-  fakeElement.style.margin = '0';
-  // Move element out of screen horizontally
-  fakeElement.style.position = 'absolute';
-  fakeElement.style[isRTL ? 'right' : 'left'] = '-9999px';
-  // Move element to the same position vertically
-  const yPosition = window.pageYOffset || document.documentElement.scrollTop;
-  fakeElement.style.top = `${yPosition}px`;
-
-  fakeElement.setAttribute('readonly', '');
-  fakeElement.value = value;
-
-  return fakeElement;
-}
-
-function writeDataToClipboard(textData: ClipboardData) {
+export function copyOrCut(textData: ClipboardData): Promise<void> {
   if (typeof ClipboardItem !== 'function') {
-    return;
+    return Promise.resolve();
   }
-  const result: Record<string, Blob> = {};
-  const keyList = Object.keys(textData) as ClipboardType[];
-  for (const key of keyList) {
-    result[key] = new Blob([textData[key]], { type: key });
-  }
-  const data = [new ClipboardItem(result)];
-  return navigator?.clipboard?.write(data);
+  const text = new Blob([textData[PLAIN_FORMAT]], { type: PLAIN_FORMAT });
+  const html = new Blob([textData[HTML_FORMAT]], { type: HTML_FORMAT });
+  const result: ClipboardItem[] = [
+    new ClipboardItem({ [text.type]: text }),
+    new ClipboardItem({ [html.type]: html }),
+  ]
+  return navigator?.clipboard?.write(result);
 }
 
-async function readDataFromClipboard(): Promise<ClipboardData> {
+export async function paste(): Promise<ClipboardData> {
   const result: ClipboardData = {
     [HTML_FORMAT]: '',
     [PLAIN_FORMAT]: '',
+    [CUSTOM_FORMAT]: '',
+    images: []
   };
   const list = (await navigator?.clipboard?.read()) || [];
   for (const item of list) {
@@ -67,53 +37,16 @@ async function readDataFromClipboard(): Promise<ClipboardData> {
       const buf = await item.getType(HTML_FORMAT);
       result[HTML_FORMAT] = await buf?.text();
     }
+    if (item.types.includes(CUSTOM_FORMAT)) {
+      const buf = await item.getType(CUSTOM_FORMAT);
+      result[CUSTOM_FORMAT] = await buf?.text();
+    }
   }
+  result[CUSTOM_FORMAT] = result[CUSTOM_FORMAT] || extractCustomData(result[HTML_FORMAT]);
   return result;
 }
 
-export const fakeCopyAction = (
-  value: string,
-  container: HTMLElement,
-  type: 'copy' | 'cut',
-) => {
-  let fakeElement: HTMLTextAreaElement | undefined = createFakeElement(value);
-  container.appendChild(fakeElement);
-  const selectedText = select(fakeElement);
-  if (document.execCommand && typeof document.execCommand === 'function') {
-    document.execCommand(type);
-  }
-  fakeElement.remove();
-  fakeElement = undefined;
-  return selectedText;
-};
-
-export async function copyOrCut(
-  textData: ClipboardData,
-  type: 'cut' | 'copy',
-): Promise<string> {
-  try {
-    await writeDataToClipboard(textData);
-    return textData[PLAIN_FORMAT];
-  } catch (error) {
-    console.error(error);
-    return fakeCopyAction(textData[PLAIN_FORMAT], document.body, type);
-  }
-}
-
-export async function paste(): Promise<ClipboardData> {
-  try {
-    return readDataFromClipboard();
-  } catch (error) {
-    console.error(error);
-    const result = (await navigator?.clipboard?.readText()) || '';
-    return {
-      [HTML_FORMAT]: '',
-      [PLAIN_FORMAT]: result,
-    };
-  }
-}
-
-export function generateHTML(style: string, content: string): string {
+export function generateHTML(style: string, content: string, customData: string = ''): string {
   return `<html
   xmlns:v="urn:schemas-microsoft-com:vml"
   xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -123,14 +56,20 @@ export function generateHTML(style: string, content: string): string {
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="ProgId" content="Excel.Sheet" />
     <meta name="Generator" content="Microsoft Excel 15" />
-    <style>
-      ${style}
-    </style>
+    ${customData ? `${CUSTOM_START_FLAG}${customData}${CUSTOM_END_FLAG}` : ''}
+    <style>${style}</style>
   </head>
   <body>
-    <table>
-      ${content}
-    </table>
+    <table>${content}</table>
   </body>
 </html>`;
+}
+
+export function extractCustomData(html: string) {
+  const start = html.indexOf(CUSTOM_START_FLAG);
+  const end = html.indexOf(CUSTOM_END_FLAG);
+  if (start >= 0 && end >= 0) {
+    return html.slice(start + CUSTOM_START_FLAG.length, end).trim();
+  }
+  return ''
 }

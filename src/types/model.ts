@@ -126,7 +126,8 @@ export type ChangeEventType =
   | 'col'
   | 'cellValue'
   | 'cellStyle'
-  | 'undoRedo'
+  | 'undo'
+  | 'redo'
   | 'noHistory';
 export interface EventType {
   changeSet: Set<ChangeEventType>;
@@ -193,7 +194,7 @@ export interface IRangeMap extends IBaseManager {
 export interface IDrawings extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'drawings'>;
   getDrawingList(sheetId?: string): DrawingElement[];
-  addDrawing(data: DrawingElement): void;
+  addDrawing(...data: DrawingElement[]): void;
   updateDrawing(uuid: string, value: Partial<DrawingElement>): void;
   deleteDrawing(uuid: string): void;
   addCol(colIndex: number, count: number): void;
@@ -255,58 +256,59 @@ export interface IWorksheet extends IBaseManager {
 
 export interface IBaseModel
   extends Pick<
-      IWorkbook,
-      | 'setCurrentSheetId'
-      | 'getCurrentSheetId'
-      | 'addSheet'
-      | 'deleteSheet'
-      | 'hideSheet'
-      | 'unhideSheet'
-      | 'renameSheet'
-      | 'getSheetInfo'
-      | 'updateSheetInfo'
-      | 'getSheetList'
-      | 'deleteAll'
-      | 'fromJSON'
-    >,
-    Pick<IRangeMap, 'setActiveRange' | 'getActiveRange' | 'validateRange'>,
-    Pick<
-      IDrawings,
-      | 'getDrawingList'
-      | 'addDrawing'
-      | 'updateDrawing'
-      | 'deleteDrawing'
-      | 'validateDrawing'
-    >,
-    Pick<
-      IDefinedName,
-      | 'getDefineName'
-      | 'setDefineName'
-      | 'checkDefineName'
-      | 'getDefineNameList'
-      | 'validateDefinedName'
-    >,
-    Pick<IMergeCell, 'getMergeCellList' | 'addMergeCell' | 'deleteMergeCell'>,
-    Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight'>,
-    Pick<ICol, 'hideCol' | 'getColWidth' | 'setColWidth'>,
-    Pick<
-      IWorksheet,
-      | 'addRow'
-      | 'deleteRow'
-      | 'addCol'
-      | 'deleteCol'
-      | 'getCell'
-      | 'setCell'
-      | 'updateCellStyle'
-      | 'getWorksheet'
-      | 'setWorksheet'
-      | 'setCellValue'
-    > {
+    IWorkbook,
+    | 'setCurrentSheetId'
+    | 'getCurrentSheetId'
+    | 'addSheet'
+    | 'deleteSheet'
+    | 'hideSheet'
+    | 'unhideSheet'
+    | 'renameSheet'
+    | 'getSheetInfo'
+    | 'updateSheetInfo'
+    | 'getSheetList'
+    | 'deleteAll'
+    | 'fromJSON'
+  >,
+  Pick<IRangeMap, 'setActiveRange' | 'getActiveRange' | 'validateRange'>,
+  Pick<
+    IDrawings,
+    | 'getDrawingList'
+    | 'addDrawing'
+    | 'updateDrawing'
+    | 'deleteDrawing'
+    | 'validateDrawing'
+  >,
+  Pick<
+    IDefinedName,
+    | 'getDefineName'
+    | 'setDefineName'
+    | 'checkDefineName'
+    | 'getDefineNameList'
+    | 'validateDefinedName'
+  >,
+  Pick<IMergeCell, 'getMergeCellList' | 'addMergeCell' | 'deleteMergeCell'>,
+  Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight'>,
+  Pick<ICol, 'hideCol' | 'getColWidth' | 'setColWidth'>,
+  Pick<
+    IWorksheet,
+    | 'addRow'
+    | 'deleteRow'
+    | 'addCol'
+    | 'deleteCol'
+    | 'getCell'
+    | 'setCell'
+    | 'updateCellStyle'
+    | 'getWorksheet'
+    | 'setWorksheet'
+    | 'setCellValue'
+  > {
   toJSON(): WorkBookJSON;
   canRedo(): boolean;
   canUndo(): boolean;
   undo(): void;
   redo(): void;
+  applyCommandList(result: EventEmitterType['modelChange']): void;
 }
 
 export interface IModel extends IBaseModel {
@@ -323,3 +325,7 @@ export type NumberFormatValue =
   | Date
   | null
   | undefined;
+
+export type EventEmitterType = {
+  modelChange: { changeSet: Set<ChangeEventType>, commandList?: ICommandItem[] };
+};

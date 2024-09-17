@@ -144,9 +144,7 @@ class WorkerMock {
     list.push(fn);
     this.listeners.set(type, list);
   }
-  removeEventListener() {
-    
-  }
+  removeEventListener() {}
   terminate() {}
   onmessageerror() {}
   dispatchEvent() {
@@ -159,10 +157,20 @@ global.Worker = WorkerMock;
 
 // @ts-ignore
 global.navigator.clipboard = {
-  write: Promise.resolve,
+  data: [],
+  /**
+   * 
+   * @param {ClipboardItems} data 
+   * @returns 
+   */
+  write(data) {
+    // @ts-ignore
+    this.data = data;
+    return Promise.resolve(data);
+  },
   writeText: Promise.resolve,
   read() {
-    return Promise.resolve([]);
+    return Promise.resolve(this.data);
   },
   readText() {
     return Promise.resolve('');

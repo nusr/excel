@@ -16,15 +16,18 @@ export type CanvasSize = {
   contentHeight: number;
 } & CanvasOverlayPosition;
 
-export type ClipboardData = Record<ClipboardType, string>;
+export type ClipboardData = {
+  'text/plain': string;
+  'text/html': string;
+  'custom/model': string;
+  images: Blob[]
+};
 
 export interface IHooks {
-  copyOrCut: (textData: ClipboardData, type: 'cut' | 'copy') => Promise<string>;
+  copyOrCut: (textData: ClipboardData, type: 'cut' | 'copy') => Promise<void>;
   paste: () => Promise<ClipboardData>;
   worker: RemoteWorkerMethod
 }
-
-export type ClipboardType = 'text/plain' | 'text/html';
 
 export interface IController extends IBaseModel {
   getWorker(): RemoteWorkerMethod;
@@ -35,9 +38,15 @@ export interface IController extends IBaseModel {
   paste(event?: ClipboardEvent): void;
   copy(event?: ClipboardEvent): void;
   cut(event?: ClipboardEvent): void;
-  getCopyRange(): IRange | undefined;
+  getCopyRange(): Promise<IRange | undefined>;
   setScroll(scroll: ScrollValue): void;
   getScroll(sheetId?: string): ScrollValue;
   setFloatElementUuid(uuid: string): void;
   batchUpdate: (fn: () => boolean, isNoHistory?: boolean) => void;
+}
+
+export type CustomClipboardData = {
+  type: 'cut' | 'copy',
+  range: IRange,
+  floatElementUuid: string,
 }

@@ -1,7 +1,5 @@
-import { IHistory, ICommandItem } from '@/types';
+import { IHistory, ICommandItem, HistoryChangeType } from '@/types';
 import { noop } from '@/util';
-
-export type HistoryChangeType = 'undoRedo' | 'commit';
 
 type Options = {
   change: (list: ICommandItem[], type: HistoryChangeType) => void;
@@ -10,7 +8,7 @@ type Options = {
   undo: (item: ICommandItem[]) => void;
 };
 
-export const DELETE_FLAG = Symbol.for('delete');
+export const DELETE_FLAG = '*#__DELETE__#*';
 
 export function transformData(
   obj: Record<string, any>,
@@ -66,8 +64,8 @@ export class History implements IHistory {
       this.options.undo = options.undo;
     }
   }
-  push(command: ICommandItem) {
-    this.commands.push(command);
+  push(...commands: ICommandItem[]) {
+    this.commands = this.commands.concat(commands);
   }
   commit() {
     if (this.commands.length === 0) {
@@ -114,7 +112,7 @@ export class History implements IHistory {
     const list = this.commandList[index];
     this.options.redo([...list]);
     this.position = index;
-    this.change(list, 'undoRedo');
+    this.change(list, 'redo');
   }
   undo(): void {
     const index = this.findUndoIndex();
@@ -124,7 +122,7 @@ export class History implements IHistory {
     const list = this.commandList[index];
     this.options.undo([...list]);
     this.position = index - 1;
-    this.change(list, 'undoRedo');
+    this.change(list, 'undo');
   }
   private findRedoIndex() {
     if (this.position >= this.commandList.length - 1) {

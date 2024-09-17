@@ -6,12 +6,14 @@ export function useClickOutside(
   const ref = useRef<HTMLDivElement>(null);
 
   function handleEvent(event: Event) {
-    if (ref && ref.current) {
-      if (ref.current.contains(event.target! as Node)) {
-      } else {
-        callback();
-      }
+    if (!ref || !ref.current) {
+      return
     }
+    const node = event.target! as Node;
+    if (ref.current === node || ref.current.contains(node)) {
+      return
+    }
+    callback();
   }
 
   useEffect(() => {

@@ -343,7 +343,8 @@ export function initCanvas(
     'row',
     'col',
     'cellStyle',
-    'undoRedo',
+    'undo',
+    'redo',
     'antLine',
   ]);
   handleStateChange(changeSet, controller);

@@ -45,13 +45,14 @@ export class MainCanvas implements MainView {
       return true
     }, true)
   }
-  render(data: EventType) {
+  async render(data: EventType) {
     const { controller } = this;
     const currentId = controller.getCurrentSheetId();
     const sheetInfo = controller.getSheetInfo(currentId);
     if (!sheetInfo) {
       return;
     }
+    const copyRange =await controller.getCopyRange();
     const jsonData = controller.toJSON();
     const eventData: RequestRender = {
       changeSet: data.changeSet,
@@ -61,7 +62,7 @@ export class MainCanvas implements MainView {
       currentSheetInfo: sheetInfo,
       scroll: controller.getScroll(currentId),
       range: controller.getActiveRange().range,
-      copyRange: controller.getCopyRange(),
+      copyRange,
       currentMergeCells: controller.getMergeCellList(currentId),
       customHeight: jsonData.customHeight,
       customWidth: jsonData.customWidth,

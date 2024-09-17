@@ -1,19 +1,21 @@
 import { Model } from '@/model';
 import { IController, IHooks } from '@/types';
 import { Controller } from './Controller';
-import { HTML_FORMAT, PLAIN_FORMAT } from '@/util';
+import { HTML_FORMAT, PLAIN_FORMAT, CUSTOM_FORMAT } from '@/util';
 import method from '@/canvas/worker';
 
 const mockWorker: any = method;
 
 export const mockHooks: IHooks = {
   async copyOrCut() {
-    return '';
+
   },
   async paste() {
     return {
       [HTML_FORMAT]: '',
       [PLAIN_FORMAT]: '',
+      [CUSTOM_FORMAT]: '',
+      images: []
     };
   },
   worker: mockWorker
