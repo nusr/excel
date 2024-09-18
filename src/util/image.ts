@@ -1,3 +1,5 @@
+import { IWindowSize } from '@/types';
+
 export const IMAGE_TYPE_MAP = {
   'image/apng': ['.apng'],
   'image/bmp': ['.bmp'],
@@ -54,4 +56,53 @@ export function convertFileToTextOrBase64(
       reader.readAsText(file);
     }
   });
+}
+
+export function getImageSize(src: string): Promise<IWindowSize> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      const width = image.width;
+      const height = image.height;
+
+      resolve({ width, height });
+    };
+    image.onerror = (error) => {
+      reject(error);
+    };
+    // base64 or link
+    image.src = src;
+  });
+}
+
+export function convertBase64toBlob(base64: string): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    if (!base64) {
+      reject(new Error('base64 is empty'));
+      return
+    }
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('ctx is null'))
+        return
+      }
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('blob is null'))
+          return
+        }
+        resolve(blob);
+      }, 'image/png');
+    };
+    img.onerror = (error) => {
+      reject(error);
+    };
+    img.src = base64;
+  })
 }

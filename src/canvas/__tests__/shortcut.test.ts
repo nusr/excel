@@ -7,7 +7,7 @@ describe('shortcut.test.ts', () => {
       const controller: IController = {
         batchUpdate: jest.fn(),
         setNextActiveCell: jest.fn(),
-      } as any as IController;
+      } as unknown as IController;
       handleTabClick(controller);
 
       expect(controller.batchUpdate).toHaveBeenCalledTimes(1);

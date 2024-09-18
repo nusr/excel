@@ -155,13 +155,58 @@ class WorkerMock {
 
 global.Worker = WorkerMock;
 
+class ClipboardItemMock {
+  /**
+   *
+   * @type {Record<string, string | Blob | PromiseLike<string | Blob>>}
+   */
+  data;
+  /**
+   * @type {ClipboardItemOptions | undefined}
+   */
+  options;
+  /**
+   * @type {string[]}
+   */
+  types = [];
+  /**
+   *
+   * @param {Record<string, string | Blob | PromiseLike<string | Blob>>} data
+   * @param {ClipboardItemOptions | undefined} options
+   */
+  constructor(data, options) {
+    this.data = data;
+    this.types = Object.keys(data);
+    this.options = options;
+  }
+  /**
+   *
+   * @param {string} type
+   * @returns {Promise<Blob>}
+   */
+  getType(type) {
+    // @ts-ignore
+    return this.data[type];
+  }
+  /**
+   *
+   * @param {string} type
+   * @returns
+   */
+  supports(type) {
+    return !!type;
+  }
+}
+// @ts-ignore
+global.ClipboardItem = ClipboardItemMock;
+
 // @ts-ignore
 global.navigator.clipboard = {
   data: [],
   /**
-   * 
-   * @param {ClipboardItems} data 
-   * @returns 
+   *
+   * @param {ClipboardItems} data
+   * @returns
    */
   write(data) {
     // @ts-ignore

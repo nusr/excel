@@ -11,6 +11,7 @@ import {
   DEFAULT_COL_COUNT,
   XLSX_MAX_COL_COUNT,
   XLSX_MAX_ROW_COUNT,
+  assert
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { $ } from '@/i18n';
@@ -85,6 +86,8 @@ export class Workbook implements IWorkbook {
   undo(item: ICommandItem): void {
     if (item.type === 'currentSheetId') {
       const sheetId = this.getSheetId();
+      assert(typeof item.oldValue === 'string')
+      assert(typeof item.newValue === 'string')
       if (
         !this.workbook[item.oldValue] ||
         this.workbook[item.oldValue].isHide
@@ -102,6 +105,8 @@ export class Workbook implements IWorkbook {
   }
   redo(item: ICommandItem): void {
     if (item.type === 'currentSheetId') {
+      assert(typeof item.oldValue === 'string')
+      assert(typeof item.newValue === 'string')
       if (
         !this.workbook[item.newValue] ||
         this.workbook[item.newValue].isHide
@@ -239,7 +244,7 @@ export class Workbook implements IWorkbook {
     const result = list.filter((v) => !v.isHide);
     return result[0]?.sheetId;
   }
-  deleteAll(): void {}
+  deleteAll(): void { }
   private checkSheetSize(sheetId?: string) {
     const id = sheetId || this.currentSheetId;
     if (!this.workbook[id]) {

@@ -1,4 +1,7 @@
-import type { WorkBookJSON } from './model';
+import type { WorkBookJSON, CustomItem, DrawingElement, ModelCellType, WorksheetType, StyleType, BorderItem } from './model';
+import { IRange } from './range';
+
+type ValueType = string | number | undefined | boolean | CustomItem | DrawingElement | IRange | ModelCellType | WorksheetType | Partial<StyleType> | BorderItem | WorkBookJSON['customWidth'] | WorkBookJSON['drawings'] | WorkBookJSON['workbook'] | WorkBookJSON['definedNames']
 
 export type ICommandItem = {
   /**
@@ -12,11 +15,11 @@ export type ICommandItem = {
   /**
    * oldValue, undo
    */
-  oldValue: any;
+  oldValue: ValueType;
   /**
    * newValue redo
    */
-  newValue: any;
+  newValue: ValueType;
 };
 
 export type CommandType = ICommandItem;

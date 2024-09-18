@@ -52,7 +52,7 @@ export class MainCanvas implements MainView {
     if (!sheetInfo) {
       return;
     }
-    const copyRange =await controller.getCopyRange();
+    const copyRange = controller.getCopyRange();
     const jsonData = controller.toJSON();
     const eventData: RequestRender = {
       changeSet: data.changeSet,

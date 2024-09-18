@@ -36,7 +36,9 @@ import {
   isCol,
   CUSTOM_FORMAT,
   convertFileToTextOrBase64,
-  getImageSize
+  getImageSize,
+  convertBase64toBlob,
+  IMAGE_FORMAT
 } from '@/util';
 import { numberFormat, isDateFormat, convertDateToNumber } from '@/model';
 
@@ -54,6 +56,8 @@ export class Controller implements IController {
   private model: IModel;
   private changeSet = new Set<ChangeEventType>();
   private floatElementUuid = '';
+  private copyRange: IRange | undefined = undefined;
+  private isCut = false;
   private isNoChange = false;
   private hooks: IHooks;
   constructor(model: IModel, hooks: IHooks) {
@@ -430,7 +434,7 @@ export class Controller implements IController {
 
     return undefined;
   }
-  private getCopyData(type: 'cut' | 'copy'): ClipboardData {
+  private async getCopyData(type: 'cut' | 'copy'): Promise<[ClipboardData, string]> {
     const { range: activeCell, isMerged } = this.getActiveRange();
     const { row, col, rowCount, colCount } = activeCell;
     const result: ResultType[][] = [];
@@ -494,13 +498,42 @@ export class Controller implements IController {
     );
     const text = `${result.map((item) => item.join('\t')).join('\r\n')}\r\n`;
 
-
-    return {
+    const clipboardData: ClipboardData = {
       [PLAIN_FORMAT]: text,
       [HTML_FORMAT]: htmlData,
       [CUSTOM_FORMAT]: customDataStr,
-      images: []
-    };
+      [IMAGE_FORMAT]: null
+    }
+
+    let imageData = ''
+
+    if (this.floatElementUuid) {
+      const list = this.getDrawingList(this.getCurrentSheetId());
+      const item = list.find((v) => v.uuid === this.floatElementUuid);
+      if (item) {
+        if (item.type === 'floating-picture') {
+          const dom = document.querySelector<HTMLCanvasElement>(
+            `canvas[data-uuid="${item.uuid}"]`,
+          );
+          if (dom) {
+            dom.toBlob((blob) => {
+              if (blob) {
+                clipboardData[IMAGE_FORMAT] = blob
+              }
+            });
+            imageData = dom.toDataURL()
+          }
+        } else {
+          imageData = item.imageSrc || ''
+          if (imageData) {
+            const blob = await convertBase64toBlob(imageData);
+            clipboardData[IMAGE_FORMAT] = blob
+          }
+        }
+      }
+    }
+
+    return [clipboardData, imageData];
   }
   private pasteFloatElement(floatElementUuid: string, isCut: boolean) {
     if (!floatElementUuid) {
@@ -516,6 +549,7 @@ export class Controller implements IController {
         marginY: 0,
       });
       this.floatElementUuid = '';
+      this.isCut = false
       this.emitChange();
       return true
     }
@@ -552,10 +586,15 @@ export class Controller implements IController {
     });
     return true
   }
-  paste(event?: ClipboardEvent) {
-    this.basePaste(event);
+  paste(event?: ClipboardEvent): Promise<void> {
+    if (this.floatElementUuid) {
+      if (this.pasteFloatElement(this.floatElementUuid, this.isCut)) {
+        return Promise.resolve()
+      }
+    }
+    return this.basePaste(event);
   }
-  private async basePaste(event?: ClipboardEvent) {
+  private async basePaste(event?: ClipboardEvent): Promise<void> {
     let html = '';
     let text = '';
     let custom: CustomClipboardData | null = null;
@@ -573,7 +612,7 @@ export class Controller implements IController {
             [PLAIN_FORMAT]: '',
             [HTML_FORMAT]: '',
             [CUSTOM_FORMAT]: '',
-            images: []
+            [IMAGE_FORMAT]: null
           },
           'copy',
         );
@@ -589,6 +628,7 @@ export class Controller implements IController {
         event.clipboardData?.setData(HTML_FORMAT, '')
         event.clipboardData?.setData(PLAIN_FORMAT, '')
         event.clipboardData?.setData(CUSTOM_FORMAT, '')
+        event.clipboardData?.setData(IMAGE_FORMAT, '')
       }
       if (event.clipboardData?.files) {
         files = event.clipboardData?.files
@@ -651,21 +691,36 @@ export class Controller implements IController {
       const result = this.parseText(text);
       if (result) {
         this.setActiveRange(result);
+        return
       }
     }
+    if (this.copyRange) {
+      const activeCell = this.model.pasteRange(this.copyRange, this.isCut);
+      this.setActiveRange(activeCell);
+      if (this.isCut) {
+        this.copyRange = undefined
+        this.isCut = false
+      }
+      return
+    }
   }
-  copy(event?: ClipboardEvent): void {
-    this.baseCopy('copy', event);
+  copy(event?: ClipboardEvent): Promise<void> {
+    this.copyRange = this.getActiveRange().range;
+    this.isCut = false;
+    return this.baseCopy('copy', event);
   }
-  cut(event?: ClipboardEvent) {
-    this.baseCopy('cut', event);
+  cut(event?: ClipboardEvent): Promise<void> {
+    this.copyRange = this.getActiveRange().range;
+    this.isCut = true;
+    return this.baseCopy('cut', event);
   }
-  private baseCopy(type: 'cut' | 'copy', event?: ClipboardEvent) {
-    const data = this.getCopyData(type);
+  private async baseCopy(type: 'cut' | 'copy', event?: ClipboardEvent) {
+    const [data, imageData] = await this.getCopyData(type);
     if (event) {
       event.clipboardData?.setData(HTML_FORMAT, data[HTML_FORMAT])
       event.clipboardData?.setData(PLAIN_FORMAT, data[PLAIN_FORMAT])
       event.clipboardData?.setData(CUSTOM_FORMAT, data[CUSTOM_FORMAT])
+      event.clipboardData?.setData(IMAGE_FORMAT, imageData)
     } else {
       this.hooks.copyOrCut(data, type);
     }
@@ -673,17 +728,11 @@ export class Controller implements IController {
 
     this.emitChange();
   }
-  async getCopyRange() {
-    const result = await this.hooks.paste()
-    const temp = result[CUSTOM_FORMAT];
-    if (!temp) {
-      return Promise.resolve(undefined);
-    }
-    const data: CustomClipboardData = JSON.parse(temp);
-    if (!data.floatElementUuid && data.range) {
-      return data.range
-    }
-    return Promise.resolve(undefined);
+  getCopyRange() {
+    return this.copyRange;
+  }
+  setCopyRange(range: IRange | undefined) {
+    this.copyRange = range;
   }
   deleteAll(sheetId?: string): void {
     this.model.deleteAll(sheetId);

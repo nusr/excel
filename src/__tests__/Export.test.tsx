@@ -17,8 +17,7 @@ const mockGetImageSize = jest.fn();
 
 jest.mock('../util/saveAs', () => {
   return {
-    saveAs: (...list: any[]) => mockSaveAs(...list),
-    getImageSize: (...list: any[]) => mockGetImageSize(...list),
+    saveAs: (...list: unknown[]) => mockSaveAs(...list),
   };
 });
 

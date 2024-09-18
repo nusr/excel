@@ -20,7 +20,7 @@ export type ClipboardData = {
   'text/plain': string;
   'text/html': string;
   'custom/model': string;
-  images: Blob[]
+  'image/png': Blob | null
 };
 
 export interface IHooks {
@@ -35,10 +35,11 @@ export interface IController extends IBaseModel {
   setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up'): void;
   getCellSize(range: IRange): IWindowSize;
   computeCellPosition(range: IRange): IPosition;
-  paste(event?: ClipboardEvent): void;
-  copy(event?: ClipboardEvent): void;
-  cut(event?: ClipboardEvent): void;
-  getCopyRange(): Promise<IRange | undefined>;
+  paste(event?: ClipboardEvent): Promise<void>;
+  copy(event?: ClipboardEvent): Promise<void>;
+  cut(event?: ClipboardEvent): Promise<void>;
+  getCopyRange(): IRange | undefined;
+  setCopyRange(range: IRange | undefined): void;
   setScroll(scroll: ScrollValue): void;
   getScroll(sheetId?: string): ScrollValue;
   setFloatElementUuid(uuid: string): void;

@@ -1,5 +1,18 @@
-import { IController, KeyboardEventItem, EditorStatus } from '@/types';
-import { isTestEnv, throttle } from '@/util';
+import {
+  IController,
+  KeyboardEventItem,
+  EditorStatus,
+  CustomClipboardData,
+  IRange,
+} from '@/types';
+import {
+  isTestEnv,
+  throttle,
+  paste,
+  CUSTOM_FORMAT,
+  eventEmitter,
+  deepEqual,
+} from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';
 
@@ -40,11 +53,11 @@ export function registerGlobalEvent(
     }
     coreStore.setState((state) => {
       if (state.editorStatus === EditorStatus.EDIT_CELL) {
-        return state
+        return state;
       }
       return {
         editorStatus: EditorStatus.EDIT_CELL,
-      }
+      };
     });
   }
 
@@ -80,12 +93,37 @@ export function registerGlobalEvent(
     controller.cut(event);
   }
 
+  function handleFocus() {
+    if (isInputEvent(event)) {
+      return;
+    }
+    paste().then((result) => {
+      const oldRange = controller.getCopyRange();
+      let newRange: IRange | undefined = undefined;
+      if (result[CUSTOM_FORMAT]) {
+        const data: CustomClipboardData = JSON.parse(result[CUSTOM_FORMAT]);
+        newRange =
+          !data.floatElementUuid && data.range ? data.range : undefined;
+        controller.setFloatElementUuid(data.floatElementUuid);
+      } else {
+        controller.setFloatElementUuid('');
+      }
+      if (!deepEqual(newRange, oldRange)) {
+        controller.setCopyRange(newRange);
+        eventEmitter.emit('modelChange', {
+          changeSet: new Set(['cellStyle']),
+        });
+      }
+    });
+  }
+
   window.addEventListener('resize', resizeWindow);
   document.body.addEventListener('keydown', handleKeydown);
   document.body.addEventListener('wheel', handleWheel);
   document.body.addEventListener('paste', handlePaste);
   document.body.addEventListener('copy', handleCopy);
   document.body.addEventListener('cut', handleCut);
+  window.addEventListener('focus', handleFocus);
 
   return () => {
     window.removeEventListener('resize', resizeWindow);
@@ -94,5 +132,6 @@ export function registerGlobalEvent(
     document.body.removeEventListener('paste', handlePaste);
     document.body.removeEventListener('copy', handleCopy);
     document.body.removeEventListener('cut', handleCut);
+    window.removeEventListener('focus', handleFocus);
   };
 }

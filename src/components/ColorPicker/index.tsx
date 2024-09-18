@@ -36,7 +36,8 @@ export const ColorPicker: FunctionComponent<
     onChange('');
   }, []);
   const handleClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    const color = (event.target as any)?.dataset?.value;
+    const color = (event.target as { dataset?: { value?: string } })?.dataset
+      ?.value;
     if (color) {
       onChange(color);
     }
@@ -49,7 +50,11 @@ export const ColorPicker: FunctionComponent<
       })}
       ref={ref}
     >
-      <div className={styles['color-picker-trigger']} onClick={openColorPicker} data-testid={`${testId}-trigger`}>
+      <div
+        className={styles['color-picker-trigger']}
+        onClick={openColorPicker}
+        data-testid={`${testId}-trigger`}
+      >
         {children}
       </div>
       {visible && (

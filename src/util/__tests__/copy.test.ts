@@ -1,5 +1,5 @@
 
-import { generateHTML, extractCustomData, paste, PLAIN_FORMAT, HTML_FORMAT, CUSTOM_FORMAT } from '../copy';
+import { generateHTML, extractCustomData, paste, PLAIN_FORMAT, HTML_FORMAT, CUSTOM_FORMAT, copyOrCut, IMAGE_FORMAT } from '../copy';
 
 describe('generateHTML', () => {
   it('should generate HTML with given style and content', () => {
@@ -17,7 +17,7 @@ describe('generateHTML', () => {
     const customData = JSON.stringify({ range: { row: 1, col: 1, colCount: 1, rowCount: 1, sheetId: 'test' }, type: 'cut' });
     const result = generateHTML(style, content, customData);
 
-    expect(result).toContain('<!-- __custom_clipboard__start{\"range\":{\"row\":1,\"col\":1,\"colCount\":1,\"rowCount\":1,\"sheetId\":\"test\"},\"type\":\"cut\"}__custom_clipboard__end -->');
+    expect(result).toContain('<!-- __custom_clipboard__start{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}__custom_clipboard__end -->');
   });
 
   it('should not include custom data if not provided', () => {
@@ -78,8 +78,19 @@ describe('extractCustomData', () => {
 });
 
 describe('paste', () => {
+  beforeEach(() => {
+    // @ts-ignore
+    jest.spyOn(global, 'Blob').mockImplementation((data: string[]) => {
+      return { text: () => Promise.resolve(data[0]) }
+    })
+  })
   test('empty', async () => {
     const result = await paste();
-    expect(result).toEqual({ [PLAIN_FORMAT]: '', [HTML_FORMAT]: '', [CUSTOM_FORMAT]: '', images: [] });
+    expect(result).toEqual({ [PLAIN_FORMAT]: '', [HTML_FORMAT]: '', [CUSTOM_FORMAT]: '', [IMAGE_FORMAT]: null });
+  })
+  test('extract', async () => {
+    await copyOrCut({ [PLAIN_FORMAT]: 'plain', [HTML_FORMAT]: '<!-- __custom_clipboard__start{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}__custom_clipboard__end -->', [CUSTOM_FORMAT]: 'custom', [IMAGE_FORMAT]: null });
+    const result = await paste();
+    expect(result).toEqual({ [PLAIN_FORMAT]: 'plain', [HTML_FORMAT]: '<!-- __custom_clipboard__start{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}__custom_clipboard__end -->', [CUSTOM_FORMAT]: '{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}', [IMAGE_FORMAT]: null });
   })
 })

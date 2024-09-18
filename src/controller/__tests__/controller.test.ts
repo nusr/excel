@@ -176,7 +176,7 @@ describe('controller.test.ts', () => {
   });
 
   describe('copy', () => {
-    test('set', () => {
+    test('set', async () => {
       let text = '';
       const textFormat = 'text/plain';
       const event = {
@@ -188,7 +188,7 @@ describe('controller.test.ts', () => {
           },
         },
       };
-      controller.copy(event as ClipboardEvent);
+      await controller.copy(event as ClipboardEvent);
       expect(!!text).toEqual(true);
     });
   });

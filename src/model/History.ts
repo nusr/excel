@@ -8,7 +8,7 @@ type Options = {
   undo: (item: ICommandItem[]) => void;
 };
 
-export const DELETE_FLAG = '*#__DELETE__#*';
+export const DELETE_FLAG = '__DELETE__';
 
 export function transformData(
   obj: Record<string, any>,

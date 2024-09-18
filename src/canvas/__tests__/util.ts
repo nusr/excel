@@ -33,7 +33,7 @@ async function getRenderData(controller: IController, theme: ThemeType) {
   const jsonData = controller.toJSON();
   const currentId = controller.getCurrentSheetId();
   const sheetInfo = controller.getSheetInfo(currentId)!;
-  const copyRange = await controller.getCopyRange()
+  const copyRange = controller.getCopyRange()
   const eventData: RequestRender = {
     changeSet: new Set<ChangeEventType>(['scroll', 'cellStyle', 'cellValue']),
     theme,
@@ -93,7 +93,7 @@ async function compareImage(
 async function renderCanvas(controller: IController, theme: ThemeType) {
   const canvas = createCanvas(defaultWidth, defaultHeight);
 
-  const instance = new OffScreenWorker(canvas as any);
+  const instance = new OffScreenWorker(canvas as unknown as OffscreenCanvas);
   instance.resize({ width: defaultWidth, height: defaultHeight });
   const data = instance.render(await getRenderData(controller, theme));
   if (data) {
@@ -136,7 +136,7 @@ export async function compareScreenShot(
   try {
     baseBuffer = await fs.promises.readFile(imagePath);
   } catch (error) {
-    if ((error as any).code === 'ENOENT') {
+    if ((error as unknown as { code: string }).code === 'ENOENT') {
       await fs.promises.writeFile(imagePath, newBuffer);
       return;
     }

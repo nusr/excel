@@ -1,7 +1,7 @@
 import { Model } from '@/model';
 import { IController, IHooks } from '@/types';
 import { Controller } from './Controller';
-import { HTML_FORMAT, PLAIN_FORMAT, CUSTOM_FORMAT } from '@/util';
+import { HTML_FORMAT, PLAIN_FORMAT, CUSTOM_FORMAT, IMAGE_FORMAT } from '@/util';
 import method from '@/canvas/worker';
 
 const mockWorker: any = method;
@@ -15,7 +15,7 @@ export const mockHooks: IHooks = {
       [HTML_FORMAT]: '',
       [PLAIN_FORMAT]: '',
       [CUSTOM_FORMAT]: '',
-      images: []
+      [IMAGE_FORMAT]: null
     };
   },
   worker: mockWorker
