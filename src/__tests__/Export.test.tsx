@@ -13,7 +13,6 @@ import { initController } from '@/controller';
 import './global.mock';
 
 const mockSaveAs = jest.fn();
-const mockGetImageSize = jest.fn();
 
 jest.mock('../util/saveAs', () => {
   return {
@@ -25,7 +24,6 @@ describe('Export.test.ts', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockSaveAs.mockReset();
-    mockGetImageSize.mockReset();
   });
   describe('download chart', () => {
     test('ok', async () => {
@@ -48,7 +46,6 @@ describe('Export.test.ts', () => {
   });
   describe('download floating picture', () => {
     test('ok', async () => {
-      mockGetImageSize.mockResolvedValue({ width: 100, height: 100 });
       act(() => {
         render(<App controller={initController()} />);
       });
@@ -71,7 +68,6 @@ describe('Export.test.ts', () => {
         screen.getByTestId('float-element-context-menu-save-as-picture'),
       );
       expect(mockSaveAs).toHaveBeenCalled()
-      expect(mockGetImageSize).toHaveBeenCalled()
     });
   });
   describe('download xlsx', () => {
