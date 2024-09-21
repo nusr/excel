@@ -18,11 +18,8 @@ export async function copyOrCut(textData: ClipboardData): Promise<void> {
   if (textData[IMAGE_FORMAT]) {
     result[IMAGE_FORMAT] = textData[IMAGE_FORMAT];
   }
-  try {
-    await navigator?.clipboard?.write([new ClipboardItem(result)]);
-  } catch (error) {
-    console.log(error);
-  }
+
+  await navigator?.clipboard?.write([new ClipboardItem(result)]);
 }
 
 export async function paste(): Promise<ClipboardData> {
@@ -32,27 +29,23 @@ export async function paste(): Promise<ClipboardData> {
     [CUSTOM_FORMAT]: '',
     [IMAGE_FORMAT]: null,
   };
-  try {
-    const list = (await navigator?.clipboard?.read()) || [];
-    for (const item of list) {
-      if (item.types.includes(PLAIN_FORMAT)) {
-        const buf = await item.getType(PLAIN_FORMAT);
-        result[PLAIN_FORMAT] = await buf?.text();
-      }
-      if (item.types.includes(HTML_FORMAT)) {
-        const buf = await item.getType(HTML_FORMAT);
-        result[HTML_FORMAT] = await buf?.text();
-      }
-      if (item.types.includes(IMAGE_FORMAT)) {
-        const buf = await item.getType(IMAGE_FORMAT);
-        if (buf) {
-          result[IMAGE_FORMAT] = buf;
-        }
-      }
+
+  const list = (await navigator?.clipboard?.read()) || [];
+  for (const item of list) {
+    if (item.types.includes(PLAIN_FORMAT)) {
+      const buf = await item.getType(PLAIN_FORMAT);
+      result[PLAIN_FORMAT] = await buf?.text();
     }
-  } catch (error) {
-    console.log(error);
+    if (item.types.includes(HTML_FORMAT)) {
+      const buf = await item.getType(HTML_FORMAT);
+      result[HTML_FORMAT] = await buf?.text();
+    }
+    if (item.types.includes(IMAGE_FORMAT)) {
+      const buf = await item.getType(IMAGE_FORMAT);
+      result[IMAGE_FORMAT] = buf;
+    }
   }
+
   result[CUSTOM_FORMAT] =
     result[CUSTOM_FORMAT] || extractCustomData(result[HTML_FORMAT]);
   return result;
@@ -68,15 +61,17 @@ export function generateHTML(
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="ProgId" content="Excel.Sheet" />
     <meta name="Generator" content="Microsoft Excel 15" />
-    ${customData ? `${CUSTOM_START_FLAG}${customData}${CUSTOM_END_FLAG}` : ''}
     <style>${style}</style>
   </head>
   <body>
-    <table>${content}</table>
+    <table>${customData}${content}</table>
   </body>
 </html>`;
 }
 
+export function formatCustomData(customData:string) {
+  return customData ? `${CUSTOM_START_FLAG}${customData}${CUSTOM_END_FLAG}` : ''
+}
 export function extractCustomData(html: string) {
   const start = html.indexOf(CUSTOM_START_FLAG);
   const end = html.indexOf(CUSTOM_END_FLAG);

@@ -3,7 +3,7 @@ module.exports = {
   rootDir: process.cwd(),
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  testMatch: ['<rootDir>/src/**/*.test.[jt]s?(x)'],
+  // testMatch: ['<rootDir>/src/**/*.test.[jt]s?(x)'],
   transform: {
     '^.+\\.css$': '<rootDir>/scripts/css-transform.js',
   },

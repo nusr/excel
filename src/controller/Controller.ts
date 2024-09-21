@@ -17,7 +17,7 @@ import {
   WorksheetData,
   EMergeCellType,
   EventEmitterType,
-  CustomClipboardData
+  CustomClipboardData,
 } from '@/types';
 import {
   PLAIN_FORMAT,
@@ -38,7 +38,8 @@ import {
   convertFileToTextOrBase64,
   getImageSize,
   convertBase64toBlob,
-  IMAGE_FORMAT
+  IMAGE_FORMAT,
+  formatCustomData,
 } from '@/util';
 import { numberFormat, isDateFormat, convertDateToNumber } from '@/model';
 
@@ -68,7 +69,7 @@ export class Controller implements IController {
     this.model.applyCommandList(result);
   }
   getWorker() {
-    return this.hooks.worker
+    return this.hooks.worker;
   }
   validateDefinedName(name: string): boolean {
     return this.model.validateDefinedName(name);
@@ -434,7 +435,9 @@ export class Controller implements IController {
 
     return undefined;
   }
-  private async getCopyData(type: 'cut' | 'copy'): Promise<[ClipboardData, string]> {
+  private async getCopyData(
+    type: 'cut' | 'copy',
+  ): Promise<[ClipboardData, string]> {
     const { range: activeCell, isMerged } = this.getActiveRange();
     const { row, col, rowCount, colCount } = activeCell;
     const result: ResultType[][] = [];
@@ -489,12 +492,12 @@ export class Controller implements IController {
       range: activeCell,
       type,
       floatElementUuid: this.floatElementUuid,
-    }
+    };
     const customDataStr = JSON.stringify(customData);
     const htmlData = generateHTML(
       classList.join('\n'),
       Array.from(colSet).join('\n') + '\n' + html.join('\n'),
-      customDataStr
+      formatCustomData(customDataStr),
     );
     const text = `${result.map((item) => item.join('\t')).join('\r\n')}\r\n`;
 
@@ -502,10 +505,10 @@ export class Controller implements IController {
       [PLAIN_FORMAT]: text,
       [HTML_FORMAT]: htmlData,
       [CUSTOM_FORMAT]: customDataStr,
-      [IMAGE_FORMAT]: null
-    }
+      [IMAGE_FORMAT]: null,
+    };
 
-    let imageData = ''
+    let imageData = '';
 
     if (this.floatElementUuid) {
       const list = this.getDrawingList(this.getCurrentSheetId());
@@ -518,17 +521,14 @@ export class Controller implements IController {
           if (dom) {
             dom.toBlob((blob) => {
               if (blob) {
-                clipboardData[IMAGE_FORMAT] = blob
+                clipboardData[IMAGE_FORMAT] = blob;
               }
             });
-            imageData = dom.toDataURL()
+            imageData = dom.toDataURL();
           }
         } else {
-          imageData = item.imageSrc || ''
-          if (imageData) {
-            const blob = await convertBase64toBlob(imageData);
-            clipboardData[IMAGE_FORMAT] = blob
-          }
+          imageData = item.imageSrc || '';
+          clipboardData[IMAGE_FORMAT] = convertBase64toBlob(imageData);
         }
       }
     }
@@ -549,9 +549,9 @@ export class Controller implements IController {
         marginY: 0,
       });
       this.floatElementUuid = '';
-      this.isCut = false
+      this.isCut = false;
       this.emitChange();
-      return true
+      return true;
     }
     const list = this.getDrawingList(this.getCurrentSheetId());
     const item = list.find((v) => v.uuid === floatElementUuid);
@@ -584,12 +584,12 @@ export class Controller implements IController {
       marginX,
       marginY,
     });
-    return true
+    return true;
   }
   paste(event?: ClipboardEvent): Promise<void> {
     if (this.floatElementUuid) {
       if (this.pasteFloatElement(this.floatElementUuid, this.isCut)) {
-        return Promise.resolve()
+        return Promise.resolve();
       }
     }
     return this.basePaste(event);
@@ -612,7 +612,7 @@ export class Controller implements IController {
             [PLAIN_FORMAT]: '',
             [HTML_FORMAT]: '',
             [CUSTOM_FORMAT]: '',
-            [IMAGE_FORMAT]: null
+            [IMAGE_FORMAT]: null,
           },
           'copy',
         );
@@ -625,25 +625,28 @@ export class Controller implements IController {
         custom = JSON.parse(t);
       }
       if (custom && custom.type === 'cut') {
-        event.clipboardData?.setData(HTML_FORMAT, '')
-        event.clipboardData?.setData(PLAIN_FORMAT, '')
-        event.clipboardData?.setData(CUSTOM_FORMAT, '')
-        event.clipboardData?.setData(IMAGE_FORMAT, '')
+        event.clipboardData?.setData(HTML_FORMAT, '');
+        event.clipboardData?.setData(PLAIN_FORMAT, '');
+        event.clipboardData?.setData(CUSTOM_FORMAT, '');
+        event.clipboardData?.setData(IMAGE_FORMAT, '');
       }
       if (event.clipboardData?.files) {
-        files = event.clipboardData?.files
+        files = event.clipboardData?.files;
       }
     }
     if (files) {
-      const list: DrawingElement[] = []
+      const list: DrawingElement[] = [];
       for (const file of files) {
+        if (file.size <= 0) {
+          continue;
+        }
         let fileName = file.name;
         const fileType = file.type.slice('image/'.length);
         fileName = fileName.slice(0, -(fileType.length + 1));
 
         const base64 = await convertFileToTextOrBase64(file, true);
         if (!base64) {
-          continue
+          continue;
         }
         const size = await getImageSize(base64);
         const range = this.getActiveRange().range;
@@ -661,22 +664,27 @@ export class Controller implements IController {
           fromCol: range.col,
           marginX: 0,
           marginY: 0,
-        })
+        });
       }
       if (list.length > 0) {
         this.addDrawing(...list);
-        return
+        return;
       }
     }
     if (custom && custom.floatElementUuid) {
-      if (this.pasteFloatElement(custom.floatElementUuid, custom.type === 'cut')) {
-        return
+      if (
+        this.pasteFloatElement(custom.floatElementUuid, custom.type === 'cut')
+      ) {
+        return;
       }
     }
     if (custom) {
-      const activeCell = this.model.pasteRange(custom.range, custom.type === 'cut');
+      const activeCell = this.model.pasteRange(
+        custom.range,
+        custom.type === 'cut',
+      );
       this.setActiveRange(activeCell);
-      return
+      return;
     }
     html = html.trim();
     text = text.trim();
@@ -684,24 +692,24 @@ export class Controller implements IController {
       const result = this.parseHTML(html);
       if (result) {
         this.setActiveRange(result);
-        return
+        return;
       }
     }
     if (text) {
       const result = this.parseText(text);
       if (result) {
         this.setActiveRange(result);
-        return
+        return;
       }
     }
     if (this.copyRange) {
       const activeCell = this.model.pasteRange(this.copyRange, this.isCut);
       this.setActiveRange(activeCell);
       if (this.isCut) {
-        this.copyRange = undefined
-        this.isCut = false
+        this.copyRange = undefined;
+        this.isCut = false;
       }
-      return
+      return;
     }
   }
   copy(event?: ClipboardEvent): Promise<void> {
@@ -717,10 +725,10 @@ export class Controller implements IController {
   private async baseCopy(type: 'cut' | 'copy', event?: ClipboardEvent) {
     const [data, imageData] = await this.getCopyData(type);
     if (event) {
-      event.clipboardData?.setData(HTML_FORMAT, data[HTML_FORMAT])
-      event.clipboardData?.setData(PLAIN_FORMAT, data[PLAIN_FORMAT])
-      event.clipboardData?.setData(CUSTOM_FORMAT, data[CUSTOM_FORMAT])
-      event.clipboardData?.setData(IMAGE_FORMAT, imageData)
+      event.clipboardData?.setData(HTML_FORMAT, data[HTML_FORMAT]);
+      event.clipboardData?.setData(PLAIN_FORMAT, data[PLAIN_FORMAT]);
+      event.clipboardData?.setData(CUSTOM_FORMAT, data[CUSTOM_FORMAT]);
+      event.clipboardData?.setData(IMAGE_FORMAT, imageData);
     } else {
       this.hooks.copyOrCut(data, type);
     }

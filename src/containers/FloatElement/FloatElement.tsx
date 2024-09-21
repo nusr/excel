@@ -58,6 +58,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
           alt={props.title}
           src={props.imageSrc!}
           className={styles['image']}
+          data-uuid={props.uuid}
           data-testid="float-element-image"
         />
       );

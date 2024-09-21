@@ -75,34 +75,22 @@ export function getImageSize(src: string): Promise<IWindowSize> {
   });
 }
 
-export function convertBase64toBlob(base64: string): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    if (!base64) {
-      reject(new Error('base64 is empty'));
-      return
+export function convertBase64toBlob(base64: string, contentType = 'image/png') {
+  const sliceSize = 1024;
+  const byteCharacters = atob(base64);
+  const bytesLength = byteCharacters.length;
+  const slicesCount = Math.ceil(bytesLength / sliceSize);
+  const byteArrays = new Array(slicesCount);
+
+  for (let sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+    let begin = sliceIndex * sliceSize;
+    let end = Math.min(begin + sliceSize, bytesLength);
+
+    let bytes = new Array(end - begin);
+    for (let offset = begin, i = 0; offset < end; ++i, ++offset) {
+      bytes[i] = byteCharacters[offset].charCodeAt(0);
     }
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('ctx is null'))
-        return
-      }
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error('blob is null'))
-          return
-        }
-        resolve(blob);
-      }, 'image/png');
-    };
-    img.onerror = (error) => {
-      reject(error);
-    };
-    img.src = base64;
-  })
+    byteArrays[sliceIndex] = new Uint8Array(bytes);
+  }
+  return new Blob(byteArrays, { type: contentType });
 }
