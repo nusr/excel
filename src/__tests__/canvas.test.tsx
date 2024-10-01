@@ -1,24 +1,17 @@
-import { App } from '@/containers';
-import * as React from 'react';
-import {
-  render,
-  screen,
-  fireEvent,
-  act,
-  waitFor,
-} from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { isMac } from '@/util';
-import '@testing-library/jest-dom';
-import { type, extractDataFromTransform } from './util';
-import { initController } from '@/controller';
+import { type, extractDataFromTransform, renderComponent } from './util';
 import './global.mock';
+import { IController } from '@/types';
 
 describe('Canvas.test.ts', () => {
+  let controller: IController;
+  beforeEach(async () => {
+    controller = renderComponent();
+    await screen.findByTestId('formula-editor-trigger');
+  });
   describe('canvas', () => {
     test('normal', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       expect(screen.getByTestId('canvas-container')!.childNodes).toHaveLength(
         4,
       );
@@ -27,9 +20,6 @@ describe('Canvas.test.ts', () => {
       ).toEqual('CANVAS');
     });
     test('context menu', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.contextMenu(screen.getByTestId('canvas-main'), {
         clientY: 200,
         clientX: 200,
@@ -39,9 +29,6 @@ describe('Canvas.test.ts', () => {
   });
   describe('BottomBar', () => {
     test('normal', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'ArrowDown', [key]: true });
       expect(screen.getByTestId('canvas-bottom-bar').childNodes.length).toEqual(
@@ -49,10 +36,6 @@ describe('Canvas.test.ts', () => {
       );
     });
     test('add rows', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'ArrowDown', [key]: true });
       const oldSheetInfo = controller.getSheetInfo()!;
@@ -65,10 +48,6 @@ describe('Canvas.test.ts', () => {
       expect(newSheetInfo.rowCount).toEqual(oldSheetInfo.rowCount + 12);
     });
     test('add rows threshold', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'ArrowDown', [key]: true });
       const oldSheetInfo = controller.getSheetInfo()!;
@@ -83,10 +62,6 @@ describe('Canvas.test.ts', () => {
   });
   describe('ScrollBar', () => {
     test('scroll down', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
-
       const oldTop = extractDataFromTransform(
         window.getComputedStyle(
           screen.getByTestId('vertical-scroll-bar-content'),
@@ -109,10 +84,6 @@ describe('Canvas.test.ts', () => {
       expect(newTop).toEqual(oldTop + 20);
     });
     test('scroll right', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
-
       const old = extractDataFromTransform(
         window.getComputedStyle(
           screen.getByTestId('horizontal-scroll-bar-content'),
@@ -137,9 +108,6 @@ describe('Canvas.test.ts', () => {
   });
   describe('selection', () => {
     test('select col', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 350,
@@ -149,10 +117,6 @@ describe('Canvas.test.ts', () => {
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('E1');
     });
     test('select col move', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 350,
@@ -169,9 +133,6 @@ describe('Canvas.test.ts', () => {
       expect(controller.getActiveRange().range.colCount).toBeGreaterThan(3);
     });
     test('select row', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 17,
@@ -181,10 +142,6 @@ describe('Canvas.test.ts', () => {
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A6');
     });
     test('select row move', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 17,
@@ -202,9 +159,6 @@ describe('Canvas.test.ts', () => {
       expect(controller.getActiveRange().range.rowCount).toBeGreaterThan(3);
     });
     test('select all', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 16,
@@ -215,10 +169,6 @@ describe('Canvas.test.ts', () => {
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
     });
     test('range move', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 300,
@@ -241,10 +191,6 @@ describe('Canvas.test.ts', () => {
   });
   describe('context menu', () => {
     test('copy', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       type('test');
       fireEvent.contextMenu(screen.getByTestId('canvas-main'), {
         clientY: 200,
@@ -265,10 +211,6 @@ describe('Canvas.test.ts', () => {
       });
     });
     test('cut', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       type('test');
       fireEvent.contextMenu(screen.getByTestId('canvas-main'), {
         clientY: 200,
@@ -298,10 +240,6 @@ describe('Canvas.test.ts', () => {
     });
 
     test('change column width', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 395,
@@ -329,10 +267,6 @@ describe('Canvas.test.ts', () => {
       ).toEqual(200);
     });
     test('hide col', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 341,
@@ -351,10 +285,6 @@ describe('Canvas.test.ts', () => {
       ).toEqual(0);
     });
     test('delete col', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const oldColCount = controller.getSheetInfo()!.colCount;
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
@@ -372,10 +302,6 @@ describe('Canvas.test.ts', () => {
       expect(controller.getSheetInfo()!.colCount).toEqual(oldColCount - 1);
     });
     test('add col left', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const oldColCount = controller.getSheetInfo()!.colCount;
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
@@ -394,10 +320,6 @@ describe('Canvas.test.ts', () => {
     });
 
     test('add col right', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const oldColCount = controller.getSheetInfo()!.colCount;
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
@@ -416,10 +338,6 @@ describe('Canvas.test.ts', () => {
     });
 
     test('change row height', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 17,
@@ -448,10 +366,6 @@ describe('Canvas.test.ts', () => {
     });
 
     test('hide row', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 17,
@@ -471,10 +385,6 @@ describe('Canvas.test.ts', () => {
     });
 
     test('delete row', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const oldRowCount = controller.getSheetInfo()!.rowCount;
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
@@ -492,10 +402,6 @@ describe('Canvas.test.ts', () => {
       expect(controller.getSheetInfo()!.rowCount).toEqual(oldRowCount - 1);
     });
     test('add row above', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const oldRowCount = controller.getSheetInfo()!.rowCount;
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
@@ -513,10 +419,6 @@ describe('Canvas.test.ts', () => {
       expect(controller.getSheetInfo()!.rowCount).toEqual(oldRowCount + 1);
     });
     test('add row below', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const oldRowCount = controller.getSheetInfo()!.rowCount;
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
@@ -534,9 +436,6 @@ describe('Canvas.test.ts', () => {
       expect(controller.getSheetInfo()!.rowCount).toEqual(oldRowCount + 1);
     });
     test('delete all', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-bold'));
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -559,21 +458,17 @@ describe('Canvas.test.ts', () => {
 
       fireEvent.click(screen.getByTestId('context-menu-delete'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('formula-editor-trigger')).not.toHaveStyle({
-          fontWeight: 'bold',
-        });
-        expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
-          '',
-        );
+      expect(
+        await screen.findByTestId('formula-editor-trigger'),
+      ).not.toHaveStyle({
+        fontWeight: 'bold',
       });
+      expect(
+        await screen.findByTestId('formula-editor-trigger'),
+      ).toHaveTextContent('');
     });
 
     test('change row height cancel', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const oldHeight = controller.getRowHeight(
         controller.getActiveRange().range.row,
       ).len;

@@ -187,3 +187,5 @@ export const SheetBarContainer: FunctionComponent<Props> = memo(
   },
 );
 SheetBarContainer.displayName = 'SheetBarContainer';
+
+export default SheetBarContainer

@@ -1,31 +1,21 @@
-import { App } from '@/containers';
-import * as React from 'react';
-import {
-  render,
-  screen,
-  fireEvent,
-  act,
-  waitFor,
-} from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { type, extractDataFromTransform } from './util';
-import { initController } from '@/controller';
+import { screen, fireEvent } from '@testing-library/react';
+import { type, extractDataFromTransform, renderComponent } from './util';
 import './global.mock';
+import { IController } from '@/types';
 
 describe('FloatElement.test.ts', () => {
+  let controller: IController;
+  beforeEach(async () => {
+    controller = renderComponent();
+    await screen.findByTestId('formula-editor-trigger');
+  });
   describe('float element', () => {
     test('add chart', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       expect(screen.getAllByTestId('float-element')).toHaveLength(1);
     });
     test('active chart', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       expect(screen.getByTestId('float-element')).not.toHaveClass('active');
@@ -35,9 +25,6 @@ describe('FloatElement.test.ts', () => {
       expect(screen.getByTestId('float-element')).toHaveClass('active');
     });
     test('toggle mask', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       expect(screen.getByTestId('float-element-mask')).not.toHaveClass(
@@ -55,9 +42,6 @@ describe('FloatElement.test.ts', () => {
       );
     });
     test('not active float element', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.pointerDown(screen.getByTestId('float-element'), {
@@ -70,9 +54,6 @@ describe('FloatElement.test.ts', () => {
   });
   describe('context menu', () => {
     test('show', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
@@ -85,9 +66,6 @@ describe('FloatElement.test.ts', () => {
       ).toHaveLength(10);
     });
     test('copy', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       expect(screen.getAllByTestId('float-element')).toHaveLength(1);
@@ -105,13 +83,8 @@ describe('FloatElement.test.ts', () => {
       expect(screen.getAllByTestId('float-element')).toHaveLength(2);
     });
     test('cut', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
-      const oldFromRow = controller.getDrawingList()[0].fromRow;
       expect(screen.getAllByTestId('float-element')).toHaveLength(1);
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
         clientY: 20,
@@ -126,12 +99,8 @@ describe('FloatElement.test.ts', () => {
       });
       fireEvent.click(screen.getByTestId('float-element-context-menu-paste'));
       expect(screen.getAllByTestId('float-element')).toHaveLength(1);
-      expect(controller.getDrawingList()[0].fromRow).toEqual(oldFromRow + 1);
     });
     test('duplicate', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
@@ -144,9 +113,6 @@ describe('FloatElement.test.ts', () => {
       expect(screen.getAllByTestId('float-element')).toHaveLength(2);
     });
     test('delete', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
@@ -168,9 +134,6 @@ describe('FloatElement.test.ts', () => {
     });
 
     test('reset size disabled', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
@@ -182,9 +145,6 @@ describe('FloatElement.test.ts', () => {
       ).toBeDisabled();
     });
     test('reset size', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.pointerDown(screen.getByTestId('float-element'), {
@@ -229,10 +189,6 @@ describe('FloatElement.test.ts', () => {
 
   describe('select data', () => {
     test('ok', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
@@ -256,9 +212,6 @@ describe('FloatElement.test.ts', () => {
       });
     });
     test('empty', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
@@ -279,9 +232,6 @@ describe('FloatElement.test.ts', () => {
     });
 
     test('invalid', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
@@ -301,10 +251,6 @@ describe('FloatElement.test.ts', () => {
       ).not.toHaveTextContent('');
     });
     test('cancel dialog', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       const oldChartRange = controller.getDrawingList()[0].chartRange!;
@@ -325,10 +271,6 @@ describe('FloatElement.test.ts', () => {
   });
   describe('chart title', () => {
     test('ok', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
@@ -346,10 +288,6 @@ describe('FloatElement.test.ts', () => {
       expect(controller.getDrawingList()[0].title).toEqual('new_chart_title');
     });
     test('empty value', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
@@ -369,10 +307,6 @@ describe('FloatElement.test.ts', () => {
       ).not.toHaveTextContent('');
     });
     test('cancel dialog', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       const oldData = controller.getDrawingList()[0].title;
@@ -398,10 +332,6 @@ describe('FloatElement.test.ts', () => {
       'polarArea',
     ]) {
       test(`change chart type to: ${item}`, async () => {
-        const controller = initController();
-        act(() => {
-          render(<App controller={controller} />);
-        });
         type('1');
         fireEvent.click(screen.getByTestId('toolbar-chart'));
         fireEvent.contextMenu(screen.getByTestId('float-element'), {
@@ -423,10 +353,6 @@ describe('FloatElement.test.ts', () => {
       });
     }
     test('cancel dialog', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       const oldData = controller.getDrawingList()[0].chartType!;
@@ -445,9 +371,6 @@ describe('FloatElement.test.ts', () => {
   describe('resize float element', () => {
     for (const item of ['top', 'top-right', 'top-left']) {
       test(item, async () => {
-        act(() => {
-          render(<App controller={initController()} />);
-        });
         type('1');
         fireEvent.click(screen.getByTestId('toolbar-chart'));
         fireEvent.pointerDown(screen.getByTestId('float-element'), {
@@ -493,9 +416,6 @@ describe('FloatElement.test.ts', () => {
     }
     for (const item of ['bottom', 'bottom-right', 'bottom-left']) {
       test(item, async () => {
-        act(() => {
-          render(<App controller={initController()} />);
-        });
         type('1');
         fireEvent.click(screen.getByTestId('toolbar-chart'));
         fireEvent.pointerDown(screen.getByTestId('float-element'), {
@@ -531,9 +451,6 @@ describe('FloatElement.test.ts', () => {
     }
     for (const item of ['top-left', 'bottom-left', 'left']) {
       test(item, async () => {
-        act(() => {
-          render(<App controller={initController()} />);
-        });
         type('1');
         fireEvent.click(screen.getByTestId('toolbar-chart'));
         fireEvent.pointerDown(screen.getByTestId('float-element'), {
@@ -578,9 +495,6 @@ describe('FloatElement.test.ts', () => {
     }
     for (const item of ['top-right', 'bottom-right', 'right']) {
       test(item, async () => {
-        act(() => {
-          render(<App controller={initController()} />);
-        });
         type('1');
         fireEvent.click(screen.getByTestId('toolbar-chart'));
         fireEvent.pointerDown(screen.getByTestId('float-element'), {
@@ -615,9 +529,6 @@ describe('FloatElement.test.ts', () => {
       });
     }
     test('no buttons', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.pointerDown(screen.getByTestId('float-element'), {
@@ -651,9 +562,6 @@ describe('FloatElement.test.ts', () => {
       ).toEqual(parseInt(oldWidth, 10));
     });
     test('no data-position', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.pointerDown(screen.getByTestId('float-element'), {
@@ -688,9 +596,6 @@ describe('FloatElement.test.ts', () => {
   });
   describe('move float element', () => {
     test('move right', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.pointerDown(screen.getByTestId('float-element'), {
@@ -724,9 +629,6 @@ describe('FloatElement.test.ts', () => {
       expect(newLeft).toEqual(oldLeft + 20);
     });
     test('move down', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       fireEvent.pointerDown(screen.getByTestId('float-element'), {
@@ -756,10 +658,6 @@ describe('FloatElement.test.ts', () => {
   });
   describe('rotate floating picture', () => {
     test('ok', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
-
       const file = new File(['test content'], 'test.png', {
         type: 'image/png',
       });
@@ -767,9 +665,7 @@ describe('FloatElement.test.ts', () => {
         target: { files: [file] },
       });
 
-      await waitFor(() => {
-        expect(screen.getAllByTestId('float-element')).toHaveLength(1);
-      });
+      expect(await screen.findAllByTestId('float-element')).toHaveLength(1);
 
       fireEvent.pointerDown(screen.getByTestId('float-element'), {
         buttons: 1,

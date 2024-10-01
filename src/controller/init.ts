@@ -14,7 +14,7 @@ export const mockHooks: IHooks = {
     return {
       [HTML_FORMAT]: '',
       [PLAIN_FORMAT]: '',
-      [CUSTOM_FORMAT]: '',
+      [CUSTOM_FORMAT]: null,
       [IMAGE_FORMAT]: null
     };
   },

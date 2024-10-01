@@ -1,5 +1,7 @@
 import { cleanup } from '@testing-library/react';
 import { canvasSizeSet } from '@/util';
+import '@testing-library/jest-dom';
+
 afterEach(cleanup);
 beforeAll(() => {
   const spy = jest.spyOn(canvasSizeSet, 'get');

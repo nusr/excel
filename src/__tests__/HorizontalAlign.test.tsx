@@ -1,17 +1,14 @@
-import { App } from '@/containers';
-import * as React from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { type } from './util';
-import { initController } from '@/controller';
+import { screen, fireEvent } from '@testing-library/react';
+import { type, renderComponent } from './util';
 import './global.mock';
 
 describe('HorizontalAlign.test.tsx', () => {
+  beforeEach(async () => {
+    renderComponent();
+    await screen.findByTestId('formula-editor-trigger');
+  });
   describe('left', () => {
     test('ok', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-horizontal-left'));
       expect(screen.getByTestId('toolbar-horizontal-left')).toHaveClass(
@@ -21,9 +18,6 @@ describe('HorizontalAlign.test.tsx', () => {
   });
   describe('center', () => {
     test('ok', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-horizontal-center'));
       expect(screen.getByTestId('toolbar-horizontal-center')).toHaveClass(
@@ -33,9 +27,6 @@ describe('HorizontalAlign.test.tsx', () => {
   });
   describe('right', () => {
     test('ok', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-horizontal-right'));
       expect(screen.getByTestId('toolbar-horizontal-right')).toHaveClass(

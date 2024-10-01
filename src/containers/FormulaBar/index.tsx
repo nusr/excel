@@ -95,3 +95,5 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
   },
 );
 FormulaBarContainer.displayName = 'FormulaBarContainer';
+
+export default FormulaBarContainer

@@ -1,17 +1,14 @@
-import { App } from '@/containers';
-import * as React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { type } from './util';
-import { initController } from '@/controller';
+import { screen, fireEvent } from '@testing-library/react';
+import { type, renderComponent } from './util';
 import './global.mock';
 
 describe('MergeCell.test.tsx', () => {
+  beforeEach(async () => {
+    renderComponent();
+    await screen.findByTestId('formula-editor-trigger');
+  });
   describe('toolbar', () => {
     test('add merge cell', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
@@ -32,9 +29,6 @@ describe('MergeCell.test.tsx', () => {
       expect(screen.getByTestId('toolbar-merge-cell')).toHaveClass('active');
     });
     test('toggle merge cell', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
@@ -56,9 +50,6 @@ describe('MergeCell.test.tsx', () => {
       );
     });
     test('merge content', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.keyDown(document.body, {
         key: 'Enter',

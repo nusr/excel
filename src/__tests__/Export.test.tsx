@@ -1,15 +1,5 @@
-import { App } from '@/containers';
-import * as React from 'react';
-import {
-  render,
-  screen,
-  fireEvent,
-  act,
-  waitFor,
-} from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { type } from './util';
-import { initController } from '@/controller';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { type, renderComponent } from './util';
 import './global.mock';
 
 const mockSaveAs = jest.fn();
@@ -21,15 +11,14 @@ jest.mock('../util/saveAs', () => {
 });
 
 describe('Export.test.ts', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
+  beforeEach(async () => {
+    jest.clearAllMocks();
     mockSaveAs.mockReset();
+    renderComponent();
+    await screen.findByTestId('formula-editor-trigger');
   });
   describe('download chart', () => {
     test('ok', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       expect(screen.getAllByTestId('float-element')).toHaveLength(1);
@@ -46,9 +35,6 @@ describe('Export.test.ts', () => {
   });
   describe('download floating picture', () => {
     test('ok', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const file = new File(['test content'], 'test.png', {
         type: 'image/png',
       });
@@ -56,9 +42,8 @@ describe('Export.test.ts', () => {
         target: { files: [file] },
       });
 
-      await waitFor(() => {
-        expect(screen.getAllByTestId('float-element')).toHaveLength(1);
-      });
+      expect(await screen.findAllByTestId('float-element')).toHaveLength(1);
+
       fireEvent.contextMenu(screen.getByTestId('float-element'), {
         clientY: 20,
         clientX: 20,
@@ -67,31 +52,25 @@ describe('Export.test.ts', () => {
       fireEvent.click(
         screen.getByTestId('float-element-context-menu-save-as-picture'),
       );
-      expect(mockSaveAs).toHaveBeenCalled()
+      expect(mockSaveAs).toHaveBeenCalled();
     });
   });
   describe('download xlsx', () => {
     test('ok', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       fireEvent.click(screen.getByTestId('menubar-export-xlsx'));
-      await waitFor(()=>{
-        expect(mockSaveAs).toHaveBeenCalled()
-      })
+      await waitFor(() => {
+        expect(mockSaveAs).toHaveBeenCalled();
+      });
     });
   });
   describe('download csv', () => {
     test('ok', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       fireEvent.click(screen.getByTestId('menubar-export-csv'));
-      expect(mockSaveAs).toHaveBeenCalled()
+      expect(mockSaveAs).toHaveBeenCalled();
     });
   });
 });

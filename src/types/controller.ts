@@ -19,7 +19,7 @@ export type CanvasSize = {
 export type ClipboardData = {
   'text/plain': string;
   'text/html': string;
-  'custom/model': string;
+  'custom/model': CustomClipboardData | null;
   'image/png': Blob | null
 };
 

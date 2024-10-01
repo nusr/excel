@@ -1,12 +1,12 @@
-import type { ClipboardData } from '@/types';
+import type { ClipboardData, CustomClipboardData } from '@/types';
 
 export const PLAIN_FORMAT = 'text/plain';
 export const HTML_FORMAT = 'text/html';
 export const CUSTOM_FORMAT = 'custom/model';
 export const IMAGE_FORMAT = 'image/png';
 
-const CUSTOM_START_FLAG = '<!-- __custom_clipboard__start';
-const CUSTOM_END_FLAG = '__custom_clipboard__end -->';
+const CUSTOM_START_FLAG = '<caption>';
+const CUSTOM_END_FLAG = '</caption>';
 
 export async function copyOrCut(textData: ClipboardData): Promise<void> {
   const text = new Blob([textData[PLAIN_FORMAT]], { type: PLAIN_FORMAT });
@@ -26,7 +26,7 @@ export async function paste(): Promise<ClipboardData> {
   const result: ClipboardData = {
     [HTML_FORMAT]: '',
     [PLAIN_FORMAT]: '',
-    [CUSTOM_FORMAT]: '',
+    [CUSTOM_FORMAT]: null,
     [IMAGE_FORMAT]: null,
   };
 
@@ -56,27 +56,39 @@ export function generateHTML(
   content: string,
   customData: string = '',
 ): string {
-  return `<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+  const result = `
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="ProgId" content="Excel.Sheet" />
     <meta name="Generator" content="Microsoft Excel 15" />
     <style>${style}</style>
   </head>
-  <body>
-    <table>${customData}${content}</table>
-  </body>
-</html>`;
+    <body>
+      <table>${customData}${content}</table>
+    </body>
+  </html>`;
+
+  return result.replaceAll('\n', '')
 }
 
-export function formatCustomData(customData:string) {
+export function formatCustomData(customData: string) {
   return customData ? `${CUSTOM_START_FLAG}${customData}${CUSTOM_END_FLAG}` : ''
 }
-export function extractCustomData(html: string) {
+export function extractCustomData(html: string): CustomClipboardData | null {
   const start = html.indexOf(CUSTOM_START_FLAG);
   const end = html.indexOf(CUSTOM_END_FLAG);
   if (start >= 0 && end >= 0) {
-    return html.slice(start + CUSTOM_START_FLAG.length, end).trim();
+    const t = html.slice(start + CUSTOM_START_FLAG.length, end).trim();
+    if (!t || t[0] !== '{' || t[t.length - 1] !== '}') {
+      return null
+    }
+    try {
+      return JSON.parse(t)
+    } catch (error) {
+      console.log(error)
+      return null
+    }
   }
-  return '';
+  return null
 }

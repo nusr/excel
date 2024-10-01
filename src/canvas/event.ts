@@ -2,7 +2,6 @@ import {
   IController,
   KeyboardEventItem,
   EditorStatus,
-  CustomClipboardData,
   IRange,
 } from '@/types';
 import {
@@ -101,7 +100,7 @@ export function registerGlobalEvent(
       const oldRange = controller.getCopyRange();
       let newRange: IRange | undefined = undefined;
       if (result[CUSTOM_FORMAT]) {
-        const data: CustomClipboardData = JSON.parse(result[CUSTOM_FORMAT]);
+        const data = result[CUSTOM_FORMAT];
         newRange =
           !data.floatElementUuid && data.range ? data.range : undefined;
         controller.setFloatElementUuid(data.floatElementUuid);

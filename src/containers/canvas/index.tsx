@@ -216,3 +216,5 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
   );
 });
 CanvasContainer.displayName = 'CanvasContainer';
+
+export default CanvasContainer

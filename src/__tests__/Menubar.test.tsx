@@ -1,30 +1,30 @@
 import { App } from '@/containers';
-import { initController } from '@/controller';
 import * as React from 'react';
 import {
-  render,
   screen,
+  render,
   fireEvent,
   act,
   RenderResult,
 } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import './global.mock';
+import { renderComponent } from './util';
+import { initController } from '@/controller';
 
 type MatchMediaFun = (data: { matches: boolean }) => void;
 
 describe('Menubar.test.ts', () => {
+  beforeEach(async () => {
+    renderComponent();
+    await screen.findByTestId('menubar');
+  });
   describe('menubar', () => {
-    test('normal', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
-      expect(screen.getByTestId('menubar')!.childNodes.length).toEqual(4);
+    test('normal', async () => {
+      expect((await screen.findByTestId('menubar')).childNodes.length).toEqual(
+        4,
+      );
     });
     test('menu', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       expect(
         screen.getByTestId('menubar-excel-portal')!.querySelectorAll('li')
@@ -37,9 +37,6 @@ describe('Menubar.test.ts', () => {
       sessionStorage.clear();
     });
     test('toggle', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const before = document.documentElement.getAttribute('data-theme');
       fireEvent.click(screen.getByTestId('menubar-theme-toggle'));
       const after = document.documentElement.getAttribute('data-theme');
@@ -48,9 +45,6 @@ describe('Menubar.test.ts', () => {
     });
 
     test('toggle twice', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const before = document.documentElement.getAttribute('data-theme');
       fireEvent.click(screen.getByTestId('menubar-theme-toggle'));
       const after = document.documentElement.getAttribute('data-theme');
@@ -61,84 +55,81 @@ describe('Menubar.test.ts', () => {
       const after2 = document.documentElement.getAttribute('data-theme');
       expect(after2).toEqual(before);
     });
-
-    test('mock matchMedia light to dark', () => {
-      let func: MatchMediaFun;
-      function addEventListener(
-        _type: string,
-        fn: (data: { matches: boolean }) => void,
-      ) {
-        func = fn;
-      }
-      Object.defineProperty(global, 'matchMedia', {
-        writable: true,
-        value: () => {
-          return {
-            matches: false,
-            addEventListener,
-          };
-        },
-      });
-      act(() => {
-        render(<App controller={initController()} />);
-      });
-      const before = document.documentElement.getAttribute('data-theme');
-      expect(before).toEqual('light');
-      act(() => {
-        func({ matches: true });
-      });
-      const after = document.documentElement.getAttribute('data-theme');
-      expect(after).toEqual('dark');
-    });
-    test('mock matchMedia dark to light', () => {
-      let func: MatchMediaFun;
-      function addEventListener(
-        _type: string,
-        fn: (data: { matches: boolean }) => void,
-      ) {
-        func = fn;
-      }
-      Object.defineProperty(global, 'matchMedia', {
-        writable: true,
-        value: () => {
-          return {
-            matches: true,
-            addEventListener,
-          };
-        },
-      });
-      act(() => {
-        render(<App controller={initController()} />);
-      });
-      const before = document.documentElement.getAttribute('data-theme');
-      expect(before).toEqual('dark');
-      act(() => {
-        func({ matches: false });
-      });
-      const after = document.documentElement.getAttribute('data-theme');
-      expect(after).toEqual('light');
-    });
   });
   describe('i18n', () => {
     test('default', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('en');
     });
-    test('change', () => {
-      let result: RenderResult;
-      const controller = initController();
-      act(() => {
-        result = render(<App controller={controller} />);
-      });
-      fireEvent.change(screen.getByTestId('menubar-i18n-select'), {
-        target: { value: 'zh' },
-      });
-      act(() => {
-        result.rerender(<App controller={controller} />);
-      });
-      expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('zh');
+  });
+});
+
+test('change i18n', () => {
+  let result: RenderResult;
+  const controller = initController();
+  act(() => {
+    result = render(<App controller={controller} />);
+  });
+  fireEvent.change(screen.getByTestId('menubar-i18n-select'), {
+    target: { value: 'zh' },
+  });
+  act(() => {
+    result.rerender(<App controller={controller} />);
+  });
+  expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('zh');
+});
+
+describe('change theme', () => {
+  test('mock matchMedia light to dark', () => {
+    let func: MatchMediaFun;
+    function addEventListener(
+      _type: string,
+      fn: (data: { matches: boolean }) => void,
+    ) {
+      func = fn;
+    }
+    Object.defineProperty(global, 'matchMedia', {
+      writable: true,
+      value: () => {
+        return {
+          matches: false,
+          addEventListener,
+        };
+      },
     });
+    renderComponent();
+    const before = document.documentElement.getAttribute('data-theme');
+    expect(before).toEqual('light');
+    act(() => {
+      func && func({ matches: true });
+    });
+    const after = document.documentElement.getAttribute('data-theme');
+    expect(after).toEqual('dark');
+  });
+  test('mock matchMedia dark to light', () => {
+    let func: MatchMediaFun;
+    function addEventListener(
+      _type: string,
+      fn: (data: { matches: boolean }) => void,
+    ) {
+      func = fn;
+    }
+    Object.defineProperty(global, 'matchMedia', {
+      writable: true,
+      value: () => {
+        return {
+          matches: true,
+          addEventListener,
+        };
+      },
+    });
+
+    renderComponent();
+    const before = document.documentElement.getAttribute('data-theme');
+    expect(before).toEqual('dark');
+    act(() => {
+      func && func({ matches: false });
+    });
+    const after = document.documentElement.getAttribute('data-theme');
+    expect(after).toEqual('light');
   });
 });

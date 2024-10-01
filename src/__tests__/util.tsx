@@ -1,4 +1,7 @@
-import { screen, fireEvent } from '@testing-library/react';
+import * as React from 'react';
+import { screen, fireEvent, render, act } from '@testing-library/react';
+import { App } from '@/containers';
+import { initController } from '@/controller';
 
 export function type(content: string, isEnter = true) {
   fireEvent.click(screen.getByTestId('formula-editor-trigger'));
@@ -23,4 +26,12 @@ export function extractDataFromTransform(
   const reg = new RegExp(type + `\\((\\d+)${p}\\)`);
   const t = transform.match(reg) ?? [];
   return Number(t[1]);
+}
+
+export function renderComponent() {
+  const controller = initController();
+  act(() => {
+    render(<App controller={controller} />);
+  });
+  return controller
 }

@@ -490,3 +490,5 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
 );
 
 ToolbarContainer.displayName = 'ToolbarContainer';
+
+export default ToolbarContainer

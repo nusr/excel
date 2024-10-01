@@ -97,3 +97,5 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
 );
 
 MenuBarContainer.displayName = 'MenuBarContainer';
+
+export default MenuBarContainer

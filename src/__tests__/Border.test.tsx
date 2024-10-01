@@ -1,20 +1,17 @@
-import { App } from '@/containers';
-import * as React from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { initController } from '@/controller';
-import './global.mock';
+import { screen, fireEvent } from '@testing-library/react';
 import { BORDER_TYPE_MAP } from '@/util';
-import { BorderItem } from '@/types';
+import { BorderItem, IController } from '@/types';
+import { renderComponent } from './util';
+import './global.mock';
 
 describe('Border.test.tsx', () => {
+  let controller: IController;
+  beforeEach(async () => {
+    controller = renderComponent();
+    await screen.findByTestId('formula-editor-trigger');
+  });
   describe('Line Color', () => {
     test('ok', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
-
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-border-color-trigger'));
       const dom = screen.getByTestId('toolbar-border-color-list');
@@ -32,9 +29,6 @@ describe('Border.test.tsx', () => {
   describe('Line Style', () => {
     for (const item of Object.keys(BORDER_TYPE_MAP)) {
       test(item, () => {
-        act(() => {
-          render(<App controller={initController()} />);
-        });
         const selector = `toolbar-border-style-${item}`;
         fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
         fireEvent.click(screen.getByTestId('toolbar-border-style'));
@@ -47,10 +41,6 @@ describe('Border.test.tsx', () => {
   });
   describe('All Borders', () => {
     test('ok', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-all-borders'));
       const item: BorderItem = {
@@ -69,10 +59,6 @@ describe('Border.test.tsx', () => {
   });
   describe('No Border', () => {
     test('ok', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-all-borders'));
       const item: BorderItem = {
@@ -102,10 +88,6 @@ describe('Border.test.tsx', () => {
   });
   describe('Top Border', () => {
     test('ok', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-top-border'));
       const item: BorderItem = {
@@ -121,10 +103,6 @@ describe('Border.test.tsx', () => {
   });
   describe('Bottom Border', () => {
     test('ok', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-bottom-border'));
       const item: BorderItem = {
@@ -140,10 +118,6 @@ describe('Border.test.tsx', () => {
   });
   describe('Left Border', () => {
     test('ok', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-left-border'));
       const item: BorderItem = {
@@ -159,10 +133,6 @@ describe('Border.test.tsx', () => {
   });
   describe('Right Border', () => {
     test('ok', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-right-border'));
       const item: BorderItem = {
@@ -178,10 +148,6 @@ describe('Border.test.tsx', () => {
   });
   describe('Thick Box Border', () => {
     test('ok', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-thick-box-border'));
       const item: BorderItem = {
@@ -200,10 +166,6 @@ describe('Border.test.tsx', () => {
   });
   describe('OutSide Borders', () => {
     test('ok', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-outside-borders'));
       const item: BorderItem = {
@@ -222,10 +184,6 @@ describe('Border.test.tsx', () => {
   });
   describe('Border Shortcut', () => {
     test('ok', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-top-border'));
       fireEvent.keyDown(document.body, { key: 'Enter' });

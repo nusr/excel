@@ -441,7 +441,7 @@ export class Controller implements IController {
     const { range: activeCell, isMerged } = this.getActiveRange();
     const { row, col, rowCount, colCount } = activeCell;
     const result: ResultType[][] = [];
-    const html: string[] = [];
+    const trList: string[] = [];
     let index = 1;
     const classList: string[] = [];
     const currentSheetId = this.model.getCurrentSheetId();
@@ -483,7 +483,7 @@ export class Controller implements IController {
         }
       }
       result.push(temp);
-      html.push(`<tr height=${h} style='height:${h}pt;'>${t.join('\n')}</tr>`);
+      trList.push(`<tr height=${h} style='height:${h}pt;'>${t.join('\n')}</tr>`);
       if (isMerged) {
         break;
       }
@@ -496,7 +496,9 @@ export class Controller implements IController {
     const customDataStr = JSON.stringify(customData);
     const htmlData = generateHTML(
       classList.join('\n'),
-      Array.from(colSet).join('\n') + '\n' + html.join('\n'),
+      `
+      ${Array.from(colSet).join('\n')}
+      ${trList.join('\n')}`,
       formatCustomData(customDataStr),
     );
     const text = `${result.map((item) => item.join('\t')).join('\r\n')}\r\n`;
@@ -504,7 +506,7 @@ export class Controller implements IController {
     const clipboardData: ClipboardData = {
       [PLAIN_FORMAT]: text,
       [HTML_FORMAT]: htmlData,
-      [CUSTOM_FORMAT]: customDataStr,
+      [CUSTOM_FORMAT]: customData,
       [IMAGE_FORMAT]: null,
     };
 
@@ -604,14 +606,14 @@ export class Controller implements IController {
       html = data[HTML_FORMAT];
       text = data[PLAIN_FORMAT];
       if (data[CUSTOM_FORMAT]) {
-        custom = JSON.parse(data[CUSTOM_FORMAT]);
+        custom = data[CUSTOM_FORMAT]
       }
       if (custom && custom.type === 'cut') {
         this.hooks.copyOrCut(
           {
             [PLAIN_FORMAT]: '',
             [HTML_FORMAT]: '',
-            [CUSTOM_FORMAT]: '',
+            [CUSTOM_FORMAT]: null,
             [IMAGE_FORMAT]: null,
           },
           'copy',
@@ -727,7 +729,7 @@ export class Controller implements IController {
     if (event) {
       event.clipboardData?.setData(HTML_FORMAT, data[HTML_FORMAT]);
       event.clipboardData?.setData(PLAIN_FORMAT, data[PLAIN_FORMAT]);
-      event.clipboardData?.setData(CUSTOM_FORMAT, data[CUSTOM_FORMAT]);
+      event.clipboardData?.setData(CUSTOM_FORMAT, data[CUSTOM_FORMAT] ? JSON.stringify(data[CUSTOM_FORMAT]) : '');
       event.clipboardData?.setData(IMAGE_FORMAT, imageData);
     } else {
       this.hooks.copyOrCut(data, type);

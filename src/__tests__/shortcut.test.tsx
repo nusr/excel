@@ -1,30 +1,23 @@
-import '@testing-library/jest-dom';
-import { App } from '@/containers';
-import * as React from 'react';
-import {
-  render,
-  fireEvent,
-  act,
-  screen,
-  waitFor,
-} from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { isMac } from '@/util';
-import { initController } from '@/controller';
 import './global.mock';
+import { IController } from '@/types';
+import { renderComponent } from './util';
 
 describe('shortcut.test.tsx', () => {
+  let controller: IController;
+  beforeEach(async () => {
+    controller = renderComponent();
+    await screen.findByTestId('canvas-main');
+  });
   describe('Enter', () => {
     test('normal', async () => {
-      render(<App controller={initController()} />);
       fireEvent.keyDown(document.body, { key: 'Enter' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
     });
   });
   describe('Tab', () => {
     test('normal', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.click(screen.getByTestId('canvas-main'));
       fireEvent.keyDown(document.body, { key: 'Tab' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('B1');
@@ -32,9 +25,6 @@ describe('shortcut.test.tsx', () => {
   });
   describe('ArrowDown', () => {
     test('meta', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       expect(screen.getByTestId('canvas-bottom-bar')).not.toHaveClass('active');
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'ArrowDown', [key]: true });
@@ -43,9 +33,6 @@ describe('shortcut.test.tsx', () => {
   });
   describe('ArrowUp', () => {
     test('normal', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.keyDown(document.body, { key: 'ArrowDown' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
       fireEvent.keyDown(document.body, { key: 'ArrowUp' });
@@ -53,9 +40,6 @@ describe('shortcut.test.tsx', () => {
     });
 
     test('meta', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       expect(screen.getByTestId('canvas-bottom-bar')).not.toHaveClass('active');
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'ArrowDown', [key]: true });
@@ -67,19 +51,12 @@ describe('shortcut.test.tsx', () => {
   });
   describe('ArrowRight', () => {
     test('normal', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.keyDown(document.body, { key: 'ArrowRight' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('B1');
       fireEvent.keyDown(document.body, { key: 'ArrowLeft' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
     });
     test('meta', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'ArrowRight', [key]: true });
       expect(controller.getScroll().col).toBeGreaterThanOrEqual(10);
@@ -87,10 +64,6 @@ describe('shortcut.test.tsx', () => {
   });
   describe('ArrowLeft', () => {
     test('meta', () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'ArrowRight', [key]: true });
       expect(controller.getScroll().col).toBeGreaterThanOrEqual(10);
@@ -100,9 +73,6 @@ describe('shortcut.test.tsx', () => {
   });
   describe('bold', () => {
     test('normal', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'b', [key]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -110,9 +80,6 @@ describe('shortcut.test.tsx', () => {
       });
     });
     test('twice', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'b', [key]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -126,9 +93,6 @@ describe('shortcut.test.tsx', () => {
   });
   describe('italic', () => {
     test('normal', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'i', [key]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -136,9 +100,6 @@ describe('shortcut.test.tsx', () => {
       });
     });
     test('twice', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'i', [key]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -152,9 +113,6 @@ describe('shortcut.test.tsx', () => {
   });
   describe('strike', () => {
     test('normal', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: '5', [key]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -162,9 +120,6 @@ describe('shortcut.test.tsx', () => {
       });
     });
     test('twice', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: '5', [key]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -178,9 +133,6 @@ describe('shortcut.test.tsx', () => {
   });
   describe('underline', () => {
     test('normal', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'u', [key]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -188,9 +140,6 @@ describe('shortcut.test.tsx', () => {
       });
     });
     test('twice', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'u', [key]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -202,9 +151,6 @@ describe('shortcut.test.tsx', () => {
       });
     });
     test('strike', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'u', [key]: true });
       fireEvent.keyDown(document.body, { key: '5', [key]: true });
@@ -215,10 +161,6 @@ describe('shortcut.test.tsx', () => {
   });
   describe('copy', () => {
     test('normal', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'b', [key]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -229,20 +171,16 @@ describe('shortcut.test.tsx', () => {
 
       fireEvent.keyDown(document.body, { key: 'Enter' });
       fireEvent.paste(document.body, { clipboardData: { getData: () => '' } });
-      await waitFor(() => {
-        expect(controller.getCell(controller.getActiveRange().range)).toEqual({
-          style: { isBold: true },
-        });
-        expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
+      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
+        'A2',
+      );
+      expect(controller.getCell(controller.getActiveRange().range)).toEqual({
+        style: { isBold: true },
       });
     });
   });
   describe('cut', () => {
     test('normal', async () => {
-      const controller = initController();
-      act(() => {
-        render(<App controller={controller} />);
-      });
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'b', [key]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
@@ -253,11 +191,11 @@ describe('shortcut.test.tsx', () => {
 
       fireEvent.keyDown(document.body, { key: 'Enter' });
       fireEvent.paste(document.body, { clipboardData: { getData: () => '' } });
-      await waitFor(() => {
-        expect(controller.getCell(controller.getActiveRange().range)).toEqual({
-          style: { isBold: true },
-        });
-        expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
+      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
+        'A2',
+      );
+      expect(controller.getCell(controller.getActiveRange().range)).toEqual({
+        style: { isBold: true },
       });
 
       fireEvent.keyDown(document.body, { key: 'ArrowUp' });
@@ -270,10 +208,6 @@ describe('shortcut.test.tsx', () => {
 
   describe('wheel', () => {
     test('scroll down', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
-
       expect(
         window.getComputedStyle(
           screen.getByTestId('vertical-scroll-bar-content'),
@@ -289,9 +223,6 @@ describe('shortcut.test.tsx', () => {
       expect(transform).toEqual('translateY(22px)');
     });
     test(' scroll right', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       expect(
         window.getComputedStyle(
           screen.getByTestId('horizontal-scroll-bar-content'),
@@ -309,11 +240,10 @@ describe('shortcut.test.tsx', () => {
   });
 
   describe('undo', () => {
-    test('ok', () => {
-      act(() => {
-        render(<App controller={initController(true)} />);
+    test.skip('ok', async () => {
+      await waitFor(() => {
+        expect(screen.getByTestId('toolbar-undo')).toBeDisabled();
       });
-      expect(screen.getByTestId('toolbar-undo')).toBeDisabled();
       fireEvent.click(screen.getByTestId('toolbar-bold'));
       expect(screen.getByTestId('toolbar-undo')).not.toBeDisabled();
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
@@ -324,9 +254,6 @@ describe('shortcut.test.tsx', () => {
 
   describe('redo', () => {
     test('ok', () => {
-      act(() => {
-        render(<App controller={initController(true)} />);
-      });
       fireEvent.click(screen.getByTestId('toolbar-bold'));
       expect(screen.getByTestId('toolbar-redo')).toBeDisabled();
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;

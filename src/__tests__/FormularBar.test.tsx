@@ -1,25 +1,18 @@
-import { App } from '@/containers';
-import * as React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { type } from './util';
-import { initController } from '@/controller';
+import { screen, fireEvent } from '@testing-library/react';
+import { type, renderComponent } from './util';
 import './global.mock';
 
 describe('FormulaBar.test.tsx', () => {
+  beforeEach(async () => {
+    renderComponent();
+    await screen.findByTestId('formula-editor-trigger');
+  });
   describe('defined name', () => {
     test('normal', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
       expect(screen.getByTestId('formula-bar')!.childNodes).toHaveLength(2);
     });
     test('range jump', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
-
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
         target: { value: 'G100' },
       });
@@ -29,9 +22,6 @@ describe('FormulaBar.test.tsx', () => {
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('G100');
     });
     test('define name jump', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
         target: { value: 'foo' },
       });
@@ -41,9 +31,6 @@ describe('FormulaBar.test.tsx', () => {
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('foo');
     });
     test('error define name', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
         target: { value: 'foo_343.=' },
       });
@@ -53,9 +40,6 @@ describe('FormulaBar.test.tsx', () => {
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
     });
     test('empty', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
         target: { value: '' },
       });
@@ -66,9 +50,6 @@ describe('FormulaBar.test.tsx', () => {
     });
 
     test('popup jump', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
         target: { value: 'foo' },
       });
@@ -87,9 +68,6 @@ describe('FormulaBar.test.tsx', () => {
     });
 
     test('duplicate', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
         target: { value: 'foo' },
       });
@@ -111,18 +89,12 @@ describe('FormulaBar.test.tsx', () => {
   });
   describe('formula editor', () => {
     test('enter', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('3');
       expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
         '3',
       );
     });
     test('tab', async () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('3', false);
       expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
         '3',

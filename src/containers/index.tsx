@@ -1,11 +1,12 @@
-import { CanvasContainer } from './canvas';
-import { FormulaBarContainer } from './FormulaBar';
-import { ToolbarContainer } from './ToolBar';
-import { SheetBarContainer } from './SheetBar';
 import styles from './index.module.css';
-import React, { memo } from 'react';
+import React, { memo, lazy } from 'react';
 import type { IController } from '@/types';
-import { MenuBarContainer } from './MenuBar';
+
+const FormulaBarContainer = lazy(() => import('./FormulaBar'));
+const ToolbarContainer = lazy(() => import('./ToolBar'));
+const CanvasContainer = lazy(() => import('./canvas'));
+const SheetBarContainer = lazy(() => import('./SheetBar'));
+const MenuBarContainer = lazy(() => import('./MenuBar'));
 
 export interface AppProps {
   controller: IController;

@@ -1,17 +1,14 @@
-import { App } from '@/containers';
-import * as React from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { type } from './util';
-import { initController } from '@/controller';
+import { screen, fireEvent } from '@testing-library/react';
+import { type, renderComponent } from './util';
 import './global.mock';
 
 describe('VerticalAlign.test.tsx', () => {
+  beforeEach(async () => {
+    renderComponent();
+    await screen.findByTestId('formula-editor-trigger');
+  });
   describe('top', () => {
     test('ok', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-vertical-top'));
       expect(screen.getByTestId('toolbar-vertical-top')).toHaveClass('active');
@@ -19,9 +16,6 @@ describe('VerticalAlign.test.tsx', () => {
   });
   describe('middle', () => {
     test('ok', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-vertical-middle'));
       expect(screen.getByTestId('toolbar-vertical-middle')).toHaveClass(
@@ -31,9 +25,6 @@ describe('VerticalAlign.test.tsx', () => {
   });
   describe('bottom', () => {
     test('ok', () => {
-      act(() => {
-        render(<App controller={initController()} />);
-      });
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-vertical-bottom'));
       expect(screen.getByTestId('toolbar-vertical-bottom')).toHaveClass(
