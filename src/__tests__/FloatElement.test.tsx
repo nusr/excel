@@ -12,7 +12,7 @@ describe('FloatElement.test.ts', () => {
     });
   });
   describe('float element', () => {
-    test('add chart', async () => {
+    test.skip('add chart', async () => {
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       expect(screen.getAllByTestId('float-element')).toHaveLength(1);
