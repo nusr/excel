@@ -8,7 +8,7 @@ describe('FloatElement.test.ts', () => {
   beforeEach(async () => {
     controller = renderComponent();
     await waitFor(() => {
-      return screen.findByTestId('formula-editor-trigger');
+      expect(screen.getByTestId('formula-editor-trigger')).toBeVisible()
     });
   });
   describe('float element', () => {
