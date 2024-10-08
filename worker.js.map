@@ -2,6 +2,6 @@
   "version": 3,
   "sources": ["../src/worker.ts"],
   "sourcesContent": ["import * as ComLink from 'comlink'\nimport method from './canvas/worker'\n\nComLink.expose(method)\n\n"],
-  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;6EAGQA,EAAOC,CAAM",
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;oKAGQA,EAAOC,CAAM",
   "names": ["expose", "worker_default"]
 }
