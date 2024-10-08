@@ -1,4 +1,4 @@
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { type, extractDataFromTransform, renderComponent } from './util';
 import './global.mock';
 import { IController } from '@/types';
@@ -7,7 +7,9 @@ describe('FloatElement.test.ts', () => {
   let controller: IController;
   beforeEach(async () => {
     controller = renderComponent();
-    await screen.findByTestId('formula-editor-trigger');
+    await waitFor(() => {
+      expect(screen.getByTestId('formula-editor-trigger')).toBeInTheDocument();
+    });
   });
   describe('float element', () => {
     test('add chart', async () => {
