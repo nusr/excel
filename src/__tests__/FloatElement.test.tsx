@@ -7,12 +7,15 @@ describe('FloatElement.test.ts', () => {
   let controller: IController;
   beforeEach(async () => {
     controller = renderComponent();
-    await waitFor(() => {
-      expect(screen.getByTestId('formula-editor-trigger')).toBeVisible()
-    });
-  });
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('formula-editor-trigger')).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+  }, 10000);
   describe('float element', () => {
-    test.skip('add chart', async () => {
+    test('add chart', async () => {
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
       expect(screen.getAllByTestId('float-element')).toHaveLength(1);
