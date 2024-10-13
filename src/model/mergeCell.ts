@@ -58,7 +58,7 @@ export class MergeCell implements IMergeCell {
     const id = sheetId || this.model.getCurrentSheetId();
     return Object.values(this.mergeCells).filter((v) => v.sheetId === id);
   }
-  addMergeCell(range: IRange): void {
+  addMergeCell(range: IRange) {
     const ref = convertToReference(
       range,
       'absolute',

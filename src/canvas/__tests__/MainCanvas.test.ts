@@ -1,7 +1,8 @@
 import { MainCanvas } from '../MainCanvas';
 import { initController } from '@/controller';
-import { RequestRender, IWindowSize, IHooks } from '@/types';
+import { RequestRender, IWindowSize, IHooks, ResponseRender } from '@/types';
 import { mockHooks } from '@/controller/init'
+import { CELL_HEIGHT, CELL_WIDTH } from '@/util';
 
 const mockWorker: any = {
   init: jest.fn(),
@@ -70,6 +71,36 @@ describe('MainCanvas.test.ts', () => {
         changeSet: new Set(['cellStyle']),
       };
       expect(mockWorker.render).toHaveBeenCalledWith(result, expect.any(Function));
+    });
+    test('render callback ok', async () => {
+      // @ts-ignore
+      hooks.worker.render = jest.fn().mockImplementation((_data: RequestRender, cb: (data: ResponseRender) => void) => {
+        cb({ rowMap: { 1: 300 }, colMap: { 1: 600 } });
+        return Promise.resolve()
+      })
+      const c = initController(false, hooks);
+      const instance = new MainCanvas(
+        c,
+        {} as HTMLCanvasElement,
+      );
+      await instance.render({ changeSet: new Set(['cellStyle']) });
+      expect(c.getRowHeight(1).len).toBe(300);
+      expect(c.getColWidth(1).len).toBe(600);
+    });
+    test('render callback fail', async () => {
+      // @ts-ignore
+      hooks.worker.render = jest.fn().mockImplementation((_data: RequestRender, cb: (data: ResponseRender) => void) => {
+        cb({ rowMap: {}, colMap: {} });
+        return Promise.resolve()
+      })
+      const c = initController(false, hooks);
+      const instance = new MainCanvas(
+        c,
+        {} as HTMLCanvasElement,
+      );
+      await instance.render({ changeSet: new Set(['cellStyle']) });
+      expect(c.getRowHeight(1).len).toBe(CELL_HEIGHT);
+      expect(c.getColWidth(1).len).toBe(CELL_WIDTH);
     });
   });
   describe('resize', () => {

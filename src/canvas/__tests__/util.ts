@@ -1,4 +1,4 @@
-import { OffScreenWorker } from '../offScreenWorker';
+import OffScreenWorker from '../offScreenWorker';
 import { createCanvas } from 'canvas';
 import { setDpr, headerSizeSet } from '@/util';
 import {
@@ -29,7 +29,7 @@ afterAll(() => {
   }
 });
 
-async function getRenderData(controller: IController, theme: ThemeType) {
+export async function getRenderData(controller: IController, theme: ThemeType) {
   const jsonData = controller.toJSON();
   const currentId = controller.getCurrentSheetId();
   const sheetInfo = controller.getSheetInfo(currentId)!;

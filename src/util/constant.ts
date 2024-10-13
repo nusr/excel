@@ -151,3 +151,5 @@ export const COLOR_PICKER_COLOR_LIST = [
   '#FBD0E8',
   '#FDE8F3',
 ];
+
+export const TEXT_FLAG = '#TEXT' as const

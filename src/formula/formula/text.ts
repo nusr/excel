@@ -1,6 +1,7 @@
 import type { TextFormulaType, ResultType } from '@/types';
 import { MAX_PARAMS_COUNT } from '@/util/constant';
 import { assert, mustOneString, mustOneNumber, mustOne } from './error';
+import { numberFormat } from '@/model/numberFormat'
 
 export const T = (...list: ResultType[]): string => {
   const value = mustOne(list);
@@ -35,6 +36,13 @@ export const UPPER = (...list: ResultType[]): string => {
   const value = mustOneString(list);
   return value.toUpperCase();
 };
+export const TEXT = (...list: ResultType[]): string => {
+  assert(list.length === 2);
+  const [value, format] = list;
+  assert(typeof value === 'string' || typeof value === 'number');
+  assert(typeof format === 'string');
+  return numberFormat(value, format)
+};
 export const TRIM = (...list: ResultType[]): string => {
   const value = mustOneString(list);
   return value.replace(/ +/g, ' ').trim();
@@ -56,6 +64,7 @@ const formulas: TextFormulaType = {
   LOWER,
   UPPER,
   TRIM,
+  TEXT,
   T,
 };
 

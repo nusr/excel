@@ -1,4 +1,4 @@
-import { CellDataMapImpl } from '../..';
+import { CellDataMapImpl } from '../../eval';
 import { expectFormula } from './util';
 
 describe('parseFormula variable', () => {

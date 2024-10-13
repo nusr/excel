@@ -13,7 +13,7 @@ import {
   extractImageType,
   CHART_TYPE_LIST,
 } from '@/util';
-import { FloatElementItem } from '@/containers/store';
+import type { FloatElementItem } from '@/containers/store';
 import { IWindowSize } from '@/types';
 import { $ } from '@/i18n';
 

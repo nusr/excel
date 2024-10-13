@@ -11,8 +11,8 @@ import {
   WorksheetType,
   ModelCellType,
   FormulaKeys,
-  RequestFormula,
-  ResponseFormula
+  RequestFormulas,
+  ResponseFormulas,
 } from '@/types';
 import { isFormula, coordinateToString, stringToCoordinate } from '@/util/util';
 
@@ -145,11 +145,13 @@ export class CellDataMapImpl implements CellDataMap {
 }
 
 
-export function parseAllFormulas(eventData: RequestFormula) {
+export function computeFormulas(eventData: RequestFormulas, cb: (data: ResponseFormulas) => void) {
   const { currentSheetId, worksheets, workbook, definedNames } = eventData;
   const formulaCache = new Map<string, InterpreterResult>();
   const sheetData = worksheets[currentSheetId] || {};
-  const list: ResponseFormula['list'] = [];
+  const result: ResponseFormulas = {
+    list: [],
+  }
   const cellDataMap: CellDataMap = {
     handleCell: () => {
       return [];
@@ -185,23 +187,24 @@ export function parseAllFormulas(eventData: RequestFormula) {
     if (!data?.formula) {
       continue;
     }
-    const result = parseFormula(
+    const temp = parseFormula(
       data?.formula,
       stringToCoordinate(k),
       cellDataMap,
       formulaCache,
     );
-    if (!result) {
+    if (!temp) {
       continue;
     }
-    const r = result.result[0];
+    const r = temp.result[0];
     if (r !== data.value) {
-      list.push({
+      result.list.push({
         key: k,
         newValue: r,
         sheetId: currentSheetId,
       });
     }
   }
-  return list;
+  cb(result);
 }
+

@@ -1,4 +1,4 @@
-import { CellDataMapImpl } from '../..';
+import { CellDataMapImpl } from '../../eval';
 import { expectFormula } from './util';
 
 describe('R1C1.test.ts', () => {

@@ -1,6 +1,7 @@
 import { Controller } from '..';
 import { Model } from '@/model';
 import { mockHooks } from '../init'
+import { DEFAULT_TEXT_FORMAT_CODE } from '@/util'
 
 describe('worksheet.test.ts', () => {
   let controller: Controller;
@@ -56,6 +57,24 @@ describe('worksheet.test.ts', () => {
           sheetId: controller.getCurrentSheetId(),
         }),
       ).toEqual({ formula: '=SUM(1,2)', value: 3 });
+    });
+    test('set text formula', () => {
+      controller.setCell([['=SUM(1,2)']], [[{ numberFormat: DEFAULT_TEXT_FORMAT_CODE }]], {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toEqual({ value: '=SUM(1,2)', style: { "numberFormat": DEFAULT_TEXT_FORMAT_CODE, } });
     });
     test('set date', () => {
       controller.setCell([[1]], [[{ numberFormat: 'h:mm:ss AM/PM' }]], {

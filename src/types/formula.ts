@@ -16,7 +16,9 @@ export type TextFormulaKeys =
   | 'UNICHAR'
   | 'UNICODE'
   | 'UPPER'
-  | 'TRIM';
+  | 'TRIM' 
+  | 'TEXT';
+  
 export type MathFormulaKeys =
   | 'ABS'
   | 'ACOS'

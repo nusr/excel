@@ -1,6 +1,6 @@
 import React, { useState, memo, useCallback } from 'react';
 import styles from './FloatElement.module.css';
-import { FloatElementItem } from '@/containers/store';
+import type { FloatElementItem } from '@/containers/store';
 import { FloatElementContextMenu } from './ContextMenu';
 import { DEFAULT_POSITION, classnames } from '@/util';
 import { ResizePosition } from './util';

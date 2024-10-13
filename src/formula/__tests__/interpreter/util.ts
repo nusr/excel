@@ -1,5 +1,5 @@
 import { Coordinate, ResultType } from '@/types';
-import { parseFormula, CellDataMapImpl } from '../..';
+import { parseFormula, CellDataMapImpl } from '../../eval';
 
 export function expectFormula(
   str: string,

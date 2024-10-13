@@ -1,5 +1,4 @@
 import React, {
-  useSyncExternalStore,
   Fragment,
   memo,
   useState,
@@ -9,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { IController, IWindowSize } from '@/types';
-import { floatElementStore, coreStore } from '@/containers/store';
+import { coreStore, FloatElementItem } from '@/containers/store';
 import { FloatElement } from './FloatElement';
 import styles from './FloatElement.module.css';
 import { getHitInfo, classnames, canvasSizeSet } from '@/util';
@@ -23,17 +22,11 @@ import {
 
 interface Props {
   controller: IController;
+  floatElementList: FloatElementItem[];
+  activeUuid: string;
 }
-export const FloatElementContainer: React.FunctionComponent<Props> = memo(
-  ({ controller }) => {
-    const floatElementList = useSyncExternalStore(
-      floatElementStore.subscribe,
-      floatElementStore.getSnapshot,
-    );
-    const { activeUuid } = useSyncExternalStore(
-      coreStore.subscribe,
-      coreStore.getSnapshot,
-    );
+const FloatElementContainer: React.FunctionComponent<Props> = memo(
+  ({ controller, floatElementList, activeUuid }) => {
     const state = useRef<State>({
       ...INITIAL_STATE,
       position: { ...INITIAL_STATE.position },
@@ -235,9 +228,6 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
       controller.setFloatElementUuid('');
       toggleEvents(false);
     }, [toggleEvents]);
-    if (floatElementList.length === 0) {
-      return undefined;
-    }
     return (
       <Fragment>
         <div
@@ -296,4 +286,4 @@ export const FloatElementContainer: React.FunctionComponent<Props> = memo(
 );
 FloatElementContainer.displayName = 'FloatElementContainer';
 
-export { InsertFloatingPicture, InsertChart } from './Toolbar';
+export default FloatElementContainer;

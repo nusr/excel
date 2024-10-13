@@ -8,6 +8,7 @@ import {
   UPPER,
   TRIM,
   CONCAT,
+  TEXT,
 } from '../../formula/text';
 import { MAX_PARAMS_COUNT } from '@/util';
 
@@ -83,6 +84,19 @@ describe('text.test.ts', () => {
       expect(() => SPLIT('a')).toThrow();
       expect(() => SPLIT(1, 2)).toThrow();
       expect(() => SPLIT('a', 'c', 'b')).toThrow();
+    });
+  });
+
+  describe('TEXT', () => {
+    test('ok', () => {
+      expect(TEXT('=SUM(1,2)', '@')).toEqual('=SUM(1,2)');
+      expect(TEXT(0.285, "0.0%")).toEqual('28.5%');
+    });
+    test('error', () => {
+      expect(() => TEXT('a')).toThrow();
+      expect(() => TEXT(1, 2)).toThrow();
+      expect(() => TEXT("test", 2)).toThrow();
+      expect(() => TEXT('a', 'c', 'b')).toThrow();
     });
   });
 

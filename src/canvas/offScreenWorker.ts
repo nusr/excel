@@ -38,7 +38,7 @@ const lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
 /**
  * run OffScreenWorker in Web Worker env
  */
-export class OffScreenWorker implements WorkerMainView {
+export default class OffScreenWorker implements WorkerMainView {
   private canvas: OffscreenCanvas;
   private ctx: OffscreenCanvasRenderingContext2D;
   private width: number = 0;

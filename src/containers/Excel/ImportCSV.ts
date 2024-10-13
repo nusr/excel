@@ -22,7 +22,7 @@ export async function importCSV(file: File, controller: IController) {
     r++;
   }
   const sheetId = controller.getCurrentSheetId();
-  controller.batchUpdate(() => {
+  await controller.batchUpdate(() => {
     controller.deleteAll(sheetId);
     controller.setWorksheet(sheetData, sheetId);
     return true;

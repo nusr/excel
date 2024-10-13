@@ -1,4 +1,11 @@
-import React, { useRef, useEffect, Fragment, useState, memo } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  Fragment,
+  useState,
+  memo,
+  useSyncExternalStore,
+} from 'react';
 import { IController, EditorStatus } from '@/types';
 import {
   getHitInfo,
@@ -8,13 +15,13 @@ import {
   isSameRange,
 } from '@/util';
 import styles from './index.module.css';
-import { coreStore } from '@/containers/store';
+import { coreStore, floatElementStore } from '@/containers/store';
 import { ScrollBar } from './ScrollBar';
 import { ContextMenu } from './ContextMenu';
 import { initCanvas } from './util';
 import { checkFocus, setActiveCellValue } from '@/canvas';
 import { BottomBar } from './BottomBar';
-import { FloatElementContainer } from '../FloatElement';
+import FloatElementContainer from '../FloatElement';
 
 interface Props {
   controller: IController;
@@ -27,6 +34,14 @@ type State = {
 
 export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
   const { controller } = props;
+  const floatElementList = useSyncExternalStore(
+    floatElementStore.subscribe,
+    floatElementStore.getSnapshot,
+  );
+  const { activeUuid } = useSyncExternalStore(
+    coreStore.subscribe,
+    coreStore.getSnapshot,
+  );
   const state = useRef<State>({
     timeStamp: 0,
   });
@@ -109,7 +124,9 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       sheetId: '',
     });
   };
-  const handlePointerDown = (event: React.PointerEvent<HTMLCanvasElement>) => {
+  const handlePointerDown = async (
+    event: React.PointerEvent<HTMLCanvasElement>,
+  ) => {
     if (event.buttons <= 0) {
       return;
     }
@@ -175,7 +192,7 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
       }
     } else {
       if (checkFocus()) {
-        setActiveCellValue(controller);
+        await setActiveCellValue(controller);
       }
       controller.setActiveRange({
         row: position.row,
@@ -203,7 +220,13 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
         />
         <ScrollBar controller={controller} />
         <BottomBar controller={controller} />
-        <FloatElementContainer controller={controller} />
+        {floatElementList.length > 0 && (
+          <FloatElementContainer
+            controller={controller}
+            floatElementList={floatElementList}
+            activeUuid={activeUuid}
+          />
+        )}
       </div>
       {menuPosition.top >= 0 && menuPosition.left >= 0 && (
         <ContextMenu
@@ -217,4 +240,4 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
 });
 CanvasContainer.displayName = 'CanvasContainer';
 
-export default CanvasContainer
+export default CanvasContainer;

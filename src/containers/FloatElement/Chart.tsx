@@ -26,7 +26,7 @@ import {
   deepEqual,
   getThemeColor,
 } from '@/util';
-import { FloatElementItem } from '@/containers/store';
+import type { FloatElementItem } from '@/containers/store';
 import { ChartProps } from '@/types';
 import styles from './chart.module.css';
 

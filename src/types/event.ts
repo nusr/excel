@@ -17,13 +17,18 @@ export interface IPosition {
   top: number;
   left: number;
 }
-
-export type RequestFormula = {
+export type RequestFormulas = {
   worksheets: WorkBookJSON['worksheets'];
   definedNames: Record<string, IRange>;
   currentSheetId: string;
   workbook: WorksheetType[];
-};
+}
+
+export type ResponseFormulas = {
+  list: Array<{ key: string; newValue: ResultType; sheetId: string }>;
+  result?: ResultType[];
+}
+
 export type RequestRender = {
   changeSet: Set<ChangeEventType>;
   theme: ThemeType;
@@ -39,9 +44,7 @@ export type RequestRender = {
   sheetData: WorksheetData;
 };
 export type RequestInit = { canvas: OffscreenCanvas; dpr: number }
-export type ResponseFormula = {
-  list: Array<{ key: string; newValue: ResultType; sheetId: string }>;
-};
+
 export type ResponseRender = {
   rowMap: Record<string, number>;
   colMap: Record<string, number>;
@@ -63,7 +66,10 @@ export type WorkerMethod = {
   init(data: RequestInit): void
   resize(data: IWindowSize): void
   render(data: RequestRender, cb: (data: ResponseRender) => void): Promise<void>
-  computeFormulas(data: RequestFormula, cb: (data: ResponseFormula) => void): Promise<void>
+  computeFormulas(data: RequestFormulas, cb: (data: ResponseFormulas) => void): void
 }
 
 export type RemoteWorkerMethod = Remote<WorkerMethod>
+
+export type WorkerType = Pick<WorkerMethod, 'computeFormulas'>
+export type RemoteWorkerType = Remote<WorkerType>

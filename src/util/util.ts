@@ -192,7 +192,3 @@ export function isFormula(value: ResultType) {
 export function isMergeContent(isMergeCell: boolean, text: string) {
   return isMergeCell && text.includes(MERGE_CELL_LINE_BREAK);
 }
-
-export function isText(list: ResultType[]): boolean {
-  return list.length === 1 && list[0] === '#TEXT';
-}

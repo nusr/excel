@@ -11,12 +11,9 @@ import {
   EMergeCellType,
   ModelCellType,
   EHorizontalAlign,
-  RequestFormula,
-  InterpreterResult,
-  CellDataMap,
-  FormulaKeys,
-  WorkerMethod,
-  ResponseFormula
+  RequestFormulas,
+  RemoteWorkerType,
+  ResponseFormulas
 } from '@/types';
 import {
   coordinateToString,
@@ -26,23 +23,21 @@ import {
   isEmpty,
   isFormula,
   deepEqual,
-  isText,
+  TEXT_FLAG,
+  DEFAULT_TEXT_FORMAT_CODE,
   stringToCoordinate,
   MERGE_CELL_LINE_BREAK,
   convertStringToResultType,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
 import { numberFormat } from '@/model';
-import { parseFormula, CustomError, allFormulas } from '@/formula';
 import * as  ComLink from 'comlink';
-
-export type WorkerType = ComLink.Remote<Pick<WorkerMethod, 'computeFormulas'>>
 
 export class Worksheet implements IWorksheet {
   private worksheets: WorkBookJSON['worksheets'] = {};
   private model: IModel;
-  private worker?: WorkerType;
-  constructor(model: IModel, worker?: WorkerType) {
+  private worker: RemoteWorkerType;
+  constructor(model: IModel, worker: RemoteWorkerType) {
     this.model = model;
     this.worker = worker;
   }
@@ -82,7 +77,7 @@ export class Worksheet implements IWorksheet {
       transformData(this, item, 'redo');
     }
   }
-  addMergeCell(range: IRange, type?: EMergeCellType): void {
+  addMergeCell(range: IRange, type?: EMergeCellType) {
     const sheetId = range.sheetId || this.model.getCurrentSheetId();
     const isMergeContent = type === EMergeCellType.MERGE_CONTENT;
     const dataList: Array<{ value: ModelCellType; row: number; col: number }> =
@@ -259,7 +254,7 @@ export class Worksheet implements IWorksheet {
     }
     return undefined;
   }
- 
+
   setWorksheet(data: WorksheetData, sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
     if (deepEqual(data, this.worksheets[id])) {
@@ -294,11 +289,11 @@ export class Worksheet implements IWorksheet {
       ...cellData,
     };
   }
-  setCell(
+  async setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
     range: IRange,
-  ): void {
+  ) {
     const { row, col } = range;
     for (let r = 0; r < value.length; r++) {
       for (let c = 0; c < value[r].length; c++) {
@@ -314,13 +309,13 @@ export class Worksheet implements IWorksheet {
     }
   }
 
-  setCellValue(value: ResultType, range: IRange): void {
+  setCellValue(value: ResultType, range: IRange) {
     const id = range.sheetId || this.model.getCurrentSheetId();
-    if (typeof value === 'string' && isFormula(value)) {
+    const old =
+      this.worksheets?.[id]?.[coordinateToString(range.row, range.col)];
+    if (typeof value === 'string' && isFormula(value) && old?.style?.numberFormat !== DEFAULT_TEXT_FORMAT_CODE) {
       this.setCellFormula(value, range);
     } else {
-      const old =
-        this.worksheets?.[id]?.[coordinateToString(range.row, range.col)];
       if (old?.formula) {
         this.setCellFormula('', range);
       }
@@ -469,33 +464,12 @@ export class Worksheet implements IWorksheet {
       oldValue: oldValue === undefined ? DELETE_FLAG : oldValue,
     });
   }
-  private setCellFormula(formula: string, range: Coordinate): void {
+  private setCellFormula(formula: string, range: Coordinate) {
     const cellModel = this.getCellModel(range);
     const oldFormula = cellModel.formula;
     if (oldFormula === formula) {
-      return;
+      return
     }
-
-    if (formula) {
-      const result = this.parseFormula(formula, range, new Map());
-      if (isText(result.result)) {
-        if (oldFormula) {
-          delete cellModel.formula;
-          this.model.push({
-            type: 'worksheets',
-            key: `${this.model.getCurrentSheetId()}.${coordinateToString(
-              range.row,
-              range.col,
-            )}.formula`,
-            newValue: DELETE_FLAG,
-            oldValue: oldFormula,
-          });
-        }
-        this.setValue(formula, range);
-        return;
-      }
-    }
-
     cellModel.formula = formula;
     this.model.push({
       type: 'worksheets',
@@ -574,52 +548,22 @@ export class Worksheet implements IWorksheet {
     this.worksheets[id][key] = this.worksheets[id][key] || {};
     return this.worksheets[id][key];
   }
-  private parseFormula(
-    formula: string,
-    coord: Coordinate,
-    cache: Map<string, InterpreterResult>,
-  ) {
-    const cellDataMap: CellDataMap = {
-      handleCell: () => {
-        return [];
-      },
-      getFunction: (name: string) => {
-        return allFormulas[name as FormulaKeys];
-      },
-      getCell: (range) => {
-        return this.model.getCell(range);
-      },
-      set: () => {
-        throw new CustomError('#REF!');
-      },
-      getSheetInfo: (sheetId?: string, sheetName?: string) => {
-        if (sheetName) {
-          return this.model.getSheetList().find((v) => v.name === sheetName);
-        }
-        return this.model.getSheetInfo(
-          sheetId || this.model.getCurrentSheetId(),
-        );
-      },
-      setDefinedName: () => {
-        throw new CustomError('#REF!');
-      },
-      getDefinedName: (name: string) => this.model.checkDefineName(name),
-    };
-    const result = parseFormula(formula, coord, cellDataMap, cache);
-    return result;
-  }
-  private computeFormulasCallback = (result: ResponseFormula) => {
+  private computeFormulasCallback = (result: ResponseFormulas) => {
     const { list } = result
     let check = false
     for (const item of list) {
       const id = item.sheetId;
       this.worksheets[id] = this.worksheets[id] || {};
       const oldValue = this.worksheets[id][item.key].value;
-      if (oldValue === item.newValue) {
-        continue
+      const oldFormula = this.worksheets[id][item.key].formula;
+      if (oldFormula && item.newValue === TEXT_FLAG && oldFormula !== oldValue) {
+        check = true
+        this.worksheets[id][item.key].value = oldFormula
+        this.worksheets[id][item.key].formula = ''
+      } else if (oldValue !== item.newValue) {
+        check = true
+        this.worksheets[id][item.key].value = item.newValue;
       }
-      check = true
-      this.worksheets[id][item.key].value = item.newValue;
     }
     if (check) {
       this.model.render(new Set(['cellValue']))
@@ -631,40 +575,17 @@ export class Worksheet implements IWorksheet {
     if (isEmpty(sheetData)) {
       return
     }
-    if (!this.worker) {
-      let check = false
-      const cache = new Map<string, InterpreterResult>();
-      for (const [k, data] of Object.entries(sheetData)) {
-        if (!data?.formula) {
-          continue;
-        }
-        const coord = stringToCoordinate(k);
-        const result = this.parseFormula(data.formula, coord, cache);
-        if (!result) {
-          continue;
-        }
-        const newValue = result.result[0];
-        const oldValue = data.value;
-        if (newValue !== oldValue) {
-          check = true
-          data.value = newValue;
-        }
-      }
-      if (check) {
-        this.model.render(new Set(['cellValue']))
-      }
-      return;
-    }
-    const definedNames: RequestFormula['definedNames'] = {};
+    const definedNames: RequestFormulas['definedNames'] = {};
     for (const item of this.model.getDefineNameList()) {
       definedNames[item.name] = item.range;
     }
-    const data: RequestFormula = {
+    const data: RequestFormulas = {
       worksheets: this.worksheets,
       definedNames,
       currentSheetId: this.model.getCurrentSheetId(),
       workbook: this.model.getSheetList(),
     };
+
     this.worker.computeFormulas(data, ComLink.proxy(this.computeFormulasCallback))
   }
 }

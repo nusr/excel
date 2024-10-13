@@ -13,7 +13,8 @@ import {
   WorksheetData,
   EMergeCellType,
   EventEmitterType,
-  HistoryChangeType
+  HistoryChangeType,
+  RemoteWorkerType
 } from '@/types';
 import {
   XLSX_MAX_ROW_COUNT,
@@ -29,10 +30,15 @@ import { Workbook } from './workbook';
 import { RangeMap } from './rangeMap';
 import { Drawing } from './drawing';
 import { DefinedName } from './definedName';
-import { Worksheet, WorkerType } from './worksheet';
+import { Worksheet } from './worksheet';
 import { MergeCell } from './mergeCell';
 import { RowManager } from './row';
 import { ColManager } from './col';
+import { computeFormulas } from '@/formula'
+
+const mockWorker: any = {
+  computeFormulas: computeFormulas,
+}
 
 export class Model implements IModel {
   private history: History;
@@ -44,7 +50,7 @@ export class Model implements IModel {
   private mergeCellManager: MergeCell;
   private rowManager: RowManager;
   private colManager: ColManager;
-  constructor(worker?: WorkerType) {
+  constructor(worker: RemoteWorkerType = mockWorker) {
     this.history = new History({
       undo: this.historyUndo,
       redo: this.historyRedo,
@@ -237,11 +243,11 @@ export class Model implements IModel {
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
     range: IRange,
-  ): void {
-    this.worksheetManager.setCell(value, style, range);
+  ) {
+    return this.worksheetManager.setCell(value, style, range);
   }
   setCellValue(value: ResultType, range: IRange) {
-    this.worksheetManager.setCellValue(value, range);
+    return this.worksheetManager.setCellValue(value, range);
   }
 
   updateCellStyle(style: Partial<StyleType>, range: IRange): void {
@@ -392,7 +398,7 @@ export class Model implements IModel {
   getMergeCellList(sheetId?: string) {
     return this.mergeCellManager.getMergeCellList(sheetId);
   }
-  addMergeCell(range: IRange, type = EMergeCellType.MERGE_CENTER): void {
+  addMergeCell(range: IRange, type = EMergeCellType.MERGE_CENTER) {
     if (range.colCount === 1 && range.rowCount === 1) {
       return;
     }

@@ -130,6 +130,7 @@ src
 - [x] LOWER
 - [x] SPLIT
 - [x] T
+- [x] TEXT
 - [x] TRIM
 - [x] UNICHAR
 - [x] UNICODE

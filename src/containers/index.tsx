@@ -1,5 +1,5 @@
 import styles from './index.module.css';
-import React, { memo, lazy } from 'react';
+import React, { memo, lazy, Suspense } from 'react';
 import type { IController } from '@/types';
 
 const FormulaBarContainer = lazy(() => import('./FormulaBar'));
@@ -15,11 +15,13 @@ export interface AppProps {
 export const App: React.FunctionComponent<AppProps> = memo(({ controller }) => {
   return (
     <div className={styles['app-container']} data-testid="app-container">
-      <MenuBarContainer controller={controller} />
-      <ToolbarContainer controller={controller} />
-      <FormulaBarContainer controller={controller} />
-      <CanvasContainer controller={controller} />
-      <SheetBarContainer controller={controller} />
+      <Suspense fallback={<div>loading</div>}>
+        <MenuBarContainer controller={controller} />
+        <ToolbarContainer controller={controller} />
+        <FormulaBarContainer controller={controller} />
+        <CanvasContainer controller={controller} />
+        <SheetBarContainer controller={controller} />
+      </Suspense>
     </div>
   );
 });
