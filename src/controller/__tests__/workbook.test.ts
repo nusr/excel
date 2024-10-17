@@ -1,11 +1,11 @@
 import { Controller } from '..';
 import { Model } from '@/model';
-import { mockHooks } from '../init'
+import { mockTestHooks } from '../init'
 
 describe('workbook.test.ts', () => {
   let controller: Controller;
   beforeEach(() => {
-    controller = new Controller(new Model(), mockHooks);
+    controller = new Controller(new Model(), mockTestHooks);
     controller.addSheet();
   });
   describe('rename', () => {

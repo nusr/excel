@@ -68,8 +68,8 @@ export class Controller implements IController {
   applyCommandList(result: EventEmitterType['modelChange']) {
     this.model.applyCommandList(result);
   }
-  getWorker() {
-    return this.hooks.worker;
+  getHooks() {
+    return this.hooks;
   }
   validateDefinedName(name: string): boolean {
     return this.model.validateDefinedName(name);

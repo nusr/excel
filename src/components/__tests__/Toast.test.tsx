@@ -10,7 +10,7 @@ describe('BaseIcon.test.ts', () => {
     expect(dom.container.childNodes.length).toEqual(1);
   });
   test('close', () => {
-    let close: any;
+    let close: () => void;
     act(() => {
       close = toast({
         type: 'success',
@@ -26,7 +26,7 @@ describe('BaseIcon.test.ts', () => {
     expect(() => screen.getByTestId('toast-close')).toThrow();
   });
   test('close twice', () => {
-    let close: any;
+    let close: () => void;
     act(() => {
       close = toast({
         type: 'success',
@@ -48,7 +48,7 @@ describe('BaseIcon.test.ts', () => {
   for (const key of ['error', 'info', 'warning', 'success'] as const) {
     const testId = `${key}-toast`;
     test(testId, () => {
-      let close: any;
+      let close: () => void;
       act(() => {
         close = toast[key]('message');
       });
@@ -61,7 +61,7 @@ describe('BaseIcon.test.ts', () => {
   }
   for (const key of ['error', 'info', 'warning', 'success'] as const) {
     test(key, () => {
-      let close: any;
+      let close: () => void;
       act(() => {
         close = toast[key]('message', key);
       });

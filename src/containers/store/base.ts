@@ -4,11 +4,15 @@ export class BaseStore<T> {
   constructor(initValue: T) {
     this.state = initValue;
   }
-  setState = (partial: T | Partial<T> | ((state: T) => (T | Partial<T>)), replace?: boolean) => {
-    if (Array.isArray(partial)) {
+  setState = (nextState: T | Partial<T>, replace?: boolean) => {
+    if (Array.isArray(nextState)) {
       replace = true
     }
-    const nextState = typeof partial === 'function' ? (partial as (state: T) => T)(this.state) : partial;
+    // @ts-ignore
+    const check = !replace && nextState && typeof nextState === 'object' && Object.entries(nextState).every(([key, value]) => Object.is(this.state[key], value));
+    if (check) {
+      return check
+    }
     if (!Object.is(this.state, nextState)) {
       const previousState = this.state;
       this.state = (replace ?? (typeof nextState !== 'object' || nextState === null)) ? (nextState as T) : Object.assign({}, this.state, nextState);

@@ -6,7 +6,7 @@ export function useClickOutside(
   const ref = useRef<HTMLDivElement>(null);
 
   function handleEvent(event: Event) {
-    if (!ref || !ref.current) {
+    if (!ref?.current) {
       return
     }
     const node = event.target! as Node;

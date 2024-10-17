@@ -278,13 +278,8 @@ export function setActiveCellValue(controller: IController) {
   controller.setCellValue(value, range);
   inputDom.value = '';
   inputDom.blur();
-  coreStore.setState((state) => {
-    if (state.editorStatus === EditorStatus.NONE) {
-      return state;
-    }
-    return {
-      editorStatus: EditorStatus.NONE,
-    }
+  coreStore.setState({
+    editorStatus: EditorStatus.NONE,
   });
 }
 

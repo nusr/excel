@@ -9,12 +9,9 @@ export class MainCanvas implements MainView {
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
-    let offscreen: OffscreenCanvas | undefined = undefined;
-    if (canvas && typeof canvas.transferControlToOffscreen === 'function') {
-      offscreen = canvas.transferControlToOffscreen();
-    }
-    const worker = this.controller.getWorker();
-    if (worker && offscreen) {
+    const offscreen = canvas?.transferControlToOffscreen?.();
+    const worker = this.controller.getHooks().worker;
+    if (offscreen) {
       const data: RequestInit = {
         canvas: offscreen,
         dpr: dpr(),
@@ -69,7 +66,7 @@ export class MainCanvas implements MainView {
       sheetData: jsonData.worksheets[currentId] || {},
     };
 
-    this.controller.getWorker().render(eventData, ComLink.proxy(this.renderCallback));
+    this.controller.getHooks().worker.render(eventData, ComLink.proxy(this.renderCallback));
   }
   resize() {
     const { canvas } = this;
@@ -80,6 +77,6 @@ export class MainCanvas implements MainView {
       width,
       height,
     };
-    this.controller.getWorker().resize(eventData);
+    this.controller.getHooks().worker.resize(eventData);
   }
 }

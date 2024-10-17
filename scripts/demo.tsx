@@ -13,8 +13,13 @@ import {
   MOCK_MODEL,
   WorkerMethod,
   initCollaboration,
+  IController,
 } from '../src';
 import * as Comlink from 'comlink';
+
+declare const window: {
+  controller: IController;
+} & Window;
 
 if (typeof Worker !== 'function') {
   throw new Error("Don't support Web Worker");
@@ -49,11 +54,11 @@ const controller = initController(true, {
     new Worker('./worker.js', { type: 'module', name: 'worker' }),
   ),
 });
-(window as any).controller = controller;
+window.controller = controller;
 createRoot(domNode).render(
   <StrictMode>
     <App controller={controller} />
   </StrictMode>,
 );
 controller.fromJSON(MOCK_MODEL);
-initCollaboration(controller)
+initCollaboration(controller);

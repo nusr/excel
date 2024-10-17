@@ -1,5 +1,5 @@
-declare global {
-  function queryLocalFonts(): Promise<
+interface Window {
+  queryLocalFonts?: () => Promise<
     Array<{
       fullName: string;
       family: string;
@@ -8,4 +8,4 @@ declare global {
     }>
   >;
 }
-export {};
+

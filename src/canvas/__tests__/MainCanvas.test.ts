@@ -1,10 +1,10 @@
 import { MainCanvas } from '../MainCanvas';
 import { initController } from '@/controller';
-import { RequestRender, IWindowSize, IHooks, ResponseRender } from '@/types';
-import { mockHooks } from '@/controller/init'
+import { RequestRender, IWindowSize, IHooks, ResponseRender, RemoteWorkerMethod } from '@/types';
+import { mockTestHooks } from '@/controller/init'
 import { CELL_HEIGHT, CELL_WIDTH } from '@/util';
 
-const mockWorker: any = {
+const mockWorker = {
   init: jest.fn(),
   render: jest.fn(),
   resize: jest.fn(),
@@ -12,8 +12,8 @@ const mockWorker: any = {
 }
 
 const hooks: IHooks = {
-  ...mockHooks,
-  worker: mockWorker
+  ...mockTestHooks,
+  worker: mockWorker as unknown as RemoteWorkerMethod
 }
 
 

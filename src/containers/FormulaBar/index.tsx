@@ -41,13 +41,8 @@ export const FormulaBarContainer: React.FunctionComponent<Props> = memo(
       );
     }, [activeCell.defineName, activeCell.col, activeCell.row]);
     const handleClick = useCallback(() => {
-      coreStore.setState((state) => {
-        if (state.editorStatus === EditorStatus.EDIT_FORMULA_BAR) {
-          return state;
-        }
-        return {
-          editorStatus: EditorStatus.EDIT_FORMULA_BAR,
-        };
+      coreStore.setState({
+        editorStatus: EditorStatus.EDIT_FORMULA_BAR,
       });
     }, []);
     const style = useMemo(() => {

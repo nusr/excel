@@ -118,7 +118,7 @@ class WorkerMock {
   }
   /**
    *
-   * @param {any} _data
+   * @param {MessageEvent} _data
    */
   onmessage(_data) {}
   /**

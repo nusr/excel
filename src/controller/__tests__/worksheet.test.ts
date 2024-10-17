@@ -1,12 +1,12 @@
 import { Controller } from '..';
 import { Model } from '@/model';
-import { mockHooks } from '../init'
+import { mockTestHooks } from '../init'
 import { DEFAULT_TEXT_FORMAT_CODE } from '@/util'
 
 describe('worksheet.test.ts', () => {
   let controller: Controller;
   beforeEach(() => {
-    controller = new Controller(new Model(), mockHooks);
+    controller = new Controller(new Model(), mockTestHooks);
     controller.addSheet();
   });
 

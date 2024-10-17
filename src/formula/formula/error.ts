@@ -1,4 +1,4 @@
-import type { ErrorTypes } from '@/types';
+import type { ErrorTypes, ResultType } from '@/types';
 import { parseNumber } from '@/util/util';
 
 export class CustomError extends Error {
@@ -18,26 +18,26 @@ export function assert(
   }
 }
 
-export function mustOne(list: any[]): any {
+export function mustOne(list: ResultType[]): ResultType {
   assert(list.length === 1);
   const [value] = list;
   return value;
 }
 
-export function mustOneString(list: any[]): string {
+export function mustOneString(list: ResultType[]): string {
   const value = mustOne(list);
   assert(typeof value === 'string');
   return value;
 }
 
-export function mustOneNumber(list: any[]): number {
+export function mustOneNumber(list: ResultType[]): number {
   const value = mustOne(list);
   const [check, num] = parseNumber(value);
   assert(check);
   return num;
 }
 
-export function mustEmpty(list: any[]) {
+export function mustEmpty(list: ResultType[]) {
   assert(list.length === 0);
 }
 

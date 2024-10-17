@@ -3,7 +3,7 @@ import type { MathFormulaType, ResultType } from '../../types';
 import { assert, mustOneNumber, mustEmpty } from './error';
 import { parseNumber } from '@/util/util';
 
-function parseNumberArray(list: any[]): number[] {
+function parseNumberArray(list: ResultType[]): number[] {
   const result: number[] = [];
   for (let i = 0; i < list.length; i++) {
     const [check, num] = parseNumber(list[i]);

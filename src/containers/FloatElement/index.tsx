@@ -219,12 +219,7 @@ const FloatElementContainer: React.FunctionComponent<Props> = memo(
         ...INITIAL_STATE,
         position: { ...INITIAL_STATE.position },
       };
-      coreStore.setState((state) => {
-        if (state.activeUuid === '') {
-          return state;
-        }
-        return { activeUuid: '' };
-      });
+      coreStore.setState({ activeUuid: '' });
       controller.setFloatElementUuid('');
       toggleEvents(false);
     }, [toggleEvents]);
@@ -261,12 +256,7 @@ const FloatElementContainer: React.FunctionComponent<Props> = memo(
                 state.current.moveStartY = event.clientY;
                 state.current.activeUuid = v.uuid;
                 controller.setFloatElementUuid(v.uuid);
-                coreStore.setState((state) => {
-                  if (state.activeUuid === v.uuid) {
-                    return state;
-                  }
-                  return { activeUuid: v.uuid };
-                });
+                coreStore.setState({ activeUuid: v.uuid });
                 setPosition({
                   top: v.top,
                   left: v.left,

@@ -2,12 +2,12 @@ import { Controller } from '..';
 import { Model } from '@/model';
 import { EHorizontalAlign, EMergeCellType } from '@/types';
 import { MERGE_CELL_LINE_BREAK } from '@/util';
-import { mockHooks } from '../init'
+import { mockTestHooks } from '../init'
 
 describe('mergeCell.test.ts', () => {
   let controller: Controller;
   beforeEach(() => {
-    controller = new Controller(new Model(), mockHooks);
+    controller = new Controller(new Model(), mockTestHooks);
     controller.addSheet();
   });
   describe('addMergeCell', () => {

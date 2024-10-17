@@ -21,7 +21,7 @@ describe('Dialog.test.ts', () => {
     expect(() => screen.getByTestId('dialog')).toThrow();
   });
   test('info', () => {
-    let result: any = {
+    let result: ReturnType<typeof info> = {
       update: () => {},
       close: () => {},
     };
@@ -39,7 +39,7 @@ describe('Dialog.test.ts', () => {
     expect(() => screen.getByTestId('dialog')).toThrow();
   });
   test('info update', () => {
-    let result: any = {
+    let result: ReturnType<typeof info> = {
       update: () => {},
       close: () => {},
     };

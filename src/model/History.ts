@@ -16,11 +16,7 @@ export function transformData(
   type: 'undo' | 'redo',
 ) {
   const key = item.type + (item.key ? '.' + item.key : '');
-  if (type === 'undo') {
-    setData(obj, key, item.oldValue);
-  } else {
-    setData(obj, key, item.newValue);
-  }
+  setData(obj, key, type === 'undo' ? item.oldValue : item.newValue);
 }
 
 function setData(obj: Record<string, any>, key: string, value: any): void {

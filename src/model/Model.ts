@@ -24,6 +24,7 @@ import {
   sheetViewSizeSet,
   headerSizeSet,
   containRange,
+  isTestEnv
 } from '@/util';
 import { History } from './History';
 import { Workbook } from './workbook';
@@ -36,7 +37,7 @@ import { RowManager } from './row';
 import { ColManager } from './col';
 import { computeFormulas } from '@/formula'
 
-const mockWorker: any = {
+const mockTestWorker: any = {
   computeFormulas: computeFormulas,
 }
 
@@ -50,7 +51,10 @@ export class Model implements IModel {
   private mergeCellManager: MergeCell;
   private rowManager: RowManager;
   private colManager: ColManager;
-  constructor(worker: RemoteWorkerType = mockWorker) {
+  constructor(worker: RemoteWorkerType = mockTestWorker) {
+    if (!isTestEnv() && worker === mockTestWorker) {
+      throw new Error('worker must be provided in production or development environment');
+    }
     this.history = new History({
       undo: this.historyUndo,
       redo: this.historyRedo,

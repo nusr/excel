@@ -30,7 +30,7 @@ export interface IHooks {
 }
 
 export interface IController extends IBaseModel {
-  getWorker(): RemoteWorkerMethod;
+  getHooks(): IHooks;
   emitChange(): void;
   setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up'): void;
   getCellSize(range: IRange): IWindowSize;

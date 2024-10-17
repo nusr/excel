@@ -1,7 +1,7 @@
 import { IWindowSize, CanvasOverlayPosition } from '@/types';
 import { ROW_TITLE_HEIGHT, COL_TITLE_WIDTH } from './constant';
 
-class BaseSet<T extends Record<string, any>> {
+class BaseSet<T> {
   private state: T;
   constructor(initValue: T) {
     this.state = initValue;

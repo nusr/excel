@@ -1,7 +1,7 @@
 import { getLanguage, setLanguage, $ } from '../';
 
 describe('i18n.test.ts', () => {
-  let languageGetter: any;
+  let languageGetter: ReturnType<typeof jest.spyOn>;
   beforeEach(() => {
     languageGetter = jest.spyOn(window.navigator, 'language', 'get');
   });

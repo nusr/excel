@@ -2,12 +2,12 @@ import { Controller } from '..';
 import { Model } from '@/model';
 import { HTML_FORMAT, PLAIN_FORMAT, headerSizeSet } from '@/util';
 import { WorkBookJSON, EUnderLine } from '@/types';
-import { mockHooks } from '../init'
+import { mockTestHooks } from '../init'
 
 describe('controller.test.ts', () => {
   let controller: Controller;
   beforeEach(() => {
-    controller = new Controller(new Model(), mockHooks);
+    controller = new Controller(new Model(), mockTestHooks);
     controller.addSheet();
   });
 

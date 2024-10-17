@@ -9,7 +9,7 @@ jest.mock('../offScreenWorker')
 
 describe('workerMethod', () => {
   const initData: RequestInit = {
-    canvas: {} as any,
+    canvas: {} as unknown as OffscreenCanvas,
     dpr: 2,
   };
   beforeEach(() => {

@@ -39,6 +39,4 @@ describe('useFPS', () => {
 
     expect(cancelAnimationFrameSpy).toHaveBeenCalled();
   });
-
-
 });

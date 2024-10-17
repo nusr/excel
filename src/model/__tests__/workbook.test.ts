@@ -1,6 +1,7 @@
 import { Model } from '../Model';
 import { XLSX_MAX_ROW_COUNT, XLSX_MAX_COL_COUNT } from '@/util';
 import { Workbook } from '../workbook';
+import { WorkBookJSON, WorksheetType } from '@/types';
 
 describe('workbook.test.ts', () => {
   let model: Model;
@@ -23,11 +24,11 @@ describe('workbook.test.ts', () => {
     });
     test('invalid', () => {
       const w = new Workbook(model);
-      expect(w.validateSheet(undefined as any)).toEqual(false);
-      expect(w.validateSheet(null as any)).toEqual(false);
+      expect(w.validateSheet(undefined as unknown as WorksheetType)).toEqual(false);
+      expect(w.validateSheet(null as unknown as WorksheetType)).toEqual(false);
 
-      expect(w.validateSheet({ sheetId: '' } as any)).toEqual(false);
-      expect(w.validateSheet({ sheetId: 'test', name: '' } as any)).toEqual(
+      expect(w.validateSheet({ sheetId: '' } as unknown as WorksheetType)).toEqual(false);
+      expect(w.validateSheet({ sheetId: 'test', name: '' } as unknown as WorksheetType)).toEqual(
         false,
       );
 
@@ -55,7 +56,7 @@ describe('workbook.test.ts', () => {
   });
   describe('JSON', () => {
     test('empty', () => {
-      model.fromJSON({} as any);
+      model.fromJSON({} as unknown as WorkBookJSON);
       expect(model.toJSON().workbook).toEqual({});
     });
     test('ok', () => {
@@ -79,7 +80,7 @@ describe('workbook.test.ts', () => {
           },
         },
         currentSheetId: undefined,
-      } as any);
+      } as unknown as WorkBookJSON);
       const jsonData = model.toJSON();
       expect(jsonData.currentSheetId).toEqual('1');
       expect(jsonData.workbook).toEqual({

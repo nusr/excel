@@ -7,16 +7,23 @@ import {
 import {
   isTestEnv,
   throttle,
-  paste,
   CUSTOM_FORMAT,
   eventEmitter,
   deepEqual,
+  paste,
 } from '@/util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { coreStore } from '@/containers/store';
 
-function isInputEvent(event: any): boolean {
-  const name = (event?.target?.tagName ?? '').toLowerCase();
+type EventType = {
+  target?: {
+    tagName?: string;
+  }
+}
+
+
+function isInputEvent(event: Event): boolean {
+  const name = (event as EventType)?.target?.tagName?.toLowerCase();
   return name === 'input' || name === 'textarea';
 }
 
@@ -50,18 +57,13 @@ export function registerGlobalEvent(
     if (event.metaKey || event.ctrlKey) {
       return;
     }
-    coreStore.setState((state) => {
-      if (state.editorStatus === EditorStatus.EDIT_CELL) {
-        return state;
-      }
-      return {
-        editorStatus: EditorStatus.EDIT_CELL,
-      };
+    coreStore.setState({
+      editorStatus: EditorStatus.EDIT_CELL,
     });
   }
 
   const handleWheel = throttle((event: WheelEvent) => {
-    const tagName = (event?.target as any)?.tagName?.toLowerCase();
+    const tagName = (event as EventType)?.target?.tagName?.toLowerCase();
     if (tagName === 'canvas' || isTestEnv()) {
       scrollBar(controller, event.deltaX, event.deltaY);
     }
@@ -92,7 +94,7 @@ export function registerGlobalEvent(
     controller.cut(event);
   }
 
-  function handleFocus() {
+  function handleFocus(event: FocusEvent) {
     if (isInputEvent(event)) {
       return;
     }
