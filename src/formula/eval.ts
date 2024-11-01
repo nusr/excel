@@ -15,6 +15,7 @@ import {
   ResponseFormulas,
 } from '@/types';
 import { isFormula, coordinateToString, stringToCoordinate } from '@/util/util';
+import { SheetRange } from '@/util';
 
 export function parseFormula(
   formula: string,
@@ -23,7 +24,11 @@ export function parseFormula(
   cache: Map<string, InterpreterResult> = new Map<string, InterpreterResult>(),
 ): InterpreterResult {
   if (cache.has(formula)) {
-    return cache.get(formula)!;
+    const t = cache.get(formula)!;
+    if (t.result.length === 0) {
+      return { result: [0] };
+    }
+    return t;
   }
   try {
     cellData.handleCell = (
@@ -81,7 +86,7 @@ export function parseFormula(
 const defaultSheetId = '_test_';
 export class CellDataMapImpl implements CellDataMap {
   private readonly map = new Map<string, ModelCellType>();
-  private readonly definedNameMap = new Map<string, IRange>();
+  private readonly definedNameMap = new Map<string, SheetRange>();
   private readonly currentSheetId = defaultSheetId;
   private sheetList: WorksheetType[] = [
     {
@@ -137,21 +142,24 @@ export class CellDataMapImpl implements CellDataMap {
     return [];
   };
   setDefinedName(name: string, value: IRange) {
-    this.definedNameMap.set(name, value);
+    const r = SheetRange.makeRange(value);
+    this.definedNameMap.set(name, r);
   }
   getDefinedName(name: string) {
     return this.definedNameMap.get(name);
   }
 }
 
-
-export function computeFormulas(eventData: RequestFormulas, cb: (data: ResponseFormulas) => void) {
+export function computeFormulas(
+  eventData: RequestFormulas,
+  cb: (data: ResponseFormulas) => void,
+) {
   const { currentSheetId, worksheets, workbook, definedNames } = eventData;
   const formulaCache = new Map<string, InterpreterResult>();
   const sheetData = worksheets[currentSheetId] || {};
   const result: ResponseFormulas = {
     list: [],
-  }
+  };
   const cellDataMap: CellDataMap = {
     handleCell: () => {
       return [];
@@ -180,7 +188,11 @@ export function computeFormulas(eventData: RequestFormulas, cb: (data: ResponseF
       throw new CustomError('#REF!');
     },
     getDefinedName: (name: string) => {
-      return definedNames[name];
+      const r = definedNames[name];
+      if (!r) {
+        return r;
+      }
+      return SheetRange.makeRange(r);
     },
   };
   for (const [k, data] of Object.entries(sheetData)) {
@@ -207,4 +219,3 @@ export function computeFormulas(eventData: RequestFormulas, cb: (data: ResponseF
   }
   cb(result);
 }
-

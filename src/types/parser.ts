@@ -5,17 +5,9 @@ import {
   ModelCellType,
   FormulaFunction,
 } from '@/types';
+import { type SheetRange } from '@/util/range';
 
 export type ResultType = boolean | string | number;
-export type ErrorTypes =
-  | '#DIV/0!' // div zero
-  | '#NAME?'
-  | '#N/A' // not available
-  | '#NULL!'
-  | '#NUM!'
-  | '#REF!'
-  | '#VALUE!'
-  | '#GETTING_DATA';
 
 export enum TokenType {
   EQUAL, // =
@@ -28,19 +20,17 @@ export enum TokenType {
   GREATER, // >
   GREATER_EQUAL, // >=
   CONCATENATE, // &
-  // : 区域运算符，形成区域
-  COLON,
+  COLON, // : 区域运算符，形成区域
   COMMA, // , 联合运算符 求并集
   EMPTY_CHAR, // ' ' 交叉运算符 求交集
   PERCENT, // %
   LESS, // <
   LESS_EQUAL, // <=
-  IDENTIFIER, //
   STRING, // string
-  FLOAT, // float
-  INTEGER, // int
-  TRUE, // true
-  FALSE, // false
+  NUMBER, // integer | float
+  BOOL, // TRUE | FALSE
+  ERROR, // #DIV/0! | #NAME? | #N/A | #NULL! | #NUM! | #VALUE! | #GETTING_DATA
+  ERROR_REF, // #REF!
   LEFT_BRACKET, // (
   RIGHT_BRACKET, // )
   lEFT_BRACE, // {
@@ -48,8 +38,14 @@ export enum TokenType {
   SEMICOLON, // ;
   EXCLAMATION, // !
   R1C1, // R1C1 reference
-  MIXED_CELL, // mixed reference
-  ABSOLUTE_CELL, // absolute reference
+  SHEET_NAME, // sheet name !
+  CELL, // /[$]?[A-Za-z]{1,3}[$]?[1-9][0-9]*/
+  COLUMN, // /[$]?[A-Za-z]{1,3}/
+  ROW, // /^\$[1-9][0-9]*/
+  DEFINED_NAME, // /[a-zA-Z_][a-zA-Z0-9_.?]*/
+  EXCEL_FUNCTION, // built-in function \(
+  REF_FUNCTION, // (INDEX | OFFSET | INDIRECT)\( 5
+  REF_FUNCTION_COND, //  (IF | CHOOSE)\( 5
   EOF,
 }
 
@@ -61,7 +57,7 @@ export interface CellDataMap {
     sheetName?: string,
   ) => WorksheetType | undefined;
   setDefinedName: (name: string, value: IRange) => void;
-  getDefinedName: (name: string) => IRange | undefined;
+  getDefinedName: (name: string) => SheetRange | undefined;
   handleCell: (
     value: ModelCellType | undefined,
     coord: Coordinate,

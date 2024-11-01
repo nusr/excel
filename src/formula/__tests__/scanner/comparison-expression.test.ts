@@ -6,33 +6,33 @@ describe('comparison expressions', () => {
     [
       '1>2',
       [
-        getToken(TokenType.INTEGER, '1'),
+        getToken(TokenType.NUMBER, '1'),
         getToken(TokenType.GREATER, '>'),
-        getToken(TokenType.INTEGER, '2'),
+        getToken(TokenType.NUMBER, '2'),
       ],
     ],
     [
       '1>=2',
       [
-        getToken(TokenType.INTEGER, '1'),
+        getToken(TokenType.NUMBER, '1'),
         getToken(TokenType.GREATER_EQUAL, '>='),
-        getToken(TokenType.INTEGER, '2'),
+        getToken(TokenType.NUMBER, '2'),
       ],
     ],
     [
       '1=2',
       [
-        getToken(TokenType.INTEGER, '1'),
+        getToken(TokenType.NUMBER, '1'),
         getToken(TokenType.EQUAL, '='),
-        getToken(TokenType.INTEGER, '2'),
+        getToken(TokenType.NUMBER, '2'),
       ],
     ],
     [
       '1<>2',
       [
-        getToken(TokenType.INTEGER, '1'),
+        getToken(TokenType.NUMBER, '1'),
         getToken(TokenType.NOT_EQUAL, '<>'),
-        getToken(TokenType.INTEGER, '2'),
+        getToken(TokenType.NUMBER, '2'),
       ],
     ],
   ];

@@ -25,8 +25,8 @@ describe('r1c1.test.ts', () => {
     }
 
     const list: BlockType[] = [
-      ['RA', [getToken(TokenType.IDENTIFIER, 'RA')]],
-      ['R1A', [getToken(TokenType.IDENTIFIER, 'R1A')]],
+      ['RA', [getToken(TokenType.COLUMN, 'RA')]],
+      ['R1A', [getToken(TokenType.DEFINED_NAME, 'R1A')]],
     ];
     itBlock(list);
   });

@@ -104,10 +104,7 @@ export function parseReference(
   return mergeRange(startCell, endCell);
 }
 
-export function mergeRange(
-  start: SheetRange,
-  end: SheetRange,
-): SheetRange | undefined {
+export function mergeRange(start: IRange, end: IRange): SheetRange | undefined {
   if (start.sheetId !== end.sheetId) {
     return undefined;
   }
@@ -117,7 +114,7 @@ export function mergeRange(
     start.rowCount === end.rowCount &&
     start.colCount === end.colCount
   ) {
-    return start;
+    return SheetRange.makeRange(start);
   }
   if (start.rowCount === 0 && end.rowCount !== 0) {
     return undefined;

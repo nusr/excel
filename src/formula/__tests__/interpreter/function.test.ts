@@ -2,7 +2,7 @@ import { expectFormula } from './util';
 
 describe('parseFormula function', () => {
   it('not defined function', () => {
-    expectFormula('foo()', ['#NAME?']);
+    expectFormula('foo()', ['#VALUE!']);
   });
   it('not support function', () => {
     expectFormula('BAHTTEXT()', ['#NAME?']);

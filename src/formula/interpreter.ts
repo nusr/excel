@@ -13,7 +13,6 @@ import type {
   Expression,
   CellRangeExpression,
   PostUnaryExpression,
-  R1C1Expression,
 } from './expression';
 import {
   BinaryExpression,
@@ -21,11 +20,10 @@ import {
   CellExpression,
   CallExpression,
   LiteralExpression,
-  TokenExpression,
   GroupExpression,
   ArrayExpression,
 } from './expression';
-import { CustomError, isRelativeReference } from './formula';
+import { CustomError } from './formula';
 
 export class Interpreter implements Visitor {
   private readonly expressions: Expression[];
@@ -106,7 +104,7 @@ export class Interpreter implements Visitor {
     }
   }
   visitCallExpression(expr: CallExpression) {
-    const callee = this.evaluate(expr.name);
+    const callee = this.cellDataMap.getFunction(expr.name.value);
     if (callee && typeof callee === 'function') {
       let params: ResultType[] = [];
       for (const item of expr.params) {
@@ -122,25 +120,35 @@ export class Interpreter implements Visitor {
     }
     throw new CustomError('#NAME?');
   }
-  visitR1C1Expression(data: R1C1Expression) {
-    const range = parseR1C1(data.value.value, this.currentCoord);
-    if (!range) {
-      throw new CustomError('#NAME?');
-    }
-    return range;
-  }
   visitCellExpression(data: CellExpression) {
     let sheetId = '';
     if (data.sheetName) {
       const sheetInfo = this.cellDataMap.getSheetInfo('', data.sheetName.value);
-      if (!sheetInfo) {
+      if (!sheetInfo?.sheetId) {
         throw new CustomError('#REF!');
       }
       sheetId = sheetInfo.sheetId;
     }
-    const range = parseReference(data.value.value);
+    let range: IRange | undefined = undefined;
+    if (
+      [
+        TokenType.DEFINED_NAME,
+        TokenType.CELL,
+        TokenType.COLUMN,
+        TokenType.R1C1,
+      ].includes(data.value.type)
+    ) {
+      range = this.cellDataMap.getDefinedName(data.value.value);
+    }
     if (!range) {
-      throw new CustomError('#NAME?');
+      if (data.value.type === TokenType.R1C1) {
+        range = parseR1C1(data.value.value, this.currentCoord);
+      } else {
+        range = parseReference(data.value.value);
+      }
+    }
+    if (!range) {
+      throw new CustomError('#REF!');
     }
     if (sheetId) {
       range.sheetId = sheetId;
@@ -152,40 +160,18 @@ export class Interpreter implements Visitor {
     switch (type) {
       case TokenType.STRING:
         return value;
-      case TokenType.FLOAT:
-      case TokenType.INTEGER: {
+      case TokenType.NUMBER: {
         const [check, num] = parseNumber(value);
         if (check) {
           return num;
         }
         throw new CustomError('#VALUE!');
       }
-      case TokenType.TRUE:
-        return true;
-      case TokenType.FALSE:
-        return false;
+      case TokenType.BOOL:
+        return value === 'TRUE';
       default:
         throw new CustomError('#VALUE!');
     }
-  }
-
-  visitTokenExpression(expr: TokenExpression) {
-    const { value } = expr.value;
-    const defineName = value.toLowerCase();
-    if (this.cellDataMap.getDefinedName(defineName)) {
-      const temp = this.cellDataMap.getDefinedName(defineName)!;
-      return this.getCellValue(temp, true);
-    }
-    const func = this.cellDataMap.getFunction(value.toUpperCase());
-    if (func) {
-      return func;
-    }
-    if (isRelativeReference(value)) {
-      return this.visitCellExpression(
-        new CellExpression(expr.value, 'relative', undefined),
-      );
-    }
-    throw new CustomError('#NAME?');
   }
   visitUnaryExpression(data: UnaryExpression): any {
     const value = this.evaluate(data.right);
@@ -242,9 +228,8 @@ export class Interpreter implements Visitor {
     if (value instanceof SheetRange) {
       if (value.colCount === value.rowCount && value.colCount === 1) {
         return this.getCellValue(value, true);
-      } else {
-        throw new CustomError('#REF!');
       }
+      throw new CustomError('#REF!');
     }
     return value;
   }

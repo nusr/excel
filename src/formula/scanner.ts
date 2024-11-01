@@ -1,14 +1,20 @@
 import { TokenType } from '@/types';
 import { Token } from './token';
 import { CustomError } from './formula';
-import { FORMULA_PREFIX } from '@/util/constant';
+import {
+  FORMULA_PREFIX,
+  ERROR_SET,
+  BUILT_IN_FUNCTION_SET,
+  CELL_REG_EXP,
+  COLUMN_REG_EXP,
+  DEFINED_NAME_REG_EXP,
+  type BuiltInFormulas,
+  ROW_REG_EXP,
+  type ErrorTypes,
+} from '@/util/constant';
 import { isDigit, isAlpha } from '@/util/reference';
 
 const emptyData = '';
-const identifierMap = new Map<string, TokenType>([
-  ['TRUE', TokenType.TRUE],
-  ['FALSE', TokenType.FALSE],
-]);
 
 export class Scanner {
   private readonly list: string[];
@@ -65,6 +71,10 @@ export class Scanner {
       this.next();
     }
     const text = this.list.slice(this.start + 1, this.current - 1).join('');
+    if (end === "'" && this.match('!')) {
+      this.tokens.push(new Token(TokenType.SHEET_NAME, text));
+      return;
+    }
     this.tokens.push(new Token(TokenType.STRING, text));
   }
   private getDigits() {
@@ -94,17 +104,17 @@ export class Scanner {
       this.getDigits();
     }
   }
-  private matchScientificCounting(isFloat: boolean) {
+  private matchScientificCounting() {
     if (this.match('E') || this.match('e')) {
       // 1E-10 1E+10
       if (this.match('+') || this.match('-')) {
         this.getDigits();
-        this.addToken(isFloat ? TokenType.FLOAT : TokenType.INTEGER);
+        this.addToken(TokenType.NUMBER);
         return true;
       }
       if (isDigit(this.peek())) {
         this.getDigits();
-        this.addToken(isFloat ? TokenType.FLOAT : TokenType.INTEGER);
+        this.addToken(TokenType.NUMBER);
         return true;
       }
       // 1E or 1.1E not valid
@@ -114,20 +124,18 @@ export class Scanner {
   }
   private number() {
     this.getDigits();
-    const check1 = this.matchScientificCounting(false);
+    const check1 = this.matchScientificCounting();
     if (check1) {
       return;
     }
-    let float = false;
     if (this.match('.')) {
-      float = true;
       this.getDigits();
     }
-    const check2 = this.matchScientificCounting(true);
+    const check2 = this.matchScientificCounting();
     if (check2) {
       return;
     }
-    this.addToken(float ? TokenType.FLOAT : TokenType.INTEGER);
+    this.addToken(TokenType.NUMBER);
   }
   private addIdentifier() {
     while (!this.isAtEnd() && this.anyChar(this.peek())) {
@@ -135,15 +143,39 @@ export class Scanner {
     }
     let text = this.list.slice(this.start, this.current).join('');
     const t = text.toUpperCase();
-    const temp = identifierMap.get(t);
-    let type: TokenType = TokenType.IDENTIFIER;
-    if (temp) {
-      text = t;
-      type = temp;
+    if (BUILT_IN_FUNCTION_SET.has(t as BuiltInFormulas) && this.match('(')) {
+      this.tokens.push(new Token(TokenType.EXCEL_FUNCTION, t));
+      return;
     }
-    if (/^[A-Z]+\$\d+$/.test(t)) {
+    if (['IF', 'CHOOSE'].includes(t) && this.match('(')) {
+      this.tokens.push(new Token(TokenType.REF_FUNCTION_COND, t));
+      return;
+    }
+    if (['INDEX', 'OFFSET', 'INDIRECT'].includes(t) && this.match('(')) {
+      this.tokens.push(new Token(TokenType.REF_FUNCTION, t));
+      return;
+    }
+    if (this.match('!')) {
+      this.tokens.push(new Token(TokenType.SHEET_NAME, text));
+      return;
+    }
+    let type: TokenType = TokenType.BOOL;
+    if (t === 'TRUE' || t === 'FALSE') {
       text = t;
-      type = TokenType.MIXED_CELL;
+      type = TokenType.BOOL;
+    } else if (ERROR_SET.has(t as ErrorTypes)) {
+      text = t;
+      type = t === '#REF!' ? TokenType.ERROR_REF : TokenType.ERROR;
+    } else if (CELL_REG_EXP.test(t)) {
+      type = TokenType.CELL;
+    } else if (COLUMN_REG_EXP.test(t)) {
+      type = TokenType.COLUMN;
+    } else if (ROW_REG_EXP.test(t)) {
+      type = TokenType.ROW;
+    } else if (DEFINED_NAME_REG_EXP.test(t)) {
+      type = TokenType.DEFINED_NAME;
+    } else {
+      throw new CustomError('#NAME?');
     }
 
     this.tokens.push(new Token(type, text));
@@ -158,22 +190,22 @@ export class Scanner {
             if (isDigit(this.peek())) {
               // $A$1 absolute reference
               this.getDigits();
-              this.addToken(TokenType.ABSOLUTE_CELL);
+              this.addToken(TokenType.CELL);
             } else {
               this.addIdentifier();
             }
           } else if (isDigit(this.peek())) {
             // $A1 mixed reference
             this.getDigits();
-            this.addToken(TokenType.MIXED_CELL);
+            this.addToken(TokenType.CELL);
           } else {
             // $A
-            this.addToken(TokenType.ABSOLUTE_CELL);
+            this.addToken(TokenType.COLUMN);
           }
         } else if (isDigit(this.peek())) {
           // $1 absolute reference
           this.getDigits();
-          this.addToken(TokenType.ABSOLUTE_CELL);
+          this.addToken(TokenType.ROW);
         } else {
           this.addIdentifier();
         }

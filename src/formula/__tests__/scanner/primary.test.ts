@@ -9,14 +9,14 @@ describe('primary', () => {
       expect(() => new Scanner('1E').scan()).toThrow();
     });
     const list: BlockType[] = [
-      ['\r \t \n 1', [getToken(TokenType.INTEGER, '1')]],
-      ['1.1', [getToken(TokenType.FLOAT, '1.1')]],
-      ['1.1E+1', [getToken(TokenType.FLOAT, '1.1E+1')]],
-      ['1.1E-1', [getToken(TokenType.FLOAT, '1.1E-1')]],
-      ['1.1E1', [getToken(TokenType.FLOAT, '1.1E1')]],
-      ['1E+1', [getToken(TokenType.INTEGER, '1E+1')]],
-      ['1E-1', [getToken(TokenType.INTEGER, '1E-1')]],
-      ['1E1', [getToken(TokenType.INTEGER, '1E1')]],
+      ['\r \t \n 1', [getToken(TokenType.NUMBER, '1')]],
+      ['1.1', [getToken(TokenType.NUMBER, '1.1')]],
+      ['1.1E+1', [getToken(TokenType.NUMBER, '1.1E+1')]],
+      ['1.1E-1', [getToken(TokenType.NUMBER, '1.1E-1')]],
+      ['1.1E1', [getToken(TokenType.NUMBER, '1.1E1')]],
+      ['1E+1', [getToken(TokenType.NUMBER, '1E+1')]],
+      ['1E-1', [getToken(TokenType.NUMBER, '1E-1')]],
+      ['1E1', [getToken(TokenType.NUMBER, '1E1')]],
     ];
     itBlock(list);
   });
@@ -32,12 +32,12 @@ describe('primary', () => {
   });
   describe('boolean', () => {
     const list: BlockType[] = [
-      ['true', [getToken(TokenType.TRUE, 'TRUE')]],
-      ['tRue', [getToken(TokenType.TRUE, 'TRUE')]],
-      ['TRUE', [getToken(TokenType.TRUE, 'TRUE')]],
-      ['false', [getToken(TokenType.FALSE, 'FALSE')]],
-      ['False', [getToken(TokenType.FALSE, 'FALSE')]],
-      ['FALSE', [getToken(TokenType.FALSE, 'FALSE')]],
+      ['true', [getToken(TokenType.BOOL, 'TRUE')]],
+      ['tRue', [getToken(TokenType.BOOL, 'TRUE')]],
+      ['TRUE', [getToken(TokenType.BOOL, 'TRUE')]],
+      ['false', [getToken(TokenType.BOOL, 'FALSE')]],
+      ['False', [getToken(TokenType.BOOL, 'FALSE')]],
+      ['FALSE', [getToken(TokenType.BOOL, 'FALSE')]],
     ];
     itBlock(list);
   });

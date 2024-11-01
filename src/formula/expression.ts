@@ -1,5 +1,4 @@
 import type { Token } from './token';
-import type { ReferenceType } from '@/types';
 import { TokenType } from '@/types';
 
 export interface Visitor {
@@ -8,11 +7,9 @@ export interface Visitor {
   visitPostUnaryExpression: (expr: PostUnaryExpression) => any;
   visitLiteralExpression: (expr: LiteralExpression) => any;
   visitCellExpression: (expr: CellExpression) => any;
-  visitR1C1Expression: (expr: R1C1Expression) => any;
   visitCellRangeExpression: (expr: CellRangeExpression) => any;
   visitCallExpression: (expr: CallExpression) => any;
   visitGroupExpression: (expr: GroupExpression) => any;
-  visitTokenExpression: (expr: TokenExpression) => any;
   visitArrayExpression: (expr: ArrayExpression) => any;
 }
 
@@ -94,26 +91,12 @@ export class LiteralExpression implements Expression {
   }
 }
 
-export class R1C1Expression implements Expression {
-  readonly value: Token;
-  constructor(value: Token) {
-    this.value = value;
-  }
-  accept(visitor: Visitor) {
-    return visitor.visitR1C1Expression(this);
-  }
-  toString(): string {
-    return this.value.toString();
-  }
-}
 export class CellExpression implements Expression {
   readonly value: Token;
   readonly sheetName: Token | undefined;
-  readonly type: ReferenceType;
-  constructor(value: Token, type: ReferenceType, sheetName: Token | undefined) {
+  constructor(value: Token, sheetName: Token | undefined) {
     this.value = value;
     this.sheetName = sheetName;
-    this.type = type;
   }
   accept(visitor: Visitor) {
     return visitor.visitCellExpression(this);
@@ -133,9 +116,9 @@ export class CellExpression implements Expression {
 }
 
 export class CallExpression implements Expression {
-  readonly name: Expression;
+  readonly name: Token;
   readonly params: Expression[];
-  constructor(name: Expression, params: Expression[]) {
+  constructor(name: Token, params: Expression[]) {
     this.name = name;
     this.params = params;
   }
@@ -143,7 +126,7 @@ export class CallExpression implements Expression {
     return visitor.visitCallExpression(this);
   }
   toString(): string {
-    return `${this.name.toString().toUpperCase()}(${this.params
+    return `${this.name.toString()}(${this.params
       .map((item) => item.toString())
       .join(',')})`;
   }
@@ -178,19 +161,6 @@ export class GroupExpression implements Expression {
   }
   toString(): string {
     return `(${this.value.toString()})`;
-  }
-}
-
-export class TokenExpression implements Expression {
-  readonly value: Token;
-  constructor(value: Token) {
-    this.value = value;
-  }
-  accept(visitor: Visitor) {
-    return visitor.visitTokenExpression(this);
-  }
-  toString(): string {
-    return this.value.toString();
   }
 }
 

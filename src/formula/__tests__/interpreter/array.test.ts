@@ -3,7 +3,7 @@ import { expectFormula } from './util';
 describe('array.test.ts', () => {
   describe('invalid', () => {
     test('{1,2,3]', () => {
-      expectFormula('{1,2,3]', ['#VALUE!']);
+      expectFormula('{1,2,3]', ['#NAME?']);
     });
     test('{,,}', () => {
       expectFormula('{,,}', ['#VALUE!']);

@@ -15,15 +15,15 @@ describe('operators', () => {
       expect(tree).toEqual(
         new BinaryExpression(
           new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
             new Token(TokenType.PLUS, '+'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '2')),
           ),
           new Token(TokenType.GREATER_EQUAL, '>='),
           new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.INTEGER, '3')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '3')),
             new Token(TokenType.MINUS, '-'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '4')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '4')),
           ),
         ),
       );
@@ -34,9 +34,9 @@ describe('operators', () => {
       expect(tree).toEqual(
         new BinaryExpression(
           new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
             new Token(TokenType.PLUS, '+'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '2')),
           ),
           new Token(TokenType.CONCATENATE, '&'),
           new LiteralExpression(new Token(TokenType.STRING, 'a')),
@@ -48,12 +48,12 @@ describe('operators', () => {
       const tree = buildTree('1 + 2 * 3');
       expect(tree).toEqual(
         new BinaryExpression(
-          new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
           new Token(TokenType.PLUS, '+'),
           new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '2')),
             new Token(TokenType.STAR, '*'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '3')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '3')),
           ),
         ),
       );
@@ -64,12 +64,12 @@ describe('operators', () => {
 
       expect(tree).toEqual(
         new BinaryExpression(
-          new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
           new Token(TokenType.STAR, '*'),
           new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '2')),
             new Token(TokenType.EXPONENT, '^'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '3')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '3')),
           ),
         ),
       );
@@ -81,13 +81,13 @@ describe('operators', () => {
         new BinaryExpression(
           new GroupExpression(
             new BinaryExpression(
-              new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+              new LiteralExpression(new Token(TokenType.NUMBER, '1')),
               new Token(TokenType.STAR, '*'),
-              new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+              new LiteralExpression(new Token(TokenType.NUMBER, '2')),
             ),
           ),
           new Token(TokenType.EXPONENT, '^'),
-          new LiteralExpression(new Token(TokenType.INTEGER, '3')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '3')),
         ),
       );
     });
@@ -98,12 +98,12 @@ describe('operators', () => {
       expect(tree).toEqual(
         new BinaryExpression(
           new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
             new Token(TokenType.PLUS, '+'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '2')),
           ),
           new Token(TokenType.PLUS, '+'),
-          new LiteralExpression(new Token(TokenType.INTEGER, '3')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '3')),
         ),
       );
     });
@@ -112,13 +112,13 @@ describe('operators', () => {
       const tree = buildTree('1 + (2 + 3)');
       expect(tree).toEqual(
         new BinaryExpression(
-          new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
           new Token(TokenType.PLUS, '+'),
           new GroupExpression(
             new BinaryExpression(
-              new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+              new LiteralExpression(new Token(TokenType.NUMBER, '2')),
               new Token(TokenType.PLUS, '+'),
-              new LiteralExpression(new Token(TokenType.INTEGER, '3')),
+              new LiteralExpression(new Token(TokenType.NUMBER, '3')),
             ),
           ),
         ),
@@ -130,12 +130,12 @@ describe('operators', () => {
       expect(tree).toEqual(
         new BinaryExpression(
           new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
             new Token(TokenType.SLASH, '/'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '2')),
           ),
           new Token(TokenType.SLASH, '/'),
-          new LiteralExpression(new Token(TokenType.INTEGER, '3')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '3')),
         ),
       );
     });
@@ -144,7 +144,7 @@ describe('operators', () => {
       expect(tree).toEqual(
         new PostUnaryExpression(
           new Token(TokenType.PERCENT, '%'),
-          new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '2')),
         ),
       );
     });

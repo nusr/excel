@@ -7,7 +7,7 @@ describe('invalid expressions', () => {
   describe('error', () => {
     test('error type', () => {
       expect(() => {
-        new Parser([new Token(TokenType.IDENTIFIER, '#VALUE!')]).parse();
+        new Parser([new Token(TokenType.ERROR, '#VALUE!')]).parse();
       }).toThrow();
     });
     test('cell range', () => {
@@ -60,7 +60,7 @@ describe('invalid expressions', () => {
     expect(() => {
       new Parser([
         new Token(TokenType.LEFT_BRACKET, '('),
-        new Token(TokenType.INTEGER, '1'),
+        new Token(TokenType.NUMBER, '1'),
         new Token(TokenType.RIGHT_BRACE, '}'),
       ]).parse();
     }).toThrow();

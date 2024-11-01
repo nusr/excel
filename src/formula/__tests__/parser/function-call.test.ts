@@ -3,34 +3,25 @@ import {
   BinaryExpression,
   CallExpression,
   LiteralExpression,
-  TokenExpression,
   UnaryExpression,
   CellExpression,
 } from '../../expression';
 import { Token } from '../../token';
 import { TokenType } from '../../../types';
 
+const getFunc = (name: string) => new Token(TokenType.EXCEL_FUNCTION, name);
+
 describe('function calls', () => {
   it('SUM()', () => {
     const tree = buildTree('SUM()');
 
-    expect(tree).toEqual(
-      new CallExpression(
-        new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-        [],
-      ),
-    );
+    expect(tree).toEqual(new CallExpression(getFunc('SUM'), []));
   });
 
   it('sum()', () => {
     const tree = buildTree('sum()');
 
-    expect(tree).toEqual(
-      new CallExpression(
-        new TokenExpression(new Token(TokenType.IDENTIFIER, 'sum')),
-        [],
-      ),
-    );
+    expect(tree).toEqual(new CallExpression(getFunc('SUM'), []));
   });
 
   it('-SUM()', () => {
@@ -39,10 +30,7 @@ describe('function calls', () => {
     expect(tree).toEqual(
       new UnaryExpression(
         new Token(TokenType.MINUS, '-'),
-        new CallExpression(
-          new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-          [],
-        ),
+        new CallExpression(getFunc('SUM'), []),
       ),
     );
   });
@@ -50,23 +38,19 @@ describe('function calls', () => {
   it('SUM(1)', () => {
     const tree = buildTree('SUM(1)');
     expect(tree).toEqual(
-      new CallExpression(
-        new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-        [new LiteralExpression(new Token(TokenType.INTEGER, '1'))],
-      ),
+      new CallExpression(getFunc('SUM'), [
+        new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+      ]),
     );
   });
 
   it('SUM(1, 2)', () => {
     const tree = buildTree('SUM(1, 2)');
     expect(tree).toEqual(
-      new CallExpression(
-        new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-        [
-          new LiteralExpression(new Token(TokenType.INTEGER, '1')),
-          new LiteralExpression(new Token(TokenType.INTEGER, '2')),
-        ],
-      ),
+      new CallExpression(getFunc('SUM'), [
+        new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+        new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+      ]),
     );
   });
 
@@ -74,42 +58,30 @@ describe('function calls', () => {
     const tree = buildTree('SUM(1, SUM(2, 3))');
 
     expect(tree).toEqual(
-      new CallExpression(
-        new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-        [
-          new LiteralExpression(new Token(TokenType.INTEGER, '1')),
-          new CallExpression(
-            new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-            [
-              new LiteralExpression(new Token(TokenType.INTEGER, '2')),
-              new LiteralExpression(new Token(TokenType.INTEGER, '3')),
-            ],
-          ),
-        ],
-      ),
+      new CallExpression(getFunc('SUM'), [
+        new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+        new CallExpression(getFunc('SUM'), [
+          new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '3')),
+        ]),
+      ]),
     );
   });
 
   it('SUM(10 / 4, SUM(2, 3))', () => {
     const tree = buildTree('SUM(10 / 4, SUM(2, 3))');
     expect(tree).toEqual(
-      new CallExpression(
-        new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-        [
-          new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.INTEGER, '10')),
-            new Token(TokenType.SLASH, '/'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '4')),
-          ),
-          new CallExpression(
-            new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-            [
-              new LiteralExpression(new Token(TokenType.INTEGER, '2')),
-              new LiteralExpression(new Token(TokenType.INTEGER, '3')),
-            ],
-          ),
-        ],
-      ),
+      new CallExpression(getFunc('SUM'), [
+        new BinaryExpression(
+          new LiteralExpression(new Token(TokenType.NUMBER, '10')),
+          new Token(TokenType.SLASH, '/'),
+          new LiteralExpression(new Token(TokenType.NUMBER, '4')),
+        ),
+        new CallExpression(getFunc('SUM'), [
+          new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '3')),
+        ]),
+      ]),
     );
   });
 
@@ -118,12 +90,11 @@ describe('function calls', () => {
 
     expect(tree).toEqual(
       new BinaryExpression(
-        new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+        new LiteralExpression(new Token(TokenType.NUMBER, '2')),
         new Token(TokenType.PLUS, '+'),
-        new CallExpression(
-          new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-          [new LiteralExpression(new Token(TokenType.INTEGER, '1'))],
-        ),
+        new CallExpression(getFunc('SUM'), [
+          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+        ]),
       ),
     );
   });
@@ -132,17 +103,14 @@ describe('function calls', () => {
     const tree = buildTree('2 + SUM(1, 2, 3, 4)');
     expect(tree).toEqual(
       new BinaryExpression(
-        new LiteralExpression(new Token(TokenType.INTEGER, '2')),
+        new LiteralExpression(new Token(TokenType.NUMBER, '2')),
         new Token(TokenType.PLUS, '+'),
-        new CallExpression(
-          new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-          [
-            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
-            new LiteralExpression(new Token(TokenType.INTEGER, '2')),
-            new LiteralExpression(new Token(TokenType.INTEGER, '3')),
-            new LiteralExpression(new Token(TokenType.INTEGER, '4')),
-          ],
-        ),
+        new CallExpression(getFunc('SUM'), [
+          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '3')),
+          new LiteralExpression(new Token(TokenType.NUMBER, '4')),
+        ]),
       ),
     );
   });
@@ -152,15 +120,13 @@ describe('function calls', () => {
 
     expect(tree).toEqual(
       new BinaryExpression(
-        new CallExpression(
-          new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-          [new LiteralExpression(new Token(TokenType.INTEGER, '2'))],
-        ),
+        new CallExpression(getFunc('SUM'), [
+          new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+        ]),
         new Token(TokenType.PLUS, '+'),
-        new CallExpression(
-          new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-          [new LiteralExpression(new Token(TokenType.INTEGER, '1'))],
-        ),
+        new CallExpression(getFunc('SUM'), [
+          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+        ]),
       ),
     );
   });
@@ -168,41 +134,32 @@ describe('function calls', () => {
   it('SUM(SUM(1), 2 + 3)', () => {
     const tree = buildTree('SUM(SUM(1), 2 + 3)');
     expect(tree).toEqual(
-      new CallExpression(
-        new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-        [
-          new CallExpression(
-            new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-            [new LiteralExpression(new Token(TokenType.INTEGER, '1'))],
-          ),
-          new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.INTEGER, '2')),
-            new Token(TokenType.PLUS, '+'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '3')),
-          ),
-        ],
-      ),
+      new CallExpression(getFunc('SUM'), [
+        new CallExpression(getFunc('SUM'), [
+          new LiteralExpression(new Token(TokenType.NUMBER, '1')),
+        ]),
+        new BinaryExpression(
+          new LiteralExpression(new Token(TokenType.NUMBER, '2')),
+          new Token(TokenType.PLUS, '+'),
+          new LiteralExpression(new Token(TokenType.NUMBER, '3')),
+        ),
+      ]),
     );
   });
   it('SUM(Sheet1!A1,$B$1)', () => {
     const tree = buildTree('SUM(Sheet1!A1,$B$1)');
 
     expect(tree).toEqual(
-      new CallExpression(
-        new TokenExpression(new Token(TokenType.IDENTIFIER, 'SUM')),
-        [
-          new CellExpression(
-            new Token(TokenType.IDENTIFIER, 'A1'),
-            'relative',
-            new Token(TokenType.IDENTIFIER, 'Sheet1'),
-          ),
-          new CellExpression(
-            new Token(TokenType.ABSOLUTE_CELL, '$B$1'),
-            'absolute',
-            undefined,
-          ),
-        ],
-      ),
+      new CallExpression(getFunc('SUM'), [
+        new CellExpression(
+          new Token(TokenType.CELL, 'A1'),
+          new Token(TokenType.SHEET_NAME, 'Sheet1'),
+        ),
+        new CellExpression(
+          new Token(TokenType.CELL, '$B$1'),
+          undefined,
+        ),
+      ]),
     );
   });
 });

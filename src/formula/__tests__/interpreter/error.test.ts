@@ -37,9 +37,9 @@ describe('error.test.ts', () => {
       expect(() => {
         interpret([
           new BinaryExpression(
-            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
             new Token(TokenType.COLON, ':'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
           ),
         ]);
       }).toThrow();
@@ -47,12 +47,12 @@ describe('error.test.ts', () => {
 
     test('LiteralExpression', () => {
       expect(() => {
-        interpret([new LiteralExpression(new Token(TokenType.INTEGER, 'aa'))]);
+        interpret([new LiteralExpression(new Token(TokenType.NUMBER, 'aa'))]);
       }).toThrow();
 
       expect(() => {
         interpret([
-          new LiteralExpression(new Token(TokenType.IDENTIFIER, 'aa')),
+          new LiteralExpression(new Token(TokenType.COLUMN, 'aa')),
         ]);
       }).toThrow();
     });
@@ -62,7 +62,7 @@ describe('error.test.ts', () => {
         interpret([
           new UnaryExpression(
             new Token(TokenType.COLON, ':'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
           ),
         ]);
       }).toThrow();
@@ -72,17 +72,9 @@ describe('error.test.ts', () => {
       expect(() => {
         interpret([
           new CellRangeExpression(
-            new CellExpression(
-              new Token(TokenType.INTEGER, '1'),
-              'relative',
-              undefined,
-            ),
-            new Token(TokenType.IDENTIFIER, 'aa'),
-            new CellExpression(
-              new Token(TokenType.INTEGER, '1'),
-              'relative',
-              undefined,
-            ),
+            new CellExpression(new Token(TokenType.NUMBER, '1'), undefined),
+            new Token(TokenType.COLUMN, 'aa'),
+            new CellExpression(new Token(TokenType.NUMBER, '1'), undefined),
           ),
         ]);
       }).toThrow();
@@ -92,14 +84,14 @@ describe('error.test.ts', () => {
         interpret([
           new CellRangeExpression(
             new CellExpression(
-              new Token(TokenType.IDENTIFIER, 'F'),
-              'relative',
+              new Token(TokenType.COLUMN, 'F'),
+
               undefined,
             ),
             new Token(TokenType.COLON, ':'),
             new CellExpression(
-              new Token(TokenType.INTEGER, '1'),
-              'relative',
+              new Token(TokenType.NUMBER, '1'),
+
               undefined,
             ),
           ),
@@ -110,8 +102,8 @@ describe('error.test.ts', () => {
       expect(() => {
         interpret([
           new PostUnaryExpression(
-            new Token(TokenType.IDENTIFIER, 'aa'),
-            new LiteralExpression(new Token(TokenType.INTEGER, '1')),
+            new Token(TokenType.COLUMN, 'aa'),
+            new LiteralExpression(new Token(TokenType.NUMBER, '1')),
           ),
         ]);
       }).toThrow();
@@ -120,8 +112,8 @@ describe('error.test.ts', () => {
       expect(() => {
         interpret([
           new CellExpression(
-            new Token(TokenType.IDENTIFIER, 'FFFFFFFFFFF1'),
-            'relative',
+            new Token(TokenType.DEFINED_NAME, 'FFFFFFFFFFF1'),
+
             undefined,
           ),
         ]);
@@ -129,9 +121,9 @@ describe('error.test.ts', () => {
       expect(() => {
         interpret([
           new CellExpression(
-            new Token(TokenType.IDENTIFIER, 'A1'),
-            'relative',
-            new Token(TokenType.IDENTIFIER, 'fe'),
+            new Token(TokenType.CELL, 'A1'),
+
+            new Token(TokenType.COLUMN, 'fe'),
           ),
         ]);
       }).toThrow();
@@ -139,27 +131,26 @@ describe('error.test.ts', () => {
   });
   describe('R1C1', () => {
     it('row overflow', () => {
-      expectFormula(`=R${XLSX_MAX_ROW_COUNT + 10}C`, ['#NAME?']);
+      expectFormula(`=R${XLSX_MAX_ROW_COUNT + 10}C`, ['#REF!']);
     });
     it('col overflow', () => {
-      expectFormula(`=RC${XLSX_MAX_COL_COUNT + 10}`, ['#NAME?']);
+      expectFormula(`=RC${XLSX_MAX_COL_COUNT + 10}`, ['#REF!']);
     });
     it('all overflow', () => {
-      expectFormula(
-        `=R${XLSX_MAX_ROW_COUNT + 10}C${XLSX_MAX_COL_COUNT + 10}`,
-        ['#NAME?'],
-      );
+      expectFormula(`=R${XLSX_MAX_ROW_COUNT + 10}C${XLSX_MAX_COL_COUNT + 10}`, [
+        '#REF!',
+      ]);
     });
   });
   describe('A1', () => {
     it('col overflow', () => {
-      expectFormula(`=XFF1`, ['#NAME?']);
+      expectFormula(`=XFF1`, ['#REF!']);
     });
     it('row overflow', () => {
-      expectFormula(`=A${XLSX_MAX_ROW_COUNT + 10}`, ['#NAME?']);
+      expectFormula(`=A${XLSX_MAX_ROW_COUNT + 10}`, ['#REF!']);
     });
     it('all overflow', () => {
-      expectFormula(`=XFF${XLSX_MAX_ROW_COUNT + 10}`, ['#NAME?']);
+      expectFormula(`=XFF${XLSX_MAX_ROW_COUNT + 10}`, ['#REF!']);
     });
   });
 });

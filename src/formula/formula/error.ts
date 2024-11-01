@@ -1,5 +1,6 @@
-import type { ErrorTypes, ResultType } from '@/types';
+import type { ResultType } from '@/types';
 import { parseNumber } from '@/util/util';
+import { type ErrorTypes } from '@/util/constant';
 
 export class CustomError extends Error {
   readonly value: ErrorTypes | '#TEXT';
@@ -39,9 +40,4 @@ export function mustOneNumber(list: ResultType[]): number {
 
 export function mustEmpty(list: ResultType[]) {
   assert(list.length === 0);
-}
-
-export function isRelativeReference(value: string) {
-  const realValue = value.toUpperCase();
-  return /^[A-Z]+\d+$/.test(realValue) || /^[A-Z]+$/.test(realValue);
 }
