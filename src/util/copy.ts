@@ -134,13 +134,12 @@ export async function paste(): Promise<ClipboardData> {
   } catch (error) {
     console.log(error);
   }
-  const result: ClipboardData = {
+  return {
     [HTML_FORMAT]: '',
     [PLAIN_FORMAT]: '',
     [CUSTOM_FORMAT]: null,
     [IMAGE_FORMAT]: null,
   };
-  return result;
 }
 
 export function generateHTML(
