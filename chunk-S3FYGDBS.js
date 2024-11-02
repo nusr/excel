@@ -22,5 +22,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 */
-import{a as m}from"./chunk-6XLS75M2.js";import"./chunk-EU4ZLVQ3.js";import{a as o}from"./chunk-PRJU7QU5.js";import"./chunk-UR5ZFE2U.js";import"./chunk-AI5EXC2Q.js";o(m);
-//# sourceMappingURL=worker.js.map
+import{Pa as c,a as f,xa as l,ya as m,za as a}from"./chunk-UR5ZFE2U.js";function u(s){let e=document.createElement("span");e.style.fontSize="72px",e.innerHTML="mmmmmmmmmmlli",e.style.fontFamily=s,document.body.appendChild(e);let{offsetWidth:n,offsetHeight:i}=e;return document.body.removeChild(e),{offsetHeight:i,offsetWidth:n}}function p(){let s=[f,"serif"],e={},n={};for(let t of s){let{offsetWidth:o,offsetHeight:r}=u(t);e[t]=o,n[t]=r}function i(t){for(let o of s){let{offsetWidth:r,offsetHeight:d}=u(t+","+o);if(r!==e[o]||d!==n[o])return!0}return!1}return i}var F=p();function b(s=F,e=a){let n=localStorage.getItem(m);if(n){let t=JSON.parse(n);if(t.length>0)return t.map(o=>({value:o,label:o,disabled:!1}))}let i=[];for(let t of e)s(t)&&i.push({label:t,value:t,disabled:!1});return typeof window.queryLocalFonts=="function"&&i.push({value:l,label:c("get-all-installed-fonts"),disabled:!1}),i}export{F as a,b};
+//# sourceMappingURL=chunk-S3FYGDBS.js.map
