@@ -3,7 +3,7 @@ import {
   IWindowSize,
   RequestRender,
   ResponseRender,
-  WorkerMethod
+  WorkerMethod,
 } from '@/types';
 import { computeFormulas } from '@/formula';
 import OffScreenWorker from './offScreenWorker';
@@ -21,14 +21,11 @@ const workerMethod: WorkerMethod = {
   },
   async render(data: RequestRender, cb: (data: ResponseRender) => void) {
     const result = offScreen?.render(data);
-    if (!result) {
-      return
+    if (result) {
+      await cb(result);
     }
-    await cb(result);
   },
   computeFormulas,
-}
+};
 
-
-export default workerMethod
-
+export default workerMethod;

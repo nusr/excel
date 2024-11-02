@@ -130,7 +130,7 @@ export default class OffScreenWorker implements WorkerMainView {
     this.ctx.lineWidth = lineWidth;
     strokeRect(this.ctx, result.left, result.top, result.width, result.height);
     this.isRendering = false;
-    return { rowMap: this.rowMap, colMap: this.colMap };
+    return { rowMap: { ...this.rowMap }, colMap: { ...this.colMap } };
   }
   resize(data: IWindowSize) {
     this.width = data.width;
@@ -503,7 +503,7 @@ export default class OffScreenWorker implements WorkerMainView {
       colCount: 1,
       sheetId: '',
     };
-    const key = coordinateToString(row, col)
+    const key = coordinateToString(row, col);
     const cellInfo = this.eventData.sheetData[key];
     if (!cellInfo) {
       return;

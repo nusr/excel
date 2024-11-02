@@ -427,24 +427,6 @@ if (!isMobile()) {
   };
 }
 
-const maxSheetId = Math.max(
-  ...Object.values(MOCK_MODEL.workbook).map((v) => {
-    const t = parseInt(v.sheetId, 10);
-    return isNaN(t) ? 0 : t;
-  }),
-);
-
-for (let i = maxSheetId + 1; i < 20; i++) {
-  const id = String(i);
-  MOCK_MODEL.workbook[id] = {
-    sheetId: id,
-    name: `Sheet${id}`,
-    isHide: false,
-    colCount: DEFAULT_COL_COUNT,
-    rowCount: DEFAULT_ROW_COUNT,
-    sort: i,
-  };
-}
 for (let i = 0; i < numberFormatOptionList.length; i++) {
   const item = numberFormatOptionList[i];
   const key = coordinateToString(i, 0);
