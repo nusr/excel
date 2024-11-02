@@ -1,4 +1,4 @@
-import type { TextFormulaType, ResultType } from '@/types';
+import type { ResultType } from '@/types';
 import { MAX_PARAMS_COUNT } from '@/util/constant';
 import { assert, mustOneString, mustOneNumber, mustOne } from './error';
 import { numberFormat } from '@/model/numberFormat'
@@ -52,7 +52,7 @@ export const CONCAT = (...list: ResultType[]): string => {
   return list.join('');
 };
 
-const formulas: TextFormulaType = {
+const formulas = {
   CONCAT,
   CONCATENATE: CONCAT,
   SPLIT,

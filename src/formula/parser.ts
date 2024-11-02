@@ -137,7 +137,7 @@ export class Parser {
     return this.call();
   }
   private call(): Expression {
-    if (
+    while (
       this.match(
         TokenType.EXCEL_FUNCTION,
         TokenType.REF_FUNCTION,

@@ -12,7 +12,6 @@ import {
   FONT_SIZE_LIST,
   QUERY_ALL_LOCAL_FONT,
   LOCAL_FONT_KEY,
-  isSupportFontFamily,
   numberFormatOptionList,
 } from '@/util';
 import {
@@ -28,6 +27,7 @@ import { fontFamilyStore, styleStore, coreStore } from '@/containers/store';
 import { InsertFloatingPicture, InsertChart } from '../FloatElement/Toolbar';
 import { $ } from '@/i18n';
 import { BorderToolBar } from './Border';
+import { isSupportFontFamily } from '../canvas/isSupportFontFamily'
 
 interface Props {
   controller: IController;

@@ -9,7 +9,6 @@ import {
   SUM,
   SIN,
   PI,
-  E,
   EXP,
   DEGREES,
   DECIMAL,
@@ -202,15 +201,6 @@ describe('math.test.ts', () => {
     test('error', () => {
       expect(() => INT(1, 2)).toThrow();
       expect(() => INT('test')).toThrow();
-    });
-  });
-  describe('E', () => {
-    test('normal', () => {
-      expect(E()).toEqual(Math.E);
-    });
-    test('error', () => {
-      expect(() => E(1, 2)).toThrow();
-      expect(() => E(1)).toThrow();
     });
   });
 

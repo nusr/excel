@@ -244,6 +244,7 @@ async function buildDev(options) {
   await ctx.watch();
   const { port } = await ctx.serve({
     servedir: distDir,
+    port: 8080
   });
   fs.writeFileSync(path.join(process.cwd(), 'port.txt'), String(port), 'utf-8');
 

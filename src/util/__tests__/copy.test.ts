@@ -1,5 +1,14 @@
-
-import { generateHTML, extractCustomData, formatCustomData, paste, PLAIN_FORMAT, HTML_FORMAT, CUSTOM_FORMAT, copyOrCut, IMAGE_FORMAT } from '../copy';
+import {
+  generateHTML,
+  extractCustomData,
+  formatCustomData,
+  paste,
+  PLAIN_FORMAT,
+  HTML_FORMAT,
+  CUSTOM_FORMAT,
+  copyOrCut,
+  IMAGE_FORMAT,
+} from '../copy';
 
 describe('generateHTML', () => {
   it('should generate HTML with given style and content', () => {
@@ -14,10 +23,15 @@ describe('generateHTML', () => {
   it('should include custom data if provided', () => {
     const style = 'body { background-color: red; }';
     const content = '<tr><td>Test</td></tr>';
-    const customData = JSON.stringify({ range: { row: 1, col: 1, colCount: 1, rowCount: 1, sheetId: 'test' }, type: 'cut' });
+    const customData = JSON.stringify({
+      range: { row: 1, col: 1, colCount: 1, rowCount: 1, sheetId: 'test' },
+      type: 'cut',
+    });
     const result = generateHTML(style, content, formatCustomData(customData));
 
-    expect(result).toContain('<caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption>');
+    expect(result).toContain(
+      '<caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption>',
+    );
   });
 
   it('should not include custom data if not provided', () => {
@@ -41,15 +55,17 @@ describe('generateHTML', () => {
     expect(result).toContain('<body>');
     expect(result).toContain('</body>');
   });
-
-
 });
 
 describe('extractCustomData', () => {
   it('should extract custom data from HTML', () => {
-    const html = '<html><caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption></html>';
+    const html =
+      '<html><caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption></html>';
     const result = extractCustomData(html);
-    expect(result).toEqual({ range: { row: 1, col: 1, colCount: 1, rowCount: 1, sheetId: 'test' }, type: 'cut' });
+    expect(result).toEqual({
+      range: { row: 1, col: 1, colCount: 1, rowCount: 1, sheetId: 'test' },
+      type: 'cut',
+    });
   });
 
   it('should return null if custom data start flag is missing', () => {
@@ -59,13 +75,15 @@ describe('extractCustomData', () => {
   });
 
   it('should return null if custom data end flag is missing', () => {
-    const html = '<html><caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</html>';
+    const html =
+      '<html><caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</html>';
     const result = extractCustomData(html);
     expect(result).toBeNull();
   });
 
   it('should return null if custom data flags are not in correct order', () => {
-    const html = '<html></caption><caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</html>';
+    const html =
+      '<html></caption><caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</html>';
     const result = extractCustomData(html);
     expect(result).toBeNull();
   });
@@ -87,16 +105,39 @@ describe('paste', () => {
   beforeEach(() => {
     // @ts-ignore
     jest.spyOn(global, 'Blob').mockImplementation((data: string[]) => {
-      return { text: () => Promise.resolve(data[0]) }
-    })
-  })
+      return { text: () => Promise.resolve(data[0]) };
+    });
+  });
   test('empty', async () => {
     const result = await paste();
-    expect(result).toEqual({ [PLAIN_FORMAT]: '', [HTML_FORMAT]: '', [CUSTOM_FORMAT]: null, [IMAGE_FORMAT]: null });
-  })
+    expect(result).toEqual({
+      [PLAIN_FORMAT]: '',
+      [HTML_FORMAT]: '',
+      [CUSTOM_FORMAT]: null,
+      [IMAGE_FORMAT]: null,
+    });
+  });
   test('extract', async () => {
-    await copyOrCut({ [PLAIN_FORMAT]: 'plain', [HTML_FORMAT]: '<caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption>', [CUSTOM_FORMAT]: null, [IMAGE_FORMAT]: null });
+    await copyOrCut(
+      {
+        [PLAIN_FORMAT]: 'plain',
+        [HTML_FORMAT]:
+          '<caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption>',
+        [CUSTOM_FORMAT]: null,
+        [IMAGE_FORMAT]: null,
+      },
+      'copy',
+    );
     const result = await paste();
-    expect(result).toEqual({ [PLAIN_FORMAT]: 'plain', [HTML_FORMAT]: '<caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption>', [CUSTOM_FORMAT]: { "range": { "row": 1, "col": 1, "colCount": 1, "rowCount": 1, "sheetId": "test" }, "type": "cut" }, [IMAGE_FORMAT]: null });
-  })
-})
+    expect(result).toEqual({
+      [PLAIN_FORMAT]: 'plain',
+      [HTML_FORMAT]:
+        '<caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption>',
+      [CUSTOM_FORMAT]: {
+        range: { row: 1, col: 1, colCount: 1, rowCount: 1, sheetId: 'test' },
+        type: 'cut',
+      },
+      [IMAGE_FORMAT]: null,
+    });
+  });
+});

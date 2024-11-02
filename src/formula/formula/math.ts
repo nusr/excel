@@ -1,5 +1,5 @@
 import { MAX_PARAMS_COUNT } from '@/util/constant';
-import type { MathFormulaType, ResultType } from '../../types';
+import type { ResultType } from '../../types';
 import { assert, mustOneNumber, mustEmpty } from './error';
 import { parseNumber } from '@/util/util';
 
@@ -131,10 +131,6 @@ export const PI = (...list: ResultType[]): number => {
   mustEmpty(list);
   return Math.PI;
 };
-export const E = (...list: ResultType[]): number => {
-  mustEmpty(list);
-  return Math.E;
-};
 export const SIN = (...list: ResultType[]): number => {
   const data = mustOneNumber(list);
   return Math.sin(data);
@@ -145,7 +141,7 @@ export const SUM = (...rest: ResultType[]): number => {
   return list.reduce((sum, cur) => sum + cur, 0);
 };
 
-const formulas: MathFormulaType = {
+const formulas = {
   ABS,
   ACOS,
   ACOSH,
@@ -162,7 +158,6 @@ const formulas: MathFormulaType = {
   EXP,
   INT,
   PI,
-  E,
   SIN,
   SUM,
 };

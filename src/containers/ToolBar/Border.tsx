@@ -8,7 +8,7 @@ import {
   SubMenu,
   ColorPicker,
 } from '../../components';
-import { IController, BorderType, BorderItem, IRange } from '@/types';
+import { IController, BorderItem, IRange, BorderType } from '@/types';
 import { BORDER_TYPE_MAP, isRow, isCol } from '@/util';
 import { $ } from '@/i18n';
 

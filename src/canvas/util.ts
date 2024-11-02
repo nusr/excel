@@ -10,7 +10,7 @@ import {
   DEFAULT_FORMAT_CODE,
   DEFAULT_LINE_WIDTH,
   BORDER_TYPE_MAP,
-  type ErrorTypes
+  type ErrorTypes,
 } from '@/util/constant';
 import {
   CanvasOverlayPosition,
@@ -21,9 +21,9 @@ import {
   StyleType,
   EHorizontalAlign,
   EVerticalAlign,
-  BorderType,
   BorderItem,
   ThemeType,
+  BorderType,
 } from '@/types';
 import { numberFormat, isDateFormat } from '@/model/numberFormat';
 import { isMergeContent } from '@/util/util';

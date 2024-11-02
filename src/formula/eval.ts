@@ -1,6 +1,10 @@
 import { Scanner } from './scanner';
 import { Parser } from './parser';
-import allFormulas, { CustomError, roundNumber } from './formula';
+import allFormulas, {
+  CustomError,
+  roundNumber,
+  type FormulaKeys,
+} from './formula';
 import { Interpreter } from './interpreter';
 import {
   CellDataMap,
@@ -10,7 +14,6 @@ import {
   Coordinate,
   WorksheetType,
   ModelCellType,
-  FormulaKeys,
   RequestFormulas,
   ResponseFormulas,
 } from '@/types';

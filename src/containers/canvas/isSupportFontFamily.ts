@@ -1,6 +1,10 @@
-import { MUST_FONT_FAMILY } from './constant';
+import {
+  MUST_FONT_FAMILY,
+  FONT_FAMILY_LIST,
+  LOCAL_FONT_KEY,
+  QUERY_ALL_LOCAL_FONT,
+} from '@/util';
 import { OptionItem } from '@/types';
-import { FONT_FAMILY_LIST, LOCAL_FONT_KEY, QUERY_ALL_LOCAL_FONT } from './font';
 import { $ } from '@/i18n';
 
 function createElement(font: string) {
@@ -17,7 +21,7 @@ function createElement(font: string) {
   };
 }
 
-export function SupportFontFamilyFactory() {
+function SupportFontFamilyFactory() {
   const baseFonts = [MUST_FONT_FAMILY, 'serif'];
   const defaultWidth: Record<string, number> = {};
   const defaultHeight: Record<string, number> = {};

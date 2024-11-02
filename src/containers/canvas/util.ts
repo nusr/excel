@@ -11,7 +11,6 @@ import {
   HIDE_CELL,
   getThemeColor,
   eventEmitter,
-  initFontFamilyList,
   sizeConfig,
   canvasSizeSet,
   MERGE_CELL_LINE_BREAK,
@@ -37,6 +36,7 @@ import {
   scrollSheetToView,
 } from '@/canvas';
 import { numberFormat as numberFormatUtil, isDateFormat } from '@/model';
+import { initFontFamilyList } from './isSupportFontFamily'
 
 function getChartData(
   range: IRange,

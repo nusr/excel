@@ -27,7 +27,7 @@ import {
   FORMULA_PREFIX,
   getImageSize,
   NUMBER_FORMAT_LIST,
-  BORDER_TYPE_MAP,
+  BORDER_TYPE_MAP
 } from '@/util';
 
 const COMMON_PREFIX = 'xl';

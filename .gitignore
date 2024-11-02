@@ -22,3 +22,6 @@ docs
 pnpm-lock.yaml
 *.lock
 package-lock.json
+/playwright-report/
+/blob-report/
+/playwright/.cache/

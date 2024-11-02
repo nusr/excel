@@ -22,6 +22,8 @@ jobs:
         run: |
           npm i -g pnpm jscpd
           pnpm i
+          pnpm exec playwright install --with-deps
+          npm run e2e
           npm run repeat
           npm run lint
           npx tsc

@@ -21,13 +21,6 @@ import { $ } from '@/i18n';
 const MOCK_MODEL: WorkBookJSON = {
   currentSheetId: '',
   rangeMap: {
-    '1': {
-      row: 2,
-      col: 2,
-      rowCount: 1,
-      colCount: 1,
-      sheetId: '1',
-    },
     '2': {
       row: 4,
       col: 4,
@@ -301,8 +294,8 @@ const MOCK_MODEL: WorkBookJSON = {
       '0_3': { value: '', formula: '=UNICODE("测试")' },
       '0_4': { value: '', formula: "='merge cell'!A1" },
       '1_0': { value: '', formula: '=PI()' },
-      '2_0': { value: '', formula: '=E()' },
-      '3_0': { value: '', formula: '=E()*PI()' },
+      '2_0': { value: '', formula: '=EXP(1)' },
+      '3_0': { value: '', formula: '=EXP(1)*PI()' },
       '4_0': { value: '', formula: '=SUM(1, SIN(PI()/2),3)' },
       '5_0': {
         value: '',
