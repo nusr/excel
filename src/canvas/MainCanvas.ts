@@ -64,6 +64,7 @@ export class MainCanvas implements MainView {
       customHeight: jsonData.customHeight,
       customWidth: jsonData.customWidth,
       sheetData: jsonData.worksheets[currentId] || {},
+      autoFilter: jsonData.autoFilter[currentId]
     };
 
     this.controller.getHooks().worker.render(eventData, ComLink.proxy(this.renderCallback));

@@ -30,7 +30,7 @@ export class Debug {
     return COLOR_PICKER_COLOR_LIST[index];
   };
   enable() {
-    return  window.localStorage.getItem('debug') === '*';
+    return window.localStorage.getItem('debug') === '*';
   }
   setColor() {
     if (!Debug.colorMap.has(this.namespace)) {

@@ -21,6 +21,7 @@ import {
 } from '@/util';
 import {
   coreStore,
+  CoreStore,
   activeCellStore,
   sheetListStore,
   fontFamilyStore,
@@ -36,7 +37,7 @@ import {
   scrollSheetToView,
 } from '@/canvas';
 import { numberFormat as numberFormatUtil, isDateFormat } from '@/model';
-import { initFontFamilyList } from './isSupportFontFamily'
+import { initFontFamilyList } from './isSupportFontFamily';
 
 function getChartData(
   range: IRange,
@@ -204,19 +205,21 @@ const handleStateChange = (
     sheetListStore.setState(sheetList);
   }
 
+  const core: Partial<CoreStore> = {
+    canRedo: controller.canRedo(),
+    canUndo: controller.canUndo(),
+  };
+
   if (changeSet.has('currentSheetId')) {
-    coreStore.setState({
-      canRedo: controller.canRedo(),
-      canUndo: controller.canUndo(),
-      activeUuid: '',
-      currentSheetId: controller.getCurrentSheetId(),
-    });
-  } else {
-    coreStore.setState({
-      canRedo: controller.canRedo(),
-      canUndo: controller.canUndo(),
-    });
+    core.activeUuid = '';
+    core.currentSheetId = controller.getCurrentSheetId();
+    core.isFilter = typeof controller.getFilter()?.col === 'number';
   }
+
+  if (changeSet.has('autoFilter')) {
+    core.isFilter = typeof controller.getFilter()?.col === 'number';
+  }
+  coreStore.setState(core);
 
   if (changeSet.has('scroll')) {
     const scroll = controller.getScroll();
@@ -346,6 +349,7 @@ export function initCanvas(
     'undo',
     'redo',
     'antLine',
+    'autoFilter'
   ]);
   handleStateChange(changeSet, controller);
   renderCanvas(changeSet);

@@ -160,6 +160,8 @@ export function modelToChangeSet(list: ICommandItem[]) {
       result.add('row');
     } else if (type === 'customWidth') {
       result.add('col');
+    } else if (type === 'autoFilter') {
+      result.add('autoFilter');
     }
   }
   return result;

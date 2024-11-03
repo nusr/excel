@@ -70,7 +70,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
     activeCellStore.subscribe,
     activeCellStore.getSnapshot,
   );
-  const [ref] = useClickOutside(hideContextMenu);
+  const ref = useClickOutside(hideContextMenu);
   const { style, position } = useMemo(() => {
     const temp = computeMenuStyle(top, left);
     return temp;

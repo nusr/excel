@@ -42,7 +42,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       width,
       height,
     } = props;
-    const [ref] = useClickOutside(hideContextMenu);
+    const ref = useClickOutside(hideContextMenu);
     const selectData = () => {
       let value = convertToReference(
         props.chartRange!,

@@ -86,7 +86,7 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = memo(
     const closeMenu = useCallback(() => {
       setOpen(false);
     }, []);
-    const [ref] = useClickOutside(closeMenu);
+    const ref = useClickOutside(closeMenu, open);
     return (
       <div
         className={classnames(styles.container, className, {

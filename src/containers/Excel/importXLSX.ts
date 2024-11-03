@@ -479,6 +479,7 @@ export function convertXMLDataToModel(
     drawings: {},
     rangeMap: {},
     worksheets: {},
+    autoFilter: {}
   };
   const relationList = getArray<RelationItem[]>(
     xmlData[WORKBOOK_RELATION_PATH],

@@ -137,14 +137,8 @@ describe('range.test.ts', () => {
       let count = 0;
       iterateRange(
         { row: 0, col: 0, rowCount: 0, colCount: 0, sheetId: '' },
-        {
-          rowCount: 10,
-          colCount: 10,
-          sheetId: '',
-          name: '',
-          isHide: false,
-          sort: 1,
-        },
+        10,
+        10,
         () => {
           count++;
           return false;
@@ -156,14 +150,8 @@ describe('range.test.ts', () => {
       let count = 0;
       iterateRange(
         { row: 0, col: 0, rowCount: 1, colCount: 0, sheetId: '' },
-        {
-          rowCount: 10,
-          colCount: 10,
-          sheetId: '',
-          name: '',
-          isHide: false,
-          sort: 1,
-        },
+        10,
+        10,
         () => {
           count++;
           return false;
@@ -175,14 +163,8 @@ describe('range.test.ts', () => {
       let count = 0;
       iterateRange(
         { row: 0, col: 0, rowCount: 0, colCount: 1, sheetId: '' },
-        {
-          rowCount: 10,
-          colCount: 10,
-          sheetId: '',
-          name: '',
-          isHide: false,
-          sort: 1,
-        },
+        10,
+        10,
         () => {
           count++;
           return false;
@@ -194,14 +176,8 @@ describe('range.test.ts', () => {
       let count = 0;
       iterateRange(
         { row: 0, col: 0, rowCount: 2, colCount: 2, sheetId: '' },
-        {
-          rowCount: 10,
-          colCount: 10,
-          sheetId: '',
-          name: '',
-          isHide: false,
-          sort: 1,
-        },
+        10,
+        10,
         () => {
           count++;
           return false;
@@ -213,7 +189,8 @@ describe('range.test.ts', () => {
       let count = 0;
       iterateRange(
         { row: 0, col: 0, rowCount: 0, colCount: 0, sheetId: '' },
-        undefined,
+        0,
+        0,
         () => {
           count++;
           return false;

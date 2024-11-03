@@ -29,11 +29,11 @@ afterAll(() => {
   }
 });
 
-export async function getRenderData(controller: IController, theme: ThemeType) {
+export function getRenderData(controller: IController, theme: ThemeType) {
   const jsonData = controller.toJSON();
   const currentId = controller.getCurrentSheetId();
   const sheetInfo = controller.getSheetInfo(currentId)!;
-  const copyRange = controller.getCopyRange()
+  const copyRange = controller.getCopyRange();
   const eventData: RequestRender = {
     changeSet: new Set<ChangeEventType>(['scroll', 'cellStyle', 'cellValue']),
     theme,
@@ -52,6 +52,7 @@ export async function getRenderData(controller: IController, theme: ThemeType) {
     customHeight: jsonData.customHeight,
     customWidth: jsonData.customWidth,
     sheetData: jsonData.worksheets[currentId] || {},
+    autoFilter: jsonData.autoFilter[currentId]
   };
   return eventData;
 }
@@ -90,12 +91,12 @@ async function compareImage(
   }
 }
 
-async function renderCanvas(controller: IController, theme: ThemeType) {
+function renderCanvas(controller: IController, theme: ThemeType) {
   const canvas = createCanvas(defaultWidth, defaultHeight);
 
   const instance = new OffScreenWorker(canvas as unknown as OffscreenCanvas);
   instance.resize({ width: defaultWidth, height: defaultHeight });
-  const data = instance.render(await getRenderData(controller, theme));
+  const data = instance.render(getRenderData(controller, theme));
   if (data) {
     let check = false;
     for (const [row, h] of Object.entries(data.rowMap)) {
@@ -113,7 +114,7 @@ async function renderCanvas(controller: IController, theme: ThemeType) {
       }
     }
     if (check) {
-      instance.render(await getRenderData(controller, theme));
+      instance.render(getRenderData(controller, theme));
     }
   }
   return canvas;
@@ -125,7 +126,7 @@ export async function compareScreenShot(
 ) {
   const { theme = 'light', maxThreshold = 0.1 } = options || {};
   setDpr(2);
-  const canvas = await renderCanvas(controller, theme);
+  const canvas = renderCanvas(controller, theme);
   const imageName = (expect.getState().currentTestName || '')
     .replaceAll(' ', '_')
     .toLowerCase();

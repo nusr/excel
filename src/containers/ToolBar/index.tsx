@@ -27,7 +27,7 @@ import { fontFamilyStore, styleStore, coreStore } from '@/containers/store';
 import { InsertFloatingPicture, InsertChart } from '../FloatElement/Toolbar';
 import { $ } from '@/i18n';
 import { BorderToolBar } from './Border';
-import { isSupportFontFamily } from '../canvas/isSupportFontFamily'
+import { isSupportFontFamily } from '../canvas/isSupportFontFamily';
 
 interface Props {
   controller: IController;
@@ -132,9 +132,11 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
             fontFamilyStore.setState(l);
             localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(fontList));
           } else {
-            fontFamilyStore.setState(fontFamilyStore
+            fontFamilyStore.setState(
+              fontFamilyStore
                 .getSnapshot()
-                .filter((v) => v.value !== QUERY_ALL_LOCAL_FONT));
+                .filter((v) => v.value !== QUERY_ALL_LOCAL_FONT),
+            );
           }
         });
       } else {
@@ -278,6 +280,13 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
         { verticalAlign: EVerticalAlign.BOTTOM },
         controller.getActiveRange().range,
       );
+    }, []);
+    const handleFilter = useCallback(() => {
+      const filter = controller.getFilter();
+      if (filter) {
+        controller.deleteFilter();
+      }
+      controller.addFilter(controller.getActiveRange().range);
     }, []);
     return (
       <div className={styles['toolbar-wrapper']} data-testid="toolbar">
@@ -481,6 +490,15 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
             {numberFormatLabel}
           </div>
         </SelectList>
+        <Button
+          active={coreData.isFilter}
+          onClick={handleFilter}
+          testId="toolbar-filter"
+          className={styles['wrap-text']}
+          title="Filter"
+        >
+          {$('filter')}
+        </Button>
         <InsertFloatingPicture controller={controller} />
         <InsertChart controller={controller} />
         <Github />
@@ -491,4 +509,4 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
 
 ToolbarContainer.displayName = 'ToolbarContainer';
 
-export default ToolbarContainer
+export default ToolbarContainer;

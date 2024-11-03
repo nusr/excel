@@ -383,6 +383,27 @@ const MOCK_MODEL: WorkBookJSON = {
     },
   },
   drawings: {},
+  autoFilter: {
+    '1': {
+      range: {
+        col: 0,
+        row: 0,
+        rowCount: 10,
+        colCount: 10,
+        sheetId: '',
+      },
+      col: 0,
+      value: {
+        type: 'number',
+        value: [
+          {
+            type: '=',
+            value: 1,
+          },
+        ],
+      },
+    },
+  },
 };
 
 if (!isMobile()) {

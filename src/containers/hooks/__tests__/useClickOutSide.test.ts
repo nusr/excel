@@ -5,7 +5,7 @@ describe('useClickOutside', () => {
   it('should call callback when clicking outside the element', () => {
     const callback = jest.fn();
     const { result } = renderHook(() => useClickOutside(callback));
-    const [ref] = result.current;
+    const ref = result.current;
 
     const div = document.createElement('div');
     // @ts-ignore
@@ -22,7 +22,7 @@ describe('useClickOutside', () => {
   it('should not call callback when clicking inside the element', () => {
     const callback = jest.fn();
     const { result } = renderHook(() => useClickOutside(callback));
-    const [ref] = result.current;
+    const ref = result.current;
 
     const div = document.createElement('div');
     // @ts-ignore
@@ -39,7 +39,7 @@ describe('useClickOutside', () => {
   it('should clean up event listeners on unmount', () => {
     const callback = jest.fn();
     const { result, unmount } = renderHook(() => useClickOutside(callback));
-    const [ref] = result.current;
+    const ref = result.current;
 
     const div = document.createElement('div');
     // @ts-ignore

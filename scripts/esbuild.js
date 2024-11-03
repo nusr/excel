@@ -23,7 +23,7 @@ const { values: envConfig } = parseArgs({
 
 const nodeEnv = envConfig.nodeEnv || 'development';
 const isDev = nodeEnv === 'development';
-const isEnableExternal = !isDev
+const isEnableExternal = !isDev;
 
 const licenseText = fs.readFileSync(
   path.join(process.cwd(), 'LICENSE'),
@@ -162,7 +162,10 @@ function buildHtml() {
       ),
       path.join(distDir, 'react-dom.js'),
     );
-    htmlData = htmlData.replace('<!-- other script -->', `<script src="./react.js"></script>\n<script src="./react-dom.js"></script>`)
+    htmlData = htmlData.replace(
+      '<!-- other script -->',
+      `<script src="./react.js"></script>\n<script src="./react-dom.js"></script>`,
+    );
   }
 
   fs.writeFileSync(
@@ -244,7 +247,7 @@ async function buildDev(options) {
   await ctx.watch();
   const { port } = await ctx.serve({
     servedir: distDir,
-    port: 8080
+    port: 8080,
   });
 
   console.log(`http://localhost:${port}`);

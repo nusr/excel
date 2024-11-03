@@ -3,13 +3,13 @@ import React, {
   FunctionComponent,
   memo,
   useCallback,
+  useEffect,
   useState,
 } from 'react';
 import { classnames } from '@/util';
 import { OptionItem } from '@/types';
 import styles from './index.module.css';
 import { Icon } from '../BaseIcon';
-import { useClickOutside } from '../../containers/hooks';
 import { Button } from '../Button';
 
 export interface SelectProps {
@@ -98,7 +98,11 @@ export const SelectPopup: FunctionComponent<SelectPopupProps> = memo(
     position = 'bottom',
     testId,
   }) => {
-    const [ref] = useClickOutside(() => onChange(''));
+    useEffect(() => {
+      return () => {
+        onChange('');
+      };
+    }, [onChange]);
     const handleSelect = useCallback(
       (event: React.MouseEvent<HTMLDivElement>) => {
         const v = (event.target as { dataset?: { value?: string } }).dataset
@@ -121,7 +125,6 @@ export const SelectPopup: FunctionComponent<SelectPopupProps> = memo(
           },
         )}
         onClick={handleSelect}
-        ref={ref}
         data-testid={testId}
       >
         {data.map((v) => (

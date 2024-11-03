@@ -24,7 +24,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
     hideMenu,
     editSheetName,
   }) => {
-    const [ref] = useClickOutside(hideMenu);
+    const ref = useClickOutside(hideMenu);
     const tabColor = useMemo(() => {
       return (
         sheetList.find((v) => v.sheetId === currentSheetId)?.tabColor || ''

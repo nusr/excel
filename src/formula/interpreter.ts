@@ -266,7 +266,7 @@ export class Interpreter implements Visitor {
     if (!sheetInfo || row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
       throw new CustomError('#REF!');
     }
-    iterateRange(range, sheetInfo, (r, c) => {
+    iterateRange(range, sheetInfo.rowCount, sheetInfo.colCount, (r, c) => {
       const t = this.cellDataMap.getCell({
         row: r,
         col: c,

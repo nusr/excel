@@ -30,6 +30,7 @@ describe('importXLSX.test.ts', () => {
       const controller = initController();
       controller.fromJSON(model);
       const result: WorkBookJSON = {
+        autoFilter: {},
         rangeMap: {
           '2': { row: 0, col: 2, rowCount: 1, colCount: 1, sheetId: '2' },
           '3': { row: 9, col: 8, rowCount: 2, colCount: 1, sheetId: '3' },

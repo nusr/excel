@@ -49,6 +49,7 @@
   "reference-is-not-valid": "The reference is not valid",
   "the-value-cannot-be-empty": "The value cannot be empty",
   "edit-data-source": "Edit Data Source",
+  "sheet-is-not-exist": "The sheet is not exist",
   "sheet-id-is-duplicate": "The sheet id is duplicate",
   "a-workbook-must-contains-at-least-one-visible-worksheet": "A workbook must contains at least one visible worksheet",
   "sheet-name-is-duplicate": "The sheet name is duplicate",
@@ -95,6 +96,7 @@
   "right-border": "Right Border",
   "line-color": "Line Color",
   "line-style": "Line Style",
-  "open-worker": "Open Worker",
-  "close-worker": "Close Worker"
+  "filter": "Filter",
+  "filter-empty": "(empty)",
+  "filter-all": "All"
 }

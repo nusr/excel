@@ -14,7 +14,8 @@ import {
   EMergeCellType,
   EventEmitterType,
   HistoryChangeType,
-  RemoteWorkerType
+  RemoteWorkerType,
+  AutoFilterItem,
 } from '@/types';
 import {
   XLSX_MAX_ROW_COUNT,
@@ -24,7 +25,8 @@ import {
   sheetViewSizeSet,
   headerSizeSet,
   containRange,
-  isTestEnv
+  isTestEnv,
+  modelLog,
 } from '@/util';
 import { History } from './History';
 import { Workbook } from './workbook';
@@ -35,11 +37,12 @@ import { Worksheet } from './worksheet';
 import { MergeCell } from './mergeCell';
 import { RowManager } from './row';
 import { ColManager } from './col';
-import { computeFormulas } from '@/formula'
+import { computeFormulas } from '@/formula';
+import { FilterManger } from './filter';
 
 const mockTestWorker: any = {
   computeFormulas: computeFormulas,
-}
+};
 
 export class Model implements IModel {
   private history: History;
@@ -51,9 +54,12 @@ export class Model implements IModel {
   private mergeCellManager: MergeCell;
   private rowManager: RowManager;
   private colManager: ColManager;
+  private filterManager: FilterManger;
   constructor(worker: RemoteWorkerType = mockTestWorker) {
     if (!isTestEnv() && worker === mockTestWorker) {
-      throw new Error('worker must be provided in production or development environment');
+      throw new Error(
+        'worker must be provided in production or development environment',
+      );
     }
     this.history = new History({
       undo: this.historyUndo,
@@ -69,11 +75,19 @@ export class Model implements IModel {
     this.mergeCellManager = new MergeCell(this);
     this.rowManager = new RowManager(this);
     this.colManager = new ColManager(this);
+    this.filterManager = new FilterManger(this);
   }
   push(...commands: ICommandItem[]): void {
     this.history.push(...commands);
   }
   render(changeSet: Set<ChangeEventType>, list: ICommandItem[] = []) {
+    if (
+      changeSet.size === 0 ||
+      (changeSet.size === 1 && changeSet.has('noHistory'))
+    ) {
+      return;
+    }
+    modelLog(changeSet, list);
     eventEmitter.emit('modelChange', { changeSet, commandList: list });
   }
   private checkComputeFormulas(list: ICommandItem[]) {
@@ -85,7 +99,7 @@ export class Model implements IModel {
     ) {
       this.worksheetManager.computeFormulas();
     }
-    return changeSet
+    return changeSet;
   }
   async emitChange(set: Set<ChangeEventType>) {
     const changeSet = modelToChangeSet(this.history.get());
@@ -138,7 +152,7 @@ export class Model implements IModel {
     if (changeSet.has('row') || changeSet.has('col')) {
       this.computeViewSize();
     }
-    this.render(changeSet, list)
+    this.render(changeSet, list);
   };
 
   getSheetList(): WorksheetType[] {
@@ -228,6 +242,7 @@ export class Model implements IModel {
     this.mergeCellManager.fromJSON(json);
     this.rowManager.fromJSON(json);
     this.colManager.fromJSON(json);
+    this.filterManager.fromJSON(json);
     this.worksheetManager.computeFormulas();
   };
   toJSON = (): WorkBookJSON => {
@@ -240,6 +255,7 @@ export class Model implements IModel {
       ...this.mergeCellManager.toJSON(),
       ...this.rowManager.toJSON(),
       ...this.colManager.toJSON(),
+      ...this.filterManager.toJSON(),
     };
   };
 
@@ -355,9 +371,9 @@ export class Model implements IModel {
       return;
     }
     if (changeSet.has('undo')) {
-      this.historyUndo(commandList)
+      this.historyUndo(commandList);
     } else {
-      this.historyRedo(commandList)
+      this.historyRedo(commandList);
     }
   }
 
@@ -423,6 +439,19 @@ export class Model implements IModel {
     return this.definedNameManager.validateDefinedName(name);
   }
 
+  getFilter(sheetId?: string) {
+    return this.filterManager.getFilter(sheetId);
+  }
+  addFilter(range: IRange): void {
+    this.filterManager.addFilter(range);
+  }
+  deleteFilter(sheetId?: string): void {
+    this.filterManager.deleteFilter(sheetId);
+  }
+  updateFilter(sheetId: string, value: Partial<AutoFilterItem>) {
+    this.filterManager.updateFilter(sheetId, value);
+  }
+
   private historyRedo = (list: ICommandItem[]) => {
     for (const item of list) {
       this.workbookManager.redo(item);
@@ -434,7 +463,7 @@ export class Model implements IModel {
       this.rowManager.redo(item);
       this.colManager.redo(item);
     }
-    this.checkComputeFormulas(list)
+    this.checkComputeFormulas(list);
   };
   private historyUndo = (list: ICommandItem[]) => {
     for (const item of list) {
@@ -447,7 +476,7 @@ export class Model implements IModel {
       this.rowManager.undo(item);
       this.colManager.undo(item);
     }
-    this.checkComputeFormulas(list)
+    this.checkComputeFormulas(list);
   };
   private computeViewSize() {
     const headerSize = headerSizeSet.get();

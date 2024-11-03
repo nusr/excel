@@ -128,6 +128,7 @@ export type ChangeEventType =
   | 'cellStyle'
   | 'undo'
   | 'redo'
+  | 'autoFilter'
   | 'noHistory';
 export interface EventType {
   changeSet: Set<ChangeEventType>;
@@ -145,6 +146,33 @@ export interface MergeCellItem {
   firstCell: Coordinate; // first cell not empty
 }
 
+export type NumberFilter = {
+  type: 'number';
+  value: Array<{ type: string; value: number }>;
+};
+
+export type TextFilter = {
+  type: 'text';
+  value: Array<{ type: string; value: string }>;
+};
+
+export type ColorFilter = {
+  type: 'color';
+  value: string;
+  colorType: 'fillColor' | 'fontColor';
+};
+
+export type NormalFilter = {
+  type: 'normal';
+  value: ResultType[];
+};
+
+export type AutoFilterItem = {
+  range: IRange;
+  col?: number;
+  value?: NormalFilter | NumberFilter | TextFilter | ColorFilter;
+};
+
 export type WorkBookJSON = {
   worksheets: Record<string, WorksheetData>; // key: sheetId
   workbook: Record<string, WorksheetType>; // key: sheetId, workbook.xml_workbook_sheets
@@ -155,6 +183,7 @@ export type WorkBookJSON = {
   currentSheetId: string;
   drawings: Record<string, DrawingElement>; // key: uuid,  chart floatImage
   rangeMap: Record<string, IRange>; // key: sheetId
+  autoFilter: Record<string, AutoFilterItem>; // key: sheetId
 };
 
 export type DefinedNameItem = { range: IRange; name: string };
@@ -254,55 +283,64 @@ export interface IWorksheet extends IBaseManager {
   addMergeCell(range: IRange, type?: EMergeCellType): void;
 }
 
+export interface IFilter extends IBaseManager {
+  toJSON(): Pick<WorkBookJSON, 'autoFilter'>;
+  addFilter(range: IRange): void;
+  deleteFilter(sheetId?: string): void;
+  getFilter(sheetId?: string): AutoFilterItem | undefined;
+  updateFilter(sheetId: string, value: Partial<AutoFilterItem>): void;
+}
+
 export interface IBaseModel
   extends Pick<
-    IWorkbook,
-    | 'setCurrentSheetId'
-    | 'getCurrentSheetId'
-    | 'addSheet'
-    | 'deleteSheet'
-    | 'hideSheet'
-    | 'unhideSheet'
-    | 'renameSheet'
-    | 'getSheetInfo'
-    | 'updateSheetInfo'
-    | 'getSheetList'
-    | 'deleteAll'
-    | 'fromJSON'
-  >,
-  Pick<IRangeMap, 'setActiveRange' | 'getActiveRange' | 'validateRange'>,
-  Pick<
-    IDrawings,
-    | 'getDrawingList'
-    | 'addDrawing'
-    | 'updateDrawing'
-    | 'deleteDrawing'
-    | 'validateDrawing'
-  >,
-  Pick<
-    IDefinedName,
-    | 'getDefineName'
-    | 'setDefineName'
-    | 'checkDefineName'
-    | 'getDefineNameList'
-    | 'validateDefinedName'
-  >,
-  Pick<IMergeCell, 'getMergeCellList' | 'addMergeCell' | 'deleteMergeCell'>,
-  Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight'>,
-  Pick<ICol, 'hideCol' | 'getColWidth' | 'setColWidth'>,
-  Pick<
-    IWorksheet,
-    | 'addRow'
-    | 'deleteRow'
-    | 'addCol'
-    | 'deleteCol'
-    | 'getCell'
-    | 'setCell'
-    | 'updateCellStyle'
-    | 'getWorksheet'
-    | 'setWorksheet'
-    | 'setCellValue'
-  > {
+      IWorkbook,
+      | 'setCurrentSheetId'
+      | 'getCurrentSheetId'
+      | 'addSheet'
+      | 'deleteSheet'
+      | 'hideSheet'
+      | 'unhideSheet'
+      | 'renameSheet'
+      | 'getSheetInfo'
+      | 'updateSheetInfo'
+      | 'getSheetList'
+      | 'deleteAll'
+      | 'fromJSON'
+    >,
+    Pick<IRangeMap, 'setActiveRange' | 'getActiveRange' | 'validateRange'>,
+    Pick<
+      IDrawings,
+      | 'getDrawingList'
+      | 'addDrawing'
+      | 'updateDrawing'
+      | 'deleteDrawing'
+      | 'validateDrawing'
+    >,
+    Pick<
+      IDefinedName,
+      | 'getDefineName'
+      | 'setDefineName'
+      | 'checkDefineName'
+      | 'getDefineNameList'
+      | 'validateDefinedName'
+    >,
+    Pick<IMergeCell, 'getMergeCellList' | 'addMergeCell' | 'deleteMergeCell'>,
+    Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight'>,
+    Pick<ICol, 'hideCol' | 'getColWidth' | 'setColWidth'>,
+    Pick<
+      IWorksheet,
+      | 'addRow'
+      | 'deleteRow'
+      | 'addCol'
+      | 'deleteCol'
+      | 'getCell'
+      | 'setCell'
+      | 'updateCellStyle'
+      | 'getWorksheet'
+      | 'setWorksheet'
+      | 'setCellValue'
+    >,
+    Pick<IFilter, 'addFilter' | 'getFilter' | 'deleteFilter' | 'updateFilter'> {
   toJSON(): WorkBookJSON;
   canRedo(): boolean;
   canUndo(): boolean;
@@ -315,7 +353,7 @@ export interface IModel extends IBaseModel {
   pasteRange(range: IRange, isCut: boolean): IRange;
   emitChange(dataset: Set<ChangeEventType>): void;
   push(command: ICommandItem): void;
-  render(dataset: Set<ChangeEventType>): void
+  render(dataset: Set<ChangeEventType>): void;
 }
 
 export type NumberFormatValue =
@@ -327,5 +365,8 @@ export type NumberFormatValue =
   | undefined;
 
 export type EventEmitterType = {
-  modelChange: { changeSet: Set<ChangeEventType>, commandList?: ICommandItem[] };
+  modelChange: {
+    changeSet: Set<ChangeEventType>;
+    commandList?: ICommandItem[];
+  };
 };

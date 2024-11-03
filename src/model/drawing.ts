@@ -89,9 +89,14 @@ export class Drawing implements IDrawings {
     if (data.type === 'chart') {
       const range = data.chartRange!;
       let check = false;
+      const info = this.model.getSheetInfo(range.sheetId);
+      if (!info) {
+        return toast.error($('sheet-is-not-exist'));
+      }
       iterateRange(
         range,
-        this.model.getSheetInfo(range.sheetId),
+        info?.rowCount,
+        info?.colCount,
         (row: number, col: number) => {
           const data = this.model.getCell({
             row,

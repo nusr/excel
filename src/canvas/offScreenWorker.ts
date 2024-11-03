@@ -26,6 +26,7 @@ import {
   CELL_WIDTH,
   HIDE_CELL,
   BORDER_TYPE_MAP,
+  FILTER_RECT_SIZE,
 } from '@/util/constant';
 import { getHeaderStyle } from './constant';
 import { intToColumnName } from '@/util/convert';
@@ -39,8 +40,8 @@ const lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
  * run OffScreenWorker in Web Worker env
  */
 export default class OffScreenWorker implements WorkerMainView {
-  private canvas: OffscreenCanvas;
-  private ctx: OffscreenCanvasRenderingContext2D;
+  private readonly canvas: OffscreenCanvas;
+  private readonly ctx: OffscreenCanvasRenderingContext2D;
   private width: number = 0;
   private height: number = 0;
   private isRendering = false;
@@ -87,6 +88,7 @@ export default class OffScreenWorker implements WorkerMainView {
     customHeight: {},
     customWidth: {},
     currentMergeCells: [],
+    autoFilter: undefined,
   };
   constructor(canvas: OffscreenCanvas) {
     this.canvas = canvas;
@@ -95,10 +97,7 @@ export default class OffScreenWorker implements WorkerMainView {
     this.ctx.scale(size, size);
   }
   render(data: RequestRender) {
-    if (data.changeSet.size === 0) {
-      return;
-    }
-    if (this.isRendering) {
+    if (data.changeSet.size === 0 || this.isRendering) {
       return;
     }
     this.isRendering = true;
@@ -185,7 +184,7 @@ export default class OffScreenWorker implements WorkerMainView {
     return { endRow: i, contentHeight: Math.floor(contentHeight) };
   }
   private renderColsHeader(width: number) {
-    const { col: colIndex } = this.eventData.scroll;
+    const { col: colIndex, row: startRow } = this.eventData.scroll;
     const headerSize = this.eventData.headerSize;
     const { colCount } = this.eventData.currentSheetInfo;
     const range = this.eventData.range;
@@ -196,6 +195,16 @@ export default class OffScreenWorker implements WorkerMainView {
 
     let x = headerSize.width;
     let i = colIndex;
+
+    const autoFilter = this.eventData.autoFilter;
+    let rowHeight = 0;
+    for (let r = startRow; r < this.eventData.currentSheetInfo.rowCount; r++) {
+      rowHeight = this.getRowHeight(startRow);
+      if (rowHeight !== 0) {
+        break;
+      }
+    }
+
     for (; i < colCount && x <= width; i++) {
       const colWidth = this.getColWidth(i);
       let temp = x;
@@ -215,6 +224,17 @@ export default class OffScreenWorker implements WorkerMainView {
           headerSize.height / 2,
         );
       }
+      if (
+        autoFilter &&
+        i >= autoFilter.range.col &&
+        i < autoFilter.range.col + autoFilter.range.colCount
+      ) {
+        this.renderFilter(
+          x + colWidth,
+          headerSize.height + rowHeight,
+          autoFilter.col === i,
+        );
+      }
       x += colWidth;
     }
     pointList.push([x, 0], [x, headerSize.height]);
@@ -226,6 +246,27 @@ export default class OffScreenWorker implements WorkerMainView {
       endCol: i,
       contentWidth: Math.floor(contentWidth),
     };
+  }
+  private renderFilter(endX: number, endY: number, isFilter: boolean) {
+    const width = FILTER_RECT_SIZE;
+    const gap = DEFAULT_LINE_WIDTH * 4;
+    const x = endX - width - gap;
+    const y = endY - width - gap;
+
+    this.ctx.fillStyle = isFilter
+      ? getThemeColor('primaryColor', this.eventData.theme)
+      : getThemeColor('borderColor', this.eventData.theme);
+    this.ctx.strokeStyle = isFilter
+      ? getThemeColor('primaryColor', this.eventData.theme)
+      : getThemeColor('borderColor', this.eventData.theme);
+    strokeRect(this.ctx, x, y, width, width);
+
+    drawTriangle(
+      this.ctx,
+      [x + width / 4, y + (width * 3) / 8],
+      [x + (width * 3) / 4, y + (width * 3) / 8],
+      [x + width / 2, y + (width * 5) / 8],
+    );
   }
   private renderGrid(width: number, height: number): void {
     const headerSize = this.eventData.headerSize;

@@ -1,13 +1,21 @@
-import { ResultType } from './parser';
-import { IRange } from './range';
-import {
+import type { ResultType } from './parser';
+import type { IRange } from './range';
+import type {
   WorkBookJSON,
   WorksheetType,
   ChangeEventType,
   WorksheetData,
+  AutoFilterItem,
 } from './model';
-import { ThemeType, CanvasOverlayPosition, ScrollValue } from './components';
-import type { Remote } from 'comlink'
+import type {
+  ThemeType,
+  CanvasOverlayPosition,
+  ScrollValue,
+} from './components';
+import type { Remote } from 'comlink';
+import { type PointerEvent } from 'react';
+import { type IController } from './controller';
+
 export interface IWindowSize {
   width: number;
   height: number;
@@ -22,12 +30,12 @@ export type RequestFormulas = {
   definedNames: Record<string, IRange>;
   currentSheetId: string;
   workbook: WorksheetType[];
-}
+};
 
 export type ResponseFormulas = {
   list: Array<{ key: string; newValue: ResultType; sheetId: string }>;
   result?: ResultType[];
-}
+};
 
 export type RequestRender = {
   changeSet: Set<ChangeEventType>;
@@ -42,8 +50,9 @@ export type RequestRender = {
   copyRange: IRange | undefined;
   currentMergeCells: IRange[];
   sheetData: WorksheetData;
+  autoFilter?: AutoFilterItem;
 };
-export type RequestInit = { canvas: OffscreenCanvas; dpr: number }
+export type RequestInit = { canvas: OffscreenCanvas; dpr: number };
 
 export type ResponseRender = {
   rowMap: Record<string, number>;
@@ -63,13 +72,53 @@ export interface WorkerMainView {
 }
 
 export type WorkerMethod = {
-  init(data: RequestInit): void
-  resize(data: IWindowSize): void
-  render(data: RequestRender, cb: (data: ResponseRender) => void): Promise<void>
-  computeFormulas(data: RequestFormulas, cb: (data: ResponseFormulas) => void): void
+  init(data: RequestInit): void;
+  resize(data: IWindowSize): void;
+  render(
+    data: RequestRender,
+    cb: (data: ResponseRender) => void,
+  ): Promise<void>;
+  computeFormulas(
+    data: RequestFormulas,
+    cb: (data: ResponseFormulas) => void,
+  ): void;
+};
+
+export type RemoteWorkerMethod = Remote<WorkerMethod>;
+
+export type WorkerType = Pick<WorkerMethod, 'computeFormulas'>;
+export type RemoteWorkerType = Remote<WorkerType>;
+
+export type HitInfoResult = {
+  row: number;
+  col: number;
+  marginX: number;
+  marginY: number;
+};
+export type EventData = {
+  position?: HitInfoResult;
+  x: number;
+  y: number;
+  controller: IController;
+};
+
+export interface ModalValue {
+  type: 'filter' | 'validation';
+  row: number;
+  col: number;
+  x: number;
+  y: number;
 }
 
-export type RemoteWorkerMethod = Remote<WorkerMethod>
+export type ModalProps = ModalValue & { controller: IController; hide(): void };
 
-export type WorkerType = Pick<WorkerMethod, 'computeFormulas'>
-export type RemoteWorkerType = Remote<WorkerType>
+export interface EventHandler {
+  pointerMove(
+    data: EventData,
+    event: PointerEvent<HTMLCanvasElement>,
+  ): boolean | ModalValue;
+  pointerDown(
+    data: EventData,
+    event: PointerEvent<HTMLCanvasElement>,
+  ): boolean | ModalValue;
+}

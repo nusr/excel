@@ -6,6 +6,7 @@ export interface CoreStore {
   canUndo: boolean;
   activeUuid: string;
   currentSheetId: string;
+  isFilter: boolean;
 }
 
 export const coreStore = new BaseStore<CoreStore>({
@@ -14,4 +15,5 @@ export const coreStore = new BaseStore<CoreStore>({
   canUndo: false,
   activeUuid: '',
   currentSheetId: '',
+  isFilter: false
 });

@@ -1,7 +1,33 @@
-import type { WorkBookJSON, CustomItem, DrawingElement, ModelCellType, WorksheetType, StyleType, BorderItem } from './model';
+import type {
+  WorkBookJSON,
+  CustomItem,
+  DrawingElement,
+  ModelCellType,
+  WorksheetType,
+  StyleType,
+  BorderItem,
+  AutoFilterItem,
+} from './model';
 import { IRange } from './range';
 
-type ValueType = string | number | undefined | boolean | CustomItem | DrawingElement | IRange | ModelCellType | WorksheetType | Partial<StyleType> | BorderItem | WorkBookJSON['customWidth'] | WorkBookJSON['drawings'] | WorkBookJSON['workbook'] | WorkBookJSON['definedNames']
+type ValueType =
+  | string
+  | number
+  | undefined
+  | boolean
+  | CustomItem
+  | DrawingElement
+  | IRange
+  | ModelCellType
+  | WorksheetType
+  | Partial<StyleType>
+  | BorderItem
+  | WorkBookJSON['customWidth']
+  | WorkBookJSON['drawings']
+  | WorkBookJSON['workbook']
+  | WorkBookJSON['definedNames']
+  | AutoFilterItem
+  | AutoFilterItem['value'];
 
 export type ICommandItem = {
   /**

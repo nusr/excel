@@ -28,6 +28,7 @@ export function parseFormula(
 ): InterpreterResult {
   if (cache.has(formula)) {
     const t = cache.get(formula)!;
+    // fix cycle import
     if (t.result.length === 0) {
       return { result: [0] };
     }

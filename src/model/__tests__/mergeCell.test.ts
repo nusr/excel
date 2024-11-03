@@ -42,6 +42,7 @@ describe('mergeCell.test.ts', () => {
         currentSheetId: '',
         drawings: {},
         rangeMap: {},
+        autoFilter: {},
       });
 
       expect(model.toJSON().mergeCells).toEqual({

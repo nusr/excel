@@ -18,6 +18,7 @@ import {
   EMergeCellType,
   EventEmitterType,
   CustomClipboardData,
+  AutoFilterItem,
 } from '@/types';
 import {
   PLAIN_FORMAT,
@@ -483,7 +484,9 @@ export class Controller implements IController {
         }
       }
       result.push(temp);
-      trList.push(`<tr height=${h} style='height:${h}pt;'>${t.join('\n')}</tr>`);
+      trList.push(
+        `<tr height=${h} style='height:${h}pt;'>${t.join('\n')}</tr>`,
+      );
       if (isMerged) {
         break;
       }
@@ -606,7 +609,7 @@ export class Controller implements IController {
       html = data[HTML_FORMAT];
       text = data[PLAIN_FORMAT];
       if (data[CUSTOM_FORMAT]) {
-        custom = data[CUSTOM_FORMAT]
+        custom = data[CUSTOM_FORMAT];
       }
       if (custom && custom.type === 'cut') {
         this.hooks.copyOrCut(
@@ -729,7 +732,10 @@ export class Controller implements IController {
     if (event) {
       event.clipboardData?.setData(HTML_FORMAT, data[HTML_FORMAT]);
       event.clipboardData?.setData(PLAIN_FORMAT, data[PLAIN_FORMAT]);
-      event.clipboardData?.setData(CUSTOM_FORMAT, data[CUSTOM_FORMAT] ? JSON.stringify(data[CUSTOM_FORMAT]) : '');
+      event.clipboardData?.setData(
+        CUSTOM_FORMAT,
+        data[CUSTOM_FORMAT] ? JSON.stringify(data[CUSTOM_FORMAT]) : '',
+      );
       event.clipboardData?.setData(IMAGE_FORMAT, imageData);
     } else {
       this.hooks.copyOrCut(data, type);
@@ -790,5 +796,20 @@ export class Controller implements IController {
   }
   setFloatElementUuid(uuid: string) {
     this.floatElementUuid = uuid;
+  }
+  getFilter(sheetId?: string): AutoFilterItem | undefined {
+    return this.model.getFilter(sheetId);
+  }
+  addFilter(range: IRange): void {
+    this.model.addFilter(range);
+    this.emitChange();
+  }
+  deleteFilter(sheetId?: string): void {
+    this.model.deleteFilter(sheetId);
+    this.emitChange();
+  }
+  updateFilter(sheetId: string, value: Partial<AutoFilterItem>) {
+    this.model.updateFilter(sheetId, value);
+    this.emitChange();
   }
 }

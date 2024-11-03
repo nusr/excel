@@ -1,12 +1,5 @@
-import type { IController } from '@/types';
+import type { IController, HitInfoResult } from '@/types';
 import { headerSizeSet } from './set';
-
-type HitInfoResult = {
-  row: number;
-  col: number;
-  marginX: number;
-  marginY: number;
-};
 
 export function getHitInfo(
   controller: IController,

@@ -414,6 +414,7 @@ describe('controller.test.ts', () => {
             marginY: 0,
           },
         },
+        autoFilter: {}
       };
       expect(controller.toJSON()).toEqual(result);
     });
@@ -493,6 +494,7 @@ describe('controller.test.ts', () => {
             marginY: 0,
           },
         },
+        autoFilter: {}
       };
       controller.fromJSON(result);
       expect(controller.getColWidth(40).len).toEqual(300);

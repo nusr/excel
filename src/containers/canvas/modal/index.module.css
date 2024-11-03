@@ -1,0 +1,30 @@
+.modalContainer {
+  background-color: var(--white);
+  padding: var(--padding);
+  border: 1px solid var(--borderColor);
+  border-radius: var(--borderRadius);
+  position: fixed;
+  z-index: 4;
+  max-width: 320px;
+  overflow: hidden;
+}
+.modalContainer label {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.listItem {
+  display: flex;
+}
+.dialog-title {
+  padding-bottom: var(--mediumPadding);
+}
+.dialog-button {
+  padding-top: var(--mediumPadding);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.dialog-button button {
+  margin-left: var(--mediumPadding);
+}

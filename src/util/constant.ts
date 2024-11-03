@@ -18,6 +18,7 @@ export const DEFAULT_ROW_COUNT = 200;
 export const MAX_ADD_ROW_THRESHOLD = 200;
 export const DEFAULT_COL_COUNT = 30;
 export const DEFAULT_POSITION = -999;
+export const FILTER_RECT_SIZE = 16;
 
 export const SHEET_ITEM_TEST_ID_PREFIX = '__sheet_item_';
 export const FORMULA_PREFIX = '=';
