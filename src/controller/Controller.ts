@@ -240,8 +240,8 @@ export class Controller implements IController {
     this.model.updateCellStyle(style, range);
     this.emitChange();
   }
-  getCell = (range: IRange) => {
-    const result = this.model.getCell(range);
+  getCell = (range: IRange, noCheck?: boolean) => {
+    const result = this.model.getCell(range, noCheck);
     return result;
   };
   canRedo(): boolean {
@@ -375,6 +375,14 @@ export class Controller implements IController {
   }
   hideRow(rowIndex: number, count: number): void {
     this.model.hideRow(rowIndex, count);
+    this.emitChange();
+  }
+  unhideRow(rowIndex: number, count: number): void {
+    this.model.unhideRow(rowIndex, count);
+    this.emitChange();
+  }
+  unhideCol(colIndex: number, count: number): void {
+    this.model.unhideCol(colIndex, count);
     this.emitChange();
   }
   getScroll(sheetId?: string): ScrollValue {

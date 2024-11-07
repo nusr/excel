@@ -285,8 +285,9 @@ export const ToolbarContainer: React.FunctionComponent<Props> = memo(
       const filter = controller.getFilter();
       if (filter) {
         controller.deleteFilter();
+      } else {
+        controller.addFilter(controller.getActiveRange().range);
       }
-      controller.addFilter(controller.getActiveRange().range);
     }, []);
     return (
       <div className={styles['toolbar-wrapper']} data-testid="toolbar">

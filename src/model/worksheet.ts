@@ -273,12 +273,13 @@ export class Worksheet implements IWorksheet {
       oldValue: oldData,
     });
   }
-  getCell(range: IRange): ModelCellType | undefined {
+  getCell(range: IRange, noCheck: boolean = false): ModelCellType | undefined {
     const { row, col, sheetId } = range;
     const id = sheetId || this.model.getCurrentSheetId();
     if (
-      this.model.getRowHeight(row, id).len === HIDE_CELL ||
-      this.model.getColWidth(col, id).len === HIDE_CELL
+      !noCheck &&
+      (this.model.getRowHeight(row, id).len === HIDE_CELL ||
+        this.model.getColWidth(col, id).len === HIDE_CELL)
     ) {
       return undefined;
     }

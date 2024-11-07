@@ -72,6 +72,7 @@ src
 - [x] Text Horizontal Align
 - [x] Text Wrapping
 - [x] Number Format
+- [x] AutoFilter
 - [x] Merge Cells
 - [x] Chart
 - [x] Floating Picture

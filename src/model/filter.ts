@@ -7,7 +7,7 @@ import {
   IRange,
 } from '@/types';
 import { DELETE_FLAG, transformData } from './History';
-import { MERGE_CELL_LINE_BREAK, HIDE_CELL } from '@/util';
+import { MERGE_CELL_LINE_BREAK } from '@/util';
 
 export class FilterManger implements IFilter {
   private model: IModel;
@@ -23,11 +23,17 @@ export class FilterManger implements IFilter {
   fromJSON(json: WorkBookJSON): void {
     const data = json.autoFilter || {};
     const oldValue = { ...this.autoFilter };
-    this.autoFilter = { ...data };
+    for (const [key, value] of Object.entries(data)) {
+      value.range.sheetId = key;
+      if (!this.model.validateRange(value.range)) {
+        continue;
+      }
+      this.autoFilter[key] = value;
+    }
     this.model.push({
       type: 'autoFilter',
       key: '',
-      newValue: { ...data },
+      newValue: { ...this.autoFilter },
       oldValue,
     });
   }
@@ -57,6 +63,12 @@ export class FilterManger implements IFilter {
   }
   addFilter(range: IRange): void {
     range.sheetId = range.sheetId || this.model.getCurrentSheetId();
+    if (!this.model.validateRange(range)) {
+      return;
+    }
+    if (range.rowCount === 1 && range.colCount === 1) {
+      return;
+    }
     const newValue: AutoFilterItem = {
       range,
     };
@@ -95,35 +107,53 @@ export class FilterManger implements IFilter {
       }
     }
     /* jscpd:ignore-end */
-    if (typeof value.col === 'undefined' || !value.value) {
+    if (typeof value.col === 'number' && value.value) {
+      this.applyFilter(item.range, value as Required<AutoFilterItem>);
       return;
     }
-    const sheetInfo = this.model.getSheetInfo(item.range.sheetId);
+    if (typeof value.col === 'undefined' && !value.value) {
+      this.clearFilter(item.range);
+    }
+  }
+  private clearFilter(range: IRange) {
+    const sheetInfo = this.model.getSheetInfo(range.sheetId);
     if (!sheetInfo) {
       return;
     }
-    const { range } = item;
-    if (value.value.type === 'normal') {
-      const set = new Set(value.value.value);
-      for (
-        let r = range.row,
-          end =
-            range.rowCount === 0
-              ? sheetInfo.rowCount
-              : range.row + range.rowCount;
-        r < end;
-        r++
-      ) {
-        const cell = this.model.getCell({
-          row: r,
-          col: value.col,
-          rowCount: 1,
-          colCount: 1,
-          sheetId: range.sheetId,
-        });
+    let r = range.row + 1;
+    let end =
+      range.rowCount === 0 ? sheetInfo.rowCount : range.row + range.rowCount;
+    for (; r < end; r++) {
+      this.model.unhideRow(r, 1);
+    }
+  }
+  private applyFilter(range: IRange, autoFilter: Required<AutoFilterItem>) {
+    const sheetInfo = this.model.getSheetInfo(range.sheetId);
+    if (!sheetInfo) {
+      return;
+    }
+    const { col, value } = autoFilter;
+    if (value?.type === 'normal') {
+      const set = new Set(value.value);
+      let r = range.row + 1;
+      let end =
+        range.rowCount === 0 ? sheetInfo.rowCount : range.row + range.rowCount;
+      for (; r < end; r++) {
+        const cell = this.model.getCell(
+          {
+            row: r,
+            col,
+            rowCount: 1,
+            colCount: 1,
+            sheetId: range.sheetId,
+          },
+          true,
+        );
         const v = cell ? cell.value : MERGE_CELL_LINE_BREAK;
         if (!set.has(v)) {
-          this.model.setRowHeight(r, HIDE_CELL, range.sheetId);
+          this.model.hideRow(r, 1);
+        } else {
+          this.model.unhideRow(r, 1);
         }
       }
     }

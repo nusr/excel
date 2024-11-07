@@ -252,6 +252,7 @@ export interface IMergeCell extends IBaseManager {
 export interface IRow extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'customHeight'>;
   hideRow(rowIndex: number, count: number): void;
+  unhideRow(rowIndex: number, count: number): void;
   getRowHeight(row: number, sheetId?: string): CustomItem;
   setRowHeight(row: number, height: number, sheetId?: string): void;
 }
@@ -259,6 +260,7 @@ export interface IRow extends IBaseManager {
 export interface ICol extends IBaseManager {
   toJSON(): Pick<WorkBookJSON, 'customWidth'>;
   hideCol(colIndex: number, count: number): void;
+  unhideCol(colIndex: number, count: number): void;
   getColWidth(col: number, sheetId?: string): CustomItem;
   setColWidth(col: number, width: number, sheetId?: string): void;
 }
@@ -271,7 +273,7 @@ export interface IWorksheet extends IBaseManager {
   pasteRange(fromRange: IRange, isCut: boolean): IRange;
   getWorksheet(sheetId?: string): WorksheetData | undefined;
   setWorksheet(data: WorksheetData, sheetId?: string): void;
-  getCell(range: IRange): ModelCellType | undefined;
+  getCell(range: IRange, noCheck?: boolean): ModelCellType | undefined;
   setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
@@ -325,8 +327,8 @@ export interface IBaseModel
       | 'validateDefinedName'
     >,
     Pick<IMergeCell, 'getMergeCellList' | 'addMergeCell' | 'deleteMergeCell'>,
-    Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight'>,
-    Pick<ICol, 'hideCol' | 'getColWidth' | 'setColWidth'>,
+    Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight' | 'unhideRow'>,
+    Pick<ICol, 'hideCol' | 'getColWidth' | 'setColWidth' | 'unhideCol'>,
     Pick<
       IWorksheet,
       | 'addRow'

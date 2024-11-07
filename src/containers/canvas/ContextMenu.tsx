@@ -247,6 +247,15 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
             {$('hide-columns')}
           </Button>
           <Button
+            testId="context-menu-unhide-column"
+            onClick={() => {
+              hideContextMenu();
+              controller.unhideCol(col, colCount);
+            }}
+          >
+            {$('unhide-columns')}
+          </Button>
+          <Button
             testId="context-menu-column-width"
             onClick={() => {
               handleDialog(false);
@@ -275,6 +284,15 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
             }}
           >
             {$('hide-rows')}
+          </Button>
+          <Button
+            testId="context-menu-unhide-row"
+            onClick={() => {
+              hideContextMenu();
+              controller.unhideRow(row, rowCount);
+            }}
+          >
+            {$('unhide-rows')}
           </Button>
           <Button
             testId="context-menu-row-height"

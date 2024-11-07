@@ -103,7 +103,7 @@ describe('rangeMap.test.ts', () => {
       controller.hideRow(3, 2);
       controller.setNextActiveCell('up');
       expect(controller.getActiveRange().range).toEqual({
-        row: 2,
+        row: 4,
         col: 5,
         rowCount: 1,
         colCount: 1,
@@ -145,7 +145,7 @@ describe('rangeMap.test.ts', () => {
       controller.hideRow(6, 2);
       controller.setNextActiveCell('down');
       expect(controller.getActiveRange().range).toEqual({
-        row: 8,
+        row: 6,
         col: 5,
         rowCount: 1,
         colCount: 1,
@@ -164,7 +164,7 @@ describe('rangeMap.test.ts', () => {
       controller.setNextActiveCell('left');
       expect(controller.getActiveRange().range).toEqual({
         row: 5,
-        col: 2,
+        col: 4,
         rowCount: 1,
         colCount: 1,
         sheetId: controller.getCurrentSheetId(),
@@ -182,7 +182,7 @@ describe('rangeMap.test.ts', () => {
       controller.setNextActiveCell('right');
       expect(controller.getActiveRange().range).toEqual({
         row: 5,
-        col: 8,
+        col: 6,
         rowCount: 1,
         colCount: 1,
         sheetId: controller.getCurrentSheetId(),

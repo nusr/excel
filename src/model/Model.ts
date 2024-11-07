@@ -273,8 +273,8 @@ export class Model implements IModel {
   updateCellStyle(style: Partial<StyleType>, range: IRange): void {
     return this.worksheetManager.updateCellStyle(style, range);
   }
-  getCell = (range: IRange) => {
-    return this.worksheetManager.getCell(range);
+  getCell = (range: IRange, noCheck?: boolean) => {
+    return this.worksheetManager.getCell(range, noCheck);
   };
   getWorksheet(sheetId?: string): WorksheetData | undefined {
     return this.worksheetManager.getWorksheet(sheetId);
@@ -347,6 +347,12 @@ export class Model implements IModel {
   hideRow(rowIndex: number, count: number): void {
     this.rowManager.hideRow(rowIndex, count);
   }
+  unhideRow(rowIndex: number, count: number): void {
+    this.rowManager.unhideRow(rowIndex, count);
+  }
+  unhideCol(colIndex: number, count: number): void {
+    this.colManager.unhideCol(colIndex, count);
+  }
   getRowHeight(row: number, sheetId?: string): CustomItem {
     return this.rowManager.getRowHeight(row, sheetId);
   }
@@ -387,6 +393,7 @@ export class Model implements IModel {
     this.mergeCellManager.deleteAll(sheetId);
     this.drawingsManager.deleteAll(sheetId);
     this.definedNameManager.deleteAll(sheetId);
+    this.filterManager.deleteAll(sheetId);
   }
   getDefineNameList(): DefinedNameItem[] {
     return this.definedNameManager.getDefineNameList();
@@ -462,6 +469,7 @@ export class Model implements IModel {
       this.mergeCellManager.redo(item);
       this.rowManager.redo(item);
       this.colManager.redo(item);
+      this.filterManager.redo(item);
     }
     this.checkComputeFormulas(list);
   };
@@ -475,6 +483,7 @@ export class Model implements IModel {
       this.mergeCellManager.undo(item);
       this.rowManager.undo(item);
       this.colManager.undo(item);
+      this.filterManager.undo(item);
     }
     this.checkComputeFormulas(list);
   };

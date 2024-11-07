@@ -213,11 +213,11 @@ const handleStateChange = (
   if (changeSet.has('currentSheetId')) {
     core.activeUuid = '';
     core.currentSheetId = controller.getCurrentSheetId();
-    core.isFilter = typeof controller.getFilter()?.col === 'number';
+    core.isFilter = !!controller.getFilter()
   }
 
   if (changeSet.has('autoFilter')) {
-    core.isFilter = typeof controller.getFilter()?.col === 'number';
+    core.isFilter = !!controller.getFilter()
   }
   coreStore.setState(core);
 

@@ -2,7 +2,6 @@ import { WorkBookJSON, ICommandItem, ICol, IModel, CustomItem } from '@/types';
 import {
   getCustomWidthOrHeightKey,
   CELL_WIDTH,
-  HIDE_CELL,
   widthOrHeightKeyToData,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
@@ -54,15 +53,18 @@ export class ColManager implements ICol {
   }
 
   hideCol(colIndex: number, count: number): void {
+    this.toggleHideCol(colIndex, count, true);
+  }
+  private toggleHideCol(colIndex: number, count: number, isHide: boolean) {
     const id = this.model.getCurrentSheetId();
     for (let i = 0; i < count; i++) {
       const c = colIndex + i;
       const key = getCustomWidthOrHeightKey(id, c);
       const old = this.getColWidth(c);
-      if (old.isHide) {
+      if (old.isHide === isHide) {
         continue;
       }
-      const newData = { ...old, isHide: true };
+      const newData = { ...old, isHide };
       this.customWidth[key] = newData;
       this.model.push({
         type: 'customWidth',
@@ -71,6 +73,9 @@ export class ColManager implements ICol {
         oldValue: this.customWidth[key] ? old : DELETE_FLAG,
       });
     }
+  }
+  unhideCol(colIndex: number, count: number): void {
+    this.toggleHideCol(colIndex, count, false);
   }
   getColWidth(col: number, sheetId?: string): CustomItem {
     const id = sheetId || this.model.getCurrentSheetId();
@@ -82,7 +87,7 @@ export class ColManager implements ICol {
         isHide: false,
       };
     }
-    return temp.isHide ? { isHide: true, len: HIDE_CELL } : { ...temp };
+    return { ...temp };
   }
   setColWidth(col: number, width: number, sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();

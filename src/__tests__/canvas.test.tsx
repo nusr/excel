@@ -281,8 +281,8 @@ describe('Canvas.test.ts', () => {
       fireEvent.click(screen.getByTestId('context-menu-hide-column'));
 
       expect(
-        controller.getColWidth(controller.getActiveRange().range.col).len,
-      ).toEqual(0);
+        controller.getColWidth(controller.getActiveRange().range.col).isHide,
+      ).toEqual(true);
     });
     test('delete col', () => {
       const oldColCount = controller.getSheetInfo()!.colCount;
@@ -380,8 +380,8 @@ describe('Canvas.test.ts', () => {
       fireEvent.click(screen.getByTestId('context-menu-hide-row'));
 
       expect(
-        controller.getRowHeight(controller.getActiveRange().range.row).len,
-      ).toEqual(0);
+        controller.getRowHeight(controller.getActiveRange().range.row).isHide,
+      ).toEqual(true);
     });
 
     test('delete row', () => {

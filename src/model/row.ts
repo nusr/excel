@@ -2,7 +2,6 @@ import { WorkBookJSON, ICommandItem, IRow, CustomItem, IModel } from '@/types';
 import {
   getCustomWidthOrHeightKey,
   CELL_HEIGHT,
-  HIDE_CELL,
   widthOrHeightKeyToData,
 } from '@/util';
 import { DELETE_FLAG, transformData } from './History';
@@ -53,15 +52,19 @@ export class RowManager implements IRow {
     }
   }
   hideRow(rowIndex: number, count: number): void {
+    this.toggleHideRow(rowIndex, count, true);
+  }
+  private toggleHideRow(rowIndex: number, count: number, isHide: boolean) {
+    const sheetId = this.model.getCurrentSheetId();
     for (let i = 0; i < count; i++) {
       const r = rowIndex + i;
-      const key = getCustomWidthOrHeightKey(this.model.getCurrentSheetId(), r);
+      const key = getCustomWidthOrHeightKey(sheetId, r);
       const old = this.getRowHeight(r);
 
-      if (old.isHide) {
+      if (old.isHide === isHide) {
         continue;
       }
-      const newData = { ...old, isHide: true };
+      const newData = { ...old, isHide };
 
       this.customHeight[key] = newData;
       this.model.push({
@@ -71,6 +74,9 @@ export class RowManager implements IRow {
         oldValue: this.customHeight[key] ? old : DELETE_FLAG,
       });
     }
+  }
+  unhideRow(rowIndex: number, count: number): void {
+    this.toggleHideRow(rowIndex, count, false);
   }
   getRowHeight(row: number, sheetId?: string): CustomItem {
     const id = sheetId || this.model.getCurrentSheetId();
@@ -82,7 +88,7 @@ export class RowManager implements IRow {
         isHide: false,
       };
     }
-    return temp.isHide ? { isHide: true, len: HIDE_CELL } : { ...temp };
+    return { ...temp };
   }
   /* jscpd:ignore-start */
   setRowHeight(row: number, height: number, sheetId?: string): void {

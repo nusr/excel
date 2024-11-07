@@ -23,13 +23,13 @@ describe('row.test.ts', () => {
   describe('hideRow', () => {
     test('ok', () => {
       controller.hideRow(20, 1);
-      expect(controller.getRowHeight(20).len).toEqual(0);
+      expect(controller.getRowHeight(20).isHide).toEqual(true);
     });
     test('not changed', () => {
       controller.hideRow(20, 1);
-      expect(controller.getRowHeight(20).len).toEqual(0);
+      expect(controller.getRowHeight(20).isHide).toEqual(true);
       controller.hideRow(20, 1);
-      expect(controller.getRowHeight(20).len).toEqual(0);
+      expect(controller.getRowHeight(20).isHide).toEqual(true);
     });
   });
 
@@ -64,11 +64,11 @@ describe('row.test.ts', () => {
     test('undo redo', () => {
       const old = controller.getRowHeight(20).len;
       controller.hideRow(20, 1);
-      expect(controller.getRowHeight(20).len).toEqual(0);
+      expect(controller.getRowHeight(20).isHide).toEqual(true);
       controller.undo();
       expect(controller.getRowHeight(20).len).toEqual(old);
       controller.redo();
-      expect(controller.getRowHeight(20).len).toEqual(0);
+      expect(controller.getRowHeight(20).isHide).toEqual(true);
     });
   });
   describe('RowHeight', () => {
@@ -78,8 +78,8 @@ describe('row.test.ts', () => {
 
     test('hide', () => {
       controller.hideRow(0, 2);
-      expect(controller.getRowHeight(0).len).toEqual(0);
-      expect(controller.getRowHeight(1).len).toEqual(0);
+      expect(controller.getRowHeight(0).isHide).toEqual(true);
+      expect(controller.getRowHeight(1).isHide).toEqual(true);
     });
     test('undo redo', () => {
       const old = controller.getRowHeight(0).len;

@@ -132,6 +132,14 @@ const MOCK_MODEL: WorkBookJSON = {
       rowCount: DEFAULT_ROW_COUNT,
       sort: 10,
     },
+    '11': {
+      sheetId: '11',
+      name: 'autoFilter',
+      isHide: false,
+      colCount: DEFAULT_COL_COUNT,
+      rowCount: DEFAULT_ROW_COUNT,
+      sort: 11,
+    },
   },
   worksheets: {
     '1': {
@@ -324,6 +332,17 @@ const MOCK_MODEL: WorkBookJSON = {
     },
     '9': {},
     '10': {},
+    '11': {
+      '0_0': {
+        value: '1'
+      },
+      '1_0': {
+        value: '2'
+      },
+      '2_0': {
+        value: '3'
+      },
+    }
   },
 
   mergeCells: {
@@ -384,24 +403,14 @@ const MOCK_MODEL: WorkBookJSON = {
   },
   drawings: {},
   autoFilter: {
-    '1': {
+    '11': {
       range: {
         col: 0,
         row: 0,
-        rowCount: 10,
-        colCount: 10,
-        sheetId: '',
-      },
-      col: 0,
-      value: {
-        type: 'number',
-        value: [
-          {
-            type: '=',
-            value: 1,
-          },
-        ],
-      },
+        rowCount: 5,
+        colCount: 5,
+        sheetId: '11',
+      }
     },
   },
 };
