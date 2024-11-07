@@ -22,5 +22,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 */
-import{a as m}from"./chunk-GMPT6SXY.js";import"./chunk-EOHQJDWP.js";import{a as o}from"./chunk-PRJU7QU5.js";import"./chunk-JN5Q2OC2.js";import"./chunk-AI5EXC2Q.js";o(m);
+import{a as m}from"./chunk-COPFB74N.js";import"./chunk-2EW72QMQ.js";import{a as o}from"./chunk-PRJU7QU5.js";import"./chunk-6ACQG57Y.js";import"./chunk-AI5EXC2Q.js";o(m);
 //# sourceMappingURL=worker.js.map
