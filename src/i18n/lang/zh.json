@@ -25,6 +25,7 @@
   "import-xlsx": "导入 XLSX",
   "export-xlsx": "导出 XLSX",
   "export-csv": "导出 CSV",
+  "export-json": "导出 JSON",
   "import-csv": "导入 CSV",
   "floating-picture": "浮动图片",
   "chart": "图表",

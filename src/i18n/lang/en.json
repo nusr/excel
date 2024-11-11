@@ -25,6 +25,7 @@
   "import-xlsx": "Import XLSX",
   "export-xlsx": "Export XLSX",
   "export-csv": "Export CSV",
+  "export-json": "Export JSON",
   "import-csv": "Import CSV",
   "floating-picture": "Floating Picture",
   "chart": "Chart",

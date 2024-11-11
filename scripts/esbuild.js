@@ -93,7 +93,7 @@ function buildBrowserConfig(options) {
     tsconfig: 'tsconfig.json',
     define: {
       'process.env.NODE_ENV': JSON.stringify(nodeEnv),
-      'process.env.VERSION': JSON.stringify(packageJson.version),
+      'process.env.FORCE_FONT': JSON.stringify(process.env.FORCE_FONT || ''),
     },
     banner: {
       js: `/* \n${licenseText}\n*/`,

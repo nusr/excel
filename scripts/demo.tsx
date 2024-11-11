@@ -52,10 +52,11 @@ const controller = initController(true, {
   ),
 });
 window.controller = controller;
+controller.fromJSON(MOCK_MODEL);
+initCollaboration(controller);
+
 createRoot(domNode).render(
   <StrictMode>
     <App controller={controller} />
   </StrictMode>,
 );
-controller.fromJSON(MOCK_MODEL);
-initCollaboration(controller);

@@ -50,6 +50,12 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       },
       [],
     );
+    const handleExportJSON = useCallback(() => {
+      const blob = new Blob([JSON.stringify(controller.toJSON())], {
+        type: 'application/json',
+      });
+      saveAs(blob, `excel_${Date.now()}.json`);
+    }, []);
     return (
       <div className={styles['menubar-container']} data-testid="menubar">
         <div className={styles['menubar-menu']}>
@@ -86,6 +92,9 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
             <MenuItem testId="menubar-export-csv" onClick={handleExportCSV}>
               {$('export-csv')}
             </MenuItem>
+            <MenuItem testId="menubar-export-json" onClick={handleExportJSON}>
+              {$('export-json')}
+            </MenuItem>
           </Menu>
         </div>
         <I18N />
@@ -98,4 +107,4 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
 
 MenuBarContainer.displayName = 'MenuBarContainer';
 
-export default MenuBarContainer
+export default MenuBarContainer;
