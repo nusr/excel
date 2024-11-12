@@ -17,6 +17,7 @@ cd excel
 
 npm i -g pnpm jscpd
 pnpm i
+pnpm exec playwright install --with-deps
 npm run start
 ```
 

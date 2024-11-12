@@ -1,5 +1,4 @@
 import { App } from '@/containers';
-import * as React from 'react';
 import {
   screen,
   render,

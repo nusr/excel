@@ -1,5 +1,4 @@
 import { Toast, toast } from '../Toast';
-import React from 'react';
 import { cleanup, render, act, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 

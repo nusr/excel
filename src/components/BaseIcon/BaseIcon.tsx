@@ -1,6 +1,6 @@
 import { classnames } from '@/util';
 import styles from './BaseIcon.module.css';
-import React, { FunctionComponent } from 'react';
+import { FunctionComponent } from 'react';
 
 interface PathItem {
   d: string;

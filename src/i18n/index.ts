@@ -8,10 +8,12 @@ export const LANGUAGE_LIST = ['en', 'zh'] as const;
 export type LanguageType = (typeof LANGUAGE_LIST)[number];
 
 export function getLanguage(): LanguageType {
+  const defaultLanguage = 'en';
+
   if (typeof window === 'undefined') {
-    return 'en';
+    return defaultLanguage;
   }
-  let language: LanguageType = 'en';
+  let language: LanguageType = defaultLanguage;
   const l = localStorage.getItem(languageKey);
   if (l && LANGUAGE_LIST.some((v) => v === l)) {
     language = l as LanguageType;

@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { screen, fireEvent, render, act } from '@testing-library/react';
 import { App } from '@/containers';
 import { initController } from '@/controller';
@@ -33,5 +32,5 @@ export function renderComponent() {
   act(() => {
     render(<App controller={controller} />);
   });
-  return controller
+  return controller;
 }

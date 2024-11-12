@@ -41,7 +41,7 @@ export function makeFont(
   const temp = `${fontStyle} ${fontWeight} ${fontSize}px `;
   const fontFamilyList: string[] = [MUST_FONT_FAMILY];
   // just for test
-  if (isTestEnv() || process.env.FORCE_FONT) {
+  if (isTestEnv() || process.env.IS_E2E) {
     fontFamilyList.unshift('Source Code Pro');
   }
   if (fontFamily) {

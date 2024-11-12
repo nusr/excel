@@ -1,6 +1,5 @@
 import { Dialog, info } from '../Dialog';
 import { cleanup, render, act, screen } from '@testing-library/react';
-import React from 'react';
 
 describe('Dialog.test.ts', () => {
   afterEach(cleanup);

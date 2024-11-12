@@ -4,18 +4,15 @@ import {
   replayIntegration,
 } from '@sentry/react';
 import { createRoot } from 'react-dom/client';
-import React, { StrictMode } from 'react';
-import {
-  App,
-  initController,
-  copyOrCut,
-  paste,
-  MOCK_MODEL,
-  WorkerMethod,
-  initCollaboration,
-  IController,
-} from '../src';
+import { StrictMode } from 'react';
+import { App } from './containers';
+import { type IController, type WorkerMethod } from './types';
+import { MOCK_MODEL } from './model';
+import { copyOrCut, paste } from './util';
+import { initController } from './controller';
+import { initCollaboration } from './collaboration';
 import * as Comlink from 'comlink';
+import './global.css';
 
 declare const window: {
   controller: IController;
@@ -48,7 +45,10 @@ const controller = initController(true, {
   copyOrCut,
   paste,
   worker: Comlink.wrap<WorkerMethod>(
-    new Worker('./worker.js', { type: 'module', name: 'worker' }),
+    new Worker(new URL('./worker.js', import.meta.url), {
+      type: 'module',
+      name: 'worker',
+    }),
   ),
 });
 window.controller = controller;

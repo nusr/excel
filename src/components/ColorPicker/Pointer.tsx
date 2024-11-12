@@ -1,4 +1,3 @@
-import React from 'react';
 import { classnames } from '@/util';
 import styles from './panel.module.css';
 

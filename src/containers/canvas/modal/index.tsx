@@ -1,6 +1,5 @@
 import styles from './index.module.css';
 import type { ModalProps } from '@/types';
-import React from 'react';
 import { FilterModal } from './Filter';
 
 const Modal = (props: ModalProps) => {

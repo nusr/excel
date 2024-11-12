@@ -1,4 +1,4 @@
-import React, { FunctionComponent, memo, useState, useRef } from 'react';
+import { FunctionComponent, memo, useState, useRef } from 'react';
 import styles from './Border.module.css';
 import {
   Button,

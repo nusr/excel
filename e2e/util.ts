@@ -17,7 +17,7 @@ export async function goto(page: Page) {
     if (type === 'error' || type === 'warning') {
       throw new Error(msg.text());
     } else {
-      console.log(msg.text());
+      // console.log(msg.text());
     }
   });
 
@@ -25,11 +25,18 @@ export async function goto(page: Page) {
   await page.waitForSelector(getByTestId(MAIN_CANVAS));
 }
 
-export async function clickFirstCell(page: Page) {
-  await page.getByTestId(MAIN_CANVAS).click({
-    position: {
-      x: 40,
-      y: 40,
-    },
-  });
+export async function clickFirstCell(page: Page, isDbClick = false) {
+  const position = {
+    x: 40,
+    y: 40,
+  };
+  if (isDbClick) {
+    await page.getByTestId(MAIN_CANVAS).dblclick({
+      position,
+    });
+  } else {
+    await page.getByTestId(MAIN_CANVAS).click({
+      position,
+    });
+  }
 }

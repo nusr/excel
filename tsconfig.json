@@ -1,9 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "ES2020",
-    "moduleResolution": "Node",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "jsx": "react-jsx",
+    "target": "ES2020",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "useDefineForClassFields": true,
+    "module": "esnext",
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "removeComments": true,
+    "declaration": true,
+    "checkJs": true,
     "strict": true,
     "noImplicitAny": true,
     "alwaysStrict": true,
@@ -15,19 +30,17 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "jsx": "react",
     "sourceMap": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "outDir": "dist",
-    "removeComments": true,
-    "declaration": true,
-    "resolveJsonModule": true,
-    "checkJs": true
+    "outDir": "dist"
   },
+  "include": [
+    "src"
+  ],
   "exclude": [
     "node_modules",
     "dist",

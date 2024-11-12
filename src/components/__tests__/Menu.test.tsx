@@ -1,5 +1,4 @@
 import { Menu, SubMenu, MenuItem } from '../Menu';
-import React from 'react';
 import {
   cleanup,
   fireEvent,

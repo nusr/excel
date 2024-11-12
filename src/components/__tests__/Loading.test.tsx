@@ -1,5 +1,4 @@
 import { Loading } from '../Loading';
-import React from 'react';
 import { cleanup, render } from '@testing-library/react';
 
 describe('BaseIcon.test.ts', () => {

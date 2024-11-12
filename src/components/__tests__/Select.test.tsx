@@ -1,5 +1,4 @@
 import { SelectList } from '../Select';
-import React from 'react';
 import { cleanup, render, fireEvent, screen } from '@testing-library/react';
 
 describe('Select.test.ts', () => {

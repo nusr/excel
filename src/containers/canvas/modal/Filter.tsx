@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { IController, ModalProps, ResultType } from '@/types';
 import { MERGE_CELL_LINE_BREAK } from '@/util';
 import { $ } from '@/i18n';

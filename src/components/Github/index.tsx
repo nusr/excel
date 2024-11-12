@@ -1,4 +1,4 @@
-import React, { FunctionComponent, memo } from 'react';
+import { FunctionComponent, memo } from 'react';
 
 import styles from './index.module.css';
 

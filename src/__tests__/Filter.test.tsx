@@ -6,7 +6,7 @@ import './global.mock';
 describe('Filter.test.tsx', () => {
   let controller: IController;
   beforeEach(async () => {
-    controller = renderComponent();
+    controller = await renderComponent();
     await screen.findByTestId('toolbar');
   });
   test('add filter', () => {

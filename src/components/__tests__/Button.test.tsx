@@ -1,6 +1,5 @@
 import { Button } from '../Button';
 import { cleanup, render } from '@testing-library/react';
-import React from 'react';
 
 describe('Button.test.ts', () => {
   afterEach(cleanup);

@@ -26,7 +26,7 @@ jobs:
           npm run e2e
           npm run repeat
           npm run lint
-          npx tsc
+          npm run type-check
           npm run coverage
       - name: Upload coverage
         uses: codecov/codecov-action@v4
