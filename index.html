@@ -36,29 +36,10 @@
   <link rel="alternate" href="https://github.com/nusr/excel" hreflang="x-default" />
 
   <title>Web Excel</title>
-  <link rel="stylesheet" href="./demo.css" />
-</head>
+<script defer src="/excel/lib-react.50f3c81d.js"></script><script defer src="/excel/29.f8c582cf.js"></script><script defer src="/excel/186.58035dd3.js"></script><script defer src="/excel/index.e84bf192.js"></script><link href="/excel/index.3d0baca6.css" rel="stylesheet"></head>
 
 <body>
   <div id="root" class="root-container"></div>
-  <script src="./react.js"></script>
-<script src="./react-dom.js"></script>
-  <script src="./demo.js" type="module"></script>
-  <script>
-    window.onload = function () {
-      if ("production" === 'development') {
-        // esbuild hot reload
-        const eventSource = new EventSource('/esbuild');
-        eventSource.addEventListener('change', function () {
-          location.reload();
-        });
-        eventSource.onerror = function (error) {
-          console.log(error);
-          eventSource.close();
-        };
-      }
-    };
-  </script>
 </body>
 
 </html>
