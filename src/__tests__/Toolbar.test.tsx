@@ -6,8 +6,8 @@ import './global.mock';
 describe('Toolbar.test.ts', () => {
   let controller: IController;
   beforeEach(async () => {
-    controller = renderComponent();
-    await screen.findByTestId('toolbar');
+    const r = renderComponent();
+    controller = r.controller;
   });
   describe('toolbar', () => {
     test('normal', () => {
@@ -198,10 +198,8 @@ describe('Toolbar.test.ts', () => {
       type('This is a very long text that needs to be wrapped');
       fireEvent.click(screen.getByTestId('toolbar-wrap-text'));
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        isWrapText: true,
-      });
+        controller.getCell(controller.getActiveRange().range)?.isWrapText,
+      ).toEqual(true);
     });
     test('single underline', () => {
       type('This is a very long text that needs to be wrapped');
@@ -234,10 +232,8 @@ describe('Toolbar.test.ts', () => {
       dom.setAttribute('data-value', '#B2B2B2');
       fireEvent.click(dom);
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        fillColor: '#B2B2B2',
-      });
+        controller.getCell(controller.getActiveRange().range)?.fillColor,
+      ).toEqual('#B2B2B2');
     });
     test('saturation', () => {
       fireEvent.click(screen.getByTestId('toolbar-fill-color'));
@@ -254,10 +250,8 @@ describe('Toolbar.test.ts', () => {
       fireEvent.pointerUp(document.body);
 
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        fillColor: '#804949',
-      });
+        controller.getCell(controller.getActiveRange().range)?.fillColor,
+      ).toEqual('#804949');
     });
   });
   describe('font color', () => {
@@ -268,10 +262,8 @@ describe('Toolbar.test.ts', () => {
       dom.setAttribute('data-value', '#B2B2B2');
       fireEvent.click(dom);
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        fontColor: '#B2B2B2',
-      });
+        controller.getCell(controller.getActiveRange().range)?.fontColor,
+      ).toEqual('#B2B2B2');
     });
     test('saturation', () => {
       fireEvent.click(screen.getByTestId('toolbar-font-color'));
@@ -288,10 +280,8 @@ describe('Toolbar.test.ts', () => {
       fireEvent.pointerUp(document.body);
 
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        fontColor: '#bf9696',
-      });
+        controller.getCell(controller.getActiveRange().range)?.fontColor,
+      ).toEqual('#bf9696');
     });
 
     test('hue', () => {
@@ -314,10 +304,8 @@ describe('Toolbar.test.ts', () => {
       fireEvent.pointerUp(document.body);
 
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        fontColor: '#b4bf96',
-      });
+        controller.getCell(controller.getActiveRange().range)?.fontColor,
+      ).toEqual('#b4bf96');
     });
     test('reset', () => {
       fireEvent.click(screen.getByTestId('toolbar-font-color'));
@@ -326,12 +314,12 @@ describe('Toolbar.test.ts', () => {
       dom.setAttribute('data-value', '#B2B2B2');
       fireEvent.click(dom);
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({ fontColor: '#B2B2B2' });
+        controller.getCell(controller.getActiveRange().range)?.fontColor,
+      ).toEqual('#B2B2B2');
       fireEvent.click(screen.getByTestId('toolbar-font-color-reset'));
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({ fontColor: '' });
+        controller.getCell(controller.getActiveRange().range)?.fontColor,
+      ).toEqual('');
     });
   });
 });
@@ -345,8 +333,8 @@ test('queryLocalFonts', async () => {
   });
   localStorage.setItem('LOCAL_FONT_KEY', JSON.stringify(['serif']));
 
-  renderComponent()
-  
+  renderComponent();
+
   fireEvent.change(await screen.findByTestId('toolbar-font-family'), {
     target: { value: 'serif' },
   });

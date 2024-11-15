@@ -1,11 +1,12 @@
-import { initController } from '@/controller';
+import { initController, getMockHooks } from '@/controller';
 import { IController } from '@/types';
 import { compareScreenShot } from './util';
 
 describe('theme.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController();
+    controller = initController(getMockHooks());
+    controller.addSheet();
   });
 
   test('light', async () => {

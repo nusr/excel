@@ -1,18 +1,23 @@
-import { Controller } from '..';
-import { Model } from '@/model';
+import { initController, getMockHooks } from '..';
 import { HTML_FORMAT, PLAIN_FORMAT, headerSizeSet } from '@/util';
-import { WorkBookJSON, EUnderLine } from '@/types';
-import { mockTestHooks } from '../init'
+import {
+  ModelJSON,
+  EUnderLine,
+  ModelCellType,
+  WorksheetData,
+  IController,
+} from '@/types';
+import { waitFor } from '@testing-library/react';
 
 describe('controller.test.ts', () => {
-  let controller: Controller;
+  let controller: IController;
   beforeEach(() => {
-    controller = new Controller(new Model(), mockTestHooks);
+    controller = initController(getMockHooks());
     controller.addSheet();
   });
 
   describe('paste', () => {
-    test('html', () => {
+    test('html', async () => {
       const mockHTML = `<html>
       <head>
         <style>
@@ -54,30 +59,31 @@ describe('controller.test.ts', () => {
         colCount: 1,
         sheetId: controller.getCurrentSheetId(),
       });
-      expect(
-        controller.getCell({
-          row: 0,
-          col: 0,
-          rowCount: 1,
-          colCount: 1,
-          sheetId: controller.getCurrentSheetId(),
-        }),
-      ).toEqual({
+      const result: ModelCellType = {
         value: 3,
         formula: '=SUM(1,2)',
-        style: {
-          fillColor: '#FCE869',
-          fontColor: '#738DF2',
-          fontSize: 36,
-          isItalic: true,
-          isBold: true,
-          isStrike: true,
-          isWrapText: true,
-          underline: EUnderLine.DOUBLE,
-        },
+        fillColor: '#FCE869',
+        fontColor: '#738DF2',
+        fontSize: 36,
+        isItalic: true,
+        isBold: true,
+        isStrike: true,
+        isWrapText: true,
+        underline: EUnderLine.DOUBLE,
+      };
+      await waitFor(() => {
+        expect(
+          controller.getCell({
+            row: 0,
+            col: 0,
+            rowCount: 1,
+            colCount: 1,
+            sheetId: controller.getCurrentSheetId(),
+          }),
+        ).toEqual(result);
       });
     });
-    test('text', () => {
+    test('text', async () => {
       const mockData = '=SUM(1,2)\t2\ntest\ttrue';
       const event = {
         clipboardData: {
@@ -90,7 +96,6 @@ describe('controller.test.ts', () => {
         },
       } as ClipboardEvent;
       controller.paste(event);
-      const sheetData = controller.getWorksheet(controller.getCurrentSheetId());
       expect(controller.getActiveRange().range).toEqual({
         row: 0,
         col: 0,
@@ -98,20 +103,38 @@ describe('controller.test.ts', () => {
         colCount: 2,
         sheetId: controller.getCurrentSheetId(),
       });
-      expect(sheetData).toEqual({
-        '0_0': {
+      const sheetId = controller.getCurrentSheetId();
+      const result: WorksheetData = [
+        {
+          row: 0,
+          col: 0,
+          sheetId,
           value: 3,
           formula: '=SUM(1,2)',
         },
-        '0_1': {
+        {
+          row: 0,
+          col: 1,
+          sheetId,
           value: 2,
         },
-        '1_0': {
+        {
+          row: 1,
+          col: 0,
+          sheetId,
           value: 'test',
         },
-        '1_1': {
+        {
+          row: 1,
+          col: 1,
+          sheetId,
           value: true,
         },
+      ];
+      await waitFor(() => {
+        expect(controller.getWorksheet(controller.getCurrentSheetId())).toEqual(
+          result,
+        );
       });
     });
   });
@@ -152,6 +175,7 @@ describe('controller.test.ts', () => {
     });
     test('set 100000', () => {
       const headerSize = headerSizeSet.get();
+      controller.updateSheetInfo({ rowCount: 100000 + 100 });
       controller.setScroll({
         top: 1000,
         left: 0,
@@ -160,6 +184,7 @@ describe('controller.test.ts', () => {
         scrollLeft: 0,
         scrollTop: 80800,
       });
+
       expect(controller.getScroll()).toEqual({
         top: 1000,
         left: 0,
@@ -223,8 +248,8 @@ describe('controller.test.ts', () => {
         rowCount: 1,
         sheetId: '',
       });
-      expect(size2.left - size.left).toEqual(controller.getColWidth(5).len);
-      expect(size2.top - size.top).toEqual(controller.getRowHeight(5).len);
+      expect(size2.left - size.left).toEqual(controller.getCol(5).len);
+      expect(size2.top - size.top).toEqual(controller.getRow(5).len);
     });
   });
 
@@ -275,8 +300,8 @@ describe('controller.test.ts', () => {
       controller.deleteAll();
       expect(controller.checkDefineName('foo')).toBeUndefined();
       expect(controller.getDrawingList()).toHaveLength(0);
-      expect(controller.getColWidth(40).len).not.toEqual(100);
-      expect(controller.getRowHeight(40).len).not.toEqual(200);
+      expect(controller.getCol(40).len).not.toEqual(100);
+      expect(controller.getRow(40).len).not.toEqual(200);
       expect(controller.getMergeCellList()).toHaveLength(0);
       expect(
         controller.getCell({
@@ -341,7 +366,8 @@ describe('controller.test.ts', () => {
         colCount: 1,
         sheetId,
       });
-      const result: WorkBookJSON = {
+      const result: ModelJSON = {
+        scroll: {},
         currentSheetId: sheetId,
         rangeMap: {
           [sheetId]: { row: 3, col: 3, rowCount: 1, colCount: 1, sheetId },
@@ -360,13 +386,9 @@ describe('controller.test.ts', () => {
           foo: { row: 0, col: 0, sheetId, rowCount: 1, colCount: 1 },
         },
         worksheets: {
-          [sheetId]: {
-            '0_0': {
-              value: 1,
-              style: {
-                isBold: true,
-              },
-            },
+          [`${sheetId}_0_0`]: {
+            value: 1,
+            isBold: true,
           },
         },
         mergeCells: {
@@ -414,13 +436,14 @@ describe('controller.test.ts', () => {
             marginY: 0,
           },
         },
-        autoFilter: {}
+        autoFilter: {},
       };
       expect(controller.toJSON()).toEqual(result);
     });
     test('fromJSON', () => {
       const sheetId = '1';
-      const result: WorkBookJSON = {
+      const result: ModelJSON = {
+        scroll: {},
         currentSheetId: sheetId,
         rangeMap: {
           [sheetId]: { row: 3, col: 3, rowCount: 1, colCount: 1, sheetId },
@@ -439,14 +462,10 @@ describe('controller.test.ts', () => {
           foo: { row: 0, col: 0, sheetId, rowCount: 1, colCount: 1 },
         },
         worksheets: {
-          [sheetId]: {
-            '0_0': {
-              formula: '=SUM(1,2)',
-              value: '',
-              style: {
-                isBold: true,
-              },
-            },
+          [`${sheetId}_0_0`]: {
+            formula: '=SUM(1,2)',
+            value: '',
+            isBold: true,
           },
         },
         mergeCells: {
@@ -494,11 +513,11 @@ describe('controller.test.ts', () => {
             marginY: 0,
           },
         },
-        autoFilter: {}
+        autoFilter: {},
       };
       controller.fromJSON(result);
-      expect(controller.getColWidth(40).len).toEqual(300);
-      expect(controller.getRowHeight(50).len).toEqual(200);
+      expect(controller.getCol(40).len).toEqual(300);
+      expect(controller.getRow(50).len).toEqual(200);
       expect(controller.getCurrentSheetId()).toEqual(sheetId);
       expect(controller.getSheetList()).toHaveLength(1);
       expect(controller.getDefineNameList()).toHaveLength(1);
@@ -515,9 +534,7 @@ describe('controller.test.ts', () => {
       ).toEqual({
         formula: '=SUM(1,2)',
         value: 3,
-        style: {
-          isBold: true,
-        },
+        isBold: true,
       });
     });
   });

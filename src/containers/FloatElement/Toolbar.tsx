@@ -1,7 +1,12 @@
 import React, { useRef, memo, useCallback } from 'react';
 import { IController } from '@/types';
 import { Button } from '../../components';
-import { generateUUID, getImageSize, convertFileToTextOrBase64 } from '@/util';
+import {
+  generateUUID,
+  getImageSize,
+  convertFileToTextOrBase64,
+  toIRange,
+} from '@/util';
 import { $ } from '@/i18n';
 
 interface Props {
@@ -83,7 +88,7 @@ export const InsertChart: React.FunctionComponent<Props> = memo(
         sheetId: range.sheetId,
         fromRow: range.row,
         fromCol: range.col,
-        chartRange: range,
+        chartRange: toIRange(range),
         chartType: 'line',
         marginX: 0,
         marginY: 0,

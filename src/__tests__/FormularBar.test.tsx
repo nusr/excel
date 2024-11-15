@@ -5,7 +5,6 @@ import './global.mock';
 describe('FormulaBar.test.tsx', () => {
   beforeEach(async () => {
     renderComponent();
-    await screen.findByTestId('formula-editor-trigger');
   });
   describe('defined name', () => {
     test('normal', () => {

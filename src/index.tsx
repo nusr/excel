@@ -7,21 +7,18 @@ import { createRoot } from 'react-dom/client';
 import { StrictMode } from 'react';
 import { App } from './containers';
 import { type IController, type WorkerMethod } from './types';
-import { MOCK_MODEL } from './model';
-import { copyOrCut, paste } from './util';
+import { copyOrCut, paste, getDocId } from './util';
 import { initController } from './controller';
-import { initCollaboration } from './collaboration';
 import * as Comlink from 'comlink';
 import './global.css';
 import Worker from './worker?worker';
+import * as Y from 'yjs';
+import { initCollaboration } from './collaboration';
 
 declare const window: {
   controller: IController;
+  doc: Y.Doc;
 } & Window;
-
-if (typeof Worker !== 'function') {
-  throw new Error("Don't support Web Worker");
-}
 
 if (location.hostname === 'nusr.github.io') {
   init({
@@ -40,19 +37,25 @@ if (location.hostname === 'nusr.github.io') {
   });
 }
 
-const domNode = document.getElementById('root')!;
+async function initView() {
+  const docId = getDocId();
+  location.hash = `#${docId}`;
+  const doc = new Y.Doc({ guid: docId });
 
-const controller = initController(true, {
-  copyOrCut,
-  paste,
-  worker: Comlink.wrap<WorkerMethod>(new Worker()),
-});
-window.controller = controller;
-controller.fromJSON(MOCK_MODEL);
-initCollaboration(controller);
+  await initCollaboration(doc);
+  const controller = initController({
+    copyOrCut,
+    paste,
+    worker: Comlink.wrap<WorkerMethod>(new Worker()),
+    doc,
+  });
 
-createRoot(domNode).render(
-  <StrictMode>
-    <App controller={controller} />
-  </StrictMode>,
-);
+  window.controller = controller;
+  window.doc = doc;
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <App controller={controller} />
+    </StrictMode>,
+  );
+}
+initView();

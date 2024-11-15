@@ -7,8 +7,8 @@ import { IController } from '@/types';
 describe('Canvas.test.ts', () => {
   let controller: IController;
   beforeEach(async () => {
-    controller = renderComponent();
-    await screen.findByTestId('formula-editor-trigger');
+    const r = renderComponent();
+    controller = r.controller;
   });
   describe('canvas', () => {
     test('normal', () => {
@@ -263,7 +263,7 @@ describe('Canvas.test.ts', () => {
         screen.getByTestId('context-menu-width-height-dialog-confirm'),
       );
       expect(
-        controller.getColWidth(controller.getActiveRange().range.col).len,
+        controller.getCol(controller.getActiveRange().range.col).len,
       ).toEqual(200);
     });
     test('hide col', () => {
@@ -281,7 +281,7 @@ describe('Canvas.test.ts', () => {
       fireEvent.click(screen.getByTestId('context-menu-hide-column'));
 
       expect(
-        controller.getColWidth(controller.getActiveRange().range.col).isHide,
+        controller.getCol(controller.getActiveRange().range.col).isHide,
       ).toEqual(true);
     });
     test('delete col', () => {
@@ -361,7 +361,7 @@ describe('Canvas.test.ts', () => {
         screen.getByTestId('context-menu-width-height-dialog-confirm'),
       );
       expect(
-        controller.getRowHeight(controller.getActiveRange().range.row).len,
+        controller.getRow(controller.getActiveRange().range.row).len,
       ).toEqual(200);
     });
 
@@ -380,7 +380,7 @@ describe('Canvas.test.ts', () => {
       fireEvent.click(screen.getByTestId('context-menu-hide-row'));
 
       expect(
-        controller.getRowHeight(controller.getActiveRange().range.row).isHide,
+        controller.getRow(controller.getActiveRange().range.row).isHide,
       ).toEqual(true);
     });
 
@@ -469,7 +469,7 @@ describe('Canvas.test.ts', () => {
     });
 
     test('change row height cancel', () => {
-      const oldHeight = controller.getRowHeight(
+      const oldHeight = controller.getRow(
         controller.getActiveRange().range.row,
       ).len;
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
@@ -489,7 +489,7 @@ describe('Canvas.test.ts', () => {
         screen.getByTestId('context-menu-width-height-dialog-cancel'),
       );
       expect(
-        controller.getRowHeight(controller.getActiveRange().range.row).len,
+        controller.getRow(controller.getActiveRange().range.row).len,
       ).toEqual(oldHeight);
     });
   });

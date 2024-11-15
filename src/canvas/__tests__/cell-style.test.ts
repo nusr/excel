@@ -1,4 +1,4 @@
-import { initController } from '@/controller';
+import { initController, getMockHooks } from '@/controller';
 import {
   EUnderLine,
   IController,
@@ -10,7 +10,8 @@ import { compareScreenShot } from './util';
 describe('cell-style.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController();
+    controller = initController(getMockHooks());
+    controller.addSheet();
   });
   afterEach(async () => {
     await compareScreenShot(controller);
@@ -92,8 +93,8 @@ describe('cell-style.test.ts', () => {
         EHorizontalAlign.RIGHT,
       ]) {
         test(`${EVerticalAlign[v]} ${EHorizontalAlign[h]}`, () => {
-          controller.setRowHeight(0, controller.getRowHeight(0).len * 2);
-          controller.setColWidth(0, controller.getColWidth(0).len * 2);
+          controller.setRowHeight(0, controller.getRow(0).len * 2);
+          controller.setColWidth(0, controller.getCol(0).len * 2);
           controller.setCell(
             [[1]],
             [

@@ -17,43 +17,27 @@ cd excel
 
 npm i -g pnpm jscpd
 pnpm i
-pnpm exec playwright install --with-deps
 npm run start
 ```
 
-## Directory Description
+## Unit Test
 
 ```bash
-src
-├── canvas         # two layer canvas
-├── components     # basic components
-├── containers     # spreadsheet view
-│   ├── Excel      # Excel export and import
-│   ├── hooks      # common React hooks
-│   └── store      # global state management
-├── controller     # spreadsheet controller
-├── formula        # Recursive descent parser parse Excel formulas
-├── i18n           # i18n
-├── model          # spreadsheet model
-├── theme          # dark mode
-├── types          # TypeScript types
-└── util           # common methods
+npm run test
 ```
 
-## All Dependencies
+## E2E Test
 
-- [esbulid](https://github.com/evanw/esbuild)
-- [react](https://github.com/facebook/react)
-- [jszip](https://github.com/Stuk/jszip)
-- [chart.js](https://github.com/chartjs/Chart.js)
-- [ssf](https://git.sheetjs.com/sheetjs/sheetjs/src/branch/master/packages/ssf)
-- [comlink](https://github.com/GoogleChromeLabs/comlink)
+```bash
+pnpm exec playwright install --with-deps
+npm run e2e
+```
 
 ## Supported Features
 
+- [x] Online Collaboration
 - [x] Web Worker parse formulas
 - [x] OffScreenCanvas Render
-- [x] Cross-tab Collaboration
 - [x] Undo
 - [x] Redo
 - [x] Copy

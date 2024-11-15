@@ -1,5 +1,5 @@
 import {
-  WorkBookJSON,
+  ModelJSON,
   EUnderLine,
   EHorizontalAlign,
   BorderItem,
@@ -18,7 +18,7 @@ import {
 import { mockImage } from './mockData';
 import { $ } from '@/i18n';
 
-const MOCK_MODEL: WorkBookJSON = {
+const MOCK_MODEL: ModelJSON = {
   currentSheetId: '',
   rangeMap: {
     '2': {
@@ -142,207 +142,169 @@ const MOCK_MODEL: WorkBookJSON = {
     },
   },
   worksheets: {
-    '1': {
-      '0_0': {
-        value: '1',
-        style: {
-          fontColor: '#ff0000',
-        },
-      },
+    '1_0_0': {
+      value: '1',
+      fontColor: '#ff0000',
+    },
 
-      '0_3': {
-        value: 'large text',
-        style: {
-          fontSize: 36,
-        },
-      },
-      '0_4': {
-        value: 'This is a very long text that needs to be wrapped',
-        style: {
-          isWrapText: true,
-          isStrike: true,
-          isItalic: true,
-          underline: EUnderLine.DOUBLE,
-        },
-      },
-      '0_5': {
-        value: '10',
-      },
+    '1_0_3': {
+      value: 'large text',
+      fontSize: 36,
+    },
+    '1_0_4': {
+      value: 'This is a very long text that needs to be wrapped',
+      isWrapText: true,
+      isStrike: true,
+      isItalic: true,
+      underline: EUnderLine.DOUBLE,
+    },
+    '1_0_5': {
+      value: '10',
+    },
 
-      '1_0': {
-        formula: '=SUM(F:F)',
-        value: '',
-      },
-      '1_5': {
-        value: '5',
-      },
-      '3_0': {
-        value: '',
-        style: {
-          fillColor: 'red',
-        },
-      },
-      '3_1': {
-        value: '',
-        style: {
-          fillColor: 'red',
-        },
-      },
-      '4_0': {
-        value: '',
-        style: {
-          fillColor: 'red',
-        },
-      },
-      '4_1': {
-        value: '',
-        style: {
-          fillColor: 'red',
-        },
-      },
+    '1_1_0': {
+      formula: '=SUM(F:F)',
+      value: '',
     },
-    '2': {
-      '0_0': { value: '', formula: '=basic!A1' },
+    '1_1_5': {
+      value: '5',
     },
-    '4': {
-      '6_6': {
-        value: 3,
-      },
-      '6_7': {
-        value: 6,
-      },
-      '6_8': {
-        value: 29,
-      },
-      '7_6': {
-        value: 35,
-      },
-      '7_7': {
-        value: 15,
-      },
-      '7_8': {
-        value: 34,
-      },
-      '8_6': {
-        value: 23,
-      },
-      '8_7': {
-        value: 24,
-      },
-      '8_8': {
-        value: 15,
-      },
+    '1_3_0': {
+      value: '',
+      fillColor: 'red',
     },
-    '5': {
-      '0_0': {
-        value: '1',
-      },
-      '0_2': {
-        value: '',
-        formula: '=foo',
-      },
+    '1_3_1': {
+      value: '',
+      fillColor: 'red',
     },
-    '6': {
-      '0_0': {
-        value: '你好，世界',
-      },
-      '0_2': {
-        value: '',
-        formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
-        style: {
-          fontSize: 36,
-        },
-      },
-      '0_3': {
-        value: '🌷🎁💩😜👍🏳️‍🌈',
-      },
-      '1_0': {
-        value: 'Hello World',
-      },
-      '2_0': {
-        value: 'Bonjour le monde',
-      },
-      '3_0': {
-        value: 'Hola mundo',
-      },
-      '4_0': {
-        value: 'Привет, мир',
-      },
-      '5_0': {
-        value: 'Hallo Welt',
-      },
-      '6_0': {
-        value: 'こんにちは、世界',
-      },
-      '7_0': {
-        value: '안녕 세계',
-      },
-      '8_0': {
-        value: 'हैलोवर्ल्ड',
-      },
-      '9_0': {
-        value: 'Halo Dunia',
-      },
-      '10_0': {
-        value: 'Olá mundo',
-      },
-      '11_0': {
-        value: 'Witaj świecie',
-      },
+    '1_4_0': {
+      value: '',
+      fillColor: 'red',
     },
-    '7': {
-      '0_0': {
-        value: '',
-        formula: '=SUM(1,2)',
-      },
-      '0_1': {
-        value: 'test',
-      },
-      '0_2': { value: '', formula: '=CONCATENATE(A1,B1)' },
-      '0_3': { value: '', formula: '=UNICODE("测试")' },
-      '0_4': { value: '', formula: "='merge cell'!A1" },
-      '1_0': { value: '', formula: '=PI()' },
-      '2_0': { value: '', formula: '=EXP(1)' },
-      '3_0': { value: '', formula: '=EXP(1)*PI()' },
-      '4_0': { value: '', formula: '=SUM(1, SIN(PI()/2),3)' },
-      '5_0': {
-        value: '',
-        formula: '=R1C3',
-      },
+    '1_4_1': {
+      value: '',
+      fillColor: 'red',
     },
-    '8': {
-      '0_0': {
-        value: '',
-        formula: '=SUM(1,2)',
-      },
-      '2_2': {
-        value: 1,
-        style: {
-          horizontalAlign: EHorizontalAlign.CENTER,
-        },
-      },
-      '5_5': {
-        value: [1, 'Hello World', true, '测试', false].join(
-          MERGE_CELL_LINE_BREAK,
-        ),
-        style: {
-          isWrapText: true,
-        },
-      },
+    '2_0_0': { value: '', formula: '=basic!A1' },
+    '4_6_6': {
+      value: 3,
     },
-    '9': {},
-    '10': {},
-    '11': {
-      '0_0': {
-        value: '1'
-      },
-      '1_0': {
-        value: '2'
-      },
-      '2_0': {
-        value: '3'
-      },
-    }
+    '4_6_7': {
+      value: 6,
+    },
+    '4_6_8': {
+      value: 29,
+    },
+    '4_7_6': {
+      value: 35,
+    },
+    '4_7_7': {
+      value: 15,
+    },
+    '4_7_8': {
+      value: 34,
+    },
+    '4_8_6': {
+      value: 23,
+    },
+    '4_8_7': {
+      value: 24,
+    },
+    '4_8_8': {
+      value: 15,
+    },
+    '5_0_0': {
+      value: '1',
+    },
+    '5_0_2': {
+      value: '',
+      formula: '=foo',
+    },
+    '6_0_0': {
+      value: '你好，世界',
+    },
+    '6_0_2': {
+      value: '',
+      formula: '=CONCAT("😊", "👨‍👨‍👧‍👧", "👦🏾")',
+      fontSize: 36,
+    },
+    '6_0_3': {
+      value: '🌷🎁💩😜👍🏳️‍🌈',
+    },
+    '6_1_0': {
+      value: 'Hello World',
+    },
+    '6_2_0': {
+      value: 'Bonjour le monde',
+    },
+    '6_3_0': {
+      value: 'Hola mundo',
+    },
+    '6_4_0': {
+      value: 'Привет, мир',
+    },
+    '6_5_0': {
+      value: 'Hallo Welt',
+    },
+    '6_6_0': {
+      value: 'こんにちは、世界',
+    },
+    '6_7_0': {
+      value: '안녕 세계',
+    },
+    '6_8_0': {
+      value: 'हैलोवर्ल्ड',
+    },
+    '6_9_0': {
+      value: 'Halo Dunia',
+    },
+    '6_10_0': {
+      value: 'Olá mundo',
+    },
+    '6_11_0': {
+      value: 'Witaj świecie',
+    },
+    '7_0_0': {
+      value: '',
+      formula: '=SUM(1,2)',
+    },
+    '7_0_1': {
+      value: 'test',
+    },
+    '7_0_2': { value: '', formula: '=CONCATENATE(A1,B1)' },
+    '7_0_3': { value: '', formula: '=UNICODE("测试")' },
+    '7_0_4': { value: '', formula: "='merge cell'!A1" },
+    '7_1_0': { value: '', formula: '=PI()' },
+    '7_2_0': { value: '', formula: '=EXP(1)' },
+    '7_3_0': { value: '', formula: '=EXP(1)*PI()' },
+    '7_4_0': { value: '', formula: '=SUM(1, SIN(PI()/2),3)' },
+    '7_5_0': {
+      value: '',
+      formula: '=R1C3',
+    },
+    '8_0_0': {
+      value: '',
+      formula: '=SUM(1,2)',
+    },
+    '8_2_2': {
+      value: 1,
+      horizontalAlign: EHorizontalAlign.CENTER,
+    },
+    '8_5_5': {
+      value: [1, 'Hello World', true, '测试', false].join(
+        MERGE_CELL_LINE_BREAK,
+      ),
+      isWrapText: true,
+    },
+    '11_0_0': {
+      value: '1',
+    },
+    '11_1_0': {
+      value: '2',
+    },
+    '11_2_0': {
+      value: '3',
+    },
   },
 
   mergeCells: {
@@ -410,9 +372,10 @@ const MOCK_MODEL: WorkBookJSON = {
         rowCount: 5,
         colCount: 5,
         sheetId: '11',
-      }
+      },
     },
   },
+  scroll: {},
 };
 
 if (!isMobile()) {
@@ -460,11 +423,9 @@ if (!isMobile()) {
 for (let i = 0; i < numberFormatOptionList.length; i++) {
   const item = numberFormatOptionList[i];
   const key = coordinateToString(i, 0);
-  MOCK_MODEL.worksheets['9'][key] = {
+  MOCK_MODEL.worksheets[`9_${key}`] = {
     value: i + 1,
-    style: {
-      numberFormat: String(item.value),
-    },
+    numberFormat: String(item.value),
   };
 }
 
@@ -475,14 +436,12 @@ for (let i = 0; i < typeList.length; i++) {
     type: typeList[i],
     color: '',
   };
-  MOCK_MODEL.worksheets['10'][key] = {
+  MOCK_MODEL.worksheets[`10_${key}`] = {
     value: '',
-    style: {
-      borderLeft: item,
-      borderRight: item,
-      borderTop: item,
-      borderBottom: item,
-    },
+    borderLeft: item,
+    borderRight: item,
+    borderTop: item,
+    borderBottom: item,
   };
 }
 

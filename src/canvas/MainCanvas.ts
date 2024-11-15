@@ -1,7 +1,14 @@
-import { EventType, MainView, IController, RequestInit, ResponseRender, RequestRender, IWindowSize } from '@/types';
+import {
+  EventType,
+  MainView,
+  IController,
+  RequestInit,
+  ResponseRender,
+  RequestRender,
+  IWindowSize,
+} from '@/types';
 import { canvasSizeSet, dpr, getTheme, headerSizeSet } from '@/util';
-import * as ComLink from 'comlink'
-
+import * as ComLink from 'comlink';
 
 export class MainCanvas implements MainView {
   private controller: IController;
@@ -20,28 +27,25 @@ export class MainCanvas implements MainView {
     }
   }
   private renderCallback = (result: ResponseRender) => {
-    const { rowMap, colMap } = result
+    const { rowMap, colMap } = result;
     const rowKeys = Object.keys(rowMap);
     const colKeys = Object.keys(colMap);
     if (colKeys.length === 0 && rowKeys.length === 0) {
       return;
     }
-    this.controller.batchUpdate(() => {
+    this.controller.transaction(() => {
       for (const [row, h] of Object.entries(rowMap)) {
         const r = parseInt(row, 10);
-        if (h !== this.controller.getRowHeight(r).len) {
-          this.controller.setRowHeight(r, h);
-        }
+
+        this.controller.setRowHeight(r, h);
       }
       for (const [col, w] of Object.entries(colMap)) {
         const c = parseInt(col, 10);
-        if (w !== this.controller.getColWidth(c).len) {
-          this.controller.setColWidth(c, w);
-        }
+
+        this.controller.setColWidth(c, w);
       }
-      return true
-    }, true)
-  }
+    });
+  };
   async render(data: EventType) {
     const { controller } = this;
     const currentId = controller.getCurrentSheetId();
@@ -63,11 +67,13 @@ export class MainCanvas implements MainView {
       currentMergeCells: controller.getMergeCellList(currentId),
       customHeight: jsonData.customHeight,
       customWidth: jsonData.customWidth,
-      sheetData: jsonData.worksheets[currentId] || {},
-      autoFilter: jsonData.autoFilter[currentId]
+      sheetData: jsonData.worksheets,
+      autoFilter: jsonData.autoFilter[currentId],
     };
 
-    this.controller.getHooks().worker.render(eventData, ComLink.proxy(this.renderCallback));
+    this.controller
+      .getHooks()
+      .worker.render(eventData, ComLink.proxy(this.renderCallback));
   }
   resize() {
     const { canvas } = this;

@@ -1,9 +1,10 @@
 import {
-  WorkBookJSON,
+  ModelJSON,
   WorksheetType,
   IWorkbook,
-  ICommandItem,
   IModel,
+  YjsModelJson,
+  TypedMap,
 } from '@/types';
 import {
   getDefaultSheetInfo,
@@ -11,18 +12,21 @@ import {
   DEFAULT_COL_COUNT,
   XLSX_MAX_COL_COUNT,
   XLSX_MAX_ROW_COUNT,
-  assert
 } from '@/util';
-import { DELETE_FLAG, transformData } from './History';
 import { $ } from '@/i18n';
 import { toast } from '@/components';
+import * as Y from 'yjs';
 
 export class Workbook implements IWorkbook {
-  private currentSheetId = '';
-  private workbook: WorkBookJSON['workbook'] = {};
   private model: IModel;
   constructor(model: IModel) {
     this.model = model;
+  }
+  private get workbook() {
+    return this.model.getRoot().get('workbook');
+  }
+  private get currentSheetId(): string {
+    return this.model.getRoot().get('currentSheetId') || '';
   }
   validateSheet(data: WorksheetType): boolean {
     if (!data) {
@@ -48,111 +52,55 @@ export class Workbook implements IWorkbook {
     }
     return true;
   }
-  toJSON() {
-    return {
-      workbook: { ...this.workbook },
-      currentSheetId: this.currentSheetId,
-    };
-  }
-  fromJSON(json: WorkBookJSON): void {
-    const workbook = json.workbook || {};
+  fromJSON(json: ModelJSON): void {
+    const data = json.workbook || {};
     const currentSheetId = json.currentSheetId || '';
-    const oldValue = { ...this.workbook };
 
-    this.workbook = {};
-    this.currentSheetId = '';
-    for (const sheet of Object.values(workbook)) {
+    const workbook = new Y.Map() as YjsModelJson['workbook'];
+    for (const sheet of Object.values(data)) {
       if (!this.validateSheet(sheet)) {
         continue;
       }
-      this.workbook[sheet.sheetId] = sheet;
+      const item = new Y.Map(Object.entries(sheet)) as TypedMap<WorksheetType>;
+      workbook.set(sheet.sheetId, item);
     }
 
+    this.model.getRoot().set('workbook', workbook);
     let newSheetId = this.getSheetId() || '';
-    if (
-      this.workbook[currentSheetId] &&
-      !this.workbook[currentSheetId].isHide
-    ) {
+    const sheetInfo = workbook.get(currentSheetId);
+    if (sheetInfo && !sheetInfo?.get('isHide')) {
       newSheetId = currentSheetId;
     }
-    this.model.push({
-      type: 'workbook',
-      key: '',
-      newValue: this.workbook,
-      oldValue,
-    });
     this.setCurrentSheetId(newSheetId);
-  }
-  undo(item: ICommandItem): void {
-    if (item.type === 'currentSheetId') {
-      const sheetId = this.getSheetId();
-      assert(typeof item.oldValue === 'string')
-      assert(typeof item.newValue === 'string')
-      if (
-        !this.workbook[item.oldValue] ||
-        this.workbook[item.oldValue].isHide
-      ) {
-        if (sheetId) {
-          this.currentSheetId = sheetId;
-        }
-      } else {
-        this.currentSheetId = item.oldValue;
-      }
-      return;
-    } else if (item.type === 'workbook') {
-      transformData(this, item, 'undo');
-    }
-  }
-  redo(item: ICommandItem): void {
-    if (item.type === 'currentSheetId') {
-      assert(typeof item.oldValue === 'string')
-      assert(typeof item.newValue === 'string')
-      if (
-        !this.workbook[item.newValue] ||
-        this.workbook[item.newValue].isHide
-      ) {
-        const sheetId = this.getSheetId();
-        if (sheetId) {
-          this.currentSheetId = sheetId;
-        }
-      } else {
-        this.currentSheetId = item.newValue;
-      }
-      return;
-    } else if (item.type === 'workbook') {
-      transformData(this, item, 'redo');
-    }
   }
   updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string) {
     const id = sheetId || this.currentSheetId;
-    if (!this.workbook[id]) {
+    const sheetInfo = this.workbook?.get(id);
+    if (!sheetInfo) {
       return;
     }
     const keyList = Object.keys(data) as Array<keyof Partial<WorksheetType>>;
     for (const key of keyList) {
-      if (key === 'sheetId') {
+      if (key === 'sheetId' || sheetInfo.get(key) === data[key]) {
         continue;
       }
-      const oldValue = this.workbook[id][key];
-      if (oldValue === data[key]) {
-        continue;
-      }
-      // @ts-ignore
-      this.workbook[id][key] = data[key];
-      this.model.push({
-        type: 'workbook',
-        key: `${id}.${key}`,
-        newValue: data[key],
-        oldValue: oldValue,
-      });
+      sheetInfo.set(key, data[key]);
     }
   }
   getSheetList(): WorksheetType[] {
-    const list = Object.values(this.workbook);
+    if (!this.workbook) {
+      return [];
+    }
+    const list = Array.from(this.workbook.values()).map((v) => v.toJSON());
     list.sort((a, b) => a.sort - b.sort);
     return list.slice();
   }
   addSheet() {
+    if (!this.workbook) {
+      this.model
+        .getRoot()
+        .set('workbook', new Y.Map() as YjsModelJson['workbook']);
+    }
     const list = this.getSheetList();
     const item = getDefaultSheetInfo(list);
     const sheet: WorksheetType = {
@@ -161,27 +109,17 @@ export class Workbook implements IWorkbook {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
     };
-    this.workbook[sheet.sheetId] = sheet;
-    this.model.push({
-      type: 'workbook',
-      key: sheet.sheetId,
-      newValue: { ...sheet },
-      oldValue: DELETE_FLAG,
-    });
+    this.workbook!.set(
+      sheet.sheetId,
+      new Y.Map(Object.entries(sheet)) as TypedMap<WorksheetType>,
+    );
     return sheet;
   }
 
   deleteSheet(sheetId?: string): void {
     const id = sheetId || this.currentSheetId;
     if (this.checkSheetSize(sheetId)) {
-      const oldSheet = { ...this.workbook[id] };
-      delete this.workbook[id];
-      this.model.push({
-        type: 'workbook',
-        key: id,
-        newValue: DELETE_FLAG,
-        oldValue: oldSheet,
-      });
+      this.workbook?.delete(id);
     }
   }
   hideSheet(sheetId?: string): void {
@@ -211,32 +149,33 @@ export class Workbook implements IWorkbook {
   }
   getSheetInfo(id?: string): WorksheetType | undefined {
     const sheetId = id || this.currentSheetId;
-    const item = this.workbook[sheetId];
+    const item = this.workbook?.get(sheetId);
     if (!item) {
       return undefined;
     }
-    if (item) {
-      item.sheetId = sheetId;
-    }
-    return { ...item };
+    return { ...item.toJSON() };
   }
   setCurrentSheetId(newSheetId: string): void {
-    if (!newSheetId || !this.workbook[newSheetId]) {
+    if (!newSheetId || !this.workbook?.get(newSheetId)) {
       return;
     }
     if (this.currentSheetId !== newSheetId) {
-      const oldSheetId = this.currentSheetId;
-      this.currentSheetId = newSheetId;
-      this.model.push({
-        type: 'currentSheetId',
-        key: '',
-        newValue: newSheetId,
-        oldValue: oldSheetId,
-      });
+      this.model.getRoot().set('currentSheetId', newSheetId);
     }
   }
-  getCurrentSheetId(): string {
-    return this.currentSheetId;
+  getCurrentSheetId() {
+    const sheetId = this.currentSheetId;
+    if (!this.workbook) {
+      if (sheetId) {
+        this.model.getRoot().set('currentSheetId', '');
+      }
+      return '';
+    }
+    if (!this.workbook?.get(sheetId)) {
+      this.model.getRoot().set('currentSheetId', '');
+      return '';
+    }
+    return sheetId;
   }
 
   private getSheetId(): string | undefined {
@@ -244,10 +183,12 @@ export class Workbook implements IWorkbook {
     const result = list.filter((v) => !v.isHide);
     return result[0]?.sheetId;
   }
-  deleteAll(): void { }
+  deleteAll(sheetId?: string): void {
+    this.deleteSheet(sheetId);
+  }
   private checkSheetSize(sheetId?: string) {
     const id = sheetId || this.currentSheetId;
-    if (!this.workbook[id]) {
+    if (!this.workbook?.get(id)) {
       return false;
     }
     const sheetList = this.getSheetList();

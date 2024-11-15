@@ -1,14 +1,16 @@
 import { Model } from '../Model';
+import { getMockHooks } from './util';
 
 describe('mergeCell.test.ts', () => {
   let model: Model;
   beforeEach(() => {
-    model = new Model();
+    model = new Model(getMockHooks());
   });
   describe('JSON', () => {
     test('ok', () => {
       model.addSheet();
       model.fromJSON({
+        scroll: {},
         workbook: {
           '1': {
             sheetId: '1',

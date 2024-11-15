@@ -1,9 +1,10 @@
 import { Model } from '../Model';
+import { getMockHooks } from './util';
 
 describe('rangeMap.test.ts', () => {
   let model: Model;
   beforeEach(() => {
-    model = new Model();
+    model = new Model(getMockHooks());
   });
   describe('validateRange', () => {
     test('invalid', () => {

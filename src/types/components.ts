@@ -1,3 +1,4 @@
+import { IController } from './controller';
 import { ModelCellType, Coordinate } from './model';
 import type {
   ChartType,
@@ -19,15 +20,6 @@ export interface CanvasOverlayPosition {
   left: number;
   width: number;
   height: number;
-}
-
-export interface ScrollValue {
-  left: number;
-  top: number;
-  row: number;
-  col: number;
-  scrollLeft: number;
-  scrollTop: number;
 }
 
 export type ActiveCellType = ModelCellType & Coordinate & CanvasOverlayPosition;
@@ -63,3 +55,8 @@ export interface ChartProps<
 }
 
 export type ThemeType = 'dark' | 'light';
+
+export type StateContextValue = {
+  isServer: boolean;
+  controller: IController | null;
+};

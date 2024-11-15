@@ -11,7 +11,7 @@ import {
   SHEET_ITEM_TEST_ID_PREFIX,
   sheetViewSizeSet,
   headerSizeSet,
-  sizeConfig,
+  computeScrollPosition,
   canvasSizeSet,
   FORMULA_EDITOR_ROLE,
   MERGE_CELL_LINE_BREAK,
@@ -22,20 +22,18 @@ import { coreStore } from '@/containers/store';
 export const BOTTOM_BUFF = 200;
 
 export function handleTabClick(controller: IController) {
-  controller.batchUpdate(() => {
+  controller.transaction(() => {
     checkActiveElement(controller);
     controller.setNextActiveCell('right');
     recalculateScroll(controller);
-    return true;
   });
 }
 
 export function handleEnterClick(controller: IController) {
-  controller.batchUpdate(() => {
+  controller.transaction(() => {
     checkActiveElement(controller);
     controller.setNextActiveCell('down');
     recalculateScroll(controller);
-    return true;
   });
 }
 
@@ -50,7 +48,7 @@ export function computeScrollRowAndCol(
     row = 0;
     let t = top;
     while (t > 0) {
-      const a = controller.getRowHeight(row).len;
+      const a = controller.getRowHeight(row);
       if (a > t) {
         break;
       }
@@ -62,7 +60,7 @@ export function computeScrollRowAndCol(
     col = 0;
     let t = left;
     while (t > 0) {
-      const a = controller.getColWidth(col).len;
+      const a = controller.getColWidth(col);
       if (a > t) {
         break;
       }
@@ -70,7 +68,6 @@ export function computeScrollRowAndCol(
       col++;
     }
   }
-
   return {
     row,
     col,
@@ -86,7 +83,7 @@ export function scrollSheetToView(sheetId: string) {
 }
 
 export function scrollToView(controller: IController, range: IRange) {
-  controller.batchUpdate(() => {
+  controller.transaction(() => {
     const sheetId = range.sheetId || controller.getCurrentSheetId();
     if (sheetId !== controller.getCurrentSheetId()) {
       controller.setCurrentSheetId(sheetId);
@@ -132,57 +129,43 @@ export function scrollToView(controller: IController, range: IRange) {
   });
 }
 
-export function computeScrollPosition(left: number, top: number) {
-  const contentSize = parseInt(sizeConfig.scrollBarContent, 10);
-  const canvasRect = canvasSizeSet.get();
-  const viewSize = sheetViewSizeSet.get();
-  const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
-  const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
-  const maxScrollHeight = canvasRect.height - contentSize;
-  const maxScrollWidth = canvasRect.width - contentSize;
-
-  const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
-  const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
-  return {
-    maxHeight,
-    maxWidth,
-    maxScrollHeight,
-    maxScrollWidth,
-    scrollTop,
-    scrollLeft,
-  };
-}
 export function scrollBar(
   controller: IController,
   scrollX: number,
   scrollY: number,
 ) {
   const oldScroll = controller.getScroll();
-  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } =
-    computeScrollPosition(oldScroll.left, oldScroll.top);
+
+  const size = computeScrollPosition();
+
+  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } = size;
   let top = oldScroll.top + Math.ceil(scrollY);
+
+  let left = oldScroll.left + Math.ceil(scrollX);
+
   if (top < 0) {
     top = 0;
   } else if (top > maxHeight) {
     top = maxHeight;
   }
 
-  let left = oldScroll.left + Math.ceil(scrollX);
   if (left < 0) {
     left = 0;
   } else if (left > maxWidth) {
     left = maxWidth;
   }
-  const { row, col } = computeScrollRowAndCol(controller, left, top);
   const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
   const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
+
+  const { row, col } = computeScrollRowAndCol(controller, left, top);
+
   const newValue: ScrollValue = {
+    left,
+    top,
+    scrollLeft,
+    scrollTop,
     row,
     col,
-    top,
-    left,
-    scrollTop,
-    scrollLeft,
   };
   controller.setScroll(newValue);
 }
@@ -203,11 +186,11 @@ export function recalculateScroll(controller: IController) {
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
   const headerSize = headerSizeSet.get();
   const buff = 5;
-  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } =
-    computeScrollPosition(oldScroll.left, oldScroll.top);
+  const size = computeScrollPosition();
+  const { maxHeight, maxWidth, maxScrollHeight, maxScrollWidth } = size;
   if (position.left + cellSize.width + buff > domRect.width) {
     if (oldScroll.col <= sheetInfo.colCount - 2) {
-      const left = oldScroll.left + controller.getColWidth(oldScroll.col).len;
+      const left = oldScroll.left + controller.getCol(oldScroll.col).len;
       const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
       controller.setScroll({
         ...oldScroll,
@@ -220,7 +203,7 @@ export function recalculateScroll(controller: IController) {
 
   if (position.left - headerSize.width < domRect.left + buff) {
     if (oldScroll.col >= 1) {
-      const left = oldScroll.left - controller.getColWidth(oldScroll.col).len;
+      const left = oldScroll.left - controller.getCol(oldScroll.col).len;
       const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
       controller.setScroll({
         ...oldScroll,
@@ -232,7 +215,7 @@ export function recalculateScroll(controller: IController) {
   }
   if (position.top + cellSize.height + buff > domRect.height) {
     if (oldScroll.row <= sheetInfo.rowCount - 2) {
-      const top = oldScroll.top + controller.getRowHeight(oldScroll.row).len;
+      const top = oldScroll.top + controller.getRowHeight(oldScroll.row);
       const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
       controller.setScroll({
         ...oldScroll,
@@ -245,7 +228,7 @@ export function recalculateScroll(controller: IController) {
 
   if (position.top - headerSize.height < domRect.top + buff) {
     if (oldScroll.row >= 1) {
-      const top = oldScroll.top - controller.getRowHeight(oldScroll.row).len;
+      const top = oldScroll.top - controller.getRowHeight(oldScroll.row);
       const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
       controller.setScroll({
         ...oldScroll,
@@ -272,7 +255,10 @@ export function setActiveCellValue(controller: IController) {
   const { range, isMerged } = controller.getActiveRange();
   const cellData = controller.getCell(range);
   let value = inputDom.value;
-  if (typeof cellData?.value === 'string' && isMergeContent(isMerged, cellData?.value)) {
+  if (
+    typeof cellData?.value === 'string' &&
+    isMergeContent(isMerged, cellData?.value)
+  ) {
     value = value.replaceAll(LINE_BREAK, MERGE_CELL_LINE_BREAK);
   }
   controller.setCellValue(value, range);
@@ -289,6 +275,9 @@ function checkActiveElement(controller: IController) {
   }
   setActiveCellValue(controller);
 }
+const modifierKey: KeyboardEventItem['modifierKey'] = [
+  isMac() ? 'meta' : 'ctrl',
+];
 /* jscpd:ignore-start */
 export const keyboardEventList: KeyboardEventItem[] = [
   {
@@ -303,12 +292,12 @@ export const keyboardEventList: KeyboardEventItem[] = [
   },
   {
     key: 'ArrowDown',
-    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    modifierKey,
     handler: (controller) => {
       if (checkFocus()) {
         return;
       }
-      controller.batchUpdate(() => {
+      controller.transaction(() => {
         checkActiveElement(controller);
         const viewSize = sheetViewSizeSet.get();
         scrollBar(controller, 0, viewSize.height);
@@ -318,12 +307,12 @@ export const keyboardEventList: KeyboardEventItem[] = [
   },
   {
     key: 'ArrowUp',
-    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    modifierKey,
     handler: (controller) => {
       if (checkFocus()) {
         return;
       }
-      controller.batchUpdate(() => {
+      controller.transaction(() => {
         checkActiveElement(controller);
         const viewSize = sheetViewSizeSet.get();
         scrollBar(controller, 0, -viewSize.height);
@@ -333,12 +322,12 @@ export const keyboardEventList: KeyboardEventItem[] = [
   },
   {
     key: 'ArrowRight',
-    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    modifierKey,
     handler: (controller) => {
       if (checkFocus()) {
         return;
       }
-      controller.batchUpdate(() => {
+      controller.transaction(() => {
         checkActiveElement(controller);
         const viewSize = sheetViewSizeSet.get();
         scrollBar(controller, viewSize.width, 0);
@@ -348,12 +337,12 @@ export const keyboardEventList: KeyboardEventItem[] = [
   },
   {
     key: 'ArrowLeft',
-    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    modifierKey,
     handler: (controller) => {
       if (checkFocus()) {
         return;
       }
-      controller.batchUpdate(() => {
+      controller.transaction(() => {
         checkActiveElement(controller);
         const viewSize = sheetViewSizeSet.get();
         scrollBar(controller, -viewSize.width, 0);
@@ -378,7 +367,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus()) {
         return;
       }
-      controller.batchUpdate(() => {
+      controller.transaction(() => {
         checkActiveElement(controller);
         controller.setNextActiveCell('up');
         recalculateScroll(controller);
@@ -403,7 +392,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
       if (checkFocus()) {
         return;
       }
-      controller.batchUpdate(() => {
+      controller.transaction(() => {
         checkActiveElement(controller);
         controller.setNextActiveCell('left');
         recalculateScroll(controller);
@@ -413,21 +402,21 @@ export const keyboardEventList: KeyboardEventItem[] = [
   },
   {
     key: 'b',
-    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    modifierKey,
     handler: (controller) => {
       if (checkFocus()) {
         return;
       }
       const cellData = controller.getCell(controller.getActiveRange().range);
       controller.updateCellStyle(
-        { isBold: !cellData?.style?.isBold },
+        { isBold: !cellData?.isBold },
         controller.getActiveRange().range,
       );
     },
   },
   {
     key: 'i',
-    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    modifierKey,
     handler: (controller) => {
       if (checkFocus()) {
         return;
@@ -435,34 +424,34 @@ export const keyboardEventList: KeyboardEventItem[] = [
 
       const cellData = controller.getCell(controller.getActiveRange().range);
       controller.updateCellStyle(
-        { isItalic: !cellData?.style?.isItalic },
+        { isItalic: !cellData?.isItalic },
         controller.getActiveRange().range,
       );
     },
   },
   {
     key: '5',
-    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    modifierKey,
     handler: (controller) => {
       if (checkFocus()) {
         return;
       }
       const cellData = controller.getCell(controller.getActiveRange().range);
       controller.updateCellStyle(
-        { isStrike: !cellData?.style?.isStrike },
+        { isStrike: !cellData?.isStrike },
         controller.getActiveRange().range,
       );
     },
   },
   {
     key: 'u',
-    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    modifierKey,
     handler: (controller) => {
       if (checkFocus()) {
         return;
       }
       const cellData = controller.getCell(controller.getActiveRange().range);
-      const underline = cellData?.style?.underline;
+      const underline = cellData?.underline;
       let newUnderline = EUnderLine.NONE;
       if (underline === undefined || underline === EUnderLine.NONE) {
         newUnderline = EUnderLine.SINGLE;
@@ -477,14 +466,14 @@ export const keyboardEventList: KeyboardEventItem[] = [
   },
   {
     key: 'z',
-    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    modifierKey,
     handler: (controller) => {
       controller.undo();
     },
   },
   {
     key: 'y',
-    modifierKey: [isMac() ? 'meta' : 'ctrl'],
+    modifierKey,
     handler: (controller) => {
       controller.redo();
     },

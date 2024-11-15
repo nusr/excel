@@ -21,14 +21,14 @@ describe('Export.test.ts', () => {
     test('ok', async () => {
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
-      expect(screen.getAllByTestId('float-element')).toHaveLength(1);
-      fireEvent.contextMenu(screen.getByTestId('float-element'), {
+      expect(await screen.findAllByTestId('float-element')).toHaveLength(1);
+      fireEvent.contextMenu(await screen.findByTestId('float-element'), {
         clientY: 20,
         clientX: 20,
       });
 
       fireEvent.click(
-        screen.getByTestId('float-element-context-menu-save-as-picture'),
+        await screen.findByTestId('float-element-context-menu-save-as-picture'),
       );
       expect(mockSaveAs).toHaveBeenCalledWith('data:,', 'Chart Title.png');
     });

@@ -1,13 +1,11 @@
 import styles from './index.module.css';
-import React, { memo, lazy, Suspense } from 'react';
+import React, { memo } from 'react';
 import type { IController } from '@/types';
-import { Loading } from '@/components';
-
-const FormulaBarContainer = lazy(() => import('./FormulaBar'));
-const ToolbarContainer = lazy(() => import('./ToolBar'));
-const CanvasContainer = lazy(() => import('./canvas'));
-const SheetBarContainer = lazy(() => import('./SheetBar'));
-const MenuBarContainer = lazy(() => import('./MenuBar'));
+import FormulaBarContainer from './FormulaBar';
+import ToolbarContainer from './ToolBar';
+import CanvasContainer from './canvas';
+import SheetBarContainer from './SheetBar';
+import MenuBarContainer from './MenuBar';
 
 interface AppProps {
   controller: IController;
@@ -16,14 +14,14 @@ interface AppProps {
 export const App: React.FunctionComponent<AppProps> = memo(({ controller }) => {
   return (
     <div className={styles['app-container']} data-testid="app-container">
-      <Suspense fallback={<Loading />}>
-        <MenuBarContainer controller={controller} />
-        <ToolbarContainer controller={controller} />
-        <FormulaBarContainer controller={controller} />
-        <CanvasContainer controller={controller} />
-        <SheetBarContainer controller={controller} />
-      </Suspense>
+      <MenuBarContainer controller={controller} />
+      <ToolbarContainer controller={controller} />
+      <FormulaBarContainer controller={controller} />
+      <CanvasContainer controller={controller} />
+      <SheetBarContainer controller={controller} />
     </div>
   );
 });
 App.displayName = 'App';
+
+export { StateContext } from './store';

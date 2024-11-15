@@ -4,7 +4,6 @@ import { MainCanvas } from './MainCanvas';
 export { registerGlobalEvent } from './event';
 export {
   computeScrollRowAndCol,
-  computeScrollPosition,
   checkFocus,
   setActiveCellValue,
   scrollBar,

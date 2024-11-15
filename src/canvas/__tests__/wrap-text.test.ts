@@ -1,11 +1,12 @@
-import { initController } from '@/controller';
+import { initController, getMockHooks } from '@/controller';
 import { IController, EMergeCellType } from '@/types';
 import { compareScreenShot } from './util';
 
 describe('wrap-text.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController();
+    controller = initController(getMockHooks());
+    controller.addSheet();
   });
   afterEach(async () => {
     await compareScreenShot(controller, { maxThreshold: 0.229 });

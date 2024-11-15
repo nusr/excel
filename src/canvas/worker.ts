@@ -4,6 +4,8 @@ import {
   RequestRender,
   ResponseRender,
   WorkerMethod,
+  RequestFormulas,
+  ResponseFormulas,
 } from '@/types';
 import { computeFormulas } from '@/formula';
 import OffScreenWorker from './offScreenWorker';
@@ -25,7 +27,13 @@ const workerMethod: WorkerMethod = {
       await cb(result);
     }
   },
-  computeFormulas,
+  async computeFormulas(
+    data: RequestFormulas,
+    cb: (data: ResponseFormulas) => boolean,
+  ) {
+    const result = await computeFormulas(data, cb);
+    return result;
+  },
 };
 
 export default workerMethod;

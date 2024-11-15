@@ -1,13 +1,13 @@
 import React, { memo, useCallback } from 'react';
 import { IController } from '@/types';
-import { Menu, MenuItem } from '../../components';
+import { Menu, MenuItem, Button } from '../../components';
 import { importXLSX, exportToXLSX, exportToCsv, importCSV } from '../Excel';
 import styles from './index.module.css';
 import { Theme } from './Theme';
 import { $ } from '@/i18n';
 import { I18N } from './I18N';
 import { FPS } from './FPS';
-import { saveAs } from '@/util';
+import { saveAs, isInIframe, getDocId } from '@/util';
 
 interface Props {
   controller: IController;
@@ -60,7 +60,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       <div className={styles['menubar-container']} data-testid="menubar">
         <div className={styles['menubar-menu']}>
           <Menu
-            label={$('menu')}
+            label={$('file')}
             className={styles.menu}
             testId="menubar-excel"
           >
@@ -96,6 +96,19 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
               {$('export-json')}
             </MenuItem>
           </Menu>
+          {!isInIframe() && (
+            <Button
+              style={{ marginLeft: 10 }}
+              onClick={() => {
+                location.href = `${location.origin}${location.pathname.replace(
+                  '/app',
+                  '',
+                )}#${getDocId()}`;
+              }}
+            >
+              Collaboration
+            </Button>
+          )}
         </div>
         <I18N />
         <Theme />

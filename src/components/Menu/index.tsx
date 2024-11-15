@@ -103,21 +103,21 @@ export const Menu: FunctionComponent<React.PropsWithChildren<MenuProps>> = memo(
         >
           {label}
         </Button>
-        {open && (
-          <div
-            className={classnames(
-              styles.menuContainer,
-              styles.portal,
-              portalClassName,
-              {
-                [styles.bottom]: position === 'bottom',
-              },
-            )}
-            data-testid={`${testId}-portal`}
-          >
-            <ul className={styles.menu}>{children}</ul>
-          </div>
-        )}
+
+        <div
+          className={classnames(
+            styles.menuContainer,
+            styles.portal,
+            portalClassName,
+            {
+              [styles.bottom]: position === 'bottom',
+            },
+          )}
+          data-testid={`${testId}-portal`}
+          hidden={!open}
+        >
+          <ul className={styles.menu}>{children}</ul>
+        </div>
       </div>
     );
   },

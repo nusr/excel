@@ -18,6 +18,7 @@ import {
   DEFAULT_FORMAT_CODE,
   getFormatCode,
   parseNumber,
+  KEY_LIST,
 } from '@/util';
 import {
   coreStore,
@@ -53,7 +54,7 @@ function getChartData(
     r < endRow;
     r++, index++
   ) {
-    const rowHeight = controller.getRowHeight(r).len;
+    const rowHeight = controller.getRowHeight(r);
     if (rowHeight === HIDE_CELL) {
       continue;
     }
@@ -98,7 +99,7 @@ function updateActiveCell(controller: IController) {
   const cellSize = controller.getCellSize(activeCell);
   const cellPosition = controller.computeCellPosition(activeCell);
   cellPosition.top = top + cellPosition.top;
-  let fontFamily = cell?.style?.fontFamily ?? '';
+  let fontFamily = cell?.fontFamily ?? '';
   if (!fontFamily) {
     let defaultFontFamily = '';
     const list = fontFamilyStore.getSnapshot();
@@ -121,9 +122,9 @@ function updateActiveCell(controller: IController) {
     underline = EUnderLine.NONE,
     horizontalAlign,
     verticalAlign,
-  } = cell?.style || {};
+  } = cell || {};
 
-  const numberFormat = cell?.style?.numberFormat || DEFAULT_FORMAT_CODE;
+  const numberFormat = cell?.numberFormat || DEFAULT_FORMAT_CODE;
   const isRight =
     numberFormat === DEFAULT_FORMAT_CODE && typeof cell?.value === 'number';
   let horAlign = horizontalAlign;
@@ -209,15 +210,14 @@ const handleStateChange = (
     canRedo: controller.canRedo(),
     canUndo: controller.canUndo(),
   };
-
   if (changeSet.has('currentSheetId')) {
     core.activeUuid = '';
     core.currentSheetId = controller.getCurrentSheetId();
-    core.isFilter = !!controller.getFilter()
+    core.isFilter = !!controller.getFilter();
   }
 
   if (changeSet.has('autoFilter')) {
-    core.isFilter = !!controller.getFilter()
+    core.isFilter = !!controller.getFilter();
   }
   coreStore.setState(core);
 
@@ -239,8 +239,8 @@ const handleStateChange = (
   if (
     changeSet.has('drawings') ||
     changeSet.has('cellValue') ||
-    changeSet.has('row') ||
-    changeSet.has('col') ||
+    changeSet.has('customHeight') ||
+    changeSet.has('customWidth') ||
     changeSet.has('currentSheetId') ||
     changeSet.has('scroll')
   ) {
@@ -287,7 +287,10 @@ const handleStateChange = (
     floatElementStore.setState(result);
   }
 
-  if (changeSet.has('currentSheetId')) {
+  if (
+    changeSet.has('currentSheetId') &&
+    sheetListStore.getSnapshot().length > 5
+  ) {
     // async update
     setTimeout(() => {
       scrollSheetToView(controller.getCurrentSheetId());
@@ -319,7 +322,7 @@ export function initCanvas(
   fontFamilyStore.setState(familyList);
   const mainCanvas = initRenderCanvas(controller, canvas);
   const resize = () => {
-    renderCanvas(new Set<ChangeEventType>(['row']));
+    renderCanvas(new Set<ChangeEventType>(['customWidth']));
   };
   const renderCanvas = (changeSet: Set<ChangeEventType>) => {
     computeCanvasSize(canvas);
@@ -334,22 +337,13 @@ export function initCanvas(
   const removeEvent = registerGlobalEvent(controller, resize);
 
   const changeSet = new Set<ChangeEventType>([
-    'currentSheetId',
-    'rangeMap',
-    'workbook',
-    'worksheets',
-    'drawings',
-    'definedNames',
-    'mergeCells',
+    ...KEY_LIST,
     'scroll',
     'cellValue',
-    'row',
-    'col',
     'cellStyle',
+    'antLine',
     'undo',
     'redo',
-    'antLine',
-    'autoFilter'
   ]);
   handleStateChange(changeSet, controller);
   renderCanvas(changeSet);

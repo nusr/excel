@@ -8,14 +8,13 @@ import {
 } from '@testing-library/react';
 import './global.mock';
 import { renderComponent } from './util';
-import { initController } from '@/controller';
+import { initController, getMockHooks } from '@/controller';
 
 type MatchMediaFun = (data: { matches: boolean }) => void;
 
 describe('Menubar.test.ts', () => {
   beforeEach(async () => {
     renderComponent();
-    await screen.findByTestId('menubar');
   });
   describe('menubar', () => {
     test('normal', async () => {
@@ -64,7 +63,8 @@ describe('Menubar.test.ts', () => {
 
 test('change i18n', () => {
   let result: RenderResult;
-  const controller = initController();
+  const controller = initController(getMockHooks());
+  controller.addSheet();
   act(() => {
     result = render(<App controller={controller} />);
   });

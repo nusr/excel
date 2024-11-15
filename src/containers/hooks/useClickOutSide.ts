@@ -7,8 +7,12 @@ export function useClickOutside(
   const ref = useRef<HTMLDivElement>(null);
 
   function handleEvent(event: Event) {
-    const node = event.target! as Node;
-    if (ref?.current && (ref.current === node || ref.current.contains(node))) {
+    const node = event.target as any;
+    if (
+      ref?.current &&
+      (ref.current === node ||
+        (node instanceof Node && ref.current.contains(node)))
+    ) {
       return;
     }
     handler();

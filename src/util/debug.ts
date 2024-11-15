@@ -1,6 +1,6 @@
 import { COLOR_PICKER_COLOR_LIST } from './constant';
 
-type NameSpaceType = 'react' | 'model' | 'test';
+type NameSpaceType = 'react' | 'model' | 'test' | 'collaboration' | string;
 
 export class Debug {
   namespace: NameSpaceType;
@@ -41,3 +41,4 @@ export class Debug {
 
 export const modelLog = new Debug('model').init();
 export const reactLog = new Debug('react').init();
+export const collaborationLog = new Debug('collaboration').init();

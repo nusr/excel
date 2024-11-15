@@ -51,8 +51,8 @@ export function getRenderData(controller: IController, theme: ThemeType) {
     currentMergeCells: controller.getMergeCellList(currentId),
     customHeight: jsonData.customHeight,
     customWidth: jsonData.customWidth,
-    sheetData: jsonData.worksheets[currentId] || {},
-    autoFilter: jsonData.autoFilter[currentId]
+    sheetData: jsonData.worksheets,
+    autoFilter: jsonData.autoFilter[currentId],
   };
   return eventData;
 }
@@ -98,24 +98,15 @@ function renderCanvas(controller: IController, theme: ThemeType) {
   instance.resize({ width: defaultWidth, height: defaultHeight });
   const data = instance.render(getRenderData(controller, theme));
   if (data) {
-    let check = false;
     for (const [row, h] of Object.entries(data.rowMap)) {
       const r = parseInt(row, 10);
-      if (h !== controller.getRowHeight(r).len) {
-        controller.setRowHeight(r, h);
-        check = true;
-      }
+      controller.setRowHeight(r, h);
     }
     for (const [col, w] of Object.entries(data.colMap)) {
       const c = parseInt(col, 10);
-      if (w !== controller.getColWidth(c).len) {
-        controller.setColWidth(c, w);
-        check = true;
-      }
+      controller.setColWidth(c, w);
     }
-    if (check) {
-      instance.render(getRenderData(controller, theme));
-    }
+    instance.render(getRenderData(controller, theme));
   }
   return canvas;
 }

@@ -17,7 +17,12 @@ import {
   RequestFormulas,
   ResponseFormulas,
 } from '@/types';
-import { isFormula, coordinateToString, stringToCoordinate } from '@/util/util';
+import {
+  isFormula,
+  stringToCoordinate,
+  getWorksheetKey,
+  convertWorksheetKey,
+} from '@/util/util';
 import { SheetRange } from '@/util';
 
 export function parseFormula(
@@ -156,11 +161,10 @@ export class CellDataMapImpl implements CellDataMap {
 
 export function computeFormulas(
   eventData: RequestFormulas,
-  cb: (data: ResponseFormulas) => void,
+  cb: (data: ResponseFormulas) => boolean,
 ) {
   const { currentSheetId, worksheets, workbook, definedNames } = eventData;
   const formulaCache = new Map<string, InterpreterResult>();
-  const sheetData = worksheets[currentSheetId] || {};
   const result: ResponseFormulas = {
     list: [],
   };
@@ -173,10 +177,8 @@ export function computeFormulas(
     },
     getCell: (range: IRange) => {
       const { row, col, sheetId } = range;
-      const realSheetId = sheetId || currentSheetId;
-      const sheetData = worksheets[realSheetId] || {};
-      const key = coordinateToString(row, col);
-      return sheetData[key];
+      const key = getWorksheetKey(sheetId || currentSheetId, row, col);
+      return worksheets[key];
     },
     set: () => {
       throw new CustomError('#REF!');
@@ -199,8 +201,9 @@ export function computeFormulas(
       return SheetRange.makeRange(r);
     },
   };
-  for (const [k, data] of Object.entries(sheetData)) {
-    if (!data?.formula) {
+  for (const [k, data] of Object.entries(worksheets)) {
+    const range = convertWorksheetKey(k);
+    if (!range || range.sheetId !== currentSheetId || !data?.formula) {
       continue;
     }
     const temp = parseFormula(
@@ -221,5 +224,5 @@ export function computeFormulas(
       });
     }
   }
-  cb(result);
+  return cb(result);
 }

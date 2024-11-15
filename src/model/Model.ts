@@ -1,6 +1,6 @@
 import {
   StyleType,
-  WorkBookJSON,
+  ModelJSON,
   WorksheetType,
   IModel,
   ResultType,
@@ -8,14 +8,14 @@ import {
   CustomItem,
   DrawingElement,
   ChangeEventType,
-  ICommandItem,
   DefinedNameItem,
   WorksheetData,
   EMergeCellType,
-  EventEmitterType,
-  HistoryChangeType,
-  RemoteWorkerType,
+  IHooks,
   AutoFilterItem,
+  ModelRoot,
+  ModelScroll,
+  SYNC_FLAG,
 } from '@/types';
 import {
   XLSX_MAX_ROW_COUNT,
@@ -25,10 +25,9 @@ import {
   sheetViewSizeSet,
   headerSizeSet,
   containRange,
-  isTestEnv,
   modelLog,
+  KEY_LIST,
 } from '@/util';
-import { History } from './History';
 import { Workbook } from './workbook';
 import { RangeMap } from './rangeMap';
 import { Drawing } from './drawing';
@@ -37,15 +36,11 @@ import { Worksheet } from './worksheet';
 import { MergeCell } from './mergeCell';
 import { RowManager } from './row';
 import { ColManager } from './col';
-import { computeFormulas } from '@/formula';
 import { FilterManger } from './filter';
-
-const mockTestWorker: any = {
-  computeFormulas: computeFormulas,
-};
+import { ScrollManager } from './scroll';
+import * as Y from 'yjs';
 
 export class Model implements IModel {
-  private history: History;
   private workbookManager: Workbook;
   private rangeMapManager: RangeMap;
   private drawingsManager: Drawing;
@@ -55,18 +50,35 @@ export class Model implements IModel {
   private rowManager: RowManager;
   private colManager: ColManager;
   private filterManager: FilterManger;
-  constructor(worker: RemoteWorkerType = mockTestWorker) {
-    if (!isTestEnv() && worker === mockTestWorker) {
-      throw new Error(
-        'worker must be provided in production or development environment',
-      );
-    }
-    this.history = new History({
-      undo: this.historyUndo,
-      redo: this.historyRedo,
-      change: this.historyChange,
-      maxLength: 1000,
+  private scrollManager: ScrollManager;
+  private doc: Y.Doc;
+  private undoManager: Y.UndoManager;
+  private changeSet = new Set<ChangeEventType>();
+  constructor(hooks: Pick<IHooks, 'doc' | 'worker'>) {
+    const { doc, worker } = hooks;
+    this.doc = doc;
+    const root = this.getRoot();
+    root.observeDeep((event) => {
+      modelLog('observeDeep', event);
+      const changeSet = modelToChangeSet(event);
+      for (const item of this.changeSet.keys()) {
+        changeSet.add(item);
+      }
+      if (changeSet.has('customHeight') || changeSet.has('customWidth')) {
+        this.computeViewSize();
+      }
+      this.render(changeSet);
+      this.changeSet = new Set<ChangeEventType>();
     });
+    this.undoManager = new Y.UndoManager(root, {
+      trackedOrigins: new Set([
+        SYNC_FLAG.MODEL,
+        SYNC_FLAG.REMOTE,
+        SYNC_FLAG.INIT,
+      ]),
+      captureTimeout: 100,
+    });
+
     this.workbookManager = new Workbook(this);
     this.rangeMapManager = new RangeMap(this);
     this.drawingsManager = new Drawing(this);
@@ -76,84 +88,48 @@ export class Model implements IModel {
     this.rowManager = new RowManager(this);
     this.colManager = new ColManager(this);
     this.filterManager = new FilterManger(this);
+    this.scrollManager = new ScrollManager(this);
   }
-  push(...commands: ICommandItem[]): void {
-    this.history.push(...commands);
+  transaction = <T>(fn: () => T, origin?: any): T => {
+    return this.doc.transact(fn, origin || SYNC_FLAG.MODEL);
+  };
+  clearHistory() {
+    this.undoManager.clear(true, true);
   }
-  render(changeSet: Set<ChangeEventType>, list: ICommandItem[] = []) {
-    if (
-      changeSet.size === 0 ||
-      (changeSet.size === 1 && changeSet.has('noHistory'))
-    ) {
+  getRoot() {
+    return this.doc.getMap('excel') as ModelRoot;
+  }
+  render(changeSet: Set<ChangeEventType>) {
+    if (changeSet.size === 0) {
       return;
     }
-    modelLog(changeSet, list);
-    eventEmitter.emit('modelChange', { changeSet, commandList: list });
+    modelLog(changeSet);
+    eventEmitter.emit('modelChange', { changeSet });
   }
-  private checkComputeFormulas(list: ICommandItem[]) {
-    const changeSet = modelToChangeSet(list);
-    if (
-      changeSet.has('cellValue') ||
-      changeSet.has('definedNames') ||
-      changeSet.has('currentSheetId')
-    ) {
-      this.worksheetManager.computeFormulas();
-    }
-    return changeSet;
-  }
-  async emitChange(set: Set<ChangeEventType>) {
-    const changeSet = modelToChangeSet(this.history.get());
-    for (const key of set.keys()) {
-      changeSet.add(key);
-    }
-    if (set.has('scroll')) {
-      this.push({
-        type: 'scroll',
-        key: '',
-        newValue: '',
-        oldValue: '',
-      });
-    }
-    if (set.has('antLine')) {
-      this.push({
-        type: 'antLine',
-        key: '',
-        newValue: '',
-        oldValue: '',
-      });
-    }
-    /* jscpd:ignore-start */
-    if (
-      changeSet.has('cellValue') ||
-      changeSet.has('definedNames') ||
-      changeSet.has('currentSheetId')
-    ) {
-      this.worksheetManager.computeFormulas();
-    }
-    /* jscpd:ignore-end */
-    if (changeSet.has('noHistory')) {
-      if (changeSet.has('row') || changeSet.has('col')) {
-        this.computeViewSize();
-      }
-      this.render(changeSet);
-    } else {
-      if (!changeSet.has('undo') && !changeSet.has('redo')) {
-        this.history.commit();
+  async emitChange(changeSet: Set<ChangeEventType>) {
+    const localChangeList: ChangeEventType[] = ['antLine', 'undo', 'redo'];
+    for (const item of localChangeList) {
+      if (changeSet.has(item)) {
+        this.changeSet.add(item);
+        changeSet.delete(item);
       }
     }
-    this.history.clear(false);
-  }
 
-  private historyChange = (list: ICommandItem[], type: HistoryChangeType) => {
-    const changeSet = modelToChangeSet(list);
-    if (type === 'undo' || type === 'redo') {
-      changeSet.add(type);
+    if (
+      changeSet.has('cellValue') ||
+      changeSet.has('definedNames') ||
+      changeSet.has('currentSheetId')
+    ) {
+      const result = await this.worksheetManager.computeFormulas();
+      if (result) {
+        this.changeSet.add('cellValue');
+      }
     }
-    if (changeSet.has('row') || changeSet.has('col')) {
-      this.computeViewSize();
+    if (changeSet.size === 0 && this.changeSet.size > 0) {
+      this.render(this.changeSet);
+      this.changeSet = new Set<ChangeEventType>();
     }
-    this.render(changeSet, list);
-  };
+  }
 
   getSheetList(): WorksheetType[] {
     return this.workbookManager.getSheetList();
@@ -185,7 +161,7 @@ export class Model implements IModel {
   }
   addSheet() {
     const result = this.workbookManager.addSheet();
-    this.worksheetManager.setWorksheet({}, result.sheetId);
+    this.worksheetManager.setWorksheet([]);
     this.workbookManager.setCurrentSheetId(result.sheetId);
     this.computeViewSize();
     return result;
@@ -195,12 +171,8 @@ export class Model implements IModel {
     if (!newSheetId) {
       return;
     }
-    const list = this.drawingsManager.getDrawingList(sheetId);
-    for (const item of list) {
-      this.drawingsManager.deleteDrawing(item.uuid);
-    }
+    this.deleteAll(sheetId);
     this.workbookManager.deleteSheet(sheetId);
-    this.worksheetManager.setWorksheet({}, sheetId);
     this.workbookManager.setCurrentSheetId(newSheetId);
   }
   updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string): void {
@@ -233,7 +205,7 @@ export class Model implements IModel {
   getCurrentSheetId(): string {
     return this.workbookManager.getCurrentSheetId();
   }
-  fromJSON = (json: WorkBookJSON): void => {
+  fromJSON = (json: ModelJSON): void => {
     this.workbookManager.fromJSON(json);
     this.rangeMapManager.fromJSON(json);
     this.drawingsManager.fromJSON(json);
@@ -243,20 +215,23 @@ export class Model implements IModel {
     this.rowManager.fromJSON(json);
     this.colManager.fromJSON(json);
     this.filterManager.fromJSON(json);
+    this.scrollManager.fromJSON(json);
     this.worksheetManager.computeFormulas();
+    // this.undoManager.clear(true, true);
   };
-  toJSON = (): WorkBookJSON => {
-    return {
-      ...this.workbookManager.toJSON(),
-      ...this.rangeMapManager.toJSON(),
-      ...this.drawingsManager.toJSON(),
-      ...this.definedNameManager.toJSON(),
-      ...this.worksheetManager.toJSON(),
-      ...this.mergeCellManager.toJSON(),
-      ...this.rowManager.toJSON(),
-      ...this.colManager.toJSON(),
-      ...this.filterManager.toJSON(),
-    };
+  toJSON = (): ModelJSON => {
+    const temp = this.getRoot().toJSON();
+    const result: any = {};
+    for (const key of KEY_LIST) {
+      const v = temp[key];
+      if (key === 'currentSheetId') {
+        result.currentSheetId = v || '';
+        continue;
+      }
+
+      result[key] = typeof v === 'undefined' ? {} : v;
+    }
+    return result;
   };
 
   setCell(
@@ -273,14 +248,14 @@ export class Model implements IModel {
   updateCellStyle(style: Partial<StyleType>, range: IRange): void {
     return this.worksheetManager.updateCellStyle(style, range);
   }
-  getCell = (range: IRange, noCheck?: boolean) => {
-    return this.worksheetManager.getCell(range, noCheck);
+  getCell = (range: IRange) => {
+    return this.worksheetManager.getCell(range);
   };
-  getWorksheet(sheetId?: string): WorksheetData | undefined {
+  getWorksheet(sheetId?: string) {
     return this.worksheetManager.getWorksheet(sheetId);
   }
-  setWorksheet(data: WorksheetData, sheetId?: string): void {
-    this.worksheetManager.setWorksheet(data, sheetId);
+  setWorksheet(data: WorksheetData): void {
+    this.worksheetManager.setWorksheet(data);
   }
   addCol(colIndex: number, count: number, isRight = false): void {
     if (count <= 0) {
@@ -312,8 +287,8 @@ export class Model implements IModel {
   hideCol(colIndex: number, count: number): void {
     this.colManager.hideCol(colIndex, count);
   }
-  getColWidth(col: number, sheetId?: string): CustomItem {
-    return this.colManager.getColWidth(col, sheetId);
+  getCol(col: number, sheetId?: string): CustomItem {
+    return this.colManager.getCol(col, sheetId);
   }
   setColWidth(col: number, width: number, sheetId?: string): void {
     this.colManager.setColWidth(col, width, sheetId);
@@ -353,34 +328,23 @@ export class Model implements IModel {
   unhideCol(colIndex: number, count: number): void {
     this.colManager.unhideCol(colIndex, count);
   }
-  getRowHeight(row: number, sheetId?: string): CustomItem {
-    return this.rowManager.getRowHeight(row, sheetId);
+  getRow(row: number, sheetId?: string): CustomItem {
+    return this.rowManager.getRow(row, sheetId);
   }
   setRowHeight(row: number, height: number, sheetId?: string): void {
     this.rowManager.setRowHeight(row, height, sheetId);
   }
   canRedo(): boolean {
-    return this.history.canRedo();
+    return this.undoManager.canRedo();
   }
   canUndo(): boolean {
-    return this.history.canUndo();
+    return this.undoManager.canUndo();
   }
   undo(): void {
-    this.history.undo();
+    this.undoManager.undo();
   }
   redo(): void {
-    this.history.redo();
-  }
-  applyCommandList(result: EventEmitterType['modelChange']) {
-    const { commandList = [], changeSet } = result;
-    if (commandList.length === 0) {
-      return;
-    }
-    if (changeSet.has('undo')) {
-      this.historyUndo(commandList);
-    } else {
-      this.historyRedo(commandList);
-    }
+    this.undoManager.redo();
   }
 
   pasteRange(fromRange: IRange, isCut: boolean): IRange {
@@ -459,34 +423,13 @@ export class Model implements IModel {
     this.filterManager.updateFilter(sheetId, value);
   }
 
-  private historyRedo = (list: ICommandItem[]) => {
-    for (const item of list) {
-      this.workbookManager.redo(item);
-      this.rangeMapManager.redo(item);
-      this.drawingsManager.redo(item);
-      this.definedNameManager.redo(item);
-      this.worksheetManager.redo(item);
-      this.mergeCellManager.redo(item);
-      this.rowManager.redo(item);
-      this.colManager.redo(item);
-      this.filterManager.redo(item);
-    }
-    this.checkComputeFormulas(list);
-  };
-  private historyUndo = (list: ICommandItem[]) => {
-    for (const item of list) {
-      this.workbookManager.undo(item);
-      this.rangeMapManager.undo(item);
-      this.drawingsManager.undo(item);
-      this.definedNameManager.undo(item);
-      this.worksheetManager.undo(item);
-      this.mergeCellManager.undo(item);
-      this.rowManager.undo(item);
-      this.colManager.undo(item);
-      this.filterManager.undo(item);
-    }
-    this.checkComputeFormulas(list);
-  };
+  getScroll(sheetId?: string) {
+    return this.scrollManager.getScroll(sheetId);
+  }
+  setScroll(value: ModelScroll, sheetId?: string) {
+    return this.scrollManager.setScroll(value, sheetId);
+  }
+
   private computeViewSize() {
     const headerSize = headerSizeSet.get();
     const sheetInfo = this.getSheetInfo();
@@ -495,10 +438,12 @@ export class Model implements IModel {
     }
     let { width, height } = headerSize;
     for (let i = 0; i < sheetInfo.colCount; i++) {
-      width += this.getColWidth(i).len;
+      const t = this.getCol(i);
+      width += t.isHide ? 0 : t.len;
     }
     for (let i = 0; i < sheetInfo.rowCount; i++) {
-      height += this.getRowHeight(i).len;
+      const t = this.getRow(i);
+      height += t.isHide ? 0 : t.len;
     }
     sheetViewSizeSet.set({ width, height });
   }

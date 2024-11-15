@@ -1,65 +1,43 @@
 import {
-  WorkBookJSON,
-  ICommandItem,
+  ModelJSON,
   IModel,
   AutoFilterItem,
   IFilter,
   IRange,
+  YjsModelJson,
+  TypedMap,
 } from '@/types';
-import { DELETE_FLAG, transformData } from './History';
-import { MERGE_CELL_LINE_BREAK } from '@/util';
+import { MERGE_CELL_LINE_BREAK, toIRange } from '@/util';
+import * as Y from 'yjs';
 
 export class FilterManger implements IFilter {
   private model: IModel;
-  private autoFilter: WorkBookJSON['autoFilter'] = {};
+
   constructor(model: IModel) {
     this.model = model;
   }
-  toJSON() {
-    return {
-      autoFilter: { ...this.autoFilter },
-    };
+  private get autoFilter() {
+    return this.model.getRoot().get('autoFilter');
   }
-  fromJSON(json: WorkBookJSON): void {
+  fromJSON(json: ModelJSON): void {
     const data = json.autoFilter || {};
-    const oldValue = { ...this.autoFilter };
+    const autoFilter = new Y.Map() as YjsModelJson['autoFilter'];
     for (const [key, value] of Object.entries(data)) {
       value.range.sheetId = key;
       if (!this.model.validateRange(value.range)) {
         continue;
       }
-      this.autoFilter[key] = value;
+      const temp = new Y.Map(Object.entries(value)) as TypedMap<AutoFilterItem>;
+
+      autoFilter.set(key, temp);
     }
-    this.model.push({
-      type: 'autoFilter',
-      key: '',
-      newValue: { ...this.autoFilter },
-      oldValue,
-    });
-  }
-  undo(item: ICommandItem): void {
-    if (item.type === 'autoFilter') {
-      transformData(this, item, 'undo');
-    }
-  }
-  redo(item: ICommandItem): void {
-    if (item.type === 'autoFilter') {
-      transformData(this, item, 'redo');
-    }
+
+    this.model.getRoot().set('autoFilter', autoFilter);
   }
 
   deleteAll(sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
-    const oldValue = this.autoFilter[id]
-      ? { ...this.autoFilter[id] }
-      : undefined;
-    delete this.autoFilter[id];
-    this.model.push({
-      type: 'autoFilter',
-      key: id,
-      newValue: DELETE_FLAG,
-      oldValue,
-    });
+    this.autoFilter?.delete(id);
   }
   addFilter(range: IRange): void {
     range.sheetId = range.sheetId || this.model.getCurrentSheetId();
@@ -69,17 +47,18 @@ export class FilterManger implements IFilter {
     if (range.rowCount === 1 && range.colCount === 1) {
       return;
     }
+    if (!this.autoFilter) {
+      this.model
+        .getRoot()
+        .set('autoFilter', new Y.Map() as YjsModelJson['autoFilter']);
+    }
     const newValue: AutoFilterItem = {
-      range,
+      range: toIRange(range),
     };
-    this.autoFilter[range.sheetId] = newValue;
-
-    this.model.push({
-      type: 'autoFilter',
-      key: range.sheetId,
-      newValue: { ...newValue },
-      oldValue: DELETE_FLAG,
-    });
+    const temp = new Y.Map(
+      Object.entries(newValue),
+    ) as TypedMap<AutoFilterItem>;
+    this.autoFilter!.set(range.sheetId, temp);
   }
   deleteFilter(sheetId?: string): void {
     this.deleteAll(sheetId);
@@ -88,31 +67,23 @@ export class FilterManger implements IFilter {
     /* jscpd:ignore-start */
     const id = sheetId || this.model.getCurrentSheetId();
     const keyList = Object.keys(value) as Array<keyof AutoFilterItem>;
-    const item = this.autoFilter[id];
+    const item = this.autoFilter?.get(id);
+    if (!item) {
+      return;
+    }
     for (const key of keyList) {
-      if (item[key] !== value[key]) {
-        const oldValue =
-          typeof item[key] === 'object' && item[key]
-            ? // @ts-ignore
-              { ...item[key] }
-            : item[key];
-        // @ts-ignore
-        item[key] = value[key];
-        this.model.push({
-          type: 'autoFilter',
-          key: `${id}.${key}`,
-          newValue: item[key],
-          oldValue: oldValue,
-        });
+      if (item.get(key) !== value[key]) {
+        item.set(key, value[key]);
       }
     }
+    const range = item.get('range')!;
     /* jscpd:ignore-end */
     if (typeof value.col === 'number' && value.value) {
-      this.applyFilter(item.range, value as Required<AutoFilterItem>);
+      this.applyFilter(range, value as Required<AutoFilterItem>);
       return;
     }
     if (typeof value.col === 'undefined' && !value.value) {
-      this.clearFilter(item.range);
+      this.clearFilter(range);
     }
   }
   private clearFilter(range: IRange) {
@@ -139,16 +110,13 @@ export class FilterManger implements IFilter {
       let end =
         range.rowCount === 0 ? sheetInfo.rowCount : range.row + range.rowCount;
       for (; r < end; r++) {
-        const cell = this.model.getCell(
-          {
-            row: r,
-            col,
-            rowCount: 1,
-            colCount: 1,
-            sheetId: range.sheetId,
-          },
-          true,
-        );
+        const cell = this.model.getCell({
+          row: r,
+          col,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: range.sheetId,
+        });
         const v = cell ? cell.value : MERGE_CELL_LINE_BREAK;
         if (!set.has(v)) {
           this.model.hideRow(r, 1);
@@ -160,7 +128,10 @@ export class FilterManger implements IFilter {
   }
   getFilter(sheetId?: string) {
     const id = sheetId || this.model.getCurrentSheetId();
-    const data = this.autoFilter[id];
-    return data ? { ...data } : undefined;
+    const data = this.autoFilter?.get(id);
+    if (data) {
+      return data.toJSON();
+    }
+    return undefined;
   }
 }

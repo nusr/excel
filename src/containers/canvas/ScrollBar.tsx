@@ -7,10 +7,11 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import { IController, ScrollStatus, ScrollValue } from '@/types';
-import { computeScrollRowAndCol, computeScrollPosition } from '@/canvas';
+import { IController, ScrollStatus } from '@/types';
+import { computeScrollRowAndCol } from '@/canvas';
 import styles from './index.module.css';
 import { scrollStore } from '../store';
+import { computeScrollPosition } from '../../util';
 
 interface Props {
   controller: IController;
@@ -24,9 +25,8 @@ interface State {
 
 function scrollBar(controller: IController, scrollX: number, scrollY: number) {
   const oldScroll = controller.getScroll();
-  const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } =
-    computeScrollPosition(oldScroll.left, oldScroll.top);
-
+  const size = computeScrollPosition();
+  const { maxHeight, maxScrollHeight, maxScrollWidth, maxWidth } = size;
   let scrollTop = oldScroll.scrollTop + Math.ceil(scrollY);
   let scrollLeft = oldScroll.scrollLeft + Math.ceil(scrollX);
   if (scrollTop < 0) {
@@ -42,23 +42,7 @@ function scrollBar(controller: IController, scrollX: number, scrollY: number) {
   const top = Math.floor((maxHeight * scrollTop) / maxScrollHeight);
   const left = Math.floor((maxWidth * scrollLeft) / maxScrollWidth);
   const { row, col } = computeScrollRowAndCol(controller, left, top);
-  const data: ScrollValue = {
-    top,
-    left,
-    row,
-    col,
-    scrollLeft,
-    scrollTop,
-  };
-  const activeCell = controller.getActiveRange().range;
-  if (data.row != oldScroll.row) {
-    activeCell.row = data.row;
-  }
-  if (data.col !== oldScroll.col) {
-    activeCell.col = data.col;
-  }
-  controller.setScroll(data);
-  return data;
+  controller.setScroll({ row, col, top, left, scrollLeft, scrollTop });
 }
 const initState: State = {
   prevPageX: 0,

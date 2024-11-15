@@ -34,33 +34,29 @@ export const Theme: React.FunctionComponent = memo(() => {
     setCssVariable(sizeConfig);
   }, []);
   useEffect(() => {
-    const update = (c: ThemeType) => {
-      setTheme(c);
-      updateCssVariable(c);
-      setThemeData(c);
-      eventEmitter.emit('modelChange', {
-        changeSet: new Set(['cellStyle']),
-      });
-    };
-    update(getTheme());
+    setThemeData(getTheme());
     if (typeof window.matchMedia === 'function') {
       window
         .matchMedia('(prefers-color-scheme: dark)')
         .addEventListener('change', (event) => {
-          update(event.matches ? 'dark' : 'light');
+          setThemeData(event.matches ? 'dark' : 'light');
         });
     }
   }, []);
 
-  const handleClick = useCallback(() => {
-    const n = themeData === 'dark' ? 'light' : 'dark';
-    updateCssVariable(n);
-    setTheme(n);
-    setThemeData(n);
+  useEffect(() => {
+    setTheme(themeData);
+    updateCssVariable(themeData);
     eventEmitter.emit('modelChange', {
       changeSet: new Set(['cellStyle']),
     });
   }, [themeData]);
+
+  const handleClick = useCallback(() => {
+    setThemeData((oldTheme) => {
+      return oldTheme === 'dark' ? 'light' : 'dark';
+    });
+  }, []);
   return (
     <div data-testid="menubar-theme" className={styles.theme}>
       <Button

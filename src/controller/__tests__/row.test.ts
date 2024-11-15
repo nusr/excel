@@ -1,35 +1,34 @@
-import { Controller } from '..';
-import { Model } from '@/model';
-import { mockTestHooks } from '../init'
+import { IController } from '@/types';
+import { initController, getMockHooks } from '..';
 
 describe('row.test.ts', () => {
-  let controller: Controller;
+  let controller: IController;
   beforeEach(() => {
-    controller = new Controller(new Model(), mockTestHooks);
+    controller = initController(getMockHooks());
     controller.addSheet();
   });
   describe('setRowHeight', () => {
     test('ok', () => {
       controller.setRowHeight(0, 100);
-      expect(controller.getRowHeight(0).len).toEqual(100);
+      expect(controller.getRow(0).len).toEqual(100);
     });
     test('no changed', () => {
       controller.setRowHeight(0, 100);
-      expect(controller.getRowHeight(0).len).toEqual(100);
+      expect(controller.getRow(0).len).toEqual(100);
       controller.setRowHeight(0, 100);
-      expect(controller.getRowHeight(0).len).toEqual(100);
+      expect(controller.getRow(0).len).toEqual(100);
     });
   });
   describe('hideRow', () => {
     test('ok', () => {
       controller.hideRow(20, 1);
-      expect(controller.getRowHeight(20).isHide).toEqual(true);
+      expect(controller.getRow(20).isHide).toEqual(true);
     });
     test('not changed', () => {
       controller.hideRow(20, 1);
-      expect(controller.getRowHeight(20).isHide).toEqual(true);
+      expect(controller.getRow(20).isHide).toEqual(true);
       controller.hideRow(20, 1);
-      expect(controller.getRowHeight(20).isHide).toEqual(true);
+      expect(controller.getRow(20).isHide).toEqual(true);
     });
   });
 
@@ -62,35 +61,35 @@ describe('row.test.ts', () => {
     });
 
     test('undo redo', () => {
-      const old = controller.getRowHeight(20).len;
+      const old = controller.getRow(20).len;
       controller.hideRow(20, 1);
-      expect(controller.getRowHeight(20).isHide).toEqual(true);
+      expect(controller.getRow(20).isHide).toEqual(true);
       controller.undo();
-      expect(controller.getRowHeight(20).len).toEqual(old);
+      expect(controller.getRow(20).len).toEqual(old);
       controller.redo();
-      expect(controller.getRowHeight(20).isHide).toEqual(true);
+      expect(controller.getRow(20).isHide).toEqual(true);
     });
   });
   describe('RowHeight', () => {
     test('get', () => {
-      expect(controller.getRowHeight(100).len).toEqual(22);
+      expect(controller.getRow(100).len).toEqual(22);
     });
 
     test('hide', () => {
       controller.hideRow(0, 2);
-      expect(controller.getRowHeight(0).isHide).toEqual(true);
-      expect(controller.getRowHeight(1).isHide).toEqual(true);
+      expect(controller.getRow(0).isHide).toEqual(true);
+      expect(controller.getRow(1).isHide).toEqual(true);
     });
     test('undo redo', () => {
-      const old = controller.getRowHeight(0).len;
+      const old = controller.getRow(0).len;
       controller.setRowHeight(0, 300);
-      expect(controller.getRowHeight(0).len).toEqual(300);
+      expect(controller.getRow(0).len).toEqual(300);
 
       controller.undo();
-      expect(controller.getRowHeight(0).len).toEqual(old);
+      expect(controller.getRow(0).len).toEqual(old);
 
       controller.redo();
-      expect(controller.getRowHeight(0).len).toEqual(300);
+      expect(controller.getRow(0).len).toEqual(300);
     });
   });
   describe('row worksheet drawing', () => {

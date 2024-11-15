@@ -1,12 +1,13 @@
 import { Model } from '../Model';
 import { XLSX_MAX_ROW_COUNT, XLSX_MAX_COL_COUNT } from '@/util';
 import { Workbook } from '../workbook';
-import { WorkBookJSON, WorksheetType } from '@/types';
+import { ModelJSON, WorksheetType } from '@/types';
+import { getMockHooks } from './util';
 
 describe('workbook.test.ts', () => {
   let model: Model;
   beforeEach(() => {
-    model = new Model();
+    model = new Model(getMockHooks());
   });
   describe('validateSheet', () => {
     test('ok', () => {
@@ -56,7 +57,7 @@ describe('workbook.test.ts', () => {
   });
   describe('JSON', () => {
     test('empty', () => {
-      model.fromJSON({} as unknown as WorkBookJSON);
+      model.fromJSON({} as unknown as ModelJSON);
       expect(model.toJSON().workbook).toEqual({});
     });
     test('ok', () => {
@@ -80,7 +81,7 @@ describe('workbook.test.ts', () => {
           },
         },
         currentSheetId: undefined,
-      } as unknown as WorkBookJSON);
+      } as unknown as ModelJSON);
       const jsonData = model.toJSON();
       expect(jsonData.currentSheetId).toEqual('1');
       expect(jsonData.workbook).toEqual({

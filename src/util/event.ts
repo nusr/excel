@@ -20,14 +20,14 @@ export function getHitInfo(
   let marginX = x - headerSize.width;
   let marginY = y - headerSize.height;
   let { row, col } = scroll;
-  while (resultX + controller.getColWidth(col).len <= x) {
-    const t = controller.getColWidth(col).len;
+  while (resultX + controller.getColWidth(col) <= x) {
+    const t = controller.getColWidth(col);
     resultX += t;
     marginX -= t;
     col++;
   }
-  while (resultY + controller.getRowHeight(row).len <= y) {
-    const t = controller.getRowHeight(row).len;
+  while (resultY + controller.getRowHeight(row) <= y) {
+    const t = controller.getRowHeight(row);
     resultY += t;
     marginY -= t;
     row++;

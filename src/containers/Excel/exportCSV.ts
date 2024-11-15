@@ -1,5 +1,5 @@
 import { IController } from '@/types';
-import { coordinateToString, CSV_SPLITTER, LINE_BREAK } from '@/util';
+import { CSV_SPLITTER, LINE_BREAK } from '@/util';
 import { numberFormat } from '@/model';
 
 const DELIMITER = CSV_SPLITTER;
@@ -40,23 +40,29 @@ function processRow(row: string[]) {
   }
   return csvRecord;
 }
-export function exportToCsv(controller: IController) {
-  const sheetData =
-    controller.toJSON().worksheets[controller.getCurrentSheetId()];
+export function exportToCsv(controller: IController): string {
+  const currentSheetId = controller.getCurrentSheetId();
   const csvList: string[] = [];
-  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
-  if (sheetData) {
-    for (let row = 0; row < sheetInfo.rowCount; row++) {
-      const list: string[] = [];
-      for (let col = 0; col < sheetInfo.colCount; col++) {
-        const key = coordinateToString(row, col);
-        const value = sheetData[key]?.value;
-        const style = sheetData[key]?.style;
-        list.push(numberFormat(value, style?.numberFormat));
-      }
-      csvList.push(processRow(list));
-    }
+  const sheetInfo = controller.getSheetInfo(currentSheetId);
+  if (!sheetInfo) {
+    return ''
   }
+
+  for (let row = 0; row < sheetInfo.rowCount; row++) {
+    const list: string[] = [];
+    for (let col = 0; col < sheetInfo.colCount; col++) {
+      const cell = controller.getCell({
+        row,
+        col,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: currentSheetId,
+      });
+      list.push(numberFormat(cell?.value, cell?.numberFormat));
+    }
+    csvList.push(processRow(list));
+  }
+
   const base = Array.from({ length: sheetInfo.colCount })
     .fill('')
     .join(DELIMITER);

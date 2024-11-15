@@ -6,7 +6,6 @@ import { numberFormatOptionList } from '@/util';
 describe('NumberFormat.test.tsx', () => {
   beforeEach(async () => {
     renderComponent();
-    await screen.findByTestId('formula-editor-trigger');
   });
   describe('General', () => {
     test('ok', () => {

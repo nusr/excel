@@ -6,8 +6,8 @@ import './global.mock';
 describe('Filter.test.tsx', () => {
   let controller: IController;
   beforeEach(async () => {
-    controller = await renderComponent();
-    await screen.findByTestId('toolbar');
+    const result = await renderComponent();
+    controller = result.controller
   });
   test('add filter', () => {
     controller.setActiveRange({

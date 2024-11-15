@@ -7,8 +7,8 @@ import './global.mock';
 describe('Border.test.tsx', () => {
   let controller: IController;
   beforeEach(async () => {
-    controller = renderComponent();
-    await screen.findByTestId('formula-editor-trigger');
+    const result = renderComponent();
+    controller = result.controller;
   });
   describe('Line Color', () => {
     test('ok', () => {
@@ -18,8 +18,7 @@ describe('Border.test.tsx', () => {
       dom.setAttribute('data-value', '#B2B2B2');
       fireEvent.click(dom);
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style
-          ?.borderLeft,
+        controller.getCell(controller.getActiveRange().range)?.borderLeft,
       ).toEqual({
         color: '#B2B2B2',
         type: 'thin',
@@ -48,8 +47,8 @@ describe('Border.test.tsx', () => {
         type: 'thin',
       };
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
+        controller.getCell(controller.getActiveRange().range),
+      ).toMatchObject({
         borderLeft: item,
         borderRight: item,
         borderTop: item,
@@ -66,8 +65,8 @@ describe('Border.test.tsx', () => {
         type: 'thin',
       };
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
+        controller.getCell(controller.getActiveRange().range),
+      ).toMatchObject({
         borderLeft: item,
         borderRight: item,
         borderTop: item,
@@ -77,8 +76,8 @@ describe('Border.test.tsx', () => {
       fireEvent.click(screen.getByTestId('toolbar-no-border'));
 
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
+        controller.getCell(controller.getActiveRange().range),
+      ).toMatchObject({
         borderLeft: undefined,
         borderRight: undefined,
         borderTop: undefined,
@@ -95,10 +94,8 @@ describe('Border.test.tsx', () => {
         type: 'thin',
       };
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        borderTop: item,
-      });
+        controller.getCell(controller.getActiveRange().range)?.borderTop,
+      ).toEqual(item);
     });
   });
   describe('Bottom Border', () => {
@@ -110,10 +107,8 @@ describe('Border.test.tsx', () => {
         type: 'thin',
       };
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        borderBottom: item,
-      });
+        controller.getCell(controller.getActiveRange().range)?.borderBottom,
+      ).toEqual(item);
     });
   });
   describe('Left Border', () => {
@@ -125,10 +120,8 @@ describe('Border.test.tsx', () => {
         type: 'thin',
       };
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        borderLeft: item,
-      });
+        controller.getCell(controller.getActiveRange().range)?.borderLeft,
+      ).toEqual(item);
     });
   });
   describe('Right Border', () => {
@@ -140,10 +133,8 @@ describe('Border.test.tsx', () => {
         type: 'thin',
       };
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        borderRight: item,
-      });
+        controller.getCell(controller.getActiveRange().range)?.borderRight,
+      ).toEqual(item);
     });
   });
   describe('Thick Box Border', () => {
@@ -155,8 +146,8 @@ describe('Border.test.tsx', () => {
         type: 'medium',
       };
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
+        controller.getCell(controller.getActiveRange().range),
+      ).toMatchObject({
         borderLeft: item,
         borderRight: item,
         borderTop: item,
@@ -173,8 +164,8 @@ describe('Border.test.tsx', () => {
         type: 'thin',
       };
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
+        controller.getCell(controller.getActiveRange().range),
+      ).toMatchObject({
         borderLeft: item,
         borderRight: item,
         borderTop: item,
@@ -194,10 +185,8 @@ describe('Border.test.tsx', () => {
         type: 'thin',
       };
       expect(
-        controller.getCell(controller.getActiveRange().range)?.style,
-      ).toEqual({
-        borderTop: item,
-      });
+        controller.getCell(controller.getActiveRange().range)?.borderTop,
+      ).toEqual(item);
     });
   });
 });

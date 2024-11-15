@@ -114,23 +114,9 @@ async function pasteRichText() {
   return result;
 }
 
-async function pastePlainText(): Promise<ClipboardData> {
-  const result = (await navigator?.clipboard?.readText()) || '';
-  return {
-    [HTML_FORMAT]: '',
-    [PLAIN_FORMAT]: result,
-    [CUSTOM_FORMAT]: null,
-    [IMAGE_FORMAT]: null,
-  };
-}
 export async function paste(): Promise<ClipboardData> {
   try {
     return await pasteRichText();
-  } catch (error) {
-    console.log(error);
-  }
-  try {
-    return await pastePlainText();
   } catch (error) {
     console.log(error);
   }

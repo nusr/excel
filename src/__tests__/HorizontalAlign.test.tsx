@@ -5,7 +5,6 @@ import './global.mock';
 describe('HorizontalAlign.test.tsx', () => {
   beforeEach(async () => {
     renderComponent();
-    await screen.findByTestId('formula-editor-trigger');
   });
   describe('left', () => {
     test('ok', () => {

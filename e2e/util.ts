@@ -1,6 +1,6 @@
-import { Page } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 
-export const INDEX_PAGE = '/';
+export const INDEX_PAGE = '/app';
 export const MAIN_CANVAS = 'canvas-main';
 
 export function getByTestId(selector: string) {
@@ -22,7 +22,7 @@ export async function goto(page: Page) {
   });
 
   await page.goto(INDEX_PAGE);
-  await page.waitForSelector(getByTestId(MAIN_CANVAS));
+  expect(page.getByTestId(MAIN_CANVAS)).toBeVisible();
 }
 
 export async function clickFirstCell(page: Page, isDbClick = false) {

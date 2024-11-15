@@ -3,14 +3,17 @@ import {
   SPLITTER,
   FORMULA_PREFIX,
   MERGE_CELL_LINE_BREAK,
+  DEFAULT_EXCEL_ID as DEFAULT_DOC_ID,
 } from './constant';
 import type {
   WorksheetType,
   ChangeEventType,
   Coordinate,
-  ICommandItem,
+  ModelJSON,
   ResultType,
+  IRange,
 } from '@/types';
+import type { YEvent } from 'yjs';
 
 export function parseNumber(value: any): [boolean, number] {
   if (typeof value === 'boolean') {
@@ -90,6 +93,27 @@ export function stringToCoordinate(key: string): Coordinate {
   };
 }
 
+export function getWorksheetKey(sheetId: string, row: number, col: number) {
+  return `${sheetId}${SPLITTER}${row}${SPLITTER}${col}`;
+}
+
+export function convertWorksheetKey(
+  key: string,
+): Pick<IRange, 'sheetId' | 'row' | 'col'> | null {
+  const [sheetId, row, col] = key.split(SPLITTER);
+  const r = parseInt(row, 10);
+  const c = parseInt(col, 10);
+  const result: Pick<IRange, 'sheetId' | 'row' | 'col'> = {
+    row: isNaN(r) ? -1 : r,
+    col: isNaN(c) ? -1 : c,
+    sheetId,
+  };
+  if (result.row < 0 || result.col < 0 || !sheetId) {
+    return null;
+  }
+  return result;
+}
+
 export function getCustomWidthOrHeightKey(
   sheetId: string,
   rowOrCol: number,
@@ -135,33 +159,47 @@ export function isMobile() {
   return matchList.some((v) => ua.match(v));
 }
 
-export function modelToChangeSet(list: ICommandItem[]) {
+export const KEY_LIST: Array<keyof ModelJSON> = [
+  'autoFilter',
+  'currentSheetId',
+  'customHeight',
+  'customWidth',
+  'workbook',
+  'worksheets',
+  'definedNames',
+  'drawings',
+  'mergeCells',
+  'rangeMap',
+  'scroll',
+] as const;
+
+export function modelToChangeSet(list: YEvent<any>[]) {
   const result = new Set<ChangeEventType>();
+  const set = new Set<keyof ModelJSON>(KEY_LIST);
   for (const item of list) {
-    const type = item.type;
-    result.add(type);
-    if (type === 'worksheets') {
-      if (item.key.includes('style')) {
-        result.add('cellStyle');
-      } else if (item.key.includes('value') || item.key.includes('formula')) {
+    if (!item) {
+      continue;
+    }
+    const keySet = new Set(item?.changes?.keys?.keys?.() || []);
+    const pathSet = new Set(item.path || []);
+    for (const key of keySet.keys()) {
+      if (set.has(key as any)) {
+        result.add(key as any);
+      }
+    }
+    for (const key of pathSet.keys()) {
+      if (set.has(key as any)) {
+        result.add(key as any);
+      }
+    }
+    if (pathSet.has('worksheets') || keySet.has('worksheets')) {
+      if (keySet.has('formula') || keySet.has('value')) {
         result.add('cellValue');
       } else {
-        result.add('cellValue');
         result.add('cellStyle');
       }
-    } else if (type === 'workbook') {
-      if (item.key.includes('rowCount')) {
-        result.add('row');
-      }
-      if (item.key.includes('colCount')) {
-        result.add('col');
-      }
-    } else if (type === 'customHeight') {
-      result.add('row');
-    } else if (type === 'customWidth') {
-      result.add('col');
-    } else if (type === 'autoFilter') {
-      result.add('autoFilter');
+    } else {
+      result.add('cellStyle');
     }
   }
   return result;
@@ -176,7 +214,7 @@ export function isTestEnv(): boolean {
 }
 
 export function isMac() {
-  return navigator.userAgent.indexOf('Mac OS X') > -1;
+  return navigator?.userAgent?.indexOf('Mac OS X') >= 0;
 }
 
 export function isFormula(value: ResultType) {
@@ -193,4 +231,16 @@ export function isFormula(value: ResultType) {
 
 export function isMergeContent(isMergeCell: boolean, text: string) {
   return isMergeCell && text.includes(MERGE_CELL_LINE_BREAK);
+}
+
+export function isInIframe() {
+  return window?.top !== window;
+}
+
+export function getDocId() {
+  const docId =
+    (window?.top?.location?.hash || '').slice(1) ||
+    window.location.hash.slice(1) ||
+    DEFAULT_DOC_ID;
+  return docId;
 }

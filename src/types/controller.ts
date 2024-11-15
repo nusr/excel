@@ -1,7 +1,8 @@
-import { IBaseModel } from './model';
-import { CanvasOverlayPosition, ScrollValue } from './components';
+import { IBaseModel, ScrollValue } from './model';
+import { CanvasOverlayPosition } from './components';
 import { IRange } from './range';
 import { IWindowSize, IPosition, RemoteWorkerMethod } from './event';
+import type { Doc } from 'yjs';
 
 export enum EBorderLineType {
   MEDIUM,
@@ -20,13 +21,14 @@ export type ClipboardData = {
   'text/plain': string;
   'text/html': string;
   'custom/model': CustomClipboardData | null;
-  'image/png': Blob | null
+  'image/png': Blob | null;
 };
 
 export interface IHooks {
   copyOrCut: (textData: ClipboardData, type: 'cut' | 'copy') => Promise<void>;
   paste: () => Promise<ClipboardData>;
-  worker: RemoteWorkerMethod
+  worker: RemoteWorkerMethod;
+  doc: Doc;
 }
 
 export interface IController extends IBaseModel {
@@ -40,14 +42,15 @@ export interface IController extends IBaseModel {
   cut(event?: ClipboardEvent): Promise<void>;
   getCopyRange(): IRange | undefined;
   setCopyRange(range: IRange | undefined): void;
-  setScroll(scroll: ScrollValue): void;
+  setScroll(scroll: ScrollValue, sheetId?: string): void;
   getScroll(sheetId?: string): ScrollValue;
   setFloatElementUuid(uuid: string): void;
-  batchUpdate: (fn: () => boolean, isNoHistory?: boolean) => void;
+  getRowHeight(row: number, sheetId?: string): number;
+  getColWidth(col: number, sheetId?: string): number;
 }
 
 export type CustomClipboardData = {
-  type: 'cut' | 'copy',
-  range: IRange,
-  floatElementUuid: string,
-}
+  type: 'cut' | 'copy';
+  range: IRange;
+  floatElementUuid: string;
+};

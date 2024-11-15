@@ -1,11 +1,12 @@
 import { exportToCsv } from '../exportCSV';
-import { initController } from '@/controller';
+import { initController, getMockHooks } from '@/controller';
 import { getFormatCode } from '@/util';
 
 describe('exportToCsv.test.ts', () => {
   describe('exportToCsv', () => {
     test('normal', () => {
-      const controller = initController();
+      const controller = initController(getMockHooks());
+      controller.addSheet();
       controller.setCell(
         [
           [true, false, 'true', 'false'],

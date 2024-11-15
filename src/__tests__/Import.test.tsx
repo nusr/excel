@@ -7,7 +7,6 @@ import { renderComponent } from './util';
 describe('Import.test.tsx', () => {
   beforeEach(async () => {
     renderComponent();
-    await screen.findByTestId('formula-editor-trigger');
   });
   describe('upload image', () => {
     test('ok', async () => {
@@ -43,7 +42,7 @@ describe('Import.test.tsx', () => {
   });
   describe('upload csv', () => {
     test('ok', async () => {
-      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
+      fireEvent.click(await screen.findByTestId('menubar-excel-trigger'));
       const file = new File(['test,1\n2,3'], 'test.csv', {
         type: 'text/csv',
       });

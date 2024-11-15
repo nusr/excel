@@ -10,3 +10,4 @@ export type { SheetItem } from './sheetList';
 export { defineNameStore } from './defineName';
 export { styleStore } from './style';
 export type { StyleStoreType } from './style';
+export { StateContext } from './context';

@@ -1,7 +1,13 @@
 import { MainCanvas } from '../MainCanvas';
 import { initController } from '@/controller';
-import { RequestRender, IWindowSize, IHooks, ResponseRender, RemoteWorkerMethod } from '@/types';
-import { mockTestHooks } from '@/controller/init'
+import {
+  RequestRender,
+  IWindowSize,
+  IHooks,
+  ResponseRender,
+  RemoteWorkerMethod,
+} from '@/types';
+import { getMockHooks } from '@/controller/init';
 import { CELL_HEIGHT, CELL_WIDTH } from '@/util';
 
 const mockWorker = {
@@ -9,13 +15,12 @@ const mockWorker = {
   render: jest.fn(),
   resize: jest.fn(),
   computeFormulas: jest.fn(),
-}
+};
 
 const hooks: IHooks = {
-  ...mockTestHooks,
-  worker: mockWorker as unknown as RemoteWorkerMethod
-}
-
+  ...getMockHooks(),
+  worker: mockWorker as unknown as RemoteWorkerMethod,
+};
 
 const resultData: RequestRender = {
   changeSet: new Set(['cellStyle']),
@@ -26,9 +31,9 @@ const resultData: RequestRender = {
     colCount: 30,
     rowCount: 200,
     isHide: false,
-    name: 'Sheet1',
-    sort: 1,
-    sheetId: '1',
+    name: 'Sheet2',
+    sort: 2,
+    sheetId: '2',
   },
   scroll: {
     col: 0,
@@ -38,12 +43,13 @@ const resultData: RequestRender = {
     scrollTop: 0,
     top: 0,
   },
-  range: { col: 0, row: 0, colCount: 1, rowCount: 1, sheetId: '1' },
+  range: { col: 0, row: 0, colCount: 1, rowCount: 1, sheetId: '2' },
   copyRange: undefined,
   currentMergeCells: [],
   customHeight: {},
   customWidth: {},
   sheetData: {},
+  autoFilter: undefined,
 };
 
 describe('MainCanvas.test.ts', () => {
@@ -53,16 +59,20 @@ describe('MainCanvas.test.ts', () => {
   describe('render', () => {
     test('init', () => {
       const offscreen = {} as OffscreenCanvas;
-      new MainCanvas(initController(false, hooks), {
+      const c = initController(hooks);
+      c.addSheet()
+      new MainCanvas(c, {
         transferControlToOffscreen() {
           return offscreen;
         },
       } as HTMLCanvasElement);
-      expect(mockWorker.init).toHaveBeenCalledWith({ "canvas": {}, "dpr": 1 });
+      expect(mockWorker.init).toHaveBeenCalledWith({ canvas: {}, dpr: 1 });
     });
     test('render ok', async () => {
+      const c = initController(hooks);
+      c.addSheet()
       const instance = new MainCanvas(
-        initController(false, hooks),
+        c,
         {} as HTMLCanvasElement,
       );
       await instance.render({ changeSet: new Set(['cellStyle']) });
@@ -70,42 +80,51 @@ describe('MainCanvas.test.ts', () => {
         ...resultData,
         changeSet: new Set(['cellStyle']),
       };
-      expect(mockWorker.render).toHaveBeenCalledWith(result, expect.any(Function));
+      expect(mockWorker.render).toHaveBeenCalledWith(
+        result,
+        expect.any(Function),
+      );
     });
     test('render callback ok', async () => {
       // @ts-ignore
-      hooks.worker.render = jest.fn().mockImplementation((_data: RequestRender, cb: (data: ResponseRender) => void) => {
-        cb({ rowMap: { 1: 300 }, colMap: { 1: 600 } });
-        return Promise.resolve()
-      })
-      const c = initController(false, hooks);
-      const instance = new MainCanvas(
-        c,
-        {} as HTMLCanvasElement,
-      );
+      hooks.worker.render = jest
+        .fn()
+        .mockImplementation(
+          (_data: RequestRender, cb: (data: ResponseRender) => void) => {
+            cb({ rowMap: { 1: 300 }, colMap: { 1: 600 } });
+            return Promise.resolve();
+          },
+        );
+      const c = initController(hooks);
+      c.addSheet()
+      const instance = new MainCanvas(c, {} as HTMLCanvasElement);
       await instance.render({ changeSet: new Set(['cellStyle']) });
-      expect(c.getRowHeight(1).len).toBe(300);
-      expect(c.getColWidth(1).len).toBe(600);
+      expect(c.getRow(1).len).toBe(300);
+      expect(c.getCol(1).len).toBe(600);
     });
     test('render callback fail', async () => {
       // @ts-ignore
-      hooks.worker.render = jest.fn().mockImplementation((_data: RequestRender, cb: (data: ResponseRender) => void) => {
-        cb({ rowMap: {}, colMap: {} });
-        return Promise.resolve()
-      })
-      const c = initController(false, hooks);
-      const instance = new MainCanvas(
-        c,
-        {} as HTMLCanvasElement,
-      );
+      hooks.worker.render = jest
+        .fn()
+        .mockImplementation(
+          (_data: RequestRender, cb: (data: ResponseRender) => void) => {
+            cb({ rowMap: {}, colMap: {} });
+            return Promise.resolve();
+          },
+        );
+      const c = initController(hooks);
+      c.addSheet()
+      const instance = new MainCanvas(c, {} as HTMLCanvasElement);
       await instance.render({ changeSet: new Set(['cellStyle']) });
-      expect(c.getRowHeight(1).len).toBe(CELL_HEIGHT);
-      expect(c.getColWidth(1).len).toBe(CELL_WIDTH);
+      expect(c.getRow(1).len).toBe(CELL_HEIGHT);
+      expect(c.getCol(1).len).toBe(CELL_WIDTH);
     });
   });
   describe('resize', () => {
     test('resize ok', () => {
-      const instance = new MainCanvas(initController(false, hooks), {
+      const c = initController(hooks);
+      c.addSheet()
+      const instance = new MainCanvas(c, {
         style: { width: '', height: '' },
       } as HTMLCanvasElement);
       instance.resize();

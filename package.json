@@ -4,7 +4,7 @@
   "description": "web excel",
   "main": "src/index.tsx",
   "scripts": {
-    "start": "vite --host --port 3000",
+    "start": "vite --force --host --port 3000",
     "build": "vite build",
     "preview": "vite preview",
     "test": "jest --config ./jest.config.js --forceExit --detectOpenHandles",
@@ -13,7 +13,7 @@
     "lint": "npx oxlint@latest --fix",
     "update-md": "node ./scripts/update-md.js",
     "prepare": "husky",
-    "repeat": "jscpd --ignore \"**/node_modules/**/*,**/*.test.tsx,**/*.test.ts\" -r html -m strict -l 7 -b -g --exitCode 1 .",
+    "repeat": "jscpd --ignore \"./node_modules/**,**/*.test.tsx,**/*.test.ts\" --reporters html --mode strict --min-lines 7 --blame --gitignore --exitCode 1 .",
     "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv",
     "e2e": "npx playwright test",
     "type-check": "tsc --build"
@@ -27,18 +27,18 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
-    "@playwright/test": "1.48.2",
+    "@playwright/test": "1.49.0",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.14",
-    "@types/node": "22.9.0",
+    "@types/node": "22.9.1",
     "@types/pixelmatch": "5.2.6",
     "@types/pngjs": "6.0.5",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "@vitejs/plugin-react": "4.3.3",
     "canvas": "2.11.2",
-    "husky": "9.1.6",
+    "husky": "9.1.7",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "pixelmatch": "6.0.0",
@@ -48,16 +48,18 @@
     "vite": "5.4.11"
   },
   "dependencies": {
-    "@sentry/react": "8.38.0",
+    "@sentry/react": "8.40.0",
+    "@supabase/supabase-js": "2.46.1",
     "chart.js": "4.4.6",
     "comlink": "4.4.2",
     "jszip": "3.10.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz"
+    "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz",
+    "yjs": "13.6.20"
   },
   "engines": {
-    "pnpm": "9.13.2"
+    "pnpm": "^9"
   },
   "pnpm": {
     "overrides": {

@@ -1,46 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Meta Description -->
-  <meta name="description" content="online spreadsheet" />
-  <!-- Standard favicon -->
-
-  <link rel="apple-touch-icon" sizes="57x57" href="./icon/apple-icon-57x57.png" />
-  <link rel="apple-touch-icon" sizes="60x60" href="./icon/apple-icon-60x60.png" />
-  <link rel="apple-touch-icon" sizes="72x72" href="./icon/apple-icon-72x72.png" />
-  <link rel="apple-touch-icon" sizes="76x76" href="./icon/apple-icon-76x76.png" />
-  <link rel="apple-touch-icon" sizes="114x114" href="./icon/apple-icon-114x114.png" />
-  <link rel="apple-touch-icon" sizes="120x120" href="./icon/apple-icon-120x120.png" />
-  <link rel="apple-touch-icon" sizes="144x144" href="./icon/apple-icon-144x144.png" />
-  <link rel="apple-touch-icon" sizes="152x152" href="./icon/apple-icon-152x152.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./icon/apple-icon-180x180.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon/android-icon-192x192.png" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./icon/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="96x96" href="./icon/favicon-96x96.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./icon/favicon-16x16.png" />
-  <link rel="manifest" href="./icon/manifest.json" />
-  <meta name="msapplication-TileColor" content="#ffffff" />
-  <meta name="msapplication-TileImage" content="./icon/ms-icon-144x144.png" />
-  <meta name="theme-color" content="#ffffff" />
-
-  <!-- To run the web application in full-screen -->
-  <meta name="mobile-web-app-capable" content="yes" />
-
-  <!-- Status Bar Style (see Supported Meta Tags below for available values) -->
-  <!-- Has no effect unless you have the previous meta tag -->
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
-  <link rel="alternate" href="https://github.com/nusr/excel" hreflang="x-default" />
-
-  <title>Web Excel</title>
-</head>
-
-<body>
-  <div id="root" class="root-container"></div>
-  <script type="module" src="/src/index.tsx"></script>
-</body>
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excel Collaborative Example</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+      }
+      .title {
+        text-align: center;
+        margin: 0;
+        font-size: 18px;
+        padding: 10px 0;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+      }
+      .extra {
+        padding-bottom: 10px;
+        text-align: center;
+      }
+      .content {
+        flex: 1;
+        display: flex;
+      }
+      .html {
+        border: 2px dashed black;
+        height: calc(100vh - 84px);
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body class="container">
+    <h1 class="title">Excel Collaborative Example (see iframes below)</h1>
+    <div class="extra">
+      <a href="%BASE_URL%app" id="full-screen">Full Screen</a>
+    </div>
+    <div class="content">
+      <iframe name="left" data-testid="left" src="%BASE_URL%app" class="html"></iframe>
+      <iframe name="right" data-testid="right" src="%BASE_URL%app" class="html"></iframe>
+    </div>
+    <script>
+      document.getElementById('full-screen').href = '%BASE_URL%app#' + window.location.hash.slice(1);
+    </script>
+  </body>
 </html>

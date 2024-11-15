@@ -45,7 +45,6 @@ function getData(
         colCount: 1,
         sheetId,
       },
-      true,
     );
     const cellValue = cellInfo ? cellInfo?.value : MERGE_CELL_LINE_BREAK;
     const isUndefined = cellInfo?.value === undefined;

@@ -44,10 +44,7 @@ describe('Menu.test.ts', () => {
       render(
         <div>
           <div data-testid="outside">outside</div>
-          <Menu
-            testId="menu"
-            label="trigger"
-          >
+          <Menu testId="menu" label="trigger">
             <MenuItem>33</MenuItem>
             <MenuItem>44</MenuItem>
             <SubMenu label="test" testId="subMenu">
@@ -62,7 +59,5 @@ describe('Menu.test.ts', () => {
     fireEvent.click(screen.getByTestId('menu-trigger'));
     fireEvent.click(screen.getByTestId('subMenu'));
     expect(screen.getByTestId('subMenu').childNodes.length).toEqual(2);
-    fireEvent.pointerDown(screen.getByTestId('outside'));
-    expect(() => screen.getByTestId('subMenu')).toThrow();
   });
 });

@@ -95,6 +95,8 @@ delete global.location;
 // @ts-ignore
 global.location = {
   reload: () => {},
+  // @ts-ignore
+  ancestorOrigins: []
 };
 
 global.localStorage = new LocalStorageMock();

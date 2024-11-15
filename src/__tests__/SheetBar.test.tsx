@@ -5,7 +5,6 @@ import { renderComponent } from './util';
 describe('SheetBar.test.ts', () => {
   beforeEach(async () => {
     renderComponent();
-    await screen.findByTestId('formula-editor-trigger');
   });
   describe('sheet bar', () => {
     test('normal', () => {

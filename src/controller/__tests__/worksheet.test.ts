@@ -1,15 +1,14 @@
-import { Controller } from '..';
-import { Model } from '@/model';
-import { mockTestHooks } from '../init';
 import { DEFAULT_TEXT_FORMAT_CODE } from '@/util';
+import { ModelCellType, WorksheetData } from '@/types';
+import { IController } from '@/types';
+import { initController, getMockHooks } from '..';
 
 describe('worksheet.test.ts', () => {
-  let controller: Controller;
+  let controller: IController;
   beforeEach(() => {
-    controller = new Controller(new Model(), mockTestHooks);
+    controller = initController(getMockHooks());
     controller.addSheet();
   });
-
   describe('cell value', () => {
     test('getCell', () => {
       expect(
@@ -77,11 +76,8 @@ describe('worksheet.test.ts', () => {
           colCount: 1,
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
-        }),
-      ).toEqual({
-        value: '=SUM(1,2)',
-        style: { numberFormat: DEFAULT_TEXT_FORMAT_CODE },
-      });
+        })?.numberFormat,
+      ).toEqual(DEFAULT_TEXT_FORMAT_CODE);
     });
     test('set date', () => {
       controller.setCell([[1]], [[{ numberFormat: 'h:mm:ss AM/PM' }]], {
@@ -169,6 +165,11 @@ describe('worksheet.test.ts', () => {
         sheetId: controller.getCurrentSheetId(),
       });
       await controller.paste();
+      const result: ModelCellType = {
+        formula: '=SUM(1,2)',
+        value: 3,
+        isBold: true,
+      };
       expect(
         controller.getCell({
           row: 5,
@@ -177,11 +178,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({
-        formula: '=SUM(1,2)',
-        value: 3,
-        style: { isBold: true },
-      });
+      ).toEqual(result);
     });
     test('cut', async () => {
       controller.setCell([['=SUM(1,2)']], [[{ isBold: true }]], {
@@ -207,6 +204,11 @@ describe('worksheet.test.ts', () => {
         sheetId: controller.getCurrentSheetId(),
       });
       await controller.paste();
+      const result: ModelCellType = {
+        formula: '=SUM(1,2)',
+        value: 3,
+        isBold: true,
+      };
       expect(
         controller.getCell({
           row: 5,
@@ -215,11 +217,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({
-        formula: '=SUM(1,2)',
-        value: 3,
-        style: { isBold: true },
-      });
+      ).toEqual(result);
       expect(
         controller.getCell({
           row: 0,
@@ -289,6 +287,7 @@ describe('worksheet.test.ts', () => {
         rowCount: 1,
         sheetId: controller.getCurrentSheetId(),
       });
+      const result: ModelCellType = { value: 1, isBold: true };
       expect(
         controller.getCell({
           row: 0,
@@ -297,7 +296,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, style: { isBold: true } });
+      ).toEqual(result);
     });
     test('update', () => {
       controller.setCell([[1]], [[{ isBold: true }]], {
@@ -307,6 +306,7 @@ describe('worksheet.test.ts', () => {
         rowCount: 1,
         sheetId: controller.getCurrentSheetId(),
       });
+      const result: ModelCellType = { value: 1, isBold: true };
       expect(
         controller.getCell({
           row: 0,
@@ -315,7 +315,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, style: { isBold: true } });
+      ).toEqual(result);
       controller.updateCellStyle(
         { isBold: false, isItalic: true },
         {
@@ -326,6 +326,11 @@ describe('worksheet.test.ts', () => {
           sheetId: controller.getCurrentSheetId(),
         },
       );
+      const result1: ModelCellType = {
+        value: 1,
+        isBold: false,
+        isItalic: true,
+      };
       expect(
         controller.getCell({
           row: 0,
@@ -334,10 +339,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({
-        value: 1,
-        style: { isBold: false, isItalic: true },
-      });
+      ).toEqual(result1);
     });
     test('undo redo', () => {
       controller.setCell([[1]], [[{ isBold: true }]], {
@@ -347,6 +349,7 @@ describe('worksheet.test.ts', () => {
         rowCount: 1,
         sheetId: controller.getCurrentSheetId(),
       });
+      const result: ModelCellType = { value: 1, isBold: true };
       expect(
         controller.getCell({
           row: 0,
@@ -355,7 +358,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, style: { isBold: true } });
+      ).toEqual(result);
 
       controller.undo();
       expect(
@@ -376,7 +379,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({ value: 1, style: { isBold: true } });
+      ).toEqual(result);
     });
   });
   describe('worksheet', () => {
@@ -389,6 +392,10 @@ describe('worksheet.test.ts', () => {
         sheetId: controller.getCurrentSheetId(),
       });
 
+      const result: ModelCellType = {
+        value: 1,
+        isBold: true,
+      };
       expect(
         controller.getCell({
           row: 0,
@@ -397,10 +404,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         }),
-      ).toEqual({
-        value: 1,
-        style: { isBold: true },
-      });
+      ).toEqual(result);
     });
     test('set', () => {
       controller.setCell([[1]], [], {
@@ -420,13 +424,19 @@ describe('worksheet.test.ts', () => {
         })?.value,
       ).toEqual(1);
 
-      controller.setWorksheet({
-        '0_0': { value: 'test', style: { isBold: true } },
-      });
-
-      expect(controller.getWorksheet()).toEqual({
-        '0_0': { value: 'test', style: { isBold: true } },
-      });
+      controller.setWorksheet([
+        { value: 'test', isBold: true, row: 0, col: 0, sheetId: '' },
+      ]);
+      const result: WorksheetData = [
+        {
+          value: 'test',
+          isBold: true,
+          sheetId: controller.getCurrentSheetId(),
+          row: 0,
+          col: 0,
+        },
+      ];
+      expect(controller.getWorksheet()).toEqual(result);
     });
   });
   describe('cycle import', () => {

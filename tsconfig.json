@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ESNext", "WebWorker"],
     "jsx": "react-jsx",
     "target": "ES2020",
     "noEmit": true,
@@ -32,16 +28,12 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
+    "experimentalDecorators": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "outDir": "dist"
   },
-  "include": [
-    "src"
-  ],
   "exclude": [
     "node_modules",
     "dist",
@@ -50,6 +42,6 @@
     "playwright-report",
     "test-results",
     "report",
-    "docs",
+    "docs"
   ]
 }

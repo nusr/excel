@@ -1,24 +1,22 @@
 import {
-  WorkBookJSON,
-  ICommandItem,
+  ModelJSON,
   DefinedNameItem,
   IRange,
   IModel,
   IDefinedName,
+  YjsModelJson,
 } from '@/types';
-import { DELETE_FLAG, transformData } from './History';
-import { MAX_PARAMS_COUNT, parseReference, DEFINED_NAME_REG_EXP } from '@/util';
+import { MAX_PARAMS_COUNT, parseReference, DEFINED_NAME_REG_EXP,toIRange } from '@/util';
+import * as Y from 'yjs';
 
 export class DefinedName implements IDefinedName {
   private model: IModel;
-  private definedNames: WorkBookJSON['definedNames'] = {};
+
   constructor(model: IModel) {
     this.model = model;
   }
-  toJSON() {
-    return {
-      definedNames: { ...this.definedNames },
-    };
+  private get definedNames() {
+    return this.model.getRoot().get('definedNames');
   }
   validateDefinedName(name: string) {
     if (!name) {
@@ -44,35 +42,22 @@ export class DefinedName implements IDefinedName {
     }
     return false;
   }
-  fromJSON(json: WorkBookJSON): void {
+  fromJSON(json: ModelJSON): void {
     const data = json.definedNames || {};
-    const oldValue = { ...this.definedNames };
-    this.definedNames = {};
+    const definedNames = new Y.Map() as YjsModelJson['definedNames'];
     for (const [key, value] of Object.entries(data)) {
       if (!this.model.validateRange(value) || !this.validateDefinedName(key)) {
         continue;
       }
-      this.definedNames[key] = value;
+      definedNames.set(key, toIRange(value));
     }
-    this.model.push({
-      type: 'definedNames',
-      key: '',
-      newValue: this.definedNames,
-      oldValue,
-    });
-  }
-  undo(item: ICommandItem): void {
-    if (item.type === 'definedNames') {
-      transformData(this, item, 'undo');
-    }
-  }
-  redo(item: ICommandItem): void {
-    if (item.type === 'definedNames') {
-      transformData(this, item, 'redo');
-    }
+    this.model.getRoot().set('definedNames', definedNames);
   }
   getDefineNameList(): DefinedNameItem[] {
-    const list = Object.entries(this.definedNames);
+    if (!this.definedNames) {
+      return [];
+    }
+    const list = Array.from(this.definedNames.entries());
     if (list.length === 0) {
       return [];
     }
@@ -82,8 +67,11 @@ export class DefinedName implements IDefinedName {
     }));
   }
   getDefineName(range: IRange): string {
+    if (!this.definedNames) {
+      return '';
+    }
     const sheetId = range.sheetId || this.model.getCurrentSheetId();
-    for (const [key, t] of Object.entries(this.definedNames)) {
+    for (const [key, t] of this.definedNames.entries()) {
       if (t.row === range.row && t.col === range.col && t.sheetId === sheetId) {
         return key;
       }
@@ -98,6 +86,11 @@ export class DefinedName implements IDefinedName {
     if (oldName === name) {
       return false;
     }
+    if (!this.definedNames) {
+      this.model
+        .getRoot()
+        .set('definedNames', new Y.Map() as YjsModelJson['definedNames']);
+    }
 
     const result: IRange = {
       row: range.row,
@@ -106,53 +99,28 @@ export class DefinedName implements IDefinedName {
       colCount: 1,
       rowCount: 1,
     };
-    this.definedNames[name] = result;
+    this.definedNames!.set(name, result);
     if (oldName) {
-      delete this.definedNames[oldName];
+      this.definedNames?.delete(oldName);
     }
 
-    if (oldName) {
-      this.model.push({
-        type: 'definedNames',
-        key: name,
-        newValue: result,
-        oldValue: DELETE_FLAG,
-      });
-
-      this.model.push({
-        type: 'definedNames',
-        key: oldName,
-        newValue: DELETE_FLAG,
-        oldValue: result,
-      });
-    } else {
-      this.model.push({
-        type: 'definedNames',
-        key: name,
-        newValue: result,
-        oldValue: DELETE_FLAG,
-      });
-    }
     return true;
   }
   checkDefineName(name: string): IRange | undefined {
-    const range = this.definedNames[name];
+    const range = this.definedNames?.get(name);
     if (range) {
-      return { ...this.definedNames[name] };
+      return { ...range };
     }
     return undefined;
   }
   deleteAll(sheetId?: string): void {
+    if (!this.definedNames) {
+      return;
+    }
     const id = sheetId || this.model.getCurrentSheetId();
-    for (const [key, value] of Object.entries(this.definedNames)) {
+    for (const [key, value] of this.definedNames.entries()) {
       if (value.sheetId === id) {
-        delete this.definedNames[key];
-        this.model.push({
-          type: 'definedNames',
-          key: key,
-          newValue: DELETE_FLAG,
-          oldValue: value,
-        });
+        this.definedNames.delete(key);
       }
     }
   }

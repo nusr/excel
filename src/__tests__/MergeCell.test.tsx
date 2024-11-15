@@ -5,7 +5,6 @@ import './global.mock';
 describe('MergeCell.test.tsx', () => {
   beforeEach(async () => {
     renderComponent();
-    await screen.findByTestId('formula-editor-trigger');
   });
   describe('toolbar', () => {
     test('add merge cell', () => {

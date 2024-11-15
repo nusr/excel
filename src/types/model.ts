@@ -1,7 +1,7 @@
 import { ResultType } from './parser';
 import { IRange } from './range';
 import type { ChartType } from 'chart.js';
-import type { ICommandItem } from './history';
+import type { ModelRoot, ModelJSON } from './yjs';
 
 export enum EVerticalAlign {
   TOP,
@@ -65,10 +65,10 @@ export interface StyleType {
   isBold: boolean;
   isStrike: boolean;
   numberFormat: string;
-  borderLeft?: BorderItem;
-  borderRight?: BorderItem;
-  borderTop?: BorderItem;
-  borderBottom?: BorderItem;
+  borderLeft?: BorderItem | undefined;
+  borderRight?: BorderItem | undefined;
+  borderTop?: BorderItem | undefined;
+  borderBottom?: BorderItem | undefined;
 }
 export interface WorksheetType {
   sheetId: string;
@@ -79,20 +79,28 @@ export interface WorksheetType {
   sort: number; // sort
   tabColor?: string;
 }
+export interface ModelScroll {
+  row: number;
+  col: number;
+}
+export interface ScrollValue extends ModelScroll {
+  top: number;
+  left: number;
+  scrollLeft: number;
+  scrollTop: number;
+}
 
-export interface ModelCellType {
+export interface ModelCellType extends Partial<StyleType> {
   value: ResultType;
   formula?: string;
-  style?: Partial<StyleType>;
 }
+
 export interface Coordinate {
   row: number;
   col: number;
 }
-export type ModelCellValue = ModelCellType & Coordinate;
-
-export type ModelColType = Record<string, ModelCellType>; // key: col number
-export type ModelRowType = Record<string, ModelColType>; // key: row number
+export type ModelCellValue = ModelCellType &
+  Pick<IRange, 'sheetId' | 'row' | 'col'>;
 
 export interface CustomItem {
   len: number; // width or height
@@ -118,18 +126,15 @@ export type DrawingElement = {
   chartType?: ChartType;
   chartRange?: IRange; // chart reference range
 };
-export type WorksheetData = Record<string, ModelCellType>; // key: row + col worksheets_*.xml_worksheet_sheetData
+export type WorksheetData = ModelCellValue[];
 
 export type ChangeEventType =
-  | ICommandItem['type']
-  | 'row'
-  | 'col'
+  | keyof ModelJSON
   | 'cellValue'
   | 'cellStyle'
-  | 'undo'
+  | 'antLine'
   | 'redo'
-  | 'autoFilter'
-  | 'noHistory';
+  | 'undo';
 export interface EventType {
   changeSet: Set<ChangeEventType>;
 }
@@ -173,30 +178,14 @@ export type AutoFilterItem = {
   value?: NormalFilter | NumberFilter | TextFilter | ColorFilter;
 };
 
-export type WorkBookJSON = {
-  worksheets: Record<string, WorksheetData>; // key: sheetId
-  workbook: Record<string, WorksheetType>; // key: sheetId, workbook.xml_workbook_sheets
-  mergeCells: Record<string, IRange>; // key: ref, worksheets_*.xml_worksheet_mergeCells
-  customHeight: CustomHeightOrWidthItem; // key: sheetId_row worksheets_*.xml_worksheet_sheetData_customHeight
-  customWidth: CustomHeightOrWidthItem; // key: sheetId_col worksheets_*.xml_worksheet_sheetData_customHeight
-  definedNames: Record<string, IRange>; // key: defineName workbook.xml_workbook_definedNames
-  currentSheetId: string;
-  drawings: Record<string, DrawingElement>; // key: uuid,  chart floatImage
-  rangeMap: Record<string, IRange>; // key: sheetId
-  autoFilter: Record<string, AutoFilterItem>; // key: sheetId
-};
-
 export type DefinedNameItem = { range: IRange; name: string };
 
 export interface IBaseManager {
-  fromJSON(json: WorkBookJSON): void;
-  undo(item: ICommandItem): void;
-  redo(item: ICommandItem): void;
+  fromJSON(json: ModelJSON): void;
   deleteAll(sheetId?: string): void;
 }
 
 export interface IWorkbook extends IBaseManager {
-  toJSON(): Pick<WorkBookJSON, 'currentSheetId' | 'workbook'>;
   setCurrentSheetId(id: string): void;
   getCurrentSheetId(): string;
   addSheet(): WorksheetType | undefined;
@@ -214,14 +203,17 @@ export type ActiveRange = {
   range: IRange; // merge range
 };
 export interface IRangeMap extends IBaseManager {
-  toJSON(): Pick<WorkBookJSON, 'rangeMap'>;
   setActiveRange(range: IRange): void;
   getActiveRange(range?: IRange): ActiveRange;
   validateRange(range: IRange): boolean;
 }
 
+export interface IScroll extends IBaseManager {
+  getScroll(sheetId?: string): ModelScroll;
+  setScroll(value: Partial<ModelScroll>, sheetId?: string): boolean;
+}
+
 export interface IDrawings extends IBaseManager {
-  toJSON(): Pick<WorkBookJSON, 'drawings'>;
   getDrawingList(sheetId?: string): DrawingElement[];
   addDrawing(...data: DrawingElement[]): void;
   updateDrawing(uuid: string, value: Partial<DrawingElement>): void;
@@ -234,7 +226,6 @@ export interface IDrawings extends IBaseManager {
 }
 
 export interface IDefinedName extends IBaseManager {
-  toJSON(): Pick<WorkBookJSON, 'definedNames'>;
   getDefineName(range: IRange): string;
   setDefineName(range: IRange, name: string): boolean;
   checkDefineName(name: string): IRange | undefined;
@@ -243,37 +234,33 @@ export interface IDefinedName extends IBaseManager {
 }
 
 export interface IMergeCell extends IBaseManager {
-  toJSON(): Pick<WorkBookJSON, 'mergeCells'>;
   getMergeCellList(sheetId?: string): IRange[];
   addMergeCell(range: IRange, type?: EMergeCellType): void;
   deleteMergeCell(range: IRange): void;
 }
 
 export interface IRow extends IBaseManager {
-  toJSON(): Pick<WorkBookJSON, 'customHeight'>;
   hideRow(rowIndex: number, count: number): void;
   unhideRow(rowIndex: number, count: number): void;
-  getRowHeight(row: number, sheetId?: string): CustomItem;
+  getRow(row: number, sheetId?: string): CustomItem;
   setRowHeight(row: number, height: number, sheetId?: string): void;
 }
 
 export interface ICol extends IBaseManager {
-  toJSON(): Pick<WorkBookJSON, 'customWidth'>;
   hideCol(colIndex: number, count: number): void;
   unhideCol(colIndex: number, count: number): void;
-  getColWidth(col: number, sheetId?: string): CustomItem;
+  getCol(col: number, sheetId?: string): CustomItem;
   setColWidth(col: number, width: number, sheetId?: string): void;
 }
 export interface IWorksheet extends IBaseManager {
-  toJSON(): Pick<WorkBookJSON, 'worksheets'>;
   addCol(colIndex: number, count: number, isRight?: boolean): void;
   addRow(rowIndex: number, count: number, isAbove?: boolean): void;
   deleteCol(colIndex: number, count: number): void;
   deleteRow(rowIndex: number, count: number): void;
   pasteRange(fromRange: IRange, isCut: boolean): IRange;
-  getWorksheet(sheetId?: string): WorksheetData | undefined;
-  setWorksheet(data: WorksheetData, sheetId?: string): void;
-  getCell(range: IRange, noCheck?: boolean): ModelCellType | undefined;
+  getWorksheet(sheetId?: string): WorksheetData;
+  setWorksheet(data: WorksheetData): void;
+  getCell(range: IRange): ModelCellType | undefined;
   setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,
@@ -286,7 +273,6 @@ export interface IWorksheet extends IBaseManager {
 }
 
 export interface IFilter extends IBaseManager {
-  toJSON(): Pick<WorkBookJSON, 'autoFilter'>;
   addFilter(range: IRange): void;
   deleteFilter(sheetId?: string): void;
   getFilter(sheetId?: string): AutoFilterItem | undefined;
@@ -327,8 +313,8 @@ export interface IBaseModel
       | 'validateDefinedName'
     >,
     Pick<IMergeCell, 'getMergeCellList' | 'addMergeCell' | 'deleteMergeCell'>,
-    Pick<IRow, 'hideRow' | 'getRowHeight' | 'setRowHeight' | 'unhideRow'>,
-    Pick<ICol, 'hideCol' | 'getColWidth' | 'setColWidth' | 'unhideCol'>,
+    Pick<IRow, 'hideRow' | 'getRow' | 'setRowHeight' | 'unhideRow'>,
+    Pick<ICol, 'hideCol' | 'getCol' | 'setColWidth' | 'unhideCol'>,
     Pick<
       IWorksheet,
       | 'addRow'
@@ -343,19 +329,22 @@ export interface IBaseModel
       | 'setCellValue'
     >,
     Pick<IFilter, 'addFilter' | 'getFilter' | 'deleteFilter' | 'updateFilter'> {
-  toJSON(): WorkBookJSON;
+  toJSON(): ModelJSON;
   canRedo(): boolean;
   canUndo(): boolean;
   undo(): void;
   redo(): void;
-  applyCommandList(result: EventEmitterType['modelChange']): void;
+  transaction<T>(fn: () => T, origin?: any): T;
+  clearHistory(): void
 }
 
-export interface IModel extends IBaseModel {
+export interface IModel
+  extends IBaseModel,
+    Pick<IScroll, 'getScroll' | 'setScroll'> {
   pasteRange(range: IRange, isCut: boolean): IRange;
   emitChange(dataset: Set<ChangeEventType>): void;
-  push(command: ICommandItem): void;
   render(dataset: Set<ChangeEventType>): void;
+  getRoot(): ModelRoot;
 }
 
 export type NumberFormatValue =
@@ -369,6 +358,12 @@ export type NumberFormatValue =
 export type EventEmitterType = {
   modelChange: {
     changeSet: Set<ChangeEventType>;
-    commandList?: ICommandItem[];
   };
 };
+
+export enum SYNC_FLAG {
+  REMOTE = 'remote',
+  MODEL = 'model',
+  INIT = 'init',
+  EMPTY = 'empty'
+}

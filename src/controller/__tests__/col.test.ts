@@ -1,35 +1,34 @@
-import { Controller } from '..';
-import { Model } from '@/model';
-import { mockTestHooks } from '../init'
+import { IController } from '@/types';
+import { getMockHooks, initController } from '..';
 
 describe('col.test.ts', () => {
-  let controller: Controller;
+  let controller: IController;
   beforeEach(() => {
-    controller = new Controller(new Model(), mockTestHooks);
+    controller = initController(getMockHooks());
     controller.addSheet();
   });
   describe('getColWidth', () => {
     test('not changed', () => {
       controller.setColWidth(0, 100);
-      expect(controller.getColWidth(0).len).toEqual(100);
+      expect(controller.getCol(0).len).toEqual(100);
       controller.setColWidth(0, 100);
-      expect(controller.getColWidth(0).len).toEqual(100);
+      expect(controller.getCol(0).len).toEqual(100);
     });
     test('ok', () => {
       controller.setColWidth(0, 100);
-      expect(controller.getColWidth(0).len).toEqual(100);
+      expect(controller.getCol(0).len).toEqual(100);
     });
   });
   describe('hideCol', () => {
     test('ok', () => {
       controller.hideCol(20, 1);
-      expect(controller.getColWidth(20).isHide).toEqual(true);
+      expect(controller.getCol(20).isHide).toEqual(true);
     });
     test('no changed', () => {
       controller.hideCol(20, 1);
-      expect(controller.getColWidth(20).isHide).toEqual(true);
+      expect(controller.getCol(20).isHide).toEqual(true);
       controller.hideCol(20, 1);
-      expect(controller.getColWidth(20).isHide).toEqual(true);
+      expect(controller.getCol(20).isHide).toEqual(true);
     });
   });
   describe('col', () => {
@@ -61,39 +60,39 @@ describe('col.test.ts', () => {
     });
 
     test('undo redo', () => {
-      const old = controller.getColWidth(20).len;
+      const old = controller.getCol(20).len;
       controller.hideCol(20, 1);
-      expect(controller.getColWidth(20).isHide).toEqual(true);
+      expect(controller.getCol(20).isHide).toEqual(true);
       controller.undo();
-      expect(controller.getColWidth(20).len).toEqual(old);
+      expect(controller.getCol(20).len).toEqual(old);
       controller.redo();
-      expect(controller.getColWidth(20).isHide).toEqual(true);
+      expect(controller.getCol(20).isHide).toEqual(true);
     });
   });
   describe('ColWidth', () => {
     test('get', () => {
-      expect(controller.getColWidth(100).len).toEqual(76);
+      expect(controller.getCol(100).len).toEqual(76);
     });
     test('hide', () => {
       controller.hideCol(0, 2);
-      expect(controller.getColWidth(0).isHide).toEqual(true);
-      expect(controller.getColWidth(1).isHide).toEqual(true);
+      expect(controller.getCol(0).isHide).toEqual(true);
+      expect(controller.getCol(1).isHide).toEqual(true);
     });
 
     test('undo redo', () => {
-      const old = controller.getColWidth(0).len;
+      const old = controller.getCol(0).len;
       controller.setColWidth(0, 300);
-      expect(controller.getColWidth(0).len).toEqual(300);
+      expect(controller.getCol(0).len).toEqual(300);
 
       controller.undo();
-      expect(controller.getColWidth(0).len).toEqual(old);
+      expect(controller.getCol(0).len).toEqual(old);
       controller.redo();
-      expect(controller.getColWidth(0).len).toEqual(300);
+      expect(controller.getCol(0).len).toEqual(300);
 
       controller.hideCol(0, 1);
-      expect(controller.getColWidth(0).isHide).toEqual(true);
+      expect(controller.getCol(0).isHide).toEqual(true);
       controller.undo();
-      expect(controller.getColWidth(0).len).toEqual(300);
+      expect(controller.getCol(0).len).toEqual(300);
     });
   });
   describe('col worksheet drawing', () => {

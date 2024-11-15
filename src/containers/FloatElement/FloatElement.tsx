@@ -1,12 +1,13 @@
-import React, { useState, memo, useCallback } from 'react';
+import React, { useState, memo, useCallback, Suspense } from 'react';
 import styles from './FloatElement.module.css';
 import type { FloatElementItem } from '@/containers/store';
 import { FloatElementContextMenu } from './ContextMenu';
 import { DEFAULT_POSITION, classnames } from '@/util';
 import { ResizePosition } from './util';
-import { Icon } from '../../components';
+import { Icon, Loading } from '../../components';
 import { IController, IWindowSize } from '@/types';
-import Chart from './Chart';
+
+const Chart = React.lazy(() => import('./Chart'));
 
 type FloatElementProps = FloatElementItem & {
   controller: IController;
@@ -63,7 +64,11 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
         />
       );
     } else if (type === 'chart') {
-      children = <Chart {...props} />;
+      children = (
+        <Suspense fallback={<Loading />}>
+          <Chart {...props} />
+        </Suspense>
+      );
     }
     if (!children) {
       return children;

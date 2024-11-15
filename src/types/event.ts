@@ -1,20 +1,16 @@
 import type { ResultType } from './parser';
 import type { IRange } from './range';
 import type {
-  WorkBookJSON,
   WorksheetType,
   ChangeEventType,
-  WorksheetData,
   AutoFilterItem,
-} from './model';
-import type {
-  ThemeType,
-  CanvasOverlayPosition,
   ScrollValue,
-} from './components';
+} from './model';
+import type { ThemeType, CanvasOverlayPosition } from './components';
 import type { Remote } from 'comlink';
 import { type PointerEvent } from 'react';
 import { type IController } from './controller';
+import { ModelJSON } from './yjs';
 
 export interface IWindowSize {
   width: number;
@@ -26,7 +22,7 @@ export interface IPosition {
   left: number;
 }
 export type RequestFormulas = {
-  worksheets: WorkBookJSON['worksheets'];
+  worksheets: ModelJSON['worksheets'];
   definedNames: Record<string, IRange>;
   currentSheetId: string;
   workbook: WorksheetType[];
@@ -45,11 +41,11 @@ export type RequestRender = {
   currentSheetInfo: WorksheetType;
   scroll: ScrollValue;
   range: IRange;
-  customHeight: WorkBookJSON['customHeight'];
-  customWidth: WorkBookJSON['customWidth'];
+  customHeight: ModelJSON['customHeight'];
+  customWidth: ModelJSON['customWidth'];
   copyRange: IRange | undefined;
   currentMergeCells: IRange[];
-  sheetData: WorksheetData;
+  sheetData: ModelJSON['worksheets'];
   autoFilter?: AutoFilterItem;
 };
 export type RequestInit = { canvas: OffscreenCanvas; dpr: number };
@@ -80,8 +76,8 @@ export type WorkerMethod = {
   ): Promise<void>;
   computeFormulas(
     data: RequestFormulas,
-    cb: (data: ResponseFormulas) => void,
-  ): void;
+    cb: (data: ResponseFormulas) => boolean,
+  ): Promise<boolean>;
 };
 
 export type RemoteWorkerMethod = Remote<WorkerMethod>;

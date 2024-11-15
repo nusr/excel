@@ -1,5 +1,5 @@
 import {
-  WorkBookJSON,
+  ModelJSON,
   WorksheetType,
   ModelCellType,
   StyleType,
@@ -18,16 +18,15 @@ import {
   CELL_WIDTH,
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
-  coordinateToString,
   getCustomWidthOrHeightKey,
   IMAGE_TYPE_MAP,
   SheetRange,
   mergeRange,
-  isEmpty,
   FORMULA_PREFIX,
   getImageSize,
   NUMBER_FORMAT_LIST,
-  BORDER_TYPE_MAP
+  BORDER_TYPE_MAP,
+  getWorksheetKey,
 } from '@/util';
 
 const COMMON_PREFIX = 'xl';
@@ -455,7 +454,7 @@ function getCellStyle(
 export function convertXMLDataToModel(
   xmlData: ObjectItem,
   imageSizeMap: Record<string, IWindowSize>,
-): WorkBookJSON {
+): ModelJSON {
   const workbook = xmlData[WORKBOOK_PATH];
 
   const sharedStrings: SharedStringItem[] = getArray(
@@ -469,7 +468,7 @@ export function convertXMLDataToModel(
     {},
   );
 
-  const result: WorkBookJSON = {
+  const result: ModelJSON = {
     workbook: {},
     mergeCells: {},
     customHeight: {},
@@ -479,7 +478,8 @@ export function convertXMLDataToModel(
     drawings: {},
     rangeMap: {},
     worksheets: {},
-    autoFilter: {}
+    autoFilter: {},
+    scroll: {},
   };
   const relationList = getArray<RelationItem[]>(
     xmlData[WORKBOOK_RELATION_PATH],
@@ -656,6 +656,7 @@ export function convertXMLDataToModel(
         const styleId = parseInt(col.s, 10);
         const style = getCellStyle(xmlData[STYLE_PATH], styleId, themeData);
         const t: ModelCellType = {
+          ...style,
           value: val,
         };
         const formula = col?.f?.[textKey] || '';
@@ -665,9 +666,6 @@ export function convertXMLDataToModel(
           } else {
             t.formula = FORMULA_PREFIX + formula;
           }
-        }
-        if (!isEmpty(style)) {
-          t.style = style;
         }
         if (col.t === 's') {
           const i = parseInt(val, 10);
@@ -679,11 +677,8 @@ export function convertXMLDataToModel(
         if (col.t === 'b') {
           t.value = val === '1';
         }
-
-        result.worksheets[item.sheetId] = result.worksheets[item.sheetId] || {};
-        result.worksheets[item.sheetId][
-          coordinateToString(realRow, range.col)
-        ] = t;
+        result.worksheets[getWorksheetKey(item.sheetId, realRow, range.col)] =
+          t;
         colCount = Math.max(colCount, range.col + 1);
       }
     }

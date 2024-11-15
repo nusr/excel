@@ -1,14 +1,19 @@
-import { WorkBookJSON, ICommandItem, IRangeMap, IRange, IModel } from '@/types';
-import { isSameRange } from '@/util';
-import { DELETE_FLAG, transformData } from './History';
+import { ModelJSON, IRangeMap, IRange, IModel, YjsModelJson } from '@/types';
+import { isSameRange, toIRange } from '@/util';
+import * as Y from 'yjs';
 
 export class RangeMap implements IRangeMap {
   private model: IModel;
-  private rangeMap: WorkBookJSON['rangeMap'] = {};
   constructor(model: IModel) {
     this.model = model;
   }
+  private get rangeMap() {
+    return this.model.getRoot().get('rangeMap');
+  }
   validateRange(range: IRange) {
+    if (!range) {
+      return false;
+    }
     range.sheetId = range.sheetId || this.model.getCurrentSheetId();
     const sheetInfo = this.model.getSheetInfo(range.sheetId);
     if (!sheetInfo) {
@@ -30,43 +35,22 @@ export class RangeMap implements IRangeMap {
     }
     return true;
   }
-  toJSON() {
-    return {
-      rangeMap: { ...this.rangeMap },
-    };
-  }
-  fromJSON(json: WorkBookJSON): void {
+  fromJSON(json: ModelJSON): void {
     const data = json.rangeMap || {};
-    const oldValue = { ...this.rangeMap };
-    this.rangeMap = {};
+    const rangeMap = new Y.Map() as YjsModelJson['rangeMap'];
     for (const range of Object.values(data)) {
       range.sheetId = range.sheetId || this.model.getCurrentSheetId();
       if (!this.model.validateRange(range)) {
         continue;
       }
-      this.rangeMap[range.sheetId] = range;
+      rangeMap.set(range.sheetId, range);
     }
-    this.model.push({
-      type: 'rangeMap',
-      key: '',
-      newValue: this.rangeMap,
-      oldValue,
-    });
-  }
-  undo(item: ICommandItem): void {
-    if (item.type === 'rangeMap') {
-      transformData(this, item, 'undo');
-    }
-  }
-  redo(item: ICommandItem): void {
-    if (item.type === 'rangeMap') {
-      transformData(this, item, 'redo');
-    }
+    this.model.getRoot().set('rangeMap', rangeMap);
   }
   getActiveRange() {
     const id = this.model.getCurrentSheetId();
 
-    const range = this.rangeMap[id];
+    const range = this.rangeMap?.get(id);
     if (range) {
       range.sheetId = range.sheetId || id;
       return {
@@ -87,22 +71,21 @@ export class RangeMap implements IRangeMap {
   }
   setActiveRange(newRange: IRange): void {
     newRange.sheetId = newRange.sheetId || this.model.getCurrentSheetId();
-    if (!this.model.validateRange(newRange)) {
+    if (!this.validateRange(newRange)) {
       return;
     }
-    const oldValue = this.rangeMap[newRange.sheetId]
-      ? { ...this.rangeMap[newRange.sheetId] }
-      : undefined;
+    let rangeMap = this.rangeMap;
+    if (!rangeMap) {
+      rangeMap = new Y.Map() as YjsModelJson['rangeMap'];
+      this.model.getRoot().set('rangeMap', rangeMap);
+    }
+    const oldValue = rangeMap.get(newRange.sheetId);
     if (oldValue && isSameRange(oldValue, newRange)) {
       return;
     }
-    this.rangeMap[newRange.sheetId] = newRange;
-    this.model.push({
-      type: 'rangeMap',
-      key: newRange.sheetId,
-      newValue: newRange,
-      oldValue: oldValue ? oldValue : DELETE_FLAG,
-    });
+    rangeMap.set(newRange.sheetId, toIRange(newRange));
   }
-  deleteAll(): void {}
+  deleteAll(sheetId?: string): void {
+    this.rangeMap?.delete(sheetId || this.model.getCurrentSheetId());
+  }
 }

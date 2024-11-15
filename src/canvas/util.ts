@@ -1,7 +1,6 @@
 import { splitToWords } from '@/util/split';
 import { getThemeColor, sizeConfig } from '@/theme';
 import { npx, dpr } from '@/util/dpr';
-import { isEmpty } from '@/util/lodash';
 import { makeFont } from '@/util/style';
 import {
   DEFAULT_FONT_SIZE,
@@ -17,7 +16,7 @@ import {
   Point,
   EUnderLine,
   IWindowSize,
-  ResultType,
+  ModelCellType,
   StyleType,
   EHorizontalAlign,
   EVerticalAlign,
@@ -256,34 +255,34 @@ export function renderBorderItem(
 type TextItem = { str: string; width: number; height: number };
 export function renderCell(
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
-  cellInfo: CanvasOverlayPosition,
-  value: ResultType,
-  style?: Partial<StyleType>,
+  position: CanvasOverlayPosition,
+  cellInfo: ModelCellType,
   isMergeCell?: boolean,
   theme?: ThemeType,
 ): IWindowSize {
+  const value = cellInfo.value;
   const result: IWindowSize = { height: 0, width: 0 };
-  if (value === '' && isEmpty(style)) {
+  if (value === '') {
     return result;
   }
-  const format = style?.numberFormat || DEFAULT_FORMAT_CODE;
+  const format = cellInfo?.numberFormat || DEFAULT_FORMAT_CODE;
   const isRight = format === DEFAULT_FORMAT_CODE && typeof value === 'number';
   const text = numberFormat(value, format);
-  const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
+  const fontSize = cellInfo?.fontSize ? cellInfo.fontSize : DEFAULT_FONT_SIZE;
   const font = makeFont(
-    style?.isItalic ? 'italic' : 'normal',
-    style?.isBold ? 'bold' : '500',
+    cellInfo?.isItalic ? 'italic' : 'normal',
+    cellInfo?.isBold ? 'bold' : '500',
     npx(fontSize),
-    style?.fontFamily,
+    cellInfo?.fontFamily,
   );
 
   // draw background color
-  if (style?.fillColor) {
-    ctx.fillStyle = style?.fillColor;
-    fillRect(ctx, cellInfo.left, cellInfo.top, cellInfo.width, cellInfo.height);
+  if (cellInfo?.fillColor) {
+    ctx.fillStyle = cellInfo?.fillColor;
+    fillRect(ctx, position.left, position.top, position.width, position.height);
   }
   // error text
-  let fillStyle = style?.fontColor || getThemeColor('contentColor', theme);
+  let fillStyle = cellInfo?.fontColor || getThemeColor('contentColor', theme);
   if (ERROR_SET.has(text as ErrorTypes)) {
     fillStyle = getThemeColor('errorFormulaColor', theme);
   }
@@ -291,7 +290,7 @@ export function renderCell(
   ctx.font = font;
   ctx.fillStyle = fillStyle;
 
-  const realStyle = style ? { ...style } : {};
+  const realStyle = { ...cellInfo };
   let align = realStyle?.horizontalAlign;
   if (realStyle?.horizontalAlign === undefined && isRight) {
     align = EHorizontalAlign.RIGHT;
@@ -302,7 +301,7 @@ export function renderCell(
   const isDate = !realStyle?.isWrapText && isDateFormat(format);
   const texts = isDate
     ? [text]
-    : splitWords(text, style?.isWrapText, isMergeCell);
+    : splitWords(text, cellInfo?.isWrapText, isMergeCell);
   const textList: TextItem[] = texts.map((item) => {
     const size = measureText(ctx, item);
     return {
@@ -315,7 +314,7 @@ export function renderCell(
   // fill text
   const { width, height, resultList } = computeCell(
     textList,
-    cellInfo,
+    position,
     realStyle,
     isMergeContent(Boolean(isMergeCell), text),
   );

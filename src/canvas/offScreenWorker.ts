@@ -32,7 +32,7 @@ import { getHeaderStyle } from './constant';
 import { intToColumnName } from '@/util/convert';
 import { isSheet, isCol, isRow, containRange } from '@/util/range';
 import { npx, dpr } from '@/util/dpr';
-import { getCustomWidthOrHeightKey, coordinateToString } from '@/util/util';
+import { getCustomWidthOrHeightKey, getWorksheetKey } from '@/util/util';
 
 const lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
 
@@ -70,10 +70,10 @@ export default class OffScreenWorker implements WorkerMainView {
       sort: 1,
     },
     scroll: {
-      left: 0,
-      top: 0,
       row: 0,
       col: 0,
+      top: 0,
+      left: 0,
       scrollLeft: 0,
       scrollTop: 0,
     },
@@ -100,6 +100,7 @@ export default class OffScreenWorker implements WorkerMainView {
     if (data.changeSet.size === 0 || this.isRendering) {
       return;
     }
+
     this.isRendering = true;
     this.eventData = data;
     this.clear();
@@ -544,7 +545,11 @@ export default class OffScreenWorker implements WorkerMainView {
       colCount: 1,
       sheetId: '',
     };
-    const key = coordinateToString(row, col);
+    const key = getWorksheetKey(
+      this.eventData.currentSheetInfo.sheetId,
+      row,
+      col,
+    );
     const cellInfo = this.eventData.sheetData[key];
     if (!cellInfo) {
       return;
@@ -564,8 +569,7 @@ export default class OffScreenWorker implements WorkerMainView {
         width: Math.min(cellSize.width, maxWidth),
         height: Math.min(cellSize.height, maxHeight),
       },
-      cellInfo.value,
-      cellInfo.style,
+      cellInfo,
       Boolean(mergeCell),
       theme,
     );
@@ -584,34 +588,10 @@ export default class OffScreenWorker implements WorkerMainView {
       width: Math.max(width, cellSize.width),
     };
 
-    renderBorderItem(
-      ctx,
-      cellPosition,
-      cellInfo.style?.borderTop,
-      'top',
-      theme,
-    );
-    renderBorderItem(
-      ctx,
-      cellPosition,
-      cellInfo.style?.borderBottom,
-      'bottom',
-      theme,
-    );
-    renderBorderItem(
-      ctx,
-      cellPosition,
-      cellInfo.style?.borderLeft,
-      'left',
-      theme,
-    );
-    renderBorderItem(
-      ctx,
-      cellPosition,
-      cellInfo.style?.borderRight,
-      'right',
-      theme,
-    );
+    renderBorderItem(ctx, cellPosition, cellInfo.borderTop, 'top', theme);
+    renderBorderItem(ctx, cellPosition, cellInfo.borderBottom, 'bottom', theme);
+    renderBorderItem(ctx, cellPosition, cellInfo.borderLeft, 'left', theme);
+    renderBorderItem(ctx, cellPosition, cellInfo.borderRight, 'right', theme);
   }
   private renderSelection(params: ContentParams): CanvasOverlayPosition {
     const range = this.eventData.range;

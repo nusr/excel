@@ -1,6 +1,6 @@
 import { screen, fireEvent, render, act } from '@testing-library/react';
 import { App } from '@/containers';
-import { initController } from '@/controller';
+import { initController, getMockHooks } from '@/controller';
 
 export function type(content: string, isEnter = true) {
   fireEvent.click(screen.getByTestId('formula-editor-trigger'));
@@ -28,9 +28,10 @@ export function extractDataFromTransform(
 }
 
 export function renderComponent() {
-  const controller = initController();
+  const controller = initController(getMockHooks());
+  controller.addSheet();
   act(() => {
     render(<App controller={controller} />);
   });
-  return controller;
+  return { controller };
 }

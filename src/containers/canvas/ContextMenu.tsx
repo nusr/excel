@@ -77,8 +77,8 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
   }, [top, left]);
   const handleDialog = (isRow: boolean) => {
     let value = isRow
-      ? controller.getRowHeight(row).len
-      : controller.getColWidth(col).len;
+      ? controller.getRow(row).len
+      : controller.getCol(col).len;
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const t = parseInt(event.target.value, 10);
       if (!isNaN(t)) {
@@ -112,18 +112,16 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           return toast.error($('greater-than-zero'));
         }
         if (isRow) {
-          controller.batchUpdate(() => {
+          controller.transaction(() => {
             for (let i = 0; i < rowCount; i++) {
               controller.setRowHeight(row + i, value);
             }
-            return true;
           });
         } else {
-          controller.batchUpdate(() => {
+          controller.transaction(() => {
             for (let i = 0; i < colCount; i++) {
               controller.setColWidth(col + i, value);
             }
-            return true;
           });
         }
         hideContextMenu();

@@ -1,8 +1,8 @@
 import { convertXMLToJSON, importXLSX } from '../importXLSX';
-import { WorkBookJSON, EVerticalAlign, EUnderLine } from '@/types';
+import { ModelJSON, EVerticalAlign, EUnderLine } from '@/types';
 import fs from 'fs/promises';
 import path from 'path';
-import { initController } from '@/controller';
+import { initController, getMockHooks } from '@/controller';
 
 describe('importXLSX.test.ts', () => {
   describe('convertColorToHex', () => {
@@ -27,9 +27,11 @@ describe('importXLSX.test.ts', () => {
       const filePath = path.join(process.cwd(), './scripts/origin.xlsx');
       const fileData = await fs.readFile(filePath);
       const model = await importXLSX(fileData);
-      const controller = initController();
+      const controller = initController(getMockHooks());
+      controller.addSheet();
       controller.fromJSON(model);
-      const result: WorkBookJSON = {
+      const result: ModelJSON = {
+        scroll: {},
         autoFilter: {},
         rangeMap: {
           '2': { row: 0, col: 2, rowCount: 1, colCount: 1, sheetId: '2' },
@@ -157,290 +159,244 @@ describe('importXLSX.test.ts', () => {
         },
 
         worksheets: {
-          '2': {
-            '0_0': {
-              value: '1a',
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-                fontSize: 11,
-                isBold: false,
-                isItalic: false,
-                isStrike: false,
-                underline: EUnderLine.NONE,
-                fontFamily: '等线',
-                fontColor: '#FF0000',
-              },
-            },
-            '0_1': {
-              value: '',
-              style: {
-                verticalAlign: EVerticalAlign.MIDDLE,
-                isWrapText: true,
-                fontSize: 26,
-                isBold: false,
-                isItalic: false,
-                isStrike: false,
-                underline: EUnderLine.NONE,
-                fontFamily: '等线',
-                fontColor: '#000000',
-              },
-            },
-            '0_2': {
-              value: '1a',
-              style: { verticalAlign: 1, isWrapText: true },
-            },
-            '0_3': {
-              value: 'large text',
-              style: {
-                verticalAlign: 1,
-                isWrapText: true,
-                fontSize: 36,
-                isBold: false,
-                isItalic: false,
-                isStrike: false,
-                underline: 0,
-                fontFamily: '等线',
-                fontColor: '#000000',
-              },
-            },
-            '1_0': { value: 15, style: { verticalAlign: 1, isWrapText: true } },
-            '1_1': { value: '', style: { verticalAlign: 1, isWrapText: true } },
-            '1_2': { value: '', style: { verticalAlign: 1, isWrapText: true } },
-            '1_3': { value: '', style: { verticalAlign: 1, isWrapText: true } },
-            '2_0': { value: '', style: { verticalAlign: 1, isWrapText: true } },
-            '2_1': { value: '', style: { verticalAlign: 1, isWrapText: true } },
-            '2_2': { value: '', style: { verticalAlign: 1, isWrapText: true } },
-            '2_3': { value: '', style: { verticalAlign: 1, isWrapText: true } },
-            '3_0': {
-              value: '',
-              style: {
-                verticalAlign: 1,
-                isWrapText: true,
-                fillColor: '#FF0000',
-              },
-            },
-            '3_1': {
-              value: '',
-              style: {
-                verticalAlign: 1,
-                isWrapText: true,
-                fillColor: '#FF0000',
-              },
-            },
-            '3_2': { value: '', style: { verticalAlign: 1, isWrapText: true } },
-            '3_3': { value: '', style: { verticalAlign: 1, isWrapText: true } },
-            '4_0': {
-              value: '',
-              style: {
-                verticalAlign: 1,
-                isWrapText: true,
-                fillColor: '#FF0000',
-              },
-            },
-            '4_1': {
-              value: '',
-              style: {
-                verticalAlign: 1,
-                isWrapText: true,
-                fillColor: '#FF0000',
-              },
-            },
-            '4_2': { value: '', style: { verticalAlign: 1, isWrapText: true } },
-            '4_3': { value: '', style: { verticalAlign: 1, isWrapText: true } },
+          '2_0_0': {
+            value: '1a',
+            verticalAlign: EVerticalAlign.MIDDLE,
+            isWrapText: true,
+            fontSize: 11,
+            isBold: false,
+            isItalic: false,
+            isStrike: false,
+            underline: EUnderLine.NONE,
+            fontFamily: '等线',
+            fontColor: '#FF0000',
           },
-          '4': { '3_4': { value: 22 }, '6_4': { value: 33 } },
-          '5': {
-            '0_0': { value: 1 },
-            '0_1': { value: 2 },
-            '0_2': { value: 3, formula: '=SUM(A1,B1)' },
-            '1_0': {
-              value: 12,
-              style: { numberFormat: '0.00_);[Red]\\(0.00\\)' },
-            },
-            '2_0': {
-              value: 13,
-              style: { numberFormat: '"￥"#,##0.00_);[Red]\\("￥"#,##0.00\\)' },
-            },
-            '3_0': {
-              value: 14,
-              style: {
-                numberFormat:
-                  '_ "￥"* #,##0.00_ ;_ "￥"* \\-#,##0.00_ ;_ "￥"* "-"??_ ;_ @_ ',
-              },
-            },
-            '4_0': { value: 15, style: { numberFormat: 'yyyy/m/d;@' } },
-            '5_0': {
-              value: 16,
-              style: { numberFormat: 'yyyy"年"m"月"d"日";@' },
-            },
-            '6_0': { value: 17, style: { numberFormat: 'h:mm:ss;@' } },
-            '7_0': { value: 18, style: { numberFormat: '0.00%' } },
-            '8_0': { value: 0.33, style: { numberFormat: '#\\ ?/?' } },
-            '9_0': { value: 20, style: { numberFormat: '0.00E+00' } },
-            '10_0': { value: 21, style: { numberFormat: '@' } },
-            '11_0': { value: 22 },
-            '12_0': { value: 23 },
-            '13_0': { value: 24 },
-            '14_0': { value: 25 },
-            '15_0': { value: 26 },
-            '16_0': { value: 27 },
+          '2_0_1': {
+            value: '',
+            verticalAlign: EVerticalAlign.MIDDLE,
+            isWrapText: true,
+            fontSize: 26,
+            isBold: false,
+            isItalic: false,
+            isStrike: false,
+            underline: EUnderLine.NONE,
+            fontFamily: '等线',
+            fontColor: '#000000',
           },
-          '6': {
-            '0_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'thin', color: '' },
-                borderRight: { type: 'thin', color: '' },
-                borderTop: { type: 'thin', color: '' },
-                borderBottom: { type: 'thin', color: '' },
-              },
-            },
-            '1_1': {
-              value: '1\n3\n2\n4',
-              style: { verticalAlign: 1, isWrapText: true },
-            },
-            '2_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'hair', color: '' },
-                borderRight: { type: 'hair', color: '' },
-                borderTop: { type: 'hair', color: '' },
-                borderBottom: { type: 'hair', color: '' },
-              },
-            },
-            '4_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'dotted', color: '' },
-                borderRight: { type: 'dotted', color: '' },
-                borderTop: { type: 'dotted', color: '' },
-                borderBottom: { type: 'dotted', color: '' },
-              },
-            },
-            '6_5': {
-              value: 2,
-              style: {
-                horizontalAlign: 1,
-                verticalAlign: 1,
-                isWrapText: false,
-              },
-            },
-            '6_6': {
-              value: '',
-              style: {
-                horizontalAlign: 1,
-                verticalAlign: 1,
-                isWrapText: false,
-              },
-            },
-            '6_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'dashed', color: '' },
-                borderRight: { type: 'dashed', color: '' },
-                borderTop: { type: 'dashed', color: '' },
-                borderBottom: { type: 'dashed', color: '' },
-              },
-            },
-            '7_5': {
-              value: '',
-              style: {
-                horizontalAlign: 1,
-                verticalAlign: 1,
-                isWrapText: false,
-              },
-            },
-            '7_6': {
-              value: '',
-              style: {
-                horizontalAlign: 1,
-                verticalAlign: 1,
-                isWrapText: false,
-              },
-            },
-            '8_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'dashDot', color: '' },
-                borderRight: { type: 'dashDot', color: '' },
-                borderTop: { type: 'dashDot', color: '' },
-                borderBottom: { type: 'dashDot', color: '' },
-              },
-            },
-            '10_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'dashDotDot', color: '' },
-                borderRight: { type: 'dashDotDot', color: '' },
-                borderTop: { type: 'dashDotDot', color: '' },
-                borderBottom: { type: 'dashDotDot', color: '' },
-              },
-            },
-            '12_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'double', color: '' },
-                borderRight: { type: 'double', color: '' },
-                borderTop: { type: 'double', color: '' },
-                borderBottom: { type: 'double', color: '' },
-              },
-            },
-            '14_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'medium', color: '' },
-                borderRight: { type: 'medium', color: '' },
-                borderTop: { type: 'medium', color: '' },
-                borderBottom: { type: 'medium', color: '' },
-              },
-            },
-            '16_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'medium', color: '' },
-                borderRight: { type: 'medium', color: '' },
-                borderTop: { type: 'medium', color: '' },
-                borderBottom: { type: 'medium', color: '' },
-              },
-            },
-            '18_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'mediumDashed', color: '' },
-                borderRight: { type: 'mediumDashed', color: '' },
-                borderTop: { type: 'mediumDashed', color: '' },
-                borderBottom: { type: 'mediumDashed', color: '' },
-              },
-            },
-            '20_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'mediumDashDot', color: '' },
-                borderRight: { type: 'mediumDashDot', color: '' },
-                borderTop: { type: 'mediumDashDot', color: '' },
-                borderBottom: { type: 'mediumDashDot', color: '' },
-              },
-            },
-            '22_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'mediumDashDotDot', color: '' },
-                borderRight: { type: 'mediumDashDotDot', color: '' },
-                borderTop: { type: 'mediumDashDotDot', color: '' },
-                borderBottom: { type: 'mediumDashDotDot', color: '' },
-              },
-            },
-            '24_8': { value: '', style: {} },
-            '26_8': {
-              value: '',
-              style: {
-                borderLeft: { type: 'thick', color: '' },
-                borderRight: { type: 'thick', color: '' },
-                borderTop: { type: 'thick', color: '' },
-                borderBottom: { type: 'thick', color: '' },
-              },
-            },
+          '2_0_2': {
+            value: '1a',
+            verticalAlign: 1,
+            isWrapText: true,
+          },
+          '2_0_3': {
+            value: 'large text',
+            verticalAlign: 1,
+            isWrapText: true,
+            fontSize: 36,
+            isBold: false,
+            isItalic: false,
+            isStrike: false,
+            underline: 0,
+            fontFamily: '等线',
+            fontColor: '#000000',
+          },
+          '2_1_0': { value: 15, verticalAlign: 1, isWrapText: true },
+          '2_1_1': { value: '', verticalAlign: 1, isWrapText: true },
+          '2_1_2': { value: '', verticalAlign: 1, isWrapText: true },
+          '2_1_3': { value: '', verticalAlign: 1, isWrapText: true },
+          '2_2_0': { value: '', verticalAlign: 1, isWrapText: true },
+          '2_2_1': { value: '', verticalAlign: 1, isWrapText: true },
+          '2_2_2': { value: '', verticalAlign: 1, isWrapText: true },
+          '2_2_3': { value: '', verticalAlign: 1, isWrapText: true },
+          '2_3_0': {
+            value: '',
+            verticalAlign: 1,
+            isWrapText: true,
+            fillColor: '#FF0000',
+          },
+          '2_3_1': {
+            value: '',
+            verticalAlign: 1,
+            isWrapText: true,
+            fillColor: '#FF0000',
+          },
+          '2_3_2': { value: '', verticalAlign: 1, isWrapText: true },
+          '2_3_3': { value: '', verticalAlign: 1, isWrapText: true },
+          '2_4_0': {
+            value: '',
+            verticalAlign: 1,
+            isWrapText: true,
+            fillColor: '#FF0000',
+          },
+          '2_4_1': {
+            value: '',
+            verticalAlign: 1,
+            isWrapText: true,
+            fillColor: '#FF0000',
+          },
+          '2_4_2': { value: '', verticalAlign: 1, isWrapText: true },
+          '2_4_3': { value: '', verticalAlign: 1, isWrapText: true },
+          '4_3_4': { value: 22 },
+          '4_6_4': { value: 33 },
+          '5_0_0': { value: 1 },
+          '5_0_1': { value: 2 },
+          '5_0_2': { value: 3, formula: '=SUM(A1,B1)' },
+          '5_1_0': {
+            value: 12,
+            numberFormat: '0.00_);[Red]\\(0.00\\)',
+          },
+          '5_2_0': {
+            value: 13,
+            numberFormat: '"￥"#,##0.00_);[Red]\\("￥"#,##0.00\\)',
+          },
+          '5_3_0': {
+            value: 14,
+            numberFormat:
+              '_ "￥"* #,##0.00_ ;_ "￥"* \\-#,##0.00_ ;_ "￥"* "-"??_ ;_ @_ ',
+          },
+          '5_4_0': { value: 15, numberFormat: 'yyyy/m/d;@' },
+          '5_5_0': {
+            value: 16,
+            numberFormat: 'yyyy"年"m"月"d"日";@',
+          },
+          '5_6_0': { value: 17, numberFormat: 'h:mm:ss;@' },
+          '5_7_0': { value: 18, numberFormat: '0.00%' },
+          '5_8_0': { value: 0.33, numberFormat: '#\\ ?/?' },
+          '5_9_0': { value: 20, numberFormat: '0.00E+00' },
+          '5_10_0': { value: 21, numberFormat: '@' },
+          '5_11_0': { value: 22 },
+          '5_12_0': { value: 23 },
+          '5_13_0': { value: 24 },
+          '5_14_0': { value: 25 },
+          '5_15_0': { value: 26 },
+          '5_16_0': { value: 27 },
+          '6_0_8': {
+            value: '',
+            borderLeft: { type: 'thin', color: '' },
+            borderRight: { type: 'thin', color: '' },
+            borderTop: { type: 'thin', color: '' },
+            borderBottom: { type: 'thin', color: '' },
+          },
+          '6_1_1': {
+            value: '1\n3\n2\n4',
+            verticalAlign: 1,
+            isWrapText: true,
+          },
+          '6_2_8': {
+            value: '',
+
+            borderLeft: { type: 'hair', color: '' },
+            borderRight: { type: 'hair', color: '' },
+            borderTop: { type: 'hair', color: '' },
+            borderBottom: { type: 'hair', color: '' },
+          },
+          '6_4_8': {
+            value: '',
+            borderLeft: { type: 'dotted', color: '' },
+            borderRight: { type: 'dotted', color: '' },
+            borderTop: { type: 'dotted', color: '' },
+            borderBottom: { type: 'dotted', color: '' },
+          },
+          '6_6_5': {
+            value: 2,
+
+            horizontalAlign: 1,
+            verticalAlign: 1,
+            isWrapText: false,
+          },
+          '6_6_6': {
+            value: '',
+
+            horizontalAlign: 1,
+            verticalAlign: 1,
+            isWrapText: false,
+          },
+          '6_6_8': {
+            value: '',
+
+            borderLeft: { type: 'dashed', color: '' },
+            borderRight: { type: 'dashed', color: '' },
+            borderTop: { type: 'dashed', color: '' },
+            borderBottom: { type: 'dashed', color: '' },
+          },
+          '6_7_5': {
+            value: '',
+
+            horizontalAlign: 1,
+            verticalAlign: 1,
+            isWrapText: false,
+          },
+          '6_7_6': {
+            value: '',
+
+            horizontalAlign: 1,
+            verticalAlign: 1,
+            isWrapText: false,
+          },
+          '6_8_8': {
+            value: '',
+
+            borderLeft: { type: 'dashDot', color: '' },
+            borderRight: { type: 'dashDot', color: '' },
+            borderTop: { type: 'dashDot', color: '' },
+            borderBottom: { type: 'dashDot', color: '' },
+          },
+          '6_10_8': {
+            value: '',
+            borderLeft: { type: 'dashDotDot', color: '' },
+            borderRight: { type: 'dashDotDot', color: '' },
+            borderTop: { type: 'dashDotDot', color: '' },
+            borderBottom: { type: 'dashDotDot', color: '' },
+          },
+          '6_12_8': {
+            value: '',
+            borderLeft: { type: 'double', color: '' },
+            borderRight: { type: 'double', color: '' },
+            borderTop: { type: 'double', color: '' },
+            borderBottom: { type: 'double', color: '' },
+          },
+          '6_14_8': {
+            value: '',
+            borderLeft: { type: 'medium', color: '' },
+            borderRight: { type: 'medium', color: '' },
+            borderTop: { type: 'medium', color: '' },
+            borderBottom: { type: 'medium', color: '' },
+          },
+          '6_16_8': {
+            value: '',
+            borderLeft: { type: 'medium', color: '' },
+            borderRight: { type: 'medium', color: '' },
+            borderTop: { type: 'medium', color: '' },
+            borderBottom: { type: 'medium', color: '' },
+          },
+          '6_18_8': {
+            value: '',
+            borderLeft: { type: 'mediumDashed', color: '' },
+            borderRight: { type: 'mediumDashed', color: '' },
+            borderTop: { type: 'mediumDashed', color: '' },
+            borderBottom: { type: 'mediumDashed', color: '' },
+          },
+          '6_20_8': {
+            value: '',
+            borderLeft: { type: 'mediumDashDot', color: '' },
+            borderRight: { type: 'mediumDashDot', color: '' },
+            borderTop: { type: 'mediumDashDot', color: '' },
+            borderBottom: { type: 'mediumDashDot', color: '' },
+          },
+          '6_22_8': {
+            value: '',
+            borderLeft: { type: 'mediumDashDotDot', color: '' },
+            borderRight: { type: 'mediumDashDotDot', color: '' },
+            borderTop: { type: 'mediumDashDotDot', color: '' },
+            borderBottom: { type: 'mediumDashDotDot', color: '' },
+          },
+          '6_24_8': { value: '' },
+          '6_26_8': {
+            value: '',
+            borderLeft: { type: 'thick', color: '' },
+            borderRight: { type: 'thick', color: '' },
+            borderTop: { type: 'thick', color: '' },
+            borderBottom: { type: 'thick', color: '' },
           },
         },
       };

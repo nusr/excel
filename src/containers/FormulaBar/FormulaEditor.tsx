@@ -118,14 +118,13 @@ export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps
           ) {
             value = value.replaceAll(LINE_BREAK, MERGE_CELL_LINE_BREAK);
           }
-          controller.batchUpdate(() => {
+          controller.transaction(() => {
             controller.setCellValue(value, range);
             if (event.key === 'Enter') {
               controller.setNextActiveCell('down');
             } else {
               controller.setNextActiveCell('right');
             }
-            return true;
           });
           coreStore.setState({
             editorStatus: EditorStatus.NONE,

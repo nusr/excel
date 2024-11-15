@@ -15,8 +15,8 @@ export class FilterHandler implements EventHandler {
     }
     const { range } = filter;
     if (col >= range.col && col < range.col + range.colCount) {
-      const height = controller.getRowHeight(row).len;
-      const width = controller.getColWidth(col).len;
+      const height = controller.getRowHeight(row);
+      const width = controller.getColWidth(col);
       if (
         marginX > width - FILTER_RECT_SIZE &&
         marginY > height - FILTER_RECT_SIZE

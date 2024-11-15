@@ -1,36 +1,48 @@
 import { Model } from '..';
 import { SheetRange } from '@/util';
-import { WorkBookJSON, RemoteWorkerType } from '@/types';
+import {
+  ModelJSON,
+  RequestFormulas,
+  IHooks,
+} from '@/types';
+import { getMockHooks } from './util';
+import * as Y from 'yjs';
 
 describe('model.test.ts', () => {
-  const mockWorker = {
-    computeFormulas: jest.fn(),
-  };
+  let model: Model;
   beforeEach(() => {
-    mockWorker.computeFormulas.mockReset();
+    model = new Model(getMockHooks());
   });
   test('should call computeFormulas', async () => {
-    const model = new Model(mockWorker as unknown as RemoteWorkerType);
+    const mockTestHooks: any = {
+      worker: {
+        computeFormulas: jest.fn(),
+      },
+      doc: new Y.Doc(),
+    };
+
+    const model = new Model(mockTestHooks as Pick<IHooks, 'doc' | 'worker'>);
+    model.addSheet();
     model.setCellValue('=sum(1,1)', new SheetRange(0, 0, 1, 1, ''));
     model.emitChange(new Set(['cellValue']));
-    expect(mockWorker.computeFormulas).toHaveBeenCalledWith(
-      {
-        currentSheetId: '',
-        definedNames: {},
-        workbook: [],
-        worksheets: { '': { '0_0': { formula: '=sum(1,1)' } } },
-      },
+    const sheetId = model.getCurrentSheetId();
+    const result: RequestFormulas = {
+      currentSheetId: sheetId,
+      definedNames: {},
+      workbook: [model.getSheetInfo()!],
+      worksheets: { [`${sheetId}_0_0`]: { formula: '=sum(1,1)', value: '' } },
+    };
+    expect(mockTestHooks.worker.computeFormulas).toHaveBeenCalledWith(
+      result,
       expect.any(Function),
     );
   });
   test('normal', () => {
-    const model = new Model();
     expect(model.getSheetList()).toHaveLength(0);
     model.addSheet();
     expect(model.getSheetList()).toHaveLength(1);
   });
   test('setCellValue', () => {
-    const model = new Model();
     model.addSheet();
     expect(model.getCell(new SheetRange(0, 0, 1, 1, ''))).toBeUndefined();
     model.setCell(
@@ -43,8 +55,8 @@ describe('model.test.ts', () => {
     });
   });
   test('toJSON', () => {
-    const model = new Model();
-    const result: WorkBookJSON = {
+    const result: ModelJSON = {
+      scroll: {},
       workbook: {},
       mergeCells: {},
       worksheets: {},
@@ -54,13 +66,13 @@ describe('model.test.ts', () => {
       currentSheetId: '',
       drawings: {},
       rangeMap: {},
-      autoFilter: {}
-    }
+      autoFilter: {},
+    };
     expect(model.toJSON()).toEqual(result);
   });
   test('fromJSON', () => {
-    const model = new Model();
-    const json: WorkBookJSON = {
+    const json: ModelJSON = {
+      scroll: {},
       currentSheetId: '',
       rangeMap: {},
       workbook: {
@@ -69,7 +81,7 @@ describe('model.test.ts', () => {
           isHide: false,
           rowCount: 200,
           colCount: 200,
-          name: 'test',
+          name: 'Sheet1',
           sort: 0,
         },
       },
@@ -78,18 +90,20 @@ describe('model.test.ts', () => {
       customWidth: {},
       definedNames: {},
       worksheets: {
-        '2': {
-          '0_0': {
-            formula: '=Sheet1!A1',
-            value: '',
-          },
+        '1_0_0': {
+          value: '1',
+        },
+        '1_2_2': {
+          formula: '=Sheet1!A1',
+          value: '1',
         },
       },
       drawings: {},
       autoFilter: {},
     };
     model.fromJSON(json);
-    const result: WorkBookJSON = {
+    const result: ModelJSON = {
+      scroll: {},
       currentSheetId: '1',
       workbook: {
         '1': {
@@ -97,7 +111,7 @@ describe('model.test.ts', () => {
           isHide: false,
           rowCount: 200,
           colCount: 200,
-          name: 'test',
+          name: 'Sheet1',
           sort: 0,
         },
       },
@@ -106,23 +120,24 @@ describe('model.test.ts', () => {
       customWidth: {},
       definedNames: {},
       worksheets: {
-        '2': {
-          '0_0': {
-            formula: '=Sheet1!A1',
-            value: '',
-          },
+        '1_0_0': {
+          value: 1,
+        },
+        '1_2_2': {
+          formula: '=Sheet1!A1',
+          value: 1,
         },
       },
       drawings: {},
       rangeMap: {},
-      autoFilter: {}
-    }
+      autoFilter: {},
+    };
     expect(model.toJSON()).toEqual(result);
   });
   test('fromJSON empty', () => {
-    const model = new Model();
-    model.fromJSON({} as unknown as WorkBookJSON);
-    const result: WorkBookJSON = {
+    model.fromJSON({} as unknown as ModelJSON);
+    const result: ModelJSON = {
+      scroll: {},
       workbook: {},
       mergeCells: {},
       worksheets: {},

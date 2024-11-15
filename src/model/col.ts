@@ -1,26 +1,29 @@
-import { WorkBookJSON, ICommandItem, ICol, IModel, CustomItem } from '@/types';
+import { ModelJSON, ICol, IModel, CustomItem, YjsModelJson } from '@/types';
 import {
   getCustomWidthOrHeightKey,
   CELL_WIDTH,
   widthOrHeightKeyToData,
 } from '@/util';
-import { DELETE_FLAG, transformData } from './History';
+import * as Y from 'yjs';
 
 export class ColManager implements ICol {
   private model: IModel;
-  private customWidth: WorkBookJSON['customWidth'] = {};
   constructor(model: IModel) {
     this.model = model;
   }
-  toJSON() {
-    return {
-      customWidth: { ...this.customWidth },
-    };
+  private get customWidth() {
+    return this.model.getRoot().get('customWidth');
   }
-  fromJSON(json: WorkBookJSON): void {
+  private getModel() {
+    const t = this.customWidth;
+    if (!t) {
+      this.model.getRoot().set('customWidth', new Y.Map() as YjsModelJson['customWidth']);
+    }
+    return this.customWidth!;
+  }
+  fromJSON(json: ModelJSON): void {
     const data = json.customWidth || {};
-    const oldValue = { ...this.customWidth };
-    this.customWidth = {};
+    const customWidth = new Y.Map() as YjsModelJson['customWidth'];
     for (const [key, value] of Object.entries(data)) {
       const { sheetId, rowOrCol: col } = widthOrHeightKeyToData(key);
       if (!sheetId || col < 0) {
@@ -31,25 +34,10 @@ export class ColManager implements ICol {
         continue;
       }
       if (typeof value.isHide === 'boolean' && typeof value.len === 'number') {
-        this.customWidth[key] = value;
+        customWidth.set(key, value);
       }
     }
-    this.model.push({
-      type: 'customHeight',
-      key: '',
-      newValue: this.customWidth,
-      oldValue,
-    });
-  }
-  undo(item: ICommandItem): void {
-    if (item.type === 'customWidth') {
-      transformData(this, item, 'undo');
-    }
-  }
-  redo(item: ICommandItem): void {
-    if (item.type === 'customWidth') {
-      transformData(this, item, 'redo');
-    }
+    this.model.getRoot().set('customWidth', customWidth);
   }
 
   hideCol(colIndex: number, count: number): void {
@@ -60,27 +48,21 @@ export class ColManager implements ICol {
     for (let i = 0; i < count; i++) {
       const c = colIndex + i;
       const key = getCustomWidthOrHeightKey(id, c);
-      const old = this.getColWidth(c);
-      if (old.isHide === isHide) {
+      const oldData = this.getCol(c, id);
+      if (oldData.isHide === isHide) {
         continue;
       }
-      const newData = { ...old, isHide };
-      this.customWidth[key] = newData;
-      this.model.push({
-        type: 'customWidth',
-        key: key,
-        newValue: { ...newData },
-        oldValue: this.customWidth[key] ? old : DELETE_FLAG,
-      });
+      const newData = { ...oldData, isHide };
+      this.getModel().set(key, newData);
     }
   }
   unhideCol(colIndex: number, count: number): void {
     this.toggleHideCol(colIndex, count, false);
   }
-  getColWidth(col: number, sheetId?: string): CustomItem {
+  getCol(col: number, sheetId?: string): CustomItem {
     const id = sheetId || this.model.getCurrentSheetId();
     const key = getCustomWidthOrHeightKey(id, col);
-    const temp = this.customWidth[key];
+    const temp = this.customWidth?.get(key);
     if (!temp) {
       return {
         len: CELL_WIDTH,
@@ -93,33 +75,23 @@ export class ColManager implements ICol {
     const id = sheetId || this.model.getCurrentSheetId();
     const key = getCustomWidthOrHeightKey(id, col);
 
-    const oldData = this.getColWidth(col, sheetId);
+    const oldData = this.getCol(col, sheetId);
     if (oldData.len === width) {
       return;
     }
 
     const newData = { ...oldData, len: width };
-    const old = this.customWidth[key];
-    this.customWidth[key] = newData;
-    this.model.push({
-      type: 'customWidth',
-      key: key,
-      newValue: newData,
-      oldValue: old ? old : DELETE_FLAG,
-    });
+    this.getModel().set(key, newData);
   }
   deleteAll(sheetId?: string): void {
+    if (!this.customWidth) {
+      return
+    }
     const id = sheetId || this.model.getCurrentSheetId();
-    for (const [key, value] of Object.entries(this.customWidth)) {
+    for (const key of this.customWidth.keys()) {
       const { sheetId } = widthOrHeightKeyToData(key);
       if (sheetId === id) {
-        delete this.customWidth[key];
-        this.model.push({
-          type: 'customWidth',
-          key: key,
-          newValue: DELETE_FLAG,
-          oldValue: value,
-        });
+        this.customWidth.delete(key);
       }
     }
   }

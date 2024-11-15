@@ -6,19 +6,20 @@ import {
   EVerticalAlign,
   EHorizontalAlign,
   BorderItem,
+  ModelCellValue,
 } from '@/types';
 import { CONFIG } from './exportConfig';
 import {
   saveAs,
   convertToReference,
   isEmpty,
-  stringToCoordinate,
   convertColorToHex,
   getCustomWidthOrHeightKey,
   extractImageType,
   widthOrHeightKeyToData,
   NUMBER_FORMAT_LIST,
   getThemeColor,
+  convertWorksheetKey,
 } from '@/util';
 import { XfItem, chartTypeList, convertToPt } from './importXLSX';
 import { numberFormat } from '@/model';
@@ -254,6 +255,29 @@ function buildStyle(style: StyleData) {
   return list.join('\n');
 }
 
+function formatCell(v: ModelCellValue, styles: StyleData) {
+  const { col, row, sheetId: _sheetId, value, formula, ...style } = v;
+  const ref = convertToReference({
+    col: col,
+    row: row,
+    rowCount: 1,
+    colCount: 1,
+    sheetId: '',
+  });
+  const f = formula ? `<f>${formula.slice(1)}</f>` : '';
+  let val = `<v>${numberFormat(value, v?.numberFormat)}</v>`;
+  let s = '';
+  if (!isEmpty(style)) {
+    s = `s="${styles.cellXfs.length}"`;
+    convertStyle(styles, style);
+  }
+  if (typeof v.value === 'boolean') {
+    val = `<v>${Number(v.value)}</v>`;
+    s += ` t="b"`;
+  }
+  return `<c r="${ref}" ${s}>${f}${val}</c>`;
+}
+
 export function convertToXMLData(controller: IController) {
   const model = controller.toJSON();
   const sheetList = Object.values(model.workbook);
@@ -346,10 +370,10 @@ export function convertToXMLData(controller: IController) {
         let endCol = drawing.fromCol;
         let endRow = drawing.fromRow;
         for (let i = 0; i < drawing.width; i++) {
-          i += controller.getColWidth(endCol++).len;
+          i += controller.getColWidth(endCol++);
         }
         for (let i = 0; i < drawing.height; i++) {
-          i += controller.getRowHeight(endRow++).len;
+          i += controller.getRowHeight(endRow++);
         }
         const position = `<xdr:from>
         <xdr:col>${drawing.fromCol}</xdr:col>
@@ -578,6 +602,14 @@ export function convertToXMLData(controller: IController) {
     </border>`,
     ],
   };
+  const worksheetList: ModelCellValue[] = [];
+  for (const [key, value] of Object.entries(model.worksheets)) {
+    const range = convertWorksheetKey(key);
+    if (!range) {
+      continue;
+    }
+    worksheetList.push({ ...value, ...range });
+  }
   for (const item of sheetList) {
     const mergeCells = Object.values(model.mergeCells)
       .filter((v) => v.sheetId === item.sheetId)
@@ -598,7 +630,6 @@ export function convertToXMLData(controller: IController) {
       sheetId: '',
     };
     range.sheetId = '';
-    const cellData = model.worksheets[item.sheetId] || {};
     const targetData: Partial<CommonData> = {
       children: '<sheetData/>',
       size: getCustomWidth(model.customWidth, item.sheetId),
@@ -612,31 +643,14 @@ export function convertToXMLData(controller: IController) {
     })}" sqref="${convertToReference(range)}"/>
   </sheetView>`,
     };
-    const rowMap = new Map<number, string[]>();
+    const rowMap = new Map<number, ModelCellValue[]>();
     const rowList: string[] = [];
-    for (const [key, v] of Object.entries(cellData)) {
-      const range = stringToCoordinate(key);
-      const ref = convertToReference({
-        ...range,
-        rowCount: 1,
-        colCount: 1,
-        sheetId: '',
-      });
-      const list = rowMap.get(range.row) || [];
-      const f = v.formula ? `<f>${v.formula.slice(1)}</f>` : '';
-      let val = `<v>${numberFormat(v.value, v.style?.numberFormat)}</v>`;
-      let s = '';
-
-      if (v.style && !isEmpty(v.style)) {
-        s = `s="${styles.cellXfs.length}"`;
-        convertStyle(styles, v.style);
+    for (const cell of worksheetList) {
+      if (cell.sheetId === item.sheetId) {
+        const t = rowMap.get(cell.row) || [];
+        t.push(cell);
+        rowMap.set(cell.row, t);
       }
-      if (typeof v.value === 'boolean') {
-        val = `<v>${Number(v.value)}</v>`;
-        s += ` t="b"`;
-      }
-      list.push(`<c r="${ref}" ${s}>${f}${val}</c>`);
-      rowMap.set(range.row, list);
     }
     const rowKeyList = Array.from(rowMap.keys());
     rowKeyList.sort();
@@ -650,7 +664,8 @@ export function convertToXMLData(controller: IController) {
           customHeight.isHide ? 'hidden="1"' : ''
         }`;
       }
-      const cols = rowMap.get(row)!;
+      const cols = rowMap.get(row)!.map((v) => formatCell(v, styles));
+
       rowList.push(
         `<row r="${row + 1}" ${ht} x14ac:dyDescent="0.4">\n${cols.join(
           '\n',

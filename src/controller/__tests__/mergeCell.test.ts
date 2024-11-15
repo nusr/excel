@@ -1,13 +1,16 @@
-import { Controller } from '..';
-import { Model } from '@/model';
-import { EHorizontalAlign, EMergeCellType } from '@/types';
+import { initController, getMockHooks } from '..';
+import {
+  EHorizontalAlign,
+  EMergeCellType,
+  ModelCellType,
+  IController,
+} from '@/types';
 import { MERGE_CELL_LINE_BREAK } from '@/util';
-import { mockTestHooks } from '../init'
 
 describe('mergeCell.test.ts', () => {
-  let controller: Controller;
+  let controller: IController;
   beforeEach(() => {
-    controller = new Controller(new Model(), mockTestHooks);
+    controller = initController(getMockHooks());
     controller.addSheet();
   });
   describe('addMergeCell', () => {
@@ -48,6 +51,10 @@ describe('mergeCell.test.ts', () => {
       expect(
         controller.getMergeCellList(controller.getCurrentSheetId()),
       ).toHaveLength(1);
+      const result: ModelCellType = {
+        value: 1,
+        horizontalAlign: EHorizontalAlign.CENTER,
+      };
       expect(
         controller.getCell({
           row: 0,
@@ -56,12 +63,7 @@ describe('mergeCell.test.ts', () => {
           colCount: 1,
           sheetId: '',
         }),
-      ).toEqual({
-        value: 1,
-        style: {
-          horizontalAlign: EHorizontalAlign.CENTER,
-        },
-      });
+      ).toEqual(result);
     });
     test('merge content', () => {
       controller.setCell(
@@ -91,6 +93,10 @@ describe('mergeCell.test.ts', () => {
       expect(
         controller.getMergeCellList(controller.getCurrentSheetId()),
       ).toHaveLength(1);
+      const result: ModelCellType = {
+        value: [1, 2, 3, 4].join(MERGE_CELL_LINE_BREAK),
+        isWrapText: true,
+      };
       expect(
         controller.getCell({
           row: 0,
@@ -99,10 +105,7 @@ describe('mergeCell.test.ts', () => {
           colCount: 1,
           sheetId: '',
         }),
-      ).toEqual({
-        value: [1, 2, 3, 4].join(MERGE_CELL_LINE_BREAK),
-        style: { isWrapText: true },
-      });
+      ).toEqual(result);
     });
   });
   describe('deleteMergeCell', () => {
