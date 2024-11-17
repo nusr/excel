@@ -48,7 +48,7 @@
     "vite": "5.4.11"
   },
   "dependencies": {
-    "@sentry/react": "8.37.1",
+    "@sentry/react": "8.38.0",
     "chart.js": "4.4.6",
     "comlink": "4.4.2",
     "jszip": "3.10.1",
@@ -57,7 +57,7 @@
     "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz"
   },
   "engines": {
-    "pnpm": "9.12.3"
+    "pnpm": "9.13.2"
   },
   "pnpm": {
     "overrides": {
