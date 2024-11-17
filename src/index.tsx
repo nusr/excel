@@ -13,6 +13,7 @@ import { initController } from './controller';
 import { initCollaboration } from './collaboration';
 import * as Comlink from 'comlink';
 import './global.css';
+import Worker from './worker?worker';
 
 declare const window: {
   controller: IController;
@@ -44,12 +45,7 @@ const domNode = document.getElementById('root')!;
 const controller = initController(true, {
   copyOrCut,
   paste,
-  worker: Comlink.wrap<WorkerMethod>(
-    new Worker(new URL('./worker.js', import.meta.url), {
-      type: 'module',
-      name: 'worker',
-    }),
-  ),
+  worker: Comlink.wrap<WorkerMethod>(new Worker()),
 });
 window.controller = controller;
 controller.fromJSON(MOCK_MODEL);
