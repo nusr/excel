@@ -6,10 +6,10 @@ import {
   IRange,
   YjsModelJson,
   TypedMap,
-} from '@/types';
-import { CHART_TYPE_LIST, iterateRange, toIRange } from '@/util';
-import { $ } from '@/i18n';
-import { toast } from '@/components';
+} from '../types';
+import { CHART_TYPE_LIST, iterateRange, toIRange } from '../util';
+import { $ } from '../i18n';
+import { toast } from '../components';
 import * as Y from 'yjs';
 
 export class Drawing implements IDrawings {

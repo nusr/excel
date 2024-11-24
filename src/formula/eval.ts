@@ -16,14 +16,14 @@ import {
   ModelCellType,
   RequestFormulas,
   ResponseFormulas,
-} from '@/types';
+} from '../types';
 import {
   isFormula,
   stringToCoordinate,
   getWorksheetKey,
   convertWorksheetKey,
-} from '@/util/util';
-import { SheetRange } from '@/util';
+} from '../util/util';
+import { SheetRange } from '../util';
 
 export function parseFormula(
   formula: string,

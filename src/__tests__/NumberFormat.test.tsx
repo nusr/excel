@@ -1,7 +1,7 @@
 import { screen, fireEvent } from '@testing-library/react';
 import './global.mock';
 import { type, renderComponent } from './util';
-import { numberFormatOptionList } from '@/util';
+import { numberFormatOptionList } from '../util';
 
 describe('NumberFormat.test.tsx', () => {
   beforeEach(async () => {

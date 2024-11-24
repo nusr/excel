@@ -1,8 +1,8 @@
 import workerMethod from '../worker';
-import { npx } from '@/util/dpr';
-import { RequestInit, RequestFormulas } from '@/types';
+import { npx } from '../../util/dpr';
+import { RequestInit, RequestFormulas } from '../../types';
 import OffScreenWorker from '../offScreenWorker';
-import { initController, getMockHooks } from '@/controller';
+import { initController, getMockHooks } from '../../controller';
 import { getRenderData } from './util';
 jest.mock('../offScreenWorker');
 

@@ -1,6 +1,6 @@
-import { EHorizontalAlign, EUnderLine, EVerticalAlign } from '@/types';
+import { EHorizontalAlign, EUnderLine, EVerticalAlign } from '../../../types';
 import { convertToXMLData } from '../exportXLSX';
-import { initController, getMockHooks } from '@/controller';
+import { initController, getMockHooks } from '../../../controller';
 import { mockImage } from '../../../model/mockData';
 
 function trimData(content: string) {

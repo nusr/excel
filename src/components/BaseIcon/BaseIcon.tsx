@@ -1,4 +1,4 @@
-import { classnames } from '@/util';
+import { classnames } from '../../util';
 import styles from './BaseIcon.module.css';
 import { FunctionComponent } from 'react';
 

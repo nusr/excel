@@ -1,4 +1,4 @@
-import { XLSX_MAX_COL_COUNT, XLSX_MAX_ROW_COUNT } from '@/util';
+import { XLSX_MAX_COL_COUNT, XLSX_MAX_ROW_COUNT } from '../../../util';
 import { Interpreter } from '../../interpreter';
 import { CellDataMapImpl } from '../../eval';
 import {
@@ -11,7 +11,7 @@ import {
   PostUnaryExpression,
 } from '../../expression';
 import { Token } from '../../token';
-import { TokenType } from '@/types';
+import { TokenType } from '../../../types';
 import { expectFormula } from './util';
 
 function interpret(list: Expression[]) {

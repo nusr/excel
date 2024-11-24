@@ -1,4 +1,4 @@
-import type { IController, HitInfoResult } from '@/types';
+import type { IController, HitInfoResult } from '../types';
 import { headerSizeSet } from './set';
 
 export function getHitInfo(

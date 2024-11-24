@@ -1,4 +1,4 @@
-import { IWindowSize } from '@/types';
+import { IWindowSize } from '../types';
 
 export const IMAGE_TYPE_MAP = {
   'image/apng': ['.apng'],

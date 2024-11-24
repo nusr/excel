@@ -3,8 +3,8 @@ import {
   EUnderLine,
   EHorizontalAlign,
   EVerticalAlign,
-} from '@/types';
-import { DEFAULT_FONT_SIZE, getThemeColor, DEFAULT_FORMAT_CODE } from '@/util';
+} from '../../types';
+import { DEFAULT_FONT_SIZE, getThemeColor, DEFAULT_FORMAT_CODE } from '../../util';
 import { BaseStore } from './base';
 
 export type StyleStoreType = Omit<StyleType, 'border'> & {

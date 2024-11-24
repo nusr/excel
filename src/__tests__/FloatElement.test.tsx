@@ -1,7 +1,7 @@
 import { screen, fireEvent } from '@testing-library/react';
 import { type, extractDataFromTransform, renderComponent } from './util';
 import './global.mock';
-import { IController } from '@/types';
+import { IController } from '../types';
 
 describe('FloatElement.test.ts', () => {
   let controller: IController;

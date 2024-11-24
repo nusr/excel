@@ -5,7 +5,7 @@ import {
   EditorStatus,
   IRange,
   ScrollValue,
-} from '@/types';
+} from '../types';
 import {
   isMac,
   SHEET_ITEM_TEST_ID_PREFIX,
@@ -17,8 +17,8 @@ import {
   MERGE_CELL_LINE_BREAK,
   LINE_BREAK,
   isMergeContent,
-} from '@/util';
-import { coreStore } from '@/containers/store';
+} from '../util';
+import { coreStore } from '../containers/store';
 export const BOTTOM_BUFF = 200;
 
 export function handleTabClick(controller: IController) {

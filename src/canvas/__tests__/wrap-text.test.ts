@@ -1,5 +1,5 @@
-import { initController, getMockHooks } from '@/controller';
-import { IController, EMergeCellType } from '@/types';
+import { initController, getMockHooks } from '../../controller';
+import { IController, EMergeCellType } from '../../types';
 import { compareScreenShot } from './util';
 
 describe('wrap-text.test.ts', () => {

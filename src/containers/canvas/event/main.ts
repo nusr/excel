@@ -1,11 +1,11 @@
-import { type EventHandler, type EventData, EditorStatus } from '@/types';
+import { type EventHandler, type EventData, EditorStatus } from '../../../types';
 import { PointerEvent } from 'react';
 import {
   headerSizeSet,
   isSameRange,
-} from '@/util';
-import { coreStore } from '@/containers/store';
-import { checkFocus, setActiveCellValue } from '@/canvas';
+} from '../../../util';
+import { coreStore } from '../../../containers/store';
+import { checkFocus, setActiveCellValue } from '../../../canvas';
 
 const DOUBLE_CLICK_TIME = 300;
 

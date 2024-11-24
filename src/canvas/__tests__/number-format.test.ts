@@ -1,8 +1,8 @@
-import { initController, getMockHooks } from '@/controller';
-import { IController } from '@/types';
+import { initController, getMockHooks } from '../../controller';
+import { IController } from '../../types';
 import { compareScreenShot } from './util';
-import { numberFormatOptionList } from '@/util';
-import { $ } from '@/i18n';
+import { numberFormatOptionList } from '../../util';
+import { $ } from '../../i18n';
 
 describe('number-format.test.ts', () => {
   let controller: IController;

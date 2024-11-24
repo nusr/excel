@@ -1,6 +1,6 @@
 import { exportToCsv } from '../exportCSV';
-import { initController, getMockHooks } from '@/controller';
-import { getFormatCode } from '@/util';
+import { initController, getMockHooks } from '../../../controller';
+import { getFormatCode } from '../../../util';
 
 describe('exportToCsv.test.ts', () => {
   describe('exportToCsv', () => {

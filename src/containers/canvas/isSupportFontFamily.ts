@@ -3,9 +3,9 @@ import {
   FONT_FAMILY_LIST,
   LOCAL_FONT_KEY,
   QUERY_ALL_LOCAL_FONT,
-} from '@/util';
-import { OptionItem } from '@/types';
-import { $ } from '@/i18n';
+} from '../../util';
+import { OptionItem } from '../../types';
+import { $ } from '../../i18n';
 
 function createElement(font: string) {
   const s = document.createElement('span');

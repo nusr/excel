@@ -10,11 +10,11 @@ import {
   DEFAULT_POSITION,
   MAX_NAME_LENGTH,
   SHEET_ITEM_TEST_ID_PREFIX,
-} from '@/util';
+} from '../../util';
 import { Button, Icon, SelectPopup } from '../../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
-import { sheetListStore, coreStore, useExcel } from '@/containers/store';
+import { sheetListStore, coreStore, useExcel } from '../../containers/store';
 
 export const SheetBarContainer = memo(() => {
   const { controller } = useExcel();

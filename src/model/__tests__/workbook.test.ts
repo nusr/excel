@@ -1,7 +1,7 @@
 import { Model } from '../Model';
-import { XLSX_MAX_ROW_COUNT, XLSX_MAX_COL_COUNT } from '@/util';
+import { XLSX_MAX_ROW_COUNT, XLSX_MAX_COL_COUNT } from '../../util';
 import { Workbook } from '../workbook';
-import { ModelJSON, WorksheetType } from '@/types';
+import { ModelJSON, WorksheetType } from '../../types';
 import { getMockHooks } from './util';
 
 describe('workbook.test.ts', () => {

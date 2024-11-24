@@ -1,8 +1,8 @@
-import { getThemeColor } from '@/theme';
-import { ThemeType } from '@/types';
-import { DEFAULT_LINE_WIDTH, DEFAULT_FONT_SIZE } from '@/util/constant';
-import { makeFont } from '@/util/style';
-import { npx } from '@/util/dpr';
+import { getThemeColor } from '../theme';
+import { ThemeType } from '../types';
+import { DEFAULT_LINE_WIDTH, DEFAULT_FONT_SIZE } from '../util/constant';
+import { makeFont } from '../util/style';
+import { npx } from '../util/dpr';
 
 export function getHeaderStyle(
   theme?: ThemeType,

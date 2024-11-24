@@ -12,7 +12,7 @@ import type {
   ModelJSON,
   ResultType,
   IRange,
-} from '@/types';
+} from '../types';
 import type { YEvent } from 'yjs';
 
 export function parseNumber(value: any): [boolean, number] {

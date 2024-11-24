@@ -24,6 +24,5 @@ package-lock.json
 /blob-report/
 /playwright/.cache/
 build
-pnpm-lock.yaml
 .env
-.env.ci
+.env.server

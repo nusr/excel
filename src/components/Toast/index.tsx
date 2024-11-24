@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import styles from './index.module.css';
-import { classnames } from '@/util';
+import { classnames } from '../../util';
 import { Icon } from '../BaseIcon';
 
 type MessageType = 'success' | 'error' | 'info' | 'warning';

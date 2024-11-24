@@ -1,5 +1,5 @@
 import { handleTabClick } from '../shortcut';
-import { IController } from '@/types';
+import { IController } from '../../types';
 
 describe('shortcut.test.ts', () => {
   describe('handleTabClick', () => {

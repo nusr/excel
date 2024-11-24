@@ -1,8 +1,8 @@
 import type { Doc } from 'yjs';
 import { initProvider, ResultData } from './provider';
 import * as Y from 'yjs';
-import { collaborationLog } from '@/util';
-import { SYNC_FLAG } from '@/types';
+import { collaborationLog } from '../util';
+import { SYNC_FLAG } from '../types';
 import { DEFAULT_UPDATE } from './provider/util';
 
 function shouldSkip(isServer: boolean, tran: Y.Transaction) {

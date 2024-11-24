@@ -1,5 +1,5 @@
 import styles from './index.module.css';
-import type { ModalProps } from '@/types';
+import type { ModalProps } from '../../../types';
 import { FilterModal } from './Filter';
 
 const Modal = (props: ModalProps) => {

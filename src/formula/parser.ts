@@ -1,4 +1,4 @@
-import { TokenType } from '@/types';
+import { TokenType } from '../types';
 import { Token } from './token';
 import {
   Expression,
@@ -13,7 +13,7 @@ import {
   ArrayExpression,
 } from './expression';
 import { CustomError } from './formula';
-import { type ErrorTypes } from '@/util/constant';
+import { type ErrorTypes } from '../util/constant';
 
 export class Parser {
   private readonly tokens: Token[];

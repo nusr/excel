@@ -1,4 +1,4 @@
-import { EventHandler } from '@/types';
+import { EventHandler } from '../../../types';
 import { MainHandler } from './main';
 import { FilterHandler } from './filter';
 

@@ -3,10 +3,10 @@ import { Menu, MenuItem, Button } from '../../components';
 import { importXLSX, exportToXLSX, exportToCsv, importCSV } from '../Excel';
 import styles from './index.module.css';
 import { Theme } from './Theme';
-import { $ } from '@/i18n';
+import { $ } from '../../i18n';
 import { I18N } from './I18N';
 import { FPS } from './FPS';
-import { saveAs, isInIframe, getDocId } from '@/util';
+import { saveAs, isInIframe, getDocId } from '../../util';
 import { useExcel } from '../store';
 
 export const MenuBarContainer = memo(() => {

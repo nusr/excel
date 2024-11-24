@@ -6,10 +6,10 @@ import {
   WorkerMethod,
   RequestFormulas,
   ResponseFormulas,
-} from '@/types';
-import { computeFormulas } from '@/formula';
+} from '../types';
+import { computeFormulas } from '../formula';
 import OffScreenWorker from './offScreenWorker';
-import { setDpr } from '@/util/dpr';
+import { setDpr } from '../util/dpr';
 
 let offScreen: OffScreenWorker | null = null;
 

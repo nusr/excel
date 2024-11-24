@@ -1,4 +1,4 @@
-import type { WorksheetType } from '@/types';
+import type { WorksheetType } from '../../types';
 import { BaseStore } from './base';
 
 export type SheetItem = Required<

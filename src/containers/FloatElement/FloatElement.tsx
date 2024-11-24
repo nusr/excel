@@ -1,11 +1,11 @@
 import React, { useState, memo, useCallback, Suspense } from 'react';
 import styles from './FloatElement.module.css';
-import type { FloatElementItem } from '@/containers/store';
+import type { FloatElementItem } from '../../containers/store';
 import { FloatElementContextMenu } from './ContextMenu';
-import { DEFAULT_POSITION, classnames } from '@/util';
+import { DEFAULT_POSITION, classnames } from '../../util';
 import { ResizePosition } from './util';
 import { Icon, Loading } from '../../components';
-import { IWindowSize } from '@/types';
+import { IWindowSize } from '../../types';
 import { Image } from './Image';
 
 const Chart = React.lazy(() => import('./Chart'));

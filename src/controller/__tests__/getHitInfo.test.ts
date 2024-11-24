@@ -1,5 +1,5 @@
 import { initController, getMockHooks } from '..';
-import { getHitInfo } from '@/util';
+import { getHitInfo } from '../../util';
 
 describe('getHitInfo.test.ts', () => {
   test('basic', () => {

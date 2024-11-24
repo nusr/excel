@@ -4,10 +4,10 @@ import {
   REALTIME_LISTEN_TYPES,
 } from '@supabase/supabase-js';
 import type { Database } from './data.type';
-import { CollaborationProvider, SYNC_FLAG } from '@/types';
+import { CollaborationProvider, SYNC_FLAG } from '../../types';
 import * as Y from 'yjs';
 import { uint8ArrayToString, stringToUint8Array } from './util';
-import { collaborationLog } from '@/util';
+import { collaborationLog } from '../../util';
 
 const DIRECTORY = 'supabase/';
 

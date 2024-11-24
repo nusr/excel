@@ -1,7 +1,7 @@
-import { initController, getMockHooks } from '@/controller';
-import { BorderItem, IController } from '@/types';
+import { initController, getMockHooks } from '../../controller';
+import { BorderItem, IController } from '../../types';
 import { compareScreenShot } from './util';
-import { BORDER_TYPE_MAP } from '@/util';
+import { BORDER_TYPE_MAP } from '../../util';
 
 describe('border.test.ts', () => {
   let controller: IController;

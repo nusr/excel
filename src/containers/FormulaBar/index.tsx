@@ -4,10 +4,10 @@ import {
   getEditorStyle,
   getDisplayStyle,
 } from './FormulaEditor';
-import { LINE_BREAK, classnames, convertToReference } from '@/util';
+import { LINE_BREAK, classnames, convertToReference } from '../../util';
 import styles from './index.module.css';
-import { EditorStatus } from '@/types';
-import { activeCellStore, coreStore, styleStore } from '@/containers/store';
+import { EditorStatus } from '../../types';
+import { activeCellStore, coreStore, styleStore } from '../../containers/store';
 import { DefineName } from './DefineName';
 
 export const FormulaBarContainer = memo(() => {

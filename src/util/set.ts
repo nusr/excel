@@ -1,4 +1,4 @@
-import { IWindowSize, CanvasOverlayPosition } from '@/types';
+import { IWindowSize, CanvasOverlayPosition } from '../types';
 import { ROW_TITLE_HEIGHT, COL_TITLE_WIDTH } from './constant';
 import { sizeConfig } from '../theme'
 

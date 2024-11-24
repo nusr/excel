@@ -1,13 +1,13 @@
-import { SheetRange, iterateRange } from '@/util/range';
-import { mergeRange, parseReference, parseR1C1 } from '@/util/reference';
-import { parseNumber } from '@/util/util';
+import { SheetRange, iterateRange } from '../util/range';
+import { mergeRange, parseReference, parseR1C1 } from '../util/reference';
+import { parseNumber } from '../util/util';
 import {
   TokenType,
   CellDataMap,
   ResultType,
   IRange,
   Coordinate,
-} from '@/types';
+} from '../types';
 import type {
   Visitor,
   Expression,

@@ -1,5 +1,5 @@
 import React, { FunctionComponent, CSSProperties, memo } from 'react';
-import { classnames, noop } from '@/util';
+import { classnames, noop } from '../../util';
 import styles from './index.module.css';
 
 export interface ButtonProps {

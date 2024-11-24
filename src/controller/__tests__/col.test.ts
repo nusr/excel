@@ -1,4 +1,4 @@
-import { IController } from '@/types';
+import { IController } from '../../types';
 import { getMockHooks, initController } from '..';
 
 describe('col.test.ts', () => {

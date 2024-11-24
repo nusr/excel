@@ -1,6 +1,6 @@
-import { IController } from '@/types';
-import { CSV_SPLITTER, LINE_BREAK } from '@/util';
-import { numberFormat } from '@/model';
+import { IController } from '../../types';
+import { CSV_SPLITTER, LINE_BREAK } from '../../util';
+import { numberFormat } from '../../model';
 
 const DELIMITER = CSV_SPLITTER;
 const RECORD_DELIMITER = LINE_BREAK;

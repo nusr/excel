@@ -7,8 +7,8 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import { IController, ScrollStatus } from '@/types';
-import { computeScrollRowAndCol } from '@/canvas';
+import { IController, ScrollStatus } from '../../types';
+import { computeScrollRowAndCol } from '../../canvas';
 import styles from './index.module.css';
 import { scrollStore, useExcel } from '../store';
 import { computeScrollPosition } from '../../util';

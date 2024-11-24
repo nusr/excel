@@ -1,5 +1,5 @@
 import type { Token } from './token';
-import { TokenType } from '@/types';
+import { TokenType } from '../types';
 
 export interface Visitor {
   visitBinaryExpression: (expr: BinaryExpression) => any;

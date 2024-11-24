@@ -18,7 +18,7 @@ import {
   EMergeCellType,
   CustomClipboardData,
   AutoFilterItem,
-} from '@/types';
+} from '../types';
 import {
   PLAIN_FORMAT,
   HTML_FORMAT,
@@ -40,8 +40,8 @@ import {
   convertBase64toBlob,
   IMAGE_FORMAT,
   formatCustomData,
-} from '@/util';
-import { numberFormat, isDateFormat, convertDateToNumber } from '@/model';
+} from '../util';
+import { numberFormat, isDateFormat, convertDateToNumber } from '../model';
 import { transaction } from './decorator';
 
 const defaultScrollValue: Omit<ScrollValue, 'row' | 'col'> = {

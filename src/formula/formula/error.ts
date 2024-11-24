@@ -1,6 +1,6 @@
-import type { ResultType } from '@/types';
-import { parseNumber } from '@/util/util';
-import { type ErrorTypes } from '@/util/constant';
+import type { ResultType } from '../../types';
+import { parseNumber } from '../../util/util';
+import { type ErrorTypes } from '../../util/constant';
 
 export class CustomError extends Error {
   readonly value: ErrorTypes | '#TEXT';

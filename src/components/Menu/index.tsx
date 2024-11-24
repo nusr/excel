@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useState, memo, useCallback } from 'react';
 import styles from './index.module.css';
-import { classnames } from '@/util';
+import { classnames } from '../../util';
 import { useClickOutside } from '../../containers/hooks';
 import { Button } from '../Button';
 

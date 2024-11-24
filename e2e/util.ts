@@ -22,7 +22,7 @@ export async function goto(page: Page) {
   });
 
   await page.goto(INDEX_PAGE);
-  expect(page.getByTestId(MAIN_CANVAS)).toBeVisible();
+  await page.waitForSelector(getByTestId(MAIN_CANVAS));
 }
 
 export async function clickFirstCell(page: Page, isDbClick = false) {

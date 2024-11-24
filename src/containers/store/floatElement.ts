@@ -1,4 +1,4 @@
-import type { DrawingElement } from '@/types';
+import type { DrawingElement } from '../../types';
 import { BaseStore } from './base';
 export type FloatElementItem = DrawingElement & {
   labels: string[];

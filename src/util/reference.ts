@@ -1,5 +1,5 @@
 import { columnNameToInt, rowLabelToInt, intToColumnName } from './convert';
-import { Coordinate, IRange, ReferenceType } from '@/types';
+import { Coordinate, IRange, ReferenceType } from '../types';
 import { SheetRange } from './range';
 import { XLSX_MAX_COL_COUNT, XLSX_MAX_ROW_COUNT } from './constant';
 

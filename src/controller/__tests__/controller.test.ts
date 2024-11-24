@@ -1,12 +1,12 @@
 import { initController, getMockHooks } from '..';
-import { HTML_FORMAT, PLAIN_FORMAT, headerSizeSet } from '@/util';
+import { HTML_FORMAT, PLAIN_FORMAT, headerSizeSet } from '../../util';
 import {
   ModelJSON,
   EUnderLine,
   ModelCellType,
   WorksheetData,
   IController,
-} from '@/types';
+} from '../../types';
 import { waitFor } from '@testing-library/react';
 
 describe('controller.test.ts', () => {

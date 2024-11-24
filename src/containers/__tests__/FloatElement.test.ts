@@ -1,5 +1,5 @@
 import { roundPosition } from '../FloatElement/util';
-import { canvasSizeSet } from '@/util';
+import { canvasSizeSet } from '../../util';
 
 describe('FloatElement.test.ts', () => {
   beforeAll(() => {

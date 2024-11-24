@@ -5,8 +5,8 @@ import {
   getImageSize,
   convertFileToTextOrBase64,
   toIRange,
-} from '@/util';
-import { $ } from '@/i18n';
+} from '../../util';
+import { $ } from '../../i18n';
 import { useExcel } from '../store';
 
 export const InsertFloatingPicture = memo(() => {

@@ -7,11 +7,11 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { IWindowSize } from '@/types';
-import { coreStore, FloatElementItem, useExcel } from '@/containers/store';
+import { IWindowSize } from '../../types';
+import { coreStore, FloatElementItem, useExcel } from '../../containers/store';
 import { FloatElement } from './FloatElement';
 import styles from './FloatElement.module.css';
-import { getHitInfo, classnames, canvasSizeSet } from '@/util';
+import { getHitInfo, classnames, canvasSizeSet } from '../../util';
 import {
   State,
   ResizePosition,

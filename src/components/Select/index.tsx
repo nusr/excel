@@ -6,8 +6,8 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { classnames } from '@/util';
-import { OptionItem } from '@/types';
+import { classnames } from '../../util';
+import { OptionItem } from '../../types';
 import styles from './index.module.css';
 import { Icon } from '../BaseIcon';
 import { Button } from '../Button';

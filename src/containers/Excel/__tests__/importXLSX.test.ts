@@ -1,8 +1,8 @@
 import { convertXMLToJSON, importXLSX } from '../importXLSX';
-import { ModelJSON, EVerticalAlign, EUnderLine } from '@/types';
+import { ModelJSON, EVerticalAlign, EUnderLine } from '../../../types';
 import fs from 'fs/promises';
 import path from 'path';
-import { initController, getMockHooks } from '@/controller';
+import { initController, getMockHooks } from '../../../controller';
 
 describe('importXLSX.test.ts', () => {
   describe('convertColorToHex', () => {

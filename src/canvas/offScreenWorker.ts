@@ -7,7 +7,7 @@ import {
   IWindowSize,
   WorkerMainView,
   ContentParams,
-} from '@/types';
+} from '../types';
 import {
   clearRect,
   fillRect,
@@ -19,7 +19,7 @@ import {
   renderBorderItem,
   renderCell,
 } from './util';
-import { getThemeColor } from '@/theme';
+import { getThemeColor } from '../theme';
 import {
   DEFAULT_LINE_WIDTH,
   CELL_HEIGHT,
@@ -27,12 +27,12 @@ import {
   HIDE_CELL,
   BORDER_TYPE_MAP,
   FILTER_RECT_SIZE,
-} from '@/util/constant';
+} from '../util/constant';
 import { getHeaderStyle } from './constant';
-import { intToColumnName } from '@/util/convert';
-import { isSheet, isCol, isRow, containRange } from '@/util/range';
-import { npx, dpr } from '@/util/dpr';
-import { getCustomWidthOrHeightKey, getWorksheetKey } from '@/util/util';
+import { intToColumnName } from '../util/convert';
+import { isSheet, isCol, isRow, containRange } from '../util/range';
+import { npx, dpr } from '../util/dpr';
+import { getCustomWidthOrHeightKey, getWorksheetKey } from '../util/util';
 
 const lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
 

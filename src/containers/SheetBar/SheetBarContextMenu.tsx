@@ -1,10 +1,10 @@
 import React, { useMemo, memo } from 'react';
 import { Button, Select, info, ColorPicker, toast } from '../../components';
-import { OptionItem } from '@/types';
+import { OptionItem } from '../../types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
 import { SheetItem, useExcel } from '../store';
-import { $ } from '@/i18n';
+import { $ } from '../../i18n';
 
 interface Props {
   position: number;

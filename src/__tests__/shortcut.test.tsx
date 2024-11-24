@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { isMac } from '@/util';
+import { isMac } from '../util';
 import './global.mock';
-import { IController } from '@/types';
+import { IController } from '../types';
 import { renderComponent } from './util';
 
 const commandKey = `${isMac() ? 'meta' : 'ctrl'}Key`;

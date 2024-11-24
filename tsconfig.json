@@ -29,9 +29,6 @@
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "experimentalDecorators": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    },
     "outDir": "dist"
   },
   "exclude": [

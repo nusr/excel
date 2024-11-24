@@ -1,9 +1,9 @@
-import { ModelJSON, ICol, IModel, CustomItem, YjsModelJson } from '@/types';
+import { ModelJSON, ICol, IModel, CustomItem, YjsModelJson } from '../types';
 import {
   getCustomWidthOrHeightKey,
   CELL_WIDTH,
   widthOrHeightKeyToData,
-} from '@/util';
+} from '../util';
 import * as Y from 'yjs';
 
 export class ColManager implements ICol {

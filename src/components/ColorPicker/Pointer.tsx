@@ -1,4 +1,4 @@
-import { classnames } from '@/util';
+import { classnames } from '../../util';
 import styles from './panel.module.css';
 
 interface Props {

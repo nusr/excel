@@ -10,7 +10,7 @@ import {
   IWindowSize,
   BorderItem,
   BorderType,
-} from '@/types';
+} from '../../types';
 import {
   get,
   parseReference,
@@ -27,7 +27,7 @@ import {
   NUMBER_FORMAT_LIST,
   BORDER_TYPE_MAP,
   getWorksheetKey,
-} from '@/util';
+} from '../../util';
 
 const COMMON_PREFIX = 'xl';
 const STYLE_PATH = 'xl/styles.xml';

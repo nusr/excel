@@ -13,8 +13,8 @@ import {
   MAX_NAME_LENGTH,
   MAX_PARAMS_COUNT,
   DEFINED_NAME_REG_EXP,
-} from '@/util';
-import { scrollToView } from '@/canvas';
+} from '../../util';
+import { scrollToView } from '../../canvas';
 import { SelectList } from '../../components';
 import { defineNameStore, useExcel } from '../store';
 

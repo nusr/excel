@@ -1,5 +1,5 @@
-import { ModelJSON, IRangeMap, IRange, IModel, YjsModelJson } from '@/types';
-import { isSameRange, toIRange } from '@/util';
+import { ModelJSON, IRangeMap, IRange, IModel, YjsModelJson } from '../types';
+import { isSameRange, toIRange } from '../util';
 import * as Y from 'yjs';
 
 export class RangeMap implements IRangeMap {

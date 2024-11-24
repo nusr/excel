@@ -1,4 +1,4 @@
-import { TokenType } from '@/types';
+import { TokenType } from '../types';
 import { Token } from './token';
 import { CustomError } from './formula';
 import {
@@ -11,8 +11,8 @@ import {
   type BuiltInFormulas,
   ROW_REG_EXP,
   type ErrorTypes,
-} from '@/util/constant';
-import { isDigit, isAlpha } from '@/util/reference';
+} from '../util/constant';
+import { isDigit, isAlpha } from '../util/reference';
 
 const emptyData = '';
 

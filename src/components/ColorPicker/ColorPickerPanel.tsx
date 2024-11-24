@@ -5,7 +5,7 @@ import { Saturation } from './Saturation';
 
 import { ColorModel, ColorPickerBaseProps, AnyColor } from './types';
 import { useColorManipulation } from './useColorManipulation';
-import { classnames, convertColorToHex } from '@/util';
+import { classnames, convertColorToHex } from '../../util';
 import { hexToHsva, hsvaToHex } from './convert';
 import styles from './panel.module.css';
 

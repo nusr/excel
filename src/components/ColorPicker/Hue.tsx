@@ -3,7 +3,7 @@ import { Interactive, Interaction } from './Interactive';
 import { Pointer } from './Pointer';
 import { hsvaToHslString } from './convert';
 import { round } from './round';
-import { classnames } from '@/util';
+import { classnames } from '../../util';
 import styles from './panel.module.css';
 
 interface Props {

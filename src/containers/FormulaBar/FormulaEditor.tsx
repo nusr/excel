@@ -6,7 +6,7 @@ import React, {
   useRef,
   useEffect,
 } from 'react';
-import { EditorStatus } from '@/types';
+import { EditorStatus } from '../../types';
 import styles from './index.module.css';
 import { CellStoreType, coreStore, StyleStoreType, useExcel } from '../store';
 import {
@@ -17,7 +17,7 @@ import {
   TEXTAREA_MAX_ROWS,
   LINE_BREAK,
   isMergeContent,
-} from '@/util';
+} from '../../util';
 
 interface MultipleLineEditorProps {
   isMergeCell: boolean;

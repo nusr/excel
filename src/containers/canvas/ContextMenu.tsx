@@ -2,9 +2,9 @@ import React, { Fragment, memo, useMemo, useSyncExternalStore } from 'react';
 import { Button, info, toast } from '../../components';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
-import { activeCellStore, useExcel } from '@/containers/store';
-import { $ } from '@/i18n';
-import { headerSizeSet, canvasSizeSet } from '@/util';
+import { activeCellStore, useExcel } from '../../containers/store';
+import { $ } from '../../i18n';
+import { headerSizeSet, canvasSizeSet } from '../../util';
 
 interface Props {
   top: number;

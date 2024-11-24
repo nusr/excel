@@ -11,10 +11,10 @@ import {
   MAX_NAME_LENGTH,
   extractImageType,
   CHART_TYPE_LIST,
-} from '@/util';
-import { useExcel, type FloatElementItem } from '@/containers/store';
-import { IWindowSize } from '@/types';
-import { $ } from '@/i18n';
+} from '../../util';
+import { useExcel, type FloatElementItem } from '../../containers/store';
+import { IWindowSize } from '../../types';
+import { $ } from '../../i18n';
 
 type Props = FloatElementItem & {
   menuLeft: number;

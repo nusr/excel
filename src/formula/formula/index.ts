@@ -1,6 +1,6 @@
 import textFormulas from './text';
 import mathFormulas from './math';
-import { BuiltInFormulas } from '@/util/constant';
+import { BuiltInFormulas } from '../../util/constant';
 
 type MergeType<T, A> = {
   [K in keyof T | keyof A as K extends BuiltInFormulas

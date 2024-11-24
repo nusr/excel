@@ -1,6 +1,6 @@
 import { screen, fireEvent } from '@testing-library/react';
-import { BORDER_TYPE_MAP } from '@/util';
-import { BorderItem, IController } from '@/types';
+import { BORDER_TYPE_MAP } from '../util';
+import { BorderItem, IController } from '../types';
 import { renderComponent } from './util';
 import './global.mock';
 

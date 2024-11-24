@@ -13,23 +13,23 @@ import {
   QUERY_ALL_LOCAL_FONT,
   LOCAL_FONT_KEY,
   numberFormatOptionList,
-} from '@/util';
+} from '../../util';
 import {
   EUnderLine,
   OptionItem,
   EMergeCellType,
   EHorizontalAlign,
   EVerticalAlign,
-} from '@/types';
+} from '../../types';
 import styles from './index.module.css';
 import {
   fontFamilyStore,
   styleStore,
   coreStore,
   useExcel,
-} from '@/containers/store';
+} from '../../containers/store';
 import { InsertFloatingPicture, InsertChart } from '../FloatElement/Toolbar';
-import { $ } from '@/i18n';
+import { $ } from '../../i18n';
 import { BorderToolBar } from './Border';
 import { isSupportFontFamily } from '../canvas/isSupportFontFamily';
 

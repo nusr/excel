@@ -5,7 +5,7 @@ import {
   EUnderLine,
   EHorizontalAlign,
   EVerticalAlign,
-} from '@/types';
+} from '../../types';
 describe('getEditorStyle', () => {
   test('EditorStatus NONE', () => {
     expect(

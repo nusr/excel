@@ -1,4 +1,4 @@
-import { IRange } from '@/types';
+import { IRange } from '../types';
 
 export function isSheet(range: IRange): boolean {
   return isRow(range) && isCol(range);

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import type { IController, ModalProps, ResultType } from '@/types';
-import { MERGE_CELL_LINE_BREAK } from '@/util';
-import { $ } from '@/i18n';
+import type { IController, ModalProps, ResultType } from '../../../types';
+import { MERGE_CELL_LINE_BREAK } from '../../../util';
+import { $ } from '../../../i18n';
 import styles from './index.module.css';
-import { Button } from '@/components';
-import { useExcel } from '@/containers/store';
+import { Button } from '../../../components';
+import { useExcel } from '../../../containers/store';
 
 type FilterItem = {
   label: string;

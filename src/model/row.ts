@@ -1,9 +1,9 @@
-import { ModelJSON, IRow, CustomItem, IModel, YjsModelJson } from '@/types';
+import { ModelJSON, IRow, CustomItem, IModel, YjsModelJson } from '../types';
 import {
   getCustomWidthOrHeightKey,
   CELL_HEIGHT,
   widthOrHeightKeyToData,
-} from '@/util';
+} from '../util';
 import * as Y from 'yjs';
 
 export class RowManager implements IRow {

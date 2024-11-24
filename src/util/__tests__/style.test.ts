@@ -6,7 +6,7 @@ import {
   convertPxToPt,
   convertToPx,
 } from '../style';
-import { EUnderLine } from '@/types';
+import { EUnderLine } from '../../types';
 
 describe('style.test.ts', () => {
   describe('convertPxToPt', () => {

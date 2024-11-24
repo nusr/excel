@@ -6,8 +6,8 @@ import {
   IRange,
   YjsModelJson,
   TypedMap,
-} from '@/types';
-import { MERGE_CELL_LINE_BREAK, toIRange } from '@/util';
+} from '../types';
+import { MERGE_CELL_LINE_BREAK, toIRange } from '../util';
 import * as Y from 'yjs';
 
 export class FilterManger implements IFilter {

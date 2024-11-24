@@ -2,9 +2,9 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './data.type';
 import { ServerProvider } from './server';
 import { LocalProvider } from './local';
-import { CollaborationProvider } from '@/types';
+import { CollaborationProvider } from '../../types';
 import { type Doc } from 'yjs';
-import { isTestEnv } from '@/util';
+import { isTestEnv } from '../../util';
 
 export type ResultData = {
   provider: CollaborationProvider;

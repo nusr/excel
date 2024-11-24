@@ -5,7 +5,7 @@ import {
   YjsModelJson,
   ModelScroll,
   TypedMap,
-} from '@/types';
+} from '../types';
 import * as Y from 'yjs';
 
 export class ScrollManager implements IScroll {

@@ -7,7 +7,7 @@ import {
   EHorizontalAlign,
   BorderItem,
   ModelCellValue,
-} from '@/types';
+} from '../../types';
 import { CONFIG } from './exportConfig';
 import {
   saveAs,
@@ -20,9 +20,9 @@ import {
   NUMBER_FORMAT_LIST,
   getThemeColor,
   convertWorksheetKey,
-} from '@/util';
+} from '../../util';
 import { XfItem, chartTypeList, convertToPt } from './importXLSX';
-import { numberFormat } from '@/model';
+import { numberFormat } from '../../model';
 interface StyleData {
   cellXfs: string[];
   numFmts: string[];

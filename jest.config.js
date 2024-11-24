@@ -10,7 +10,6 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}', 'src/*.{ts,tsx,js,jsx}'],
   coverageReporters: ['clover', 'json', 'lcov', 'text', 'html'],
   moduleNameMapper: {
-    '@/(.*)': '<rootDir>/src/$1',
     '\\.css$': '<rootDir>/scripts/css-mock.js',
   },
   setupFiles: ['<rootDir>/scripts/jest.setup.js']

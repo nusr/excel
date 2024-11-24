@@ -16,7 +16,7 @@ import {
   ModelRoot,
   ModelScroll,
   SYNC_FLAG,
-} from '@/types';
+} from '../types';
 import {
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
@@ -27,7 +27,7 @@ import {
   containRange,
   modelLog,
   KEY_LIST,
-} from '@/util';
+} from '../util';
 import { Workbook } from './workbook';
 import { RangeMap } from './rangeMap';
 import { Drawing } from './drawing';

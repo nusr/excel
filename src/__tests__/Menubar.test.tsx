@@ -1,4 +1,4 @@
-import { App, StateContext } from '@/containers';
+import { App, StateContext } from '../containers';
 import {
   screen,
   render,
@@ -8,7 +8,7 @@ import {
 } from '@testing-library/react';
 import './global.mock';
 import { renderComponent } from './util';
-import { initController, getMockHooks } from '@/controller';
+import { initController, getMockHooks } from '../controller';
 
 type MatchMediaFun = (data: { matches: boolean }) => void;
 

@@ -1,5 +1,5 @@
-import type { CanvasOverlayPosition } from '@/types';
-import { DEFAULT_POSITION } from '@/util';
+import type { CanvasOverlayPosition } from '../../types';
+import { DEFAULT_POSITION } from '../../util';
 import { BaseStore } from './base';
 
 export type CellStoreType = CanvasOverlayPosition & {

@@ -1,6 +1,6 @@
 import { screen, fireEvent } from '@testing-library/react';
 import { type, renderComponent } from './util';
-import { IController } from '@/types';
+import { IController } from '../types';
 import './global.mock';
 
 describe('Toolbar.test.ts', () => {

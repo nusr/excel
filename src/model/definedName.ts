@@ -5,8 +5,8 @@ import {
   IModel,
   IDefinedName,
   YjsModelJson,
-} from '@/types';
-import { MAX_PARAMS_COUNT, parseReference, DEFINED_NAME_REG_EXP,toIRange } from '@/util';
+} from '../types';
+import { MAX_PARAMS_COUNT, parseReference, DEFINED_NAME_REG_EXP,toIRange } from '../util';
 import * as Y from 'yjs';
 
 export class DefinedName implements IDefinedName {

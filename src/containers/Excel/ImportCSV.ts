@@ -1,5 +1,5 @@
-import { IController, WorksheetData } from '@/types';
-import { parseText, CSV_SPLITTER, convertFileToTextOrBase64 } from '@/util';
+import { IController, WorksheetData } from '../../types';
+import { parseText, CSV_SPLITTER, convertFileToTextOrBase64 } from '../../util';
 
 export async function importCSV(file: File, controller: IController) {
   const text = await convertFileToTextOrBase64(file, false);

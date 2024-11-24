@@ -1,4 +1,4 @@
-import type { ClipboardData, CustomClipboardData } from '@/types';
+import type { ClipboardData, CustomClipboardData } from '../types';
 
 export const PLAIN_FORMAT = 'text/plain';
 export const HTML_FORMAT = 'text/html';

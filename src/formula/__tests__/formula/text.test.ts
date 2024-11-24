@@ -10,7 +10,7 @@ import {
   CONCAT,
   TEXT,
 } from '../../formula/text';
-import { MAX_PARAMS_COUNT } from '@/util';
+import { MAX_PARAMS_COUNT } from '../../../util';
 
 describe('text.test.ts', () => {
   describe('T', () => {

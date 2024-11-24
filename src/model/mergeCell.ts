@@ -1,7 +1,7 @@
-import { ModelJSON, IRange, IMergeCell, IModel, YjsModelJson } from '@/types';
-import { convertToReference, toIRange } from '@/util';
-import { $ } from '@/i18n';
-import { toast } from '@/components';
+import { ModelJSON, IRange, IMergeCell, IModel, YjsModelJson } from '../types';
+import { convertToReference, toIRange } from '../util';
+import { $ } from '../i18n';
+import { toast } from '../components';
 import * as Y from 'yjs';
 
 export class MergeCell implements IMergeCell {

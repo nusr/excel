@@ -4,8 +4,8 @@ import {
   WorksheetType,
   ModelCellType,
   FormulaFunction,
-} from '@/types';
-import { type SheetRange } from '@/util/range';
+} from '../types';
+import { type SheetRange } from '../util/range';
 
 export type ResultType = boolean | string | number;
 

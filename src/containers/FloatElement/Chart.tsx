@@ -25,9 +25,9 @@ import {
   parseNumber,
   deepEqual,
   getThemeColor,
-} from '@/util';
-import type { FloatElementItem } from '@/containers/store';
-import { ChartProps } from '@/types';
+} from '../../util';
+import type { FloatElementItem } from '../../containers/store';
+import { ChartProps } from '../../types';
 import styles from './chart.module.css';
 
 ChartJS.register(

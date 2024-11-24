@@ -4,7 +4,7 @@ import {
   EHorizontalAlign,
   BorderItem,
   BorderType,
-} from '@/types';
+} from '../types';
 import {
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
@@ -14,9 +14,9 @@ import {
   numberFormatOptionList,
   coordinateToString,
   BORDER_TYPE_MAP,
-} from '@/util';
+} from '../util';
 import { mockImage } from './mockData';
-import { $ } from '@/i18n';
+import { $ } from '../i18n';
 
 const MOCK_MODEL: ModelJSON = {
   currentSheetId: '',

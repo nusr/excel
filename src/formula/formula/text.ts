@@ -1,7 +1,7 @@
-import type { ResultType } from '@/types';
-import { MAX_PARAMS_COUNT } from '@/util/constant';
+import type { ResultType } from '../../types';
+import { MAX_PARAMS_COUNT } from '../../util/constant';
 import { assert, mustOneString, mustOneNumber, mustOne } from './error';
-import { numberFormat } from '@/model/numberFormat'
+import { numberFormat } from '../../model/numberFormat'
 
 export const T = (...list: ResultType[]): string => {
   const value = mustOne(list);

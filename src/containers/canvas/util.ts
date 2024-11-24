@@ -5,7 +5,7 @@ import {
   IRange,
   EMergeCellType,
   EHorizontalAlign,
-} from '@/types';
+} from '../../types';
 import {
   DEFAULT_FONT_SIZE,
   HIDE_CELL,
@@ -19,7 +19,7 @@ import {
   getFormatCode,
   parseNumber,
   KEY_LIST,
-} from '@/util';
+} from '../../util';
 import {
   coreStore,
   CoreStore,
@@ -31,13 +31,13 @@ import {
   FloatElementItem,
   defineNameStore,
   styleStore,
-} from '@/containers/store';
+} from '../../containers/store';
 import {
   initRenderCanvas,
   registerGlobalEvent,
   scrollSheetToView,
-} from '@/canvas';
-import { numberFormat as numberFormatUtil, isDateFormat } from '@/model';
+} from '../../canvas';
+import { numberFormat as numberFormatUtil, isDateFormat } from '../../model';
 import { initFontFamilyList } from './isSupportFontFamily';
 
 function getChartData(

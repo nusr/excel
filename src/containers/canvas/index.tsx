@@ -6,10 +6,10 @@ import React, {
   memo,
   useSyncExternalStore,
 } from 'react';
-import type { IController, EventData, ModalValue } from '@/types';
-import { getHitInfo, DEFAULT_POSITION, canvasSizeSet } from '@/util';
+import type { IController, EventData, ModalValue } from '../../types';
+import { getHitInfo, DEFAULT_POSITION, canvasSizeSet } from '../../util';
 import styles from './index.module.css';
-import { coreStore, floatElementStore, useExcel } from '@/containers/store';
+import { coreStore, floatElementStore, useExcel } from '../../containers/store';
 import { ScrollBar } from './ScrollBar';
 import { ContextMenu } from './ContextMenu';
 import { initCanvas } from './util';

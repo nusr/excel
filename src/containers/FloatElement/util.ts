@@ -1,4 +1,4 @@
-import { headerSizeSet, canvasSizeSet } from '@/util';
+import { headerSizeSet, canvasSizeSet } from '../../util';
 
 export enum ResizePosition {
   top = 'top',

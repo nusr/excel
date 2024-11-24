@@ -1,4 +1,4 @@
-import { MainView, IController } from '@/types';
+import { MainView, IController } from '../types';
 import { MainCanvas } from './MainCanvas';
 
 export { registerGlobalEvent } from './event';

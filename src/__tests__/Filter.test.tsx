@@ -1,5 +1,5 @@
 import { screen, fireEvent } from '@testing-library/react';
-import { IController } from '@/types';
+import { IController } from '../types';
 import { renderComponent } from './util';
 import './global.mock';
 

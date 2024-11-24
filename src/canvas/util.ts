@@ -1,7 +1,7 @@
-import { splitToWords } from '@/util/split';
-import { getThemeColor, sizeConfig } from '@/theme';
-import { npx, dpr } from '@/util/dpr';
-import { makeFont } from '@/util/style';
+import { splitToWords } from '../util/split';
+import { getThemeColor, sizeConfig } from '../theme';
+import { npx, dpr } from '../util/dpr';
+import { makeFont } from '../util/style';
 import {
   DEFAULT_FONT_SIZE,
   ERROR_SET,
@@ -10,7 +10,7 @@ import {
   DEFAULT_LINE_WIDTH,
   BORDER_TYPE_MAP,
   type ErrorTypes,
-} from '@/util/constant';
+} from '../util/constant';
 import {
   CanvasOverlayPosition,
   Point,
@@ -23,9 +23,9 @@ import {
   BorderItem,
   ThemeType,
   BorderType,
-} from '@/types';
-import { numberFormat, isDateFormat } from '@/model/numberFormat';
-import { isMergeContent } from '@/util/util';
+} from '../types';
+import { numberFormat, isDateFormat } from '../model/numberFormat';
+import { isMergeContent } from '../util/util';
 
 const measureTextMap = new Map<string, IWindowSize>();
 

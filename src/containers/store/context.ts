@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { StateContextValue } from '@/types';
+import { StateContextValue } from '../../types';
 
 export const StateContext = createContext<StateContextValue | undefined>(
   undefined,

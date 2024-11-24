@@ -6,8 +6,8 @@ import {
   ResponseRender,
   RequestRender,
   IWindowSize,
-} from '@/types';
-import { canvasSizeSet, dpr, getTheme, headerSizeSet } from '@/util';
+} from '../types';
+import { canvasSizeSet, dpr, getTheme, headerSizeSet } from '../util';
 import * as ComLink from 'comlink';
 
 export class MainCanvas implements MainView {

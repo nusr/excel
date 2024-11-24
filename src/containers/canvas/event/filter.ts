@@ -1,6 +1,6 @@
-import { type EventHandler, type EventData, type ModalValue } from '@/types';
+import { type EventHandler, type EventData, type ModalValue } from '../../../types';
 import { PointerEvent } from 'react';
-import { FILTER_RECT_SIZE } from '@/util';
+import { FILTER_RECT_SIZE } from '../../../util';
 
 export class FilterHandler implements EventHandler {
   pointerDown(data: EventData, event: PointerEvent<HTMLCanvasElement>) {

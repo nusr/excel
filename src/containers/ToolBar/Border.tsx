@@ -8,9 +8,9 @@ import {
   SubMenu,
   ColorPicker,
 } from '../../components';
-import { BorderItem, IRange, BorderType } from '@/types';
-import { BORDER_TYPE_MAP, isRow, isCol } from '@/util';
-import { $ } from '@/i18n';
+import { BorderItem, IRange, BorderType } from '../../types';
+import { BORDER_TYPE_MAP, isRow, isCol } from '../../util';
+import { $ } from '../../i18n';
 import { useExcel } from '../store';
 
 type ShortCutType =

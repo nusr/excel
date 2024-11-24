@@ -8,8 +8,8 @@ import {
   setTheme,
   getTheme,
   eventEmitter,
-} from '@/util';
-import { ThemeType } from '@/types';
+} from '../../util';
+import { ThemeType } from '../../types';
 
 function setCssVariable(data: Record<string, string | number>) {
   const keyList = Object.keys(data);

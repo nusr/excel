@@ -1,5 +1,5 @@
 import { BaseStore } from './base';
-import { EditorStatus } from '@/types';
+import { EditorStatus } from '../../types';
 export interface CoreStore {
   editorStatus: EditorStatus;
   canRedo: boolean;

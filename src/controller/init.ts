@@ -1,8 +1,8 @@
-import { Model } from '@/model';
-import { IController, IHooks, RemoteWorkerMethod } from '@/types';
+import { Model } from '../model';
+import { IController, IHooks, RemoteWorkerMethod } from '../types';
 import { Controller } from './Controller';
-import { HTML_FORMAT, PLAIN_FORMAT, CUSTOM_FORMAT, IMAGE_FORMAT } from '@/util';
-import method from '@/canvas/worker';
+import { HTML_FORMAT, PLAIN_FORMAT, CUSTOM_FORMAT, IMAGE_FORMAT } from '../util';
+import method from '../canvas/worker';
 import * as Y from 'yjs';
 
 export function getMockHooks() {

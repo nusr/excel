@@ -1,12 +1,12 @@
 import OffScreenWorker from '../offScreenWorker';
 import { createCanvas } from 'canvas';
-import { setDpr, headerSizeSet } from '@/util';
+import { setDpr, headerSizeSet } from '../../util';
 import {
   IController,
   ChangeEventType,
   ThemeType,
   RequestRender,
-} from '@/types';
+} from '../../types';
 import fs from 'fs';
 import path from 'path';
 import pixelMatch from 'pixelmatch';

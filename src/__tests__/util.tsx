@@ -1,6 +1,6 @@
 import { screen, fireEvent, render, act } from '@testing-library/react';
-import { App, StateContext } from '@/containers';
-import { initController, getMockHooks } from '@/controller';
+import { App, StateContext } from '../containers';
+import { initController, getMockHooks } from '../controller';
 
 export function type(content: string, isEnter = true) {
   fireEvent.click(screen.getByTestId('formula-editor-trigger'));

@@ -8,7 +8,7 @@
  * e.g italic bold 14px/16px sans-serif;
  */
 
-import { EUnderLine, StyleType, ResultType } from '@/types';
+import { EUnderLine, StyleType, ResultType } from '../types';
 import { DEFAULT_FONT_SIZE, MUST_FONT_FAMILY } from './constant';
 import { camelCase } from './lodash';
 import { parseNumber, isTestEnv } from './util';

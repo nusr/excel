@@ -4,8 +4,8 @@ import {
   EMergeCellType,
   ModelCellType,
   IController,
-} from '@/types';
-import { MERGE_CELL_LINE_BREAK } from '@/util';
+} from '../../types';
+import { MERGE_CELL_LINE_BREAK } from '../../util';
 
 describe('mergeCell.test.ts', () => {
   let controller: IController;

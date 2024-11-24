@@ -1,6 +1,6 @@
-import { DEFAULT_TEXT_FORMAT_CODE } from '@/util';
-import { ModelCellType, WorksheetData } from '@/types';
-import { IController } from '@/types';
+import { DEFAULT_TEXT_FORMAT_CODE } from '../../util';
+import { ModelCellType, WorksheetData } from '../../types';
+import { IController } from '../../types';
 import { initController, getMockHooks } from '..';
 
 describe('worksheet.test.ts', () => {

@@ -1,5 +1,5 @@
-import { initController, getMockHooks } from '@/controller';
-import { IController } from '@/types';
+import { initController, getMockHooks } from '../../controller';
+import { IController } from '../../types';
 import { compareScreenShot } from './util';
 
 describe('ccp.test.ts', () => {

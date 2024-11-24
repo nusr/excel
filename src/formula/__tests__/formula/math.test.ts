@@ -27,7 +27,7 @@ import {
   ATAN2,
   ATANH,
 } from '../../formula/math';
-import { MAX_PARAMS_COUNT } from '@/util';
+import { MAX_PARAMS_COUNT } from '../../../util';
 import { roundNumber } from '../../formula/float';
 
 function equal(result: number, expected: number) {

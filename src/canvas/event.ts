@@ -3,7 +3,7 @@ import {
   KeyboardEventItem,
   EditorStatus,
   IRange,
-} from '@/types';
+} from '../types';
 import {
   isTestEnv,
   throttle,
@@ -11,9 +11,9 @@ import {
   eventEmitter,
   deepEqual,
   paste,
-} from '@/util';
+} from '../util';
 import { keyboardEventList, scrollBar } from './shortcut';
-import { coreStore } from '@/containers/store';
+import { coreStore } from '../containers/store';
 
 type EventType = {
   target?: {

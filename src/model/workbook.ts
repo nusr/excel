@@ -5,16 +5,16 @@ import {
   IModel,
   YjsModelJson,
   TypedMap,
-} from '@/types';
+} from '../types';
 import {
   getDefaultSheetInfo,
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
   XLSX_MAX_COL_COUNT,
   XLSX_MAX_ROW_COUNT,
-} from '@/util';
-import { $ } from '@/i18n';
-import { toast } from '@/components';
+} from '../util';
+import { $ } from '../i18n';
+import { toast } from '../components';
 import * as Y from 'yjs';
 
 export class Workbook implements IWorkbook {

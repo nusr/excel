@@ -16,7 +16,7 @@ import {
   ResponseFormulas,
   TypedMap,
   YjsModelJson,
-} from '@/types';
+} from '../types';
 import {
   iterateRange,
   FORMULA_PREFIX,
@@ -30,8 +30,8 @@ import {
   MERGE_CELL_LINE_BREAK,
   convertStringToResultType,
   getWorksheetKey,
-} from '@/util';
-import { numberFormat } from '@/model';
+} from '../util';
+import { numberFormat } from '../model';
 import * as ComLink from 'comlink';
 import * as Y from 'yjs';
 

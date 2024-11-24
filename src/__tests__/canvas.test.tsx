@@ -1,8 +1,8 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { isMac } from '@/util';
+import { isMac } from '../util';
 import { type, extractDataFromTransform, renderComponent } from './util';
 import './global.mock';
-import { IController } from '@/types';
+import { IController } from '../types';
 
 describe('Canvas.test.ts', () => {
   let controller: IController;

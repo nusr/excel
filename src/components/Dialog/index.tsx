@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import { createRoot, Root } from 'react-dom/client';
 import { Button } from '../Button';
 import styles from './index.module.css';
-import { classnames } from '@/util';
-import { $ } from '@/i18n';
+import { classnames } from '../../util';
+import { $ } from '../../i18n';
 
 interface DialogProps {
   title: string;

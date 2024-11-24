@@ -1,7 +1,7 @@
 import { buildTree } from './util';
 import { Parser } from '../../parser';
 import { Token } from '../../token';
-import { TokenType } from '@/types';
+import { TokenType } from '../../../types';
 
 describe('invalid expressions', () => {
   describe('error', () => {

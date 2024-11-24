@@ -1,10 +1,10 @@
-import { initController, getMockHooks } from '@/controller';
+import { initController, getMockHooks } from '../../controller';
 import {
   EUnderLine,
   IController,
   EVerticalAlign,
   EHorizontalAlign,
-} from '@/types';
+} from '../../types';
 import { compareScreenShot } from './util';
 
 describe('cell-style.test.ts', () => {

@@ -1,4 +1,4 @@
-import { SYNC_FLAG } from '@/types';
+import { SYNC_FLAG } from '../types';
 
 export function transaction(origin: SYNC_FLAG = SYNC_FLAG.MODEL) {
   return function (_target: any, _key: string, descriptor: PropertyDescriptor) {

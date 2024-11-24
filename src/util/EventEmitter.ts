@@ -1,4 +1,4 @@
-import { EventEmitterType } from '@/types';
+import { EventEmitterType } from '../types';
 
 export class EventEmitter<
   EventType extends Record<string, unknown> = Record<string, unknown>,

@@ -1,5 +1,5 @@
 import type { ChartType } from 'chart.js';
-import { $ } from '@/i18n';
+import { $ } from '../i18n';
 import { DEFAULT_FORMAT_CODE, DEFAULT_TEXT_FORMAT_CODE } from './constant';
 
 export const CHART_TYPE_LIST: Array<{

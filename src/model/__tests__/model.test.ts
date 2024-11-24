@@ -1,10 +1,10 @@
 import { Model } from '..';
-import { SheetRange } from '@/util';
+import { SheetRange } from '../../util';
 import {
   ModelJSON,
   RequestFormulas,
   IHooks,
-} from '@/types';
+} from '../../types';
 import { getMockHooks } from './util';
 import * as Y from 'yjs';
 

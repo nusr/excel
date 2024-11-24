@@ -1,6 +1,6 @@
-import { CollaborationProvider, SYNC_FLAG } from '@/types';
+import { CollaborationProvider, SYNC_FLAG } from '../../types';
 import * as Y from 'yjs';
-import { collaborationLog } from '@/util';
+import { collaborationLog } from '../../util';
 
 export class LocalProvider implements CollaborationProvider {
   private readonly broadcastChannel: BroadcastChannel;

@@ -1,14 +1,14 @@
 import { MainCanvas } from '../MainCanvas';
-import { initController } from '@/controller';
+import { initController } from '../../controller';
 import {
   RequestRender,
   IWindowSize,
   IHooks,
   ResponseRender,
   RemoteWorkerMethod,
-} from '@/types';
-import { getMockHooks } from '@/controller/init';
-import { CELL_HEIGHT, CELL_WIDTH } from '@/util';
+} from '../../types';
+import { getMockHooks } from '../../controller/init';
+import { CELL_HEIGHT, CELL_WIDTH } from '../../util';
 
 const mockWorker = {
   init: jest.fn(),

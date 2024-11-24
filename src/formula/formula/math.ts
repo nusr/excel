@@ -1,7 +1,7 @@
-import { MAX_PARAMS_COUNT } from '@/util/constant';
+import { MAX_PARAMS_COUNT } from '../../util/constant';
 import type { ResultType } from '../../types';
 import { assert, mustOneNumber, mustEmpty } from './error';
-import { parseNumber } from '@/util/util';
+import { parseNumber } from '../../util/util';
 
 function parseNumberArray(list: ResultType[]): number[] {
   const result: number[] = [];

@@ -1,4 +1,4 @@
-import { ThemeType } from '@/types';
+import { ThemeType } from '../types';
 import size from './size';
 import zIndex from './zIndex';
 import { lightColor, darkColor } from './color';
