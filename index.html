@@ -38,14 +38,14 @@
   <body class="container">
     <h1 class="title">Excel Collaborative Example (see iframes below)</h1>
     <div class="extra">
-      <a href="/app" id="full-screen">Full Screen</a>
+      <a href="/excel/app" id="full-screen">Full Screen</a>
     </div>
     <div class="content">
-      <iframe name="left" data-testid="left" src="/app" class="html"></iframe>
-      <iframe name="right" data-testid="right" src="/app" class="html"></iframe>
+      <iframe name="left" data-testid="left" src="/excel/app" class="html"></iframe>
+      <iframe name="right" data-testid="right" src="/excel/app" class="html"></iframe>
     </div>
     <script>
-      document.getElementById('full-screen').href = '/app#' + window.location.hash.slice(1);
+      document.getElementById('full-screen').href = '/excel/app#' + window.location.hash.slice(1);
     </script>
   </body>
 </html>
