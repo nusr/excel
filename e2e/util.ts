@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Page } from '@playwright/test';
 
 export const INDEX_PAGE = '/app';
 export const MAIN_CANVAS = 'canvas-main';
