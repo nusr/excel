@@ -7,7 +7,6 @@ import React, {
   memo,
   useCallback,
 } from 'react';
-import { IController } from '@/types';
 import styles from './index.module.css';
 import {
   parseReference,
@@ -17,16 +16,16 @@ import {
 } from '@/util';
 import { scrollToView } from '@/canvas';
 import { SelectList } from '../../components';
-import { defineNameStore } from '../store';
+import { defineNameStore, useExcel } from '../store';
 
 interface Props {
-  controller: IController;
   displayName: string;
   defineName: string;
 }
 
 export const DefineName: React.FunctionComponent<Props> = memo(
-  ({ controller, displayName, defineName }) => {
+  ({ displayName, defineName }) => {
+    const { controller } = useExcel();
     const ref = useRef<HTMLInputElement>(null);
 
     const [value, setValue] = useState(displayName);

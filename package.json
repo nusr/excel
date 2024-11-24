@@ -5,6 +5,7 @@
   "main": "src/index.tsx",
   "scripts": {
     "start": "vite --force --host --port 3000",
+    "server":"npm run start -- --mode server",
     "build": "vite build",
     "preview": "vite preview",
     "test": "jest --config ./jest.config.js --forceExit --detectOpenHandles",

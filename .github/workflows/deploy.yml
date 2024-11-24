@@ -20,8 +20,8 @@ concurrency:
   group: 'pages'
   cancel-in-progress: true
 env:
-  VITE_PUBLIC_SUPABASE_URL: ${{ vars.VITE_PUBLIC_SUPABASE_URL }}
-  VITE_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.VITE_PUBLIC_SUPABASE_ANON_KEY }}
+  VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+  VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
 jobs:
   deploy:
     environment:

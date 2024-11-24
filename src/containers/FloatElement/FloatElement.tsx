@@ -5,12 +5,12 @@ import { FloatElementContextMenu } from './ContextMenu';
 import { DEFAULT_POSITION, classnames } from '@/util';
 import { ResizePosition } from './util';
 import { Icon, Loading } from '../../components';
-import { IController, IWindowSize } from '@/types';
+import { IWindowSize } from '@/types';
+import { Image } from './Image';
 
 const Chart = React.lazy(() => import('./Chart'));
 
 type FloatElementProps = FloatElementItem & {
-  controller: IController;
   active: boolean;
   resetResize: (size: IWindowSize) => void;
   pointerDown: (event: React.PointerEvent<HTMLDivElement>) => void;
@@ -54,13 +54,10 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
     let children: React.ReactNode = undefined;
     if (type === 'floating-picture') {
       children = (
-        <img
+        <Image
           title={props.title}
-          alt={props.title}
-          src={props.imageSrc!}
-          className={styles['image']}
-          data-uuid={props.uuid}
-          data-testid="float-element-image"
+          imageSrc={props.imageSrc!}
+          uuid={props.uuid}
         />
       );
     } else if (type === 'chart') {

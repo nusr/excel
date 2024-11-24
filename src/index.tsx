@@ -14,6 +14,7 @@ import './global.css';
 import Worker from './worker?worker';
 import * as Y from 'yjs';
 import { initCollaboration } from './collaboration';
+import { StateContext } from './containers';
 
 declare const window: {
   controller: IController;
@@ -42,7 +43,7 @@ async function initView() {
   location.hash = `#${docId}`;
   const doc = new Y.Doc({ guid: docId });
 
-  await initCollaboration(doc);
+  const { isServer, provider } = await initCollaboration(doc);
   const controller = initController({
     copyOrCut,
     paste,
@@ -54,7 +55,16 @@ async function initView() {
   window.doc = doc;
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      <App controller={controller} />
+      <StateContext.Provider
+        value={{
+          controller,
+          isServer,
+          updateFile: provider.updateFile,
+          downloadFile: provider.downloadFile,
+        }}
+      >
+        <App />
+      </StateContext.Provider>
     </StrictMode>,
   );
 }

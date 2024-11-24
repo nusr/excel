@@ -9,7 +9,7 @@ import React, {
 import type { IController, EventData, ModalValue } from '@/types';
 import { getHitInfo, DEFAULT_POSITION, canvasSizeSet } from '@/util';
 import styles from './index.module.css';
-import { coreStore, floatElementStore } from '@/containers/store';
+import { coreStore, floatElementStore, useExcel } from '@/containers/store';
 import { ScrollBar } from './ScrollBar';
 import { ContextMenu } from './ContextMenu';
 import { initCanvas } from './util';
@@ -17,10 +17,6 @@ import { BottomBar } from './BottomBar';
 import FloatElementContainer from '../FloatElement';
 import handlerList from './event';
 import Modal from './modal';
-
-interface Props {
-  controller: IController;
-}
 
 function getEventData(
   event: React.PointerEvent<HTMLCanvasElement>,
@@ -42,8 +38,8 @@ function getEventData(
   return result;
 }
 
-export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
-  const { controller } = props;
+export const CanvasContainer = memo(() => {
+  const { controller } = useExcel();
   const [modalState, setModalState] = useState<ModalValue | null>(null);
   const floatElementList = useSyncExternalStore(
     floatElementStore.subscribe,
@@ -127,30 +123,19 @@ export const CanvasContainer: React.FunctionComponent<Props> = memo((props) => {
           ref={ref}
           data-testid="canvas-main"
         />
-        <ScrollBar controller={controller} />
-        <BottomBar controller={controller} />
+        <ScrollBar />
+        <BottomBar />
         {floatElementList.length > 0 && (
           <FloatElementContainer
-            controller={controller}
             floatElementList={floatElementList}
             activeUuid={activeUuid}
           />
         )}
       </div>
       {menuPosition.top >= 0 && menuPosition.left >= 0 && (
-        <ContextMenu
-          {...menuPosition}
-          controller={controller}
-          hideContextMenu={hideContextMenu}
-        />
+        <ContextMenu {...menuPosition} hideContextMenu={hideContextMenu} />
       )}
-      {modalState && (
-        <Modal
-          {...modalState}
-          controller={controller}
-          hide={() => setModalState(null)}
-        />
-      )}
+      {modalState && <Modal {...modalState} hide={() => setModalState(null)} />}
     </Fragment>
   );
 });

@@ -4,6 +4,7 @@ import { MERGE_CELL_LINE_BREAK } from '@/util';
 import { $ } from '@/i18n';
 import styles from './index.module.css';
 import { Button } from '@/components';
+import { useExcel } from '@/containers/store';
 
 type FilterItem = {
   label: string;
@@ -37,15 +38,13 @@ function getData(
   const end =
     range.rowCount === 0 ? sheetInfo.rowCount : range.row + range.rowCount;
   for (let r = range.row + 1; r < end; r++) {
-    const cellInfo = controller.getCell(
-      {
-        row: r,
-        col,
-        rowCount: 1,
-        colCount: 1,
-        sheetId,
-      },
-    );
+    const cellInfo = controller.getCell({
+      row: r,
+      col,
+      rowCount: 1,
+      colCount: 1,
+      sheetId,
+    });
     const cellValue = cellInfo ? cellInfo?.value : MERGE_CELL_LINE_BREAK;
     const isUndefined = cellInfo?.value === undefined;
 
@@ -72,7 +71,8 @@ function getData(
   };
 }
 
-export const FilterModal = ({ controller, col, hide }: ModalProps) => {
+export const FilterModal = ({ col, hide }: ModalProps) => {
+  const { controller } = useExcel();
   const [dataList, setDataList] = useState<FilterItem[]>([]);
   useEffect(() => {
     const result = getData(controller, col);

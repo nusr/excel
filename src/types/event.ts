@@ -106,7 +106,7 @@ export interface ModalValue {
   y: number;
 }
 
-export type ModalProps = ModalValue & { controller: IController; hide(): void };
+export type ModalProps = ModalValue & { hide(): void };
 
 export interface EventHandler {
   pointerMove(

@@ -1,14 +1,12 @@
 import React, { Fragment, memo, useMemo, useSyncExternalStore } from 'react';
 import { Button, info, toast } from '../../components';
-import { IController } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
-import { activeCellStore } from '@/containers/store';
+import { activeCellStore, useExcel } from '@/containers/store';
 import { $ } from '@/i18n';
 import { headerSizeSet, canvasSizeSet } from '@/util';
 
 interface Props {
-  controller: IController;
   top: number;
   left: number;
   hideContextMenu: () => void;
@@ -65,7 +63,8 @@ function computeMenuStyle(top: number, left: number) {
 const threshold = 10000;
 
 export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
-  const { controller, top, left, hideContextMenu } = props;
+  const { controller } = useExcel();
+  const { top, left, hideContextMenu } = props;
   const { row, col, colCount, rowCount } = useSyncExternalStore(
     activeCellStore.subscribe,
     activeCellStore.getSnapshot,
@@ -76,9 +75,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
     return temp;
   }, [top, left]);
   const handleDialog = (isRow: boolean) => {
-    let value = isRow
-      ? controller.getRow(row).len
-      : controller.getCol(col).len;
+    let value = isRow ? controller.getRow(row).len : controller.getCol(col).len;
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const t = parseInt(event.target.value, 10);
       if (!isNaN(t)) {

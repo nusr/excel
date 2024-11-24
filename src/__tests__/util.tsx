@@ -1,5 +1,5 @@
 import { screen, fireEvent, render, act } from '@testing-library/react';
-import { App } from '@/containers';
+import { App, StateContext } from '@/containers';
 import { initController, getMockHooks } from '@/controller';
 
 export function type(content: string, isEnter = true) {
@@ -31,7 +31,22 @@ export function renderComponent() {
   const controller = initController(getMockHooks());
   controller.addSheet();
   act(() => {
-    render(<App controller={controller} />);
+    render(
+      <StateContext.Provider
+        value={{
+          controller,
+          isServer: false,
+          updateFile: async (_file: File, base64: string) => {
+            return base64;
+          },
+          downloadFile: async (filePath: string) => {
+            return filePath;
+          },
+        }}
+      >
+        <App />
+      </StateContext.Provider>,
+    );
   });
   return { controller };
 }

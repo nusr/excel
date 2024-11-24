@@ -9,6 +9,8 @@ import * as Y from 'yjs';
 import { uint8ArrayToString, stringToUint8Array } from './util';
 import { collaborationLog } from '@/util';
 
+const DIRECTORY = 'supabase/';
+
 export class ServerProvider implements CollaborationProvider {
   private readonly db: SupabaseClient<Database>;
   private readonly doc: Y.Doc;
@@ -35,7 +37,7 @@ export class ServerProvider implements CollaborationProvider {
           Y.applyUpdate(
             this.doc,
             stringToUint8Array(update as string),
-            SYNC_FLAG.REMOTE,
+            SYNC_FLAG.SKIP_UPDATE,
           );
         },
       )
@@ -49,7 +51,7 @@ export class ServerProvider implements CollaborationProvider {
       });
   }
 
-  addHistory = async (update: Uint8Array) => {
+  async addHistory(update: Uint8Array) {
     const result = uint8ArrayToString(update);
     const r = await this.db
       .from('history')
@@ -61,8 +63,8 @@ export class ServerProvider implements CollaborationProvider {
       payload: { update: result },
     });
     collaborationLog('channel send', real);
-  };
-  retrieveHistory = async () => {
+  }
+  async retrieveHistory() {
     const result = await this.db
       .from('history')
       .select('*')
@@ -71,5 +73,22 @@ export class ServerProvider implements CollaborationProvider {
     collaborationLog('retrieveHistory', result);
     const list = (result.data || []).map((v) => stringToUint8Array(v.update));
     return list;
+  }
+  updateFile = async (file: File, _base64: string): Promise<string> => {
+    const filePath = `${DIRECTORY}${file.name}`;
+    const result = await this.db.storage.from('avatars').upload(filePath, file);
+    collaborationLog('updateFile', result);
+    return result.data?.path || '';
+  };
+  downloadFile = async (filePath: string): Promise<string> => {
+    if (!filePath || !filePath.startsWith(DIRECTORY)) {
+      return filePath
+    }
+    const result = await this.db.storage.from('avatars').download(filePath);
+    collaborationLog('downloadFile', result);
+    if (result.data) {
+      return URL.createObjectURL(result.data);
+    }
+    return ''
   };
 }

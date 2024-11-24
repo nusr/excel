@@ -6,9 +6,9 @@ import React, {
   useRef,
   useEffect,
 } from 'react';
-import { EditorStatus, IController } from '@/types';
+import { EditorStatus } from '@/types';
 import styles from './index.module.css';
-import { CellStoreType, coreStore, StyleStoreType } from '../store';
+import { CellStoreType, coreStore, StyleStoreType, useExcel } from '../store';
 import {
   MAX_NAME_LENGTH,
   FORMULA_EDITOR_ROLE,
@@ -24,7 +24,6 @@ interface MultipleLineEditorProps {
   initValue: string;
   style: CSSProperties | undefined;
   testId?: string;
-  controller: IController;
   className?: string;
 }
 export function getDisplayStyle(
@@ -93,7 +92,8 @@ function countRows(count: number) {
 }
 
 export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps> =
-  memo(({ initValue, style, testId, isMergeCell, controller, className }) => {
+  memo(({ initValue, style, testId, isMergeCell, className }) => {
+    const { controller } = useExcel();
     const ref = useRef<HTMLTextAreaElement>(null);
     const [rowCount, setRowCount] = useState(minRows);
     useEffect(() => {

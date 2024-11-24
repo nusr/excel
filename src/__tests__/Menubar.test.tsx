@@ -1,4 +1,4 @@
-import { App } from '@/containers';
+import { App, StateContext } from '@/containers';
 import {
   screen,
   render,
@@ -66,13 +66,35 @@ test('change i18n', () => {
   const controller = initController(getMockHooks());
   controller.addSheet();
   act(() => {
-    result = render(<App controller={controller} />);
+    result = render(
+      <StateContext.Provider
+        value={{
+          controller,
+          isServer: false,
+          updateFile: jest.fn(),
+          downloadFile: jest.fn(),
+        }}
+      >
+        <App />
+      </StateContext.Provider>,
+    );
   });
   fireEvent.change(screen.getByTestId('menubar-i18n-select'), {
     target: { value: 'zh' },
   });
   act(() => {
-    result.rerender(<App controller={controller} />);
+    result.rerender(
+      <StateContext.Provider
+        value={{
+          controller,
+          isServer: false,
+          updateFile: jest.fn(),
+          downloadFile: jest.fn(),
+        }}
+      >
+        <App />
+      </StateContext.Provider>,
+    );
   });
   expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('zh');
 });

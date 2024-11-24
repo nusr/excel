@@ -1,6 +1,5 @@
 import React, { memo } from 'react';
 import { Button, info, Select, toast } from '../../components';
-import { IController } from '@/types';
 import styles from './FloatElement.module.css';
 import { useClickOutside } from '../hooks';
 import type { ChartType } from 'chart.js';
@@ -13,12 +12,11 @@ import {
   extractImageType,
   CHART_TYPE_LIST,
 } from '@/util';
-import type { FloatElementItem } from '@/containers/store';
+import { useExcel, type FloatElementItem } from '@/containers/store';
 import { IWindowSize } from '@/types';
 import { $ } from '@/i18n';
 
 type Props = FloatElementItem & {
-  controller: IController;
   menuLeft: number;
   menuTop: number;
   resetResize: (size: IWindowSize) => void;
@@ -28,7 +26,6 @@ type Props = FloatElementItem & {
 export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
   (props) => {
     const {
-      controller,
       menuLeft,
       menuTop,
       uuid,
@@ -42,6 +39,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       width,
       height,
     } = props;
+    const { controller } = useExcel();
     const ref = useClickOutside(hideContextMenu);
     const selectData = () => {
       let value = convertToReference(

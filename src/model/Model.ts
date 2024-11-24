@@ -73,8 +73,7 @@ export class Model implements IModel {
     this.undoManager = new Y.UndoManager(root, {
       trackedOrigins: new Set([
         SYNC_FLAG.MODEL,
-        SYNC_FLAG.REMOTE,
-        SYNC_FLAG.INIT,
+        SYNC_FLAG.SKIP_UPDATE,
       ]),
       captureTimeout: 100,
     });

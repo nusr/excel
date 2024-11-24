@@ -56,7 +56,16 @@ export interface ChartProps<
 
 export type ThemeType = 'dark' | 'light';
 
-export type StateContextValue = {
+export interface CollaborationProvider {
+  addHistory(update: Uint8Array): void;
+  retrieveHistory(): Promise<Uint8Array[]>;
+  subscribe(): void;
+  updateFile(file: File, base64: string): Promise<string>;
+  downloadFile(filePath: string): Promise<string>;
+}
+
+export interface StateContextValue
+  extends Pick<CollaborationProvider, 'updateFile' | 'downloadFile'> {
   isServer: boolean;
-  controller: IController | null;
-};
+  controller: IController;
+}

@@ -1,29 +1,22 @@
 import type { Doc } from 'yjs';
-import { initProvider } from './provider';
+import { initProvider, ResultData } from './provider';
 import * as Y from 'yjs';
 import { collaborationLog } from '@/util';
 import { SYNC_FLAG } from '@/types';
 import { DEFAULT_UPDATE } from './provider/util';
 
-function shouldSkip(tran: Y.Transaction) {
-  if (tran.origin === SYNC_FLAG.REMOTE || tran.origin === SYNC_FLAG.INIT) {
+function shouldSkip(isServer: boolean, tran: Y.Transaction) {
+  if (isServer && tran.origin === SYNC_FLAG.SKIP_UPDATE) {
     return true;
-  }
-  for (const value of tran.changed.values()) {
-    if (value.has('drawings')) {
-      return true;
-    }
   }
   return false;
 }
 
-export async function initCollaboration(
-  doc: Doc,
-): Promise<{ isServer: boolean }> {
+export async function initCollaboration(doc: Doc): Promise<ResultData> {
   const { provider, isServer } = initProvider(doc);
 
   doc.on('update', (update: Uint8Array, _b, _c, tran) => {
-    if (isServer && shouldSkip(tran)) {
+    if (shouldSkip(isServer, tran)) {
       return;
     }
     collaborationLog('doc update', tran);
@@ -33,10 +26,10 @@ export async function initCollaboration(
 
   const result = await provider.retrieveHistory();
   if (result.length > 0) {
-    Y.applyUpdate(doc, Y.mergeUpdates(result), SYNC_FLAG.INIT);
+    Y.applyUpdate(doc, Y.mergeUpdates(result), SYNC_FLAG.SKIP_UPDATE);
   } else {
-    Y.applyUpdate(doc, DEFAULT_UPDATE, SYNC_FLAG.EMPTY);
+    Y.applyUpdate(doc, DEFAULT_UPDATE, SYNC_FLAG.SKIP_UNDO_REDO);
   }
 
-  return { isServer };
+  return { isServer, provider };
 }

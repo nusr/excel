@@ -1,13 +1,12 @@
 import React, { useMemo, memo } from 'react';
 import { Button, Select, info, ColorPicker, toast } from '../../components';
-import { IController, OptionItem } from '@/types';
+import { OptionItem } from '@/types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
-import { SheetItem } from '../store';
+import { SheetItem, useExcel } from '../store';
 import { $ } from '@/i18n';
 
 interface Props {
-  controller: IController;
   position: number;
   sheetList: SheetItem[];
   currentSheetId: string;
@@ -16,14 +15,8 @@ interface Props {
 }
 
 export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
-  ({
-    controller,
-    position,
-    sheetList,
-    currentSheetId,
-    hideMenu,
-    editSheetName,
-  }) => {
+  ({ position, sheetList, currentSheetId, hideMenu, editSheetName }) => {
+    const { controller } = useExcel();
     const ref = useClickOutside(hideMenu);
     const tabColor = useMemo(() => {
       return (

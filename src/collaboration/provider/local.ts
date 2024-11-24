@@ -19,17 +19,23 @@ export class LocalProvider implements CollaborationProvider {
       ) => {
         const { update } = event.data;
         collaborationLog('onmessage', event);
-        Y.applyUpdate(this.doc, update, SYNC_FLAG.REMOTE);
+        Y.applyUpdate(this.doc, update, SYNC_FLAG.SKIP_UPDATE);
       },
     );
   }
 
-  addHistory = async (update: Uint8Array) => {
+  async addHistory(update: Uint8Array) {
     this.broadcastChannel.postMessage({
       update,
     });
-  };
-  retrieveHistory = async () => {
+  }
+  async retrieveHistory() {
     return [];
+  }
+  updateFile = async (_file: File, base64: string): Promise<string> => {
+    return base64;
+  };
+  downloadFile = async (filePath: string): Promise<string> => {
+    return filePath;
   };
 }

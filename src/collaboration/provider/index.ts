@@ -6,12 +6,14 @@ import { CollaborationProvider } from '@/types';
 import { type Doc } from 'yjs';
 import { isTestEnv } from '@/util';
 
-export function initProvider(doc: Doc): {
+export type ResultData = {
   provider: CollaborationProvider;
   isServer: boolean;
-} {
-  const url = import.meta.env.VITE_PUBLIC_SUPABASE_URL;
-  const key = import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY;
+};
+
+export function initProvider(doc: Doc): ResultData {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
   let isServer = false;
   let provider: CollaborationProvider;
   if (url && key && !isTestEnv() && !process.env.IS_E2E) {

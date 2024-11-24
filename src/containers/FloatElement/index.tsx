@@ -7,8 +7,8 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { IController, IWindowSize } from '@/types';
-import { coreStore, FloatElementItem } from '@/containers/store';
+import { IWindowSize } from '@/types';
+import { coreStore, FloatElementItem, useExcel } from '@/containers/store';
 import { FloatElement } from './FloatElement';
 import styles from './FloatElement.module.css';
 import { getHitInfo, classnames, canvasSizeSet } from '@/util';
@@ -21,12 +21,12 @@ import {
 } from './util';
 
 interface Props {
-  controller: IController;
   floatElementList: FloatElementItem[];
   activeUuid: string;
 }
 const FloatElementContainer: React.FunctionComponent<Props> = memo(
-  ({ controller, floatElementList, activeUuid }) => {
+  ({ floatElementList, activeUuid }) => {
+    const { controller } = useExcel();
     const state = useRef<State>({
       ...INITIAL_STATE,
       position: { ...INITIAL_STATE.position },
@@ -243,7 +243,6 @@ const FloatElementContainer: React.FunctionComponent<Props> = memo(
               key={v.uuid}
               {...props}
               active={isActive}
-              controller={controller}
               resetResize={resetResize}
               pointerDown={(event) => {
                 event.stopPropagation();

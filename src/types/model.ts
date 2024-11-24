@@ -335,7 +335,7 @@ export interface IBaseModel
   undo(): void;
   redo(): void;
   transaction<T>(fn: () => T, origin?: any): T;
-  clearHistory(): void
+  clearHistory(): void;
 }
 
 export interface IModel
@@ -362,8 +362,7 @@ export type EventEmitterType = {
 };
 
 export enum SYNC_FLAG {
-  REMOTE = 'remote',
   MODEL = 'model',
-  INIT = 'init',
-  EMPTY = 'empty'
+  SKIP_UPDATE = 'skip-update',
+  SKIP_UNDO_REDO = 'skip-undo-redo',
 }
