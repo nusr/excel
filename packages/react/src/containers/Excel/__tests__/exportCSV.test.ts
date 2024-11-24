@@ -1,0 +1,44 @@
+import { exportToCsv } from '../exportCSV';
+import { initController, getMockHooks } from '../../../controller';
+import { getFormatCode } from '@excel/shared';
+
+describe('exportToCsv.test.ts', () => {
+  describe('exportToCsv', () => {
+    test('normal', () => {
+      const controller = initController(getMockHooks());
+      controller.addSheet();
+      controller.setCell(
+        [
+          [true, false, 'true', 'false'],
+          [4, 5, 6],
+          [',', '\n', '\t', '"'],
+          [',\n', ',\n', ',\t', ',"'],
+          [',\n\t', ',"\n'],
+          [',\n\t"'],
+        ],
+        [
+          [],
+          [
+            { numberFormat: getFormatCode(0) },
+            { numberFormat: getFormatCode(2) },
+          ],
+        ],
+        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
+      );
+      const text = exportToCsv(controller).split('\n');
+      expect(text).toEqual([
+        'TRUE,FALSE,TRUE,FALSE,,,,,,,,,,,,,,,,,,,,,,,,,,',
+        '4,5.00,6,,,,,,,,,,,,,,,,,,,,,,,,,,,',
+        '",",0,0,"""""",,,,,,,,,,,,,,,,,,,,,,,,,,',
+        '",',
+        '",",',
+        '",",\t",",""""",,,,,,,,,,,,,,,,,,,,,,,,,,',
+        '",',
+        '\t",",""""',
+        '",,,,,,,,,,,,,,,,,,,,,,,,,,,,',
+        '",',
+        '\t""""",,,,,,,,,,,,,,,,,,,,,,,,,,,,,',
+      ]);
+    });
+  });
+});

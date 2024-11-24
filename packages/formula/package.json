@@ -1,0 +1,38 @@
+{
+  "name": "@excel/formula",
+  "version": "0.0.0",
+  "description": "online excel",
+  "author": "Steve Xu <stevexugc@gmail.com>",
+  "bugs": "https://github.com/nusr/excel/issues",
+  "homepage": "https://github.com/nusr/excel",
+  "repository": "git+https://github.com/nusr/excel.git",
+  "license": "MIT",
+  "main": "./dist/formula.umd.js",
+  "module": "./dist/formula.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/formula.mjs",
+      "require": "./dist/formula.umd.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "type-check": "tsc"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@excel/shared": "workspace:*",
+    "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz"
+  },
+  "keywords": [
+    "excel"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

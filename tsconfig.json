@@ -1,13 +1,16 @@
 {
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ESNext", "WebWorker"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
     "jsx": "react-jsx",
     "target": "ES2020",
     "noEmit": true,
     "skipLibCheck": true,
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "isolatedModules": true,
     "moduleDetection": "force",
     "resolveJsonModule": true,
     "moduleResolution": "Bundler",
@@ -15,8 +18,8 @@
     "esModuleInterop": true,
     "removeComments": true,
     "declaration": true,
-    "checkJs": true,
     "strict": true,
+    "checkJs": true,
     "noImplicitAny": true,
     "alwaysStrict": true,
     "strictNullChecks": true,
@@ -39,6 +42,7 @@
     "playwright-report",
     "test-results",
     "report",
-    "docs"
+    "docs",
+    "**/__tests__/**"
   ]
 }

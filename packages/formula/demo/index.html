@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excel</title>
+    <style>
+      textarea {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <label for="reference">Input the Excel reference:</label>
+      <textarea
+        id="reference"
+        name="reference"
+        rows="5"
+        cols="33"
+        autocorrect="on"
+        spellcheck
+      ></textarea>
+    </div>
+    <div>
+      <label for="formula">Input the Excel formula:</label>
+      <textarea
+        id="formula"
+        name="formula"
+        rows="5"
+        cols="33"
+        autofocus
+        autocorrect="on"
+        spellcheck
+      ></textarea>
+      <div>
+        <button id="submit">Parse</button>
+      </div>
+    </div>
+    <div id="result"></div>
+    <script type="module" src="./index.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "name": "@excel/shared",
+  "version": "0.0.0",
+  "description": "online excel",
+  "author": "Steve Xu <stevexugc@gmail.com>",
+  "bugs": "https://github.com/nusr/excel/issues",
+  "homepage": "https://github.com/nusr/excel",
+  "repository": "git+https://github.com/nusr/excel.git",
+  "license": "MIT",
+  "main": "./dist/shared.umd.js",
+  "module": "./dist/shared.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/shared.mjs",
+      "require": "./dist/shared.umd.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "type-check": "tsc",
+    "dev": "vite"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "excel"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "yjs": "13.6.20",
+    "comlink": "4.4.2"
+  }
+}

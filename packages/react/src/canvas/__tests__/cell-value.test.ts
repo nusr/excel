@@ -1,0 +1,60 @@
+import { initController, getMockHooks } from '../../controller';
+import { IController } from '@excel/shared';
+import { compareScreenShot } from './util';
+
+describe('cell-value.test.ts', () => {
+  let controller: IController;
+  beforeEach(() => {
+    controller = initController(getMockHooks());
+    controller.addSheet();
+  });
+  afterEach(async () => {
+    await compareScreenShot(controller);
+  });
+
+  test('number', () => {
+    controller.setCell([[1]], [], {
+      row: 0,
+      col: 0,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
+  });
+  test('boolean', () => {
+    controller.setCell([[true, false]], [], {
+      row: 0,
+      col: 0,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
+  });
+  test('string', () => {
+    controller.setCell([['test']], [], {
+      row: 0,
+      col: 0,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
+  });
+  test('empty string', () => {
+    controller.setCell([['']], [], {
+      row: 0,
+      col: 0,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
+  });
+  test('error', () => {
+    controller.setCell([['#DIV/0!']], [], {
+      row: 0,
+      col: 0,
+      rowCount: 1,
+      colCount: 1,
+      sheetId: '',
+    });
+  });
+});

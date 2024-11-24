@@ -20,15 +20,13 @@ jobs:
         run: npm run install-font
       - name: Test
         run: |
-          npm i -g pnpm jscpd
+          npm i -g pnpm
           pnpm i
-          npm run repeat
-          npm run lint
           npm run type-check
+          npm run lint
+          npm run build
           npm run coverage
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-      - name: Build
-        run: npm run build

@@ -26,3 +26,11 @@ package-lock.json
 build
 .env
 .env.server
+
+
+.nx/cache
+.nx/workspace-data
+vite.config.mts.*.mjs
+diff.txt
+pnpm-lock.yaml
+.nx
