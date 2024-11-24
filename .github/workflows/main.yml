@@ -32,9 +32,13 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Build
         run: npm run build
+        env:
+          VITE_PUBLIC_SUPABASE_URL: ${{ vars.VITE_PUBLIC_SUPABASE_URL }}
+          VITE_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.VITE_PUBLIC_SUPABASE_ANON_KEY }}
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN  }}
           publish_dir: ./dist
+          commit_message: ${{ github.event.head_commit.message }}
