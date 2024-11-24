@@ -5,6 +5,9 @@ name: CI
 on:
   - push
   - pull_request
+env:
+  VITE_PUBLIC_SUPABASE_URL: ${{ vars.VITE_PUBLIC_SUPABASE_URL }}
+  VITE_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.VITE_PUBLIC_SUPABASE_ANON_KEY }}
 jobs:
   build:
     timeout-minutes: 60
@@ -32,9 +35,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
       - name: Build
         run: npm run build
-        env:
-          VITE_PUBLIC_SUPABASE_URL: ${{ vars.VITE_PUBLIC_SUPABASE_URL }}
-          VITE_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.VITE_PUBLIC_SUPABASE_ANON_KEY }}
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         if: ${{ github.ref == 'refs/heads/main' }}
