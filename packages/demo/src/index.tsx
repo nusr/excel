@@ -13,6 +13,8 @@ import { copyOrCut, paste, getDocId, type WorkerMethod } from '@excel/shared';
 import './sentry';
 import Worker from './worker?worker';
 
+console.log(import.meta.env);
+
 const workerInstance = wrap<WorkerMethod>(new Worker());
 
 async function initView() {
@@ -41,8 +43,9 @@ async function initView() {
       </StateContext.Provider>
     </StrictMode>,
   );
+  document.body.append(`<!-- ${process.env.COMMIT_LOG} --> `);
   setTimeout(() => {
     document.getElementById('loading')?.remove();
-  }, 500);
+  }, 0);
 }
 initView();
