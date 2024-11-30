@@ -6,8 +6,17 @@ import { Theme } from './Theme';
 import { $ } from '../../i18n';
 import { I18N } from './I18N';
 import { FPS } from './FPS';
-import { saveAs, isInIframe, getDocId } from '@excel/shared';
+import { saveAs, isInIframe, DEFAULT_EXCEL_ID } from '@excel/shared';
 import { useExcel } from '../store';
+
+export function getDocId(defaultExcelId: string = '') {
+  const docId =
+    (window?.top?.location?.hash || '').slice(1) ||
+    window.location.hash.slice(1) ||
+    defaultExcelId ||
+    DEFAULT_EXCEL_ID;
+  return docId;
+}
 
 export const MenuBarContainer = memo(() => {
   const { controller } = useExcel();

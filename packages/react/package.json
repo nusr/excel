@@ -21,7 +21,7 @@
       "import": "./dist/worker.mjs",
       "require": "./dist/worker.js"
     },
-    "./style": "./dist/style.css"
+    "./style.css": "./dist/style.css"
   },
   "scripts": {
     "build": "vite build",

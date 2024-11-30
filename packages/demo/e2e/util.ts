@@ -40,3 +40,7 @@ export async function clickFirstCell(page: Page, isDbClick = false) {
     });
   }
 }
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

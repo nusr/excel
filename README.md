@@ -15,7 +15,7 @@
 git clone https://github.com/nusr/excel.git
 cd excel
 
-npm i -g pnpm jscpd
+npm i -g pnpm
 pnpm i
 npm run start
 ```
@@ -29,7 +29,6 @@ npm run test
 ## E2E Test
 
 ```bash
-pnpm exec playwright install --with-deps
 npm run e2e
 ```
 

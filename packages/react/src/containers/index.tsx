@@ -20,3 +20,4 @@ export const App = memo(() => {
 App.displayName = 'App';
 
 export { StateContext, useExcel } from './store';
+export { getDocId } from './MenuBar'

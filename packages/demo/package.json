@@ -11,7 +11,7 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite --force --host --port 3000",
-    "e2e": "npx playwright test",
+    "e2e": "playwright test",
     "type-check": "tsc"
   },
   "dependencies": {

@@ -7,18 +7,17 @@ import {
   initCollaboration,
   initDoc,
   wrap,
+  getDocId,
 } from '@excel/react';
-import '@excel/react/style';
-import { copyOrCut, paste, getDocId, type WorkerMethod } from '@excel/shared';
+import '@excel/react/style.css';
+import { copyOrCut, paste, type WorkerMethod } from '@excel/shared';
 import './sentry';
 import Worker from './worker?worker';
-
-console.log(import.meta.env);
 
 const workerInstance = wrap<WorkerMethod>(new Worker());
 
 async function initView() {
-  const docId = getDocId();
+  const docId = getDocId(import.meta.env.VITE_DEFAULT_EXCEL_ID);
   location.hash = `#${docId}`;
   const doc = initDoc({ guid: docId });
   const { isServer, provider } = await initCollaboration(doc);

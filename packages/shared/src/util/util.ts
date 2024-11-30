@@ -3,7 +3,6 @@ import {
   SPLITTER,
   FORMULA_PREFIX,
   MERGE_CELL_LINE_BREAK,
-  DEFAULT_EXCEL_ID as DEFAULT_DOC_ID,
 } from './constant';
 import type {
   WorksheetType,
@@ -235,12 +234,4 @@ export function isMergeContent(isMergeCell: boolean, text: string) {
 
 export function isInIframe() {
   return window?.top !== window;
-}
-
-export function getDocId() {
-  const docId =
-    (window?.top?.location?.hash || '').slice(1) ||
-    window.location.hash.slice(1) ||
-    DEFAULT_DOC_ID;
-  return docId;
 }
