@@ -11,7 +11,6 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite --force --host --port 3000",
-    "e2e": "playwright test",
     "type-check": "tsc"
   },
   "dependencies": {
@@ -29,8 +28,5 @@
   ],
   "publishConfig": {
     "access": "public"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.49.0"
   }
 }

@@ -7,8 +7,8 @@
     "start:formula": "nx dev @excel/formula",
     "dev": "nx run-many -t dev",
     "type-check": "nx run-many -t type-check",
-    "e2e": "nx e2e @excel/demo",
-    "e2e:ui": "nx e2e @excel/demo --ui",
+    "e2e": "playwright test",
+    "e2e:ui": "npm run e2e --ui",
     "build": "nx run-many -t build",
     "test": "jest --config ./jest.config.js --forceExit --detectOpenHandles",
     "coverage": "npm run test -- --coverage",
@@ -27,6 +27,7 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.14",
