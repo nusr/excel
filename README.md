@@ -29,6 +29,7 @@ npm run test
 ## E2E Test
 
 ```bash
+pnpm exec playwright install
 npm run e2e
 ```
 
