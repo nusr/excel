@@ -28,6 +28,8 @@ async function initView() {
     doc,
   });
   controller.setCurrentSheetId(controller.getCurrentSheetId());
+  (window as any).controller = controller;
+  (window as any).doc = doc;
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>

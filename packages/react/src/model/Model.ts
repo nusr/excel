@@ -94,7 +94,7 @@ export class Model implements IModel {
       for (const item of this.changeSet.keys()) {
         changeSet.add(item);
       }
-      modelLog('observeDeep', event, changeSet);
+      modelLog('observeDeep', doc.clientID, event[0], changeSet);
       this.render(changeSet);
       this.changeSet = new Set<ChangeEventType>();
     });
@@ -131,7 +131,13 @@ export class Model implements IModel {
     eventEmitter.emit('modelChange', { changeSet });
   }
   async emitChange(changeSet: Set<ChangeEventType>) {
-    const localChangeList: ChangeEventType[] = ['antLine', 'undo', 'redo'];
+    const localChangeList: ChangeEventType[] = [
+      'antLine',
+      'undo',
+      'redo',
+      'scroll',
+      'rangeMap',
+    ];
     if (changeSet.has('customHeight') || changeSet.has('customWidth')) {
       this.computeViewSize();
     }
@@ -258,7 +264,11 @@ export class Model implements IModel {
 
       result[key] = typeof v === 'undefined' ? {} : v;
     }
-    return result;
+    return {
+      ...result,
+      rangeMap: this.rangeMapManager.toJSON(),
+      scroll: this.scrollManager.toJSON(),
+    };
   };
 
   setCell(

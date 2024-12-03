@@ -1,50 +1,38 @@
-import type {
-  ModelJSON,
-  IScroll,
-  IModel,
-  YjsModelJson,
-  ModelScroll,
-  TypedMap,
-} from '@excel/shared';
-import * as Y from 'yjs';
+import type { ModelJSON, IScroll, IModel, ModelScroll } from '@excel/shared';
 
 export class ScrollManager implements IScroll {
   private model: IModel;
+  private scroll: ModelJSON['scroll'] = {};
   constructor(model: IModel) {
     this.model = model;
   }
-  private get scroll() {
-    return this.model.getRoot().get('scroll');
-  }
   fromJSON(json: ModelJSON): void {
     const data = json.scroll || {};
-    const scroll = new Y.Map() as YjsModelJson['scroll'];
+    const scroll: ModelJSON['scroll'] = {};
     for (const [sheetId, value] of Object.entries(data)) {
       if (!sheetId || value.row < 0 || value.col < 0) {
         continue;
       }
-      scroll.set(
-        sheetId,
-        new Y.Map(Object.entries(value)) as TypedMap<ModelScroll>,
-      );
+      scroll[sheetId] = value;
     }
-    this.model.getRoot().set('scroll', scroll);
+    this.scroll = scroll;
+  }
+  toJSON() {
+    return { ...this.scroll };
   }
   deleteAll(sheetId?: string): void {
-    this.scroll?.delete(sheetId || this.model.getCurrentSheetId());
+    const id = sheetId || this.model.getCurrentSheetId();
+    delete this.scroll[id];
   }
   getScroll(sheetId?: string): ModelScroll {
-    const t = this.scroll?.get(sheetId || this.model.getCurrentSheetId());
+    const t = this.scroll[sheetId || this.model.getCurrentSheetId()];
     if (!t) {
       return { row: 0, col: 0 };
     }
-    return t.toJSON();
+    return { ...t };
   }
   setScroll(value: ModelScroll, sheetId?: string) {
     const id = sheetId || this.model.getCurrentSheetId();
-    if (!this.scroll) {
-      this.model.getRoot().set('scroll', new Y.Map() as YjsModelJson['scroll']);
-    }
     const sheetInfo = this.model.getSheetInfo(id);
     if (!sheetInfo) {
       return false;
@@ -61,23 +49,7 @@ export class ScrollManager implements IScroll {
     } else if (value.col < 0) {
       value.col = 0;
     }
-    const item = this.scroll?.get(id);
-    if (!item) {
-      this.scroll!.set(
-        id,
-        new Y.Map(Object.entries(value)) as TypedMap<ModelScroll>,
-      );
-      return false;
-    }
-    let check = false;
-    if (item.get('row') !== value.row) {
-      check = true;
-      item.set('row', value.row);
-    }
-    if (item.get('col') !== value.col) {
-      check = true;
-      item.set('col', value.col);
-    }
-    return check;
+    this.scroll[id] = { ...value };
+    return true;
   }
 }

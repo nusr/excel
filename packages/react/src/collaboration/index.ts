@@ -11,9 +11,7 @@ function shouldSkip(isServer: boolean, tran: Y.Transaction) {
   return false;
 }
 
-export async function initCollaboration(
-  doc: Y.Doc,
-): Promise<{
+export async function initCollaboration(doc: Y.Doc): Promise<{
   provider: CollaborationProvider;
   isServer: boolean;
   isInit: boolean;
@@ -24,7 +22,7 @@ export async function initCollaboration(
     if (shouldSkip(isServer, tran)) {
       return;
     }
-    collaborationLog('doc update', tran);
+    collaborationLog('doc update', tran.doc.clientID, tran);
     provider.addHistory(update);
   });
   provider.subscribe();

@@ -41,7 +41,11 @@ import {
   IMAGE_FORMAT,
   formatCustomData,
 } from '@excel/shared';
-import { numberFormat, isDateFormat, convertDateToNumber } from '@excel/formula';
+import {
+  numberFormat,
+  isDateFormat,
+  convertDateToNumber,
+} from '@excel/formula';
 import { transaction } from './decorator';
 
 const defaultScrollValue: Omit<ScrollValue, 'row' | 'col'> = {
@@ -97,7 +101,6 @@ export class Controller implements IController {
   getActiveRange(r?: IRange) {
     return this.model.getActiveRange(r);
   }
-  @transaction()
   setNextActiveCell(direction: 'left' | 'right' | 'down' | 'up') {
     const { range, isMerged } = this.getActiveRange();
     let startCol = range.col;
@@ -150,7 +153,6 @@ export class Controller implements IController {
     }
     this.setActiveRange(result);
   }
-  @transaction()
   setActiveRange(range: IRange): void {
     this.model.setActiveRange(range);
     this.changeSet.add('rangeMap');

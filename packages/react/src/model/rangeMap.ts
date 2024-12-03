@@ -1,14 +1,10 @@
-import type { ModelJSON, IRangeMap, IRange, IModel, YjsModelJson } from '@excel/shared';
-import { isSameRange, toIRange } from '@excel/shared';
-import * as Y from 'yjs';
+import type { ModelJSON, IRangeMap, IRange, IModel } from '@excel/shared';
 
 export class RangeMap implements IRangeMap {
   private model: IModel;
+  private rangeMap: ModelJSON['rangeMap'] = {};
   constructor(model: IModel) {
     this.model = model;
-  }
-  private get rangeMap() {
-    return this.model.getRoot().get('rangeMap');
   }
   validateRange(range: IRange) {
     if (!range) {
@@ -37,20 +33,23 @@ export class RangeMap implements IRangeMap {
   }
   fromJSON(json: ModelJSON): void {
     const data = json.rangeMap || {};
-    const rangeMap = new Y.Map() as YjsModelJson['rangeMap'];
+    const rangeMap: ModelJSON['rangeMap'] = {};
     for (const range of Object.values(data)) {
       range.sheetId = range.sheetId || this.model.getCurrentSheetId();
       if (!this.model.validateRange(range)) {
         continue;
       }
-      rangeMap.set(range.sheetId, range);
+      rangeMap[range.sheetId] = { ...range };
     }
-    this.model.getRoot().set('rangeMap', rangeMap);
+    this.rangeMap = rangeMap;
+  }
+  toJSON() {
+    return {...this.rangeMap}
   }
   getActiveRange() {
     const id = this.model.getCurrentSheetId();
 
-    const range = this.rangeMap?.get(id);
+    const range = this.rangeMap[id];
     if (range) {
       range.sheetId = range.sheetId || id;
       return {
@@ -74,18 +73,9 @@ export class RangeMap implements IRangeMap {
     if (!this.validateRange(newRange)) {
       return;
     }
-    let rangeMap = this.rangeMap;
-    if (!rangeMap) {
-      rangeMap = new Y.Map() as YjsModelJson['rangeMap'];
-      this.model.getRoot().set('rangeMap', rangeMap);
-    }
-    const oldValue = rangeMap.get(newRange.sheetId);
-    if (oldValue && isSameRange(oldValue, newRange)) {
-      return;
-    }
-    rangeMap.set(newRange.sheetId, toIRange(newRange));
+    this.rangeMap[newRange.sheetId] = { ...newRange };
   }
   deleteAll(sheetId?: string): void {
-    this.rangeMap?.delete(sheetId || this.model.getCurrentSheetId());
+    delete this.rangeMap[sheetId || this.model.getCurrentSheetId()];
   }
 }
