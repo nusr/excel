@@ -20,16 +20,14 @@ async function initView() {
   const docId = getDocId(import.meta.env.VITE_DEFAULT_EXCEL_ID);
   location.hash = `#${docId}`;
   const doc = initDoc({ guid: docId });
-  const { isServer, provider, isInit } = await initCollaboration(doc);
+  const { isServer, provider } = await initCollaboration(doc);
   const controller = initController({
     copyOrCut,
     paste,
     worker: workerInstance,
     doc,
   });
-  if (isInit) {
-    controller.setCurrentSheetId(controller.getCurrentSheetId());
-  }
+  controller.setCurrentSheetId(controller.getCurrentSheetId());
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
