@@ -9,6 +9,7 @@ export {
   scrollBar,
   scrollToView,
   scrollSheetToView,
+  computeScrollPosition,
 } from './shortcut';
 
 let instance: MainCanvas;

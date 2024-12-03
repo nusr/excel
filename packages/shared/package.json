@@ -20,7 +20,7 @@
   "scripts": {
     "build": "vite build",
     "type-check": "tsc",
-    "dev": "vite"
+    "dev": "npm run build"
   },
   "files": [
     "dist"

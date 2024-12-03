@@ -3,7 +3,11 @@ import { Button } from '../../components';
 import styles from './index.module.css';
 import { scrollBar } from '../../canvas';
 import { $ } from '../../i18n';
-import { classnames, sheetViewSizeSet, MAX_ADD_ROW_THRESHOLD } from '@excel/shared';
+import {
+  classnames,
+  sheetViewSizeSet,
+  MAX_ADD_ROW_THRESHOLD,
+} from '@excel/shared';
 import { scrollStore, useExcel } from '../store';
 
 const defaultData = 10;

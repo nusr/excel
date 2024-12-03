@@ -1,6 +1,6 @@
-import { initProvider, ResultData } from './provider';
+import { initProvider } from './provider';
 import * as Y from 'yjs';
-import { collaborationLog } from '@excel/shared';
+import { collaborationLog, CollaborationProvider } from '@excel/shared';
 import { SYNC_FLAG } from '@excel/shared';
 import { DEFAULT_UPDATE } from './provider/util';
 
@@ -11,7 +11,13 @@ function shouldSkip(isServer: boolean, tran: Y.Transaction) {
   return false;
 }
 
-export async function initCollaboration(doc: Y.Doc): Promise<ResultData> {
+export async function initCollaboration(
+  doc: Y.Doc,
+): Promise<{
+  provider: CollaborationProvider;
+  isServer: boolean;
+  isInit: boolean;
+}> {
   const { provider, isServer } = initProvider(doc);
 
   doc.on('update', (update: Uint8Array, _b, _c, tran) => {
@@ -24,11 +30,13 @@ export async function initCollaboration(doc: Y.Doc): Promise<ResultData> {
   provider.subscribe();
 
   const result = await provider.retrieveHistory();
+  let isInit = false;
   if (result.length > 0) {
     Y.applyUpdate(doc, Y.mergeUpdates(result), SYNC_FLAG.SKIP_UPDATE);
   } else {
+    isInit = true;
     Y.applyUpdate(doc, DEFAULT_UPDATE, SYNC_FLAG.SKIP_UNDO_REDO);
   }
 
-  return { isServer, provider };
+  return { isServer, provider, isInit };
 }

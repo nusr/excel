@@ -6,13 +6,11 @@ import {
 } from './constant';
 import type {
   WorksheetType,
-  ChangeEventType,
   Coordinate,
   ModelJSON,
   ResultType,
   IRange,
 } from '../types';
-import type { YEvent } from 'yjs';
 
 export function parseNumber(value: any): [boolean, number] {
   if (typeof value === 'boolean') {
@@ -171,38 +169,6 @@ export const KEY_LIST: Array<keyof ModelJSON> = [
   'rangeMap',
   'scroll',
 ] as const;
-
-export function modelToChangeSet(list: YEvent<any>[]) {
-  const result = new Set<ChangeEventType>();
-  const set = new Set<keyof ModelJSON>(KEY_LIST);
-  for (const item of list) {
-    if (!item) {
-      continue;
-    }
-    const keySet = new Set(item?.changes?.keys?.keys?.() || []);
-    const pathSet = new Set(item.path || []);
-    for (const key of keySet.keys()) {
-      if (set.has(key as any)) {
-        result.add(key as any);
-      }
-    }
-    for (const key of pathSet.keys()) {
-      if (set.has(key as any)) {
-        result.add(key as any);
-      }
-    }
-    if (pathSet.has('worksheets') || keySet.has('worksheets')) {
-      if (keySet.has('formula') || keySet.has('value')) {
-        result.add('cellValue');
-      } else {
-        result.add('cellStyle');
-      }
-    } else {
-      result.add('cellStyle');
-    }
-  }
-  return result;
-}
 
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

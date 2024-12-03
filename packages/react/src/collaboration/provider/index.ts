@@ -5,12 +5,7 @@ import { LocalProvider } from './local';
 import { CollaborationProvider } from '@excel/shared';
 import { type Doc } from 'yjs';
 
-export type ResultData = {
-  provider: CollaborationProvider;
-  isServer: boolean;
-};
-
-export function initProvider(doc: Doc): ResultData {
+export function initProvider(doc: Doc) {
   const url = import.meta.env.VITE_SUPABASE_URL;
   const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
   let isServer = false;

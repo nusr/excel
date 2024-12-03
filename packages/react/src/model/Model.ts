@@ -20,7 +20,6 @@ import {
 import {
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
-  modelToChangeSet,
   eventEmitter,
   sheetViewSizeSet,
   headerSizeSet,
@@ -39,6 +38,38 @@ import { ColManager } from './col';
 import { FilterManger } from './filter';
 import { ScrollManager } from './scroll';
 import * as Y from 'yjs';
+
+export function modelToChangeSet(list: Y.YEvent<any>[]) {
+  const result = new Set<ChangeEventType>();
+  const set = new Set<keyof ModelJSON>(KEY_LIST);
+  for (const item of list) {
+    if (!item) {
+      continue;
+    }
+    const keySet = new Set(item?.changes?.keys?.keys?.() || []);
+    const pathSet = new Set(item.path || []);
+    for (const key of keySet.keys()) {
+      if (set.has(key as any)) {
+        result.add(key as any);
+      }
+    }
+    for (const key of pathSet.keys()) {
+      if (set.has(key as any)) {
+        result.add(key as any);
+      }
+    }
+    if (pathSet.has('worksheets') || keySet.has('worksheets')) {
+      if (keySet.has('formula') || keySet.has('value')) {
+        result.add('cellValue');
+      } else {
+        result.add('cellStyle');
+      }
+    } else {
+      result.add('cellStyle');
+    }
+  }
+  return result;
+}
 
 export class Model implements IModel {
   private workbookManager: Workbook;
@@ -59,14 +90,11 @@ export class Model implements IModel {
     this.doc = doc;
     const root = this.getRoot();
     root.observeDeep((event) => {
-      modelLog('observeDeep', event);
       const changeSet = modelToChangeSet(event);
       for (const item of this.changeSet.keys()) {
         changeSet.add(item);
       }
-      if (changeSet.has('customHeight') || changeSet.has('customWidth')) {
-        this.computeViewSize();
-      }
+      modelLog('observeDeep', event, changeSet);
       this.render(changeSet);
       this.changeSet = new Set<ChangeEventType>();
     });
@@ -104,6 +132,10 @@ export class Model implements IModel {
   }
   async emitChange(changeSet: Set<ChangeEventType>) {
     const localChangeList: ChangeEventType[] = ['antLine', 'undo', 'redo'];
+    if (changeSet.has('customHeight') || changeSet.has('customWidth')) {
+      this.computeViewSize();
+    }
+
     for (const item of localChangeList) {
       if (changeSet.has(item)) {
         this.changeSet.add(item);
@@ -159,7 +191,6 @@ export class Model implements IModel {
     const result = this.workbookManager.addSheet();
     this.worksheetManager.setWorksheet([]);
     this.workbookManager.setCurrentSheetId(result.sheetId);
-    this.computeViewSize();
     return result;
   }
   deleteSheet(sheetId?: string): void {

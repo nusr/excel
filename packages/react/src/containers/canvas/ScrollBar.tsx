@@ -8,10 +8,9 @@ import React, {
   useMemo,
 } from 'react';
 import { type IController, ScrollStatus } from '@excel/shared';
-import { computeScrollRowAndCol } from '../../canvas';
+import { computeScrollRowAndCol, computeScrollPosition } from '../../canvas';
 import styles from './index.module.css';
 import { scrollStore, useExcel } from '../store';
-import { computeScrollPosition } from '@excel/shared';
 
 interface State {
   prevPageY: number;

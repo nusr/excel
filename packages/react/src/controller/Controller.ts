@@ -160,6 +160,7 @@ export class Controller implements IController {
   setCurrentSheetId(id: string): void {
     this.model.setCurrentSheetId(id);
     this.changeSet.add('currentSheetId');
+    this.changeSet.add('customHeight');
     this.emitChange();
   }
 
@@ -178,6 +179,7 @@ export class Controller implements IController {
   addSheet() {
     const result = this.model.addSheet();
     this.changeSet.add('workbook');
+    this.changeSet.add('customHeight');
     this.emitChange();
     return result;
   }
@@ -185,24 +187,28 @@ export class Controller implements IController {
   deleteSheet(sheetId?: string) {
     this.model.deleteSheet(sheetId);
     this.changeSet.add('workbook');
+    this.changeSet.add('customHeight');
     this.emitChange();
   }
   @transaction()
   updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string): void {
     this.model.updateSheetInfo(data, sheetId);
     this.changeSet.add('workbook');
+    this.changeSet.add('customHeight');
     this.emitChange();
   }
   @transaction()
   hideSheet(sheetId?: string): void {
     this.model.hideSheet(sheetId);
     this.changeSet.add('workbook');
+    this.changeSet.add('customHeight');
     this.emitChange();
   }
   @transaction()
   unhideSheet(sheetId: string): void {
     this.model.unhideSheet(sheetId);
     this.changeSet.add('workbook');
+    this.changeSet.add('customHeight');
     this.emitChange();
   }
   @transaction()
@@ -833,6 +839,8 @@ export class Controller implements IController {
     this.changeSet.add('cellStyle');
     this.changeSet.add('autoFilter');
     this.changeSet.add('drawings');
+    this.changeSet.add('customHeight');
+    this.changeSet.add('customWidth');
     this.emitChange();
   }
   getDefineName(range: IRange): string {

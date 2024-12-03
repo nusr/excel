@@ -280,11 +280,13 @@ export default class OffScreenWorker implements WorkerMainView {
     const pointList: Point[] = [];
     let y = 0;
     let x = 0;
+    const xTemp: Point[] = [];
+    const yTemp: Point[] = [];
     for (let i = rowIndex; i < rowCount && y <= height; i++) {
       while (i < rowCount && this.getRowHeight(i) === 0) {
         i++;
       }
-      pointList.push([0, y], [width, y]);
+      yTemp.push([0, y]);
       const h = this.getRowHeight(i);
       y += h;
     }
@@ -292,9 +294,15 @@ export default class OffScreenWorker implements WorkerMainView {
       while (i < colCount && this.getColWidth(i) === 0) {
         i++;
       }
-      pointList.push([x, 0], [x, y]);
+      xTemp.push([x, 0]);
       const w = this.getColWidth(i);
       x += w;
+    }
+    for (const item of xTemp) {
+      pointList.push(item, [item[0], y]);
+    }
+    for (const item of yTemp) {
+      pointList.push(item, [x, item[1]]);
     }
     pointList.push([0, y], [x, y]);
     pointList.push([x, 0], [x, y]);

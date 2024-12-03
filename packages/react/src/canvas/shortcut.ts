@@ -11,7 +11,6 @@ import {
   SHEET_ITEM_TEST_ID_PREFIX,
   sheetViewSizeSet,
   headerSizeSet,
-  computeScrollPosition,
   canvasSizeSet,
   FORMULA_EDITOR_ROLE,
   MERGE_CELL_LINE_BREAK,
@@ -19,7 +18,6 @@ import {
   isMergeContent,
 } from '@excel/shared';
 import { coreStore } from '../containers/store';
-export const BOTTOM_BUFF = 200;
 
 export function handleTabClick(controller: IController) {
   controller.transaction(() => {
@@ -127,6 +125,24 @@ export function scrollToView(controller: IController, range: IRange) {
     controller.setActiveRange(range);
     return true;
   });
+}
+
+export function computeScrollPosition() {
+  const contentSize = 30;
+  const BOTTOM_BUFF = 200;
+  const canvasRect = canvasSizeSet.get();
+  const viewSize = sheetViewSizeSet.get();
+  const maxHeight = viewSize.height - canvasRect.height + BOTTOM_BUFF;
+  const maxWidth = viewSize.width - canvasRect.width + BOTTOM_BUFF;
+  const maxScrollHeight = canvasRect.height - contentSize;
+  const maxScrollWidth = canvasRect.width - contentSize;
+
+  return {
+    maxHeight,
+    maxWidth,
+    maxScrollHeight,
+    maxScrollWidth,
+  };
 }
 
 export function scrollBar(

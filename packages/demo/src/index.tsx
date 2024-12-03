@@ -20,13 +20,16 @@ async function initView() {
   const docId = getDocId(import.meta.env.VITE_DEFAULT_EXCEL_ID);
   location.hash = `#${docId}`;
   const doc = initDoc({ guid: docId });
-  const { isServer, provider } = await initCollaboration(doc);
+  const { isServer, provider, isInit } = await initCollaboration(doc);
   const controller = initController({
     copyOrCut,
     paste,
     worker: workerInstance,
     doc,
   });
+  if (isInit) {
+    controller.setCurrentSheetId(controller.getCurrentSheetId());
+  }
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -42,9 +45,7 @@ async function initView() {
       </StateContext.Provider>
     </StrictMode>,
   );
-  document.body.append(`<!-- ${process.env.COMMIT_LOG} --> `);
-  setTimeout(() => {
-    document.getElementById('loading')?.remove();
-  }, 0);
+  document.head.append(`<!-- ${process.env.COMMIT_LOG} --> `);
+  document.getElementById('loading')?.remove();
 }
 initView();

@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "vite build",
-    "dev": "vite",
+    "dev": "vite --port 5000",
     "type-check": "tsc"
   },
   "files": [
