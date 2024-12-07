@@ -81,7 +81,7 @@ export class CollaborationProvider {
         REALTIME_LISTEN_TYPES.BROADCAST,
         { event: this.doc.guid },
         (payload) => {
-          const { update, clientID, type } = payload?.payload;
+          const { update, clientID, type } = payload?.payload || {};
           if (!update || this.doc.clientID === clientID) {
             return;
           }
