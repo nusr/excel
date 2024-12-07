@@ -1,22 +1,22 @@
 {
   "name": "excel-root",
-  "description": "web excel",
+  "version": "0.0.0",
   "scripts": {
-    "start": "nx dev @excel/demo",
-    "start:react": "nx dev @excel/react",
-    "start:formula": "nx dev @excel/formula",
-    "dev": "nx run-many -t dev",
-    "type-check": "nx run-many -t type-check",
+    "preinstall": "npx only-allow pnpm",
+    "start": "npm run dev",
+    "dev": "vite --force --host --port 3000",
+    "type-check": "tsc",
     "e2e": "playwright test",
     "e2e:ui": "npm run e2e --ui",
-    "build": "nx run-many -t build",
+    "build": "vite build",
     "test": "jest --config ./jest.config.js --forceExit --detectOpenHandles",
     "coverage": "npm run test -- --coverage",
     "lint": "npx oxlint@latest --fix",
     "update-md": "node ./scripts/update-md.js",
     "prepare": "husky",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" --reporters html --mode strict --min-lines 7 --blame --gitignore --exitCode 1 .",
-    "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv"
+    "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv",
+    "release": "release-it patch --config .release-it.json --no-git --no-npm"
   },
   "repository": {
     "type": "git",
@@ -27,34 +27,43 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
-    "@playwright/test": "^1.49.0",
+    "@playwright/test": "1.49.1",
     "@testing-library/jest-dom": "6.6.3",
-    "@testing-library/react": "16.0.1",
+    "@testing-library/react": "16.1.0",
     "@types/jest": "29.5.14",
     "@types/pixelmatch": "5.2.6",
     "@types/pngjs": "6.0.5",
-    "@types/react": "18.3.12",
-    "@types/react-dom": "18.3.1",
+    "@types/react": "19.0.1",
+    "@types/react-dom": "19.0.2",
     "@vitejs/plugin-react": "4.3.4",
     "canvas": "2.11.2",
     "husky": "9.1.7",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
-    "nx": "20.1.4",
     "pixelmatch": "5.3.0",
     "pngjs": "7.0.0",
+    "release-it": "^17.10.0",
     "ts-jest": "29.2.5",
+    "ts-jest-mock-import-meta": "1.2.1",
     "typescript": "5.7.2",
-    "vite": "5.4.11",
+    "vite": "6.0.3",
     "vite-plugin-dts": "4.3.0"
+  },
+  "dependencies": {
+    "@sentry/react": "8.43.0",
+    "@supabase/supabase-js": "2.47.5",
+    "chart.js": "4.4.7",
+    "comlink": "4.4.2",
+    "dexie": "4.0.10",
+    "jszip": "3.10.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz",
+    "uuid": "11.0.3",
+    "y-protocols": "1.0.6",
+    "yjs": "13.6.20"
   },
   "engines": {
     "pnpm": "^9"
-  },
-  "pnpm": {
-    "overrides": {
-      "pixelmatch": "5.3.0",
-      "@types/node": "22.9.1"
-    }
   }
 }

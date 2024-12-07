@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-process.env.IS_E2E = 'true';
+process.env.VITE_IS_E2E = 'true';
 
 /**
  * See https://playwright.dev/docs/test-configuration.

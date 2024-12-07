@@ -1,0 +1,105 @@
+.canvas-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+.vertical-scroll-bar {
+  position: absolute;
+  width: var(--largePadding);
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background-color: var(--white);
+  box-sizing: border-box;
+  padding: 0 5px;
+  border: 1px solid var(--borderColor);
+  border-top-color: var(--white);
+}
+
+.vertical-scroll-bar-content {
+  position: relative;
+  cursor: pointer;
+  border-radius: var(--borderRadius);
+  background-color: var(--scrollbarColor);
+  height: var(--scrollBarContent);
+}
+
+.horizontal-scroll-bar {
+  position: absolute;
+  height: var(--largePadding);
+  right: 0;
+  left: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  padding: 5px 0;
+  border: 1px solid var(--borderColor);
+  border-left-color: var(--white);
+  background-color: var(--white);
+}
+
+.horizontal-scroll-bar-content {
+  position: relative;
+  cursor: pointer;
+  border-radius: var(--borderRadius);
+  background-color: var(--scrollbarColor);
+  height: 100%;
+  width: var(--scrollBarContent);
+}
+
+.horizontal-scroll-bar-content:hover,
+.vertical-scroll-bar-content:hover {
+  background-color: var(--scrollbarHoveColor);
+}
+
+.context-menu {
+  position: fixed;
+  background-color: var(--white);
+  border-radius: var(--borderRadius);
+  min-width: 150px;
+  z-index: 4;
+}
+
+.context-menu > button {
+  width: 100%;
+  background-color: var(--white);
+}
+
+.bottom-bar {
+  position: absolute;
+  display: none;
+  align-items: center;
+  padding: var(--tinyPadding) var(--mediumPadding);
+  padding-top: 50px;
+  right: 18px;
+  bottom: 36px;
+  left: 68px;
+}
+.bottom-bar.active {
+  display: flex;
+}
+
+.bottom-bar-text {
+  margin: 0 var(--tinyPadding);
+}
+
+.bottom-bar-input {
+  width: 60px;
+}
+.add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user {
+  position: absolute;
+}
+
+.userContent {
+  background-color: var(--white);
+  position: absolute;
+  top: -22px;
+}

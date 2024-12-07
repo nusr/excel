@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const FORMULA_DIR = path.join(process.cwd(), './src/formula/formula');
+const FORMULA_DIR = path.join(process.cwd(), './packages/formula/src/formula');
 const PREFIX_TEXT = 'const formulas:';
 const FORMULA_TAG = '## Supported Formulas';
 const MD_PATH = path.join(process.cwd(), 'README.md');

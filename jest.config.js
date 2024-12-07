@@ -1,5 +1,5 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-process.env.IS_E2E = 'true';
+process.env.VITE_IS_E2E = 'true';
 module.exports = {
   rootDir: process.cwd(),
   preset: 'ts-jest',
@@ -7,11 +7,32 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.test.ts?(x)'],
   transform: {
     '^.+\\.css$': '<rootDir>/scripts/css-transform.js',
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        diagnostics: {
+          ignoreCodes: [1343],
+        },
+        astTransformers: {
+          before: [
+            {
+              path: 'ts-jest-mock-import-meta',
+              options: {
+                metaObjectReplacement: {
+                  VITE_IS_E2E: 'true',
+                  VITE_SUPABASE_URL: '',
+                  VITE_SUPABASE_ANON_KEY: '',
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
   },
   coverageReporters: ['clover', 'json', 'lcov', 'text', 'html'],
   moduleNameMapper: {
     '\\.css$': '<rootDir>/scripts/css-mock.js',
-    '@excel/shared': '<rootDir>/packages/shared/src',
   },
-  setupFiles: ['<rootDir>/scripts/jest.setup.js']
+  setupFiles: ['<rootDir>/scripts/jest.setup.js'],
 };
