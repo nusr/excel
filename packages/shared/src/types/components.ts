@@ -1,4 +1,3 @@
-import { IController } from './controller';
 import { ModelCellType, Coordinate } from './model';
 
 export interface OptionItem {
@@ -31,17 +30,3 @@ export enum EditorStatus {
 }
 
 export type ThemeType = 'dark' | 'light';
-
-export interface CollaborationProvider {
-  addHistory(update: Uint8Array): void;
-  retrieveHistory(): Promise<Uint8Array[]>;
-  subscribe(): void;
-  updateFile(file: File, base64: string): Promise<string>;
-  downloadFile(filePath: string): Promise<string>;
-}
-
-export interface StateContextValue
-  extends Partial<Pick<CollaborationProvider, 'updateFile' | 'downloadFile'>> {
-  isServer: boolean;
-  controller: IController;
-}

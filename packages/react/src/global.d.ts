@@ -1,4 +1,4 @@
-interface Window {
+declare interface Window {
   queryLocalFonts?: () => Promise<
     Array<{
       fullName: string;
@@ -8,4 +8,3 @@ interface Window {
     }>
   >;
 }
-

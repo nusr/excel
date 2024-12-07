@@ -1,10 +1,8 @@
 {
   "name": "excel-root",
-  "description": "web excel",
   "scripts": {
     "start": "nx dev @excel/demo",
     "start:react": "nx dev @excel/react",
-    "start:formula": "nx dev @excel/formula",
     "dev": "nx run-many -t dev",
     "type-check": "nx run-many -t type-check",
     "e2e": "playwright test",
@@ -27,7 +25,11 @@
   "license": "MIT",
   "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
-    "@playwright/test": "^1.49.0",
+    "@nx/js": "20.1.4",
+    "@playwright/test": "1.49.0",
+    "@swc-node/register": "1.10.9",
+    "@swc/core": "1.9.3",
+    "@swc/helpers": "0.5.15",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.14",
@@ -41,11 +43,12 @@
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
     "nx": "20.1.4",
-    "pixelmatch": "5.3.0",
+    "pixelmatch": "6.0.0",
     "pngjs": "7.0.0",
     "ts-jest": "29.2.5",
+    "ts-jest-mock-import-meta": "1.2.1",
     "typescript": "5.7.2",
-    "vite": "5.4.11",
+    "vite": "6.0.2",
     "vite-plugin-dts": "4.3.0"
   },
   "engines": {
@@ -53,8 +56,7 @@
   },
   "pnpm": {
     "overrides": {
-      "pixelmatch": "5.3.0",
-      "@types/node": "22.9.1"
+      "pixelmatch": "5.3.0"
     }
   }
 }

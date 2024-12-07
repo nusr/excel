@@ -19,7 +19,7 @@ describe('Menubar.test.ts', () => {
   describe('menubar', () => {
     test('normal', async () => {
       expect((await screen.findByTestId('menubar')).childNodes.length).toEqual(
-        4,
+        5,
       );
     });
     test('menu', () => {
@@ -70,7 +70,6 @@ test('change i18n', () => {
       <StateContext.Provider
         value={{
           controller,
-          isServer: false,
         }}
       >
         <App />
@@ -85,7 +84,6 @@ test('change i18n', () => {
       <StateContext.Provider
         value={{
           controller,
-          isServer: false,
         }}
       >
         <App />

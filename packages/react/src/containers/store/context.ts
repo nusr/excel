@@ -1,5 +1,11 @@
 import { createContext, useContext } from 'react';
-import { StateContextValue } from '@excel/shared';
+import { IController } from '@excel/shared';
+import { CollaborationProvider } from '../../collaboration';
+
+export type StateContextValue = {
+  controller: IController;
+  provider?: CollaborationProvider;
+};
 
 export const StateContext = createContext<StateContextValue | undefined>(
   undefined,

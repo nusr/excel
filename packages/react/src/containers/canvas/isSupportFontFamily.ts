@@ -8,6 +8,9 @@ import type { OptionItem } from '@excel/shared';
 import { $ } from '../../i18n';
 
 function createElement(font: string) {
+  if (typeof document === 'undefined') {
+    return { offsetHeight: 0, offsetWidth: 0 };
+  }
   const s = document.createElement('span');
   s.style.fontSize = '72px';
   s.innerHTML = 'mmmmmmmmmmlli';

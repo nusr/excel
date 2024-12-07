@@ -1,7 +1,6 @@
 import { initController, getMockHooks } from '../../controller';
-import { BorderItem, IController } from '@excel/shared';
+import { BorderItem, IController, BORDER_TYPE_MAP } from '@excel/shared';
 import { compareScreenShot } from './util';
-import { BORDER_TYPE_MAP } from '@excel/shared';
 
 describe('border.test.ts', () => {
   let controller: IController;

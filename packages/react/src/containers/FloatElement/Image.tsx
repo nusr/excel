@@ -13,22 +13,23 @@ export const Image: React.FunctionComponent<Props> = memo(
   ({ title, imageSrc = '', uuid }) => {
     const [src, setSrc] = useState('');
     const [loading, setLoading] = useState(false);
-    const { downloadFile } = useExcel();
+    const { provider } = useExcel();
 
     useEffect(() => {
-      if (!downloadFile) {
+      if (!provider) {
         setSrc(imageSrc);
         return;
       }
       setLoading(true);
-      downloadFile(imageSrc)
+      provider
+        .downloadFile(imageSrc)
         .then((data) => {
           setSrc(data);
         })
         .finally(() => {
           setLoading(false);
         });
-    }, [imageSrc, downloadFile]);
+    }, [imageSrc, provider]);
     if (loading) {
       return <Loading />;
     }

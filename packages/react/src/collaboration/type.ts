@@ -1,34 +1,44 @@
-import type { HistoryItem } from '@excel/shared';
-
 export type DocumentItem = {
-  id: string;
+  id?: string;
   name: string;
   create_time: string;
+  sync: boolean;
+};
+
+export type HistoryItem = {
+  id?: number;
+  doc_id: string;
+  update: string;
+  create_time: string;
+  sync: boolean;
 };
 
 export interface Database {
   public: {
     Tables: {
       document: {
-        Row: DocumentItem;
+        Row: Required<DocumentItem>;
         Insert: {
-          id?: never;
+          id?: string;
           name: string;
           create_time?: never;
+          sync?: boolean;
         };
         Update: {
-          id?: never;
+          id?: string;
           name?: string;
           create_time?: never;
+          sync?: boolean;
         };
       };
       history: {
-        Row: HistoryItem;
+        Row: Required<HistoryItem>;
         Insert: {
-          id?: never;
+          id?: number;
           doc_id: string;
           update: string;
           create_time?: never;
+          sync?: boolean;
         };
       };
     };

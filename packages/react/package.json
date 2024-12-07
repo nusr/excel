@@ -7,14 +7,14 @@
   "homepage": "https://github.com/nusr/excel",
   "repository": "git+https://github.com/nusr/excel.git",
   "license": "MIT",
-  "main": "./dist/excel.js",
-  "module": "./dist/excel.mjs",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/src/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "import": "./dist/excel.mjs",
-      "require": "./dist/excel.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./worker": {
       "types": "./dist/src/worker.d.ts",
@@ -38,7 +38,10 @@
     "@supabase/supabase-js": "2.46.1",
     "chart.js": "4.4.6",
     "comlink": "4.4.2",
+    "dexie": "^4.0.10",
     "jszip": "3.10.1",
+    "uuid": "^11.0.3",
+    "y-protocols": "^1.0.6",
     "yjs": "13.6.20"
   },
   "files": [

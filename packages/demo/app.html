@@ -36,46 +36,10 @@
   <link rel="alternate" href="https://github.com/nusr/excel" hreflang="x-default" />
 
   <title>Web Excel</title>
-  <style>
-    .container {
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: white;
-    }
-
-    .loading {
-      width: 48px;
-      height: 48px;
-      border: 5px solid #217346;
-      border-bottom-color: transparent;
-      border-radius: 50%;
-      box-sizing: border-box;
-      animation: rotation 1s linear infinite;
-    }
-
-    @keyframes rotation {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-  </style>
 </head>
 
 <body>
   <div id="root" class="root-container"></div>
-  <div class="container" id="loading">
-    <div class="loading"></div>
-  </div>
   <script type="module" src="/src/index.tsx"></script>
 </body>
 

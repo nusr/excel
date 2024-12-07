@@ -81,10 +81,3 @@ type Convert<T> = T extends Record<string, any>
 export type ModelJSON = Convert<YjsModelJson>;
 
 export type ModelRoot = TypedMap<YjsModelJson>;
-
-export type HistoryItem = {
-  id: number;
-  doc_id: string;
-  update: string;
-  create_time: string;
-};

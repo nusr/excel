@@ -26,7 +26,7 @@ describe('importXLSX.test.ts', () => {
     test('normal', async () => {
       const filePath = path.join(process.cwd(), './scripts/origin.xlsx');
       const fileData = await fs.readFile(filePath);
-      const model = await importXLSX(fileData);
+      const model = await importXLSX(fileData as any);
       const controller = initController(getMockHooks());
       controller.addSheet();
       controller.fromJSON(model);

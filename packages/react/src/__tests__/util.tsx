@@ -35,7 +35,6 @@ export function renderComponent() {
       <StateContext.Provider
         value={{
           controller,
-          isServer: false,
         }}
       >
         <App />

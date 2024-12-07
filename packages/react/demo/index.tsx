@@ -1,33 +1,28 @@
 import { createRoot } from 'react-dom/client';
 import { StrictMode } from 'react';
 import {
-  App,
   initController,
   StateContext,
   initDoc,
   wrap,
-} from '../src/index';
+  initCollaboration,
+  App,
+} from '../src';
 import { copyOrCut, paste, WorkerMethod } from '@excel/shared';
-import '../src/global.css';
 import Worker from './worker?worker';
 
 const doc = initDoc({});
+const provider = initCollaboration(doc);
 const controller = initController({
   copyOrCut,
   paste,
   worker: wrap<WorkerMethod>(new Worker()),
   doc,
 });
-controller.addSheet();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <StateContext.Provider
-      value={{
-        controller,
-        isServer: false,
-      }}
-    >
+    <StateContext.Provider value={{ provider, controller }}>
       <App />
     </StateContext.Provider>
   </StrictMode>,

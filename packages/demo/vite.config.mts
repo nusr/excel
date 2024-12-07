@@ -9,7 +9,7 @@ export default defineConfig({
   base: process.env.CI ? '/excel/' : '',
   plugins: [react()],
   define: {
-    'process.env.IS_E2E': JSON.stringify(process.env.IS_E2E || ''),
+    'process.env.VITE_IS_E2E': JSON.stringify(process.env.VITE_IS_E2E || ''),
     'process.env.COMMIT_LOG': JSON.stringify(log || ''),
   },
   build: {

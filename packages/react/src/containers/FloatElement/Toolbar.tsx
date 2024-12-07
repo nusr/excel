@@ -10,7 +10,7 @@ import { $ } from '../../i18n';
 import { useExcel } from '../store';
 
 export const InsertFloatingPicture = memo(() => {
-  const { controller, updateFile } = useExcel();
+  const { controller, provider } = useExcel();
   const ref = useRef<HTMLInputElement>(null);
 
   const handleImport = useCallback(
@@ -43,8 +43,8 @@ export const InsertFloatingPicture = memo(() => {
       }
       const size = await getImageSize(base64);
       let imageSrc = base64;
-      if (updateFile) {
-        imageSrc = await updateFile(file, base64);
+      if (provider) {
+        imageSrc = await provider.updateFile(file, base64);
       }
       if (!imageSrc) {
         toast.warning('choose image file');
@@ -52,7 +52,7 @@ export const InsertFloatingPicture = memo(() => {
         return;
       }
       const range = controller.getActiveRange().range;
-      await controller.addDrawing({
+      controller.addDrawing({
         width: size.width,
         height: size.height,
         originHeight: size.height,
@@ -69,7 +69,7 @@ export const InsertFloatingPicture = memo(() => {
       });
       clearUpdate();
     },
-    [updateFile],
+    [provider],
   );
   return (
     <Button testId="toolbar-floating-picture" title="Floating Picture">
@@ -92,7 +92,7 @@ export const InsertChart = memo(() => {
   const { controller } = useExcel();
   const handleClick = useCallback(async () => {
     const range = controller.getActiveRange().range;
-    await controller.addDrawing({
+    controller.addDrawing({
       width: 400,
       height: 300,
       originHeight: 300,

@@ -832,7 +832,7 @@ export function convertXMLDataToModel(
   return result;
 }
 
-export async function importXLSX(file: File | Buffer) {
+export async function importXLSX(file: File) {
   const jszip = await import('jszip');
   const zip = await jszip.default.loadAsync(file);
   const { files } = zip;

@@ -320,13 +320,13 @@ export function initCanvas(
   const familyList = initFontFamilyList();
   fontFamilyStore.setState(familyList);
   const mainCanvas = initRenderCanvas(controller, canvas);
-  const resize = () => {
-    renderCanvas(new Set<ChangeEventType>(['customWidth']));
-  };
   const renderCanvas = (changeSet: Set<ChangeEventType>) => {
     computeCanvasSize(canvas);
     mainCanvas.resize();
     mainCanvas.render({ changeSet });
+  };
+  const resize = () => {
+    renderCanvas(new Set<ChangeEventType>(['customWidth']));
   };
   const offEvent = eventEmitter.on('modelChange', ({ changeSet }) => {
     handleStateChange(changeSet, controller);
@@ -346,9 +346,6 @@ export function initCanvas(
   ]);
   handleStateChange(changeSet, controller);
   renderCanvas(changeSet);
-  queueMicrotask(() => {
-    renderCanvas(changeSet);
-  });
 
   return () => {
     removeEvent();

@@ -1,11 +1,11 @@
-const SPLITER = ',';
+const SPLITTER = ',';
 
 export function stringToUint8Array(str: string): Uint8Array {
-  return Uint8Array.from(str.split(SPLITER).map((v) => parseInt(v, 10)));
+  return Uint8Array.from(str.split(SPLITTER).map((v) => parseInt(v, 10)));
 }
 
 export function uint8ArrayToString(buf: Uint8Array): string {
-  return Array.from(buf).join(SPLITER);
+  return Array.from(buf).join(SPLITTER);
 }
 
 export const DEFAULT_UPDATE = Uint8Array.from([

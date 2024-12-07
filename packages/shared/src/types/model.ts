@@ -364,9 +364,16 @@ export type NumberFormatValue =
   | null
   | undefined;
 
+export type UserItem = {
+  range: IRange;
+  clientId: number;
+};
 export type EventEmitterType = {
   modelChange: {
     changeSet: Set<ChangeEventType>;
+  };
+  awarenessChange: {
+    users: UserItem[];
   };
 };
 
@@ -374,4 +381,5 @@ export enum SYNC_FLAG {
   MODEL = 'model',
   SKIP_UPDATE = 'skip-update',
   SKIP_UNDO_REDO = 'skip-undo-redo',
+  SKIP_UNDO_REDO_UPDATE = 'skip-undo-redo-update',
 }
