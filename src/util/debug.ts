@@ -1,4 +1,4 @@
-import { COLOR_PICKER_COLOR_LIST } from './constant';
+import { getRandomColor } from './util';
 
 type NameSpaceType = 'react' | 'model' | 'test' | 'collaboration' | string;
 
@@ -25,16 +25,12 @@ export class Debug {
     const result = [`%c ${namespace}:`, `color:${color};`, ...rest];
     console.log(...result);
   };
-  getRandomColor = (): string => {
-    const index = Math.floor(Math.random() * COLOR_PICKER_COLOR_LIST.length);
-    return COLOR_PICKER_COLOR_LIST[index];
-  };
   enable() {
     return window.localStorage.getItem('debug') === '*';
   }
   setColor() {
     if (!Debug.colorMap.has(this.namespace)) {
-      Debug.colorMap.set(this.namespace, this.getRandomColor());
+      Debug.colorMap.set(this.namespace, getRandomColor());
     }
   }
 }

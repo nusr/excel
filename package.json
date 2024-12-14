@@ -2,7 +2,6 @@
   "name": "excel-root",
   "version": "0.0.0",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "start": "npm run dev",
     "dev": "vite --force --host --port 3000",
     "type-check": "tsc",

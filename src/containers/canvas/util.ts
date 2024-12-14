@@ -223,13 +223,13 @@ const handleStateChange = (
   if (changeSet.has('scroll')) {
     const scroll = controller.getScroll();
     const canvasSize = controller.getCanvasSize();
-    const showBottomBar = scroll.scrollTop / canvasSize.height >= 0.91;
     scrollStore.setState({
       scrollLeft: scroll.scrollLeft,
       scrollTop: scroll.scrollTop,
-      showBottomBar,
       row: scroll.row,
       col: scroll.col,
+      canvasHeight: canvasSize.height,
+      canvasWidth: canvasSize.width,
     });
   }
   if (changeSet.has('definedNames')) {

@@ -11,10 +11,11 @@ const defaultData = 10;
 export const BottomBar = memo(() => {
   const { controller } = useExcel();
   const [value, setValue] = useState(defaultData);
-  const { showBottomBar } = useSyncExternalStore(
+  const scroll = useSyncExternalStore(
     scrollStore.subscribe,
     scrollStore.getSnapshot,
   );
+  const showBottomBar = scroll.scrollTop / scroll.canvasHeight >= 0.91;
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.stopPropagation();
     const val = parseInt(event.target.value, 10);

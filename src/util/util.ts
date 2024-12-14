@@ -3,7 +3,7 @@ import {
   SPLITTER,
   FORMULA_PREFIX,
   MERGE_CELL_LINE_BREAK,
-  DEFAULT_EXCEL_ID
+  DEFAULT_EXCEL_ID,
 } from './constant';
 import type {
   WorksheetType,
@@ -210,4 +210,17 @@ export function getDocId() {
     import.meta.env.VITE_DEFAULT_EXCEL_ID ||
     DEFAULT_EXCEL_ID;
   return docId;
+}
+
+export function getRandomColor() {
+  const r = Math.floor(Math.random() * 256)
+    .toString(16)
+    .padStart(2, '0');
+  const g = Math.floor(Math.random() * 256)
+    .toString(16)
+    .padStart(2, '0');
+  const b = Math.floor(Math.random() * 256)
+    .toString(16)
+    .padStart(2, '0');
+  return `#${r}${g}${b}`;
 }

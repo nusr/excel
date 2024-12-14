@@ -41,11 +41,23 @@
       <a href="%BASE_URL%app" id="full-screen">Full Screen</a>
     </div>
     <div class="content">
-      <iframe name="left" data-testid="left" src="%BASE_URL%app" class="html"></iframe>
-      <iframe name="right" data-testid="right" src="%BASE_URL%app" class="html"></iframe>
+      <iframe
+        name="left"
+        data-testid="left"
+        src="%BASE_URL%app"
+        class="html"
+      ></iframe>
+      <iframe
+        name="right"
+        data-testid="right"
+        src="%BASE_URL%app"
+        class="html"
+      ></iframe>
     </div>
     <script>
-      document.getElementById('full-screen').href = '%BASE_URL%app#' + window.location.hash.slice(1);
+      const docId = window.location.hash.slice(1);
+      document.getElementById('full-screen').href =
+        '%BASE_URL%app' + (docId ? '#' + docId : '');
     </script>
   </body>
 </html>

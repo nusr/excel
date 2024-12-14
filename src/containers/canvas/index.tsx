@@ -5,6 +5,7 @@ import React, {
   useState,
   memo,
   useSyncExternalStore,
+  useCallback,
 } from 'react';
 import type { IController, EventData, ModalValue } from '../../types';
 import { getHitInfo, DEFAULT_POSITION } from '../../util';
@@ -62,54 +63,61 @@ export const CanvasContainer = memo(() => {
     }
     return initCanvas(controller, ref.current);
   }, []);
-  const handleContextMenu = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    event.preventDefault();
-    setMenuPosition({
-      top: event.clientY,
-      left: event.clientX,
-    });
-  };
+  const handleContextMenu = useCallback(
+    (event: React.MouseEvent<HTMLCanvasElement>) => {
+      event.preventDefault();
+      setMenuPosition({
+        top: event.clientY,
+        left: event.clientX,
+      });
+    },
+    [],
+  );
   const hideContextMenu = () => {
     setMenuPosition({
       top: DEFAULT_POSITION,
       left: DEFAULT_POSITION,
     });
   };
-  const handlePointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
-    /* jscpd:ignore-start */
-    if (event.buttons <= 0) {
-      return;
-    }
-    const data = getEventData(event, controller);
-    for (const handler of handlerList) {
-      const r = handler.pointerMove(data, event);
-      if (r) {
-        if (typeof r !== 'boolean') {
-          setModalState(r);
-        }
-        break;
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLCanvasElement>) => {
+      /* jscpd:ignore-start */
+      if (event.buttons <= 0) {
+        return;
       }
-    }
-    /* jscpd:ignore-end */
-  };
-  const handlePointerDown = async (
-    event: React.PointerEvent<HTMLCanvasElement>,
-  ) => {
-    if (event.buttons <= 0) {
-      return;
-    }
-    setModalState(null);
-    const data = getEventData(event, controller);
-    for (const handler of handlerList) {
-      const r = handler.pointerDown(data, event);
-      if (r) {
-        if (typeof r !== 'boolean') {
-          setModalState(r);
+      const data = getEventData(event, controller);
+      for (const handler of handlerList) {
+        const r = handler.pointerMove(data, event);
+        if (r) {
+          if (typeof r !== 'boolean') {
+            setModalState(r);
+          }
+          break;
         }
-        break;
       }
-    }
-  };
+      /* jscpd:ignore-end */
+    },
+    [],
+  );
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLCanvasElement>) => {
+      if (event.buttons <= 0) {
+        return;
+      }
+      setModalState(null);
+      const data = getEventData(event, controller);
+      for (const handler of handlerList) {
+        const r = handler.pointerDown(data, event);
+        if (r) {
+          if (typeof r !== 'boolean') {
+            setModalState(r);
+          }
+          break;
+        }
+      }
+    },
+    [],
+  );
   return (
     <Fragment>
       <div

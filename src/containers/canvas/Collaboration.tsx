@@ -7,7 +7,7 @@ import React, {
 import { userStore, useExcel, coreStore, scrollStore } from '../store';
 import { UserItem, CanvasOverlayPosition } from '../../types';
 import styles from './index.module.css';
-import { COLOR_PICKER_COLOR_LIST } from '../../util';
+import { getRandomColor } from '../../util';
 
 export const Collaboration = () => {
   const users = useSyncExternalStore(
@@ -35,8 +35,7 @@ export const User: React.FunctionComponent<UserItem> = ({
 }) => {
   const { controller } = useExcel();
   const color = useMemo(() => {
-    const index = Math.floor(Math.random() * COLOR_PICKER_COLOR_LIST.length);
-    return COLOR_PICKER_COLOR_LIST[index];
+    return getRandomColor();
   }, []);
   const { row, col } = useSyncExternalStore(
     scrollStore.subscribe,
