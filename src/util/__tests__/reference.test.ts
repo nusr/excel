@@ -225,35 +225,35 @@ describe('reference.test.ts', () => {
     });
 
     test('RC10', () => {
-      expect(parseR1C1('RC10', { row: 0, col: 0 })).toEqual(
+      expect(parseR1C1('RC10', { row: 0, col: 0, sheetId: '' })).toEqual(
         new SheetRange(0, 9, 1, 1, ''),
       );
     });
 
     test('R10C', () => {
-      expect(parseR1C1('R10C', { row: 0, col: 0 })).toEqual(
+      expect(parseR1C1('R10C', { row: 0, col: 0, sheetId: '' })).toEqual(
         new SheetRange(9, 0, 1, 1, ''),
       );
     });
 
     test('R[-2]C', () => {
-      expect(parseR1C1('R[-2]C', { row: 10, col: 10 })).toEqual(
+      expect(parseR1C1('R[-2]C', { row: 10, col: 10, sheetId: '' })).toEqual(
         new SheetRange(8, 10, 1, 1, ''),
       );
     });
     test('R[1]C10', () => {
-      expect(parseR1C1('R[1]C10', { row: 0, col: 0 })).toEqual(
+      expect(parseR1C1('R[1]C10', { row: 0, col: 0, sheetId: '' })).toEqual(
         new SheetRange(1, 9, 1, 1, ''),
       );
     });
     test('R[2]C[2]', () => {
-      expect(parseR1C1('R[2]C[2]', { row: 0, col: 0 })).toEqual(
-        new SheetRange(2, 2, 1, 1, ''),
-      );
+      expect(
+        parseR1C1('R[2]C[2]', { row: 0, col: 0, sheetId: 'test' }),
+      ).toEqual(new SheetRange(2, 2, 1, 1, 'test'));
     });
 
     test('RC', () => {
-      expect(parseR1C1('RC', { row: 0, col: 0 })).toEqual(
+      expect(parseR1C1('RC', { row: 0, col: 0, sheetId: '' })).toEqual(
         new SheetRange(0, 0, 1, 1, ''),
       );
     });

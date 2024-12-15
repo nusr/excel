@@ -1,24 +1,25 @@
-import type {
-  ModelJSON,
-  StyleType,
-  ChangeEventType,
-  IController,
-  IHooks,
-  IModel,
-  WorksheetType,
-  IWindowSize,
-  ScrollValue,
-  IRange,
-  ResultType,
-  ClipboardData,
-  DrawingElement,
-  IPosition,
-  DefinedNameItem,
-  WorksheetData,
-  EMergeCellType,
-  CustomClipboardData,
-  AutoFilterItem,
-  CanvasOverlayPosition,
+import {
+  type ModelJSON,
+  type StyleType,
+  type ChangeEventType,
+  type IController,
+  type IHooks,
+  type IModel,
+  type WorksheetType,
+  type IWindowSize,
+  type ScrollValue,
+  type IRange,
+  type ResultType,
+  type ClipboardData,
+  type DrawingElement,
+  type IPosition,
+  type DefinedNameItem,
+  type WorksheetData,
+  type EMergeCellType,
+  type CustomClipboardData,
+  type AutoFilterItem,
+  type CanvasOverlayPosition,
+  SYNC_FLAG,
 } from '../types';
 import {
   PLAIN_FORMAT,
@@ -27,7 +28,6 @@ import {
   convertToCssString,
   parseHTML,
   parseText,
-  generateUUID,
   ROW_TITLE_HEIGHT,
   COL_TITLE_WIDTH,
   convertPxToPt,
@@ -44,6 +44,7 @@ import {
 } from '../util';
 import { numberFormat, isDateFormat, convertDateToNumber } from '../formula';
 import { transaction } from './decorator';
+import { v4 } from 'uuid';
 
 const defaultScrollValue: Omit<ScrollValue, 'row' | 'col'> = {
   top: 0,
@@ -222,7 +223,6 @@ export class Controller implements IController {
     });
     this.emitChange();
   }
-  @transaction()
   setCurrentSheetId(id: string): void {
     this.model.setCurrentSheetId(id);
     this.changeSet.add('currentSheetId');
@@ -247,14 +247,20 @@ export class Controller implements IController {
     const result = this.model.addSheet();
     this.changeSet.add('workbook');
     this.changeSet.add('customHeight');
+    this.changeSet.add('currentSheetId');
     this.emitChange();
     return result;
+  }
+  @transaction(SYNC_FLAG.SKIP_UNDO_REDO)
+  addFirstSheet() {
+    return this.addSheet();
   }
   @transaction()
   deleteSheet(sheetId?: string) {
     this.model.deleteSheet(sheetId);
     this.changeSet.add('workbook');
     this.changeSet.add('customHeight');
+    this.changeSet.add('currentSheetId');
     this.emitChange();
   }
   @transaction()
@@ -269,6 +275,7 @@ export class Controller implements IController {
     this.model.hideSheet(sheetId);
     this.changeSet.add('workbook');
     this.changeSet.add('customHeight');
+    this.changeSet.add('currentSheetId');
     this.emitChange();
   }
   @transaction()
@@ -276,6 +283,7 @@ export class Controller implements IController {
     this.model.unhideSheet(sheetId);
     this.changeSet.add('workbook');
     this.changeSet.add('customHeight');
+    this.changeSet.add('currentSheetId');
     this.emitChange();
   }
   @transaction()
@@ -286,6 +294,15 @@ export class Controller implements IController {
   }
   @transaction()
   fromJSON(json: ModelJSON): void {
+    this.changeSet.add('currentSheetId');
+    this.changeSet.add('cellValue');
+    this.changeSet.add('cellStyle');
+    this.changeSet.add('definedNames');
+    this.changeSet.add('mergeCells');
+    this.changeSet.add('autoFilter');
+    this.changeSet.add('drawings');
+    this.changeSet.add('customHeight');
+    this.changeSet.add('customWidth');
     this.model.fromJSON(json);
   }
   toJSON(): ModelJSON {
@@ -715,7 +732,7 @@ export class Controller implements IController {
     }
     this.addDrawing({
       ...item,
-      uuid: generateUUID(),
+      uuid: v4(),
       marginX,
       marginY,
     });
@@ -798,7 +815,7 @@ export class Controller implements IController {
           originWidth: size.width,
           title: fileName,
           type: 'floating-picture',
-          uuid: generateUUID(),
+          uuid: v4(),
           imageSrc: base64,
           sheetId: range.sheetId,
           fromRow: range.row,

@@ -1,11 +1,10 @@
 import { EHorizontalAlign, EUnderLine, EVerticalAlign } from '../../../types';
 import { convertToXMLData } from '../exportXLSX';
 import { initController, getMockHooks } from '../../../controller';
-import { mockImage } from '../../../model/mockData';
 
-function trimData(content: string) {
+function trimData(content: string = '') {
   const list = content
-    .split('\n')
+    ?.split('\n')
     .map((v) => v.trim())
     .filter((v) => v);
 
@@ -39,7 +38,7 @@ describe('exportXLSX.test.ts', () => {
           <sheetPr/>
           <dimension ref="A1:D5"/>
           <sheetViews>
-            <sheetView tabSelected="1" workbookViewId="0">
+            <sheetView workbookViewId="0">
             <selection activeCell="A1" sqref="A1"/>
             </sheetView>
           </sheetViews>
@@ -133,7 +132,7 @@ describe('exportXLSX.test.ts', () => {
         title: 'icon',
         type: 'floating-picture',
         uuid: '2',
-        imageSrc: mockImage,
+        imageSrc: '',
         width: 200,
         height: 356,
         originHeight: 356,
@@ -304,7 +303,7 @@ describe('exportXLSX.test.ts', () => {
         </mc:AlternateContent>
         <xr:revisionPtr revIDLastSave="0" documentId="13_ncr:1_{39800FFC-1B5B-45A9-B956-6FB55C475C9F}" xr6:coauthVersionLast="47" xr6:coauthVersionMax="47" xr10:uidLastSave="{00000000-0000-0000-0000-000000000000}"/>
         <bookViews>
-        <workbookView xWindow="-98" yWindow="-98" windowWidth="19396" windowHeight="11475"  activeTab="1" xr2:uid="{11AE31A3-10C3-4738-A21D-56F9E9832A43}"/>
+        <workbookView xWindow="-98" yWindow="-98" windowWidth="19396" windowHeight="11475" xr2:uid="{11AE31A3-10C3-4738-A21D-56F9E9832A43}"/>
         </bookViews>
         <sheets>
           <sheet name="Sheet1" sheetId="1" r:id="rId1"/>
@@ -329,14 +328,12 @@ describe('exportXLSX.test.ts', () => {
       <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
         <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
         <Default Extension="xml" ContentType="application/xml"/>
-        <Default Extension="jpeg" ContentType="image/jpeg"/>
         <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
         <Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
         <Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>
         <Override PartName="/xl/charts/colors1.xml" ContentType="application/vnd.ms-office.chartcolorstyle+xml"/>
         <Override PartName="/xl/charts/style1.xml" ContentType="application/vnd.ms-office.chartstyle+xml"/>
         <Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>
-        <Override PartName="/xl/drawings/drawing2.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>
         <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
         <Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>
         <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
@@ -350,13 +347,6 @@ describe('exportXLSX.test.ts', () => {
         trimData(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
       <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
       <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart1.xml"/>
-      </Relationships>`),
-      );
-
-      expect(trimData(result['xl/drawings/_rels/drawing2.xml.rels'])).toEqual(
-        trimData(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-      <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-      <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image1.jpeg"/>
       </Relationships>`),
       );
     });

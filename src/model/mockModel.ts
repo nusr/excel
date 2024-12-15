@@ -1,21 +1,9 @@
-import {
-  ModelJSON,
-  EUnderLine,
-  EHorizontalAlign,
-  BorderItem,
-  BorderType,
-} from '../types';
+import { ModelJSON, EUnderLine, EHorizontalAlign } from '../types';
 import {
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
-  generateUUID,
-  isMobile,
   MERGE_CELL_LINE_BREAK,
-  coordinateToString,
-  BORDER_TYPE_MAP,
 } from '../util';
-import { mockImage } from './mockData';
-import { $ } from '../i18n';
 
 const MOCK_MODEL: ModelJSON = {
   currentSheetId: '',
@@ -376,72 +364,5 @@ const MOCK_MODEL: ModelJSON = {
   },
   scroll: {},
 };
-
-if (!isMobile()) {
-  const imageUuid = generateUUID();
-  MOCK_MODEL.drawings[imageUuid] = {
-    title: 'Black Myth: Wukong',
-    type: 'floating-picture',
-    uuid: imageUuid,
-    imageSrc: mockImage,
-    width: 200,
-    height: 125,
-    originHeight: 125,
-    originWidth: 200,
-    sheetId: '2',
-    fromCol: 1,
-    fromRow: 1,
-    marginX: 0,
-    marginY: 0,
-  };
-  const chartUuid = generateUUID();
-  MOCK_MODEL.drawings[chartUuid] = {
-    title: $('chart-title'),
-    type: 'chart',
-    uuid: chartUuid,
-    width: 400,
-    height: 250,
-    originHeight: 250,
-    originWidth: 400,
-    marginX: 0,
-    marginY: 0,
-    sheetId: '4',
-    fromCol: 4,
-    fromRow: 4,
-    chartType: 'bar',
-    chartRange: {
-      row: 6,
-      col: 6,
-      colCount: 3,
-      rowCount: 3,
-      sheetId: '4',
-    },
-  };
-}
-
-// for (let i = 0; i < numberFormatOptionList.length; i++) {
-//   const item = numberFormatOptionList[i];
-//   const key = coordinateToString(i, 0);
-//   MOCK_MODEL.worksheets[`9_${key}`] = {
-//     value: i + 1,
-//     numberFormat: String(item.value),
-//   };
-// }
-
-const typeList = Object.keys(BORDER_TYPE_MAP) as BorderType[];
-for (let i = 0; i < typeList.length; i++) {
-  const key = coordinateToString(i, i);
-  const item: BorderItem = {
-    type: typeList[i],
-    color: '',
-  };
-  MOCK_MODEL.worksheets[`10_${key}`] = {
-    value: '',
-    borderLeft: item,
-    borderRight: item,
-    borderTop: item,
-    borderBottom: item,
-  };
-}
 
 export { MOCK_MODEL };

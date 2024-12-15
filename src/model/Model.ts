@@ -135,6 +135,9 @@ export class Model implements IModel {
       'redo',
       'scroll',
       'rangeMap',
+      'currentSheetId',
+      'customHeight',
+      'customWidth'
     ];
 
     for (const item of localChangeList) {

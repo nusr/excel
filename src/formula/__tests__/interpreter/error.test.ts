@@ -17,7 +17,7 @@ import { expectFormula } from './util';
 function interpret(list: Expression[]) {
   return new Interpreter(
     list,
-    { row: 0, col: 0 },
+    { row: 0, col: 0, sheetId: '' },
     new CellDataMapImpl(),
   ).interpret();
 }
@@ -51,9 +51,7 @@ describe('error.test.ts', () => {
       }).toThrow();
 
       expect(() => {
-        interpret([
-          new LiteralExpression(new Token(TokenType.COLUMN, 'aa')),
-        ]);
+        interpret([new LiteralExpression(new Token(TokenType.COLUMN, 'aa'))]);
       }).toThrow();
     });
 

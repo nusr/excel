@@ -24,7 +24,7 @@ const controller = initController({
   worker: workerInstance,
   doc,
 });
-controller.addSheet();
+controller.addFirstSheet();
 (window as any).controller = controller;
 (window as any).doc = doc;
 

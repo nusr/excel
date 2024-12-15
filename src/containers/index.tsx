@@ -33,7 +33,7 @@ export function useCollaboration() {
       if (result.length > 0) {
         applyUpdate(provider.doc, result);
       } else if (controller.getSheetList().length === 0) {
-        controller.addSheet();
+        controller.addFirstSheet();
       }
       setIsLoading(false);
     }

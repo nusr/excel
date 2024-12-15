@@ -8,7 +8,7 @@ import {
 } from '../util';
 import { TokenType } from '../types';
 
-import type { CellDataMap, ResultType, IRange, Coordinate } from '../types';
+import type { CellDataMap, ResultType, IRange } from '../types';
 import type {
   Visitor,
   Expression,
@@ -29,10 +29,10 @@ import { CustomError } from './formula';
 export class Interpreter implements Visitor {
   private readonly expressions: Expression[];
   private readonly cellDataMap: CellDataMap;
-  private currentCoord: Coordinate;
+  private currentCoord: Pick<IRange, 'sheetId' | 'row' | 'col'>;
   constructor(
     expressions: Expression[],
-    currentCoord: Coordinate,
+    currentCoord: Pick<IRange, 'sheetId' | 'row' | 'col'>,
     cellDataMap: CellDataMap,
   ) {
     this.expressions = expressions;
@@ -258,6 +258,7 @@ export class Interpreter implements Visitor {
       const r = this.cellDataMap.handleCell(t, {
         row: range.row,
         col: range.col,
+        sheetId: range.sheetId,
       });
       result = result.concat(r);
       return result;
@@ -275,7 +276,7 @@ export class Interpreter implements Visitor {
         colCount: 1,
         sheetId,
       });
-      const a = this.cellDataMap.handleCell(t, { row: r, col: c });
+      const a = this.cellDataMap.handleCell(t, { row: r, col: c, sheetId });
       result = result.concat(a);
       return false;
     });

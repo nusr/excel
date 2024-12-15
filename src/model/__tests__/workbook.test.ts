@@ -83,7 +83,7 @@ describe('workbook.test.ts', () => {
         currentSheetId: undefined,
       } as unknown as ModelJSON);
       const jsonData = model.toJSON();
-      expect(jsonData.currentSheetId).toEqual('1');
+      expect(jsonData.currentSheetId).toEqual('');
       expect(jsonData.workbook).toEqual({
         '1': {
           sheetId: '1',

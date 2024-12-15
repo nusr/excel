@@ -1,4 +1,4 @@
-import { IBaseModel, ScrollValue } from './model';
+import { IBaseModel, ScrollValue, WorksheetType } from './model';
 import { CanvasOverlayPosition } from './components';
 import { IRange } from './range';
 import { IWindowSize, IPosition, WorkerMethod } from './event';
@@ -52,6 +52,7 @@ export interface IController extends IBaseModel {
   getHeaderSize(): IWindowSize;
   setCanvasSize(size: CanvasOverlayPosition): void;
   getCanvasSize(): CanvasOverlayPosition;
+  addFirstSheet(): WorksheetType | undefined;
 }
 
 export type CustomClipboardData = {

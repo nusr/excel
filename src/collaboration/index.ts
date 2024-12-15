@@ -31,7 +31,7 @@ export function initCollaboration(doc: Y.Doc) {
 }
 
 export function applyUpdate(doc: Y.Doc, result: Uint8Array[]) {
-  Y.applyUpdate(doc, Y.mergeUpdates(result), SYNC_FLAG.SKIP_UPDATE);
+  Y.applyUpdate(doc, Y.mergeUpdates(result), SYNC_FLAG.SKIP_UNDO_REDO_UPDATE);
 }
 
 export { CollaborationProvider };

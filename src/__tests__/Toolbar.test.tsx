@@ -83,10 +83,10 @@ describe('Toolbar.test.ts', () => {
   });
   describe('undo', () => {
     test('normal', () => {
-      expect(screen.getByTestId('toolbar-undo')).not.toBeDisabled();
+      expect(screen.getByTestId('toolbar-undo')).toBeDisabled();
     });
-    test('able', () => {
-      fireEvent.click(screen.getByTestId('toolbar-bold'));
+    test('able', async () => {
+      await type('test');
       expect(screen.getByTestId('toolbar-undo')).not.toBeDisabled();
 
       fireEvent.click(screen.getByTestId('toolbar-undo'));
@@ -98,9 +98,9 @@ describe('Toolbar.test.ts', () => {
     test('normal', () => {
       expect(screen.getByTestId('toolbar-redo')).toBeDisabled();
     });
-    test('able', () => {
+    test('able', async () => {
       expect(screen.getByTestId('toolbar-redo')).toBeDisabled();
-      fireEvent.click(screen.getByTestId('toolbar-bold'));
+      await type('test');
       fireEvent.click(screen.getByTestId('toolbar-undo'));
       expect(screen.getByTestId('toolbar-redo')).not.toBeDisabled();
       fireEvent.click(screen.getByTestId('toolbar-redo'));

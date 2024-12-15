@@ -104,7 +104,7 @@ describe('model.test.ts', () => {
     model.fromJSON(json);
     const result: ModelJSON = {
       scroll: {},
-      currentSheetId: '1',
+      currentSheetId: '',
       workbook: {
         '1': {
           sheetId: '1',

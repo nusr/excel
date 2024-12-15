@@ -1,5 +1,4 @@
 import {
-  Coordinate,
   IRange,
   WorksheetType,
   ModelCellType,
@@ -60,7 +59,7 @@ export interface CellDataMap {
   getDefinedName: (name: string) => SheetRange | undefined;
   handleCell: (
     value: ModelCellType | undefined,
-    coord: Coordinate,
+    coord: Pick<IRange, 'sheetId' | 'row' | 'col'>,
   ) => ResultType[];
   getFunction: (name: string) => FormulaFunction | undefined;
 }

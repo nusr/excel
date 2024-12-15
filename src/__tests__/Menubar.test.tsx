@@ -64,7 +64,7 @@ describe('Menubar.test.ts', () => {
 test('change i18n', () => {
   let result: RenderResult;
   const controller = initController(getMockHooks());
-  controller.addSheet();
+  controller.addFirstSheet();
   act(() => {
     result = render(
       <StateContext

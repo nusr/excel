@@ -1,5 +1,5 @@
 import { columnNameToInt, rowLabelToInt, intToColumnName } from './convert';
-import { Coordinate, IRange, ReferenceType } from '../types';
+import { IRange, ReferenceType } from '../types';
 import { SheetRange } from './range';
 import { XLSX_MAX_COL_COUNT, XLSX_MAX_ROW_COUNT } from './constant';
 
@@ -184,7 +184,11 @@ function parseNumber(text: string, num: number) {
 
 export function parseR1C1(
   name: string,
-  activeCell: Coordinate = { row: -1, col: -1 },
+  activeCell: Pick<IRange, 'sheetId' | 'row' | 'col'> = {
+    row: -1,
+    col: -1,
+    sheetId: '',
+  },
 ): SheetRange | undefined {
   const text = name.toUpperCase();
   if (text[0] !== 'R') {
@@ -215,6 +219,6 @@ export function parseR1C1(
   ) {
     return undefined;
   }
-  const range = new SheetRange(row, col, 1, 1, '');
+  const range = new SheetRange(row, col, 1, 1, activeCell.sheetId);
   return range;
 }

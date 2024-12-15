@@ -115,7 +115,7 @@ describe('importXLSX.test.ts', () => {
           '2_3': { len: 350, isHide: false },
         },
         definedNames: {},
-        currentSheetId: '6',
+        currentSheetId: '',
         drawings: {
           '1': {
             title: 'Picture 2',

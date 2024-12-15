@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { isMac } from '../util';
 import './global.mock';
 import { IController } from '../types';
-import { renderComponent } from './util';
+import { renderComponent, type } from './util';
 
 const commandKey = `${isMac() ? 'meta' : 'ctrl'}Key`;
 
@@ -251,6 +251,7 @@ describe('shortcut.test.tsx', () => {
 
   describe('undo', () => {
     test('ok', async () => {
+      await type('test');
       expect(screen.getByTestId('toolbar-undo')).not.toBeDisabled();
 
       fireEvent.keyDown(document.body, { key: 'z', [commandKey]: true });

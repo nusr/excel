@@ -29,7 +29,7 @@ export function extractDataFromTransform(
 
 export function renderComponent() {
   const controller = initController(getMockHooks());
-  controller.addSheet();
+  controller.addFirstSheet();
   act(() => {
     render(
       <StateContext

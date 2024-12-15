@@ -17,17 +17,16 @@ import type {
   RequestFormulas,
   ResponseFormulas,
 } from '../types';
-import {
-  isFormula,
-  stringToCoordinate,
-  getWorksheetKey,
-  convertWorksheetKey,
-} from '../util';
+import { isFormula, getWorksheetKey, convertWorksheetKey } from '../util';
 import { SheetRange } from '../util';
 
 export function parseFormula(
   formula: string,
-  currentCoord: Coordinate = { row: 0, col: 0 },
+  currentCoord: Pick<IRange, 'sheetId' | 'row' | 'col'> = {
+    row: 0,
+    col: 0,
+    sheetId: '',
+  },
   cellData: CellDataMap = new CellDataMapImpl(),
   cache: Map<string, InterpreterResult> = new Map<string, InterpreterResult>(),
 ): InterpreterResult {
@@ -42,7 +41,7 @@ export function parseFormula(
   try {
     cellData.handleCell = (
       value: ModelCellType | undefined,
-      coord: Coordinate,
+      coord: Pick<IRange, 'sheetId' | 'row' | 'col'>,
     ): ResultType[] => {
       if (value) {
         if (value.formula) {
@@ -206,12 +205,7 @@ export function computeFormulas(
     if (!range || range.sheetId !== currentSheetId || !data?.formula) {
       continue;
     }
-    const temp = parseFormula(
-      data?.formula,
-      stringToCoordinate(k),
-      cellDataMap,
-      formulaCache,
-    );
+    const temp = parseFormula(data?.formula, range, cellDataMap, formulaCache);
     if (!temp) {
       continue;
     }

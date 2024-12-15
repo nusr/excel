@@ -1,13 +1,9 @@
 import React, { useRef, memo, useCallback } from 'react';
 import { Button, toast } from '../../components';
-import {
-  generateUUID,
-  getImageSize,
-  convertFileToTextOrBase64,
-  toIRange,
-} from '../../util';
+import { getImageSize, convertFileToTextOrBase64, toIRange } from '../../util';
 import { $ } from '../../i18n';
 import { useExcel } from '../store';
+import { v4 } from 'uuid';
 
 export const InsertFloatingPicture = memo(() => {
   const { controller, provider } = useExcel();
@@ -59,7 +55,7 @@ export const InsertFloatingPicture = memo(() => {
         originWidth: size.width,
         title: fileName,
         type: 'floating-picture',
-        uuid: generateUUID(),
+        uuid: v4(),
         imageSrc,
         sheetId: range.sheetId,
         fromRow: range.row,
@@ -99,7 +95,7 @@ export const InsertChart = memo(() => {
       originWidth: 400,
       title: $('chart-title'),
       type: 'chart',
-      uuid: generateUUID(),
+      uuid: v4(),
       sheetId: range.sheetId,
       fromRow: range.row,
       fromCol: range.col,

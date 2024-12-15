@@ -344,7 +344,7 @@ describe('controller.test.ts', () => {
       });
       const result: ModelJSON = {
         scroll: {},
-        currentSheetId: sheetId,
+        currentSheetId: '',
         rangeMap: {
           [sheetId]: { row: 3, col: 3, rowCount: 1, colCount: 1, sheetId },
         },

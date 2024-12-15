@@ -19,14 +19,12 @@ import * as Y from 'yjs';
 
 export class Workbook implements IWorkbook {
   private model: IModel;
+  private currentSheetId: string = '';
   constructor(model: IModel) {
     this.model = model;
   }
   private get workbook() {
     return this.model.getRoot().get('workbook');
-  }
-  private get currentSheetId(): string {
-    return this.model.getRoot().get('currentSheetId') || '';
   }
   validateSheet(data: WorksheetType): boolean {
     if (!data) {
@@ -74,7 +72,7 @@ export class Workbook implements IWorkbook {
     this.setCurrentSheetId(newSheetId);
   }
   updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string) {
-    const id = sheetId || this.currentSheetId;
+    const id = sheetId || this.getCurrentSheetId();
     const sheetInfo = this.workbook?.get(id);
     if (!sheetInfo) {
       return;
@@ -117,7 +115,7 @@ export class Workbook implements IWorkbook {
   }
 
   deleteSheet(sheetId?: string): void {
-    const id = sheetId || this.currentSheetId;
+    const id = sheetId || this.getCurrentSheetId();
     if (this.checkSheetSize(sheetId)) {
       this.workbook?.delete(id);
     }
@@ -135,7 +133,7 @@ export class Workbook implements IWorkbook {
       toast.error($('the-value-cannot-be-empty'));
       return;
     }
-    const id = sheetId || this.currentSheetId;
+    const id = sheetId || this.getCurrentSheetId();
     const sheetList = this.getSheetList();
     const item = sheetList.find((v) => v.name === sheetName);
     if (item) {
@@ -148,7 +146,7 @@ export class Workbook implements IWorkbook {
     this.updateSheetInfo({ name: sheetName }, id);
   }
   getSheetInfo(id?: string): WorksheetType | undefined {
-    const sheetId = id || this.currentSheetId;
+    const sheetId = id || this.getCurrentSheetId();
     const item = this.workbook?.get(sheetId);
     if (!item) {
       return undefined;
@@ -156,26 +154,20 @@ export class Workbook implements IWorkbook {
     return { ...item.toJSON() };
   }
   setCurrentSheetId(newSheetId: string): void {
-    if (!newSheetId || !this.workbook?.get(newSheetId)) {
-      return;
-    }
-    if (this.currentSheetId !== newSheetId) {
-      this.model.getRoot().set('currentSheetId', newSheetId);
+    if (this.workbook?.get(newSheetId)) {
+      this.currentSheetId = newSheetId;
     }
   }
-  getCurrentSheetId() {
-    const sheetId = this.currentSheetId;
-    if (!this.workbook) {
-      if (sheetId) {
-        this.model.getRoot().set('currentSheetId', '');
-      }
-      return '';
+  getCurrentSheetId(): string {
+    if (this.workbook?.get(this.currentSheetId)) {
+      return this.currentSheetId;
     }
-    if (!this.workbook?.get(sheetId)) {
-      this.model.getRoot().set('currentSheetId', '');
-      return '';
+    const sheetId = this.getSheetId();
+    if (sheetId) {
+      this.currentSheetId = sheetId;
+      return sheetId;
     }
-    return sheetId;
+    return '';
   }
 
   private getSheetId(): string | undefined {
@@ -187,7 +179,7 @@ export class Workbook implements IWorkbook {
     this.deleteSheet(sheetId);
   }
   private checkSheetSize(sheetId?: string) {
-    const id = sheetId || this.currentSheetId;
+    const id = sheetId || this.getCurrentSheetId();
     if (!this.workbook?.get(id)) {
       return false;
     }
