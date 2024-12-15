@@ -49,8 +49,8 @@
     "vite-plugin-dts": "4.3.0"
   },
   "dependencies": {
-    "@sentry/react": "8.43.0",
-    "@supabase/supabase-js": "2.47.5",
+    "@sentry/react": "8.45.0",
+    "@supabase/supabase-js": "2.47.7",
     "chart.js": "4.4.7",
     "comlink": "4.4.2",
     "dexie": "4.0.10",

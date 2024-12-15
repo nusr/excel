@@ -25,7 +25,16 @@
 }
 .user {
   display: flex;
+  align-items: center;
 }
-.user > div {
+
+.status {
   margin-right: var(--mediumPadding);
+  margin-left: var(--mediumPadding);
+  font-size: 20px;
+}
+
+.file {
+  margin-right: var(--mediumPadding);
+  cursor: pointer;
 }

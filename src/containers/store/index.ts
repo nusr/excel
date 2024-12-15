@@ -12,3 +12,4 @@ export { styleStore } from './style';
 export type { StyleStoreType } from './style';
 export { StateContext, useExcel, type StateContextValue } from './context';
 export { userStore } from './user';
+export { fileStore, type FileStoreType } from './file';

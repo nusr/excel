@@ -32,12 +32,7 @@
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "experimentalDecorators": true,
-    "outDir": "dist",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
+    "outDir": "dist"
   },
   "exclude": [
     "node_modules",

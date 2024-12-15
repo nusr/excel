@@ -83,7 +83,7 @@ export type ModelJSON = Convert<YjsModelJson>;
 export type ModelRoot = TypedMap<YjsModelJson>;
 
 export enum ProviderStatus {
-  ONLINE = 'Connect',
-  LOCAL = 'Local',
-  SYNCING = 'Syncing',
+  ONLINE = 'connection',
+  LOCAL = 'disconnection',
+  SYNCING = 'syncing',
 }

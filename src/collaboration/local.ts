@@ -17,7 +17,7 @@ export class DocumentDB extends Dexie {
   readonly history!: Table<HistoryItem, number>;
   constructor() {
     super('excel');
-    this.version(2).stores({
+    this.version(3).stores({
       document: 'id',
       history: '++id, doc_id',
     });
@@ -34,6 +34,9 @@ export class DocumentDB extends Dexie {
   }
   updateDocument(docId: string, name: string) {
     return this.document.update(docId, { name });
+  }
+  getDocument(docId: string) {
+    return this.document.get(docId);
   }
   addDocument(docId: string, name: string, sync = false) {
     return this.document.add({

@@ -10,6 +10,7 @@ import { saveAs } from '../../util';
 import { useExcel } from '../store';
 import { User } from './User';
 import { ProviderStatus } from '../../types';
+import { File } from './File';
 
 type Props = {
   providerStatus?: ProviderStatus;
@@ -71,6 +72,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
     return (
       <div className={styles['menubar-container']} data-testid="menubar">
         <div className={styles['menubar-menu']}>
+          <File />
           <Menu
             label={$('file')}
             className={styles.menu}
@@ -112,7 +114,6 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
             </MenuItem>
           </Menu>
         </div>
-
         <User providerStatus={providerStatus} />
         <I18N />
         <Theme />

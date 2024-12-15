@@ -103,5 +103,8 @@
   "filter": "Filter",
   "filter-empty": "(empty)",
   "filter-all": "All",
-  "new-file": "New File"
+  "new-file": "New File",
+  "default-name": "default name",
+  "change-file-name": "Change File Name",
+  "user-name": "User"
 }

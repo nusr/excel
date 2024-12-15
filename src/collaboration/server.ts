@@ -3,7 +3,7 @@ import {
   RealtimeChannel,
   REALTIME_LISTEN_TYPES,
 } from '@supabase/supabase-js';
-import type { Database } from './type';
+import type { Database, DocumentItem } from './type';
 import { SYNC_FLAG, IRange, UserItem } from '../types';
 import { collaborationLog, eventEmitter, omit } from '../util';
 import * as Y from 'yjs';
@@ -39,10 +39,16 @@ export class CollaborationProvider {
     if (typeof indexedDB !== 'undefined') {
       this.localDB = new DocumentDB();
     }
-    this.broadcastChannel = new BroadcastChannel(this.doc.guid);
+    this.broadcastChannel = new BroadcastChannel(this.docId);
     this.awareness = new awarenessProtocol.Awareness(doc);
     this.onConnect();
     this.subscribe();
+  }
+  private get clientID() {
+    return this.doc.clientID;
+  }
+  private get docId() {
+    return this.doc.guid;
   }
 
   isOnline = () => {
@@ -64,7 +70,7 @@ export class CollaborationProvider {
         }>,
       ) => {
         const { update, type, clientID } = event.data;
-        if (this.isOnline() || this.doc.clientID === clientID) {
+        if (this.isOnline() || this.clientID === clientID) {
           return;
         }
         collaborationLog('onmessage', event);
@@ -75,10 +81,10 @@ export class CollaborationProvider {
     this.channel
       ?.on(
         REALTIME_LISTEN_TYPES.BROADCAST,
-        { event: this.doc.guid },
+        { event: this.docId },
         (payload) => {
           const { update, clientID, type } = payload?.payload || {};
-          if (!update || this.doc.clientID === clientID) {
+          if (!update || this.clientID === clientID) {
             return;
           }
           collaborationLog('subscribe:', payload);
@@ -103,7 +109,7 @@ export class CollaborationProvider {
       }
       const users: UserItem[] = [];
       for (const [key, value] of list.entries()) {
-        if (key === this.doc.clientID) {
+        if (key === this.clientID) {
           continue;
         }
         users.push({ range: value.range as IRange, clientId: key });
@@ -120,7 +126,7 @@ export class CollaborationProvider {
   private applyUpdate(update: Uint8Array, type: EventType) {
     if (type === 'message') {
       Y.applyUpdate(this.doc, update, SYNC_FLAG.SKIP_UPDATE);
-    } else {
+    } else if (type === 'awareness') {
       awarenessProtocol.applyAwarenessUpdate(this.awareness, update, this);
     }
   }
@@ -128,19 +134,19 @@ export class CollaborationProvider {
     if (this.awareness.getLocalState() !== null) {
       const awarenessUpdate = awarenessProtocol.encodeAwarenessUpdate(
         this.awareness,
-        [this.doc.clientID],
+        [this.clientID],
       );
       this.broadcastChannel.postMessage({
         update: awarenessUpdate,
         type: 'awareness',
-        clientId: this.doc.clientID,
+        clientId: this.clientID,
       });
     }
   }
   private readonly onDisconnect = () => {
     awarenessProtocol.removeAwarenessStates(
       this.awareness,
-      [this.doc.clientID],
+      [this.clientID],
       this,
     );
   };
@@ -158,7 +164,7 @@ export class CollaborationProvider {
     if (!this.isOnline()) {
       this.broadcastChannel.postMessage({
         update,
-        clientID: this.doc.clientID,
+        clientID: this.clientID,
         type,
       });
       return;
@@ -166,8 +172,8 @@ export class CollaborationProvider {
     const result = uint8ArrayToString(update);
     const real = await this.channel?.send({
       type: REALTIME_LISTEN_TYPES.BROADCAST,
-      event: this.doc.guid,
-      payload: { update: result, clientID: this.doc.clientID, type },
+      event: this.docId,
+      payload: { update: result, clientID: this.clientID, type },
     });
     collaborationLog('channel send', real);
   }
@@ -175,25 +181,26 @@ export class CollaborationProvider {
   async addHistory(update: Uint8Array) {
     this.postMessage(update, 'message');
     if (!this.isOnline()) {
-      await this.localDB?.addHistory(this.doc.guid, update);
+      await this.localDB?.addHistory(this.docId, update);
       return;
     }
     const result = uint8ArrayToString(update);
     const r = await this.remoteDB
       ?.from('history')
-      .insert([{ doc_id: this.doc.guid, update: result }]);
+      .insert([{ doc_id: this.docId, update: result }]);
     collaborationLog('db insert', r);
-    await this.localDB?.addHistory(this.doc.guid, update, true);
+    await this.localDB?.addHistory(this.docId, update, true);
   }
-  async retrieveHistory() {
+
+  async retrieveHistory(): Promise<Uint8Array[]> {
     if (!this.isOnline()) {
-      const list = await this.localDB?.getAllHistory(this.doc.guid);
-      return list?.map((item) => stringToUint8Array(item.update));
+      const list = await this.localDB?.getAllHistory(this.docId);
+      return list?.map((item) => stringToUint8Array(item.update)) || [];
     }
     const result = await this.remoteDB
       ?.from('history')
       .select('*')
-      .eq('doc_id', this.doc.guid)
+      .eq('doc_id', this.docId)
       .order('create_time', { ascending: false });
     collaborationLog('retrieveHistory', result);
     const list = (result?.data || []).map((v) => stringToUint8Array(v.update));
@@ -246,7 +253,10 @@ export class CollaborationProvider {
       await this.localDB?.addDocument(docId, '');
       return docId;
     }
-    const r = await this.remoteDB?.from('document').insert([{ name: '' }]).select();
+    const r = await this.remoteDB
+      ?.from('document')
+      .insert([{ name: '' }])
+      .select();
     collaborationLog('db addDocument', r);
     // @ts-ignore
     const docId = r.data?.[0].id as string;
@@ -254,13 +264,20 @@ export class CollaborationProvider {
   }
   async updateDocument(name: string): Promise<void> {
     if (!this.isOnline()) {
-      await this.localDB?.updateDocument(this.doc.guid, name);
+      await this.localDB?.updateDocument(this.docId, name);
       return;
     }
-    await this.remoteDB
+    await this.remoteDB?.from('document').update({ name }).eq('id', this.docId);
+  }
+  async getDocument(): Promise<DocumentItem | undefined> {
+    if (!this.isOnline()) {
+      return await this.localDB?.getDocument(this.docId);
+    }
+    const result = await this.remoteDB
       ?.from('document')
-      .update({ name })
-      .eq('id', this.doc.guid);
+      .select('*')
+      .eq('id', this.docId);
+    return result?.data?.[0];
   }
   syncRange(range: IRange) {
     this.awareness.setLocalStateField('range', range);

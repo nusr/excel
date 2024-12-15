@@ -1,9 +1,4 @@
-import {
-  IController,
-  KeyboardEventItem,
-  EditorStatus,
-  IRange,
-} from '../types';
+import { IController, KeyboardEventItem, EditorStatus, IRange } from '../types';
 import {
   isTestEnv,
   throttle,
@@ -21,9 +16,13 @@ type EventType = {
   };
 };
 
-function isInputEvent(event: Event): boolean {
-  const name = (event as EventType)?.target?.tagName?.toLowerCase();
-  return name === 'input' || name === 'textarea';
+function isInputEvent(event: any): boolean {
+  const targetName = event?.target?.tagName?.toLowerCase() || '';
+  const currentTargetName = event?.currentTarget?.tagName?.toLowerCase() || '';
+  return (
+    ['input', 'textarea'].includes(targetName) &&
+    ['input', 'textarea'].includes(currentTargetName)
+  );
 }
 
 export function registerGlobalEvent(

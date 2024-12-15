@@ -103,5 +103,8 @@
   "filter-empty": "(空)",
   "filter-all": "全部",
   "sheet-is-not-exist": "工作表不存在",
-  "new-file": "新建文件"
+  "new-file": "新建文件",
+  "default-name": "默认名称",
+  "change-file-name": "修改文件名称",
+  "user-name": "用户"
 }

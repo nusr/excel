@@ -5,7 +5,7 @@ import ToolbarContainer from './ToolBar';
 import CanvasContainer from './canvas';
 import SheetBarContainer from './SheetBar';
 import MenuBarContainer from './MenuBar';
-import { useExcel, userStore } from './store';
+import { useExcel, userStore, fileStore } from './store';
 import { applyUpdate } from '../collaboration';
 import { Loading } from '../components';
 import { eventEmitter } from '../util';
@@ -18,19 +18,26 @@ export function useCollaboration() {
   );
   const { provider, controller } = useExcel();
   useEffect(() => {
-    setIsLoading(true);
-    provider
-      ?.retrieveHistory()
-      .then((result = []) => {
-        if (result.length > 0) {
-          applyUpdate(provider.doc, result);
-        } else if (controller.getSheetList().length === 0) {
-          controller.addSheet();
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
+    async function init() {
+      if (!provider) {
+        return;
+      }
+      setIsLoading(true);
+      const file = await provider?.getDocument();
+      fileStore.setState({
+        id: file?.id ?? '',
+        name: file?.name ?? '',
+        clientId: provider.doc.clientID,
       });
+      const result = await provider?.retrieveHistory();
+      if (result.length > 0) {
+        applyUpdate(provider.doc, result);
+      } else if (controller.getSheetList().length === 0) {
+        controller.addSheet();
+      }
+      setIsLoading(false);
+    }
+    init();
   }, [provider, controller]);
 
   useEffect(() => {
