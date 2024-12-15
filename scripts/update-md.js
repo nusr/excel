@@ -17,7 +17,6 @@ function updateFormula() {
   for (const item of fileList) {
     const filePath = path.join(FORMULA_DIR, item);
     const text = fs.readFileSync(filePath, 'utf-8');
-    console.log(text);
     let start = text.indexOf(PREFIX_TEXT);
     if (start <= 0) {
       continue;
@@ -32,7 +31,6 @@ function updateFormula() {
       end++;
     }
     const temp = text.slice(start + 1, end);
-    console.log(temp);
     const keyList = temp
       .trim()
       .split('\n')

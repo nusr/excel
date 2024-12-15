@@ -156,18 +156,16 @@ export class Workbook implements IWorkbook {
   setCurrentSheetId(newSheetId: string): void {
     if (this.workbook?.get(newSheetId)) {
       this.currentSheetId = newSheetId;
+    } else {
+      this.currentSheetId = this.getSheetId() || '';
     }
   }
   getCurrentSheetId(): string {
     if (this.workbook?.get(this.currentSheetId)) {
       return this.currentSheetId;
     }
-    const sheetId = this.getSheetId();
-    if (sheetId) {
-      this.currentSheetId = sheetId;
-      return sheetId;
-    }
-    return '';
+    this.currentSheetId = this.getSheetId() || '';
+    return this.currentSheetId;
   }
 
   private getSheetId(): string | undefined {
