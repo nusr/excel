@@ -1,11 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const FORMULA_DIR = path.join(process.cwd(), './packages/formula/src/formula');
-const PREFIX_TEXT = 'const formulas:';
+const FORMULA_DIR = path.join(process.cwd(), './src/formula/formula');
+const PREFIX_TEXT = 'const formulas = ';
 const FORMULA_TAG = '## Supported Formulas';
 const MD_PATH = path.join(process.cwd(), 'README.md');
-const ENCODE = 'utf-8';
 
 function updateFormula() {
   if (!fs.existsSync(FORMULA_DIR)) {
@@ -17,11 +16,8 @@ function updateFormula() {
 
   for (const item of fileList) {
     const filePath = path.join(FORMULA_DIR, item);
-    const result = fs.lstatSync(filePath);
-    if (result.isDirectory()) {
-      continue;
-    }
-    const text = fs.readFileSync(filePath, ENCODE);
+    const text = fs.readFileSync(filePath, 'utf-8');
+    console.log(text);
     let start = text.indexOf(PREFIX_TEXT);
     if (start <= 0) {
       continue;
@@ -36,6 +32,7 @@ function updateFormula() {
       end++;
     }
     const temp = text.slice(start + 1, end);
+    console.log(temp);
     const keyList = temp
       .trim()
       .split('\n')
@@ -55,7 +52,7 @@ function updateFormula() {
     const v = formulaMap[key].map((item) => `- [x] ${item}`).join('\n');
     list.push(`### ${t}\n\n${v}`);
   }
-  const oldText = fs.readFileSync(MD_PATH, ENCODE);
+  const oldText = fs.readFileSync(MD_PATH, 'utf-8');
   const index = oldText.indexOf(FORMULA_TAG);
   const mdText = `${oldText.slice(
     0,
