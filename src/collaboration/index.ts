@@ -18,7 +18,10 @@ export function shouldSkipUpdate(
 }
 
 export function initCollaboration(doc: Y.Doc) {
-  const provider = new CollaborationProvider(doc);
+  const url = import.meta.env.VITE_SUPABASE_URL ?? '';
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
+
+  const provider = new CollaborationProvider(doc, url, key);
   doc.on('update', (update: Uint8Array, _b, _c, tran) => {
     if (shouldSkipUpdate(tran, provider)) {
       return;

@@ -18,7 +18,7 @@ import {
   KEY_LIST,
   isTestEnv,
 } from '../../util';
-import { getThemeColor, sizeConfig } from '../../theme';
+import { getThemeColor } from '../../theme';
 import {
   coreStore,
   CoreStore,
@@ -300,17 +300,19 @@ const handleStateChange = (
 };
 
 function computeCanvasSize(canvas: HTMLCanvasElement) {
-  const scrollbarSize = parseInt(sizeConfig.largePadding, 10);
+  const scrollbarSize = 20;
   const dom = canvas.parentElement;
   if (!dom) {
     return null;
   }
   const size = dom.getBoundingClientRect();
+  const width = dom.clientWidth - scrollbarSize;
+  const height = dom.clientHeight - scrollbarSize;
   const result = {
     top: size.top,
     left: size.left,
-    width: dom.clientWidth - scrollbarSize,
-    height: dom.clientHeight - scrollbarSize,
+    width,
+    height,
   };
   return result;
 }

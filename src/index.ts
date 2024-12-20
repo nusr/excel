@@ -12,3 +12,5 @@ export * from './types';
 export function initDoc(...params: ConstructorParameters<typeof Y.Doc>) {
   return new Y.Doc(...params);
 }
+
+export const version = process.env.VERSION;

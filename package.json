@@ -1,6 +1,28 @@
 {
-  "name": "excel-root",
-  "version": "0.0.0",
+  "name": "excel-collab",
+  "version": "0.0.1",
+  "description": "Online Collaboration Excel",
+  "author": "Steve Xu <stevexugc@gmail.com>",
+  "bugs": "https://github.com/nusr/excel/issues",
+  "homepage": "https://github.com/nusr/excel",
+  "repository": "git+https://github.com/nusr/excel.git",
+  "license": "MIT",
+  "main": "./lib/excel.js",
+  "module": "./lib/excel.mjs",
+  "types": "./lib/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/src/index.d.ts",
+      "import": "./lib/excel.mjs",
+      "require": "./lib/excel.js"
+    },
+    "./worker": {
+      "types": "./lib/src/worker.d.ts",
+      "import": "./lib/worker.mjs",
+      "require": "./lib/worker.js"
+    },
+    "./style.css": "./lib/style.css"
+  },
   "scripts": {
     "start": "npm run dev",
     "dev": "vite --force --host --port 3000",
@@ -8,6 +30,7 @@
     "e2e": "playwright test",
     "e2e:ui": "npm run e2e --ui",
     "build": "vite build",
+    "build:lib": "vite build --mode lib",
     "test": "jest --config ./jest.config.js --forceExit --detectOpenHandles",
     "coverage": "npm run test -- --coverage",
     "lint": "npx oxlint@latest --fix",
@@ -17,14 +40,6 @@
     "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv",
     "release": "release-it patch --config .release-it.json --no-git --no-npm"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nusr/excel.git"
-  },
-  "keywords": [],
-  "author": "Steve Xu",
-  "license": "MIT",
-  "homepage": "https://nusr.github.io/excel",
   "devDependencies": {
     "@playwright/test": "1.49.1",
     "@testing-library/jest-dom": "6.6.3",
@@ -32,7 +47,7 @@
     "@types/jest": "29.5.14",
     "@types/pixelmatch": "5.2.6",
     "@types/pngjs": "6.0.5",
-    "@types/react": "19.0.1",
+    "@types/react": "19.0.2",
     "@types/react-dom": "19.0.2",
     "@vitejs/plugin-react": "4.3.4",
     "canvas": "2.11.2",
@@ -41,28 +56,45 @@
     "jest-environment-jsdom": "29.7.0",
     "pixelmatch": "5.3.0",
     "pngjs": "7.0.0",
-    "release-it": "^17.10.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "release-it": "17.10.0",
     "ts-jest": "29.2.5",
     "ts-jest-mock-import-meta": "1.2.1",
     "typescript": "5.7.2",
-    "vite": "6.0.3",
-    "vite-plugin-dts": "4.3.0"
+    "vite": "6.0.5",
+    "vite-plugin-dts": "4.4.0"
   },
   "dependencies": {
-    "@sentry/react": "8.45.0",
-    "@supabase/supabase-js": "2.47.7",
+    "@sentry/react": "8.47.0",
+    "@supabase/supabase-js": "2.47.10",
     "chart.js": "4.4.7",
     "comlink": "4.4.2",
     "dexie": "4.0.10",
     "jszip": "3.10.1",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
     "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz",
     "uuid": "11.0.3",
     "y-protocols": "1.0.6",
     "yjs": "13.6.20"
   },
+  "peerDependencies": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
   "engines": {
     "pnpm": "^9"
+  },
+  "keywords": [
+    "react",
+    "yjs",
+    "collaboration",
+    "excel",
+    "supabase"
+  ],
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }

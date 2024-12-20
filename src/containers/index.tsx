@@ -72,27 +72,41 @@ export function useCollaboration() {
   };
 }
 
-const App = memo(({ providerStatus }: { providerStatus?: ProviderStatus }) => {
-  return (
-    <div className={styles['app-container']} data-testid="app-container">
-      <MenuBarContainer providerStatus={providerStatus} />
-      <ToolbarContainer />
-      <FormulaBarContainer />
-      <CanvasContainer />
-      <SheetBarContainer />
-    </div>
-  );
-});
+const App = memo(
+  ({
+    providerStatus,
+    style,
+  }: {
+    providerStatus?: ProviderStatus;
+    style?: React.CSSProperties;
+  }) => {
+    return (
+      <div
+        className={styles['app-container']}
+        data-testid="app-container"
+        style={style}
+      >
+        <MenuBarContainer providerStatus={providerStatus} />
+        <ToolbarContainer />
+        <FormulaBarContainer />
+        <CanvasContainer />
+        <SheetBarContainer />
+      </div>
+    );
+  },
+);
 
 App.displayName = 'App';
 
-const AppWithCollaboration = memo(() => {
-  const { isLoading, providerStatus } = useCollaboration();
-  if (isLoading) {
-    return <Loading />;
-  }
-  return <App providerStatus={providerStatus} />;
-});
+const AppWithCollaboration = memo(
+  ({ style }: { style?: React.CSSProperties }) => {
+    const { isLoading, providerStatus } = useCollaboration();
+    if (isLoading) {
+      return <Loading />;
+    }
+    return <App providerStatus={providerStatus} style={style} />;
+  },
+);
 AppWithCollaboration.displayName = 'AppWithCollaboration';
 
 export * from './store';

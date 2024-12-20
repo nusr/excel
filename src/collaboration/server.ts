@@ -24,9 +24,7 @@ export class CollaborationProvider {
   private readonly broadcastChannel: BroadcastChannel;
   private readonly _isOnline: boolean = false;
   private readonly awareness: awarenessProtocol.Awareness;
-  constructor(doc: Y.Doc) {
-    const url = import.meta.env.VITE_SUPABASE_URL ?? '';
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
+  constructor(doc: Y.Doc, url: string, key: string) {
     if (url && key && navigator.onLine) {
       this._isOnline = true;
       const remoteDB = new SupabaseClient<Database>(url, key);
