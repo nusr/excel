@@ -35,7 +35,7 @@ jobs:
           node-version: 20
       - name: Install Font
         run: npm run install-font
-      - name: Test
+      - name: Build
         run: |
           npm i -g pnpm
           cd ./examples/collaboration

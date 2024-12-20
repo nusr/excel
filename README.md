@@ -7,7 +7,7 @@
 
 [online demo](https://nusr.github.io/excel/)
 
-![demo](https://github.com/nusr/excel/blob/main/scripts/demo.gif)
+![demo](./scripts/demo.gif)
 
 ## Install
 
@@ -17,9 +17,11 @@ npm i --save excel-collab
 
 ## Examples
 
-[Simple Example][https://github.com/nusr/excel/tree/main/examples/simple]
-[Custom Example][https://github.com/nusr/excel/tree/main/examples/custom]
-[Collaboration Example][https://github.com/nusr/excel/tree/main/examples/collaboration]
+[Simple Example](https://github.com/nusr/excel/tree/main/examples/simple)
+
+[Custom Example](https://github.com/nusr/excel/tree/main/examples/custom)
+
+[Collaboration Example](https://github.com/nusr/excel/tree/main/examples/collaboration)
 
 ## Unit Test
 

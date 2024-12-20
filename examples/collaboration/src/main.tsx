@@ -38,4 +38,3 @@ createRoot(document.getElementById('root')!).render(
     </StateContext>
   </StrictMode>,
 );
-document.head.append(`<!-- ${process.env.COMMIT_LOG} --> `);
