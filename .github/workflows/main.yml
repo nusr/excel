@@ -3,7 +3,7 @@ on:
   - push
   - pull_request
 jobs:
-  build:
+  CI:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     permissions:

@@ -11,7 +11,8 @@ import {
   paste,
   type WorkerMethod,
   AppWithCollaboration,
-} from '../src';
+} from 'excel-collab';
+import 'excel-collab/style.css';
 import './sentry';
 import Worker from './worker?worker';
 

@@ -38,6 +38,7 @@ jobs:
       - name: Test
         run: |
           npm i -g pnpm
+          cd ./examples/collaboration
           pnpm i
           npm run build
       - name: Setup Pages

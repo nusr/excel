@@ -30,7 +30,7 @@
     "experimentalDecorators": true,
     "outDir": "dist"
   },
-  "include": ["src", "demo", "e2e"],
+  "include": ["src", "playground", "e2e"],
   "exclude": [
     "node_modules",
     "dist",

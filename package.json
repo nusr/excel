@@ -24,13 +24,12 @@
     "./style.css": "./lib/style.css"
   },
   "scripts": {
-    "start": "npm run dev",
-    "dev": "vite --force --host --port 3000",
+    "start:e2e": "cd examples/collaboration && npm run start",
+    "start": "vite --force",
     "type-check": "tsc",
     "e2e": "playwright test",
     "e2e:ui": "npm run e2e --ui",
     "build": "vite build",
-    "build:lib": "vite build --mode lib",
     "test": "jest --config ./jest.config.js --forceExit --detectOpenHandles",
     "coverage": "npm run test -- --coverage",
     "lint": "npx oxlint@latest --fix",
@@ -66,7 +65,6 @@
     "vite-plugin-dts": "4.4.0"
   },
   "dependencies": {
-    "@sentry/react": "8.47.0",
     "@supabase/supabase-js": "2.47.10",
     "chart.js": "4.4.7",
     "comlink": "4.4.2",
@@ -78,17 +76,16 @@
     "yjs": "13.6.20"
   },
   "peerDependencies": {
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
-  },
-  "engines": {
-    "pnpm": "^9"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "keywords": [
     "react",
     "yjs",
     "collaboration",
     "excel",
+    "xlsx",
+    "spreadsheet",
     "supabase"
   ],
   "files": [

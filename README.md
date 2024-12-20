@@ -7,18 +7,19 @@
 
 [online demo](https://nusr.github.io/excel/)
 
-![demo](./scripts/demo.gif)
+![demo](https://github.com/nusr/excel/blob/main/scripts/demo.gif)
 
-## Start
+## Install
 
 ```bash
-git clone https://github.com/nusr/excel.git
-cd excel
-
-npm i -g pnpm
-pnpm i
-npm run start
+npm i --save excel-collab
 ```
+
+## Examples
+
+[Simple Example][https://github.com/nusr/excel/tree/main/examples/simple]
+[Custom Example][https://github.com/nusr/excel/tree/main/examples/custom]
+[Collaboration Example][https://github.com/nusr/excel/tree/main/examples/collaboration]
 
 ## Unit Test
 
