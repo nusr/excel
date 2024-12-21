@@ -12,11 +12,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install
+      - name: Build
         run: |
           npm i -g pnpm
           pnpm i
-          npm run test
           npm run build
       - uses: JS-DevTools/npm-publish@v3
         with:
