@@ -1,6 +1,6 @@
 {
   "name": "excel-collab",
-  "version": "0.0.2",
+  "version": "0.0.3-beta.0",
   "description": "Online Collaboration Excel",
   "author": "Steve Xu <stevexugc@gmail.com>",
   "bugs": "https://github.com/nusr/excel/issues",
@@ -37,7 +37,7 @@
     "postinstall": "husky",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" --reporters html --mode strict --min-lines 7 --blame --gitignore --exitCode 1 .",
     "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv",
-    "release": "release-it patch --config .release-it.json --no-git --no-npm"
+    "release": "release-it prepatch --preRelease=beta --preReleaseBase=1 --no-git --no-npm"
   },
   "devDependencies": {
     "@playwright/test": "1.49.1",
