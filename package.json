@@ -1,6 +1,6 @@
 {
   "name": "excel-collab",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Online Collaboration Excel",
   "author": "Steve Xu <stevexugc@gmail.com>",
   "bugs": "https://github.com/nusr/excel/issues",
@@ -41,6 +41,8 @@
   },
   "devDependencies": {
     "@playwright/test": "1.49.1",
+    "@release-it/bumper": "^6.0.1",
+    "@release-it/conventional-changelog": "^9.0.3",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.1.0",
     "@types/jest": "29.5.14",
