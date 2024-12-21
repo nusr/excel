@@ -17,7 +17,7 @@ jobs:
           npm i -g pnpm
           pnpm i
           npm run build
-      - name: Publish 🚀
-        run: npm publish --access public
+      - name: Publish 
+        run: npm publish excel-collab --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
