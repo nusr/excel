@@ -3,7 +3,7 @@ import {
   RealtimeChannel,
   REALTIME_LISTEN_TYPES,
 } from '@supabase/supabase-js';
-import type { Database, DocumentItem } from './type';
+import type { Database, DocumentItem, CollaborationOptions } from './type';
 import { SYNC_FLAG, IRange, UserItem } from '../types';
 import { collaborationLog, eventEmitter, omit } from '../util';
 import * as Y from 'yjs';
@@ -24,10 +24,13 @@ export class CollaborationProvider {
   private readonly broadcastChannel: BroadcastChannel;
   private readonly _isOnline: boolean = false;
   private readonly awareness: awarenessProtocol.Awareness;
-  constructor(doc: Y.Doc, url: string, key: string) {
-    if (url && key && navigator.onLine) {
+  constructor(doc: Y.Doc, options: CollaborationOptions = {}) {
+    if (options.supabaseUrl && options.supabaseAnonKey && navigator.onLine) {
       this._isOnline = true;
-      const remoteDB = new SupabaseClient<Database>(url, key);
+      const remoteDB = new SupabaseClient<Database>(
+        options.supabaseUrl,
+        options.supabaseAnonKey,
+      );
       this.remoteDB = remoteDB;
       this.channel = remoteDB.channel(doc.guid, {
         config: { broadcast: { ack: false } },
@@ -35,7 +38,7 @@ export class CollaborationProvider {
     }
     this.doc = doc;
     if (typeof indexedDB !== 'undefined') {
-      this.localDB = new DocumentDB();
+      this.localDB = new DocumentDB(options.dbVersion);
     }
     this.broadcastChannel = new BroadcastChannel(this.docId);
     this.awareness = new awarenessProtocol.Awareness(doc);

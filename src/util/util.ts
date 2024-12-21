@@ -3,7 +3,6 @@ import {
   SPLITTER,
   FORMULA_PREFIX,
   MERGE_CELL_LINE_BREAK,
-  DEFAULT_EXCEL_ID,
 } from './constant';
 import type {
   WorksheetType,
@@ -175,15 +174,6 @@ export function isFormula(value: ResultType) {
 
 export function isMergeContent(isMergeCell: boolean, text: string) {
   return isMergeCell && text.includes(MERGE_CELL_LINE_BREAK);
-}
-
-export function getDocId() {
-  const docId =
-    (window?.top?.location?.hash || '').slice(1) ||
-    window.location.hash.slice(1) ||
-    import.meta.env.VITE_DEFAULT_EXCEL_ID ||
-    DEFAULT_EXCEL_ID;
-  return docId;
 }
 
 export function getRandomColor() {

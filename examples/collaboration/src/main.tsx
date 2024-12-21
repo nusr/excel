@@ -6,11 +6,11 @@ import {
   initCollaboration,
   initDoc,
   wrap,
-  getDocId,
   copyOrCut,
   paste,
   type WorkerMethod,
   AppWithCollaboration,
+  DEFAULT_EXCEL_ID,
 } from 'excel-collab';
 import 'excel-collab/style.css';
 import './sentry';
@@ -18,7 +18,7 @@ import Worker from './worker?worker';
 
 const workerInstance = wrap<WorkerMethod>(new Worker());
 
-const docId = getDocId();
+const docId = import.meta.env.VITE_DEFAULT_EXCEL_ID || DEFAULT_EXCEL_ID;
 location.hash = `#${docId}`;
 const doc = initDoc({ guid: docId });
 const provider = initCollaboration(doc);

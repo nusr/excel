@@ -6,7 +6,6 @@ import {
   initCollaboration,
   initDoc,
   wrap,
-  getDocId,
   copyOrCut,
   paste,
   type WorkerMethod,
@@ -97,9 +96,7 @@ const App = memo(() => {
 
 const workerInstance = wrap<WorkerMethod>(new Worker());
 
-const docId = getDocId();
-location.hash = `#${docId}`;
-const doc = initDoc({ guid: docId });
+const doc = initDoc();
 const provider = initCollaboration(doc);
 const controller = initController({
   copyOrCut,

@@ -6,20 +6,17 @@ import {
   initCollaboration,
   initDoc,
   wrap,
-  getDocId,
   copyOrCut,
   paste,
   type WorkerMethod,
-  AppWithCollaboration,
+  App,
 } from 'excel-collab';
 import Worker from './worker?worker';
-import 'excel-collab/style.css'
+import 'excel-collab/style.css';
 
 const workerInstance = wrap<WorkerMethod>(new Worker());
 
-const docId = getDocId();
-location.hash = `#${docId}`;
-const doc = initDoc({ guid: docId });
+const doc = initDoc();
 const provider = initCollaboration(doc);
 const controller = initController({
   copyOrCut,
@@ -27,11 +24,12 @@ const controller = initController({
   worker: workerInstance,
   doc,
 });
+controller.addFirstSheet()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <StateContext value={{ provider, controller }}>
-      <AppWithCollaboration />
+      <App />
     </StateContext>
   </StrictMode>,
 );

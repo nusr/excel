@@ -41,3 +41,9 @@ export interface Database {
     };
   };
 }
+
+export type CollaborationOptions = {
+  dbVersion?: number;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+};

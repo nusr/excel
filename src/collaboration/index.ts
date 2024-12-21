@@ -2,6 +2,7 @@ import { CollaborationProvider } from './server';
 import * as Y from 'yjs';
 import { SYNC_FLAG } from '../types';
 import { collaborationLog } from '../util';
+import { CollaborationOptions } from './type';
 
 export function shouldSkipUpdate(
   tran: Y.Transaction,
@@ -17,11 +18,11 @@ export function shouldSkipUpdate(
   return false;
 }
 
-export function initCollaboration(doc: Y.Doc) {
-  const url = import.meta.env.VITE_SUPABASE_URL ?? '';
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
-
-  const provider = new CollaborationProvider(doc, url, key);
+export function initCollaboration(
+  doc: Y.Doc,
+  options: CollaborationOptions = {},
+) {
+  const provider = new CollaborationProvider(doc, options);
   doc.on('update', (update: Uint8Array, _b, _c, tran) => {
     if (shouldSkipUpdate(tran, provider)) {
       return;
@@ -37,4 +38,4 @@ export function applyUpdate(doc: Y.Doc, result: Uint8Array[]) {
   Y.applyUpdate(doc, Y.mergeUpdates(result), SYNC_FLAG.SKIP_UNDO_REDO_UPDATE);
 }
 
-export { CollaborationProvider };
+export { CollaborationProvider, type CollaborationOptions };

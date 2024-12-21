@@ -6,7 +6,7 @@ import {
   initCollaboration,
   initDoc,
   wrap,
-  getDocId,
+  DEFAULT_EXCEL_ID,
   copyOrCut,
   paste,
   type WorkerMethod,
@@ -16,7 +16,7 @@ import Worker from './worker?worker';
 
 const workerInstance = wrap<WorkerMethod>(new Worker());
 
-const docId = getDocId();
+const docId = DEFAULT_EXCEL_ID;
 location.hash = `#${docId}`;
 const doc = initDoc({ guid: docId });
 const provider = initCollaboration(doc);
@@ -36,4 +36,3 @@ createRoot(document.getElementById('root')!).render(
     </StateContext>
   </StrictMode>,
 );
-

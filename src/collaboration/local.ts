@@ -15,9 +15,9 @@ function sortByCreateTime(
 export class DocumentDB extends Dexie {
   readonly document!: Table<DocumentItem, string>;
   readonly history!: Table<HistoryItem, number>;
-  constructor() {
+  constructor(version = 1) {
     super('excel');
-    this.version(3).stores({
+    this.version(version).stores({
       document: 'id',
       history: '++id, doc_id',
     });
