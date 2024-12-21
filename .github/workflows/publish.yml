@@ -16,8 +16,8 @@ jobs:
         run: |
           npm i -g pnpm
           pnpm i
+          npm run test
           npm run build
-      - name: Publish 
-        run: npm publish excel-collab --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
