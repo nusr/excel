@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.0.3-beta.3](https://github.com/nusr/excel/compare/v0.0.3-beta.2...v0.0.3-beta.3) (2024-12-21)
+
 ## [0.0.3-beta.2](https://github.com/nusr/excel/compare/v0.0.3-beta.1...v0.0.3-beta.2) (2024-12-21)
 
 ## [0.0.3-beta.1](https://github.com/nusr/excel/compare/v0.0.3-beta.0...v0.0.3-beta.1) (2024-12-21)
