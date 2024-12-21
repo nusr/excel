@@ -43,7 +43,10 @@ export interface Database {
 }
 
 export type CollaborationOptions = {
+  // indexedDB version
   dbVersion?: number;
+  // Supbase URL
   supabaseUrl?: string;
+  // Supabase Anon Key
   supabaseAnonKey?: string;
 };
