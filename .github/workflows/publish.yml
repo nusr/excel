@@ -17,7 +17,6 @@ jobs:
           npm i -g pnpm
           pnpm i
           npm run build
-      - name: Publish
-        run: pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
