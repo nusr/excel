@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+env:
+  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -17,6 +20,5 @@ jobs:
           npm i -g pnpm
           pnpm i
           npm run build
-      - uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
+      - name: Publish
+        run: npm publish
