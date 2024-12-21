@@ -34,7 +34,7 @@
     "coverage": "npm run test -- --coverage",
     "lint": "npx oxlint@latest --fix",
     "update-md": "node ./scripts/update-md.js",
-    "prepare": "husky",
+    "postinstall": "husky",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" --reporters html --mode strict --min-lines 7 --blame --gitignore --exitCode 1 .",
     "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv",
     "release": "release-it patch --config .release-it.json --no-git --no-npm"
