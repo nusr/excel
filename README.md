@@ -9,75 +9,60 @@
 
 ![demo](./scripts/demo.gif)
 
-## Getting Started
+## Installation
 
 ```
-npm create vite@latest my-app -- --template react-ts
 npm i --save excel-collab
-```
-
-```ts
-// ./src/main.tsx
-import { createRoot } from 'react-dom/client';
-import { StrictMode } from 'react';
-import {
-  initController,
-  StateContext,
-  initCollaboration,
-  initDoc,
-  wrap,
-  copyOrCut,
-  paste,
-  type WorkerMethod,
-  App,
-} from 'excel-collab';
-import Worker from './worker?worker';
-import 'excel-collab/style.css';
-
-const workerInstance = wrap<WorkerMethod>(new Worker());
-
-const doc = initDoc();
-const provider = initCollaboration(doc);
-const controller = initController({
-  copyOrCut,
-  paste,
-  worker: workerInstance,
-  doc,
-});
-controller.addFirstSheet()
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <StateContext value={{ provider, controller }}>
-      <App />
-    </StateContext>
-  </StrictMode>,
-);
-```
-
-```ts
-// ./src/worker.ts
-import { workerMethod, expose } from 'excel-collab';
-expose(workerMethod);
 ```
 
 ## Examples
 
-[Simple Example](https://github.com/nusr/excel/tree/main/examples/simple)
+[Simple Example](https://stackblitz.com/edit/nusr-excel-simple)
 
-[Custom Example](https://github.com/nusr/excel/tree/main/examples/custom)
+[Custom Example](https://stackblitz.com/edit/nusr-excel-custom)
 
-[Collaboration Example](https://github.com/nusr/excel/tree/main/examples/collaboration)
+[Collaboration Example](https://stackblitz.com/edit/nusr-excel-collaboration)
 
 ## Developing
 
-```
+```bash
 git clone https://github.com/nusr/excel.git
 cd excel
 
 npm i -g pnpm
 pnpm i
 npm run start
+```
+
+## Environment
+
+Create an `.env` file and modify it as the `.env.example` file
+
+| Key                    | Required | Description        |
+| ---------------------- | -------- | ------------------ |
+| VITE_SUPABASE_URL      | optional | Supbase url        |
+| VITE_SUPABASE_ANON_KEY | optional | Supbase anon key   |
+| VITE_DEFAULT_EXCEL_ID  | optional | default excel uuid |
+
+## Supbase
+
+Collaborative editing requires supabase to be configured.
+You need to configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+
+```sql
+CREATE TABLE IF NOT EXISTS history (
+  id SERIAL PRIMARY KEY,
+  doc_id UUID,
+  update TEXT,
+  create_time TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW(),
+);
+
+-- document table need to enable real time
+CREATE TABLE IF NOT EXISTS document (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  name VARCHAR(20),
+  create_time TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW(),
+);
 ```
 
 ## Supported Features

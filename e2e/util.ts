@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 
-export const INDEX_PAGE = '/app';
+export const INDEX_PAGE = '/';
 export const MAIN_CANVAS = 'canvas-main';
 
 export function getByTestId(selector: string) {

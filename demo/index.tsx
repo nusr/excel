@@ -11,10 +11,9 @@ import {
   type WorkerMethod,
   AppWithCollaboration,
   DEFAULT_EXCEL_ID,
-} from 'excel-collab';
-import 'excel-collab/style.css';
-import './sentry';
+} from '../src';
 import Worker from './worker?worker';
+import './sentry'
 
 const workerInstance = wrap<WorkerMethod>(new Worker());
 

@@ -28,17 +28,7 @@
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "experimentalDecorators": true,
-    "outDir": "dist"
+    "outDir": "lib"
   },
-  "include": ["src", "playground", "e2e"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "coverage",
-    "lib",
-    "playwright-report",
-    "test-results",
-    "report",
-    "docs"
-  ]
+  "include": ["src", "demo", "e2e"]
 }

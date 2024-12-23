@@ -24,12 +24,12 @@
     "./style.css": "./lib/style.css"
   },
   "scripts": {
-    "start:e2e": "cd examples/collaboration && npm run start",
-    "start": "vite --force",
+    "start": "vite --force --host --port 3000",
     "type-check": "tsc",
     "e2e": "playwright test",
     "e2e:ui": "npm run e2e --ui",
     "build": "vite build",
+    "build:gh-pages": "vite build --mode gh-pages",
     "test": "jest --config ./jest.config.js --forceExit --detectOpenHandles",
     "coverage": "npm run test -- --coverage",
     "lint": "npx oxlint@latest --fix",
@@ -42,8 +42,9 @@
   },
   "devDependencies": {
     "@playwright/test": "1.49.1",
-    "@release-it/bumper": "^6.0.1",
-    "@release-it/conventional-changelog": "^9.0.3",
+    "@release-it/bumper": "6.0.1",
+    "@release-it/conventional-changelog": "9.0.4",
+    "@sentry/react": "8.47.0",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.1.0",
     "@types/jest": "29.5.14",
@@ -60,7 +61,7 @@
     "pngjs": "7.0.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "release-it": "17.10.0",
+    "release-it": "17.11.0",
     "ts-jest": "29.2.5",
     "ts-jest-mock-import-meta": "1.2.1",
     "typescript": "5.7.2",
@@ -76,7 +77,7 @@
     "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz",
     "uuid": "11.0.3",
     "y-protocols": "1.0.6",
-    "yjs": "13.6.20"
+    "yjs": "13.6.21"
   },
   "peerDependencies": {
     "react": "^19.0.0",
