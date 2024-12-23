@@ -9,10 +9,56 @@
 
 ![demo](./scripts/demo.gif)
 
-## Install
+## Getting Started
 
-```bash
+```
+npm create vite@latest my-app -- --template react-ts
 npm i --save excel-collab
+```
+
+```ts
+// ./src/main.tsx
+import { createRoot } from 'react-dom/client';
+import { StrictMode } from 'react';
+import {
+  initController,
+  StateContext,
+  initCollaboration,
+  initDoc,
+  wrap,
+  copyOrCut,
+  paste,
+  type WorkerMethod,
+  App,
+} from 'excel-collab';
+import Worker from './worker?worker';
+import 'excel-collab/style.css';
+
+const workerInstance = wrap<WorkerMethod>(new Worker());
+
+const doc = initDoc();
+const provider = initCollaboration(doc);
+const controller = initController({
+  copyOrCut,
+  paste,
+  worker: workerInstance,
+  doc,
+});
+controller.addFirstSheet()
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <StateContext value={{ provider, controller }}>
+      <App />
+    </StateContext>
+  </StrictMode>,
+);
+```
+
+```ts
+// ./src/worker.ts
+import { workerMethod, expose } from 'excel-collab';
+expose(workerMethod);
 ```
 
 ## Examples
@@ -23,17 +69,15 @@ npm i --save excel-collab
 
 [Collaboration Example](https://github.com/nusr/excel/tree/main/examples/collaboration)
 
-## Unit Test
+## Developing
 
-```bash
-npm run test
 ```
+git clone https://github.com/nusr/excel.git
+cd excel
 
-## E2E Test
-
-```bash
-pnpm exec playwright install
-npm run e2e
+npm i -g pnpm
+pnpm i
+npm run start
 ```
 
 ## Supported Features
