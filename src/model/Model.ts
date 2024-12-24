@@ -92,7 +92,7 @@ export class Model implements IModel {
       for (const item of this.changeSet.keys()) {
         changeSet.add(item);
       }
-      modelLog('observeDeep', doc.clientID, event[0], changeSet);
+      modelLog('observeDeep', doc.clientID, changeSet);
       this.render(changeSet);
       this.changeSet = new Set<ChangeEventType>();
     });
@@ -125,7 +125,7 @@ export class Model implements IModel {
     if (changeSet.size === 0) {
       return;
     }
-    modelLog(changeSet);
+    modelLog('render', changeSet);
     eventEmitter.emit('modelChange', { changeSet });
   }
   async emitChange(changeSet: Set<ChangeEventType>) {
@@ -141,13 +141,6 @@ export class Model implements IModel {
       'customWidth',
     ];
 
-    for (const item of localChangeList) {
-      if (changeSet.has(item)) {
-        this.changeSet.add(item);
-        changeSet.delete(item);
-      }
-    }
-
     if (
       changeSet.has('cellValue') ||
       changeSet.has('definedNames') ||
@@ -158,7 +151,15 @@ export class Model implements IModel {
         this.changeSet.add('cellValue');
       }
     }
-    if (changeSet.size === 0 && this.changeSet.size > 0) {
+
+    for (const item of localChangeList) {
+      if (changeSet.has(item)) {
+        this.changeSet.add(item);
+        changeSet.delete(item);
+      }
+    }
+
+    if (this.changeSet.size > 0) {
       this.render(this.changeSet);
       this.changeSet = new Set<ChangeEventType>();
     }
@@ -249,7 +250,6 @@ export class Model implements IModel {
     this.filterManager.fromJSON(json);
     this.scrollManager.fromJSON(json);
     this.worksheetManager.computeFormulas();
-    // this.undoManager.clear(true, true);
   };
   toJSON = (): ModelJSON => {
     const temp = this.getRoot().toJSON();

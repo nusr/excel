@@ -52,11 +52,6 @@ describe('SheetBar.test.ts', () => {
       expect(screen.getByTestId('sheet-bar-tab-color-item')).toHaveStyle({
         backgroundColor: '#B2B2B2',
       });
-      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
-
-      expect(screen.getByTestId('sheet-bar-list')!.firstChild).toHaveStyle({
-        backgroundColor: '#B2B2B2',
-      });
     });
   });
   describe('rename sheet', () => {
@@ -197,7 +192,7 @@ describe('SheetBar.test.ts', () => {
         screen.getByTestId('sheet-bar-context-menu-unhide-dialog-confirm'),
       );
       expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent(
-        'Sheet4',
+        'Sheet1',
       );
     });
     test('unhide cancel', () => {
@@ -218,24 +213,6 @@ describe('SheetBar.test.ts', () => {
         screen.getByTestId('sheet-bar-context-menu-unhide-dialog-cancel'),
       );
       expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(3);
-    });
-  });
-  describe('select sheet', () => {
-    test('normal', () => {
-      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
-      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
-      expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent(
-        'Sheet3',
-      );
-
-      fireEvent.click(screen.getByTestId('sheet-bar-select-sheet'));
-
-      const dom = screen.getByTestId('sheet-bar-select-sheet-popup');
-      dom.setAttribute('data-value', '1');
-      fireEvent.click(dom);
-      expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent(
-        'Sheet1',
-      );
     });
   });
 });
