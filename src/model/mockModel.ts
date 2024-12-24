@@ -7,29 +7,7 @@ import {
 
 const MOCK_MODEL: ModelJSON = {
   currentSheetId: '',
-  rangeMap: {
-    '2': {
-      row: 4,
-      col: 4,
-      rowCount: 2,
-      colCount: 2,
-      sheetId: '2',
-    },
-    '3': {
-      row: 4,
-      col: 4,
-      rowCount: 2,
-      colCount: 2,
-      sheetId: '3',
-    },
-    '8': {
-      row: 2,
-      col: 2,
-      rowCount: 2,
-      colCount: 2,
-      sheetId: '8',
-    },
-  },
+  rangeMap: {},
   workbook: {
     '1': {
       sheetId: '1',

@@ -38,10 +38,19 @@ export class MainCanvas implements MainView {
       for (const [row, h] of Object.entries(rowMap)) {
         const r = parseInt(row, 10);
 
+        const old = this.controller.getRowHeight(r);
+        if (old === h) {
+          continue;
+        }
+
         this.controller.setRowHeight(r, h);
       }
       for (const [col, w] of Object.entries(colMap)) {
         const c = parseInt(col, 10);
+        const old = this.controller.getColWidth(c);
+        if (old === w) {
+          continue;
+        }
 
         this.controller.setColWidth(c, w);
       }

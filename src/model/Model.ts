@@ -129,6 +129,7 @@ export class Model implements IModel {
     eventEmitter.emit('modelChange', { changeSet });
   }
   async emitChange(changeSet: Set<ChangeEventType>) {
+    modelLog('emitChange', changeSet);
     const localChangeList: ChangeEventType[] = [
       'antLine',
       'undo',
@@ -137,7 +138,7 @@ export class Model implements IModel {
       'rangeMap',
       'currentSheetId',
       'customHeight',
-      'customWidth'
+      'customWidth',
     ];
 
     for (const item of localChangeList) {
