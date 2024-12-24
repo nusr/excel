@@ -328,6 +328,9 @@ export class Controller implements IController {
       !isNaN(Date.parse(value))
     ) {
       const v = convertDateToNumber(new Date(value));
+      if (v === null) {
+        return;
+      }
       this.model.setCellValue(v, range);
     } else {
       this.model.setCellValue(value, range);

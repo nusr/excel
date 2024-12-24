@@ -1,17 +1,26 @@
-import React, { useSyncExternalStore, useState, useCallback } from 'react';
+import React, {
+  useState,
+  useCallback,
+  FunctionComponent,
+  useEffect,
+} from 'react';
 import { fileStore, useExcel } from '../store';
 import styles from './index.module.css';
 import { Dialog } from '../../components';
 import { $ } from '../../i18n';
 
-export const File = () => {
+type Props = {
+  visible: boolean;
+  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
   const { provider } = useExcel();
-  const [visible, setVisible] = useState(false);
-  const [value, setValue] = useState($('default-name'));
-  const { name } = useSyncExternalStore(
-    fileStore.subscribe,
-    fileStore.getSnapshot,
-  );
+  const [value, setValue] = useState('');
+  const { name } = fileStore.useStore();
+  useEffect(() => {
+    setValue(name || $('default-name'));
+  }, [name]);
   const handleClick = useCallback(() => {
     setVisible(true);
   }, []);

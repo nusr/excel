@@ -1,4 +1,8 @@
-import { type EventHandler, type EventData, type ModalValue } from '../../../types';
+import {
+  type EventHandler,
+  type EventData,
+  type ModalValue,
+} from '../../../types';
 import { PointerEvent } from 'react';
 import { FILTER_RECT_SIZE } from '../../../util';
 
@@ -9,6 +13,9 @@ export class FilterHandler implements EventHandler {
     }
     const { controller, position } = data;
     const { row, col, marginX, marginY } = position;
+    if (row !== 0) {
+      return false;
+    }
     const filter = controller.getFilter();
     if (!filter) {
       return false;

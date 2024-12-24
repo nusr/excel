@@ -1,10 +1,9 @@
 import { createContext, useContext } from 'react';
-import { IController } from '../../types';
-import { CollaborationProvider } from '../../collaboration';
+import { IController, ICollaborationProvider } from '../../types';
 
 export type StateContextValue = {
   controller: IController;
-  provider?: CollaborationProvider;
+  provider?: ICollaborationProvider;
 };
 
 export const StateContext = createContext<StateContextValue | undefined>(

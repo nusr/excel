@@ -104,6 +104,7 @@
   "filter-empty": "(empty)",
   "filter-all": "All",
   "new-file": "New File",
+  "rename-file": "Rename",
   "default-name": "default name",
   "change-file-name": "Change File Name",
   "user-name": "User"

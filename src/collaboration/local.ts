@@ -1,6 +1,6 @@
 import Dexie, { Table } from 'dexie';
 import { uint8ArrayToString } from './util';
-import { DocumentItem, HistoryItem } from './type';
+import { DocumentItem, HistoryItem } from '../types';
 
 function sortByCreateTime(
   a: HistoryItem | DocumentItem,

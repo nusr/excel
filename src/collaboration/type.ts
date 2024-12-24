@@ -1,17 +1,4 @@
-export type DocumentItem = {
-  id?: string;
-  name: string;
-  create_time: string;
-  sync?: boolean;
-};
-
-export type HistoryItem = {
-  id?: number;
-  doc_id: string;
-  update: string;
-  create_time: string;
-  sync?: boolean;
-};
+import { DocumentItem, HistoryItem } from '../types';
 
 export interface Database {
   public: {

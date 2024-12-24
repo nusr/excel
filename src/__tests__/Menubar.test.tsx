@@ -27,7 +27,7 @@ describe('Menubar.test.ts', () => {
       expect(
         screen.getByTestId('menubar-excel-portal')!.querySelectorAll('li')
           .length,
-      ).toEqual(6);
+      ).toEqual(7);
     });
   });
   describe('dark mode', () => {

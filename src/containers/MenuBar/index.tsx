@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { Menu, MenuItem } from '../../components';
 import { importXLSX, exportToXLSX, exportToCsv, importCSV } from '../Excel';
 import styles from './index.module.css';
@@ -19,6 +19,7 @@ type Props = {
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
   ({ providerStatus = ProviderStatus.LOCAL }) => {
     const { controller, provider } = useExcel();
+    const [visible, setVisible] = useState(false);
     const handleExportXLSX = useCallback(() => {
       exportToXLSX(`excel_${Date.now()}.xlsx`, controller);
     }, []);
@@ -72,7 +73,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
     return (
       <div className={styles['menubar-container']} data-testid="menubar">
         <div className={styles['menubar-menu']}>
-          <File />
+          <File visible={visible} setVisible={setVisible} />
           <Menu
             label={$('file')}
             className={styles.menu}
@@ -80,6 +81,12 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
           >
             <MenuItem onClick={handleAddDocument} testId="menubar-new-excel">
               {$('new-file')}
+            </MenuItem>
+            <MenuItem
+              onClick={() => setVisible(true)}
+              testId="menubar-new-excel"
+            >
+              {$('rename-file')}
             </MenuItem>
             <MenuItem testId="menubar-import-xlsx">
               <input

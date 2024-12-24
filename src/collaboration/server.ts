@@ -3,8 +3,14 @@ import {
   RealtimeChannel,
   REALTIME_LISTEN_TYPES,
 } from '@supabase/supabase-js';
-import type { Database, DocumentItem, CollaborationOptions } from './type';
-import { SYNC_FLAG, IRange, UserItem } from '../types';
+import type { Database, CollaborationOptions } from './type';
+import {
+  SYNC_FLAG,
+  IRange,
+  UserItem,
+  ICollaborationProvider,
+  DocumentItem,
+} from '../types';
 import { collaborationLog, eventEmitter, omit } from '../util';
 import * as Y from 'yjs';
 import { uint8ArrayToString, stringToUint8Array } from './util';
@@ -16,7 +22,7 @@ const DIRECTORY = 'supabase/';
 
 type EventType = 'message' | 'awareness';
 
-export class CollaborationProvider {
+export class CollaborationProvider implements ICollaborationProvider {
   public readonly doc: Y.Doc;
   private readonly remoteDB: SupabaseClient<Database> | null = null;
   private readonly channel: RealtimeChannel | null = null;
@@ -118,10 +124,6 @@ export class CollaborationProvider {
       collaborationLog('awarenessChange', users);
       eventEmitter.emit('awarenessChange', { users });
     });
-
-    eventEmitter.on('rangeChange', ({ range }) => {
-      this.syncRange(range);
-    });
   }
 
   private applyUpdate(update: Uint8Array, type: EventType) {
@@ -207,7 +209,7 @@ export class CollaborationProvider {
     const list = (result?.data || []).map((v) => stringToUint8Array(v.update));
     return list;
   }
-  updateFile = async (file: File, _base64: string): Promise<string> => {
+  uploadFile = async (file: File, _base64: string): Promise<string> => {
     if (!this.isOnline()) {
       return _base64;
     }

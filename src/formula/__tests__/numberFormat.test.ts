@@ -94,9 +94,9 @@ describe('general.test.ts', function () {
   });
   describe('Date', () => {
     it('ok', function () {
-      expect(numberFormat(new Date(2017, 1, 19))).toEqual('2/19/17');
-      expect(numberFormat(new Date(1901, 0, 1))).toEqual('1/1/01');
-      expect(numberFormat(new Date(1904, 0, 1))).toEqual('1/1/04');
+      expect(numberFormat(new Date(2017, 1, 19))).toEqual('42785');
+      expect(numberFormat(new Date(1901, 0, 1))).toEqual('367');
+      expect(numberFormat(new Date(1904, 0, 1))).toEqual('1462');
     });
   });
 });

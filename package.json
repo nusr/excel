@@ -27,7 +27,7 @@
     "start": "vite --force --host --port 3000",
     "type-check": "tsc",
     "e2e": "playwright test",
-    "e2e:ui": "npm run e2e --ui",
+    "e2e:ui": "npm run e2e -- --ui",
     "build": "vite build",
     "build:gh-pages": "vite build --mode gh-pages",
     "test": "jest --config ./jest.config.js --forceExit --detectOpenHandles",
@@ -74,7 +74,7 @@
     "comlink": "4.4.2",
     "dexie": "4.0.10",
     "jszip": "3.10.1",
-    "ssf": "https://cdn.sheetjs.com/ssf-0.11.3/ssf-0.11.3.tgz",
+    "numfmt": "3.1.4",
     "uuid": "11.0.3",
     "y-protocols": "1.0.6",
     "yjs": "13.6.21"

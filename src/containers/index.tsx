@@ -60,6 +60,9 @@ export function useCollaboration() {
     eventEmitter.on('awarenessChange', ({ users }) => {
       userStore.setState(users);
     });
+    eventEmitter.on('rangeChange', ({ range }) => {
+      provider?.syncRange(range);
+    });
     return () => {
       window.removeEventListener('online', handleEvent);
       window.removeEventListener('online', handleEvent);

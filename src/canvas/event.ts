@@ -17,11 +17,11 @@ type EventType = {
 };
 
 function isInputEvent(event: any): boolean {
-  const targetName = event?.target?.tagName?.toLowerCase() || '';
-  const currentTargetName = event?.currentTarget?.tagName?.toLowerCase() || '';
+  const targetName = event?.target?.tagName || '';
+  const currentTargetName = event?.currentTarget?.tagName || '';
   return (
-    ['input', 'textarea'].includes(targetName) &&
-    ['input', 'textarea'].includes(currentTargetName)
+    ['INPUT', 'TEXTAREA'].includes(targetName) ||
+    ['INPUT', 'TEXTAREA'].includes(currentTargetName)
   );
 }
 
