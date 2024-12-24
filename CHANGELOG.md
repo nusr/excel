@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.0.4](https://github.com/nusr/excel/compare/v0.0.3...v0.0.4) (2024-12-24)
+
+### Bug Fixes
+
+* number format ([f62f605](https://github.com/nusr/excel/commit/f62f605bef9b10e67a6107680911d80b7c4f3f65))
+* publish ([ec540a1](https://github.com/nusr/excel/commit/ec540a1ea9b6c3059048e6f4972aebc4ce97747e))
+* remove examples ([8846b18](https://github.com/nusr/excel/commit/8846b1851fdf06d04e16e71c3ad17599d8b4cf65))
+* render loop ([744811f](https://github.com/nusr/excel/commit/744811f06433a71497a7036fe6b77ae7bcedc03a))
+* supbase ([c14c6ba](https://github.com/nusr/excel/commit/c14c6ba4562335a8f57b9ceadc0a7ce7b0eadd83))
+
 ## [0.0.3](https://github.com/nusr/excel/compare/v0.0.2...v0.0.3) (2024-12-21)
 
 ## [0.0.2](https://github.com/nusr/excel/compare/v0.0.1...v0.0.2) (2024-12-21)
