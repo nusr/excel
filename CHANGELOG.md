@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.5](https://github.com/nusr/excel/compare/v0.0.4...v0.0.5) (2024-12-24)
+
+### Bug Fixes
+
+* toggle sheet ([a9f1f12](https://github.com/nusr/excel/commit/a9f1f12dba58be7f04e0dfe150bf0d69b181a31c))
+
 ## [0.0.4](https://github.com/nusr/excel/compare/v0.0.3...v0.0.4) (2024-12-24)
 
 ### Bug Fixes
