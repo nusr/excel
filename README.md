@@ -46,8 +46,9 @@ Create an `.env` file and modify it as the `.env.example` file
 
 ## Supbase
 
-Collaborative editing requires supabase to be configured.
+Collaborative editing uses [Supabase](https://supabase.com/) as backend.
 You need to configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+With Row Level Security (RLS) disabled, anonymous users will be able to read/write data in the table.
 
 ```sql
 CREATE TABLE IF NOT EXISTS history (
