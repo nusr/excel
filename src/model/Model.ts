@@ -7,7 +7,6 @@ import {
   IRange,
   CustomItem,
   DrawingElement,
-  ChangeEventType,
   DefinedNameItem,
   WorksheetData,
   EMergeCellType,
@@ -22,7 +21,6 @@ import {
   XLSX_MAX_COL_COUNT,
   eventEmitter,
   containRange,
-  modelLog,
   KEY_LIST,
 } from '../util';
 import { Workbook } from './workbook';
@@ -37,64 +35,25 @@ import { FilterManger } from './filter';
 import { ScrollManager } from './scroll';
 import * as Y from 'yjs';
 
-export function modelToChangeSet(list: Y.YEvent<any>[]) {
-  const result = new Set<ChangeEventType>();
-  const set = new Set<keyof ModelJSON>(KEY_LIST);
-  for (const item of list) {
-    if (!item) {
-      continue;
-    }
-    const keySet = new Set(item?.changes?.keys?.keys?.() || []);
-    const pathSet = new Set(item.path || []);
-    for (const key of keySet.keys()) {
-      if (set.has(key as any)) {
-        result.add(key as any);
-      }
-    }
-    for (const key of pathSet.keys()) {
-      if (set.has(key as any)) {
-        result.add(key as any);
-      }
-    }
-    if (pathSet.has('worksheets') || keySet.has('worksheets')) {
-      if (keySet.has('formula') || keySet.has('value')) {
-        result.add('cellValue');
-      } else {
-        result.add('cellStyle');
-      }
-    } else {
-      result.add('cellStyle');
-    }
-  }
-  return result;
-}
-
 export class Model implements IModel {
-  private workbookManager: Workbook;
-  private rangeMapManager: RangeMap;
-  private drawingsManager: Drawing;
-  private definedNameManager: DefinedName;
-  private worksheetManager: Worksheet;
-  private mergeCellManager: MergeCell;
-  private rowManager: RowManager;
-  private colManager: ColManager;
-  private filterManager: FilterManger;
-  private scrollManager: ScrollManager;
-  private doc: Y.Doc;
-  private undoManager: Y.UndoManager;
-  private changeSet = new Set<ChangeEventType>();
+  private readonly workbookManager: Workbook;
+  private readonly rangeMapManager: RangeMap;
+  private readonly drawingsManager: Drawing;
+  private readonly definedNameManager: DefinedName;
+  private readonly worksheetManager: Worksheet;
+  private readonly mergeCellManager: MergeCell;
+  private readonly rowManager: RowManager;
+  private readonly colManager: ColManager;
+  private readonly filterManager: FilterManger;
+  private readonly scrollManager: ScrollManager;
+  private readonly doc: Y.Doc;
+  private readonly undoManager: Y.UndoManager;
   constructor(hooks: Pick<IHooks, 'doc' | 'worker'>) {
     const { doc, worker } = hooks;
     this.doc = doc;
     const root = this.getRoot();
     root.observeDeep((event) => {
-      const changeSet = modelToChangeSet(event);
-      for (const item of this.changeSet.keys()) {
-        changeSet.add(item);
-      }
-      modelLog('observeDeep', doc.clientID, changeSet);
-      this.render(changeSet);
-      this.changeSet = new Set<ChangeEventType>();
+      eventEmitter.emit('modelChange', { event });
     });
     this.undoManager = new Y.UndoManager(root, {
       trackedOrigins: new Set([SYNC_FLAG.MODEL, SYNC_FLAG.SKIP_UPDATE]),
@@ -121,48 +80,8 @@ export class Model implements IModel {
   getRoot() {
     return this.doc.getMap('excel') as ModelRoot;
   }
-  render(changeSet: Set<ChangeEventType>) {
-    if (changeSet.size === 0) {
-      return;
-    }
-    modelLog('render', changeSet);
-    eventEmitter.emit('modelChange', { changeSet });
-  }
-  async emitChange(changeSet: Set<ChangeEventType>) {
-    modelLog('emitChange', changeSet);
-    const localChangeList: ChangeEventType[] = [
-      'antLine',
-      'undo',
-      'redo',
-      'scroll',
-      'rangeMap',
-      'currentSheetId',
-      'customHeight',
-      'customWidth',
-    ];
-
-    if (
-      changeSet.has('cellValue') ||
-      changeSet.has('definedNames') ||
-      changeSet.has('currentSheetId')
-    ) {
-      const result = await this.worksheetManager.computeFormulas();
-      if (result) {
-        this.changeSet.add('cellValue');
-      }
-    }
-
-    for (const item of localChangeList) {
-      if (changeSet.has(item)) {
-        this.changeSet.add(item);
-        changeSet.delete(item);
-      }
-    }
-
-    if (this.changeSet.size > 0) {
-      this.render(this.changeSet);
-      this.changeSet = new Set<ChangeEventType>();
-    }
+  computeFormulas() {
+    return this.worksheetManager.computeFormulas();
   }
 
   getSheetList(): WorksheetType[] {

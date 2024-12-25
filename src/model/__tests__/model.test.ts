@@ -1,10 +1,6 @@
 import { Model } from '..';
 import { SheetRange } from '../../util';
-import {
-  ModelJSON,
-  RequestFormulas,
-  IHooks,
-} from '../../types';
+import { ModelJSON, RequestFormulas, IHooks } from '../../types';
 import { getMockHooks } from './util';
 import * as Y from 'yjs';
 
@@ -24,7 +20,7 @@ describe('model.test.ts', () => {
     const model = new Model(mockTestHooks as Pick<IHooks, 'doc' | 'worker'>);
     model.addSheet();
     model.setCellValue('=sum(1,1)', new SheetRange(0, 0, 1, 1, ''));
-    model.emitChange(new Set(['cellValue']));
+    await model.computeFormulas();
     const sheetId = model.getCurrentSheetId();
     const result: RequestFormulas = {
       currentSheetId: sheetId,

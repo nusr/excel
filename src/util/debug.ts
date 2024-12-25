@@ -1,6 +1,11 @@
 import { getRandomColor } from './util';
 
-type NameSpaceType = 'react' | 'model' | 'test' | 'collaboration' | string;
+type NameSpaceType =
+  | 'react'
+  | 'model'
+  | 'test'
+  | 'collaboration'
+  | 'controller';
 
 export class Debug {
   namespace: NameSpaceType;
@@ -36,5 +41,6 @@ export class Debug {
 }
 
 export const modelLog = new Debug('model').init();
+export const controllerLog = new Debug('controller').init();
 export const reactLog = new Debug('react').init();
 export const collaborationLog = new Debug('collaboration').init();

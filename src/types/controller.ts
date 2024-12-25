@@ -17,7 +17,7 @@ export interface IController extends IBaseModel {
   /**
    * Emits a change event.
    */
-  emitChange(): void;
+  emitChange(): Promise<void>;
 
   /**
    * Sets the next active cell based on the given direction.

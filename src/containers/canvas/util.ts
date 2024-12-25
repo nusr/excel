@@ -335,7 +335,7 @@ export function initCanvas(
   const resize = () => {
     renderCanvas(new Set<ChangeEventType>(['customWidth']));
   };
-  const offEvent = eventEmitter.on('modelChange', ({ changeSet }) => {
+  const offEvent = eventEmitter.on('renderChange', ({ changeSet }) => {
     handleStateChange(changeSet, controller);
     mainCanvas.render({ changeSet });
   });
