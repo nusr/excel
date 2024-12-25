@@ -109,7 +109,7 @@ export function registerGlobalEvent(
       }
       if (!deepEqual(newRange, oldRange)) {
         controller.setCopyRange(newRange);
-        eventEmitter.emit('modelChange', {
+        eventEmitter.emit('renderChange', {
           changeSet: new Set(['cellStyle']),
         });
       }

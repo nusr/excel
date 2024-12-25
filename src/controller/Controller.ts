@@ -41,6 +41,7 @@ import {
   IMAGE_FORMAT,
   formatCustomData,
   eventEmitter,
+  controllerLog,
 } from '../util';
 import { numberFormat, isDateFormat, convertDateToNumber } from '../formula';
 import { transaction } from './decorator';
@@ -55,12 +56,12 @@ const defaultScrollValue: Omit<ScrollValue, 'row' | 'col'> = {
 
 export class Controller implements IController {
   private scrollValue: Record<string, Omit<ScrollValue, 'row' | 'col'>> = {};
-  private model: IModel;
+  private readonly model: IModel;
   private changeSet = new Set<ChangeEventType>();
   private floatElementUuid = '';
   private copyRange: IRange | undefined = undefined;
   private isCut = false;
-  private hooks: IHooks;
+  private readonly hooks: IHooks;
   private sheetViewSize: IWindowSize | null = null;
   private canvasSize: CanvasOverlayPosition = {
     top: 0,
@@ -144,15 +145,26 @@ export class Controller implements IController {
   transaction = <T>(fn: () => T, origin?: any): T => {
     return this.model.transaction(fn, origin);
   };
-  emitChange() {
-    if (
-      this.changeSet.has('customHeight') ||
-      this.changeSet.has('customWidth')
-    ) {
+  async emitChange() {
+    const changeSet = new Set(this.changeSet);
+    this.changeSet = new Set<ChangeEventType>();
+    if (changeSet.has('customHeight') || changeSet.has('customWidth')) {
       this.setSheetViewSize();
     }
-    this.model.emitChange(this.changeSet);
-    this.changeSet = new Set<ChangeEventType>();
+    if (
+      changeSet.has('cellValue') ||
+      changeSet.has('definedNames') ||
+      changeSet.has('currentSheetId')
+    ) {
+      const result = await this.model.computeFormulas();
+      if (result) {
+        changeSet.add('cellValue');
+      }
+    }
+    if (changeSet.size > 0) {
+      controllerLog('emitChange', changeSet);
+      eventEmitter.emit('renderChange', { changeSet });
+    }
   }
   getActiveRange(r?: IRange) {
     return this.model.getActiveRange(r);

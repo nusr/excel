@@ -47,7 +47,7 @@ export const Theme: React.FunctionComponent = memo(() => {
   useEffect(() => {
     setTheme(themeData);
     updateCssVariable(themeData);
-    eventEmitter.emit('modelChange', {
+    eventEmitter.emit('renderChange', {
       changeSet: new Set(['cellStyle']),
     });
   }, [themeData]);

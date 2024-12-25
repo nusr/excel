@@ -1,6 +1,7 @@
 import { ResultType } from './parser';
 import { IRange } from './range';
 import type { ModelRoot, ModelJSON } from './yjs';
+import type { YEvent } from 'yjs';
 
 export type ChartType =
   | 'bar'
@@ -779,19 +780,7 @@ export interface IModel
    */
   pasteRange(range: IRange, isCut: boolean): IRange;
 
-  /**
-   * Emits a change event.
-   *
-   * @param dataset - A set of change event types to emit.
-   */
-  emitChange(dataset: Set<ChangeEventType>): void;
-
-  /**
-   * Renders the model based on the provided dataset.
-   *
-   * @param dataset - A set of change event types to render.
-   */
-  render(dataset: Set<ChangeEventType>): void;
+  computeFormulas(): Promise<boolean>;
 
   /**
    * Gets the root of the model.
@@ -814,7 +803,7 @@ export type UserItem = {
   clientId: number;
 };
 export type EventEmitterType = {
-  modelChange: {
+  renderChange: {
     changeSet: Set<ChangeEventType>;
   };
   awarenessChange: {
@@ -822,6 +811,9 @@ export type EventEmitterType = {
   };
   rangeChange: {
     range: IRange;
+  };
+  modelChange: {
+    event: YEvent<any>[];
   };
 };
 
