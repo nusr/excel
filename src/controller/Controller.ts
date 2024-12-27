@@ -42,6 +42,8 @@ import {
   formatCustomData,
   eventEmitter,
   controllerLog,
+  copyOrCut,
+  paste,
 } from '../util';
 import { numberFormat, isDateFormat, convertDateToNumber } from '../formula';
 import { transaction } from './decorator';
@@ -63,6 +65,7 @@ export class Controller implements IController {
   private isCut = false;
   private readonly hooks: IHooks;
   private sheetViewSize: IWindowSize | null = null;
+  private readonly = false;
   private canvasSize: CanvasOverlayPosition = {
     top: 0,
     left: 0,
@@ -72,6 +75,12 @@ export class Controller implements IController {
   constructor(model: IModel, hooks: IHooks) {
     this.model = model;
     this.hooks = hooks;
+  }
+  setReadOnly(readOnly: boolean): void {
+    this.readonly = readOnly;
+  }
+  getReadOnly(): boolean {
+    return this.readonly;
   }
   setCanvasSize(size: CanvasOverlayPosition) {
     this.canvasSize = { ...size };
@@ -173,7 +182,10 @@ export class Controller implements IController {
     const { range, isMerged } = this.getActiveRange();
     let startCol = range.col;
     let startRow = range.row;
-    const sheetInfo = this.getSheetInfo(range.sheetId)!;
+    const sheetInfo = this.getSheetInfo(range.sheetId);
+    if (!sheetInfo) {
+      return;
+    }
     const result: IRange = {
       ...range,
       rowCount: 1,
@@ -313,9 +325,14 @@ export class Controller implements IController {
     this.changeSet.add('mergeCells');
     this.changeSet.add('autoFilter');
     this.changeSet.add('drawings');
+    this.changeSet.add('workbook');
+    this.changeSet.add('worksheets');
+    this.changeSet.add('rangeMap');
+    this.changeSet.add('scroll');
     this.changeSet.add('customHeight');
     this.changeSet.add('customWidth');
     this.model.fromJSON(json);
+    this.emitChange();
   }
   toJSON(): ModelJSON {
     return this.model.toJSON();
@@ -533,7 +550,6 @@ export class Controller implements IController {
     return { ...result, ...data };
   }
 
-  @transaction()
   setScroll(data: ScrollValue, sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
     let { row, col, ...realData } = data;
@@ -773,14 +789,14 @@ export class Controller implements IController {
     let custom: CustomClipboardData | null = null;
     let files: FileList | null = null;
     if (!event) {
-      const data = await this.hooks.paste();
+      const data = await paste();
       html = data[HTML_FORMAT];
       text = data[PLAIN_FORMAT];
       if (data[CUSTOM_FORMAT]) {
         custom = data[CUSTOM_FORMAT];
       }
       if (custom && custom.type === 'cut') {
-        this.hooks.copyOrCut(
+        copyOrCut(
           {
             [PLAIN_FORMAT]: '',
             [HTML_FORMAT]: '',
@@ -906,7 +922,7 @@ export class Controller implements IController {
       );
       event.clipboardData?.setData(IMAGE_FORMAT, imageData);
     } else {
-      this.hooks.copyOrCut(data, type);
+      copyOrCut(data, type);
     }
     this.changeSet.add('antLine');
 

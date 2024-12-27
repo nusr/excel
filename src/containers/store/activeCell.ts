@@ -1,6 +1,6 @@
 import type { CanvasOverlayPosition } from '../../types';
 import { DEFAULT_POSITION } from '../../util';
-import { BaseStore } from './base';
+import { create } from 'zustand';
 
 export type CellStoreType = CanvasOverlayPosition & {
   defineName: string;
@@ -26,4 +26,6 @@ const cellData: CellStoreType = {
   colCount: 1,
 };
 
-export const activeCellStore = new BaseStore<CellStoreType>(cellData);
+export const useActiveCell = create<CellStoreType>(() => ({
+  ...cellData,
+}));

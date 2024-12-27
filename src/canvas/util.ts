@@ -34,8 +34,9 @@ export function measureText(
   char: string,
 ): IWindowSize {
   const mapKey = `${char}__${ctx.font}`;
-  if (measureTextMap.has(mapKey)) {
-    return measureTextMap.get(mapKey)!;
+  const t = measureTextMap.get(mapKey);
+  if (t) {
+    return t;
   }
   const text = ctx.measureText(char);
   const { actualBoundingBoxAscent, actualBoundingBoxDescent } = text;

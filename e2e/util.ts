@@ -16,8 +16,6 @@ export async function goto(page: Page) {
     const type = msg.type();
     if (type === 'error' || type === 'warning') {
       throw new Error(msg.text());
-    } else {
-      // console.log(msg.text());
     }
   });
 

@@ -19,6 +19,7 @@ jobs:
         run: |
           npm i -g pnpm
           pnpm i
+          pnpm exec playwright install --with-deps
           npm run type-check
           npm run lint
           npm run build
@@ -28,3 +29,5 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+      - name: E2E test
+        run: npm run e2e

@@ -8,7 +8,12 @@ import React, {
 } from 'react';
 import { EditorStatus } from '../../types';
 import styles from './index.module.css';
-import { CellStoreType, coreStore, StyleStoreType, useExcel } from '../store';
+import {
+  CellStoreType,
+  useCoreStore,
+  StyleStoreType,
+  useExcel,
+} from '../store';
 import {
   MAX_NAME_LENGTH,
   FORMULA_EDITOR_ROLE,
@@ -17,6 +22,7 @@ import {
   TEXTAREA_MAX_ROWS,
   LINE_BREAK,
   isMergeContent,
+  npx,
 } from '../../util';
 
 interface MultipleLineEditorProps {
@@ -77,7 +83,7 @@ export function getEditorStyle(
   }
   const result = {
     ...editorStyle,
-    top: style.top,
+    top: style.top - npx(1),
     left: style.left,
     width: style.width,
     height: style.height,
@@ -94,6 +100,7 @@ function countRows(count: number) {
 export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps> =
   memo(({ initValue, style, testId, isMergeCell, className }) => {
     const { controller } = useExcel();
+    const setEditorStatus = useCoreStore((state) => state.setEditorStatus);
     const ref = useRef<HTMLTextAreaElement>(null);
     const [rowCount, setRowCount] = useState(minRows);
     useEffect(() => {
@@ -126,9 +133,7 @@ export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps
               controller.setNextActiveCell('right');
             }
           });
-          coreStore.setState({
-            editorStatus: EditorStatus.NONE,
-          });
+          setEditorStatus(EditorStatus.NONE);
           event.currentTarget.value = '';
           event.currentTarget.blur();
         } else {

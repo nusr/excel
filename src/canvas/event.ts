@@ -8,7 +8,7 @@ import {
   paste,
 } from '../util';
 import { keyboardEventList, scrollBar } from './shortcut';
-import { coreStore } from '../containers/store';
+import { useCoreStore } from '../containers/store';
 
 type EventType = {
   target?: {
@@ -55,9 +55,7 @@ export function registerGlobalEvent(
     if (event.metaKey || event.ctrlKey) {
       return;
     }
-    coreStore.setState({
-      editorStatus: EditorStatus.EDIT_CELL,
-    });
+    useCoreStore.getState().setEditorStatus(EditorStatus.EDIT_CELL);
   }
 
   const handleWheel = throttle((event: WheelEvent) => {

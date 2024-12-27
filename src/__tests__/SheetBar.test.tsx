@@ -8,12 +8,14 @@ describe('SheetBar.test.ts', () => {
   });
   describe('sheet bar', () => {
     test('normal', () => {
-      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(1);
+      expect(screen.getByTestId('sheet-bar-list').childNodes).toHaveLength(1);
     });
-    test('add sheet', () => {
+    test('add sheet', async () => {
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
-      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(3);
+      expect(
+        (await screen.findByTestId('sheet-bar-list')).childNodes,
+      ).toHaveLength(3);
     });
     test('click active', () => {
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
@@ -97,40 +99,52 @@ describe('SheetBar.test.ts', () => {
         screen.getByTestId('sheet-bar-context-menu').childNodes,
       ).toHaveLength(6);
     });
-    test('hide sheet', () => {
+    test('hide sheet', async () => {
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-insert'));
-      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(2);
+
+      expect(
+        (await screen.findByTestId('sheet-bar-list')).childNodes,
+      ).toHaveLength(2);
 
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-hide'));
-      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(1);
+
+      expect(
+        (await screen.findByTestId('sheet-bar-list')).childNodes,
+      ).toHaveLength(1);
     });
 
-    test('insert sheet', () => {
+    test('insert sheet', async () => {
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-insert'));
 
-      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(2);
+      expect(
+        (await screen.findByTestId('sheet-bar-list')).childNodes,
+      ).toHaveLength(2);
     });
 
-    test('delete sheet', () => {
+    test('delete sheet', async () => {
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-insert'));
-      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(2);
+      expect(
+        (await screen.findByTestId('sheet-bar-list')).childNodes,
+      ).toHaveLength(2);
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-delete'));
-      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(1);
+      expect(
+        (await screen.findByTestId('sheet-bar-list')).childNodes,
+      ).toHaveLength(1);
     });
   });
   describe('unhide sheet', () => {
@@ -143,7 +157,7 @@ describe('SheetBar.test.ts', () => {
       ).toBeDisabled();
     });
 
-    test('unhide', () => {
+    test('unhide', async () => {
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
@@ -156,16 +170,19 @@ describe('SheetBar.test.ts', () => {
         clientX: 199,
       });
       expect(
-        screen.getByTestId('sheet-bar-context-menu-unhide'),
+        await screen.findByTestId('sheet-bar-context-menu-unhide'),
       ).not.toBeDisabled();
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-unhide'));
 
       fireEvent.click(
         screen.getByTestId('sheet-bar-context-menu-unhide-dialog-confirm'),
       );
-      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(4);
+
+      expect(
+        (await screen.findByTestId('sheet-bar-list')).childNodes,
+      ).toHaveLength(4);
     });
-    test('unhide change', () => {
+    test('unhide change', async () => {
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
@@ -182,20 +199,26 @@ describe('SheetBar.test.ts', () => {
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
-      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-unhide'));
+      fireEvent.click(
+        await screen.findByTestId('sheet-bar-context-menu-unhide'),
+      );
       fireEvent.change(
-        screen.getByTestId('sheet-bar-context-menu-unhide-dialog-select'),
+        await screen.findByTestId(
+          'sheet-bar-context-menu-unhide-dialog-select',
+        ),
         { target: { value: '4' } },
       );
 
       fireEvent.click(
-        screen.getByTestId('sheet-bar-context-menu-unhide-dialog-confirm'),
+        await screen.findByTestId(
+          'sheet-bar-context-menu-unhide-dialog-confirm',
+        ),
       );
-      expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent(
-        'Sheet1',
-      );
+      expect(
+        await screen.findByTestId('sheet-bar-active-item'),
+      ).toHaveTextContent('Sheet1');
     });
-    test('unhide cancel', () => {
+    test('unhide cancel', async () => {
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
@@ -207,12 +230,18 @@ describe('SheetBar.test.ts', () => {
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
-      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-unhide'));
+      fireEvent.click(
+        await screen.findByTestId('sheet-bar-context-menu-unhide'),
+      );
 
       fireEvent.click(
-        screen.getByTestId('sheet-bar-context-menu-unhide-dialog-cancel'),
+        await screen.findByTestId(
+          'sheet-bar-context-menu-unhide-dialog-cancel',
+        ),
       );
-      expect(screen.getByTestId('sheet-bar-list')!.childNodes).toHaveLength(3);
+      expect(
+        (await screen.findByTestId('sheet-bar-list')).childNodes,
+      ).toHaveLength(3);
     });
   });
 });

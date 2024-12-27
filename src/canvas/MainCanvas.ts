@@ -12,6 +12,7 @@ import { getTheme } from '../theme';
 import * as ComLink from 'comlink';
 
 export class MainCanvas implements MainView {
+  static instance: MainCanvas;
   private controller: IController;
   private canvas: HTMLCanvasElement;
   constructor(controller: IController, canvas: HTMLCanvasElement) {

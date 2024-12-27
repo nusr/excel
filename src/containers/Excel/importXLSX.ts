@@ -644,7 +644,7 @@ export function convertXMLDataToModel(
         if (!col) {
           continue;
         }
-        const range = parseReference(col.r)!;
+        const range = parseReference(col.r);
         if (!range) {
           continue;
         }

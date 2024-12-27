@@ -2,16 +2,17 @@ import {
   SupabaseClient,
   RealtimeChannel,
   REALTIME_LISTEN_TYPES,
+  type AuthChangeEvent,
+  type Session,
 } from '@supabase/supabase-js';
 import type { Database, CollaborationOptions } from './type';
 import {
   SYNC_FLAG,
-  IRange,
   UserItem,
   ICollaborationProvider,
   DocumentItem,
 } from '../types';
-import { collaborationLog, eventEmitter, omit } from '../util';
+import { collaborationLog, omit } from '../util';
 import * as Y from 'yjs';
 import { uint8ArrayToString, stringToUint8Array } from './util';
 import { DocumentDB } from './local';
@@ -30,6 +31,13 @@ export class CollaborationProvider implements ICollaborationProvider {
   private readonly broadcastChannel: BroadcastChannel;
   private readonly _isOnline: boolean = false;
   private readonly awareness: awarenessProtocol.Awareness;
+  private awarenessChangeCallback: ((users: UserItem[]) => void) | null = null;
+  private authChangeCallback:
+    | ((
+        event: AuthChangeEvent,
+        session: Session | null,
+      ) => void | Promise<void>)
+    | null = null;
   constructor(doc: Y.Doc, options: CollaborationOptions = {}) {
     if (options.supabaseUrl && options.supabaseAnonKey && navigator.onLine) {
       this._isOnline = true;
@@ -56,6 +64,40 @@ export class CollaborationProvider implements ICollaborationProvider {
   }
   private get docId() {
     return this.doc.guid;
+  }
+  canUseRemoteDB() {
+    return Boolean(this.remoteDB && this.channel);
+  }
+  async login() {
+    if (!this.remoteDB) {
+      return;
+    }
+    const result = await this.remoteDB.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: window.location.href,
+      },
+    });
+    collaborationLog('login result:', result);
+  }
+  async logOut() {
+    if (!this.remoteDB) {
+      return;
+    }
+    const result = await this.remoteDB.auth.signOut();
+    collaborationLog('log out result:', result);
+  }
+
+  setAuthChangeCallback(
+    callback: (
+      event: AuthChangeEvent,
+      session: Session | null,
+    ) => void | Promise<void>,
+  ): void {
+    this.authChangeCallback = callback;
+  }
+  setAwarenessChangeCallback(callback: (users: UserItem[]) => void): void {
+    this.awarenessChangeCallback = callback;
   }
 
   isOnline = () => {
@@ -116,13 +158,27 @@ export class CollaborationProvider implements ICollaborationProvider {
       }
       const users: UserItem[] = [];
       for (const [key, value] of list.entries()) {
-        if (key === this.clientID) {
+        if (key === this.clientID || !value) {
           continue;
         }
-        users.push({ range: value.range as IRange, clientId: key });
+        const userData = value as Pick<
+          UserItem,
+          'range' | 'userId' | 'userName'
+        >;
+        users.push({
+          range: userData.range,
+          clientId: key,
+          userName: userData.userName,
+          userId: userData.userId,
+        });
       }
-      collaborationLog('awarenessChange', users);
-      eventEmitter.emit('awarenessChange', { users });
+      collaborationLog('awareness', users);
+      this.awarenessChangeCallback?.(users);
+    });
+
+    this.remoteDB?.auth.onAuthStateChange((event, session) => {
+      collaborationLog('onAuthStateChange', event, session);
+      this.authChangeCallback?.(event, session);
     });
   }
 
@@ -282,7 +338,7 @@ export class CollaborationProvider implements ICollaborationProvider {
       .eq('id', this.docId);
     return result?.data?.[0];
   }
-  syncRange(range: IRange) {
-    this.awareness.setLocalStateField('range', range);
+  syncRange(data: Pick<UserItem, 'range' | 'userId' | 'userName'>) {
+    this.awareness.setLocalState(data);
   }
 }

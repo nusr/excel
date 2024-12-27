@@ -1,7 +1,11 @@
-import { type EventHandler, type EventData, EditorStatus } from '../../../types';
+import {
+  type EventHandler,
+  type EventData,
+  EditorStatus,
+} from '../../../types';
 import { PointerEvent } from 'react';
 import { isSameRange } from '../../../util';
-import { coreStore } from '../../../containers/store';
+import { useCoreStore } from '../../../containers/store';
 import { checkFocus, setActiveCellValue } from '../../../canvas';
 
 const DOUBLE_CLICK_TIME = 300;
@@ -103,7 +107,7 @@ export class MainHandler implements EventHandler {
     if (isSameRange(activeCell, range)) {
       const delay = timeStamp - this.lastTimeStamp;
       if (delay < DOUBLE_CLICK_TIME) {
-        coreStore.setState({ editorStatus: EditorStatus.EDIT_CELL });
+        useCoreStore.getState().setEditorStatus(EditorStatus.EDIT_CELL);
       }
     } else {
       if (checkFocus()) {

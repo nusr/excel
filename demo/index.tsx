@@ -6,14 +6,12 @@ import {
   initCollaboration,
   initDoc,
   wrap,
-  copyOrCut,
-  paste,
   type WorkerMethod,
-  AppWithCollaboration,
+  Excel,
   DEFAULT_EXCEL_ID,
 } from '../src';
 import Worker from './worker?worker';
-import './sentry'
+import './sentry';
 
 const workerInstance = wrap<WorkerMethod>(new Worker());
 
@@ -26,8 +24,6 @@ const provider = initCollaboration(doc, {
   supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
 });
 const controller = initController({
-  copyOrCut,
-  paste,
   worker: workerInstance,
   doc,
 });
@@ -37,7 +33,7 @@ const controller = initController({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <StateContext value={{ provider, controller }}>
-      <AppWithCollaboration />
+      <Excel />
     </StateContext>
   </StrictMode>,
 );

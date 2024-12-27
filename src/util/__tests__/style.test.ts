@@ -50,7 +50,7 @@ describe('style.test.ts', () => {
     });
     it('should get normal normal 12px simsun,sans-serif', () => {
       expect(makeFont('italic', 'bold', 14, 'simsun')).toEqual(
-        'italic bold 14px simsun,Source Code Pro,sans-serif',
+        'italic bold 14px Source Code Pro,simsun,sans-serif',
       );
     });
   });

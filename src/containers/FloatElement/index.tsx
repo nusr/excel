@@ -8,7 +8,11 @@ import React, {
   useCallback,
 } from 'react';
 import { IWindowSize } from '../../types';
-import { coreStore, FloatElementItem, useExcel } from '../../containers/store';
+import {
+  useCoreStore,
+  FloatElementItem,
+  useExcel,
+} from '../../containers/store';
 import { FloatElement } from './FloatElement';
 import styles from './FloatElement.module.css';
 import { getHitInfo, classnames } from '../../util';
@@ -27,6 +31,7 @@ interface Props {
 const FloatElementContainer: React.FunctionComponent<Props> = memo(
   ({ floatElementList, activeUuid }) => {
     const { controller } = useExcel();
+    const setActiveUuid = useCoreStore((state) => state.setActiveUuid);
     const state = useRef<State>({
       ...INITIAL_STATE,
       position: { ...INITIAL_STATE.position },
@@ -219,7 +224,7 @@ const FloatElementContainer: React.FunctionComponent<Props> = memo(
         ...INITIAL_STATE,
         position: { ...INITIAL_STATE.position },
       };
-      coreStore.setState({ activeUuid: '' });
+      setActiveUuid('');
       controller.setFloatElementUuid('');
       toggleEvents(false);
     }, [toggleEvents]);
@@ -255,7 +260,7 @@ const FloatElementContainer: React.FunctionComponent<Props> = memo(
                 state.current.moveStartY = event.clientY;
                 state.current.activeUuid = v.uuid;
                 controller.setFloatElementUuid(v.uuid);
-                coreStore.setState({ activeUuid: v.uuid });
+                setActiveUuid(v.uuid);
                 setPosition({
                   top: v.top,
                   left: v.left,

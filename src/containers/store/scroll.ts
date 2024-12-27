@@ -1,4 +1,4 @@
-import { BaseStore } from './base';
+import { create } from 'zustand';
 
 export interface ScrollStore {
   scrollTop: number;
@@ -11,7 +11,7 @@ export interface ScrollStore {
   canvasWidth: number;
 }
 
-export const scrollStore = new BaseStore<ScrollStore>({
+export const useScrollStore = create<ScrollStore>(() => ({
   scrollTop: 0,
   scrollLeft: 0,
   top: 0,
@@ -20,4 +20,4 @@ export const scrollStore = new BaseStore<ScrollStore>({
   col: 0,
   canvasHeight: 0,
   canvasWidth: 0,
-});
+}));

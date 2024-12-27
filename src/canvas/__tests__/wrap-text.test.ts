@@ -2,7 +2,7 @@ import { initController, getMockHooks } from '../../controller';
 import { IController, EMergeCellType } from '../../types';
 import { compareScreenShot } from './util';
 
-describe.skip('wrap-text.test.ts', () => {
+describe('wrap-text.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
     controller = initController(getMockHooks());

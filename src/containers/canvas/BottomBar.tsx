@@ -1,21 +1,19 @@
-import React, { useState, memo, useSyncExternalStore } from 'react';
+import React, { useState, memo } from 'react';
 import { Button } from '../../components';
 import styles from './index.module.css';
 import { scrollBar } from '../../canvas';
 import { $ } from '../../i18n';
 import { classnames, MAX_ADD_ROW_THRESHOLD } from '../../util';
-import { scrollStore, useExcel } from '../store';
+import { useExcel, useScrollStore } from '../store';
 
 const defaultData = 10;
 
 export const BottomBar = memo(() => {
   const { controller } = useExcel();
   const [value, setValue] = useState(defaultData);
-  const scroll = useSyncExternalStore(
-    scrollStore.subscribe,
-    scrollStore.getSnapshot,
-  );
-  const showBottomBar = scroll.scrollTop / scroll.canvasHeight >= 0.91;
+  const scrollTop = useScrollStore((s) => s.scrollTop);
+  const canvasHeight = useScrollStore((s) => s.canvasHeight);
+  const showBottomBar = scrollTop / canvasHeight >= 0.91;
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.stopPropagation();
     const val = parseInt(event.target.value, 10);
@@ -30,7 +28,10 @@ export const BottomBar = memo(() => {
     }
   };
   const handleClick = () => {
-    const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
+    const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+    if (!sheetInfo) {
+      return;
+    }
     controller.addRow(sheetInfo.rowCount - 1, value);
     const viewSize = controller.getSheetViewSize();
     scrollBar(controller, 0, viewSize.height);

@@ -107,5 +107,8 @@
   "rename-file": "Rename",
   "default-name": "default name",
   "change-file-name": "Change File Name",
-  "user-name": "User"
+  "user-name": "User",
+  "no-login-editing": "You can't edit a document until you're logged in",
+  "login": "Login",
+  "log-out": "Log Out"
 }

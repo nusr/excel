@@ -216,7 +216,10 @@ export class Model implements IModel {
     if (count <= 0) {
       return;
     }
-    const sheetInfo = this.getSheetInfo()!;
+    const sheetInfo = this.getSheetInfo();
+    if (!sheetInfo) {
+      return;
+    }
     if (sheetInfo.colCount >= XLSX_MAX_COL_COUNT) {
       return;
     }
@@ -231,7 +234,10 @@ export class Model implements IModel {
     if (count <= 0) {
       return;
     }
-    const sheetInfo = this.getSheetInfo()!;
+    const sheetInfo = this.getSheetInfo();
+    if (!sheetInfo) {
+      return;
+    }
     const id = this.getCurrentSheetId();
     const newCount = sheetInfo.colCount - count;
     this.workbookManager.updateSheetInfo({ colCount: newCount }, id);
@@ -253,7 +259,10 @@ export class Model implements IModel {
     if (count <= 0) {
       return;
     }
-    const sheetInfo = this.getSheetInfo()!;
+    const sheetInfo = this.getSheetInfo();
+    if (!sheetInfo) {
+      return;
+    }
     if (sheetInfo.rowCount >= XLSX_MAX_ROW_COUNT) {
       return;
     }
@@ -267,7 +276,10 @@ export class Model implements IModel {
     if (count <= 0) {
       return;
     }
-    const sheetInfo = this.getSheetInfo()!;
+    const sheetInfo = this.getSheetInfo();
+    if (!sheetInfo) {
+      return;
+    }
     const newCount = sheetInfo.rowCount - count;
     this.workbookManager.updateSheetInfo({ rowCount: newCount });
     this.drawingsManager.deleteRow(rowIndex, count);

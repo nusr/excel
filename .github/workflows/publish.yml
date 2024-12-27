@@ -1,8 +1,11 @@
-name: Release Package
+name: Publish to NPM
 
 on:
   release:
     types: [published]
+
+env:
+  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 jobs:
   publish:
@@ -12,11 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: 'https://registry.npmjs.org'
       - name: Build
-        run: |
-          npm i -g pnpm
-          pnpm i
-          npm run build
-      - uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
+        run: npm i && npm run build
+      - name: Publish package on NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

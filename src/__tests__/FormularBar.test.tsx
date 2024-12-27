@@ -55,15 +55,19 @@ describe('FormulaBar.test.tsx', () => {
       fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
         key: 'Enter',
       });
-      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('foo');
+      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
+        'foo',
+      );
 
       fireEvent.keyDown(document.body, { key: 'Enter' });
 
-      fireEvent.click(screen.getByTestId('formula-bar-name-trigger'));
-      const dom = screen.getByTestId('formula-bar-name-popup');
+      fireEvent.click(await screen.findByTestId('formula-bar-name-trigger'));
+      const dom = await screen.findByTestId('formula-bar-name-popup');
       dom.setAttribute('data-value', 'foo');
       fireEvent.click(dom);
-      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('foo');
+      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
+        'foo',
+      );
     });
 
     test('duplicate', async () => {

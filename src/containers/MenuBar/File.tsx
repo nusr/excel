@@ -4,7 +4,7 @@ import React, {
   FunctionComponent,
   useEffect,
 } from 'react';
-import { fileStore, useExcel } from '../store';
+import { useExcel, useUserInfo } from '../store';
 import styles from './index.module.css';
 import { Dialog } from '../../components';
 import { $ } from '../../i18n';
@@ -17,10 +17,11 @@ type Props = {
 export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
   const { provider } = useExcel();
   const [value, setValue] = useState('');
-  const { name } = fileStore.useStore();
+  const fileName = useUserInfo((s) => s.fileName);
+  const setFileName = useUserInfo((s) => s.setFileName);
   useEffect(() => {
-    setValue(name || $('default-name'));
-  }, [name]);
+    setValue(fileName || $('default-name'));
+  }, [fileName]);
   const handleClick = useCallback(() => {
     setVisible(true);
   }, []);
@@ -35,14 +36,14 @@ export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
       return;
     }
     provider?.updateDocument(value).then(() => {
-      fileStore.setState({ name: value });
+      setFileName(value);
       setVisible(false);
     });
   }, [value, provider]);
   return (
     <React.Fragment>
       <div className={styles.file} onClick={handleClick}>
-        {name || $('default-name')}
+        {fileName || $('default-name')}
       </div>
       <Dialog
         title={$('change-file-name')}

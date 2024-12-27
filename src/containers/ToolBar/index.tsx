@@ -1,4 +1,4 @@
-import React, { useSyncExternalStore, useMemo, memo, useCallback } from 'react';
+import React, { useMemo, memo, useCallback } from 'react';
 import {
   Icon,
   Button,
@@ -20,12 +20,7 @@ import {
   EVerticalAlign,
 } from '../../types';
 import styles from './index.module.css';
-import {
-  fontFamilyStore,
-  styleStore,
-  coreStore,
-  useExcel,
-} from '../../containers/store';
+import { useStyleStore, useCoreStore, useExcel } from '../../containers/store';
 import { InsertFloatingPicture, InsertChart } from '../FloatElement/Toolbar';
 import { $ } from '../../i18n';
 import { BorderToolBar } from './Border';
@@ -38,18 +33,14 @@ import {
 
 export const ToolbarContainer = memo(() => {
   const { controller } = useExcel();
-  const coreData = useSyncExternalStore(
-    coreStore.subscribe,
-    coreStore.getSnapshot,
-  );
-  const cellStyle = useSyncExternalStore(
-    styleStore.subscribe,
-    styleStore.getSnapshot,
-  );
-  const fontFamilyList = useSyncExternalStore(
-    fontFamilyStore.subscribe,
-    fontFamilyStore.getSnapshot,
-  );
+  const canRedo = useCoreStore((s) => s.canRedo);
+  const canUndo = useCoreStore((s) => s.canUndo);
+  const isFilter = useCoreStore((s) => s.isFilter);
+  const fontFamilies = useCoreStore((s) => s.fontFamilies);
+  const setFontFamilies = useCoreStore((s) => s.setFontFamilies);
+  const cellStyle = useStyleStore();
+
+  const fontFamilyList = useCoreStore((s) => s.fontFamilies);
 
   const fillStyle = useMemo(() => {
     return { color: cellStyle.fillColor };
@@ -96,13 +87,11 @@ export const ToolbarContainer = memo(() => {
           disabled: false,
         }));
         if (fontList.length > 0) {
-          fontFamilyStore.setState(l);
+          setFontFamilies(l);
           localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(fontList));
         } else {
-          fontFamilyStore.setState(
-            fontFamilyStore
-              .getSnapshot()
-              .filter((v) => v.value !== QUERY_ALL_LOCAL_FONT),
+          setFontFamilies(
+            fontFamilies.filter((v) => v.value !== QUERY_ALL_LOCAL_FONT),
           );
         }
       });
@@ -259,7 +248,7 @@ export const ToolbarContainer = memo(() => {
   return (
     <div className={styles['toolbar-wrapper']} data-testid="toolbar">
       <Button
-        disabled={!coreData.canUndo}
+        disabled={!canUndo}
         onClick={undo}
         testId="toolbar-undo"
         title="Undo"
@@ -268,7 +257,7 @@ export const ToolbarContainer = memo(() => {
         <Icon name="undo" />
       </Button>
       <Button
-        disabled={!coreData.canRedo}
+        disabled={!canRedo}
         onClick={redo}
         testId="toolbar-redo"
         title="Redo"
@@ -459,7 +448,7 @@ export const ToolbarContainer = memo(() => {
         </div>
       </SelectList>
       <Button
-        active={coreData.isFilter}
+        active={isFilter}
         onClick={handleFilter}
         testId="toolbar-filter"
         className={styles['wrap-text']}

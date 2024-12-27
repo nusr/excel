@@ -76,13 +76,13 @@ export class FilterManger implements IFilter {
         item.set(key, value[key]);
       }
     }
-    const range = item.get('range')!;
+    const range = item.get('range');
     /* jscpd:ignore-end */
-    if (typeof value.col === 'number' && value.value) {
+    if (range && typeof value.col === 'number' && value.value) {
       this.applyFilter(range, value as Required<AutoFilterItem>);
       return;
     }
-    if (typeof value.col === 'undefined' && !value.value) {
+    if (range && typeof value.col === 'undefined' && !value.value) {
       this.clearFilter(range);
     }
   }

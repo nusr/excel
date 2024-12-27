@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client';
 import styles from './index.module.css';
 import { classnames } from '../../util';
 import { Icon } from '../BaseIcon';
+import { MessageType } from '../../types';
 
-type MessageType = 'success' | 'error' | 'info' | 'warning';
 type Props = {
   message: string;
   type: MessageType;

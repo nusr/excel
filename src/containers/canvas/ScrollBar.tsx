@@ -1,7 +1,6 @@
 import React, {
   useRef,
   Fragment,
-  useSyncExternalStore,
   memo,
   useEffect,
   useCallback,
@@ -10,7 +9,7 @@ import React, {
 import { type IController, ScrollStatus } from '../../types';
 import { computeScrollRowAndCol, computeScrollPosition } from '../../canvas';
 import styles from './index.module.css';
-import { scrollStore, useExcel } from '../store';
+import { useScrollStore, useExcel } from '../store';
 
 interface State {
   prevPageY: number;
@@ -47,10 +46,9 @@ const initState: State = {
 export const ScrollBar = memo(() => {
   const { controller } = useExcel();
   const state = useRef<State>({ ...initState });
-  const { scrollLeft, scrollTop } = useSyncExternalStore(
-    scrollStore.subscribe,
-    scrollStore.getSnapshot,
-  );
+  const scrollLeft = useScrollStore((s) => s.scrollLeft);
+  const scrollTop = useScrollStore((s) => s.scrollTop);
+
   const [toggleEvents] = useMemo(() => {
     function handlePointerUp() {
       state.current = { ...initState };

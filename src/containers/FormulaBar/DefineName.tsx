@@ -2,7 +2,6 @@ import React, {
   useEffect,
   useState,
   useRef,
-  useSyncExternalStore,
   useMemo,
   memo,
   useCallback,
@@ -16,7 +15,7 @@ import {
 } from '../../util';
 import { scrollToView } from '../../canvas';
 import { SelectList } from '../../components';
-import { defineNameStore, useExcel } from '../store';
+import { useCoreStore, useExcel } from '../store';
 
 interface Props {
   displayName: string;
@@ -29,10 +28,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(
     const ref = useRef<HTMLInputElement>(null);
 
     const [value, setValue] = useState(displayName);
-    const defineNameList = useSyncExternalStore(
-      defineNameStore.subscribe,
-      defineNameStore.getSnapshot,
-    );
+    const defineNameList = useCoreStore((s) => s.defineNames);
     const popupList = useMemo(() => {
       return defineNameList.map((v) => ({
         disabled: false,
@@ -67,7 +63,10 @@ export const DefineName: React.FunctionComponent<Props> = memo(
           });
           const sheetInfo = controller.getSheetInfo(
             r?.sheetId || controller.getCurrentSheetId(),
-          )!;
+          );
+          if (!sheetInfo) {
+            return;
+          }
           if (r && r.col < sheetInfo.colCount && r.row < sheetInfo.rowCount) {
             r.sheetId = r.sheetId || controller.getCurrentSheetId();
             setValue(displayName);

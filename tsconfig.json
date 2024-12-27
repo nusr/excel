@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
     "jsx": "react-jsx",
     "target": "ES2020",
     "noEmit": true,
@@ -30,5 +34,9 @@
     "experimentalDecorators": true,
     "outDir": "lib"
   },
-  "include": ["src", "demo", "e2e"]
+  "include": [
+    "src",
+    "demo",
+    "e2e"
+  ]
 }

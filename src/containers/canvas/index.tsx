@@ -4,13 +4,12 @@ import React, {
   Fragment,
   useState,
   memo,
-  useSyncExternalStore,
   useCallback,
 } from 'react';
 import type { IController, EventData, ModalValue } from '../../types';
 import { getHitInfo, DEFAULT_POSITION } from '../../util';
 import styles from './index.module.css';
-import { coreStore, floatElementStore, useExcel } from '../../containers/store';
+import { useCoreStore, useExcel } from '../../containers/store';
 import { ScrollBar } from './ScrollBar';
 import { ContextMenu } from './ContextMenu';
 import { initCanvas } from './util';
@@ -43,14 +42,8 @@ function getEventData(
 export const CanvasContainer = memo(() => {
   const { controller } = useExcel();
   const [modalState, setModalState] = useState<ModalValue | null>(null);
-  const floatElementList = useSyncExternalStore(
-    floatElementStore.subscribe,
-    floatElementStore.getSnapshot,
-  );
-  const { activeUuid } = useSyncExternalStore(
-    coreStore.subscribe,
-    coreStore.getSnapshot,
-  );
+  const activeUuid = useCoreStore((s) => s.activeUuid);
+  const floatElementList = useCoreStore((s) => s.drawings);
   const [menuPosition, setMenuPosition] = useState({
     top: DEFAULT_POSITION,
     left: DEFAULT_POSITION,

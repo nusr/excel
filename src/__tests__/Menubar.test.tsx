@@ -1,4 +1,4 @@
-import { App, StateContext } from '../containers';
+import { ExcelEditor, StateContext } from '../containers';
 import {
   screen,
   render,
@@ -72,7 +72,7 @@ test('change i18n', () => {
           controller,
         }}
       >
-        <App />
+        <ExcelEditor />
       </StateContext>,
     );
   });
@@ -86,7 +86,7 @@ test('change i18n', () => {
           controller,
         }}
       >
-        <App />
+        <ExcelEditor />
       </StateContext>,
     );
   });
