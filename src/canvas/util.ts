@@ -10,6 +10,7 @@ import {
   DEFAULT_LINE_WIDTH,
   BORDER_TYPE_MAP,
   type ErrorTypes,
+  isEmpty,
 } from '../util';
 import {
   CanvasOverlayPosition,
@@ -261,9 +262,9 @@ export function renderCell(
   isMergeCell?: boolean,
   theme?: ThemeType,
 ): IWindowSize {
-  const value = cellInfo.value;
+  const { value, formula: _formula, ...style } = cellInfo;
   const result: IWindowSize = { height: 0, width: 0 };
-  if (value === '') {
+  if (value === '' && isEmpty(style)) {
     return result;
   }
   const format = cellInfo?.numberFormat || DEFAULT_FORMAT_CODE;
