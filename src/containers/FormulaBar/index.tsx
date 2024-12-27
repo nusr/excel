@@ -1,4 +1,4 @@
-import { useSyncExternalStore, useMemo, memo, useCallback } from 'react';
+import { useMemo, memo, useCallback } from 'react';
 import {
   MultipleLineEditor,
   getEditorStyle,
@@ -7,22 +7,19 @@ import {
 import { LINE_BREAK, classnames, convertToReference } from '../../util';
 import styles from './index.module.css';
 import { EditorStatus } from '../../types';
-import { activeCellStore, coreStore, styleStore } from '../../containers/store';
+import {
+  useActiveCell,
+  useCoreStore,
+  useStyleStore,
+} from '../../containers/store';
 import { DefineName } from './DefineName';
 
 export const FormulaBarContainer = memo(() => {
-  const activeCell = useSyncExternalStore(
-    activeCellStore.subscribe,
-    activeCellStore.getSnapshot,
-  );
-  const cellStyle = useSyncExternalStore(
-    styleStore.subscribe,
-    styleStore.getSnapshot,
-  );
-  const { editorStatus } = useSyncExternalStore(
-    coreStore.subscribe,
-    coreStore.getSnapshot,
-  );
+  const activeCell = useActiveCell();
+  const cellStyle = useStyleStore();
+  const editorStatus = useCoreStore((state) => state.editorStatus);
+  const setEditorStatus = useCoreStore((state) => state.setEditorStatus);
+
   const displayName = useMemo(() => {
     return (
       activeCell.defineName ||
@@ -36,9 +33,7 @@ export const FormulaBarContainer = memo(() => {
     );
   }, [activeCell.defineName, activeCell.col, activeCell.row]);
   const handleClick = useCallback(() => {
-    coreStore.setState({
-      editorStatus: EditorStatus.EDIT_FORMULA_BAR,
-    });
+    setEditorStatus(EditorStatus.EDIT_FORMULA_BAR);
   }, []);
   const style = useMemo(() => {
     return getDisplayStyle(cellStyle);

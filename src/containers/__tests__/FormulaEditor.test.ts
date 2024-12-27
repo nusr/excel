@@ -98,7 +98,7 @@ describe('getEditorStyle', () => {
       color: 'green',
       textDecorationLine: 'line-through',
       left: 0,
-      top: 0,
+      top: -2,
       width: 100,
       height: 100,
     };

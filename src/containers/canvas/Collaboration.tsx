@@ -1,10 +1,5 @@
-import React, {
-  useState,
-  useSyncExternalStore,
-  useEffect,
-  useMemo,
-} from 'react';
-import { userStore, useExcel, coreStore, scrollStore } from '../store';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useUserInfo, useExcel, useCoreStore, useScrollStore } from '../store';
 import { UserItem, CanvasOverlayPosition } from '../../types';
 import styles from './index.module.css';
 import { $ } from '../../i18n';
@@ -19,18 +14,10 @@ function getBytesFromUint32(num: number) {
 }
 
 export const Collaboration = () => {
-  const users = useSyncExternalStore(
-    userStore.subscribe,
-    userStore.getSnapshot,
-  );
-  const { row, col } = useSyncExternalStore(
-    scrollStore.subscribe,
-    scrollStore.getSnapshot,
-  );
-  const { currentSheetId } = useSyncExternalStore(
-    coreStore.subscribe,
-    coreStore.getSnapshot,
-  );
+  const users = useUserInfo((s) => s.users);
+  const row = useScrollStore((s) => s.row);
+  const col = useScrollStore((s) => s.col);
+  const currentSheetId = useCoreStore((s) => s.currentSheetId);
   const userList = users.filter((v) => v?.range?.sheetId === currentSheetId);
 
   return (
@@ -44,7 +31,7 @@ export const Collaboration = () => {
 
 export const User: React.FunctionComponent<
   UserItem & { row: number; col: number }
-> = ({ range, clientId, row, col }) => {
+> = ({ range, clientId, row, col, userName }) => {
   const { controller } = useExcel();
   const color = useMemo(() => {
     const list = getBytesFromUint32(clientId);
@@ -72,7 +59,7 @@ export const User: React.FunctionComponent<
       style={{ ...position, border: `2px solid ${color}` }}
     >
       <div className={styles.userContent} style={{ color }}>
-        {`${$('user-name')} ${clientId}`}
+        {userName || `${$('user-name')} ${clientId}`}
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
-import { IBaseModel, ScrollValue, WorksheetType } from './model';
+import { IBaseModel, ScrollValue, WorksheetType, UserItem } from './model';
 import { CanvasOverlayPosition, IHooks, DocumentItem } from './components';
 import { IRange } from './range';
 import { IWindowSize, IPosition } from './event';
 import type { Doc } from 'yjs';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 /**
  * Interface representing a controller with various methods for managing and interacting with a spreadsheet.
@@ -137,6 +138,17 @@ export interface IController extends IBaseModel {
    * @returns {WorksheetType | undefined} The first sheet, or undefined if it could not be added.
    */
   addFirstSheet(): WorksheetType | undefined;
+  /**
+   * Sets the read-only status of the collaboration provider.
+   * @param readOnly - A boolean indicating the read-only status.
+   */
+  setReadOnly(readOnly: boolean): void;
+
+  /**
+   * Gets the read-only status of the collaboration provider.
+   * @returns A boolean indicating the read-only status.
+   */
+  getReadOnly(): boolean;
 }
 
 /**
@@ -209,7 +221,16 @@ export interface ICollaborationProvider {
 
   /**
    * Synchronizes a specific range of data with the collaboration provider.
-   * @param range - The range to be synchronized.
    */
-  syncRange(range: IRange): void;
+  syncRange(data: Pick<UserItem, 'range' | 'userId' | 'userName'>): void;
+  setAwarenessChangeCallback(callback: (users: UserItem[]) => void): void;
+  setAuthChangeCallback(
+    callback: (
+      event: AuthChangeEvent,
+      session: Session | null,
+    ) => void | Promise<void>,
+  ): void;
+  login(): Promise<void>;
+  logOut(): Promise<void>;
+  canUseRemoteDB(): boolean;
 }

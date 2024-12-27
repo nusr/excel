@@ -107,5 +107,8 @@
   "rename-file": "重命名",
   "default-name": "默认名称",
   "change-file-name": "修改文件名称",
-  "user-name": "用户"
+  "user-name": "用户",
+  "no-login-editing": "你只有登录后，才可以编辑文档",
+  "login": "登录",
+  "log-out": "退出"
 }

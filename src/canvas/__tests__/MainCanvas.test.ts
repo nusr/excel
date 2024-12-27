@@ -67,7 +67,7 @@ describe('MainCanvas.test.ts', () => {
           return offscreen;
         },
       } as HTMLCanvasElement);
-      expect(mockWorker.init).toHaveBeenCalledWith({ canvas: {}, dpr: 1 });
+      expect(mockWorker.init).toHaveBeenCalledWith({ canvas: {}, dpr: 2 });
     });
     test('render ok', async () => {
       const c = initController(hooks);

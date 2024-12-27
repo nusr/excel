@@ -97,11 +97,11 @@ async function pasteRichText() {
   for (const item of list) {
     if (item.types.includes(PLAIN_FORMAT)) {
       const buf = await item.getType(PLAIN_FORMAT);
-      result[PLAIN_FORMAT] = await buf?.text();
+      result[PLAIN_FORMAT] = (await buf?.text?.()) || '';
     }
     if (item.types.includes(HTML_FORMAT)) {
       const buf = await item.getType(HTML_FORMAT);
-      result[HTML_FORMAT] = await buf?.text();
+      result[HTML_FORMAT] = (await buf?.text?.()) || '';
     }
     if (item.types.includes(IMAGE_FORMAT)) {
       const buf = await item.getType(IMAGE_FORMAT);

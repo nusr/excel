@@ -5,13 +5,12 @@ import type {
   IModel,
   YjsModelJson,
 } from '../types';
-import { convertToReference, toIRange } from '../util';
+import { convertToReference, toIRange, eventEmitter } from '../util';
 import { $ } from '../i18n';
-import { toast } from '../components';
 import * as Y from 'yjs';
 
 export class MergeCell implements IMergeCell {
-  private model: IModel;
+  private readonly model: IModel;
 
   constructor(model: IModel) {
     this.model = model;
@@ -52,7 +51,10 @@ export class MergeCell implements IMergeCell {
       this.convertSheetIdToName,
     );
     if (this.mergeCells?.get(ref)) {
-      toast.error($('merging-cell-is-duplicate'));
+      eventEmitter.emit('toastMessage', {
+        type: 'error',
+        message: $('merging-cell-is-duplicate'),
+      });
       return;
     }
     if (!this.mergeCells) {

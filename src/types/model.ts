@@ -801,19 +801,25 @@ export type NumberFormatValue =
 export type UserItem = {
   range: IRange;
   clientId: number;
+  userId: string;
+  userName: string;
 };
+export type MessageType = 'success' | 'error' | 'info' | 'warning';
 export type EventEmitterType = {
   renderChange: {
     changeSet: Set<ChangeEventType>;
-  };
-  awarenessChange: {
-    users: UserItem[];
   };
   rangeChange: {
     range: IRange;
   };
   modelChange: {
     event: YEvent<any>[];
+  };
+  toastMessage: {
+    message: string;
+    type: MessageType;
+    duration?: number; // second
+    testId?: string;
   };
 };
 

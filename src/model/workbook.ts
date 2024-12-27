@@ -12,13 +12,13 @@ import {
   DEFAULT_COL_COUNT,
   XLSX_MAX_COL_COUNT,
   XLSX_MAX_ROW_COUNT,
+  eventEmitter,
 } from '../util';
 import { $ } from '../i18n';
-import { toast } from '../components';
 import * as Y from 'yjs';
 
 export class Workbook implements IWorkbook {
-  private model: IModel;
+  private readonly model: IModel;
   private currentSheetId: string = '';
   constructor(model: IModel) {
     this.model = model;
@@ -130,7 +130,10 @@ export class Workbook implements IWorkbook {
   }
   renameSheet(sheetName: string, sheetId?: string): void {
     if (!sheetName) {
-      toast.error($('the-value-cannot-be-empty'));
+      eventEmitter.emit('toastMessage', {
+        type: 'error',
+        message: $('the-value-cannot-be-empty'),
+      });
       return;
     }
     const id = sheetId || this.getCurrentSheetId();
@@ -140,7 +143,10 @@ export class Workbook implements IWorkbook {
       if (item.sheetId === id) {
         return;
       }
-      toast.error($('sheet-name-is-duplicate'));
+      eventEmitter.emit('toastMessage', {
+        type: 'error',
+        message: $('sheet-name-is-duplicate'),
+      });
       return;
     }
     this.updateSheetInfo({ name: sheetName }, id);
@@ -184,7 +190,10 @@ export class Workbook implements IWorkbook {
     const sheetList = this.getSheetList();
     const list = sheetList.filter((v) => !v.isHide);
     if (list.length < 2) {
-      toast.error($('a-workbook-must-contains-at-least-one-visible-worksheet'));
+      eventEmitter.emit('toastMessage', {
+        type: 'error',
+        message: $('a-workbook-must-contains-at-least-one-visible-worksheet'),
+      });
       return false;
     }
     return true;

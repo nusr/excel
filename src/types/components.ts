@@ -47,28 +47,12 @@ export type ClipboardData = {
  */
 export interface IHooks {
   /**
-   * Handles the copy or cut operation.
-   *
-   * @param textData - The data to be copied or cut to the clipboard.
-   * @param type - The type of operation, either 'cut' or 'copy'.
-   * @returns A promise that resolves when the operation is complete.
-   */
-  copyOrCut: (textData: ClipboardData, type: 'cut' | 'copy') => Promise<void>;
-
-  /**
-   * Handles the paste operation.
-   *
-   * @returns A promise that resolves with the pasted clipboard data.
-   */
-  paste: () => Promise<ClipboardData>;
-
-  /**
    * The worker method for handling remote operations.
    */
   worker: Remote<WorkerMethod>;
 
   /**
-   * The document object.
+   * The Yjs Doc object.
    */
   doc: Doc;
 }

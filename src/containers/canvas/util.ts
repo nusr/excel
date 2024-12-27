@@ -15,24 +15,18 @@ import {
   DEFAULT_FORMAT_CODE,
   getFormatCode,
   parseNumber,
-  KEY_LIST,
-  isTestEnv,
 } from '../../util';
 import { getThemeColor } from '../../theme';
 import {
-  coreStore,
   CoreStore,
-  activeCellStore,
-  sheetListStore,
-  fontFamilyStore,
-  scrollStore,
-  floatElementStore,
+  useActiveCell,
+  useCoreStore,
+  useScrollStore,
   FloatElementItem,
-  defineNameStore,
-  styleStore,
+  useStyleStore,
 } from '../../containers/store';
 import {
-  initRenderCanvas,
+  MainCanvas,
   registerGlobalEvent,
   scrollSheetToView,
 } from '../../canvas';
@@ -101,7 +95,7 @@ function updateActiveCell(controller: IController) {
   let fontFamily = cell?.fontFamily ?? '';
   if (!fontFamily) {
     let defaultFontFamily = '';
-    const list = fontFamilyStore.getSnapshot();
+    const list = useCoreStore.getState().fontFamilies;
     for (const item of list) {
       if (!item.disabled) {
         defaultFontFamily = String(item.value);
@@ -150,7 +144,7 @@ function updateActiveCell(controller: IController) {
     }
   }
 
-  activeCellStore.setState({
+  useActiveCell.setState({
     top: cellPosition.top,
     left: cellPosition.left,
     width: cellSize.width,
@@ -164,7 +158,7 @@ function updateActiveCell(controller: IController) {
     displayValue: cell?.formula || displayValue,
   });
 
-  styleStore.setState({
+  useStyleStore.setState({
     isBold,
     isItalic,
     isStrike,
@@ -195,6 +189,11 @@ const handleStateChange = (
   ) {
     updateActiveCell(controller);
   }
+
+  const core: Partial<CoreStore> = {
+    canRedo: controller.canRedo(),
+    canUndo: controller.canUndo(),
+  };
   if (changeSet.has('workbook')) {
     const sheetList = controller.getSheetList().map((v) => ({
       sheetId: v.sheetId,
@@ -202,13 +201,8 @@ const handleStateChange = (
       isHide: v.isHide,
       tabColor: v.tabColor || '',
     }));
-    sheetListStore.setState(sheetList);
+    core.sheetList = sheetList;
   }
-
-  const core: Partial<CoreStore> = {
-    canRedo: controller.canRedo(),
-    canUndo: controller.canUndo(),
-  };
   if (changeSet.has('currentSheetId')) {
     core.activeUuid = '';
     core.currentSheetId = controller.getCurrentSheetId();
@@ -218,25 +212,10 @@ const handleStateChange = (
   if (changeSet.has('autoFilter')) {
     core.isFilter = !!controller.getFilter();
   }
-  coreStore.setState(core);
-
-  if (changeSet.has('scroll')) {
-    const scroll = controller.getScroll();
-    const canvasSize = controller.getCanvasSize();
-    scrollStore.setState({
-      scrollLeft: scroll.scrollLeft,
-      scrollTop: scroll.scrollTop,
-      row: scroll.row,
-      col: scroll.col,
-      canvasHeight: canvasSize.height,
-      canvasWidth: canvasSize.width,
-    });
-  }
   if (changeSet.has('definedNames')) {
     const list = controller.getDefineNameList().map((v) => v.name);
-    defineNameStore.setState(list);
+    core.defineNames = list;
   }
-
   if (
     changeSet.has('drawings') ||
     changeSet.has('cellValue') ||
@@ -285,12 +264,26 @@ const handleStateChange = (
         result.push(t);
       }
     }
-    floatElementStore.setState(result);
+    core.drawings = result;
+  }
+  useCoreStore.setState(core);
+
+  if (changeSet.has('scroll')) {
+    const scroll = controller.getScroll();
+    const canvasSize = controller.getCanvasSize();
+    useScrollStore.setState({
+      scrollLeft: scroll.scrollLeft,
+      scrollTop: scroll.scrollTop,
+      row: scroll.row,
+      col: scroll.col,
+      canvasHeight: canvasSize.height,
+      canvasWidth: canvasSize.width,
+    });
   }
 
   if (
     changeSet.has('currentSheetId') &&
-    sheetListStore.getSnapshot().length > 5
+    useCoreStore.getState().sheetList.length > 5
   ) {
     // async update
     setTimeout(() => {
@@ -300,11 +293,11 @@ const handleStateChange = (
 };
 
 function computeCanvasSize(canvas: HTMLCanvasElement) {
-  const scrollbarSize = 20;
   const dom = canvas.parentElement;
   if (!dom) {
     return null;
   }
+  const scrollbarSize = 20;
   const size = dom.getBoundingClientRect();
   const width = dom.clientWidth - scrollbarSize;
   const height = dom.clientHeight - scrollbarSize;
@@ -321,9 +314,10 @@ export function initCanvas(
   controller: IController,
   canvas: HTMLCanvasElement,
 ): () => void {
-  const familyList = initFontFamilyList();
-  fontFamilyStore.setState(familyList);
-  const mainCanvas = initRenderCanvas(controller, canvas);
+  useCoreStore.getState().setFontFamilies(initFontFamilyList());
+  const mainCanvas =
+    MainCanvas.instance ||
+    (MainCanvas.instance = new MainCanvas(controller, canvas));
   const renderCanvas = (changeSet: Set<ChangeEventType>) => {
     const size = computeCanvasSize(canvas);
     if (size) {
@@ -342,22 +336,7 @@ export function initCanvas(
 
   const removeEvent = registerGlobalEvent(controller, resize);
 
-  const changeSet = new Set<ChangeEventType>([
-    ...KEY_LIST,
-    'scroll',
-    'cellValue',
-    'cellStyle',
-    'antLine',
-    'undo',
-    'redo',
-  ]);
-  handleStateChange(changeSet, controller);
-  renderCanvas(changeSet);
-  if (!isTestEnv()) {
-    queueMicrotask(() => {
-      renderCanvas(changeSet);
-    });
-  }
+  resize();
 
   return () => {
     removeEvent();

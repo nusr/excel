@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 process.env.VITE_IS_E2E = 'true';
+const permissions = ['clipboard-read', 'clipboard-write'];
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -56,11 +57,19 @@ export default defineConfig({
     /* Test against branded browsers. */
     {
       name: 'Microsoft Edge',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' },
+      use: {
+        ...devices['Desktop Edge'],
+        channel: 'msedge',
+        permissions,
+      },
     },
     {
       name: 'Google Chrome',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        permissions,
+      },
     },
   ],
 

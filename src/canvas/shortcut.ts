@@ -14,7 +14,7 @@ import {
   LINE_BREAK,
   isMergeContent,
 } from '../util';
-import { coreStore } from '../containers/store';
+import { useCoreStore } from '../containers/store';
 
 export function handleTabClick(controller: IController) {
   controller.transaction(() => {
@@ -196,7 +196,10 @@ export function recalculateScroll(controller: IController) {
   const cellSize = controller.getCellSize(temp);
   const domRect = controller.getCanvasSize();
   const oldScroll = controller.getScroll();
-  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
+  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+  if (!sheetInfo) {
+    return;
+  }
   const headerSize = controller.getHeaderSize();
   const buff = 5;
   const size = computeScrollPosition(controller);
@@ -277,9 +280,7 @@ export function setActiveCellValue(controller: IController) {
   controller.setCellValue(value, range);
   inputDom.value = '';
   inputDom.blur();
-  coreStore.setState({
-    editorStatus: EditorStatus.NONE,
-  });
+  useCoreStore.getState().setEditorStatus(EditorStatus.NONE);
 }
 
 function checkActiveElement(controller: IController) {

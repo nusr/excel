@@ -45,8 +45,6 @@ describe('shortcut.test.tsx', () => {
     });
 
     test('meta', () => {
-      expect(screen.getByTestId('canvas-bottom-bar')).not.toHaveClass('active');
-
       fireEvent.keyDown(document.body, {
         key: 'ArrowDown',
         [commandKey]: true,

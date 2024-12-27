@@ -33,8 +33,19 @@
   margin-left: var(--mediumPadding);
   font-size: 20px;
 }
+.userName {
+  margin-right: var(--mediumPadding);
+}
+.avatar {
+  margin-right: var(--mediumPadding);
+}
 
 .file {
   margin-right: var(--mediumPadding);
   cursor: pointer;
+}
+.login {
+  display: flex;
+  align-items: center;
+  color: var(--primaryColor);
 }

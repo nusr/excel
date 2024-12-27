@@ -62,7 +62,7 @@
   z-index: 4;
 }
 
-.context-menu > button {
+.context-menu>button {
   width: 100%;
   background-color: var(--white);
 }
@@ -77,6 +77,7 @@
   bottom: 36px;
   left: 68px;
 }
+
 .bottom-bar.active {
   display: flex;
 }
@@ -88,6 +89,7 @@
 .bottom-bar-input {
   width: 60px;
 }
+
 .add-button {
   display: flex;
   align-items: center;

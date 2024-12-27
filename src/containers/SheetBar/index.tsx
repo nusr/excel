@@ -1,10 +1,4 @@
-import React, {
-  useSyncExternalStore,
-  useState,
-  useMemo,
-  memo,
-  useCallback,
-} from 'react';
+import React, { useState, useMemo, memo, useCallback } from 'react';
 import {
   classnames,
   DEFAULT_POSITION,
@@ -14,14 +8,11 @@ import {
 import { Button, Icon, SelectPopup } from '../../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
-import { sheetListStore, coreStore, useExcel } from '../../containers/store';
+import { useCoreStore, useExcel } from '../../containers/store';
 
 export const SheetBarContainer = memo(() => {
   const { controller } = useExcel();
-  const sheetList = useSyncExternalStore(
-    sheetListStore.subscribe,
-    sheetListStore.getSnapshot,
-  );
+  const sheetList = useCoreStore((s) => s.sheetList);
   const realSheetList = useMemo(() => {
     return sheetList.filter((v) => !v.isHide);
   }, [sheetList]);
@@ -32,10 +23,7 @@ export const SheetBarContainer = memo(() => {
   }, [sheetList]);
 
   const [popupActive, setPopupActive] = useState(false);
-  const { currentSheetId } = useSyncExternalStore(
-    coreStore.subscribe,
-    coreStore.getSnapshot,
-  );
+  const currentSheetId = useCoreStore((s) => s.currentSheetId);
   const [menuPosition, setMenuPosition] = useState(DEFAULT_POSITION);
   const [editing, setEditing] = useState(false);
   const handleContextMenu = useCallback(

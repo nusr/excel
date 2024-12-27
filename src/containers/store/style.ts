@@ -5,8 +5,8 @@ import {
   EVerticalAlign,
 } from '../../types';
 import { DEFAULT_FONT_SIZE, DEFAULT_FORMAT_CODE } from '../../util';
-import { getThemeColor } from '../../theme'
-import { BaseStore } from './base';
+import { getThemeColor } from '../../theme';
+import { create } from 'zustand';
 
 export type StyleStoreType = Omit<StyleType, 'border'> & {
   isMergeCell: boolean;
@@ -30,4 +30,6 @@ const cellData: StyleStoreType = {
   mergeType: '',
 };
 
-export const styleStore = new BaseStore<StyleStoreType>(cellData);
+export const useStyleStore = create<StyleStoreType>(() => ({
+  ...cellData,
+}));

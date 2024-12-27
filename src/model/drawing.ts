@@ -7,13 +7,12 @@ import type {
   YjsModelJson,
   TypedMap,
 } from '../types';
-import { CHART_TYPE_LIST, iterateRange, toIRange } from '../util';
+import { CHART_TYPE_LIST, iterateRange, toIRange, eventEmitter } from '../util';
 import { $ } from '../i18n';
-import { toast } from '../components';
 import * as Y from 'yjs';
 
 export class Drawing implements IDrawings {
-  private model: IModel;
+  private readonly model: IModel;
   constructor(model: IModel) {
     this.model = model;
   }
@@ -21,7 +20,7 @@ export class Drawing implements IDrawings {
     return this.model.getRoot().get('drawings');
   }
   validateDrawing(data: DrawingElement): boolean {
-    if (!data || !data.uuid) {
+    if (!data?.uuid) {
       return false;
     }
     const sheetInfo = this.model.getSheetInfo(data.sheetId);
@@ -70,7 +69,10 @@ export class Drawing implements IDrawings {
   addDrawing(data: DrawingElement) {
     const oldData = this.drawings?.get(data.uuid);
     if (oldData) {
-      return toast.error($('uuid-is-duplicate'));
+      return eventEmitter.emit('toastMessage', {
+        type: 'error',
+        message: $('uuid-is-duplicate'),
+      });
     }
     if (!this.validateDrawing(data)) {
       return;
@@ -80,7 +82,10 @@ export class Drawing implements IDrawings {
       let check = false;
       const info = this.model.getSheetInfo(range.sheetId);
       if (!info) {
-        return toast.error($('sheet-is-not-exist'));
+        return eventEmitter.emit('toastMessage', {
+          type: 'error',
+          message: $('sheet-is-not-exist'),
+        });
       }
       iterateRange(
         range,
@@ -103,7 +108,10 @@ export class Drawing implements IDrawings {
         },
       );
       if (!check) {
-        return toast.error($('cells-must-contain-data'));
+        return eventEmitter.emit('toastMessage', {
+          type: 'error',
+          message: $('cells-must-contain-data'),
+        });
       }
       data.chartRange = toIRange(data.chartRange!);
     } else if (data.type === 'floating-picture') {
@@ -134,7 +142,10 @@ export class Drawing implements IDrawings {
             (v) => v.value === value.chartType!,
           );
           if (index < 0) {
-            return toast.error($('unsupported-chart-types'));
+            return eventEmitter.emit('toastMessage', {
+              type: 'error',
+              message: $('unsupported-chart-types'),
+            });
           }
         }
       }
@@ -156,7 +167,11 @@ export class Drawing implements IDrawings {
     if (!this.drawings) {
       return;
     }
-    const colCount = this.model.getSheetInfo()!.colCount;
+    const sheetInfo = this.model.getSheetInfo();
+    if (!sheetInfo) {
+      return
+    }
+    const colCount = sheetInfo.colCount;
     for (const [uuid, v] of this.drawings.entries()) {
       const item = v.toJSON();
       const result: Partial<DrawingElement> = {};
@@ -192,7 +207,11 @@ export class Drawing implements IDrawings {
     if (!this.drawings) {
       return;
     }
-    const rowCount = this.model.getSheetInfo()!.rowCount;
+    const sheetInfo = this.model.getSheetInfo();
+    if (!sheetInfo) {
+      return;
+    }
+    const rowCount = sheetInfo.rowCount;
     for (const [uuid, v] of this.drawings.entries()) {
       const item = v.toJSON();
       const result: Partial<DrawingElement> = {};

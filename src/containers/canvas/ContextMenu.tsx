@@ -1,8 +1,8 @@
-import React, { Fragment, memo, useMemo, useSyncExternalStore } from 'react';
+import React, { Fragment, memo, useMemo } from 'react';
 import { Button, info, toast } from '../../components';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
-import { activeCellStore, useExcel } from '../../containers/store';
+import { useActiveCell, useExcel } from '../../containers/store';
 import { $ } from '../../i18n';
 import { IController } from '../../types';
 
@@ -65,10 +65,10 @@ const threshold = 10000;
 export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
   const { controller } = useExcel();
   const { top, left, hideContextMenu } = props;
-  const { row, col, colCount, rowCount } = useSyncExternalStore(
-    activeCellStore.subscribe,
-    activeCellStore.getSnapshot,
-  );
+  const row = useActiveCell((state) => state.row);
+  const col = useActiveCell((state) => state.col);
+  const colCount = useActiveCell((state) => state.colCount);
+  const rowCount = useActiveCell((state) => state.rowCount);
   const ref = useClickOutside(hideContextMenu);
   const { style, position } = useMemo(() => {
     const temp = computeMenuStyle(top, left, controller);

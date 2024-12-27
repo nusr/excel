@@ -2,6 +2,7 @@ import { screen, fireEvent } from '@testing-library/react';
 import { type, renderComponent } from './util';
 import { IController } from '../types';
 import './global.mock';
+import userEvent from '@testing-library/user-event';
 
 describe('Toolbar.test.ts', () => {
   let controller: IController;
@@ -111,10 +112,11 @@ describe('Toolbar.test.ts', () => {
   });
   describe('copy', () => {
     test('toolbar', async () => {
+      const user = userEvent.setup()
       type('=SUM(1,2)');
-      fireEvent.click(screen.getByTestId('toolbar-copy'));
+      await user.click(screen.getByTestId('toolbar-copy'));
       fireEvent.keyDown(document.body, { key: 'Enter' });
-      fireEvent.click(screen.getByTestId('toolbar-paste'));
+      await user.click(screen.getByTestId('toolbar-paste'));
 
       expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
         'A2',
@@ -126,10 +128,11 @@ describe('Toolbar.test.ts', () => {
   });
   describe('cut', () => {
     test('toolbar', async () => {
+      const user = userEvent.setup()
       type('=SUM(1,2)');
-      fireEvent.click(screen.getByTestId('toolbar-cut'));
+      await user.click(screen.getByTestId('toolbar-cut'));
       fireEvent.keyDown(document.body, { key: 'Enter' });
-      fireEvent.click(screen.getByTestId('toolbar-paste'));
+      await user.click(screen.getByTestId('toolbar-paste'));
 
       expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
         'A2',

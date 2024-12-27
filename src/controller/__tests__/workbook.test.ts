@@ -89,19 +89,6 @@ describe('workbook.test.ts', () => {
       expect(newSheetInfo.colCount).not.toEqual(sheetInfo.colCount);
       expect(newSheetInfo.isHide).not.toEqual(sheetInfo.isHide);
     });
-
-    test.skip('undo redo', () => {
-      const firstSheetId = controller.getCurrentSheetId();
-      controller.addSheet();
-      const sheetId = controller.getCurrentSheetId();
-      expect(controller.getSheetList()).toHaveLength(2);
-      controller.undo();
-      expect(firstSheetId).toEqual(controller.getCurrentSheetId());
-      expect(controller.getSheetList()).toHaveLength(1);
-      controller.redo();
-      expect(controller.getSheetList()).toHaveLength(2);
-      expect(sheetId).toEqual(controller.getCurrentSheetId());
-    });
   });
 
   describe('sheetId', () => {
