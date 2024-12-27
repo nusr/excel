@@ -5,7 +5,7 @@
 ![GitHub](https://img.shields.io/github/license/nusr/excel.svg)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/nusr/excel.svg)
 
-[online demo](https://nusr.github.io/excel/)
+[online demo](https://stackblitz.com/edit/nusr-excel-collaboration)
 
 ![demo](./scripts/demo.gif)
 
