@@ -24,7 +24,9 @@ const provider = initCollaboration({
   dbVersion: 2,
   supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
   supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-  loginRedirectTo: window.location.href,
+  loginRedirectTo: process.env.CI
+    ? 'https://nusr.github.io/excel'
+    : window.location.href,
 });
 const controller = initController({
   worker: workerInstance,
