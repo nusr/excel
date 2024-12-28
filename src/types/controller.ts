@@ -231,6 +231,7 @@ export interface ICollaborationProvider {
     ) => void | Promise<void>,
   ): void;
   login(): Promise<void>;
+  getLoginInfo(): Promise<Session | null | undefined>;
   logOut(): Promise<void>;
   canUseRemoteDB(): boolean;
 }

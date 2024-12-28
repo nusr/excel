@@ -8,8 +8,9 @@ import MenuBarContainer from './MenuBar';
 import { useExcel, useUserInfo } from './store';
 import { applyUpdate } from '../collaboration';
 import { Loading, toast } from '../components';
-import { eventEmitter, KEY_LIST } from '../util';
+import { eventEmitter, KEY_LIST, reactLog } from '../util';
 import { ProviderStatus, ChangeEventType } from '../types';
+import { type Session } from '@supabase/supabase-js';
 
 function useCollaboration() {
   const [isLoading, setIsLoading] = useState(true);
@@ -31,11 +32,23 @@ function useCollaboration() {
       'redo',
     ]);
 
+    function handleSession(session: Session | null | undefined) {
+      reactLog('session:', session);
+      const name = session?.user.user_metadata.user_name;
+      const id = session?.user.user_metadata.provider_id;
+      controller.setReadOnly(!id);
+      setUserInfo(id || '', name || '');
+    }
+
     async function init() {
       if (!provider) {
         return eventEmitter.emit('renderChange', {
           changeSet,
         });
+      }
+      if (provider.canUseRemoteDB()) {
+        const session = await provider?.getLoginInfo();
+        handleSession(session);
       }
       setIsLoading(true);
       const file = await provider?.getDocument();
@@ -56,14 +69,10 @@ function useCollaboration() {
       });
       setIsLoading(false);
       if (provider.canUseRemoteDB()) {
-        controller.setReadOnly(true);
+        provider?.setAuthChangeCallback((_event, session) => {
+          handleSession(session);
+        });
       }
-      provider?.setAuthChangeCallback((_event, session) => {
-        controller.setReadOnly(!session);
-        const name = session?.user.user_metadata.user_name;
-        const id = session?.user.user_metadata.provider_id;
-        setUserInfo(id || '', name || '');
-      });
     }
     init();
   }, []);
@@ -97,9 +106,12 @@ function useCollaboration() {
         userName: user.userName,
       });
     });
-    eventEmitter.on('toastMessage', ({ type, message, duration, testId }) => {
-      toast({ type, message, duration, testId: testId ?? `${type}-toast` });
-    });
+    eventEmitter.on(
+      'toastMessage',
+      ({ type, message, duration = 5, testId }) => {
+        toast({ type, message, duration, testId: testId ?? `${type}-toast` });
+      },
+    );
     return () => {
       window.removeEventListener('online', handleEvent);
       window.removeEventListener('online', handleEvent);

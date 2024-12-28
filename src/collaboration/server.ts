@@ -12,7 +12,7 @@ import {
   ICollaborationProvider,
   DocumentItem,
 } from '../types';
-import { collaborationLog, omit } from '../util';
+import { collaborationLog, eventEmitter, omit } from '../util';
 import * as Y from 'yjs';
 import { uint8ArrayToString, stringToUint8Array } from './util';
 import { DocumentDB } from './local';
@@ -69,9 +69,15 @@ export class CollaborationProvider implements ICollaborationProvider {
     return this.doc.guid;
   }
   canUseRemoteDB() {
-    return Boolean(this.remoteDB && this.channel);
+    return Boolean(this.remoteDB);
   }
   async login() {
+    if (!this.remoteDB) {
+      return eventEmitter.emit('toastMessage', {
+        type: 'error',
+        message: 'Need to config VITE_SUPABASE_ANON_KEY and VITE_SUPABASE_URL env',
+      });
+    }
     collaborationLog('loginRedirectTo:', this.options.loginRedirectTo);
     const result = await this.remoteDB?.auth.signInWithOAuth({
       provider: 'github',
@@ -80,6 +86,14 @@ export class CollaborationProvider implements ICollaborationProvider {
       },
     });
     collaborationLog('login result:', result);
+  }
+  async getLoginInfo() {
+    if (!this.remoteDB) {
+      return;
+    }
+    const result = await this.remoteDB.auth.getSession();
+    collaborationLog('getLoginInfo:', result);
+    return result?.data.session;
   }
   async logOut() {
     const result = await this.remoteDB?.auth.signOut();
