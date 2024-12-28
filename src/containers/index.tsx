@@ -36,7 +36,6 @@ function useCollaboration() {
       reactLog('session:', session);
       const name = session?.user.user_metadata.user_name;
       const id = session?.user.user_metadata.provider_id;
-      controller.setReadOnly(!id);
       setUserInfo(id || '', name || '');
     }
 
@@ -47,6 +46,9 @@ function useCollaboration() {
         });
       }
       if (provider.canUseRemoteDB()) {
+        provider?.setAuthChangeCallback((_event, session) => {
+          handleSession(session);
+        });
         const session = await provider?.getLoginInfo();
         handleSession(session);
       }
@@ -68,11 +70,6 @@ function useCollaboration() {
         changeSet,
       });
       setIsLoading(false);
-      if (provider.canUseRemoteDB()) {
-        provider?.setAuthChangeCallback((_event, session) => {
-          handleSession(session);
-        });
-      }
     }
     init();
   }, []);
