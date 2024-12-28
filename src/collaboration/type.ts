@@ -1,4 +1,5 @@
 import { DocumentItem, HistoryItem } from '../types';
+import type { Doc } from 'yjs';
 
 export interface Database {
   public: {
@@ -30,10 +31,13 @@ export interface Database {
 }
 
 export type CollaborationOptions = {
+  doc: Doc;
+  disableIndexDB?: boolean;
   // indexedDB version
   dbVersion?: number;
   // Supbase URL
   supabaseUrl?: string;
   // Supabase Anon Key
   supabaseAnonKey?: string;
+  loginRedirectTo?: string;
 };

@@ -18,10 +18,13 @@ const workerInstance = wrap<WorkerMethod>(new Worker());
 const docId = import.meta.env.VITE_DEFAULT_EXCEL_ID || DEFAULT_EXCEL_ID;
 location.hash = `#${docId}`;
 const doc = initDoc({ guid: docId });
-const provider = initCollaboration(doc, {
-  dbVersion: 1,
+const provider = initCollaboration({
+  doc,
+  disableIndexDB: false,
+  dbVersion: 2,
   supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
   supabaseAnonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+  loginRedirectTo: window.location.href,
 });
 const controller = initController({
   worker: workerInstance,

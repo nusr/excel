@@ -31,6 +31,7 @@ export class CollaborationProvider implements ICollaborationProvider {
   private readonly broadcastChannel: BroadcastChannel;
   private readonly _isOnline: boolean = false;
   private readonly awareness: awarenessProtocol.Awareness;
+  private options: CollaborationOptions;
   private awarenessChangeCallback: ((users: UserItem[]) => void) | null = null;
   private authChangeCallback:
     | ((
@@ -38,7 +39,9 @@ export class CollaborationProvider implements ICollaborationProvider {
         session: Session | null,
       ) => void | Promise<void>)
     | null = null;
-  constructor(doc: Y.Doc, options: CollaborationOptions = {}) {
+  constructor(options: CollaborationOptions) {
+    this.options = options;
+    const { doc } = options;
     if (options.supabaseUrl && options.supabaseAnonKey && navigator.onLine) {
       this._isOnline = true;
       const remoteDB = new SupabaseClient<Database>(
@@ -51,7 +54,7 @@ export class CollaborationProvider implements ICollaborationProvider {
       });
     }
     this.doc = doc;
-    if (typeof indexedDB !== 'undefined') {
+    if (typeof indexedDB !== 'undefined' && !options.disableIndexDB) {
       this.localDB = new DocumentDB(options.dbVersion);
     }
     this.broadcastChannel = new BroadcastChannel(this.docId);
@@ -69,22 +72,17 @@ export class CollaborationProvider implements ICollaborationProvider {
     return Boolean(this.remoteDB && this.channel);
   }
   async login() {
-    if (!this.remoteDB) {
-      return;
-    }
-    const result = await this.remoteDB.auth.signInWithOAuth({
+    collaborationLog('loginRedirectTo:', this.options.loginRedirectTo);
+    const result = await this.remoteDB?.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: window.location.href,
+        redirectTo: this.options.loginRedirectTo,
       },
     });
     collaborationLog('login result:', result);
   }
   async logOut() {
-    if (!this.remoteDB) {
-      return;
-    }
-    const result = await this.remoteDB.auth.signOut();
+    const result = await this.remoteDB?.auth.signOut();
     collaborationLog('log out result:', result);
   }
 

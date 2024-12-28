@@ -11,7 +11,14 @@ export default defineConfig((env) => {
     base: process.env.CI && !isLibrary ? '/excel/' : undefined,
     plugins: isLibrary
       ? [dts()]
-      : [react(), VitePWA({ registerType: 'autoUpdate' })],
+      : [
+          react(),
+          VitePWA({
+            registerType: 'autoUpdate',
+            manifest: { theme_color: '#217346' },
+            showMaximumFileSizeToCacheInBytesWarning: true,
+          }),
+        ],
     define: {
       'process.env.VITE_IS_E2E': JSON.stringify(process.env.VITE_IS_E2E ?? ''),
       'process.env.VERSION': JSON.stringify(version),

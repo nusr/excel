@@ -19,11 +19,10 @@ export function shouldSkipUpdate(
 }
 
 export function initCollaboration(
-  doc: Y.Doc,
-  options: CollaborationOptions = {},
+  options: CollaborationOptions,
 ): ICollaborationProvider {
-  const provider = new CollaborationProvider(doc, options);
-  doc.on('update', (update: Uint8Array, _b, _c, tran) => {
+  const provider = new CollaborationProvider(options);
+  options.doc.on('update', (update: Uint8Array, _b, _c, tran) => {
     if (shouldSkipUpdate(tran, provider)) {
       return;
     }
@@ -38,4 +37,4 @@ export function applyUpdate(doc: Y.Doc, result: Uint8Array[]) {
   Y.applyUpdate(doc, Y.mergeUpdates(result), SYNC_FLAG.SKIP_UNDO_REDO_UPDATE);
 }
 
-export { type CollaborationOptions };
+export { type CollaborationOptions, CollaborationProvider };

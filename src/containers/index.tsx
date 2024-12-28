@@ -58,6 +58,12 @@ function useCollaboration() {
       if (provider.canUseRemoteDB()) {
         controller.setReadOnly(true);
       }
+      provider?.setAuthChangeCallback((_event, session) => {
+        controller.setReadOnly(!session);
+        const name = session?.user.user_metadata.user_name;
+        const id = session?.user.user_metadata.provider_id;
+        setUserInfo(id || '', name || '');
+      });
     }
     init();
   }, []);
@@ -79,16 +85,9 @@ function useCollaboration() {
     }
     window.addEventListener('online', handleEvent);
     window.addEventListener('offline', handleEvent);
+    setClientId(provider?.doc.clientID ?? 0);
     provider?.setAwarenessChangeCallback((users) => {
       setUsers(users);
-    });
-    setClientId(provider?.doc.clientID ?? 0);
-
-    provider?.setAuthChangeCallback((_event, session) => {
-      controller.setReadOnly(!session);
-      const name = session?.user.user_metadata.user_name;
-      const id = session?.user.user_metadata.provider_id;
-      setUserInfo(id || '', name || '');
     });
     eventEmitter.on('rangeChange', ({ range }) => {
       const user = useUserInfo.getState();
