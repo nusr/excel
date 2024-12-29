@@ -1,5 +1,16 @@
 # Changelog
 
+* fix: icon (b4ec70c)
+* fix: login (dd5c500)
+* fix: login (27c3813)
+* fix: github login (fe200fa)
+* fix: add logger (cf104ad)
+* fix: skip test cases (736536f)
+* fix: render style (2dbae6f)
+* feat: support github login (d67f885)
+* fix: render (8e06068)
+* Update README.md (e14b789)
+
 ## [0.0.5](https://github.com/nusr/excel/compare/v0.0.4...v0.0.5) (2024-12-24)
 
 ### Bug Fixes
