@@ -1,10 +1,9 @@
-import {
-  SupabaseClient,
+import type {
   RealtimeChannel,
-  REALTIME_LISTEN_TYPES,
-  type AuthChangeEvent,
-  type Session,
+  AuthChangeEvent,
+  Session,
 } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import type { Database, CollaborationOptions } from './type';
 import {
   SYNC_FLAG,
@@ -22,6 +21,8 @@ import * as awarenessProtocol from 'y-protocols/awareness';
 const DIRECTORY = 'supabase/';
 
 type EventType = 'message' | 'awareness';
+
+const BROADCAST = 'broadcast';
 
 export class CollaborationProvider implements ICollaborationProvider {
   public readonly doc: Y.Doc;
@@ -42,20 +43,19 @@ export class CollaborationProvider implements ICollaborationProvider {
   constructor(options: CollaborationOptions) {
     this.options = options;
     const { doc } = options;
-    if (options.supabaseUrl && options.supabaseAnonKey && navigator.onLine) {
+    if (options.supabaseUrl && options.supabaseAnonKey) {
       this._isOnline = true;
-      const remoteDB = new SupabaseClient<Database>(
+      this.remoteDB = new SupabaseClient<Database>(
         options.supabaseUrl,
         options.supabaseAnonKey,
       );
-      this.remoteDB = remoteDB;
-      this.channel = remoteDB.channel(doc.guid, {
+      this.channel = this.remoteDB.channel(doc.guid, {
         config: { broadcast: { ack: false } },
       });
     }
     this.doc = doc;
     if (typeof indexedDB !== 'undefined' && !options.disableIndexDB) {
-      this.localDB = new DocumentDB(options.dbVersion);
+      this.localDB = new DocumentDB(options.indexedBDVersion);
     }
     this.broadcastChannel = new BroadcastChannel(this.docId);
     this.awareness = new awarenessProtocol.Awareness(doc);
@@ -75,7 +75,8 @@ export class CollaborationProvider implements ICollaborationProvider {
     if (!this.remoteDB) {
       return eventEmitter.emit('toastMessage', {
         type: 'error',
-        message: 'Need to config VITE_SUPABASE_ANON_KEY and VITE_SUPABASE_URL env',
+        message:
+          'Need to config VITE_SUPABASE_ANON_KEY and VITE_SUPABASE_URL env',
       });
     }
     collaborationLog('loginRedirectTo:', this.options.loginRedirectTo);
@@ -93,7 +94,9 @@ export class CollaborationProvider implements ICollaborationProvider {
     }
     const result = await this.remoteDB.auth.getSession();
     collaborationLog('getLoginInfo:', result);
-    return result?.data.session;
+    const temp = result?.data.session;
+    this.authChangeCallback?.('INITIAL_SESSION', temp);
+    return temp;
   }
   async logOut() {
     const result = await this.remoteDB?.auth.signOut();
@@ -140,19 +143,15 @@ export class CollaborationProvider implements ICollaborationProvider {
     );
 
     this.channel
-      ?.on(
-        REALTIME_LISTEN_TYPES.BROADCAST,
-        { event: this.docId },
-        (payload) => {
-          const { update, clientID, type } = payload?.payload || {};
-          if (!update || this.clientID === clientID) {
-            return;
-          }
-          collaborationLog('subscribe:', payload);
-          const updateData = stringToUint8Array(update);
-          this.applyUpdate(updateData, type);
-        },
-      )
+      ?.on(BROADCAST, { event: this.docId }, (payload) => {
+        const { update, clientID, type } = payload?.payload || {};
+        if (!update || this.clientID === clientID) {
+          return;
+        }
+        collaborationLog('subscribe:', payload);
+        const updateData = stringToUint8Array(update);
+        this.applyUpdate(updateData, type);
+      })
       .subscribe((status, error) => {
         if (error) {
           collaborationLog('subscribe error:', error, status);
@@ -242,7 +241,7 @@ export class CollaborationProvider implements ICollaborationProvider {
     }
     const result = uint8ArrayToString(update);
     const real = await this.channel?.send({
-      type: REALTIME_LISTEN_TYPES.BROADCAST,
+      type: BROADCAST,
       event: this.docId,
       payload: { update: result, clientID: this.clientID, type },
     });

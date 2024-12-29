@@ -5,7 +5,6 @@ import styles from './index.module.css';
 import { Theme } from './Theme';
 import { $ } from '../../i18n';
 import { I18N } from './I18N';
-import { FPS } from './FPS';
 import { saveAs } from '../../util';
 import { useExcel } from '../store';
 import { User } from './User';
@@ -14,10 +13,11 @@ import { File } from './File';
 
 type Props = {
   providerStatus?: ProviderStatus;
+  enableLogin?: boolean;
 };
 
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
-  ({ providerStatus = ProviderStatus.LOCAL }) => {
+  ({ providerStatus = ProviderStatus.LOCAL, enableLogin = false }) => {
     const { controller, provider } = useExcel();
     const [visible, setVisible] = useState(false);
     const handleExportXLSX = useCallback(() => {
@@ -121,10 +121,9 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
             </MenuItem>
           </Menu>
         </div>
-        <User providerStatus={providerStatus} />
+        <User providerStatus={providerStatus} enableLogin={enableLogin} />
         <I18N />
         <Theme />
-        <FPS />
       </div>
     );
   },

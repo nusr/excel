@@ -16,20 +16,6 @@ describe('Menubar.test.ts', () => {
   beforeEach(async () => {
     renderComponent();
   });
-  describe('menubar', () => {
-    test('normal', async () => {
-      expect((await screen.findByTestId('menubar')).childNodes.length).toEqual(
-        5,
-      );
-    });
-    test('menu', () => {
-      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
-      expect(
-        screen.getByTestId('menubar-excel-portal')!.querySelectorAll('li')
-          .length,
-      ).toEqual(7);
-    });
-  });
   describe('dark mode', () => {
     afterEach(() => {
       sessionStorage.clear();

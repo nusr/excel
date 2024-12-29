@@ -33,11 +33,8 @@ export interface Database {
 export type CollaborationOptions = {
   doc: Doc;
   disableIndexDB?: boolean;
-  // indexedDB version
-  dbVersion?: number;
-  // Supbase URL
-  supabaseUrl?: string;
-  // Supabase Anon Key
-  supabaseAnonKey?: string;
+  indexedBDVersion?: number;
   loginRedirectTo?: string;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
 };

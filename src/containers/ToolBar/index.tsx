@@ -2,7 +2,6 @@ import React, { useMemo, memo, useCallback } from 'react';
 import {
   Icon,
   Button,
-  Github,
   Select,
   FillColorIcon,
   ColorPicker,
@@ -458,7 +457,6 @@ export const ToolbarContainer = memo(() => {
       </Button>
       <InsertFloatingPicture />
       <InsertChart />
-      <Github />
     </div>
   );
 });

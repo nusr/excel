@@ -10,7 +10,7 @@ import { applyUpdate } from '../collaboration';
 import { Loading, toast } from '../components';
 import { eventEmitter, KEY_LIST, reactLog } from '../util';
 import { ProviderStatus, ChangeEventType } from '../types';
-import { type Session } from '@supabase/supabase-js';
+import type { Session } from '@supabase/supabase-js';
 
 function useCollaboration() {
   const [isLoading, setIsLoading] = useState(true);
@@ -45,13 +45,10 @@ function useCollaboration() {
           changeSet,
         });
       }
-      if (provider.canUseRemoteDB()) {
-        provider?.setAuthChangeCallback((_event, session) => {
-          handleSession(session);
-        });
-        const session = await provider?.getLoginInfo();
+      provider?.setAuthChangeCallback((_event, session) => {
         handleSession(session);
-      }
+      });
+      await provider?.getLoginInfo();
       setIsLoading(true);
       const file = await provider?.getDocument();
       useUserInfo.setState({
@@ -124,47 +121,42 @@ function useCollaboration() {
   };
 }
 
-const ExcelEditor: React.FunctionComponent<{
+type Props = {
   style?: React.CSSProperties;
   providerStatus?: ProviderStatus;
-}> = memo(({ style, providerStatus }) => {
-  return (
-    <div
-      className={styles['app-container']}
-      data-testid="app-container"
-      style={style}
-    >
-      <MenuBarContainer providerStatus={providerStatus} />
-      <ToolbarContainer />
-      <FormulaBarContainer />
-      <CanvasContainer />
-      <SheetBarContainer />
-    </div>
-  );
-});
-
-ExcelEditor.displayName = 'ExcelEditor';
-
-const Excel: React.FunctionComponent<{ style?: React.CSSProperties }> = memo(
-  ({ style }) => {
-    const { isLoading, providerStatus } = useCollaboration();
-    if (isLoading) {
-      return <Loading />;
-    }
-
+  enableLogin?: boolean;
+};
+const ExcelEditor: React.FunctionComponent<Props> = memo(
+  ({ style, providerStatus, enableLogin }) => {
     return (
       <div
         className={styles['app-container']}
         data-testid="app-container"
         style={style}
       >
-        <MenuBarContainer providerStatus={providerStatus} />
+        <MenuBarContainer
+          providerStatus={providerStatus}
+          enableLogin={enableLogin}
+        />
         <ToolbarContainer />
         <FormulaBarContainer />
         <CanvasContainer />
         <SheetBarContainer />
       </div>
     );
+  },
+);
+
+ExcelEditor.displayName = 'ExcelEditor';
+
+const Excel: React.FunctionComponent<Omit<Props, 'providerStatus'>> = memo(
+  (props) => {
+    const { isLoading, providerStatus } = useCollaboration();
+    if (isLoading) {
+      return <Loading />;
+    }
+
+    return <ExcelEditor {...props} providerStatus={providerStatus} />;
   },
 );
 

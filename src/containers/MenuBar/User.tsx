@@ -7,7 +7,8 @@ import { $ } from '../../i18n';
 
 export const User: FunctionComponent<{
   providerStatus: ProviderStatus;
-}> = ({ providerStatus }) => {
+  enableLogin: boolean;
+}> = ({ providerStatus, enableLogin }) => {
   const { provider } = useExcel();
   const clientId = useUserInfo((s) => s.clientId);
   const userName = useUserInfo((s) => s.userName);
@@ -30,14 +31,15 @@ export const User: FunctionComponent<{
           alt={userName}
         />
       )}
-      {userName ? (
-        <Button onClick={handleLogOut}>{$('log-out')}</Button>
-      ) : (
-        <Button onClick={handleLogin} className={styles.login}>
-          {$('login')} &nbsp;
-          <Icon name="github" />
-        </Button>
-      )}
+      {enableLogin &&
+        (userName ? (
+          <Button onClick={handleLogOut}>{$('log-out')}</Button>
+        ) : (
+          <Button onClick={handleLogin} className={styles.login}>
+            {$('login')} &nbsp;
+            <Icon name="github" />
+          </Button>
+        ))}
 
       <Icon name={providerStatus} className={styles.status} />
     </div>
