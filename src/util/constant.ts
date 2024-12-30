@@ -27,7 +27,6 @@ export const MAX_NAME_LENGTH = 35;
 export const MAX_PARAMS_COUNT = 256;
 export const FORMULA_MAX_PRECISION = 9;
 export const FORMULA_EDITOR_ROLE = '__FORMULA_EDITOR_ROLE__';
-export const DEFAULT_EXCEL_ID = '184858c4-be37-41b5-af82-52689004e605';
 
 export const DEFAULT_FORMAT_CODE = 'General';
 export const DEFAULT_TEXT_FORMAT_CODE = '@';

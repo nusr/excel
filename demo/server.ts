@@ -1,22 +1,57 @@
-import type {
-  RealtimeChannel,
-  AuthChangeEvent,
-  Session,
-} from '@supabase/supabase-js';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 import { SupabaseClient } from '@supabase/supabase-js';
-import type { Database, CollaborationOptions } from './type';
 import {
   SYNC_FLAG,
   UserItem,
   ICollaborationProvider,
   DocumentItem,
-} from '../types';
-import { collaborationLog, eventEmitter, omit } from '../util';
+  collaborationLog,
+  omit,
+  uint8ArrayToString,
+  stringToUint8Array,
+  shouldSkipUpdate,
+  HistoryItem,
+} from '../src';
 import * as Y from 'yjs';
-import { uint8ArrayToString, stringToUint8Array } from './util';
 import { DocumentDB } from './local';
 import { v4 as uuidV4 } from 'uuid';
 import * as awarenessProtocol from 'y-protocols/awareness';
+
+interface Database {
+  public: {
+    Tables: {
+      document: {
+        Row: Required<DocumentItem>;
+        Insert: {
+          id?: string;
+          name: string;
+          create_time?: never;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          create_time?: never;
+        };
+      };
+      history: {
+        Row: Required<HistoryItem>;
+        Insert: {
+          id?: number;
+          doc_id: string;
+          update: string;
+          create_time?: never;
+        };
+      };
+    };
+  };
+}
+
+type CollaborationOptions = {
+  doc: Y.Doc;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+  enableIndexDb?: boolean;
+};
 
 const DIRECTORY = 'supabase/';
 
@@ -25,26 +60,16 @@ type EventType = 'message' | 'awareness';
 const BROADCAST = 'broadcast';
 
 export class CollaborationProvider implements ICollaborationProvider {
-  public readonly doc: Y.Doc;
+  private readonly doc: Y.Doc;
   private readonly remoteDB: SupabaseClient<Database> | null = null;
   private readonly channel: RealtimeChannel | null = null;
   private readonly localDB: DocumentDB | null = null;
   private readonly broadcastChannel: BroadcastChannel;
-  private readonly _isOnline: boolean = false;
   private readonly awareness: awarenessProtocol.Awareness;
-  private options: CollaborationOptions;
   private awarenessChangeCallback: ((users: UserItem[]) => void) | null = null;
-  private authChangeCallback:
-    | ((
-        event: AuthChangeEvent,
-        session: Session | null,
-      ) => void | Promise<void>)
-    | null = null;
   constructor(options: CollaborationOptions) {
-    this.options = options;
     const { doc } = options;
     if (options.supabaseUrl && options.supabaseAnonKey) {
-      this._isOnline = true;
       this.remoteDB = new SupabaseClient<Database>(
         options.supabaseUrl,
         options.supabaseAnonKey,
@@ -54,13 +79,15 @@ export class CollaborationProvider implements ICollaborationProvider {
       });
     }
     this.doc = doc;
-    if (typeof indexedDB !== 'undefined' && !options.disableIndexDB) {
-      this.localDB = new DocumentDB(options.indexedBDVersion);
+    if (typeof indexedDB !== 'undefined' && options.enableIndexDb) {
+      this.localDB = new DocumentDB(2);
     }
     this.broadcastChannel = new BroadcastChannel(this.docId);
     this.awareness = new awarenessProtocol.Awareness(doc);
-    this.onConnect();
     this.subscribe();
+  }
+  getDoc() {
+    return this.doc;
   }
   private get clientID() {
     return this.doc.clientID;
@@ -68,59 +95,14 @@ export class CollaborationProvider implements ICollaborationProvider {
   private get docId() {
     return this.doc.guid;
   }
-  canUseRemoteDB() {
-    return Boolean(this.remoteDB);
-  }
-  async login() {
-    if (!this.remoteDB) {
-      return eventEmitter.emit('toastMessage', {
-        type: 'error',
-        message:
-          'Need to config VITE_SUPABASE_ANON_KEY and VITE_SUPABASE_URL env',
-      });
-    }
-    collaborationLog('loginRedirectTo:', this.options.loginRedirectTo);
-    const result = await this.remoteDB?.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: this.options.loginRedirectTo,
-      },
-    });
-    collaborationLog('login result:', result);
-  }
-  async getLoginInfo() {
-    if (!this.remoteDB) {
-      return;
-    }
-    const result = await this.remoteDB.auth.getSession();
-    collaborationLog('getLoginInfo:', result);
-    const temp = result?.data.session;
-    this.authChangeCallback?.('INITIAL_SESSION', temp);
-    return temp;
-  }
-  async logOut() {
-    const result = await this.remoteDB?.auth.signOut();
-    collaborationLog('log out result:', result);
-  }
 
-  setAuthChangeCallback(
-    callback: (
-      event: AuthChangeEvent,
-      session: Session | null,
-    ) => void | Promise<void>,
-  ): void {
-    this.authChangeCallback = callback;
-  }
   setAwarenessChangeCallback(callback: (users: UserItem[]) => void): void {
     this.awarenessChangeCallback = callback;
   }
 
-  isOnline = () => {
-    if (this._isOnline === false) {
-      return false;
-    }
-    return navigator.onLine;
-  };
+  private isOnline() {
+    return navigator.onLine && this.remoteDB !== null;
+  }
 
   private subscribe() {
     this.awareness.on('update', this.onAwarenessUpdate);
@@ -187,10 +169,15 @@ export class CollaborationProvider implements ICollaborationProvider {
       this.awarenessChangeCallback?.(users);
     });
 
-    this.remoteDB?.auth.onAuthStateChange((event, session) => {
-      collaborationLog('onAuthStateChange', event, session);
-      this.authChangeCallback?.(event, session);
+    this.doc.on('update', (update: Uint8Array, _b, _c, tran) => {
+      if (shouldSkipUpdate(tran)) {
+        return;
+      }
+      collaborationLog('doc update', tran.doc.clientID, tran);
+      this.addHistory(update);
     });
+
+    this.onConnect();
   }
 
   private applyUpdate(update: Uint8Array, type: EventType) {
@@ -248,7 +235,7 @@ export class CollaborationProvider implements ICollaborationProvider {
     collaborationLog('channel send', real);
   }
 
-  async addHistory(update: Uint8Array) {
+  private async addHistory(update: Uint8Array) {
     this.postMessage(update, 'message');
     if (!this.isOnline()) {
       await this.localDB?.addHistory(this.docId, update);
@@ -332,12 +319,15 @@ export class CollaborationProvider implements ICollaborationProvider {
     const docId = r.data?.[0].id as string;
     return docId;
   }
-  async updateDocument(name: string): Promise<void> {
+  async updateDocument(docId: string, name: string): Promise<void> {
     if (!this.isOnline()) {
-      await this.localDB?.updateDocument(this.docId, name);
+      await this.localDB?.updateDocument(docId || this.docId, name);
       return;
     }
-    await this.remoteDB?.from('document').update({ name }).eq('id', this.docId);
+    await this.remoteDB
+      ?.from('document')
+      .update({ name })
+      .eq('id', docId || this.docId);
   }
   async getDocument(): Promise<DocumentItem | undefined> {
     if (!this.isOnline()) {

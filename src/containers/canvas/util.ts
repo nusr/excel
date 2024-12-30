@@ -15,6 +15,8 @@ import {
   DEFAULT_FORMAT_CODE,
   getFormatCode,
   parseNumber,
+  isTestEnv,
+  KEY_LIST,
 } from '../../util';
 import { getThemeColor } from '../../theme';
 import {
@@ -336,8 +338,22 @@ export function initCanvas(
 
   const removeEvent = registerGlobalEvent(controller, resize);
 
-  resize();
-
+  const changeSet = new Set<ChangeEventType>([
+    ...KEY_LIST,
+    'scroll',
+    'cellValue',
+    'cellStyle',
+    'antLine',
+    'undo',
+    'redo',
+  ]);
+  handleStateChange(changeSet, controller);
+  renderCanvas(changeSet);
+  if (!isTestEnv()) {
+    setTimeout(() => {
+      renderCanvas(changeSet);
+    }, 0);
+  }
   return () => {
     removeEvent();
     offEvent();

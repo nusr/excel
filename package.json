@@ -25,6 +25,9 @@
   },
   "scripts": {
     "start": "vite --force --host --port 3000",
+    "dev": "run-p start server:*",
+    "server:websocket": "npx y-websocket",
+    "server:webrtc": "npx y-webrtc-signaling",
     "type-check": "tsc",
     "e2e": "playwright test",
     "e2e:ui": "npm run e2e -- --ui",
@@ -44,6 +47,7 @@
     "@release-it/bumper": "6.0.1",
     "@release-it/conventional-changelog": "9.0.4",
     "@sentry/react": "8.47.0",
+    "@supabase/supabase-js": "2.47.10",
     "@testing-library/jest-dom": "6.6.3",
     "@testing-library/react": "16.1.0",
     "@testing-library/user-event": "14.5.2",
@@ -54,9 +58,11 @@
     "@types/react-dom": "19.0.2",
     "@vitejs/plugin-react": "4.3.4",
     "canvas": "2.11.2",
+    "dexie": "4.0.10",
     "husky": "9.1.7",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
+    "npm-run-all": "4.1.5",
     "pixelmatch": "5.3.0",
     "pngjs": "7.0.0",
     "react": "19.0.0",
@@ -67,17 +73,17 @@
     "typescript": "5.7.2",
     "vite": "6.0.6",
     "vite-plugin-dts": "4.4.0",
-    "vite-plugin-pwa": "0.21.1"
+    "vite-plugin-pwa": "0.21.1",
+    "y-protocols": "1.0.6",
+    "y-webrtc": "10.3.0",
+    "y-websocket": "2.1.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "2.47.10",
     "chart.js": "4.4.7",
     "comlink": "4.4.2",
-    "dexie": "4.0.10",
     "jszip": "3.10.1",
     "numfmt": "3.1.4",
     "uuid": "11.0.3",
-    "y-protocols": "1.0.6",
     "yjs": "13.6.21",
     "zustand": "5.0.2"
   },
@@ -91,8 +97,7 @@
     "collaboration",
     "excel",
     "xlsx",
-    "spreadsheet",
-    "supabase"
+    "spreadsheet"
   ],
   "files": [
     "lib",

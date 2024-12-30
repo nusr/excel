@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { version } from './package.json';
 import dts from 'vite-plugin-dts';
 import { VitePWA } from 'vite-plugin-pwa';
+import { resolve } from 'path';
 
 export default defineConfig((env) => {
   const isLibrary = env.mode === 'production';
@@ -21,7 +22,6 @@ export default defineConfig((env) => {
     define: {
       'process.env.VITE_IS_E2E': JSON.stringify(process.env.VITE_IS_E2E ?? ''),
       'process.env.VERSION': JSON.stringify(version),
-      'process.env.CI': JSON.stringify(process.env.CI || ''),
     },
     build: {
       sourcemap: true,
@@ -45,7 +45,12 @@ export default defineConfig((env) => {
               },
             },
           }
-        : undefined,
+        : {
+            input: {
+              main: resolve(__dirname, 'index.html'),
+              app: resolve(__dirname, 'app.html'),
+            },
+          },
     },
   };
 });

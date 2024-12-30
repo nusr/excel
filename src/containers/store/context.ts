@@ -3,7 +3,7 @@ import { IController, ICollaborationProvider } from '../../types';
 
 export type StateContextValue = {
   controller: IController;
-  provider?: ICollaborationProvider;
+  provider?: Partial<ICollaborationProvider>;
 };
 
 export const StateContext = createContext<StateContextValue | undefined>(

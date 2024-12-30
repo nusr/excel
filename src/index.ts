@@ -1,7 +1,6 @@
 import * as Y from 'yjs';
 import './global.css';
 
-export * from './collaboration';
 export * from 'comlink';
 export * from './components';
 export * from './containers';

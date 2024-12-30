@@ -3,7 +3,6 @@ import { CanvasOverlayPosition, IHooks, DocumentItem } from './components';
 import { IRange } from './range';
 import { IWindowSize, IPosition } from './event';
 import type { Doc } from 'yjs';
-import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 /**
  * Interface representing a controller with various methods for managing and interacting with a spreadsheet.
@@ -155,23 +154,7 @@ export interface IController extends IBaseModel {
  * Interface representing a collaboration provider for document handling and synchronization.
  */
 export interface ICollaborationProvider {
-  /**
-   * The document associated with the collaboration provider.
-   */
-  readonly doc: Doc;
-
-  /**
-   * Checks if the collaboration provider is online.
-   * @returns A boolean indicating the online status.
-   */
-  isOnline(): boolean;
-
-  /**
-   * Adds a history update to the collaboration provider.
-   * @param update - The update to be added as a Uint8Array.
-   * @returns A promise that resolves when the update is added.
-   */
-  addHistory(update: Uint8Array): Promise<void>;
+  getDoc(): Doc;
 
   /**
    * Retrieves the history of updates from the collaboration provider.
@@ -208,10 +191,8 @@ export interface ICollaborationProvider {
 
   /**
    * Updates an existing document in the collaboration provider.
-   * @param name - The name of the document to be updated.
-   * @returns A promise that resolves when the document is updated.
    */
-  updateDocument(name: string): Promise<void>;
+  updateDocument(docId: string, name: string): Promise<void>;
 
   /**
    * Retrieves a document from the collaboration provider.
@@ -223,15 +204,4 @@ export interface ICollaborationProvider {
    * Synchronizes a specific range of data with the collaboration provider.
    */
   syncRange(data: Pick<UserItem, 'range' | 'userId' | 'userName'>): void;
-  setAwarenessChangeCallback(callback: (users: UserItem[]) => void): void;
-  setAuthChangeCallback(
-    callback: (
-      event: AuthChangeEvent,
-      session: Session | null,
-    ) => void | Promise<void>,
-  ): void;
-  login(): Promise<void>;
-  getLoginInfo(): Promise<Session | null | undefined>;
-  logOut(): Promise<void>;
-  canUseRemoteDB(): boolean;
 }

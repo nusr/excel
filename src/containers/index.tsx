@@ -6,66 +6,41 @@ import CanvasContainer from './canvas';
 import SheetBarContainer from './SheetBar';
 import MenuBarContainer from './MenuBar';
 import { useExcel, useUserInfo } from './store';
-import { applyUpdate } from '../collaboration';
 import { Loading, toast } from '../components';
-import { eventEmitter, KEY_LIST, reactLog } from '../util';
-import { ProviderStatus, ChangeEventType } from '../types';
-import type { Session } from '@supabase/supabase-js';
+import { eventEmitter, applyUpdate } from '../util';
+import { ProviderStatus } from '../types';
 
 function useCollaboration() {
   const [isLoading, setIsLoading] = useState(true);
   const setClientId = useUserInfo((s) => s.setClientId);
-  const setUserInfo = useUserInfo((s) => s.setUserInfo);
-  const setUsers = useUserInfo((s) => s.setUsers);
   const [providerStatus, setProviderStatus] = useState<ProviderStatus>(
     ProviderStatus.LOCAL,
   );
   const { provider, controller } = useExcel();
   useEffect(() => {
-    const changeSet = new Set<ChangeEventType>([
-      ...KEY_LIST,
-      'scroll',
-      'cellValue',
-      'cellStyle',
-      'antLine',
-      'undo',
-      'redo',
-    ]);
-
-    function handleSession(session: Session | null | undefined) {
-      reactLog('session:', session);
-      const name = session?.user.user_metadata.user_name;
-      const id = session?.user.user_metadata.provider_id;
-      setUserInfo(id || '', name || '');
-    }
-
     async function init() {
       if (!provider) {
-        return eventEmitter.emit('renderChange', {
-          changeSet,
-        });
+        if (controller.getSheetList().length === 0) {
+          controller.addFirstSheet();
+        }
+        setIsLoading(false);
+        return;
       }
-      provider?.setAuthChangeCallback((_event, session) => {
-        handleSession(session);
-      });
-      await provider?.getLoginInfo();
       setIsLoading(true);
-      const file = await provider?.getDocument();
+      const file = await provider?.getDocument?.();
+      const doc = provider?.getDoc?.();
       useUserInfo.setState({
         fileId: file?.id ?? '',
         fileName: file?.name ?? '',
-        clientId: provider.doc.clientID,
+        clientId: doc?.clientID,
       });
-      const result = await provider?.retrieveHistory();
-      if (result.length > 0) {
-        applyUpdate(provider.doc, result);
+      const result = await provider?.retrieveHistory?.();
+      if (result && result.length > 0 && doc) {
+        applyUpdate(doc, result);
       }
       if (controller.getSheetList().length === 0) {
         controller.addFirstSheet();
       }
-      eventEmitter.emit('renderChange', {
-        changeSet,
-      });
       setIsLoading(false);
     }
     init();
@@ -73,28 +48,23 @@ function useCollaboration() {
 
   useEffect(() => {
     function handleEvent() {
-      if (provider?.isOnline()) {
+      if (navigator.onLine) {
         setProviderStatus(ProviderStatus.SYNCING);
         provider
-          ?.syncData()
+          ?.syncData?.()
           .finally(() =>
             setProviderStatus(
-              provider?.isOnline()
-                ? ProviderStatus.ONLINE
-                : ProviderStatus.LOCAL,
+              navigator.onLine ? ProviderStatus.ONLINE : ProviderStatus.LOCAL,
             ),
           );
       }
     }
     window.addEventListener('online', handleEvent);
     window.addEventListener('offline', handleEvent);
-    setClientId(provider?.doc.clientID ?? 0);
-    provider?.setAwarenessChangeCallback((users) => {
-      setUsers(users);
-    });
+    setClientId(provider?.getDoc?.().clientID ?? 0);
     eventEmitter.on('rangeChange', ({ range }) => {
       const user = useUserInfo.getState();
-      provider?.syncRange({
+      provider?.syncRange?.({
         range,
         userId: user.userId,
         userName: user.userName,
@@ -108,7 +78,7 @@ function useCollaboration() {
     );
     return () => {
       window.removeEventListener('online', handleEvent);
-      window.removeEventListener('online', handleEvent);
+      window.removeEventListener('offline', handleEvent);
       eventEmitter.off('renderChange');
       eventEmitter.off('rangeChange');
       eventEmitter.off('modelChange');
@@ -124,20 +94,16 @@ function useCollaboration() {
 type Props = {
   style?: React.CSSProperties;
   providerStatus?: ProviderStatus;
-  enableLogin?: boolean;
 };
 const ExcelEditor: React.FunctionComponent<Props> = memo(
-  ({ style, providerStatus, enableLogin }) => {
+  ({ style, providerStatus }) => {
     return (
       <div
         className={styles['app-container']}
         data-testid="app-container"
         style={style}
       >
-        <MenuBarContainer
-          providerStatus={providerStatus}
-          enableLogin={enableLogin}
-        />
+        <MenuBarContainer providerStatus={providerStatus} />
         <ToolbarContainer />
         <FormulaBarContainer />
         <CanvasContainer />
@@ -160,7 +126,7 @@ const Excel: React.FunctionComponent<Omit<Props, 'providerStatus'>> = memo(
   },
 );
 
-Excel.displayName = 'ExcelEditor';
+Excel.displayName = 'Excel';
 
 export * from './store';
 export * from './MenuBar';

@@ -12,6 +12,9 @@ import type {
   IRange,
 } from '../types';
 
+import * as Y from 'yjs';
+import { SYNC_FLAG } from '../types';
+
 export function parseNumber(value: any): [boolean, number] {
   if (typeof value === 'boolean') {
     return [true, Number(value)];
@@ -187,4 +190,32 @@ export function getRandomColor() {
     .toString(16)
     .padStart(2, '0');
   return `#${r}${g}${b}`;
+}
+
+export function shouldSkipUpdate(tran: Y.Transaction) {
+  if (
+    [SYNC_FLAG.SKIP_UPDATE, SYNC_FLAG.SKIP_UNDO_REDO_UPDATE].includes(
+      tran.origin,
+    )
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function applyUpdate(doc: Y.Doc, result: Uint8Array[]) {
+  Y.applyUpdate(doc, Y.mergeUpdates(result), SYNC_FLAG.SKIP_UNDO_REDO_UPDATE);
+}
+
+export function stringToUint8Array(str: string) {
+  const binString = atob(str);
+  // @ts-ignore
+  return Uint8Array.from(binString, (m) => m.codePointAt(0));
+}
+
+export function uint8ArrayToString(bytes: Uint8Array) {
+  const binString = Array.from(bytes, (byte) =>
+    String.fromCodePoint(byte),
+  ).join('');
+  return btoa(binString);
 }

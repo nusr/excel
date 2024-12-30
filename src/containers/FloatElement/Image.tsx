@@ -16,7 +16,7 @@ export const Image: React.FunctionComponent<Props> = memo(
     const { provider } = useExcel();
 
     useEffect(() => {
-      if (!provider) {
+      if (!provider?.downloadFile) {
         setSrc(imageSrc);
         return;
       }

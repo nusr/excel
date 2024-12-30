@@ -38,12 +38,6 @@ npm run start
 
 Create an `.env` file and modify it as the `.env.example` file
 
-| Key                    | Required | Description        |
-| ---------------------- | -------- | ------------------ |
-| VITE_SUPABASE_URL      | optional | Supbase url        |
-| VITE_SUPABASE_ANON_KEY | optional | Supbase anon key   |
-| VITE_DEFAULT_EXCEL_ID  | optional | default excel uuid |
-
 ## Supbase
 
 Collaborative editing uses [Supabase](https://supabase.com/) as backend.

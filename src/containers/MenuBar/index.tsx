@@ -13,11 +13,10 @@ import { File } from './File';
 
 type Props = {
   providerStatus?: ProviderStatus;
-  enableLogin?: boolean;
 };
 
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
-  ({ providerStatus = ProviderStatus.LOCAL, enableLogin = false }) => {
+  ({ providerStatus = ProviderStatus.LOCAL }) => {
     const { controller, provider } = useExcel();
     const [visible, setVisible] = useState(false);
     const handleExportXLSX = useCallback(() => {
@@ -62,7 +61,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       saveAs(blob, `excel_${Date.now()}.json`);
     }, []);
     const handleAddDocument = useCallback(() => {
-      provider?.addDocument().then((docId) => {
+      provider?.addDocument?.().then((docId) => {
         if (!docId) {
           return;
         }
@@ -121,7 +120,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
             </MenuItem>
           </Menu>
         </div>
-        <User providerStatus={providerStatus} enableLogin={enableLogin} />
+        <User providerStatus={providerStatus} />
         <I18N />
         <Theme />
       </div>

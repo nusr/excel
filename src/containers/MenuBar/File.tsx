@@ -35,10 +35,9 @@ export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
     if (!value) {
       return;
     }
-    provider?.updateDocument(value).then(() => {
-      setFileName(value);
-      setVisible(false);
-    });
+    provider?.updateDocument?.(provider?.getDoc?.().guid || '', value);
+    setFileName(value);
+    setVisible(false);
   }, [value, provider]);
   return (
     <React.Fragment>

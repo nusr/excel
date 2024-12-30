@@ -77,3 +77,12 @@ export type HistoryItem = {
   create_time: string;
   sync?: boolean;
 };
+
+export type CollaborationOptions = {
+  doc: Doc;
+  disableIndexDB?: boolean;
+  indexedBDVersion?: number;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+};
+
