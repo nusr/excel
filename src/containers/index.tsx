@@ -6,13 +6,13 @@ import CanvasContainer from './canvas';
 import SheetBarContainer from './SheetBar';
 import MenuBarContainer from './MenuBar';
 import { useExcel, useUserInfo } from './store';
-import { Loading, toast } from '../components';
-import { eventEmitter, applyUpdate } from '../util';
+import { Loading } from '../components';
+import { applyUpdate } from '../util';
 import { ProviderStatus } from '../types';
 
 function useCollaboration() {
   const [isLoading, setIsLoading] = useState(true);
-  const setClientId = useUserInfo((s) => s.setClientId);
+  const setFileInfo = useUserInfo((s) => s.setFileInfo);
   const [providerStatus, setProviderStatus] = useState<ProviderStatus>(
     ProviderStatus.LOCAL,
   );
@@ -28,12 +28,8 @@ function useCollaboration() {
       }
       setIsLoading(true);
       const file = await provider?.getDocument?.();
-      const doc = provider?.getDoc?.();
-      useUserInfo.setState({
-        fileId: file?.id ?? '',
-        fileName: file?.name ?? '',
-        clientId: doc?.clientID,
-      });
+      const doc = controller.getHooks().doc;
+      setFileInfo(file?.id ?? '', file?.name ?? '');
       const result = await provider?.retrieveHistory?.();
       if (result && result.length > 0 && doc) {
         applyUpdate(doc, result);
@@ -61,32 +57,13 @@ function useCollaboration() {
     }
     window.addEventListener('online', handleEvent);
     window.addEventListener('offline', handleEvent);
-    setClientId(provider?.getDoc?.().clientID ?? 0);
-    eventEmitter.on('rangeChange', ({ range }) => {
-      const user = useUserInfo.getState();
-      provider?.syncRange?.({
-        range,
-        userId: user.userId,
-        userName: user.userName,
-      });
-    });
-    eventEmitter.on(
-      'toastMessage',
-      ({ type, message, duration = 5, testId }) => {
-        toast({ type, message, duration, testId: testId ?? `${type}-toast` });
-      },
-    );
     return () => {
       window.removeEventListener('online', handleEvent);
       window.removeEventListener('offline', handleEvent);
-      eventEmitter.off('renderChange');
-      eventEmitter.off('rangeChange');
-      eventEmitter.off('modelChange');
-      eventEmitter.off('toastMessage');
     };
   }, []);
   return {
-    isLoading: isLoading && Boolean(provider),
+    isLoading,
     providerStatus,
   };
 }

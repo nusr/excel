@@ -15,11 +15,12 @@ import {
   ModelRoot,
   ModelScroll,
   SYNC_FLAG,
+  ModelEventEmitterType,
 } from '../types';
 import {
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
-  eventEmitter,
+  EventEmitter,
   containRange,
   KEY_LIST,
 } from '../util';
@@ -35,7 +36,10 @@ import { FilterManger } from './filter';
 import { ScrollManager } from './scroll';
 import * as Y from 'yjs';
 
-export class Model implements IModel {
+export class Model
+  extends EventEmitter<ModelEventEmitterType>
+  implements IModel
+{
   private readonly workbookManager: Workbook;
   private readonly rangeMapManager: RangeMap;
   private readonly drawingsManager: Drawing;
@@ -49,11 +53,12 @@ export class Model implements IModel {
   private readonly doc: Y.Doc;
   private readonly undoManager: Y.UndoManager;
   constructor(hooks: Pick<IHooks, 'doc' | 'worker'>) {
+    super();
     const { doc, worker } = hooks;
     this.doc = doc;
     const root = this.getRoot();
     root.observeDeep((event) => {
-      eventEmitter.emit('modelChange', { event });
+      this.emit('modelChange', { event });
     });
     this.undoManager = new Y.UndoManager(root, {
       trackedOrigins: new Set([SYNC_FLAG.MODEL, SYNC_FLAG.SKIP_UPDATE]),

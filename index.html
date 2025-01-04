@@ -10,41 +10,43 @@
         margin: 0;
         padding: 0;
       }
+
       .title {
         text-align: center;
         margin: 0;
         font-size: 18px;
         padding: 10px 0;
       }
+
       .container {
         display: flex;
         flex-direction: column;
       }
+
       .extra {
         padding-bottom: 10px;
         text-align: center;
       }
+
       .content {
         flex: 1;
         display: flex;
       }
+
       .html {
         border: 2px dashed black;
-        height: calc(100vh - 110px);
+        height: calc(100vh - 80px);
         flex: 1;
       }
+
       .enable {
         text-align: center;
       }
     </style>
   </head>
+
   <body class="container">
     <h1 class="title">Excel Collaborative Example (see iframes below)</h1>
-    <div id="enable" class="enable">
-      <button data-value="supbase">Enable Supbase</button>
-      <button data-value="websocket">Enable Websocket</button>
-      <button data-value="webrtc">Enable Webrtc</button>
-    </div>
     <div class="extra">
       <a href="%BASE_URL%app" id="full-screen">Full Screen</a>
     </div>
@@ -64,35 +66,5 @@
         class="html"
       ></iframe>
     </div>
-    <script>
-      function editSearch(id, type) {
-        if (!type) {
-          return;
-        }
-        var search = '?providerType=' + type;
-        const iframe = document.getElementById(id);
-        const iframeWindow = iframe.contentWindow;
-        if (iframeWindow) {
-          iframeWindow.location.search = search;
-        }
-      }
-      var docId = window.location.hash.slice(1);
-      document.getElementById('full-screen').href =
-        '%BASE_URL%app' + (docId ? '#' + docId : '');
-      document
-        .getElementById('enable')
-        .addEventListener('click', function (event) {
-          var type = event.target.dataset.value;
-          editSearch('left', type);
-          editSearch('right', type);
-        });
-      window.onload = function () {
-        var providerType = new URLSearchParams(location.search).get(
-          'providerType',
-        );
-        editSearch('left', providerType);
-        editSearch('right', providerType);
-      };
-    </script>
   </body>
 </html>

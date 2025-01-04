@@ -20,6 +20,7 @@ import {
   type AutoFilterItem,
   type CanvasOverlayPosition,
   SYNC_FLAG,
+  type ControllerEventEmitterType,
 } from '../types';
 import {
   PLAIN_FORMAT,
@@ -40,10 +41,10 @@ import {
   convertBase64toBlob,
   IMAGE_FORMAT,
   formatCustomData,
-  eventEmitter,
   controllerLog,
   copyOrCut,
   paste,
+  EventEmitter,
 } from '../util';
 import { numberFormat, isDateFormat, convertDateToNumber } from '../formula';
 import { transaction } from './decorator';
@@ -56,9 +57,12 @@ const defaultScrollValue: Omit<ScrollValue, 'row' | 'col'> = {
   scrollTop: 0,
 };
 
-export class Controller implements IController {
+export class Controller
+  extends EventEmitter<ControllerEventEmitterType>
+  implements IController
+{
   private scrollValue: Record<string, Omit<ScrollValue, 'row' | 'col'>> = {};
-  private readonly model: IModel;
+  readonly model: IModel;
   private changeSet = new Set<ChangeEventType>();
   private floatElementUuid = '';
   private copyRange: IRange | undefined = undefined;
@@ -73,6 +77,7 @@ export class Controller implements IController {
     height: 0,
   };
   constructor(model: IModel, hooks: IHooks) {
+    super();
     this.model = model;
     this.hooks = hooks;
   }
@@ -172,7 +177,7 @@ export class Controller implements IController {
     }
     if (changeSet.size > 0) {
       controllerLog('emitChange', changeSet);
-      eventEmitter.emit('renderChange', { changeSet });
+      this.emit('renderChange', { changeSet });
     }
   }
   getActiveRange(r?: IRange) {
@@ -236,15 +241,14 @@ export class Controller implements IController {
   setActiveRange(range: IRange): void {
     this.model.setActiveRange(range);
     this.changeSet.add('rangeMap');
-    eventEmitter.emit('rangeChange', {
-      range: {
-        row: range.row,
-        col: range.col,
-        sheetId: range.sheetId,
-        rowCount: range.rowCount,
-        colCount: range.colCount,
-      },
-    });
+    const r = {
+      row: range.row,
+      col: range.col,
+      sheetId: range.sheetId || this.model.getCurrentSheetId(),
+      rowCount: range.rowCount,
+      colCount: range.colCount,
+    };
+    this.emit('rangeChange', r);
     this.emitChange();
   }
   setCurrentSheetId(id: string): void {

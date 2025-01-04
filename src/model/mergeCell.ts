@@ -5,7 +5,7 @@ import type {
   IModel,
   YjsModelJson,
 } from '../types';
-import { convertToReference, toIRange, eventEmitter } from '../util';
+import { convertToReference, toIRange } from '../util';
 import { $ } from '../i18n';
 import * as Y from 'yjs';
 
@@ -51,7 +51,7 @@ export class MergeCell implements IMergeCell {
       this.convertSheetIdToName,
     );
     if (this.mergeCells?.get(ref)) {
-      eventEmitter.emit('toastMessage', {
+      this.model.emit('toastMessage', {
         type: 'error',
         message: $('merging-cell-is-duplicate'),
       });

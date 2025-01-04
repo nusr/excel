@@ -9,7 +9,6 @@ import {
 import {
   DEFAULT_FONT_SIZE,
   HIDE_CELL,
-  eventEmitter,
   MERGE_CELL_LINE_BREAK,
   LINE_BREAK,
   DEFAULT_FORMAT_CODE,
@@ -26,6 +25,7 @@ import {
   useScrollStore,
   FloatElementItem,
   useStyleStore,
+  useUserInfo,
 } from '../../containers/store';
 import {
   MainCanvas,
@@ -34,6 +34,7 @@ import {
 } from '../../canvas';
 import { numberFormat as numberFormatUtil, isDateFormat } from '../../formula';
 import { initFontFamilyList } from './isSupportFontFamily';
+import { toast } from '../../components';
 
 function getChartData(
   range: IRange,
@@ -317,6 +318,8 @@ export function initCanvas(
   canvas: HTMLCanvasElement,
 ): () => void {
   useCoreStore.getState().setFontFamilies(initFontFamilyList());
+  useUserInfo.getState().setClientId(controller.getHooks().doc.clientID);
+
   const mainCanvas =
     MainCanvas.instance ||
     (MainCanvas.instance = new MainCanvas(controller, canvas));
@@ -331,12 +334,12 @@ export function initCanvas(
   const resize = () => {
     renderCanvas(new Set<ChangeEventType>(['customWidth']));
   };
-  const offEvent = eventEmitter.on('renderChange', ({ changeSet }) => {
+  const offRenderChange = controller.on('renderChange', ({ changeSet }) => {
     handleStateChange(changeSet, controller);
     mainCanvas.render({ changeSet });
   });
 
-  const removeEvent = registerGlobalEvent(controller, resize);
+  const offGlobalEvent = registerGlobalEvent(controller, resize);
 
   const changeSet = new Set<ChangeEventType>([
     ...KEY_LIST,
@@ -354,8 +357,23 @@ export function initCanvas(
       renderCanvas(changeSet);
     }, 0);
   }
+
+  const offToastMessage = controller.on(
+    'toastMessage',
+    ({ type, message, duration = 5, testId }) => {
+      toast({ type, message, duration, testId: testId ?? `${type}-toast` });
+    },
+  );
+  const offModelToastMessage = controller.model.on(
+    'toastMessage',
+    ({ type, message, duration = 5, testId }) => {
+      toast({ type, message, duration, testId: testId ?? `${type}-toast` });
+    },
+  );
   return () => {
-    removeEvent();
-    offEvent();
+    offGlobalEvent();
+    offRenderChange();
+    offToastMessage();
+    offModelToastMessage();
   };
 }

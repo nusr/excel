@@ -34,3 +34,4 @@ vite.config.mts.*.mjs
 diff.txt
 .nx
 pnpm-lock.yaml
+levelDB

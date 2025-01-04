@@ -1,5 +1,5 @@
 import { SYNC_FLAG, IController } from '../types';
-import { eventEmitter, controllerLog } from '../util';
+import { controllerLog } from '../util';
 import { $ } from '../i18n';
 
 export function transaction(origin: SYNC_FLAG = SYNC_FLAG.MODEL) {
@@ -10,7 +10,7 @@ export function transaction(origin: SYNC_FLAG = SYNC_FLAG.MODEL) {
       const self = this as IController;
       if (self.getReadOnly()) {
         controllerLog('no auth method:', key);
-        return eventEmitter.emit('toastMessage', {
+        return self.emit('toastMessage', {
           type: 'error',
           message: $('no-login-editing'),
         });

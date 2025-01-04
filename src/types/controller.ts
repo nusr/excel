@@ -1,13 +1,31 @@
-import { IBaseModel, ScrollValue, WorksheetType, UserItem } from './model';
+import {
+  IBaseModel,
+  ScrollValue,
+  WorksheetType,
+  IEventEmitter,
+  ChangeEventType,
+  ModelEventEmitterType,
+  IModel,
+} from './model';
 import { CanvasOverlayPosition, IHooks, DocumentItem } from './components';
 import { IRange } from './range';
 import { IWindowSize, IPosition } from './event';
-import type { Doc } from 'yjs';
+
+export type ControllerEventEmitterType = {
+  renderChange: {
+    changeSet: Set<ChangeEventType>;
+  };
+  rangeChange: IRange;
+  toastMessage: ModelEventEmitterType['toastMessage'];
+};
 
 /**
  * Interface representing a controller with various methods for managing and interacting with a spreadsheet.
  */
-export interface IController extends IBaseModel {
+export interface IController
+  extends IBaseModel,
+    IEventEmitter<ControllerEventEmitterType> {
+  readonly model: IModel;
   /**
    * Retrieves the hooks associated with the controller.
    * @returns {IHooks} The hooks.
@@ -154,8 +172,6 @@ export interface IController extends IBaseModel {
  * Interface representing a collaboration provider for document handling and synchronization.
  */
 export interface ICollaborationProvider {
-  getDoc(): Doc;
-
   /**
    * Retrieves the history of updates from the collaboration provider.
    * @returns A promise that resolves to an array of Uint8Array representing the history.
@@ -199,9 +215,4 @@ export interface ICollaborationProvider {
    * @returns A promise that resolves to a DocumentItem or undefined if not found.
    */
   getDocument(): Promise<DocumentItem | undefined>;
-
-  /**
-   * Synchronizes a specific range of data with the collaboration provider.
-   */
-  syncRange(data: Pick<UserItem, 'range' | 'userId' | 'userName'>): void;
 }

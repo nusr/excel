@@ -31,7 +31,7 @@ export const Collaboration = () => {
 
 export const User: React.FunctionComponent<
   UserItem & { row: number; col: number }
-> = ({ range, clientId, row, col, userName }) => {
+> = ({ range, clientId, row, col }) => {
   const { controller } = useExcel();
   const color = useMemo(() => {
     const list = getBytesFromUint32(clientId);
@@ -59,7 +59,7 @@ export const User: React.FunctionComponent<
       style={{ ...position, border: `2px solid ${color}` }}
     >
       <div className={styles.userContent} style={{ color }}>
-        {userName || `${$('user-name')} ${clientId}`}
+        {`${$('user-name')} ${clientId}`}
       </div>
     </div>
   );

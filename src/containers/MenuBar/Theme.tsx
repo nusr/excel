@@ -9,7 +9,7 @@ import {
   getTheme,
 } from '../../theme';
 import { ThemeType } from '../../types';
-import { eventEmitter } from '../../util';
+import { useExcel } from '../store';
 
 function setCssVariable(data: Record<string, string | number>) {
   const keyList = Object.keys(data);
@@ -29,6 +29,7 @@ function updateCssVariable(value: ThemeType) {
 }
 
 export const Theme: React.FunctionComponent = memo(() => {
+  const { controller } = useExcel();
   const [themeData, setThemeData] = useState<ThemeType>('light');
   useEffect(() => {
     setCssVariable(sizeConfig);
@@ -47,10 +48,10 @@ export const Theme: React.FunctionComponent = memo(() => {
   useEffect(() => {
     setTheme(themeData);
     updateCssVariable(themeData);
-    eventEmitter.emit('renderChange', {
+    controller.emit('renderChange', {
       changeSet: new Set(['cellStyle']),
     });
-  }, [themeData]);
+  }, [themeData, controller]);
 
   const handleClick = useCallback(() => {
     setThemeData((oldTheme) => {

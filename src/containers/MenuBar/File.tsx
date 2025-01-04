@@ -15,7 +15,7 @@ type Props = {
 };
 
 export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
-  const { provider } = useExcel();
+  const { provider, controller } = useExcel();
   const [value, setValue] = useState('');
   const fileName = useUserInfo((s) => s.fileName);
   const setFileName = useUserInfo((s) => s.setFileName);
@@ -35,10 +35,10 @@ export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
     if (!value) {
       return;
     }
-    provider?.updateDocument?.(provider?.getDoc?.().guid || '', value);
+    provider?.updateDocument?.(controller.getHooks().doc.guid, value);
     setFileName(value);
     setVisible(false);
-  }, [value, provider]);
+  }, [value, provider, controller]);
   return (
     <React.Fragment>
       <div className={styles.file} onClick={handleClick}>

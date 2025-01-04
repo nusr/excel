@@ -3,7 +3,6 @@ import {
   isTestEnv,
   throttle,
   CUSTOM_FORMAT,
-  eventEmitter,
   deepEqual,
   paste,
 } from '../util';
@@ -107,7 +106,7 @@ export function registerGlobalEvent(
       }
       if (!deepEqual(newRange, oldRange)) {
         controller.setCopyRange(newRange);
-        eventEmitter.emit('renderChange', {
+        controller.emit('renderChange', {
           changeSet: new Set(['cellStyle']),
         });
       }

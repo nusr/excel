@@ -7,7 +7,7 @@ import type {
   YjsModelJson,
   TypedMap,
 } from '../types';
-import { CHART_TYPE_LIST, iterateRange, toIRange, eventEmitter } from '../util';
+import { CHART_TYPE_LIST, iterateRange, toIRange } from '../util';
 import { $ } from '../i18n';
 import * as Y from 'yjs';
 
@@ -69,7 +69,7 @@ export class Drawing implements IDrawings {
   addDrawing(data: DrawingElement) {
     const oldData = this.drawings?.get(data.uuid);
     if (oldData) {
-      return eventEmitter.emit('toastMessage', {
+      return this.model.emit('toastMessage', {
         type: 'error',
         message: $('uuid-is-duplicate'),
       });
@@ -82,7 +82,7 @@ export class Drawing implements IDrawings {
       let check = false;
       const info = this.model.getSheetInfo(range.sheetId);
       if (!info) {
-        return eventEmitter.emit('toastMessage', {
+        return this.model.emit('toastMessage', {
           type: 'error',
           message: $('sheet-is-not-exist'),
         });
@@ -108,7 +108,7 @@ export class Drawing implements IDrawings {
         },
       );
       if (!check) {
-        return eventEmitter.emit('toastMessage', {
+        return this.model.emit('toastMessage', {
           type: 'error',
           message: $('cells-must-contain-data'),
         });
@@ -142,7 +142,7 @@ export class Drawing implements IDrawings {
             (v) => v.value === value.chartType!,
           );
           if (index < 0) {
-            return eventEmitter.emit('toastMessage', {
+            return this.model.emit('toastMessage', {
               type: 'error',
               message: $('unsupported-chart-types'),
             });
@@ -169,7 +169,7 @@ export class Drawing implements IDrawings {
     }
     const sheetInfo = this.model.getSheetInfo();
     if (!sheetInfo) {
-      return
+      return;
     }
     const colCount = sheetInfo.colCount;
     for (const [uuid, v] of this.drawings.entries()) {

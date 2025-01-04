@@ -4,30 +4,23 @@ import { create } from 'zustand';
 
 export type UserInfo = {
   clientId: number;
-  userId: string;
-  userName: string;
   users: UserItem[];
   fileId: string;
   fileName: string;
 };
 
 type Action = {
-  setUserInfo(userId: string, userName: string): void;
   setUsers(users: UserItem[]): void;
   setClientId(clientId: number): void;
   setFileName(name: string): void;
+  setFileInfo(id: string, name: string): void;
 };
 
 export const useUserInfo = create<UserInfo & Action>((set) => ({
   clientId: 0,
-  userId: '',
-  userName: '',
   users: [],
   fileId: '',
   fileName: '',
-  setUserInfo(id, name) {
-    set({ userId: id, userName: name });
-  },
   setUsers(users) {
     set({ users });
   },
@@ -36,5 +29,8 @@ export const useUserInfo = create<UserInfo & Action>((set) => ({
   },
   setFileName(name) {
     set({ fileName: name });
+  },
+  setFileInfo(id, name) {
+    set({ fileId: id, fileName: name });
   },
 }));

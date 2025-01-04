@@ -12,7 +12,6 @@ import {
   DEFAULT_COL_COUNT,
   XLSX_MAX_COL_COUNT,
   XLSX_MAX_ROW_COUNT,
-  eventEmitter,
 } from '../util';
 import { $ } from '../i18n';
 import * as Y from 'yjs';
@@ -130,7 +129,7 @@ export class Workbook implements IWorkbook {
   }
   renameSheet(sheetName: string, sheetId?: string): void {
     if (!sheetName) {
-      eventEmitter.emit('toastMessage', {
+      this.model.emit('toastMessage', {
         type: 'error',
         message: $('the-value-cannot-be-empty'),
       });
@@ -143,7 +142,7 @@ export class Workbook implements IWorkbook {
       if (item.sheetId === id) {
         return;
       }
-      eventEmitter.emit('toastMessage', {
+      this.model.emit('toastMessage', {
         type: 'error',
         message: $('sheet-name-is-duplicate'),
       });
@@ -190,7 +189,7 @@ export class Workbook implements IWorkbook {
     const sheetList = this.getSheetList();
     const list = sheetList.filter((v) => !v.isHide);
     if (list.length < 2) {
-      eventEmitter.emit('toastMessage', {
+      this.model.emit('toastMessage', {
         type: 'error',
         message: $('a-workbook-must-contains-at-least-one-visible-worksheet'),
       });

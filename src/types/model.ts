@@ -764,13 +764,45 @@ export interface IBaseModel
   clearHistory(): void;
 }
 
+export interface IEventEmitter<
+  EventType extends Record<string, unknown> = Record<string, unknown>,
+> {
+  getEventLength<T extends keyof EventType>(name: T): number;
+  on<T extends keyof EventType>(
+    name: T,
+    callback: (data: EventType[T]) => void,
+  ): VoidFunction;
+  emit<T extends keyof EventType>(name: T, data: EventType[T]): void;
+  off<T extends keyof EventType>(
+    name: T,
+    callback?: (data: EventType[T]) => void,
+  ): void;
+  once<T extends keyof EventType>(
+    name: T,
+    callback: (data: EventType[T]) => void,
+  ): VoidFunction;
+}
+
+export type ModelEventEmitterType = {
+  modelChange: {
+    event: YEvent<any>[];
+  };
+  toastMessage: {
+    message: string;
+    type: MessageType;
+    duration?: number; // second
+    testId?: string;
+  };
+};
+
 /**
  * Interface representing a model with various functionalities.
  *
  */
 export interface IModel
   extends IBaseModel,
-    Pick<IScroll, 'getScroll' | 'setScroll'> {
+    Pick<IScroll, 'getScroll' | 'setScroll'>,
+    IEventEmitter<ModelEventEmitterType> {
   /**
    * Pastes a range of cells.
    *
@@ -801,27 +833,8 @@ export type NumberFormatValue =
 export type UserItem = {
   range: IRange;
   clientId: number;
-  userId: string;
-  userName: string;
 };
 export type MessageType = 'success' | 'error' | 'info' | 'warning';
-export type EventEmitterType = {
-  renderChange: {
-    changeSet: Set<ChangeEventType>;
-  };
-  rangeChange: {
-    range: IRange;
-  };
-  modelChange: {
-    event: YEvent<any>[];
-  };
-  toastMessage: {
-    message: string;
-    type: MessageType;
-    duration?: number; // second
-    testId?: string;
-  };
-};
 
 export enum SYNC_FLAG {
   MODEL = 'model',

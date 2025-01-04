@@ -5,7 +5,7 @@
 ![GitHub](https://img.shields.io/github/license/nusr/excel.svg)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/nusr/excel.svg)
 
-[online demo](https://stackblitz.com/edit/nusr-excel-collaboration)
+[online demo](https://nusr.github.io/excel)
 
 ![demo](./scripts/demo.gif)
 
@@ -31,33 +31,7 @@ cd excel
 
 npm i -g pnpm
 pnpm i
-npm run start
-```
-
-## Environment
-
-Create an `.env` file and modify it as the `.env.example` file
-
-## Supbase
-
-Collaborative editing uses [Supabase](https://supabase.com/) as backend.
-You need to configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-With Row Level Security (RLS) disabled, anonymous users will be able to read/write data in the table.
-
-```sql
-CREATE TABLE IF NOT EXISTS history (
-  id SERIAL PRIMARY KEY,
-  doc_id UUID,
-  update TEXT,
-  create_time TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW(),
-);
-
--- document table need to enable real time
-CREATE TABLE IF NOT EXISTS document (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  name VARCHAR(20),
-  create_time TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW(),
-);
+npm run dev
 ```
 
 ## Supported Features
