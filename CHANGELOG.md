@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.7](https://github.com/nusr/excel/compare/v0.0.6...v0.0.7) (2025-01-04)
+
+### Features
+
+* support websocket and webrtc ([f16c9cb](https://github.com/nusr/excel/commit/f16c9cbcb53c9ea8a2d683069beae376e1eed929))
+* y-websocket ([b23be4c](https://github.com/nusr/excel/commit/b23be4c6bb6265aff670a63cf725302039209631))
+
 ## [0.0.6](https://github.com/nusr/excel/compare/v0.0.5...v0.0.6) (2024-12-29)
 
 ## [0.0.5](https://github.com/nusr/excel/compare/v0.0.4...v0.0.5) (2024-12-24)
