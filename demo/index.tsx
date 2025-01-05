@@ -35,7 +35,6 @@ provider.awareness.on('update', () => {
     }
     list.push({ clientId: key, range: value.range });
   }
-  console.log(list)
   useUserInfo.getState().setUsers(list);
 });
 
