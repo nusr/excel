@@ -23,17 +23,9 @@ const docId =
 const doc = initDoc({ guid: docId });
 location.hash = `#${docId}`;
 
-// Github Pages no server
-const isCI = Boolean(process.env.CI);
-
-const webSocket = new WebsocketProvider(
-  isCI ? '' : 'ws://localhost:1234',
-  doc.guid,
-  doc,
-  {
-    connect: false,
-  },
-);
+const webSocket = new WebsocketProvider('ws://localhost:1234', doc.guid, doc, {
+  connect: false,
+});
 
 webSocket.connect();
 webSocket.awareness.on('update', () => {
@@ -67,7 +59,7 @@ doc.on('update', (_a, _b, _c, tran) => {
 (window as any).doc = doc;
 (window as any).version = version;
 
-const provider = isCI ? undefined : new Provider();
+const provider = process.env.CI ? undefined : new Provider();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
