@@ -1,5 +1,6 @@
 node_modules
 node_modules/**
+*/node_modules
 dist
 .vscode
 .idea
@@ -24,14 +25,10 @@ package-lock.json
 /blob-report/
 /playwright/.cache/
 build
-.env
-.env.server
 
-
-.nx/cache
-.nx/workspace-data
-vite.config.mts.*.mjs
 diff.txt
-.nx
 pnpm-lock.yaml
 levelDB
+uploads
+dev.db
+dev.db-journal

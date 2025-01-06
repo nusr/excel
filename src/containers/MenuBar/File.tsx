@@ -35,7 +35,7 @@ export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
     if (!value) {
       return;
     }
-    provider?.updateDocument?.(controller.getHooks().doc.guid, value);
+    provider?.updateDocument?.(controller.getHooks().doc.guid, { name: value });
     setFileName(value);
     setVisible(false);
   }, [value, provider, controller]);
@@ -50,7 +50,13 @@ export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
         onCancel={() => setVisible(false)}
         onOk={handleOk}
       >
-        <input type="text" value={value} onChange={handleChange} autoFocus />
+        <input
+          type="text"
+          value={value}
+          onChange={handleChange}
+          maxLength={50}
+          autoFocus
+        />
       </Dialog>
     </React.Fragment>
   );

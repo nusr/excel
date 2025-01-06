@@ -3,4 +3,3 @@ npm run type-check
 npm run test
 npm run build
 npm run build:gh-pages
-npm run update-md

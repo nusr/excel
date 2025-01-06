@@ -10,10 +10,12 @@ import {
   version,
   UserItem,
   useUserInfo,
+  modelToChangeSet,
 } from '../src';
 import Worker from './worker?worker';
 import './sentry';
 import { WebsocketProvider } from 'y-websocket';
+import { Provider } from './provider';
 
 const docId =
   import.meta.env.VITE_DEFAULT_EXCEL_ID ||
@@ -21,14 +23,22 @@ const docId =
 const doc = initDoc({ guid: docId });
 location.hash = `#${docId}`;
 
-const provider = new WebsocketProvider('ws://localhost:1234', doc.guid, doc, {
-  connect: false,
-});
+// Github Pages no server
+const isCI = Boolean(process.env.CI);
 
-provider.connect();
-provider.awareness.on('update', () => {
+const webSocket = new WebsocketProvider(
+  isCI ? '' : 'ws://localhost:1234',
+  doc.guid,
+  doc,
+  {
+    connect: false,
+  },
+);
+
+webSocket.connect();
+webSocket.awareness.on('update', () => {
   const list: UserItem[] = [];
-  for (const item of provider.awareness.getStates().entries()) {
+  for (const item of webSocket.awareness.getStates().entries()) {
     const [key, value] = item;
     if (!value.range || key === doc.clientID) {
       continue;
@@ -45,20 +55,23 @@ const controller = initController({
 });
 
 controller.on('rangeChange', (range) => {
-  provider.awareness.setLocalStateField('range', range);
+  webSocket.awareness.setLocalStateField('range', range);
 });
 
-doc.on('update', () => {
-  controller.emit('renderChange', { changeSet: new Set(['rangeMap']) });
+doc.on('update', (_a, _b, _c, tran) => {
+  const changeSet = modelToChangeSet(tran);
+  controller.emit('renderChange', { changeSet });
 });
 
 (window as any).controller = controller;
 (window as any).doc = doc;
 (window as any).version = version;
 
+const provider = isCI ? undefined : new Provider();
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <StateContext value={{ controller }}>
+    <StateContext value={{ controller, provider }}>
       <Excel />
     </StateContext>
   </StrictMode>,

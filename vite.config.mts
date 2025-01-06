@@ -9,10 +9,11 @@ export default defineConfig((env) => {
 
   return {
     base: process.env.CI && !isLibrary ? '/excel/' : undefined,
-    plugins: isLibrary ? [dts()] : [react()],
+    plugins: [isLibrary ? dts() : react()],
     define: {
       'process.env.VITE_IS_E2E': JSON.stringify(process.env.VITE_IS_E2E ?? ''),
       'process.env.VERSION': JSON.stringify(version),
+      'process.env.CI': JSON.stringify(process.env.CI || ''),
     },
     build: {
       sourcemap: true,

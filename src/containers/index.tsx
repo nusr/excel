@@ -7,15 +7,11 @@ import SheetBarContainer from './SheetBar';
 import MenuBarContainer from './MenuBar';
 import { useExcel, useUserInfo } from './store';
 import { Loading } from '../components';
-import { applyUpdate } from '../util';
 import { ProviderStatus } from '../types';
 
 function useCollaboration() {
   const [isLoading, setIsLoading] = useState(true);
   const setFileInfo = useUserInfo((s) => s.setFileInfo);
-  const [providerStatus, setProviderStatus] = useState<ProviderStatus>(
-    ProviderStatus.LOCAL,
-  );
   const { provider, controller } = useExcel();
   useEffect(() => {
     async function init() {
@@ -27,13 +23,16 @@ function useCollaboration() {
         return;
       }
       setIsLoading(true);
-      const file = await provider?.getDocument?.();
       const doc = controller.getHooks().doc;
-      setFileInfo(file?.id ?? '', file?.name ?? '');
-      const result = await provider?.retrieveHistory?.();
-      if (result && result.length > 0 && doc) {
-        applyUpdate(doc, result);
+      const file = await provider?.getDocument?.(doc.guid);
+      if (!file) {
+        await provider.addDocument?.(doc.guid);
       }
+      const content = file?.content ?? '';
+      if (content) {
+        controller.fromJSON(JSON.parse(content));
+      }
+      setFileInfo(file?.id ?? doc.guid, file?.name ?? '');
       if (controller.getSheetList().length === 0) {
         controller.addFirstSheet();
       }
@@ -42,29 +41,11 @@ function useCollaboration() {
     init();
   }, []);
 
-  useEffect(() => {
-    function handleEvent() {
-      if (navigator.onLine) {
-        setProviderStatus(ProviderStatus.SYNCING);
-        provider
-          ?.syncData?.()
-          .finally(() =>
-            setProviderStatus(
-              navigator.onLine ? ProviderStatus.ONLINE : ProviderStatus.LOCAL,
-            ),
-          );
-      }
-    }
-    window.addEventListener('online', handleEvent);
-    window.addEventListener('offline', handleEvent);
-    return () => {
-      window.removeEventListener('online', handleEvent);
-      window.removeEventListener('offline', handleEvent);
-    };
-  }, []);
   return {
     isLoading,
-    providerStatus,
+    providerStatus: navigator.onLine
+      ? ProviderStatus.ONLINE
+      : ProviderStatus.LOCAL,
   };
 }
 

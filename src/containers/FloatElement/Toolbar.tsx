@@ -40,7 +40,11 @@ export const InsertFloatingPicture = memo(() => {
       const size = await getImageSize(base64);
       let imageSrc = base64;
       if (provider?.uploadFile) {
-        imageSrc = await provider.uploadFile(file, base64);
+        imageSrc = await provider.uploadFile(
+          controller.getHooks().doc.guid,
+          file,
+          base64,
+        );
       }
       if (!imageSrc) {
         toast.warning('choose image file');

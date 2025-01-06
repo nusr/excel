@@ -20,8 +20,7 @@ module.exports = {
               options: {
                 metaObjectReplacement: {
                   VITE_IS_E2E: 'true',
-                  VITE_SUPABASE_URL: '',
-                  VITE_SUPABASE_ANON_KEY: '',
+                  VITE_DEFAULT_EXCEL_ID: '',
                 },
               },
             },

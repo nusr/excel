@@ -173,46 +173,36 @@ export interface IController
  */
 export interface ICollaborationProvider {
   /**
-   * Retrieves the history of updates from the collaboration provider.
-   * @returns A promise that resolves to an array of Uint8Array representing the history.
-   */
-  retrieveHistory(): Promise<Uint8Array[]>;
-
-  /**
    * Uploads a file to the collaboration provider.
    * @param file - The file to be uploaded.
    * @param base64 - The base64 representation of the file.
    * @returns A promise that resolves to a string representing the file path.
    */
-  uploadFile(file: File, base64: string): Promise<string>;
+  uploadFile(docId: string, file: File, base64: string): Promise<string>;
 
   /**
    * Downloads a file from the collaboration provider.
    * @param filePath - The path of the file to be downloaded.
    * @returns A promise that resolves to a string representing the file content.
    */
-  downloadFile(filePath: string): Promise<string>;
-
-  /**
-   * Synchronizes data with the collaboration provider.
-   * @returns A promise that resolves when the data is synchronized.
-   */
-  syncData(): Promise<void>;
+  downloadFile(docId: string, filePath: string): Promise<string>;
 
   /**
    * Adds a new document to the collaboration provider.
-   * @returns A promise that resolves to a string representing the document ID.
    */
-  addDocument(): Promise<string>;
+  addDocument(id: string): Promise<void>;
 
   /**
    * Updates an existing document in the collaboration provider.
    */
-  updateDocument(docId: string, name: string): Promise<void>;
+  updateDocument(
+    id: string,
+    data: Pick<DocumentItem, 'name' | 'content'>,
+  ): Promise<void>;
 
   /**
    * Retrieves a document from the collaboration provider.
    * @returns A promise that resolves to a DocumentItem or undefined if not found.
    */
-  getDocument(): Promise<DocumentItem | undefined>;
+  getDocument(id: string): Promise<DocumentItem | undefined>;
 }

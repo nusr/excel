@@ -64,25 +64,8 @@ export type CustomClipboardData = {
 };
 
 export type DocumentItem = {
-  id?: string;
-  name: string;
+  id: string;
+  name?: string;
   create_time: string;
-  sync?: boolean;
+  content?: string;
 };
-
-export type HistoryItem = {
-  id?: number;
-  doc_id: string;
-  update: string;
-  create_time: string;
-  sync?: boolean;
-};
-
-export type CollaborationOptions = {
-  doc: Doc;
-  disableIndexDB?: boolean;
-  indexedBDVersion?: number;
-  supabaseUrl?: string;
-  supabaseAnonKey?: string;
-};
-

@@ -10,6 +10,7 @@ import { useExcel } from '../store';
 import { User } from './User';
 import { ProviderStatus } from '../../types';
 import { File } from './File';
+import { v4 } from 'uuid';
 
 type Props = {
   providerStatus?: ProviderStatus;
@@ -61,10 +62,8 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       saveAs(blob, `excel_${Date.now()}.json`);
     }, []);
     const handleAddDocument = useCallback(() => {
-      provider?.addDocument?.().then((docId) => {
-        if (!docId) {
-          return;
-        }
+      const docId = v4()
+      provider?.addDocument?.(docId).then(() => {
         location.hash = `#${docId}`;
         location.reload();
       });

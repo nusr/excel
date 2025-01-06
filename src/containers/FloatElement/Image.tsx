@@ -13,7 +13,7 @@ export const Image: React.FunctionComponent<Props> = memo(
   ({ title, imageSrc = '', uuid }) => {
     const [src, setSrc] = useState('');
     const [loading, setLoading] = useState(false);
-    const { provider } = useExcel();
+    const { provider, controller } = useExcel();
 
     useEffect(() => {
       if (!provider?.downloadFile) {
@@ -22,7 +22,7 @@ export const Image: React.FunctionComponent<Props> = memo(
       }
       setLoading(true);
       provider
-        .downloadFile(imageSrc)
+        .downloadFile(controller.getHooks().doc.guid, imageSrc)
         .then((data) => {
           setSrc(data);
         })

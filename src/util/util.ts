@@ -10,6 +10,7 @@ import type {
   ModelJSON,
   ResultType,
   IRange,
+  ChangeEventType,
 } from '../types';
 
 import * as Y from 'yjs';
@@ -192,17 +193,6 @@ export function getRandomColor() {
   return `#${r}${g}${b}`;
 }
 
-export function shouldSkipUpdate(tran: Y.Transaction) {
-  if (
-    [SYNC_FLAG.SKIP_UPDATE, SYNC_FLAG.SKIP_UNDO_REDO_UPDATE].includes(
-      tran.origin,
-    )
-  ) {
-    return true;
-  }
-  return false;
-}
-
 export function applyUpdate(doc: Y.Doc, result: Uint8Array[]) {
   Y.applyUpdate(doc, Y.mergeUpdates(result), SYNC_FLAG.SKIP_UNDO_REDO_UPDATE);
 }
@@ -218,4 +208,23 @@ export function uint8ArrayToString(bytes: Uint8Array) {
     String.fromCodePoint(byte),
   ).join('');
   return btoa(binString);
+}
+
+export function modelToChangeSet(list: Y.Transaction) {
+  const result = new Set<ChangeEventType>();
+  const set: Set<string> = new Set(KEY_LIST);
+  for (const item of list.changed.keys()) {
+    const key = item._item?.parentSub;
+    if (key && set.has(key)) {
+      result.add(key as ChangeEventType);
+    }
+  }
+  for (const item of list.changedParentTypes.keys()) {
+    const key = item._item?.parentSub;
+    if (key && set.has(key)) {
+      result.add(key as ChangeEventType);
+    }
+  }
+
+  return result;
 }
