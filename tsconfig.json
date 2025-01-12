@@ -35,8 +35,6 @@
     "outDir": "lib"
   },
   "include": [
-    "src",
-    "demo",
-    "e2e"
+    "src"
   ]
 }

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excel Collaborative Example</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+      }
+
+      .title {
+        text-align: center;
+        margin: 0;
+        font-size: 18px;
+        padding: 10px 0;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .extra {
+        padding-bottom: 10px;
+        text-align: center;
+      }
+
+      .content {
+        flex: 1;
+        display: flex;
+      }
+
+      .html {
+        border: 2px dashed black;
+        height: calc(100vh - 80px);
+        flex: 1;
+      }
+
+      .enable {
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body class="container">
+    <h1 class="title">Excel Collaborative Example (see iframes below)</h1>
+    <div class="extra">
+      <a href="%BASE_URL%app" id="full-screen">Full Screen</a>
+    </div>
+    <div class="content">
+      <iframe
+        name="left"
+        id="left"
+        data-testid="left"
+        src="%BASE_URL%app"
+        class="html"
+      ></iframe>
+      <iframe
+        name="right"
+        id="right"
+        data-testid="right"
+        src="%BASE_URL%app"
+        class="html"
+      ></iframe>
+    </div>
+  </body>
+</html>

@@ -81,41 +81,46 @@ export const FilterModal = ({ col, hide }: ModalProps) => {
     }
   }, [controller, col]);
   return (
-    <div>
+    <div data-testid="filter-modal">
       <div className={styles['dialog-title']}>{$('filter')}</div>
       <div>
         <div>
-          <input
-            type="checkbox"
-            id="modal_all"
-            name="all"
-            value="all"
-            checked={dataList.every((v) => v.checked)}
-            onChange={(e) => {
-              setDataList((oldList) =>
-                oldList.map((v) => ({ ...v, checked: e.target.checked })),
-              );
-            }}
-          />
-          <label htmlFor="modal_all">{$('filter-all')} </label>
+          <label htmlFor="modal_all">
+            <input
+              type="checkbox"
+              id="modal_all"
+              name="all"
+              value="all"
+              data-testid="filter-model-all"
+              checked={dataList.every((v) => v.checked)}
+              onChange={(e) => {
+                setDataList((oldList) =>
+                  oldList.map((v) => ({ ...v, checked: e.target.checked })),
+                );
+              }}
+            />
+            {$('filter-all')}
+          </label>
           <span>({dataList.length})</span>
         </div>
         {dataList.map((v, index) => (
           <div key={v.label} className={styles.listItem}>
-            <input
-              type="checkbox"
-              id={`modal_${v.label}`}
-              name={v.label}
-              value={v.label}
-              checked={v.checked}
-              onChange={(e) =>
-                setDataList((oldList) => {
-                  oldList[index].checked = e.target.checked;
-                  return [...oldList];
-                })
-              }
-            />
-            <label htmlFor={`modal_${v.label}`}>{v.label}</label>
+            <label htmlFor={`modal_${v.label}`}>
+              <input
+                type="checkbox"
+                id={`modal_${v.label}`}
+                name={v.label}
+                value={v.label}
+                checked={v.checked}
+                onChange={(e) =>
+                  setDataList((oldList) => {
+                    oldList[index].checked = e.target.checked;
+                    return [...oldList];
+                  })
+                }
+              />
+              {v.label}
+            </label>
             <span>({v.count})</span>
           </div>
         ))}

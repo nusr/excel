@@ -4,9 +4,8 @@ const path = require('path');
 const FORMULA_DIR = path.join(process.cwd(), './src/formula/formula');
 const PREFIX_TEXT = 'const formulas = ';
 const FORMULA_TAG = '## Supported Formulas';
-const MD_PATH = path.join(process.cwd(), 'README.md');
 
-function updateFormula() {
+function getFormulas() {
   if (!fs.existsSync(FORMULA_DIR)) {
     return;
   }
@@ -35,7 +34,11 @@ function updateFormula() {
       .trim()
       .split('\n')
       .map((item) => {
-        const list = /[A-Z0-9]+/g.exec(item.trim()) || [];
+        const t = item.trim();
+        if (t.startsWith('// ')) {
+          return '';
+        }
+        const list = /[A-Z0-9]+/g.exec(t) || [];
         return list[0] || '';
       })
       .filter((v) => v);
@@ -50,13 +53,22 @@ function updateFormula() {
     const v = formulaMap[key].map((item) => `- [x] ${item}`).join('\n');
     list.push(`### ${t}\n\n${v}`);
   }
-  const oldText = fs.readFileSync(MD_PATH, 'utf-8');
+  return list.join('\n\n');
+}
+
+function updateFile(filePath, content) {
+  const oldText = fs.readFileSync(filePath, 'utf-8');
   const index = oldText.indexOf(FORMULA_TAG);
   const mdText = `${oldText.slice(
     0,
     index + FORMULA_TAG.length,
-  )}\n\n${list.join('\n\n')}\n`;
-  fs.writeFileSync(MD_PATH, mdText);
+  )}\n\n${content}\n`;
+  fs.writeFileSync(filePath, mdText);
+}
+function init() {
+  const content = getFormulas();
+  updateFile(path.join(process.cwd(), 'README.md'), content);
+  updateFile(path.join(process.cwd(), 'README_zh.md'), content);
 }
 
-updateFormula();
+init();

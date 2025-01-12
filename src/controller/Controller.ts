@@ -320,7 +320,7 @@ export class Controller
     this.changeSet.add('workbook');
     this.emitChange();
   }
-  @transaction()
+  @transaction(SYNC_FLAG.SKIP_UNDO_REDO_UPDATE)
   fromJSON(json: ModelJSON): void {
     this.changeSet.add('currentSheetId');
     this.changeSet.add('cellValue');

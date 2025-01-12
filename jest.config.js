@@ -7,27 +7,6 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.test.ts?(x)'],
   transform: {
     '^.+\\.css$': '<rootDir>/scripts/css-transform.js',
-    '^.+\\.tsx?$': [
-      'ts-jest',
-      {
-        diagnostics: {
-          ignoreCodes: [1343],
-        },
-        astTransformers: {
-          before: [
-            {
-              path: 'ts-jest-mock-import-meta',
-              options: {
-                metaObjectReplacement: {
-                  VITE_IS_E2E: 'true',
-                  VITE_DEFAULT_EXCEL_ID: '',
-                },
-              },
-            },
-          ],
-        },
-      },
-    ],
   },
   coverageReporters: ['clover', 'json', 'lcov', 'text', 'html'],
   moduleNameMapper: {

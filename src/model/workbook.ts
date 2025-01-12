@@ -14,7 +14,7 @@ import {
   XLSX_MAX_ROW_COUNT,
 } from '../util';
 import { $ } from '../i18n';
-import * as Y from 'yjs';
+import { Map } from 'yjs';
 
 export class Workbook implements IWorkbook {
   private readonly model: IModel;
@@ -53,12 +53,12 @@ export class Workbook implements IWorkbook {
     const data = json.workbook || {};
     const currentSheetId = json.currentSheetId || '';
 
-    const workbook = new Y.Map() as YjsModelJson['workbook'];
+    const workbook = new Map() as YjsModelJson['workbook'];
     for (const sheet of Object.values(data)) {
       if (!this.validateSheet(sheet)) {
         continue;
       }
-      const item = new Y.Map(Object.entries(sheet)) as TypedMap<WorksheetType>;
+      const item = new Map(Object.entries(sheet)) as TypedMap<WorksheetType>;
       workbook.set(sheet.sheetId, item);
     }
 
@@ -96,7 +96,7 @@ export class Workbook implements IWorkbook {
     if (!this.workbook) {
       this.model
         .getRoot()
-        .set('workbook', new Y.Map() as YjsModelJson['workbook']);
+        .set('workbook', new Map() as YjsModelJson['workbook']);
     }
     const list = this.getSheetList();
     const item = getDefaultSheetInfo(list);
@@ -108,7 +108,7 @@ export class Workbook implements IWorkbook {
     };
     this.workbook!.set(
       sheet.sheetId,
-      new Y.Map(Object.entries(sheet)) as TypedMap<WorksheetType>,
+      new Map(Object.entries(sheet)) as TypedMap<WorksheetType>,
     );
     return sheet;
   }

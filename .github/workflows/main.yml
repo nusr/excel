@@ -22,7 +22,6 @@ jobs:
           npm run type-check
           npm run lint
           npm run build
-          npm run build:gh-pages
           npm run coverage
       - name: Upload coverage
         uses: codecov/codecov-action@v4

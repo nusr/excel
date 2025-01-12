@@ -12,9 +12,7 @@ import type {
   IRange,
   ChangeEventType,
 } from '../types';
-
-import * as Y from 'yjs';
-import { SYNC_FLAG } from '../types';
+import { type Transaction } from 'yjs';
 
 export function parseNumber(value: any): [boolean, number] {
   if (typeof value === 'boolean') {
@@ -193,10 +191,6 @@ export function getRandomColor() {
   return `#${r}${g}${b}`;
 }
 
-export function applyUpdate(doc: Y.Doc, result: Uint8Array[]) {
-  Y.applyUpdate(doc, Y.mergeUpdates(result), SYNC_FLAG.SKIP_UNDO_REDO_UPDATE);
-}
-
 export function stringToUint8Array(str: string) {
   const binString = atob(str);
   // @ts-ignore
@@ -210,7 +204,7 @@ export function uint8ArrayToString(bytes: Uint8Array) {
   return btoa(binString);
 }
 
-export function modelToChangeSet(list: Y.Transaction) {
+export function modelToChangeSet(list: Transaction) {
   const result = new Set<ChangeEventType>();
   const set: Set<string> = new Set(KEY_LIST);
   for (const item of list.changed.keys()) {

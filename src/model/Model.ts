@@ -34,7 +34,7 @@ import { RowManager } from './row';
 import { ColManager } from './col';
 import { FilterManger } from './filter';
 import { ScrollManager } from './scroll';
-import * as Y from 'yjs';
+import { Doc, UndoManager } from 'yjs';
 
 export class Model
   extends EventEmitter<ModelEventEmitterType>
@@ -50,8 +50,8 @@ export class Model
   private readonly colManager: ColManager;
   private readonly filterManager: FilterManger;
   private readonly scrollManager: ScrollManager;
-  private readonly doc: Y.Doc;
-  private readonly undoManager: Y.UndoManager;
+  private readonly doc: Doc;
+  private readonly undoManager: UndoManager;
   constructor(hooks: Pick<IHooks, 'doc' | 'worker'>) {
     super();
     const { doc, worker } = hooks;
@@ -60,7 +60,7 @@ export class Model
     root.observeDeep((event) => {
       this.emit('modelChange', { event });
     });
-    this.undoManager = new Y.UndoManager(root, {
+    this.undoManager = new UndoManager(root, {
       trackedOrigins: new Set([SYNC_FLAG.MODEL, SYNC_FLAG.SKIP_UPDATE]),
       captureTimeout: 100,
     });

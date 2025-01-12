@@ -9,7 +9,7 @@ import type {
 } from '../types';
 import { dpr } from '../util';
 import { getTheme } from '../theme';
-import * as ComLink from 'comlink';
+import { transfer, proxy } from 'comlink';
 
 export class MainCanvas implements MainView {
   static instance: MainCanvas;
@@ -25,7 +25,7 @@ export class MainCanvas implements MainView {
         canvas: offscreen,
         dpr: dpr(),
       };
-      worker.init(ComLink.transfer(data, [data.canvas]));
+      worker.init(transfer(data, [data.canvas]));
     }
   }
   private renderCallback = (result: ResponseRender) => {
@@ -84,7 +84,7 @@ export class MainCanvas implements MainView {
 
     return this.controller
       .getHooks()
-      .worker.render(eventData, ComLink.proxy(this.renderCallback));
+      .worker.render(eventData, proxy(this.renderCallback));
   }
   resize() {
     const { canvas } = this;

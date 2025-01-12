@@ -9,7 +9,7 @@ import type {
 } from '../types';
 import { CHART_TYPE_LIST, iterateRange, toIRange } from '../util';
 import { $ } from '../i18n';
-import * as Y from 'yjs';
+import { Map } from 'yjs';
 
 export class Drawing implements IDrawings {
   private readonly model: IModel;
@@ -46,12 +46,12 @@ export class Drawing implements IDrawings {
   }
   fromJSON(json: ModelJSON): void {
     const data = json.drawings || {};
-    const drawings = new Y.Map() as YjsModelJson['drawings'];
+    const drawings = new Map() as YjsModelJson['drawings'];
     for (const [uuid, value] of Object.entries(data)) {
       if (!this.validateDrawing(value) || !uuid) {
         return;
       }
-      const item = new Y.Map(Object.entries(value)) as TypedMap<DrawingElement>;
+      const item = new Map(Object.entries(value)) as TypedMap<DrawingElement>;
       drawings.set(uuid, item);
     }
     this.model.getRoot().set('drawings', drawings);
@@ -122,11 +122,11 @@ export class Drawing implements IDrawings {
     if (!this.drawings) {
       this.model
         .getRoot()
-        .set('drawings', new Y.Map() as YjsModelJson['drawings']);
+        .set('drawings', new Map() as YjsModelJson['drawings']);
     }
     this.drawings!.set(
       data.uuid,
-      new Y.Map(Object.entries(data)) as TypedMap<DrawingElement>,
+      new Map(Object.entries(data)) as TypedMap<DrawingElement>,
     );
   }
   updateDrawing(uuid: string, value: Partial<DrawingElement>) {

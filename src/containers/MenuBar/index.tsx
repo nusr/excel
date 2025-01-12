@@ -14,10 +14,12 @@ import { v4 } from 'uuid';
 
 type Props = {
   providerStatus?: ProviderStatus;
+  leftChildren?: React.ReactNode;
+  rightChildren?: React.ReactNode;
 };
 
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
-  ({ providerStatus = ProviderStatus.LOCAL }) => {
+  ({ providerStatus = ProviderStatus.LOCAL, leftChildren, rightChildren }) => {
     const { controller, provider } = useExcel();
     const [visible, setVisible] = useState(false);
     const handleExportXLSX = useCallback(() => {
@@ -62,11 +64,8 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       saveAs(blob, `excel_${Date.now()}.json`);
     }, []);
     const handleAddDocument = useCallback(() => {
-      const docId = v4()
-      provider?.addDocument?.(docId).then(() => {
-        location.hash = `#${docId}`;
-        location.reload();
-      });
+      const docId = v4();
+      provider?.addDocument?.(docId);
     }, []);
     return (
       <div className={styles['menubar-container']} data-testid="menubar">
@@ -118,7 +117,9 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
               {$('export-json')}
             </MenuItem>
           </Menu>
+          {leftChildren}
         </div>
+        {rightChildren}
         <User providerStatus={providerStatus} />
         <I18N />
         <Theme />

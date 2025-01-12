@@ -12,7 +12,7 @@ import {
   DEFINED_NAME_REG_EXP,
   toIRange,
 } from '../util';
-import * as Y from 'yjs';
+import { Map } from 'yjs';
 
 export class DefinedName implements IDefinedName {
   private model: IModel;
@@ -49,7 +49,7 @@ export class DefinedName implements IDefinedName {
   }
   fromJSON(json: ModelJSON): void {
     const data = json.definedNames || {};
-    const definedNames = new Y.Map() as YjsModelJson['definedNames'];
+    const definedNames = new Map() as YjsModelJson['definedNames'];
     for (const [key, value] of Object.entries(data)) {
       if (!this.model.validateRange(value) || !this.validateDefinedName(key)) {
         continue;
@@ -94,7 +94,7 @@ export class DefinedName implements IDefinedName {
     if (!this.definedNames) {
       this.model
         .getRoot()
-        .set('definedNames', new Y.Map() as YjsModelJson['definedNames']);
+        .set('definedNames', new Map() as YjsModelJson['definedNames']);
     }
 
     const result: IRange = {

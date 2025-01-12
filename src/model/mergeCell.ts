@@ -7,7 +7,7 @@ import type {
 } from '../types';
 import { convertToReference, toIRange } from '../util';
 import { $ } from '../i18n';
-import * as Y from 'yjs';
+import { Map } from 'yjs';
 
 export class MergeCell implements IMergeCell {
   private readonly model: IModel;
@@ -21,7 +21,7 @@ export class MergeCell implements IMergeCell {
   }
   fromJSON(json: ModelJSON): void {
     const data = json.mergeCells || {};
-    const mergeCells = new Y.Map() as YjsModelJson['mergeCells'];
+    const mergeCells = new Map() as YjsModelJson['mergeCells'];
     for (const range of Object.values(data)) {
       range.sheetId = range.sheetId || this.model.getCurrentSheetId();
       if (!this.model.validateRange(range)) {
@@ -60,7 +60,7 @@ export class MergeCell implements IMergeCell {
     if (!this.mergeCells) {
       this.model
         .getRoot()
-        .set('mergeCells', new Y.Map() as YjsModelJson['mergeCells']);
+        .set('mergeCells', new Map() as YjsModelJson['mergeCells']);
     }
     this.mergeCells!.set(ref, toIRange(range));
   }

@@ -52,20 +52,35 @@ function useCollaboration() {
 type Props = {
   style?: React.CSSProperties;
   providerStatus?: ProviderStatus;
+  menubarLeftChildren?: React.ReactNode;
+  menubarRightChildren?: React.ReactNode;
+  toolbarChildren?: React.ReactNode;
+  sheetBarChildren?: React.ReactNode;
 };
 const ExcelEditor: React.FunctionComponent<Props> = memo(
-  ({ style, providerStatus }) => {
+  ({
+    style,
+    providerStatus,
+    menubarLeftChildren,
+    menubarRightChildren,
+    toolbarChildren,
+    sheetBarChildren,
+  }) => {
     return (
       <div
         className={styles['app-container']}
         data-testid="app-container"
         style={style}
       >
-        <MenuBarContainer providerStatus={providerStatus} />
-        <ToolbarContainer />
+        <MenuBarContainer
+          providerStatus={providerStatus}
+          leftChildren={menubarLeftChildren}
+          rightChildren={menubarRightChildren}
+        />
+        <ToolbarContainer>{toolbarChildren}</ToolbarContainer>
         <FormulaBarContainer />
         <CanvasContainer />
-        <SheetBarContainer />
+        <SheetBarContainer>{sheetBarChildren}</SheetBarContainer>
       </div>
     );
   },

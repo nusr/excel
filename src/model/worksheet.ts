@@ -15,7 +15,7 @@ import {
   ResponseFormulas,
   TypedMap,
   YjsModelJson,
-  IHooks
+  IHooks,
 } from '../types';
 import {
   iterateRange,
@@ -32,8 +32,8 @@ import {
   getWorksheetKey,
 } from '../util';
 import { numberFormat } from '../formula';
-import * as ComLink from 'comlink';
-import * as Y from 'yjs';
+import { proxy } from 'comlink';
+import { Map } from 'yjs';
 
 export class Worksheet implements IWorksheet {
   private model: IModel;
@@ -64,7 +64,7 @@ export class Worksheet implements IWorksheet {
     }
     this.model
       .getRoot()
-      .set('worksheets', new Y.Map() as YjsModelJson['worksheets']);
+      .set('worksheets', new Map() as YjsModelJson['worksheets']);
 
     this.setWorksheet(result);
   }
@@ -473,10 +473,10 @@ export class Worksheet implements IWorksheet {
     let worksheets = this.worksheets;
 
     if (!this.worksheets) {
-      worksheets = new Y.Map() as YjsModelJson['worksheets'];
+      worksheets = new Map() as YjsModelJson['worksheets'];
       this.model.getRoot().set('worksheets', worksheets);
     }
-    const cellData = new Y.Map(Object.entries(data)) as TypedMap<ModelCellType>;
+    const cellData = new Map(Object.entries(data)) as TypedMap<ModelCellType>;
     worksheets!.set(key, cellData);
     return cellData;
   }
@@ -523,7 +523,7 @@ export class Worksheet implements IWorksheet {
 
     return this.worker.computeFormulas(
       data,
-      ComLink.proxy(this.computeFormulasCallback),
+      proxy(this.computeFormulasCallback),
     );
   }
 }

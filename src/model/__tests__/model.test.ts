@@ -2,7 +2,7 @@ import { Model } from '..';
 import { SheetRange } from '../../util';
 import { ModelJSON, RequestFormulas, IHooks } from '../../types';
 import { getMockHooks } from './util';
-import * as Y from 'yjs';
+import { Doc } from 'yjs';
 
 describe('model.test.ts', () => {
   let model: Model;
@@ -14,7 +14,7 @@ describe('model.test.ts', () => {
       worker: {
         computeFormulas: jest.fn(),
       },
-      doc: new Y.Doc(),
+      doc: new Doc(),
     };
 
     const model = new Model(mockTestHooks as Pick<IHooks, 'doc' | 'worker'>);

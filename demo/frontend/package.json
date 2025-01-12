@@ -1,0 +1,32 @@
+{
+  "name": "demo",
+  "private": true,
+  "scripts": {
+    "dev": "run-p dev:*",
+    "dev:vite": "vite --force --host --port 3000",
+    "dev:websocket": "env-cmd -e development -- npx y-websocket",
+    "e2e": "playwright test",
+    "e2e:ui": "npm run e2e -- --ui",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@sentry/react": "^8.48.0",
+    "@types/react": "^19.0.4",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "env-cmd": "^10.1.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  },
+  "dependencies": {
+    "comlink": "^4.4.2",
+    "excel-collab": "file:../../",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "y-websocket": "^2.1.0",
+    "yjs": "^13.6.21"
+  }
+}

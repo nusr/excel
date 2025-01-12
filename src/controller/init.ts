@@ -2,13 +2,13 @@ import { Model } from '../model';
 import type { IController, IHooks, WorkerMethod } from '../types';
 import { Controller } from './Controller';
 import method from '../canvas/worker';
-import * as Y from 'yjs';
-import { Remote } from 'comlink';
+import { Doc } from 'yjs';
+import type { Remote } from 'comlink';
 
 export function getMockHooks() {
   const mockTestHooks: IHooks = {
     worker: method as unknown as Remote<WorkerMethod>,
-    doc: new Y.Doc(),
+    doc: new Doc(),
   };
   return mockTestHooks;
 }

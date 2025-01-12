@@ -50,7 +50,6 @@ router.get('/', (ctx: Koa.Context) => {
       })
      .then(response => response.json())
      .then(data => {
-          console.log(data)
           if (data.filePath) {
             const img = document.createElement('img');
             img.src = data.filePath;
@@ -77,13 +76,30 @@ router.post('/upload', async (ctx: Koa.Context) => {
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
   }
-  const fileName = Date.now() + '-' + (file as any).originalFilename;
+  const fileName =
+    Date.now() +
+    '_' +
+    Math.floor(Math.random() * 1e9) +
+    '_' +
+    (file as any).originalFilename;
   const filePath = path.join(uploadDir, fileName);
   const stream = fs.createWriteStream(filePath);
-  reader.pipe(stream);
-  ctx.body = {
-    filePath: '/upload/' + encodeURIComponent(fileName),
-  };
+  return new Promise<void>((resolve, reject) => {
+    reader.pipe(stream);
+
+    stream.on('finish', () => {
+      ctx.body = {
+        filePath: '/upload/' + encodeURIComponent(fileName),
+      };
+      resolve();
+    });
+
+    stream.on('error', (err) => {
+      ctx.status = 500;
+      ctx.body = { message: err?.message, stack: err?.stack };
+      reject(err);
+    });
+  });
 });
 router.get('/upload/:fileName', (ctx: Koa.Context) => {
   const fileName = ctx.params.fileName;
@@ -131,6 +147,13 @@ router.get('/document/:id', async (ctx: Koa.Context) => {
   ctx.assert(id, 401, 'id should be provided');
   const result = await prisma.document.findFirst({
     where: { id },
+  });
+  ctx.body = result;
+});
+
+router.get('/documents', async (ctx: Koa.Context) => {
+  const result = await prisma.document.findMany({
+    orderBy: { create_time: 'desc' },
   });
   ctx.body = result;
 });

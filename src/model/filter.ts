@@ -8,7 +8,7 @@ import type {
   TypedMap,
 } from '../types';
 import { MERGE_CELL_LINE_BREAK, toIRange } from '../util';
-import * as Y from 'yjs';
+import { Map } from 'yjs';
 
 export class FilterManger implements IFilter {
   private model: IModel;
@@ -21,13 +21,13 @@ export class FilterManger implements IFilter {
   }
   fromJSON(json: ModelJSON): void {
     const data = json.autoFilter || {};
-    const autoFilter = new Y.Map() as YjsModelJson['autoFilter'];
+    const autoFilter = new Map() as YjsModelJson['autoFilter'];
     for (const [key, value] of Object.entries(data)) {
       value.range.sheetId = key;
       if (!this.model.validateRange(value.range)) {
         continue;
       }
-      const temp = new Y.Map(Object.entries(value)) as TypedMap<AutoFilterItem>;
+      const temp = new Map(Object.entries(value)) as TypedMap<AutoFilterItem>;
 
       autoFilter.set(key, temp);
     }
@@ -50,14 +50,12 @@ export class FilterManger implements IFilter {
     if (!this.autoFilter) {
       this.model
         .getRoot()
-        .set('autoFilter', new Y.Map() as YjsModelJson['autoFilter']);
+        .set('autoFilter', new Map() as YjsModelJson['autoFilter']);
     }
     const newValue: AutoFilterItem = {
       range: toIRange(range),
     };
-    const temp = new Y.Map(
-      Object.entries(newValue),
-    ) as TypedMap<AutoFilterItem>;
+    const temp = new Map(Object.entries(newValue)) as TypedMap<AutoFilterItem>;
     this.autoFilter!.set(range.sheetId, temp);
   }
   deleteFilter(sheetId?: string): void {

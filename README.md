@@ -1,29 +1,29 @@
-# Online Collaboration Excel
+# 🌐 Online Collaboration Excel
 
 [![CI](https://github.com/nusr/excel/actions/workflows/main.yml/badge.svg)](https://github.com/nusr/excel/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/nusr/excel/branch/main/graph/badge.svg?token=ZOC8RHD3Z1)](https://codecov.io/gh/nusr/excel)
 ![GitHub](https://img.shields.io/github/license/nusr/excel.svg)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/nusr/excel.svg)
 
-[online demo](https://nusr.github.io/excel)
+English | [中文](./README_zh.md)
 
-![demo](./scripts/demo.gif)
+[Online Demo](https://nusr.github.io/excel)
 
-## Installation
+![Demo](./scripts/demo.gif)
 
-```
+## 🚀 Installation
+
+```bash
 npm i --save excel-collab
 ```
 
-## Examples
+## 📚 Examples
 
-[Simple Example](https://stackblitz.com/edit/nusr-excel-simple)
+- [Simple Example](https://stackblitz.com/edit/nusr-excel-simple)
+- [Custom Example](https://stackblitz.com/edit/nusr-excel-custom)
+- [Collaboration Example](https://stackblitz.com/edit/nusr-excel-collaboration)
 
-[Custom Example](https://stackblitz.com/edit/nusr-excel-custom)
-
-[Collaboration Example](https://stackblitz.com/edit/nusr-excel-collaboration)
-
-## Developing
+## 🛠️ Developing
 
 ```bash
 git clone https://github.com/nusr/excel.git
@@ -31,10 +31,12 @@ cd excel
 
 npm i -g pnpm
 pnpm i
+cd demo/frontend && pnpm i && cd -
+cd demo/backend && pnpm i && cd -
 npm run dev
 ```
 
-## Supported Features
+## ✨ Supported Features
 
 - [x] Online Collaboration
 - [x] Create File

@@ -1,10 +1,16 @@
-import type { ModelJSON, ICol, IModel, CustomItem, YjsModelJson } from '../types';
+import type {
+  ModelJSON,
+  ICol,
+  IModel,
+  CustomItem,
+  YjsModelJson,
+} from '../types';
 import {
   getCustomWidthOrHeightKey,
   CELL_WIDTH,
   widthOrHeightKeyToData,
 } from '../util';
-import * as Y from 'yjs';
+import { Map } from 'yjs';
 
 export class ColManager implements ICol {
   private model: IModel;
@@ -17,13 +23,15 @@ export class ColManager implements ICol {
   private getModel() {
     const t = this.customWidth;
     if (!t) {
-      this.model.getRoot().set('customWidth', new Y.Map() as YjsModelJson['customWidth']);
+      this.model
+        .getRoot()
+        .set('customWidth', new Map() as YjsModelJson['customWidth']);
     }
     return this.customWidth!;
   }
   fromJSON(json: ModelJSON): void {
     const data = json.customWidth || {};
-    const customWidth = new Y.Map() as YjsModelJson['customWidth'];
+    const customWidth = new Map() as YjsModelJson['customWidth'];
     for (const [key, value] of Object.entries(data)) {
       const { sheetId, rowOrCol: col } = widthOrHeightKeyToData(key);
       if (!sheetId || col < 0) {
@@ -85,7 +93,7 @@ export class ColManager implements ICol {
   }
   deleteAll(sheetId?: string): void {
     if (!this.customWidth) {
-      return
+      return;
     }
     const id = sheetId || this.model.getCurrentSheetId();
     for (const key of this.customWidth.keys()) {

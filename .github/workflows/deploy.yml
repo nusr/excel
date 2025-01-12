@@ -31,13 +31,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Install Font
-        run: npm run install-font
       - name: Build
         run: |
           npm i -g pnpm
           pnpm i
-          npm run build:gh-pages
+          npm run build
+          cd demo/frontend
+          pnpm i
+          npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact

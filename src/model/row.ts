@@ -1,10 +1,16 @@
-import type { ModelJSON, IRow, CustomItem, IModel, YjsModelJson } from '../types';
+import type {
+  ModelJSON,
+  IRow,
+  CustomItem,
+  IModel,
+  YjsModelJson,
+} from '../types';
 import {
   getCustomWidthOrHeightKey,
   CELL_HEIGHT,
   widthOrHeightKeyToData,
 } from '../util';
-import * as Y from 'yjs';
+import { Map } from 'yjs';
 
 export class RowManager implements IRow {
   private model: IModel;
@@ -20,13 +26,13 @@ export class RowManager implements IRow {
     if (!t) {
       this.model
         .getRoot()
-        .set('customHeight', new Y.Map() as YjsModelJson['customHeight']);
+        .set('customHeight', new Map() as YjsModelJson['customHeight']);
     }
     return this.customHeight!;
   }
   fromJSON(json: ModelJSON): void {
     const data = json.customHeight || {};
-    const customHeight = new Y.Map() as YjsModelJson['customWidth'];
+    const customHeight = new Map() as YjsModelJson['customWidth'];
     for (const [key, value] of Object.entries(data)) {
       const { sheetId, rowOrCol: row } = widthOrHeightKeyToData(key);
       if (!sheetId || row < 0) {
@@ -40,7 +46,7 @@ export class RowManager implements IRow {
         customHeight.set(key, value);
       }
     }
-    this.model.getRoot().set('customHeight',customHeight);
+    this.model.getRoot().set('customHeight', customHeight);
   }
   hideRow(rowIndex: number, count: number): void {
     this.toggleHideRow(rowIndex, count, true);
@@ -91,7 +97,7 @@ export class RowManager implements IRow {
   }
   deleteAll(sheetId?: string): void {
     if (!this.customHeight) {
-      return
+      return;
     }
     const id = sheetId || this.model.getCurrentSheetId();
     for (const key of this.customHeight.keys()) {
