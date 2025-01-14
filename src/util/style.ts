@@ -150,7 +150,7 @@ function parseStyle(
   styleMap: Record<string, CSSStyleDeclaration>,
   style: CSSStyleDeclaration,
   className: string,
-  tagName: string,
+  tagName: string = '',
 ): Partial<StyleType> {
   let result: Partial<StyleType> = {};
   const name = tagName.toLowerCase();
@@ -284,9 +284,9 @@ export function parseHTML(html: string) {
       while (temp.nodeType !== Node.TEXT_NODE) {
         const style = parseStyle(
           styleMap,
-          temp.style,
+          temp.style || {},
           temp.className ? `.${temp.className}` : '',
-          temp.tagName,
+          temp.tagName || '',
         );
         itemStyle = Object.assign(itemStyle, style);
         if (temp.firstChild) {
