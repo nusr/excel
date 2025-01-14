@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.0.8](https://github.com/nusr/excel/compare/v0.0.7...v0.0.8) (2025-01-14)
+
+### Features
+
+* doc list page ([826d855](https://github.com/nusr/excel/commit/826d855daf3bbcdeab770ff0e76f20d6ba458e4d))
+* local server ([19cc16d](https://github.com/nusr/excel/commit/19cc16dcea03ca34e6f9c0045c98a4133662fe0f))
+
+### Bug Fixes
+
+* CI ([22c107c](https://github.com/nusr/excel/commit/22c107c89046cc474caea7f389fa19d9fd2e9366))
+* collab ([749335a](https://github.com/nusr/excel/commit/749335acf68a27b05be7144d108c4df68ae6f04b))
+* remove console.log ([eab76e5](https://github.com/nusr/excel/commit/eab76e53a0dc79422e732bf5b57fad0e80c91591))
+* style ([f283074](https://github.com/nusr/excel/commit/f2830745425ef3c3c87b0cb192cce9fe6717083f))
+* undefined ([5915996](https://github.com/nusr/excel/commit/5915996e0abbf452904adbf7995dbeca20f6b2b6))
+* websocket url ([cdbf605](https://github.com/nusr/excel/commit/cdbf605f56c070d0e5cd7da8acca2bbb53960c9a))
+
 ## [0.0.7](https://github.com/nusr/excel/compare/v0.0.6...v0.0.7) (2025-01-04)
 
 ### Features
