@@ -27,8 +27,6 @@ package-lock.json
 build
 
 diff.txt
-pnpm-lock.yaml
-levelDB
 uploads
 dev.db
 dev.db-journal

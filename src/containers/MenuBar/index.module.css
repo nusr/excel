@@ -33,9 +33,6 @@
   margin-left: var(--mediumPadding);
   font-size: 20px;
 }
-.userName {
-  margin-right: var(--mediumPadding);
-}
 .avatar {
   margin-right: var(--mediumPadding);
 }

@@ -1,5 +1,4 @@
 import { fetchData, RemoteProvider } from '../provider';
-import { DocumentItem } from 'excel-collab';
 
 const BASE_URL = 'http://localhost:4000';
 
@@ -95,7 +94,7 @@ describe('Provider', () => {
 
     const file = new File(['content'], 'test.txt', { type: 'text/plain' });
     const result = await provider.uploadFile('docId', file, 'base64string');
-    expect(result).toEqual(BASE_URL + '/path/to/file');
+    expect(result).toEqual('/path/to/file');
     expect(global.fetch).toHaveBeenCalledWith(`${BASE_URL}/upload`, {
       method: 'POST',
       body: expect.any(FormData),
@@ -152,7 +151,7 @@ describe('Provider', () => {
   });
 
   it('should get a document', async () => {
-    const mockResponse: DocumentItem = {
+    const mockResponse = {
       id: 'docId',
       name: 'test',
       content: 'content',

@@ -1,0 +1,16 @@
+.cardList {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin-left: 10px;
+  margin-top: 10px;
+  border: 1px solid gray;
+  border-radius: 5px;
+}

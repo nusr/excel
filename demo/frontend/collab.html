@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Excel Collaborative Example</title>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+    }
+
+    .title {
+      text-align: center;
+      margin: 0;
+      font-size: 18px;
+      padding: 10px 0;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .extra {
+      padding-bottom: 10px;
+      text-align: center;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+    }
+
+    .html {
+      border: 1px solid gray;
+      height: calc(100vh - 72px);
+      flex: 1;
+    }
+
+    .enable {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body class="container">
+  <h1 class="title">Excel Collaborative Example (see iframes below)</h1>
+  <div class="extra">
+    <a href="%BASE_URL%" style="margin-right:10px;">Home</a>
+    <a href="%BASE_URL%app" id="app">Full Screen</a>
+  </div>
+  <div class="content">
+    <iframe name="left" title="left" id="left" data-testid="left" class="html"></iframe>
+    <iframe name="right" title="right" id="right" data-testid="right" class="html"></iframe>
+  </div>
+  <script>
+    window.onload = function () {
+      var docId = (location.hash || '').slice(1);
+      var url = "%BASE_URL%app" + (docId ? '#' + docId : '');
+      document.getElementById('left').src = url;
+      document.getElementById('right').src = url;
+      document.getElementById('app').href = url;
+    }
+  </script>
+</body>
+
+</html>

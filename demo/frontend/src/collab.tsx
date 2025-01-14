@@ -9,17 +9,7 @@ import Worker from './worker?worker';
 import { WebsocketProvider } from 'y-websocket';
 import { wrap } from 'comlink';
 import { Doc } from 'yjs';
-
-function getDocId(): string {
-  const hash = location.hash;
-  if (hash.startsWith('#')) {
-    return hash.slice(1);
-  }
-  return (
-    import.meta.env.VITE_DEFAULT_EXCEL_ID ||
-    '184858c4-be37-41b5-af82-52689004e605'
-  );
-}
+import { getDocId } from './util';
 
 export function initControllerState() {
   const docId = getDocId();

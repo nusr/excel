@@ -5,10 +5,12 @@ import cors from '@koa/cors';
 import path from 'path';
 import koaBody from 'koa-body';
 import fs from 'fs';
+import sendFile from 'koa-sendfile';
 
 const app = new Koa();
 const prisma = new PrismaClient({ log: ['query', 'error', 'info', 'warn'] });
 const router = new Router();
+const UPLOAD_DIR = '/uploads/';
 
 app.use(cors());
 app.use(koaBody({ multipart: true, json: true }));
@@ -23,49 +25,14 @@ app.use(async (ctx, next) => {
   }
 });
 
-router.get('/', (ctx: Koa.Context) => {
-  const htmlText: string = `<!DOCTYPE html>
-<html lang="en-US">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>preview</title>
-</head>
-<body>
-  <form action="/upload" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" accept="image/*">
-    <input type="submit" value="upload image">
-  </form>
-  <div id="image-preview"></div>
-
-  <script>
-    document.querySelector('form').addEventListener('submit', function(event) {
-      event.preventDefault();
-
-      const formData = new FormData(this);
-
-      fetch('/upload', {
-        method: 'POST',
-        body: formData
-      })
-     .then(response => response.json())
-     .then(data => {
-          if (data.filePath) {
-            const img = document.createElement('img');
-            img.src = data.filePath;
-            document.getElementById('image-preview').innerHTML = '';
-            document.getElementById('image-preview').appendChild(img);
-          }
-        });
-    });
-  </script>
-</body>
-</html>`;
+router.get('/', async (ctx: Koa.Context) => {
+  const html = await fs.promises.readFile(
+    path.join(__dirname, '../index.html'),
+    'utf-8',
+  );
   ctx.type = 'html';
-  ctx.body = htmlText;
+  ctx.body = html;
 });
-
-const UPLOAD_DIR = '/uploads/';
 
 router.post('/upload', async (ctx: Koa.Context) => {
   const uploadDir = path.join(__dirname, '..', UPLOAD_DIR);
@@ -101,7 +68,7 @@ router.post('/upload', async (ctx: Koa.Context) => {
     });
   });
 });
-router.get('/upload/:fileName', (ctx: Koa.Context) => {
+router.get('/upload/:fileName', async (ctx: Koa.Context) => {
   const fileName = ctx.params.fileName;
   ctx.assert(fileName, 401, 'fileName should be provided');
   const filePath = path.join(
@@ -109,8 +76,9 @@ router.get('/upload/:fileName', (ctx: Koa.Context) => {
     '..',
     UPLOAD_DIR + decodeURIComponent(fileName),
   );
-  ctx.type = path.extname(filePath);
-  ctx.body = fs.createReadStream(filePath);
+
+  await sendFile(ctx, filePath);
+  if (!ctx.status) ctx.throw(404);
 });
 
 router.post('/document', async (ctx: Koa.Context) => {

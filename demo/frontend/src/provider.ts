@@ -1,4 +1,6 @@
-import { ICollaborationProvider, DocumentItem } from 'excel-collab';
+import type { ICollaborationProvider, DocumentItem } from 'excel-collab';
+
+const LOCAL_STORAGE_KEY = 'excel-collab-docs';
 
 export interface IProvider extends ICollaborationProvider {
   getDocumentList(): Promise<DocumentItem[]>;
@@ -34,8 +36,11 @@ export async function fetchData<T>(
 
 export class RemoteProvider implements IProvider {
   private readonly baseUrl: string;
-  private readonly callback: (id: string) => void;
-  constructor(baseUrl: string, callback: (id: string) => void = () => {}) {
+  private readonly callback: (id: string) => Promise<void>;
+  constructor(
+    baseUrl: string,
+    callback: (id: string) => Promise<void> = async () => {},
+  ) {
     this.baseUrl = baseUrl;
     this.callback = callback;
   }
@@ -53,11 +58,14 @@ export class RemoteProvider implements IProvider {
       form,
     );
     if (res?.filePath) {
-      return this.baseUrl + res?.filePath;
+      return res?.filePath;
     }
     return _base64;
   }
   downloadFile(_docId: string, filePath: string): Promise<string> {
+    if (filePath.startsWith('/upload/')) {
+      return Promise.resolve(this.baseUrl + filePath);
+    }
     return Promise.resolve(filePath);
   }
   async addDocument(id: string) {
@@ -66,7 +74,7 @@ export class RemoteProvider implements IProvider {
       'POST',
       JSON.stringify({ name: '', id }),
     );
-    this.callback(id);
+    await this.callback(id);
   }
   async updateDocument(
     id: string,
@@ -88,11 +96,9 @@ export class RemoteProvider implements IProvider {
   }
 }
 
-const LOCAL_STORAGE_KEY = 'excel-collab-docs';
-
 export class LocalProvider implements IProvider {
-  private readonly callback: (id: string) => void;
-  constructor(callback: (id: string) => void = () => {}) {
+  private readonly callback: (id: string) => Promise<void>;
+  constructor(callback: (id: string) => Promise<void> = async () => {}) {
     this.callback = callback;
   }
   async getDocumentList() {
@@ -122,7 +128,7 @@ export class LocalProvider implements IProvider {
       create_time: new Date().toISOString(),
     });
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-    this.callback(id);
+    await this.callback(id);
   }
   async updateDocument(
     id: string,

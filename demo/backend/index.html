@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>preview</title>
+</head>
+
+<body>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept="image/*">
+    <input type="submit" value="upload image">
+  </form>
+  <div id="image-preview"></div>
+
+  <script>
+    document.querySelector('form').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const formData = new FormData(this);
+
+      fetch('/upload', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.filePath) {
+            const img = document.createElement('img');
+            img.src = data.filePath;
+            document.getElementById('image-preview').innerHTML = '';
+            document.getElementById('image-preview').appendChild(img);
+          }
+        });
+    });
+  </script>
+</body>
+
+</html>

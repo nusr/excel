@@ -84,7 +84,7 @@ async function compareImage(
   maxThresholdData = Math.max(maxThresholdData, threshold);
   if (threshold > maxThreshold) {
     const diffPath = basePath.replace('.png', '.diff.png');
-    await fs.promises.writeFile(diffPath, PNG.PNG.sync.write(diff));
+    await fs.promises.writeFile(diffPath, PNG.PNG.sync.write(diff) as any);
     return 1;
   } else {
     return 0;
@@ -129,7 +129,7 @@ export async function compareScreenShot(
     baseBuffer = await fs.promises.readFile(imagePath);
   } catch (error) {
     if ((error as unknown as { code: string }).code === 'ENOENT') {
-      fs.promises.writeFile(imagePath, newBuffer);
+      fs.promises.writeFile(imagePath, newBuffer as any);
       return;
     }
     throw error;

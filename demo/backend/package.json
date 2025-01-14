@@ -22,6 +22,7 @@
     "@koa/router": "^13.1.0",
     "@prisma/client": "^6.2.1",
     "koa": "^2.15.3",
-    "koa-body": "^6.0.1"
+    "koa-body": "^6.0.1",
+    "koa-sendfile": "^3.0.0"
   }
 }

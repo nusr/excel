@@ -12,7 +12,6 @@ export const User: FunctionComponent<{
   return (
     <div className={styles.user}>
       <div className={styles.userName}>{`${$('user-name')} ${clientId}`}</div>
-
       <Icon name={providerStatus} className={styles.status} />
     </div>
   );
