@@ -51,5 +51,5 @@ export function initControllerState() {
     const changeSet = modelToChangeSet(tran);
     controller.emit('renderChange', { changeSet });
   });
-  return controller;
+  return { controller, doc };
 }

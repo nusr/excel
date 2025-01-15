@@ -12,12 +12,16 @@ const callback = async (id: string) => {
   location.reload();
 };
 
-const httpBaseUrl = import.meta.env.VITE_HTTP_BASE_URL;
+const httpBaseUrl = import.meta.env.VITE_BACKEND_URL;
 const provider = httpBaseUrl
   ? new RemoteProvider(httpBaseUrl, callback)
   : new LocalProvider(callback);
 
-const controller = initControllerState();
+const { controller, doc } = initControllerState();
+
+(window as any).controller = controller;
+(window as any).provider = provider;
+(window as any).doc = doc;
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

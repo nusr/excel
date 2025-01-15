@@ -97,7 +97,7 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
               [styles['active']]: isActive,
             });
             let style = undefined;
-            if (!isActive && !editing && tabColor) {
+            if (!isActive && tabColor) {
               style = { backgroundColor: tabColor };
             }
             const testId = isActive ? 'sheet-bar-active-item' : undefined;

@@ -10,6 +10,14 @@ datasource db {
 model document {
   id          String   @id
   name        String?  
-  create_time String
+  create_time DateTime @default(now())
   content     String?
+}
+
+model file {
+  id            Int      @id @default(autoincrement())
+  name          String
+  last_modified DateTime @default(now())
+  content       Bytes    
+  size          Int
 }

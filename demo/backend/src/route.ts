@@ -5,12 +5,12 @@ import cors from '@koa/cors';
 import path from 'path';
 import koaBody from 'koa-body';
 import fs from 'fs';
-import sendFile from 'koa-sendfile';
+import stream from 'stream';
 
 const app = new Koa();
 const prisma = new PrismaClient({ log: ['query', 'error', 'info', 'warn'] });
 const router = new Router();
-const UPLOAD_DIR = '/uploads/';
+const UPLOAD_PREFIX = '/upload/';
 
 app.use(cors());
 app.use(koaBody({ multipart: true, json: true }));
@@ -25,6 +25,36 @@ app.use(async (ctx, next) => {
   }
 });
 
+async function sendFile(ctx: Koa.Context) {
+  const fileId = parseInt(ctx.params.fileId, 10);
+  ctx.assert(fileId, 401, 'fileId should be provided');
+  const result = await prisma.file.findFirst({
+    where: { id: fileId },
+  });
+  if (!result) {
+    ctx.throw(404);
+  }
+  ctx.response.status = 200;
+  ctx.response.lastModified = result.last_modified;
+  ctx.response.length = result.size;
+  ctx.type = path.extname(result.name);
+
+  switch (ctx.request.method) {
+    case 'HEAD':
+      ctx.status = ctx.request.fresh ? 304 : 200;
+      break;
+    case 'GET':
+      if (ctx.request.fresh) {
+        ctx.status = 304;
+      } else {
+        const bufferStream = new stream.PassThrough();
+        bufferStream.end(Buffer.from(result.content));
+        ctx.body = bufferStream;
+      }
+      break;
+  }
+}
+
 router.get('/', async (ctx: Koa.Context) => {
   const html = await fs.promises.readFile(
     path.join(__dirname, '../index.html'),
@@ -35,50 +65,34 @@ router.get('/', async (ctx: Koa.Context) => {
 });
 
 router.post('/upload', async (ctx: Koa.Context) => {
-  const uploadDir = path.join(__dirname, '..', UPLOAD_DIR);
-  const file = ctx.request.files?.file;
-  ctx.assert(file, 401, 'file is required');
-  const oldFilePath = (file as any).filepath;
-  const reader = fs.createReadStream(oldFilePath);
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-  }
-  const fileName =
-    Date.now() +
-    '_' +
-    Math.floor(Math.random() * 1e9) +
-    '_' +
-    (file as any).originalFilename;
-  const filePath = path.join(uploadDir, fileName);
-  const stream = fs.createWriteStream(filePath);
-  return new Promise<void>((resolve, reject) => {
-    reader.pipe(stream);
-
-    stream.on('finish', () => {
-      ctx.body = {
-        filePath: '/upload/' + encodeURIComponent(fileName),
-      };
-      resolve();
-    });
-
-    stream.on('error', (err) => {
-      ctx.status = 500;
-      ctx.body = { message: err?.message, stack: err?.stack };
-      reject(err);
-    });
-  });
-});
-router.get('/upload/:fileName', async (ctx: Koa.Context) => {
-  const fileName = ctx.params.fileName;
-  ctx.assert(fileName, 401, 'fileName should be provided');
-  const filePath = path.join(
-    __dirname,
-    '..',
-    UPLOAD_DIR + decodeURIComponent(fileName),
+  const list = ctx.request.files?.file;
+  ctx.assert(list, 401, 'file is required');
+  const file = Array.isArray(list) ? list[0] : list;
+  const reader = await fs.promises.readFile(file.filepath);
+  fs.writeFileSync(
+    './test.json',
+    JSON.stringify(Array.from(new Uint8Array(reader))),
   );
+  const name = file.originalFilename ?? '';
+  const { content: _content, ...rest } = await prisma.file.create({
+    data: {
+      name,
+      content: reader,
+      size: file.size,
+      last_modified: file.mtime ?? new Date(),
+    },
+  });
+  ctx.body = {
+    ...rest,
+    filePath: UPLOAD_PREFIX + rest.id,
+  };
+});
 
-  await sendFile(ctx, filePath);
-  if (!ctx.status) ctx.throw(404);
+router.get(`${UPLOAD_PREFIX}:fileId`, async (ctx: Koa.Context) => {
+  await sendFile(ctx);
+});
+router.head(`${UPLOAD_PREFIX}:fileId`, async (ctx: Koa.Context) => {
+  await sendFile(ctx);
 });
 
 router.post('/document', async (ctx: Koa.Context) => {
@@ -86,7 +100,7 @@ router.post('/document', async (ctx: Koa.Context) => {
   ctx.assert(typeof name === 'string', 401, 'name should be a string');
   ctx.assert(id, 401, 'id should be provided');
   const result = await prisma.document.create({
-    data: { name, id, create_time: new Date().toISOString() },
+    data: { name, id },
   });
   ctx.body = result;
 });
@@ -135,7 +149,6 @@ router.post('/sync', async (ctx: Koa.Context) => {
     create: {
       content: realContent,
       id,
-      create_time: new Date().toISOString(),
     },
     update: {
       content: realContent,

@@ -30,7 +30,7 @@ export const Image: React.FunctionComponent<Props> = memo(
           setLoading(false);
         });
     }, [imageSrc, provider]);
-    if (loading) {
+    if (loading || !src) {
       return <Loading />;
     }
     return (
