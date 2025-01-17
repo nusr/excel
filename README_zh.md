@@ -1,4 +1,4 @@
-# 🌐 在线协作 Excel
+# 在线协作 Excel
 
 [![CI](https://github.com/nusr/excel/actions/workflows/main.yml/badge.svg)](https://github.com/nusr/excel/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/nusr/excel/branch/main/graph/badge.svg?token=ZOC8RHD3Z1)](https://codecov.io/gh/nusr/excel)
@@ -11,19 +11,104 @@
 
 ![演示](./scripts/demo.gif)
 
-## 🚀 安装
+## 安装
 
 ```bash
 npm i --save excel-collab
 ```
 
-## 📚 示例
+## 示例
 
 - [简单示例](https://stackblitz.com/edit/nusr-excel-simple)
 - [自定义示例](https://stackblitz.com/edit/nusr-excel-custom)
 - [协作示例](https://stackblitz.com/edit/nusr-excel-collaboration)
 
-## 🛠️ 开发
+## 快速开始
+
+创建 React 应用
+
+```bash
+npm create vite@latest my-app -- --template react-ts
+cd my-app
+npm i
+```
+
+安装依赖
+
+```bash
+npm i --save excel-collab@latest comlink@latest yjs@latest react@latest react-dom@latest @types/react@latest @types/react-dom@latest
+```
+
+修改 main.tsx 文件
+
+```ts src/main.tsx
+// src/main.tsx
+import { createRoot } from 'react-dom/client';
+import { StrictMode } from 'react';
+import {
+  initController,
+  StateContext,
+  type WorkerMethod,
+  ExcelEditor,
+} from 'excel-collab';
+import Worker from './worker?worker';
+import 'excel-collab/style.css';
+import { wrap } from 'comlink';
+import * as Y from 'yjs';
+
+const workerInstance = wrap<WorkerMethod>(new Worker());
+
+const doc = new Y.Doc();
+const controller = initController({
+  worker: workerInstance,
+  doc,
+});
+
+controller.addFirstSheet();
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <div style={{ height: '100vh' }}>
+      <StateContext value={{ controller }}>
+        <ExcelEditor />
+      </StateContext>
+    </div>
+  </StrictMode>,
+);
+```
+
+创建 worker.ts 文件
+
+```ts src/worker.ts
+// src/worker.ts
+import { workerMethod } from 'excel-collab';
+import { expose } from 'comlink';
+
+expose(workerMethod);
+```
+
+修改配置文件
+
+```ts vite.config.ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  worker: {
+    format: 'es',
+  },
+});
+```
+
+启动应用
+
+```bash
+npm run dev
+```
+
+## 本地开发
 
 ```bash
 git clone https://github.com/nusr/excel.git
@@ -36,7 +121,7 @@ cd demo/backend && pnpm i && cd -
 npm run dev
 ```
 
-## ✨ 支持的功能
+## 支持的功能
 
 - [x] 在线协作
 - [x] 创建文件

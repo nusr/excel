@@ -5,6 +5,7 @@ import type { DocumentItem } from 'excel-collab';
 import { getDocId, jumpPage } from '../util';
 import styles from './index.module.css';
 import { v4 } from 'uuid';
+import mockModel from '../model.json';
 
 const App = () => {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
@@ -15,17 +16,18 @@ const App = () => {
     const callback = async () => {
       const list = await provider.getDocumentList();
       const item = list.find((item) => item.id === docId);
-      if (!item) {
-        list.push({
-          id: docId,
-          name: '',
-          create_time: new Date().toISOString(),
-        });
+      if (item) {
+        setDocs(list);
+        return;
       }
-      setDocs(list);
+      await provider.addDocument(docId);
+      await provider.updateDocument(docId, {
+        content: JSON.stringify(mockModel),
+      });
+      setDocs(await provider.getDocumentList());
     };
 
-    const httpBaseUrl = import.meta.env.VITE_HTTP_BASE_URL;
+    const httpBaseUrl = import.meta.env.VITE_BACKEND_URL;
     const provider = httpBaseUrl
       ? new RemoteProvider(httpBaseUrl, callback)
       : new LocalProvider(callback);

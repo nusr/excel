@@ -16,6 +16,7 @@ concurrency:
 
 env:
   VITE_DEFAULT_EXCEL_ID: ${{ vars.VITE_DEFAULT_EXCEL_ID }}
+  ROOT_BASE_URL: ${{ vars.ROOT_BASE_URL }}
 
 jobs:
   deploy:

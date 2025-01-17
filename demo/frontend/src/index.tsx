@@ -7,6 +7,7 @@ import { Excel, StateContext, Button } from 'excel-collab';
 import { RemoteProvider, LocalProvider } from './provider';
 import { jumpPage, getDocId } from './util';
 
+
 const callback = async (id: string) => {
   location.hash = `#${id}`;
   location.reload();

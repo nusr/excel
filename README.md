@@ -1,4 +1,4 @@
-# 🌐 Online Collaboration Excel
+# Online Collaboration Excel
 
 [![CI](https://github.com/nusr/excel/actions/workflows/main.yml/badge.svg)](https://github.com/nusr/excel/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/nusr/excel/branch/main/graph/badge.svg?token=ZOC8RHD3Z1)](https://codecov.io/gh/nusr/excel)
@@ -11,19 +11,104 @@ English | [中文](./README_zh.md)
 
 ![Demo](./scripts/demo.gif)
 
-## 🚀 Installation
+## Installation
 
 ```bash
 npm i --save excel-collab
 ```
 
-## 📚 Examples
+## Examples
 
 - [Simple Example](https://stackblitz.com/edit/nusr-excel-simple)
 - [Custom Example](https://stackblitz.com/edit/nusr-excel-custom)
 - [Collaboration Example](https://stackblitz.com/edit/nusr-excel-collaboration)
 
-## 🛠️ Developing
+## Quick Start
+
+Create a React app
+
+```bash
+npm create vite@latest my-app -- --template react-ts
+cd my-app
+npm i
+```
+
+Install the Required Libraries
+
+```bash
+npm i --save excel-collab comlink yjs react@latest react-dom@latest @types/react@latest @types/react-dom@latest
+```
+
+Modify the Main File
+
+```ts src/main.tsx
+// src/main.tsx
+import { createRoot } from 'react-dom/client';
+import { StrictMode } from 'react';
+import {
+  initController,
+  StateContext,
+  type WorkerMethod,
+  ExcelEditor,
+} from 'excel-collab';
+import Worker from './worker?worker';
+import 'excel-collab/style.css';
+import { wrap } from 'comlink';
+import * as Y from 'yjs';
+
+const workerInstance = wrap<WorkerMethod>(new Worker());
+
+const doc = new Y.Doc();
+const controller = initController({
+  worker: workerInstance,
+  doc,
+});
+
+controller.addFirstSheet();
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <div style={{ height: '100vh' }}>
+      <StateContext value={{ controller }}>
+        <ExcelEditor />
+      </StateContext>
+    </div>
+  </StrictMode>,
+);
+```
+
+Create the Worker File
+
+```ts src/worker.ts
+// src/worker.ts
+import { workerMethod } from 'excel-collab';
+import { expose } from 'comlink';
+
+expose(workerMethod);
+```
+
+Modify the Config File
+
+```ts vite.config.ts
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  worker: {
+    format: 'es',
+  },
+});
+```
+
+Start the app
+
+```bash
+npm run dev
+```
+
+## Local Developing
 
 ```bash
 git clone https://github.com/nusr/excel.git
@@ -36,7 +121,7 @@ cd demo/backend && pnpm i && cd -
 npm run dev
 ```
 
-## ✨ Supported Features
+## Supported Features
 
 - [x] Online Collaboration
 - [x] Create File

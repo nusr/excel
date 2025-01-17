@@ -3,10 +3,11 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: process.env.CI ? '/excel/' : undefined,
+  base: process.env.ROOT_BASE_URL ? process.env.ROOT_BASE_URL : undefined,
   plugins: [react()],
   define: {
     'process.env.VITE_IS_E2E': JSON.stringify(process.env.VITE_IS_E2E ?? ''),
+    'process.env.CI': JSON.stringify(process.env.CI ?? ''),
   },
   build: {
     minify: false,

@@ -80,10 +80,18 @@ export class RemoteProvider implements IProvider {
     id: string,
     data: Pick<DocumentItem, 'name' | 'content'>,
   ): Promise<void> {
+    const temp: Pick<DocumentItem, 'name' | 'content'> = {};
+    if (data.name) {
+      temp.name = data.name;
+    }
+    if (data.content) {
+      temp.content = data.content;
+    }
+
     await fetchData<DocumentItem>(
       this.baseUrl + '/document/' + id,
       'PUT',
-      JSON.stringify(data),
+      JSON.stringify(temp),
     );
   }
   async getDocument(id: string): Promise<DocumentItem | undefined> {
@@ -98,11 +106,12 @@ export class RemoteProvider implements IProvider {
 
 export class LocalProvider implements IProvider {
   private readonly callback: (id: string) => Promise<void>;
+  private storage: Storage = localStorage;
   constructor(callback: (id: string) => Promise<void> = async () => {}) {
     this.callback = callback;
   }
   async getDocumentList() {
-    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const data = this.storage.getItem(LOCAL_STORAGE_KEY);
     const list: DocumentItem[] = data ? JSON.parse(data) : [];
     list.sort(
       (a, b) =>
@@ -127,7 +136,7 @@ export class LocalProvider implements IProvider {
       name: '',
       create_time: new Date().toISOString(),
     });
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+    this.storage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
     await this.callback(id);
   }
   async updateDocument(
@@ -145,7 +154,7 @@ export class LocalProvider implements IProvider {
     if (data.content) {
       item.content = data.content;
     }
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+    this.storage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
   }
   async getDocument(id: string): Promise<DocumentItem | undefined> {
     const list = await this.getDocumentList();

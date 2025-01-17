@@ -31,3 +31,4 @@ uploads
 dev.db
 dev.db-journal
 migrations
+.env.development

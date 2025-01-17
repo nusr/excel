@@ -31,7 +31,7 @@ export class Debug {
     console.log(...result);
   };
   enable() {
-    return window.localStorage.getItem('debug') === '*';
+    return window.localStorage.getItem('debug');
   }
   setColor() {
     if (!Debug.colorMap.has(this.namespace)) {

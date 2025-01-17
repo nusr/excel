@@ -8619,22 +8619,6 @@
       "chartType": "line",
       "marginX": 0,
       "marginY": 0
-    },
-    "c54bf687-6dd2-4b7f-a48a-ad6abd8b52b3": {
-      "width": 200,
-      "height": 356,
-      "originHeight": 356,
-      "originWidth": 200,
-      "title": "icon",
-      "type": "floating-picture",
-      "uuid": "c54bf687-6dd2-4b7f-a48a-ad6abd8b52b3",
-      "imageSrc": "/upload/1",
-      "sheetId": "2",
-      "fromRow": 0,
-      "fromCol": 3,
-      "marginX": 18,
-      "marginY": 0,
-      "imageAngle": 0
     }
   },
   "mergeCells": {
