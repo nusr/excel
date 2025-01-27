@@ -3,6 +3,7 @@ npm run type-check
 npm run test
 npm run build
 cd demo/frontend
+pnpm i
 npm run build
 cd -
 cd demo/backend

@@ -5,6 +5,7 @@ import {
   CUSTOM_FORMAT,
   deepEqual,
   paste,
+  reactLog,
 } from '../util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { useCoreStore } from '../containers/store';
@@ -32,6 +33,7 @@ export function registerGlobalEvent(
     if (isInputEvent(event)) {
       return;
     }
+    reactLog('keydown:', event);
     const list = keyboardEventList.filter((v) => v.key === event.key);
     list.sort((a, b) => b.modifierKey.length - a.modifierKey.length);
     let temp: KeyboardEventItem | undefined = undefined;

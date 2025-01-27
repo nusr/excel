@@ -1,3 +1,6 @@
+import { RemoteProvider, LocalProvider, type IProvider } from './provider';
+import mockModal from '../../../scripts/model.json';
+
 export function getDocId(): string {
   const hash = location.hash;
   if (hash.startsWith('#')) {
@@ -12,4 +15,31 @@ export function getDocId(): string {
 export function jumpPage(route: 'collab' | '' | 'app', id?: string) {
   location.href =
     location.origin + import.meta.env.BASE_URL + route + (id ? '#' + id : '');
+}
+
+export async function getProvider(
+  callback: (p: IProvider, id: string) => Promise<void>,
+) {
+  const httpBaseUrl = import.meta.env.VITE_BACKEND_URL;
+  const provider = httpBaseUrl
+    ? new RemoteProvider(httpBaseUrl, callback)
+    : new LocalProvider(callback);
+
+  const docId = getDocId();
+  const doc = await provider.getDocument(docId);
+  if (!doc && !process.env.VITE_IS_E2E) {
+    await provider.addDocument(docId);
+    const data = { ...mockModal };
+    for (const [k, v] of Object.entries(data.drawings)) {
+      if (v.type === 'floating-picture') {
+        // @ts-ignore
+        delete data.drawings[k];
+      }
+    }
+    await provider.updateDocument(docId, {
+      content: JSON.stringify(data),
+      name: 'Template',
+    });
+  }
+  return provider;
 }

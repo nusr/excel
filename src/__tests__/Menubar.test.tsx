@@ -8,13 +8,13 @@ import {
 } from '@testing-library/react';
 import './global.mock';
 import { renderComponent } from './util';
-import { initController, getMockHooks } from '../controller';
+import { initController } from '../controller';
 
 type MatchMediaFun = (data: { matches: boolean }) => void;
 
 describe('Menubar.test.ts', () => {
   beforeEach(async () => {
-    renderComponent();
+    await renderComponent();
   });
   describe('dark mode', () => {
     afterEach(() => {
@@ -49,7 +49,7 @@ describe('Menubar.test.ts', () => {
 
 test('change i18n', () => {
   let result: RenderResult;
-  const controller = initController(getMockHooks());
+  const controller = initController();
   controller.addFirstSheet();
   act(() => {
     result = render(
@@ -80,7 +80,7 @@ test('change i18n', () => {
 });
 
 describe('change theme', () => {
-  test('mock matchMedia light to dark', () => {
+  test('mock matchMedia light to dark', async () => {
     let func: MatchMediaFun;
     function addEventListener(
       _type: string,
@@ -97,7 +97,7 @@ describe('change theme', () => {
         };
       },
     });
-    renderComponent();
+    await renderComponent();
     const before = document.documentElement.getAttribute('data-theme');
     expect(before).toEqual('light');
     act(() => {
@@ -106,7 +106,7 @@ describe('change theme', () => {
     const after = document.documentElement.getAttribute('data-theme');
     expect(after).toEqual('dark');
   });
-  test('mock matchMedia dark to light', () => {
+  test('mock matchMedia dark to light', async () => {
     let func: MatchMediaFun;
     function addEventListener(
       _type: string,
@@ -124,7 +124,7 @@ describe('change theme', () => {
       },
     });
 
-    renderComponent();
+    await renderComponent();
     const before = document.documentElement.getAttribute('data-theme');
     expect(before).toEqual('dark');
     act(() => {

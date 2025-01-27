@@ -14,18 +14,11 @@ import PNG from 'pngjs';
 
 const defaultWidth = 200;
 const defaultHeight = 100;
-let maxThresholdData = 0;
 
 beforeAll(async () => {
   const imageDir = path.join(__dirname, './static');
   if (!fs.existsSync(imageDir)) {
     await fs.promises.mkdir(imageDir);
-  }
-});
-
-afterAll(() => {
-  if (maxThresholdData > 0) {
-    console.log('maxThresholdData: ', maxThresholdData);
   }
 });
 
@@ -35,7 +28,7 @@ export function getRenderData(controller: IController, theme: ThemeType) {
   const sheetInfo = controller.getSheetInfo(currentId)!;
   const copyRange = controller.getCopyRange();
   const eventData: RequestRender = {
-    changeSet: new Set<ChangeEventType>(['scroll', 'cellStyle', 'cellValue']),
+    changeSet: new Set<ChangeEventType>(['scroll', 'cellStyle', 'worksheets']),
     theme,
     canvasSize: {
       top: 0,
@@ -78,11 +71,8 @@ async function compareImage(
     },
   );
   const threshold = Math.sqrt(result / (width * height));
-  if (threshold > 0) {
-    console.log(threshold);
-  }
-  maxThresholdData = Math.max(maxThresholdData, threshold);
   if (threshold > maxThreshold) {
+    console.log(`threshold: ${threshold},maxThreshold: ${maxThreshold}`);
     const diffPath = basePath.replace('.png', '.diff.png');
     await fs.promises.writeFile(diffPath, PNG.PNG.sync.write(diff) as any);
     return 1;

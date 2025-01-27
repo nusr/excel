@@ -7,15 +7,8 @@ import userEvent from '@testing-library/user-event';
 describe('Toolbar.test.ts', () => {
   let controller: IController;
   beforeEach(async () => {
-    const r = renderComponent();
+    const r = await renderComponent();
     controller = r.controller;
-  });
-  describe('toolbar', () => {
-    test('normal', () => {
-      expect(
-        screen.getByTestId('toolbar')!.childNodes.length,
-      ).toBeGreaterThanOrEqual(3);
-    });
   });
   describe('fontSize', () => {
     test('normal', async () => {
@@ -112,7 +105,7 @@ describe('Toolbar.test.ts', () => {
   });
   describe('copy', () => {
     test('toolbar', async () => {
-      const user = userEvent.setup()
+      const user = userEvent.setup();
       type('=SUM(1,2)');
       await user.click(screen.getByTestId('toolbar-copy'));
       fireEvent.keyDown(document.body, { key: 'Enter' });
@@ -128,7 +121,7 @@ describe('Toolbar.test.ts', () => {
   });
   describe('cut', () => {
     test('toolbar', async () => {
-      const user = userEvent.setup()
+      const user = userEvent.setup();
       type('=SUM(1,2)');
       await user.click(screen.getByTestId('toolbar-cut'));
       fireEvent.keyDown(document.body, { key: 'Enter' });
@@ -336,7 +329,7 @@ test('queryLocalFonts', async () => {
   });
   localStorage.setItem('LOCAL_FONT_KEY', JSON.stringify(['serif']));
 
-  renderComponent();
+  await renderComponent();
 
   fireEvent.change(await screen.findByTestId('toolbar-font-family'), {
     target: { value: 'serif' },

@@ -140,7 +140,6 @@ export type WorksheetData = ModelCellValue[];
 
 export type ChangeEventType =
   | keyof ModelJSON
-  | 'cellValue'
   | 'cellStyle'
   | 'antLine'
   | 'redo'
@@ -630,6 +629,8 @@ export interface IWorksheet extends IBaseManager {
    */
   getCell(range: IRange): ModelCellType | undefined;
 
+  deleteCell(range: IRange): void;
+
   /**
    * Sets the value and style of a range of cells.
    *
@@ -753,6 +754,7 @@ export interface IBaseModel
       | 'getWorksheet'
       | 'setWorksheet'
       | 'setCellValue'
+      | 'deleteCell'
     >,
     Pick<IFilter, 'addFilter' | 'getFilter' | 'deleteFilter' | 'updateFilter'> {
   toJSON(): ModelJSON;

@@ -1,13 +1,11 @@
 import {
   initController,
-  type WorkerMethod,
   UserItem,
   useUserInfo,
   modelToChangeSet,
 } from 'excel-collab';
-import Worker from './worker?worker';
+import Worker from 'excel-collab/worker?worker';
 import { WebsocketProvider } from 'y-websocket';
-import { wrap } from 'comlink';
 import { Doc } from 'yjs';
 import { getDocId } from './util';
 
@@ -39,7 +37,7 @@ export function initControllerState() {
   });
 
   const controller = initController({
-    worker: wrap<WorkerMethod>(new Worker()),
+    worker: new Worker(),
     doc,
   });
 

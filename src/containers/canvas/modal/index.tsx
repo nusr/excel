@@ -20,4 +20,6 @@ const Modal = (props: ModalProps) => {
   );
 };
 
+export type { ModalProps };
+
 export default Modal;

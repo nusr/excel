@@ -40,7 +40,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       height,
     } = props;
     const { controller } = useExcel();
-    const ref = useClickOutside(hideContextMenu);
+    const ref = useClickOutside(true, hideContextMenu);
     const selectData = () => {
       let value = convertToReference(
         props.chartRange!,

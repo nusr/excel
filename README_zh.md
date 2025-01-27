@@ -25,7 +25,7 @@ npm i --save excel-collab
 
 ## 快速开始
 
-创建 React 应用
+1. 创建 React 应用
 
 ```bash
 npm create vite@latest my-app -- --template react-ts
@@ -33,76 +33,40 @@ cd my-app
 npm i
 ```
 
-安装依赖
+2. 安装依赖
 
 ```bash
-npm i --save excel-collab@latest comlink@latest yjs@latest react@latest react-dom@latest @types/react@latest @types/react-dom@latest
+npm i --save excel-collab@latest yjs@latest react@latest react-dom@latest @types/react@latest @types/react-dom@latest
 ```
 
-修改 main.tsx 文件
+3. 修改 main.tsx 文件
 
 ```ts src/main.tsx
 // src/main.tsx
 import { createRoot } from 'react-dom/client';
 import { StrictMode } from 'react';
-import {
-  initController,
-  StateContext,
-  type WorkerMethod,
-  ExcelEditor,
-} from 'excel-collab';
-import Worker from './worker?worker';
+import { initController, StateContext, Excel } from 'excel-collab';
+import Worker from 'excel-collab/worker?worker';
 import 'excel-collab/style.css';
-import { wrap } from 'comlink';
 import * as Y from 'yjs';
 
-const workerInstance = wrap<WorkerMethod>(new Worker());
-
-const doc = new Y.Doc();
 const controller = initController({
-  worker: workerInstance,
-  doc,
+  worker: new Worker(),
+  doc: new Y.Doc(),
 });
-
-controller.addFirstSheet();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <div style={{ height: '100vh' }}>
       <StateContext value={{ controller }}>
-        <ExcelEditor />
+        <Excel />
       </StateContext>
     </div>
   </StrictMode>,
 );
 ```
 
-创建 worker.ts 文件
-
-```ts src/worker.ts
-// src/worker.ts
-import { workerMethod } from 'excel-collab';
-import { expose } from 'comlink';
-
-expose(workerMethod);
-```
-
-修改配置文件
-
-```ts vite.config.ts
-// vite.config.ts
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-
-export default defineConfig({
-  plugins: [react()],
-  worker: {
-    format: 'es',
-  },
-});
-```
-
-启动应用
+4. 启动应用
 
 ```bash
 npm run dev
@@ -116,6 +80,11 @@ cd excel
 
 npm i -g pnpm
 pnpm i
+
+# debug
+npm start
+
+# or collaboration
 cd demo/frontend && pnpm i && cd -
 cd demo/backend && pnpm i && cd -
 npm run dev

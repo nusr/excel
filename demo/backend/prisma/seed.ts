@@ -1,13 +1,13 @@
 import { PrismaClient, Prisma } from '@prisma/client';
-import mockModal from './model.json';
-import mockImage from './image.json';
+import mockModal from '../../../scripts/model.json';
+import mockImage from '../../../scripts/image.json';
 
 const prisma = new PrismaClient();
 
 const documents: Prisma.documentCreateInput[] = [
   {
     id: '184858c4-be37-41b5-af82-52689004e605',
-    name: '',
+    name: 'Template',
     content: JSON.stringify(mockModal),
     create_time: new Date().toISOString(),
   },

@@ -2,7 +2,7 @@ import { convertXMLToJSON, importXLSX } from '../importXLSX';
 import { ModelJSON, EVerticalAlign, EUnderLine } from '../../../types';
 import fs from 'fs/promises';
 import path from 'path';
-import { initController, getMockHooks } from '../../../controller';
+import { initController } from '../../../controller';
 
 describe('importXLSX.test.ts', () => {
   describe('convertColorToHex', () => {
@@ -27,7 +27,7 @@ describe('importXLSX.test.ts', () => {
       const filePath = path.join(process.cwd(), './scripts/origin.xlsx');
       const fileData = await fs.readFile(filePath);
       const model = await importXLSX(fileData as any);
-      const controller = initController(getMockHooks());
+      const controller = initController();
       controller.addSheet();
       controller.fromJSON(model);
       const result: ModelJSON = {

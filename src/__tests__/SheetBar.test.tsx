@@ -4,7 +4,7 @@ import { renderComponent } from './util';
 
 describe('SheetBar.test.ts', () => {
   beforeEach(async () => {
-    renderComponent();
+    await renderComponent();
   });
   describe('sheet bar', () => {
     test('normal', () => {
@@ -216,7 +216,7 @@ describe('SheetBar.test.ts', () => {
       );
       expect(
         await screen.findByTestId('sheet-bar-active-item'),
-      ).toHaveTextContent('Sheet1');
+      ).toHaveTextContent('Sheet4');
     });
     test('unhide cancel', async () => {
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));

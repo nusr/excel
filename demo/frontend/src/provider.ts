@@ -29,17 +29,19 @@ export async function fetchData<T>(
     const res = result.json();
     return res as T;
   } catch (error) {
-    console.log(error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.log(error);
+    }
     return;
   }
 }
 
 export class RemoteProvider implements IProvider {
   private readonly baseUrl: string;
-  private readonly callback: (id: string) => Promise<void>;
+  private readonly callback: (p: IProvider, id: string) => Promise<void>;
   constructor(
     baseUrl: string,
-    callback: (id: string) => Promise<void> = async () => {},
+    callback: (p: IProvider, id: string) => Promise<void> = async () => {},
   ) {
     this.baseUrl = baseUrl;
     this.callback = callback;
@@ -74,7 +76,7 @@ export class RemoteProvider implements IProvider {
       'POST',
       JSON.stringify({ name: '', id }),
     );
-    await this.callback(id);
+    await this.callback(this, id);
   }
   async updateDocument(
     id: string,
@@ -105,13 +107,14 @@ export class RemoteProvider implements IProvider {
 }
 
 export class LocalProvider implements IProvider {
-  private readonly callback: (id: string) => Promise<void>;
-  private storage: Storage = localStorage;
-  constructor(callback: (id: string) => Promise<void> = async () => {}) {
+  private readonly callback: (p: IProvider, id: string) => Promise<void>;
+  constructor(
+    callback: (p: IProvider, id: string) => Promise<void> = async () => {},
+  ) {
     this.callback = callback;
   }
   async getDocumentList() {
-    const data = this.storage.getItem(LOCAL_STORAGE_KEY);
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     const list: DocumentItem[] = data ? JSON.parse(data) : [];
     list.sort(
       (a, b) =>
@@ -136,8 +139,8 @@ export class LocalProvider implements IProvider {
       name: '',
       create_time: new Date().toISOString(),
     });
-    this.storage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-    await this.callback(id);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+    await this.callback(this, id);
   }
   async updateDocument(
     id: string,
@@ -154,7 +157,7 @@ export class LocalProvider implements IProvider {
     if (data.content) {
       item.content = data.content;
     }
-    this.storage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
   }
   async getDocument(id: string): Promise<DocumentItem | undefined> {
     const list = await this.getDocumentList();

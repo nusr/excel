@@ -1,4 +1,4 @@
-import { initController, getMockHooks } from '../../controller';
+import { initController } from '../../controller';
 import {
   EUnderLine,
   IController,
@@ -10,7 +10,7 @@ import { compareScreenShot } from './util';
 describe('cell-style.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController(getMockHooks());
+    controller = initController();
     controller.addSheet();
   });
   afterEach(async () => {

@@ -25,9 +25,6 @@ function useCollaboration() {
       setIsLoading(true);
       const doc = controller.getHooks().doc;
       const file = await provider?.getDocument?.(doc.guid);
-      if (!file) {
-        await provider.addDocument?.(doc.guid);
-      }
       const content = file?.content ?? '';
       if (content) {
         controller.fromJSON(JSON.parse(content));

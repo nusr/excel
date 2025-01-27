@@ -2,7 +2,10 @@ import { defineConfig } from 'vite';
 import { version } from './package.json';
 import dts from 'vite-plugin-dts';
 
+console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
+
 export default defineConfig({
+  root: process.env.NODE_ENV === 'development' ? './playground' : undefined,
   plugins: [dts()],
   define: {
     'process.env.VITE_IS_E2E': JSON.stringify(process.env.VITE_IS_E2E ?? ''),
@@ -22,13 +25,12 @@ export default defineConfig({
     },
 
     rollupOptions: {
-      external: ['react', 'react-dom', 'yjs', 'comlink'],
+      external: ['react', 'react-dom', 'yjs'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
           yjs: 'Y',
-          comlink: 'Comlink',
         },
       },
     },

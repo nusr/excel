@@ -1,6 +1,7 @@
-import { fetchData, RemoteProvider } from '../provider';
+import { fetchData, RemoteProvider, LocalProvider } from '../provider';
 
 const BASE_URL = 'http://localhost:4000';
+const LOCAL_STORAGE_KEY = 'excel-collab-docs';
 
 describe('fetchData', () => {
   beforeEach(() => {
@@ -77,7 +78,7 @@ describe('fetchData', () => {
   });
 });
 
-describe('Provider', () => {
+describe('RemoteProvider', () => {
   let provider: RemoteProvider;
 
   beforeEach(() => {
@@ -177,6 +178,98 @@ describe('Provider', () => {
     });
 
     const result = await provider.getDocument('docId');
+    expect(result).toBeUndefined();
+  });
+});
+
+describe('LocalProvider', () => {
+  let localProvider: LocalProvider;
+  const mockCallback = jest.fn();
+
+  beforeEach(() => {
+    localProvider = new LocalProvider(mockCallback);
+    localStorage.clear();
+  });
+
+  test('getDocumentList should return sorted document list', async () => {
+    const documents = [
+      { id: '1', name: 'Doc 1', create_time: '2023-01-01T00:00:00Z' },
+      { id: '2', name: 'Doc 2', create_time: '2023-01-02T00:00:00Z' },
+    ];
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(documents));
+
+    const result = await localProvider.getDocumentList();
+
+    expect(result).toEqual([documents[1], documents[0]]);
+  });
+
+  test('uploadFile should return base64 string', async () => {
+    const base64 = 'base64string';
+    const result = await localProvider.uploadFile(
+      'docId',
+      new File([], 'file'),
+      base64,
+    );
+
+    expect(result).toBe(base64);
+  });
+
+  test('downloadFile should return file path', async () => {
+    const filePath = 'path/to/file';
+    const result = await localProvider.downloadFile('docId', filePath);
+
+    expect(result).toBe(filePath);
+  });
+
+  test('addDocument should add a new document and call callback', async () => {
+    const id = '3';
+    await localProvider.addDocument(id);
+
+    const documents = JSON.parse(
+      localStorage.getItem(LOCAL_STORAGE_KEY) || '[]',
+    );
+    expect(documents).toHaveLength(1);
+    expect(documents[0].id).toBe(id);
+    expect(mockCallback).toHaveBeenCalled();
+  });
+
+  test('updateDocument should update document name and content', async () => {
+    const documents = [
+      {
+        id: '1',
+        name: 'Doc 1',
+        create_time: '2023-01-01T00:00:00Z',
+        content: 'Old content',
+      },
+    ];
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(documents));
+
+    await localProvider.updateDocument('1', {
+      name: 'Updated Doc 1',
+      content: 'New content',
+    });
+
+    const updatedDocuments = JSON.parse(
+      localStorage.getItem(LOCAL_STORAGE_KEY) || '[]',
+    );
+    expect(updatedDocuments[0].name).toBe('Updated Doc 1');
+    expect(updatedDocuments[0].content).toBe('New content');
+  });
+
+  test('getDocument should return the document by id', async () => {
+    const documents = [
+      { id: '1', name: 'Doc 1', create_time: '2023-01-01T00:00:00Z' },
+    ];
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(documents));
+
+    const result = await localProvider.getDocument('1');
+
+    expect(result).toEqual(documents[0]);
+  });
+
+  test('getDocument should return undefined if document not found', async () => {
+    const result = await localProvider.getDocument('non-existent-id');
+
     expect(result).toBeUndefined();
   });
 });

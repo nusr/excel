@@ -159,21 +159,23 @@ export class Controller
   transaction = <T>(fn: () => T, origin?: any): T => {
     return this.model.transaction(fn, origin);
   };
-  async emitChange() {
+  emitChange() {
     const changeSet = new Set(this.changeSet);
     this.changeSet = new Set<ChangeEventType>();
     if (changeSet.has('customHeight') || changeSet.has('customWidth')) {
       this.setSheetViewSize();
     }
     if (
-      changeSet.has('cellValue') ||
+      changeSet.has('worksheets') ||
       changeSet.has('definedNames') ||
       changeSet.has('currentSheetId')
     ) {
-      const result = await this.model.computeFormulas();
-      if (result) {
-        changeSet.add('cellValue');
-      }
+      this.model.computeFormulas().then((result) => {
+        if (result) {
+          controllerLog('computeFormulas');
+          this.emit('renderChange', { changeSet: new Set(['worksheets']) });
+        }
+      });
     }
     if (changeSet.size > 0) {
       controllerLog('emitChange', changeSet);
@@ -267,7 +269,6 @@ export class Controller
     this.model.setWorksheet(data);
     this.changeSet.add('worksheets');
     this.changeSet.add('cellStyle');
-    this.changeSet.add('cellValue');
     this.emitChange();
   }
   @transaction()
@@ -320,10 +321,9 @@ export class Controller
     this.changeSet.add('workbook');
     this.emitChange();
   }
-  @transaction(SYNC_FLAG.SKIP_UNDO_REDO_UPDATE)
+  @transaction(SYNC_FLAG.SKIP_UNDO_REDO)
   fromJSON(json: ModelJSON): void {
     this.changeSet.add('currentSheetId');
-    this.changeSet.add('cellValue');
     this.changeSet.add('cellStyle');
     this.changeSet.add('definedNames');
     this.changeSet.add('mergeCells');
@@ -348,7 +348,14 @@ export class Controller
     range: IRange,
   ): void {
     this.model.setCell(value, style, range);
-    this.changeSet.add('cellValue');
+    this.changeSet.add('worksheets');
+    this.changeSet.add('cellStyle');
+    this.emitChange();
+  }
+  @transaction()
+  deleteCell(range: IRange) {
+    this.model.deleteCell(range);
+    this.changeSet.add('worksheets');
     this.changeSet.add('cellStyle');
     this.emitChange();
   }
@@ -368,7 +375,7 @@ export class Controller
     } else {
       this.model.setCellValue(value, range);
     }
-    this.changeSet.add('cellValue');
+    this.changeSet.add('worksheets');
     this.emitChange();
   }
   @transaction()
@@ -783,7 +790,7 @@ export class Controller
       }
     }
     await this.basePaste(event);
-    this.changeSet.add('cellValue');
+    this.changeSet.add('worksheets');
     this.changeSet.add('cellStyle');
     this.emitChange();
   }
@@ -943,13 +950,13 @@ export class Controller
   deleteAll(sheetId?: string): void {
     this.model.deleteAll(sheetId);
     this.changeSet.add('definedNames');
-    this.changeSet.add('cellValue');
     this.changeSet.add('mergeCells');
     this.changeSet.add('cellStyle');
     this.changeSet.add('autoFilter');
     this.changeSet.add('drawings');
     this.changeSet.add('customHeight');
     this.changeSet.add('customWidth');
+    this.changeSet.add('worksheets');
     this.emitChange();
   }
   getDefineName(range: IRange): string {

@@ -1,4 +1,4 @@
-import { initController, getMockHooks } from '..';
+import { initController } from '..';
 import {
   EHorizontalAlign,
   EMergeCellType,
@@ -10,7 +10,7 @@ import { MERGE_CELL_LINE_BREAK } from '../../util';
 describe('mergeCell.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController(getMockHooks());
+    controller = initController();
     controller.addSheet();
   });
   describe('addMergeCell', () => {

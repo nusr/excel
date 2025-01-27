@@ -14,3 +14,6 @@ if (!fs.existsSync(filePath)) {
     `VITE_BACKEND_URL=http://localhost:4000\nVITE_DEFAULT_EXCEL_ID=`,
   );
 }
+process.on('exit', () => {
+  fs.unlinkSync(filePath);
+});

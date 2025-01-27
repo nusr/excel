@@ -112,6 +112,7 @@ export const FilterModal = ({ col, hide }: ModalProps) => {
                 name={v.label}
                 value={v.label}
                 checked={v.checked}
+                data-testid="filter-model-item"
                 onChange={(e) =>
                   setDataList((oldList) => {
                     oldList[index].checked = e.target.checked;

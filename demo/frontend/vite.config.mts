@@ -10,7 +10,6 @@ export default defineConfig({
     'process.env.CI': JSON.stringify(process.env.CI ?? ''),
   },
   build: {
-    minify: false,
     sourcemap: true,
     outDir: './dist',
     rollupOptions: {
@@ -20,8 +19,5 @@ export default defineConfig({
         collab: resolve(__dirname, 'collab.html'),
       },
     },
-  },
-  worker: {
-    format: 'es',
-  },
+  }
 });

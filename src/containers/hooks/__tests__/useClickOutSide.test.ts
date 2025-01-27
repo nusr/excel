@@ -4,7 +4,7 @@ import { fireEvent, renderHook } from '@testing-library/react';
 describe('useClickOutside', () => {
   it('should call callback when clicking outside the element', () => {
     const callback = jest.fn();
-    const { result } = renderHook(() => useClickOutside(callback));
+    const { result } = renderHook(() => useClickOutside(true, callback));
     const ref = result.current;
 
     const div = document.createElement('div');
@@ -21,7 +21,7 @@ describe('useClickOutside', () => {
 
   it('should not call callback when clicking inside the element', () => {
     const callback = jest.fn();
-    const { result } = renderHook(() => useClickOutside(callback));
+    const { result } = renderHook(() => useClickOutside(true, callback));
     const ref = result.current;
 
     const div = document.createElement('div');
@@ -38,7 +38,9 @@ describe('useClickOutside', () => {
 
   it('should clean up event listeners on unmount', () => {
     const callback = jest.fn();
-    const { result, unmount } = renderHook(() => useClickOutside(callback));
+    const { result, unmount } = renderHook(() =>
+      useClickOutside(true, callback),
+    );
     const ref = result.current;
 
     const div = document.createElement('div');

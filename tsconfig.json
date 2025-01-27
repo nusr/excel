@@ -35,6 +35,7 @@
     "outDir": "lib"
   },
   "include": [
-    "src"
+    "src",
+    "playground"
   ]
 }

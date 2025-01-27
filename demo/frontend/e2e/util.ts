@@ -1,13 +1,14 @@
 import { Page } from '@playwright/test';
 
 export const INDEX_PAGE = '/app';
+export const COLLABORATION_PAGE = '/collab';
 export const MAIN_CANVAS = 'canvas-main';
 
 export function getByTestId(selector: string) {
   return `[data-testid="${selector}"]`;
 }
 
-export async function goto(page: Page) {
+export async function goto(page: Page, url = INDEX_PAGE) {
   page.on('pageerror', (err) => {
     throw err;
   });
@@ -19,8 +20,10 @@ export async function goto(page: Page) {
     }
   });
 
-  await page.goto(INDEX_PAGE);
-  await page.waitForSelector(getByTestId(MAIN_CANVAS));
+  await page.goto(url);
+  if (url === INDEX_PAGE) {
+    await page.waitForSelector(getByTestId(MAIN_CANVAS));
+  }
 }
 
 export async function clickFirstCell(page: Page, isDbClick = false) {

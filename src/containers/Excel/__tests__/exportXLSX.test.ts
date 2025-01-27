@@ -1,6 +1,6 @@
 import { EHorizontalAlign, EUnderLine, EVerticalAlign } from '../../../types';
 import { convertToXMLData } from '../exportXLSX';
-import { initController, getMockHooks } from '../../../controller';
+import { initController } from '../../../controller';
 
 function trimData(content: string = '') {
   const list = content
@@ -23,7 +23,7 @@ function trimData(content: string = '') {
 describe('exportXLSX.test.ts', () => {
   describe('convertToXMLData', () => {
     test('empty', () => {
-      const controller = initController(getMockHooks());
+      const controller = initController();
       controller.addSheet();
       const result = convertToXMLData(controller);
       expect(trimData(result['xl/worksheets/sheet1.xml'])).toEqual(
@@ -50,7 +50,7 @@ describe('exportXLSX.test.ts', () => {
       );
     });
     test('normal', () => {
-      const controller = initController(getMockHooks());
+      const controller = initController();
       controller.addSheet();
       controller.updateSheetInfo({ tabColor: 'red' });
       controller.setCell(

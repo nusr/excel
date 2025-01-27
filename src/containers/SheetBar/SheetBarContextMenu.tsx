@@ -17,7 +17,7 @@ interface Props {
 export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
   ({ position, sheetList, currentSheetId, hideMenu, editSheetName }) => {
     const { controller } = useExcel();
-    const ref = useClickOutside(hideMenu);
+    const ref = useClickOutside(true, hideMenu);
     const tabColor = useMemo(() => {
       return (
         sheetList.find((v) => v.sheetId === currentSheetId)?.tabColor || ''

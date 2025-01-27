@@ -1,8 +1,8 @@
 import { useRef, useEffect } from 'react';
 
 export function useClickOutside(
+  shouldExecute = false,
   handler: () => void,
-  shouldExecute: boolean = true,
 ) {
   const ref = useRef<HTMLDivElement>(null);
 

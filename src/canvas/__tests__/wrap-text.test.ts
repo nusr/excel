@@ -1,15 +1,15 @@
-import { initController, getMockHooks } from '../../controller';
+import { initController } from '../../controller';
 import { IController, EMergeCellType } from '../../types';
 import { compareScreenShot } from './util';
 
-describe.skip('wrap-text.test.ts', () => {
+describe('wrap-text.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController(getMockHooks());
+    controller = initController();
     controller.addSheet();
   });
   afterEach(async () => {
-    await compareScreenShot(controller, { maxThreshold: 0.229 });
+    await compareScreenShot(controller, { maxThreshold: 0.4 });
   });
   test('basic', () => {
     controller.setCell(

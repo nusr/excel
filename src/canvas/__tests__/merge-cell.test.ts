@@ -1,11 +1,11 @@
-import { initController, getMockHooks } from '../../controller';
+import { initController } from '../../controller';
 import { IController, EMergeCellType } from '../../types';
 import { compareScreenShot } from './util';
 
 describe('merge-cell.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController(getMockHooks());
+    controller = initController();
     controller.addSheet();
   });
   afterEach(async () => {

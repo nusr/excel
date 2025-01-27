@@ -69,10 +69,6 @@ router.post('/upload', async (ctx: Koa.Context) => {
   ctx.assert(list, 401, 'file is required');
   const file = Array.isArray(list) ? list[0] : list;
   const reader = await fs.promises.readFile(file.filepath);
-  fs.writeFileSync(
-    './test.json',
-    JSON.stringify(Array.from(new Uint8Array(reader))),
-  );
   const name = file.originalFilename ?? '';
   const { content: _content, ...rest } = await prisma.file.create({
     data: {

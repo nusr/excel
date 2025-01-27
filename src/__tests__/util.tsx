@@ -1,16 +1,16 @@
 import { screen, fireEvent, render, act } from '@testing-library/react';
 import { ExcelEditor, StateContext } from '../containers';
-import { initController, getMockHooks } from '../controller';
+import { initController } from '../controller';
 
 export function type(content: string, isEnter = true) {
   fireEvent.click(screen.getByTestId('formula-editor-trigger'));
   fireEvent.change(screen.getByTestId('formula-editor'), {
     target: { value: content },
   });
+
   fireEvent.keyDown(screen.getByTestId('formula-editor'), {
     key: isEnter ? 'Enter' : 'Tab',
   });
-
   if (isEnter) {
     fireEvent.keyDown(document.body, { key: 'ArrowUp' });
   } else {
@@ -27,8 +27,8 @@ export function extractDataFromTransform(
   return Number(t[1]);
 }
 
-export function renderComponent() {
-  const controller = initController(getMockHooks());
+export async function renderComponent() {
+  const controller = initController();
   controller.addFirstSheet();
   act(() => {
     render(

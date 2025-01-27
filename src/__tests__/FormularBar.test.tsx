@@ -4,7 +4,7 @@ import './global.mock';
 
 describe('FormulaBar.test.tsx', () => {
   beforeEach(async () => {
-    renderComponent();
+    await renderComponent();
   });
   describe('defined name', () => {
     test('normal', () => {

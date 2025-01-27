@@ -6,7 +6,7 @@ import { renderComponent } from './util';
 
 describe('Import.test.tsx', () => {
   beforeEach(async () => {
-    renderComponent();
+    await renderComponent();
   });
   describe('upload image', () => {
     test('ok', async () => {

@@ -194,6 +194,10 @@ export class Model
     };
   };
 
+  deleteCell(range: IRange){
+    this.worksheetManager.deleteCell(range)
+  }
+
   setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,

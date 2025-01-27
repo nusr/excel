@@ -7,7 +7,7 @@ import './global.mock';
 describe('Border.test.tsx', () => {
   let controller: IController;
   beforeEach(async () => {
-    const result = renderComponent();
+    const result = await renderComponent();
     controller = result.controller;
   });
   describe('Line Color', () => {

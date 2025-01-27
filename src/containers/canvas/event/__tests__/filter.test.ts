@@ -1,5 +1,5 @@
 import { type IController, type EventData } from '../../../../types';
-import { initController, getMockHooks } from '../../../../controller';
+import { initController } from '../../../../controller';
 import { FilterHandler } from '../filter';
 
 describe('filter.test.ts', () => {
@@ -7,7 +7,7 @@ describe('filter.test.ts', () => {
   let filterHandler: FilterHandler;
 
   beforeEach(() => {
-    controller = initController(getMockHooks());
+    controller = initController();
     controller.addSheet();
     filterHandler = new FilterHandler();
   });

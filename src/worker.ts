@@ -1,2 +1,4 @@
 import workerMethod from './canvas/worker';
-export { workerMethod };
+import { expose } from 'comlink';
+
+expose(workerMethod)

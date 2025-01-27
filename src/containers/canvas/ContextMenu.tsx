@@ -69,7 +69,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
   const col = useActiveCell((state) => state.col);
   const colCount = useActiveCell((state) => state.colCount);
   const rowCount = useActiveCell((state) => state.rowCount);
-  const ref = useClickOutside(hideContextMenu);
+  const ref = useClickOutside(true, hideContextMenu);
   const { style, position } = useMemo(() => {
     const temp = computeMenuStyle(top, left, controller);
     return temp;

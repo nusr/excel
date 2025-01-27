@@ -186,7 +186,7 @@ const handleStateChange = (
   if (
     changeSet.has('rangeMap') ||
     changeSet.has('cellStyle') ||
-    changeSet.has('cellValue') ||
+    changeSet.has('worksheets') ||
     changeSet.has('currentSheetId') ||
     changeSet.has('mergeCells')
   ) {
@@ -221,7 +221,7 @@ const handleStateChange = (
   }
   if (
     changeSet.has('drawings') ||
-    changeSet.has('cellValue') ||
+    changeSet.has('worksheets') ||
     changeSet.has('customHeight') ||
     changeSet.has('customWidth') ||
     changeSet.has('currentSheetId') ||
@@ -344,7 +344,6 @@ export function initCanvas(
   const changeSet = new Set<ChangeEventType>([
     ...KEY_LIST,
     'scroll',
-    'cellValue',
     'cellStyle',
     'antLine',
     'undo',

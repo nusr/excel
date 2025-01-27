@@ -4,17 +4,17 @@ import './global.mock';
 
 describe('VerticalAlign.test.tsx', () => {
   beforeEach(async () => {
-    renderComponent();
+    await renderComponent();
   });
   describe('top', () => {
-    test('ok', () => {
+    test('ok', async () => {
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-vertical-top'));
       expect(screen.getByTestId('toolbar-vertical-top')).toHaveClass('active');
     });
   });
   describe('middle', () => {
-    test('ok', () => {
+    test('ok', async () => {
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-vertical-middle'));
       expect(screen.getByTestId('toolbar-vertical-middle')).toHaveClass(
@@ -23,7 +23,7 @@ describe('VerticalAlign.test.tsx', () => {
     });
   });
   describe('bottom', () => {
-    test('ok', () => {
+    test('ok', async () => {
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-vertical-bottom'));
       expect(screen.getByTestId('toolbar-vertical-bottom')).toHaveClass(

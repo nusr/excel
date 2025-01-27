@@ -1,10 +1,10 @@
 import { IController } from '../../types';
-import { initController, getMockHooks } from '..';
+import { initController } from '..';
 
 describe('filter.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController(getMockHooks());
+    controller = initController();
     controller.addSheet();
   });
   test('not valid', () => {

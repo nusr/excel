@@ -492,5 +492,19 @@ export const keyboardEventList: KeyboardEventItem[] = [
       controller.redo();
     },
   },
+  {
+    key: 'Backspace',
+    modifierKey: [],
+    handler: (controller) => {
+      controller.deleteCell(controller.getActiveRange().range);
+    },
+  },
+  {
+    key: 'Delete',
+    modifierKey: [],
+    handler: (controller) => {
+      controller.deleteCell(controller.getActiveRange().range);
+    },
+  },
 ];
 /* jscpd:ignore-end */

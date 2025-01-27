@@ -9,7 +9,7 @@ const commandKey = `${isMac() ? 'meta' : 'ctrl'}Key`;
 describe('shortcut.test.tsx', () => {
   let controller: IController;
   beforeEach(async () => {
-    const r = renderComponent();
+    const r = await renderComponent();
     controller = r.controller;
   });
   describe('Enter', () => {

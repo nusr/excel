@@ -27,12 +27,17 @@ import {
   HIDE_CELL,
   BORDER_TYPE_MAP,
   FILTER_RECT_SIZE,
+  npx,
+  dpr,
+  intToColumnName,
+  isSheet,
+  isCol,
+  isRow,
+  containRange,
+  getCustomWidthOrHeightKey,
+  getWorksheetKey,
 } from '../util';
 import { getHeaderStyle } from './constant';
-import { intToColumnName } from '../util';
-import { isSheet, isCol, isRow, containRange } from '../util';
-import { npx, dpr } from '../util';
-import { getCustomWidthOrHeightKey, getWorksheetKey } from '../util';
 
 const lineWidth = Math.max(...Object.values(BORDER_TYPE_MAP));
 

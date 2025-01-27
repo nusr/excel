@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
 describe('Canvas.test.ts', () => {
   let controller: IController;
   beforeEach(async () => {
-    const r = renderComponent();
+    const r = await renderComponent();
     controller = r.controller;
   });
   describe('canvas', () => {
@@ -62,7 +62,7 @@ describe('Canvas.test.ts', () => {
     });
   });
   describe('ScrollBar', () => {
-    test.skip('scroll down', async () => {
+    test('scroll down', async () => {
       const oldTop = extractDataFromTransform(
         window.getComputedStyle(
           await screen.findByTestId('vertical-scroll-bar-content'),

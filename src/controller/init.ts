@@ -1,19 +1,32 @@
 import { Model } from '../model';
-import type { IController, IHooks, WorkerMethod } from '../types';
+import type { IController } from '../types';
 import { Controller } from './Controller';
 import method from '../canvas/worker';
 import { Doc } from 'yjs';
-import type { Remote } from 'comlink';
+import { wrap } from 'comlink';
 
-export function getMockHooks() {
-  const mockTestHooks: IHooks = {
-    worker: method as unknown as Remote<WorkerMethod>,
+function getMockHooks() {
+  return {
+    worker: method as any,
     doc: new Doc(),
   };
-  return mockTestHooks;
 }
 
-export function initController(hooks: IHooks = getMockHooks()): IController {
+export function initController(
+  options: {
+    worker: Worker;
+    doc: Doc;
+  } = getMockHooks(),
+): IController {
+  const worker =
+    options.worker instanceof Worker
+      ? wrap(options.worker)
+      : (options.worker as any);
+
+  const hooks = {
+    worker,
+    doc: options.doc,
+  };
   const model = new Model(hooks);
   const controller = new Controller(model, hooks);
   return controller;

@@ -1,12 +1,12 @@
-import { initController, getMockHooks } from '../../controller';
+import { initController } from '../../controller';
 import { BorderItem, IController } from '../../types';
-import { BORDER_TYPE_MAP } from '../../util'
+import { BORDER_TYPE_MAP } from '../../util';
 import { compareScreenShot } from './util';
 
 describe('border.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController(getMockHooks());
+    controller = initController();
     controller.addSheet();
   });
   afterEach(async () => {

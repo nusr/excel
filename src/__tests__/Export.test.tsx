@@ -18,12 +18,14 @@ describe('Export.test.ts', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockSaveAs.mockReset();
-    renderComponent();
+    await renderComponent();
   });
   describe('download chart', () => {
     test('ok', async () => {
       type('1');
+
       fireEvent.click(screen.getByTestId('toolbar-chart'));
+
       expect(await screen.findAllByTestId('float-element')).toHaveLength(1);
       fireEvent.contextMenu(await screen.findByTestId('float-element'), {
         clientY: 20,

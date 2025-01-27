@@ -35,7 +35,7 @@ export interface IController
   /**
    * Emits a change event.
    */
-  emitChange(): Promise<void>;
+  emitChange(): void;
 
   /**
    * Sets the next active cell based on the given direction.

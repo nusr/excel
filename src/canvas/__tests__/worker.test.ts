@@ -2,7 +2,7 @@ import workerMethod from '../worker';
 import { npx } from '../../util';
 import { RequestInit, RequestFormulas } from '../../types';
 import OffScreenWorker from '../offScreenWorker';
-import { initController, getMockHooks } from '../../controller';
+import { initController } from '../../controller';
 import { getRenderData } from './util';
 
 jest.mock('../offScreenWorker');
@@ -34,7 +34,7 @@ describe('workerMethod', () => {
   });
   test('should call render on OffScreenWorker instance', async () => {
     workerMethod.init(initData);
-    const c = initController(getMockHooks());
+    const c = initController();
     c.addSheet();
     const data = await getRenderData(c, 'light');
     const callback = jest.fn();
@@ -49,7 +49,7 @@ describe('workerMethod', () => {
 
   test('should call render on OffScreenWorker instance and callback', async () => {
     workerMethod.init(initData);
-    const c = initController(getMockHooks())
+    const c = initController();
     c.addSheet();
     const data = await getRenderData(c, 'light');
     const callback = jest.fn();
@@ -65,7 +65,7 @@ describe('workerMethod', () => {
   });
 
   test('should call computeFormulas on OffScreenWorker instance', async () => {
-    const c = initController(getMockHooks())
+    const c = initController();
     c.addSheet();
     const sheetId = c.getCurrentSheetId();
     const data: RequestFormulas = {

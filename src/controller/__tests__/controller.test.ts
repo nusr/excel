@@ -1,4 +1,4 @@
-import { initController, getMockHooks } from '..';
+import { initController } from '..';
 import { HTML_FORMAT, PLAIN_FORMAT } from '../../util';
 import {
   ModelJSON,
@@ -12,7 +12,7 @@ import { waitFor } from '@testing-library/react';
 describe('controller.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController(getMockHooks());
+    controller = initController();
     controller.addSheet();
   });
 

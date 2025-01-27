@@ -1,11 +1,11 @@
 import { DEFAULT_TEXT_FORMAT_CODE } from '../../util';
 import { ModelCellType, WorksheetData, IController } from '../../types';
-import { initController, getMockHooks } from '..';
+import { initController } from '..';
 
 describe('worksheet.test.ts', () => {
   let controller: IController;
   beforeEach(() => {
-    controller = initController(getMockHooks());
+    controller = initController();
     controller.addSheet();
   });
   describe('cell value', () => {
@@ -55,6 +55,26 @@ describe('worksheet.test.ts', () => {
           sheetId: controller.getCurrentSheetId(),
         }),
       ).toEqual({ formula: '=SUM(1,2)', value: 3 });
+    });
+    test('delete formula', () => {
+      const range = {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      };
+      controller.setCell([['=SUM(1,2)']], [], range);
+      controller.deleteCell(range);
+      expect(
+        controller.getCell({
+          row: 0,
+          col: 0,
+          colCount: 1,
+          rowCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        }),
+      ).toBeUndefined();
     });
     test('set text formula', () => {
       controller.setCell(

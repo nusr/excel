@@ -264,6 +264,22 @@ export class Worksheet implements IWorksheet {
       ...cell.toJSON(),
     };
   }
+  deleteCell(range: IRange) {
+    const id = range.sheetId || this.model.getCurrentSheetId();
+    const info = this.model.getSheetInfo(id);
+    if (!info || !this.worksheets) {
+      return;
+    }
+    const keyList: string[] = [];
+    iterateRange(range, info.rowCount, info.colCount, (row, col) => {
+      const key = getWorksheetKey(id, row, col);
+      keyList.push(key);
+      return false;
+    });
+    for (const key of keyList) {
+      this.worksheets.delete(key);
+    }
+  }
   async setCell(
     value: ResultType[][],
     style: Array<Array<Partial<StyleType>>>,

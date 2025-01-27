@@ -26,9 +26,9 @@ export const ColorPicker: FunctionComponent<
     className,
   } = props;
   const [visible, setVisible] = useState(false);
-  const ref = useClickOutside(() => {
+  const ref = useClickOutside(visible, () => {
     setVisible(false);
-  }, visible);
+  });
   const openColorPicker = useCallback(() => {
     setVisible(true);
   }, []);
