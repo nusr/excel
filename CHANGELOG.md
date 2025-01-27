@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.0](https://github.com/nusr/excel/compare/v0.0.8...v0.1.0) (2025-01-27)
+
+### Features
+
+* init model ([6b0d06d](https://github.com/nusr/excel/commit/6b0d06d4e45f113c4e266b561837829ad89f290b))
+
+### Bug Fixes
+
+* simplify the import of worker ([77982de](https://github.com/nusr/excel/commit/77982de7b286ab3ffca0711120aed95e3d3b9421))
+* update dep ([dc9aa8f](https://github.com/nusr/excel/commit/dc9aa8ff30567f377d4e3ed1e514ac4adf026bbe))
+
 ## [0.0.8](https://github.com/nusr/excel/compare/v0.0.7...v0.0.8) (2025-01-14)
 
 ### Features

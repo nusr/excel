@@ -17,12 +17,6 @@
 npm i --save excel-collab
 ```
 
-## 示例
-
-- [简单示例](https://stackblitz.com/edit/nusr-excel-simple)
-- [自定义示例](https://stackblitz.com/edit/nusr-excel-custom)
-- [协作示例](https://stackblitz.com/edit/nusr-excel-collaboration)
-
 ## 快速开始
 
 1. 创建 React 应用
@@ -72,7 +66,12 @@ createRoot(document.getElementById('root')!).render(
 npm run dev
 ```
 
-## 本地开发
+## 示例
+
+- [简单示例](https://stackblitz.com/edit/nusr-excel-simple)
+- [自定义示例](https://stackblitz.com/edit/nusr-excel-custom)
+
+## 协作示例
 
 ```bash
 git clone https://github.com/nusr/excel.git
@@ -81,10 +80,6 @@ cd excel
 npm i -g pnpm
 pnpm i
 
-# debug
-npm start
-
-# or collaboration
 cd demo/frontend && pnpm i && cd -
 cd demo/backend && pnpm i && cd -
 npm run dev
