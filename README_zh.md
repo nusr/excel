@@ -30,7 +30,7 @@ npm i
 2. 安装依赖
 
 ```bash
-npm i --save excel-collab@latest yjs@latest react@latest react-dom@latest @types/react@latest @types/react-dom@latest
+npm i --save excel-collab@latest yjs@latest
 ```
 
 3. 修改 main.tsx 文件
