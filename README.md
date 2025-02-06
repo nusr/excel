@@ -30,7 +30,7 @@ npm i
 2. Install the Required Libraries
 
 ```bash
-npm i --save excel-collab yjs react@latest react-dom@latest @types/react@latest @types/react-dom@latest
+npm i --save excel-collab yjs
 ```
 
 3. Modify the Main File
