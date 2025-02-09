@@ -34,7 +34,7 @@ jobs:
           node-version: 22
       - name: Build
         run: |
-          npm i -g pnpm
+          npm i -g pnpm@9.15.4
           pnpm i
           npm run build
           cd demo/frontend
