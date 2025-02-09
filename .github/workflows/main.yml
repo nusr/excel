@@ -17,7 +17,9 @@ jobs:
         run: npm run install-font
       - name: Test
         run: |
-          npm i
+          npm i -g pnpm
+          pnpm i
+          pnpm approve-builds canvas
           npm run type-check
           npm run lint
           npm run build
