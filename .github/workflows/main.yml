@@ -12,12 +12,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
       - name: Install Font
         run: npm run install-font
       - name: Test
         run: |
           npm i -g pnpm@9.15.4
+          pnpm -v
           pnpm i
           npm run type-check
           npm run lint
