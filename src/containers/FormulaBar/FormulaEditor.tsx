@@ -22,7 +22,6 @@ import {
   TEXTAREA_MAX_ROWS,
   LINE_BREAK,
   isMergeContent,
-  npx,
 } from '../../util';
 
 interface MultipleLineEditorProps {
@@ -62,9 +61,6 @@ export function getDisplayStyle(
   } else if (style?.isStrike) {
     result.textDecorationLine = 'line-through';
   }
-  // if (style.underline === EUnderLine.DOUBLE) {
-  //   result.textDecorationStyle = 'double';
-  // }
   return result;
 }
 export function getEditorStyle(
@@ -81,12 +77,13 @@ export function getEditorStyle(
   if (isFormulaBar) {
     return editorStyle;
   }
-  const result = {
+  const result: CSSProperties = {
     ...editorStyle,
-    top: style.top - npx(1),
+    top: style.top,
     left: style.left,
     width: style.width,
     height: style.height,
+    borderRadius: 0,
   };
   return result;
 }

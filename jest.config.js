@@ -1,5 +1,5 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
 process.env.VITE_IS_E2E = 'true';
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   rootDir: process.cwd(),
   preset: 'ts-jest',

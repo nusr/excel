@@ -80,8 +80,8 @@ function getChartData(
   return result;
 }
 
-function updateActiveCell(controller: IController) {
-  const { top } = controller.getCanvasSize();
+function updateActiveCell(controller: IController, canvas: HTMLCanvasElement) {
+  const pos = computeCanvasSize(canvas)
   const { range: activeCell, isMerged } = controller.getActiveRange();
   const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
   const cell = controller.getCell(activeCell);
@@ -94,7 +94,7 @@ function updateActiveCell(controller: IController) {
   });
   const cellSize = controller.getCellSize(activeCell);
   const cellPosition = controller.computeCellPosition(activeCell);
-  cellPosition.top = top + cellPosition.top;
+  cellPosition.top += pos?.top ?? 0;
   let fontFamily = cell?.fontFamily ?? '';
   if (!fontFamily) {
     let defaultFontFamily = '';
@@ -182,6 +182,7 @@ function updateActiveCell(controller: IController) {
 const handleStateChange = (
   changeSet: Set<ChangeEventType>,
   controller: IController,
+  canvas: HTMLCanvasElement,
 ) => {
   if (
     changeSet.has('rangeMap') ||
@@ -190,7 +191,7 @@ const handleStateChange = (
     changeSet.has('currentSheetId') ||
     changeSet.has('mergeCells')
   ) {
-    updateActiveCell(controller);
+    updateActiveCell(controller, canvas);
   }
 
   const core: Partial<CoreStore> = {
@@ -335,7 +336,7 @@ export function initCanvas(
     renderCanvas(new Set<ChangeEventType>(['customWidth']));
   };
   const offRenderChange = controller.on('renderChange', ({ changeSet }) => {
-    handleStateChange(changeSet, controller);
+    handleStateChange(changeSet, controller, canvas);
     mainCanvas.render({ changeSet });
   });
 
@@ -349,7 +350,7 @@ export function initCanvas(
     'undo',
     'redo',
   ]);
-  handleStateChange(changeSet, controller);
+  handleStateChange(changeSet, controller, canvas);
   renderCanvas(changeSet);
   if (!isTestEnv()) {
     setTimeout(() => {

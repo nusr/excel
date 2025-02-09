@@ -13,11 +13,9 @@ describe('Canvas.test.ts', () => {
   });
   describe('canvas', () => {
     test('normal', () => {
-      expect(screen.getByTestId('canvas-container')!.childNodes).toHaveLength(
-        4,
-      );
+      expect(screen.getByTestId('canvas-container').childNodes).toHaveLength(4);
       expect(
-        screen.getByTestId('canvas-container')!.firstChild!.nodeName,
+        screen.getByTestId('canvas-container').firstChild!.nodeName,
       ).toEqual('CANVAS');
     });
     test('context menu', () => {
@@ -25,7 +23,7 @@ describe('Canvas.test.ts', () => {
         clientY: 200,
         clientX: 200,
       });
-      expect(screen.getByTestId('context-menu')!.childNodes).toHaveLength(7);
+      expect(screen.getByTestId('context-menu').childNodes).toHaveLength(7);
     });
   });
   describe('BottomBar', () => {

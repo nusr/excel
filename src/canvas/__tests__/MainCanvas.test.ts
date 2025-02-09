@@ -82,7 +82,10 @@ describe('MainCanvas.test.ts', () => {
         .fn()
         .mockImplementation(
           (_data: RequestRender, cb: (data: ResponseRender) => void) => {
-            cb({ rowMap: { 1: 300 }, colMap: { 1: 600 } });
+            cb({
+              rowMap: { 1: 300 },
+              colMap: { 1: 600 },
+            });
             return Promise.resolve();
           },
         );
@@ -99,7 +102,10 @@ describe('MainCanvas.test.ts', () => {
         .fn()
         .mockImplementation(
           (_data: RequestRender, cb: (data: ResponseRender) => void) => {
-            cb({ rowMap: {}, colMap: {} });
+            cb({
+              rowMap: {},
+              colMap: {},
+            });
             return Promise.resolve();
           },
         );

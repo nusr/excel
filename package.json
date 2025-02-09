@@ -27,7 +27,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "start": "vite --port 3000",
+    "start": "vite --port 3000 --host",
     "dev": "run-p dev:*",
     "dev:frontend": "cd demo/frontend && npm run dev",
     "dev:backend": "cd demo/backend && npm run dev",
@@ -39,12 +39,9 @@
     "update-md": "node ./scripts/update-md.js",
     "prepare": "husky && npm run build",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" --reporters html --mode strict --min-lines 7 --blame --gitignore --exitCode 1 .",
-    "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv",
-    "release": "release-it --no-git --no-npm"
+    "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv"
   },
   "devDependencies": {
-    "@release-it/bumper": "^7.0.1",
-    "@release-it/conventional-changelog": "^10.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^14.6.1",
@@ -62,7 +59,6 @@
     "pngjs": "^7.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "release-it": "^18.1.2",
     "ts-jest": "^29.2.5",
     "typescript": "^5.7.3",
     "vite": "^6.0.11",

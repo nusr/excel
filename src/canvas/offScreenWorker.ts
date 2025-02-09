@@ -7,6 +7,7 @@ import type {
   IWindowSize,
   WorkerMainView,
   ContentParams,
+  ResponseRender,
 } from '../types';
 import {
   clearRect,
@@ -134,8 +135,13 @@ export default class OffScreenWorker implements WorkerMainView {
     this.renderContent({ endRow, endCol, contentHeight, contentWidth });
     this.ctx.lineWidth = lineWidth;
     strokeRect(this.ctx, result.left, result.top, result.width, result.height);
+
     this.isRendering = false;
-    return { rowMap: { ...this.rowMap }, colMap: { ...this.colMap } };
+    const res: ResponseRender = {
+      rowMap: { ...this.rowMap },
+      colMap: { ...this.colMap },
+    };
+    return res;
   }
   resize(data: IWindowSize) {
     this.width = data.width;

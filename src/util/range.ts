@@ -49,8 +49,8 @@ export function containRange(
   return false;
 }
 
-export function toIRange(range:IRange) {
-  return SheetRange.makeRange(range).toIRange()
+export function toIRange(range: IRange) {
+  return SheetRange.makeRange(range).toIRange();
 }
 
 export class SheetRange implements IRange {

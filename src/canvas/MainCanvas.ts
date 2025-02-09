@@ -13,8 +13,8 @@ import { transfer, proxy } from 'comlink';
 
 export class MainCanvas implements MainView {
   static instance: MainCanvas;
-  private controller: IController;
-  private canvas: HTMLCanvasElement;
+  private readonly controller: IController;
+  private readonly canvas: HTMLCanvasElement;
   constructor(controller: IController, canvas: HTMLCanvasElement) {
     this.controller = controller;
     this.canvas = canvas;
@@ -28,7 +28,7 @@ export class MainCanvas implements MainView {
       worker.init(transfer(data, [data.canvas]));
     }
   }
-  private renderCallback = (result: ResponseRender) => {
+  private readonly renderCallback = (result: ResponseRender) => {
     const { rowMap, colMap } = result;
     const rowKeys = Object.keys(rowMap);
     const colKeys = Object.keys(colMap);
