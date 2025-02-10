@@ -477,16 +477,28 @@ export class Controller
     let resultY = size.height;
     let r = scroll.row;
     let c = scroll.col;
-    if (col >= c) {
+    if (col >= scroll.col) {
       while (c < col) {
         resultX += this.getColWidth(c, sheetId);
         c++;
       }
+    } else {
+      resultX = -size.width;
+      while (c > col) {
+        resultX -= this.getColWidth(c, sheetId);
+        c--;
+      }
     }
-    if (row >= r) {
+    if (row >= scroll.row) {
       while (r < row) {
         resultY += this.getRowHeight(r, sheetId);
         r++;
+      }
+    } else {
+      resultY = -size.height;
+      while (r > row) {
+        resultY -= this.getRowHeight(r, sheetId);
+        r--;
       }
     }
     return {
