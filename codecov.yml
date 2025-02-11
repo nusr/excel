@@ -1,0 +1,16 @@
+coverage:
+  ignore:
+    - '**/*.test.tsx'
+    - '**/*.test.ts'
+  status:
+    project:
+      default:
+        target: 90%
+        threshold: 1%
+      # must:
+      #   target: 100%
+      #   paths:
+      #     - src/controller
+      #     - src/model
+      #     - src/formula
+    patch: off
