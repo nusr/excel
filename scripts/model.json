@@ -209,31 +209,31 @@
       "value": 1,
       "formula": "=basic!A1"
     },
-    "4_6_6": {
+    "4_0_0": {
       "value": 3
     },
-    "4_6_7": {
+    "4_0_1": {
       "value": 6
     },
-    "4_6_8": {
+    "4_0_2": {
       "value": 29
     },
-    "4_7_6": {
+    "4_1_0": {
       "value": 35
     },
-    "4_7_7": {
+    "4_1_1": {
       "value": 15
     },
-    "4_7_8": {
+    "4_1_2": {
       "value": 34
     },
-    "4_8_6": {
+    "4_2_0": {
       "value": 23
     },
-    "4_8_7": {
+    "4_2_1": {
       "value": 24
     },
-    "4_8_8": {
+    "4_2_2": {
       "value": 15
     },
     "5_0_0": {
@@ -8607,11 +8607,11 @@
       "type": "chart",
       "uuid": "a1af3f90-1b36-45d6-a4a8-562d9306cb38",
       "sheetId": "4",
-      "fromRow": 6,
-      "fromCol": 6,
+      "fromRow": 0,
+      "fromCol": 0,
       "chartRange": {
-        "row": 6,
-        "col": 6,
+        "row": 0,
+        "col": 0,
         "rowCount": 3,
         "colCount": 3,
         "sheetId": "4"
@@ -8630,8 +8630,8 @@
       "uuid": "c54bf687-6dd2-4b7f-a48a-ad6abd8b52b3",
       "imageSrc": "/upload/1",
       "sheetId": "2",
-      "fromRow": 0,
-      "fromCol": 3,
+      "fromRow": 2,
+      "fromCol": 2,
       "marginX": 18,
       "marginY": 0,
       "imageAngle": 0

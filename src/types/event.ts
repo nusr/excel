@@ -7,7 +7,6 @@ import type {
   ScrollValue,
 } from './model';
 import type { ThemeType, CanvasOverlayPosition } from './components';
-import { type PointerEvent } from 'react';
 import { type IController } from './controller';
 import { ModelJSON } from './yjs';
 
@@ -148,7 +147,7 @@ export interface EventHandler {
    */
   pointerMove(
     data: EventData,
-    event: PointerEvent<HTMLCanvasElement>,
+    event: React.PointerEvent<HTMLCanvasElement>,
   ): boolean | ModalValue;
 
   /**
@@ -160,6 +159,6 @@ export interface EventHandler {
    */
   pointerDown(
     data: EventData,
-    event: PointerEvent<HTMLCanvasElement>,
+    event: React.PointerEvent<HTMLCanvasElement>,
   ): boolean | ModalValue;
 }

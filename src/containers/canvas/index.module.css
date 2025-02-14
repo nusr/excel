@@ -104,7 +104,6 @@
   background-color: var(--white);
   position: absolute;
   top: -22px;
-  height: 100%;
   left: 0;
   white-space: nowrap;
 }

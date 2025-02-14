@@ -7,12 +7,13 @@ import SheetBarContainer from './SheetBar';
 import MenuBarContainer from './MenuBar';
 import { useExcel, useUserInfo } from './store';
 import { Loading } from '../components';
-import { ProviderStatus } from '../types';
+import { ProviderStatus, UserItem } from '../types';
+import { modelToChangeSet } from '../util';
 
 function useCollaboration() {
   const [isLoading, setIsLoading] = useState(true);
   const setFileInfo = useUserInfo((s) => s.setFileInfo);
-  const { provider, controller } = useExcel();
+  const { provider, controller, awareness } = useExcel();
   useEffect(() => {
     async function init() {
       if (!provider) {
@@ -36,6 +37,33 @@ function useCollaboration() {
       setIsLoading(false);
     }
     init();
+  }, []);
+
+  useEffect(() => {
+    if (!awareness) {
+      return;
+    }
+    const doc = controller.getHooks().doc;
+    awareness.on('update', () => {
+      const list: UserItem[] = [];
+      for (const item of awareness.getStates().entries()) {
+        const [key, value] = item;
+        if (!value.range || key === doc.clientID) {
+          continue;
+        }
+        list.push({ clientId: key, range: value.range });
+      }
+      useUserInfo.getState().setUsers(list);
+    });
+
+    doc.on('update', (_a, _b, _c, tran) => {
+      const changeSet = modelToChangeSet(tran);
+      controller.emit('renderChange', { changeSet });
+    });
+
+    controller.on('rangeChange', (range) => {
+      awareness.setLocalStateField('range', range);
+    });
   }, []);
 
   return {

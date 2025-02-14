@@ -84,6 +84,7 @@ export function getEditorStyle(
     width: style.width,
     height: style.height,
     borderRadius: 0,
+    border: '2px solid var(--primaryColor);'
   };
   return result;
 }

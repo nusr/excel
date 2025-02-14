@@ -81,7 +81,7 @@ function getChartData(
 }
 
 function updateActiveCell(controller: IController, canvas: HTMLCanvasElement) {
-  const pos = computeCanvasSize(canvas)
+  const pos = computeCanvasSize(canvas);
   const { range: activeCell, isMerged } = controller.getActiveRange();
   const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
   const cell = controller.getCell(activeCell);
@@ -354,8 +354,9 @@ export function initCanvas(
   renderCanvas(changeSet);
   if (!isTestEnv()) {
     setTimeout(() => {
+      handleStateChange(changeSet, controller, canvas);
       renderCanvas(changeSet);
-    }, 0);
+    }, 50);
   }
 
   const offToastMessage = controller.on(

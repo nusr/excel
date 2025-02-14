@@ -11,7 +11,7 @@
     "@types/koa": "^2.15.0",
     "@types/koa__cors": "^5.0.0",
     "@types/koa__router": "^12.0.4",
-    "@types/node": "^22.13.1",
+    "@types/node": "^22.13.4",
     "prisma": "^6.3.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
@@ -20,7 +20,7 @@
     "@koa/cors": "^5.0.0",
     "@koa/router": "^13.1.0",
     "@prisma/client": "^6.3.1",
-    "koa": "^2.15.3",
+    "koa": "^2.15.4",
     "koa-body": "^6.0.1"
   },
   "prisma": {

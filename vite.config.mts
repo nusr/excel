@@ -2,8 +2,6 @@ import { defineConfig } from 'vite';
 import { version } from './package.json';
 import dts from 'vite-plugin-dts';
 
-console.log('process.env.NODE_ENV:', process.env.NODE_ENV);
-
 export default defineConfig({
   root: process.env.NODE_ENV === 'development' ? './playground' : undefined,
   plugins: [dts()],

@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.50.1",
-    "@sentry/react": "^8.54.0",
+    "@sentry/react": "^8.55.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",

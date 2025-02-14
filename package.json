@@ -76,7 +76,8 @@
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "yjs": "^13.6.23"
+    "yjs": "^13.6.23",
+    "y-protocols": "^1.0.6"
   },
   "keywords": [
     "react",
