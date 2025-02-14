@@ -102,7 +102,7 @@ describe('getEditorStyle', () => {
       width: 100,
       height: 100,
       borderRadius: 0,
-      border: '2px solid var(--primaryColor);',
+      border: '2px solid var(--primaryColor)',
     };
     expect(
       getEditorStyle(
