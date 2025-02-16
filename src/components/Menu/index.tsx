@@ -52,17 +52,16 @@ export const SubMenu: FunctionComponent<
       data-testid={testId}
     >
       <div>{label}</div>
-      {open && (
-        <div
-          className={classnames(
-            styles.subMenuContainer,
-            styles.portal,
-            portalClassName,
-          )}
-        >
-          <ul className={styles.menu}>{children}</ul>
-        </div>
-      )}
+      <div
+        className={classnames(
+          styles.subMenuContainer,
+          styles.portal,
+          portalClassName,
+        )}
+        hidden={!open}
+      >
+        <ul className={styles.menu}>{children}</ul>
+      </div>
     </li>
   );
 };

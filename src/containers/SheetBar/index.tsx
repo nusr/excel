@@ -9,6 +9,7 @@ import { Button, Icon, SelectPopup } from '../../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
 import { useCoreStore, useExcel } from '../../containers/store';
+import { useClickOutside } from '../hooks';
 
 export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren> =
   memo(({ children }) => {
@@ -66,9 +67,14 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
     const togglePopup = useCallback(() => {
       setPopupActive((v) => !v);
     }, []);
+
+    const ref = useClickOutside(popupActive, () => {
+      setPopupActive(false);
+    });
+
     return (
       <div className={styles['sheet-bar-wrapper']} data-testid="sheet-bar">
-        <div>
+        <div ref={ref}>
           <Button
             onClick={togglePopup}
             className={styles['menu-button']}

@@ -172,6 +172,7 @@ export const BorderToolBar = memo(() => {
     };
     record[type]();
   };
+
   return (
     <div className={styles['container']}>
       <Button

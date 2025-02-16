@@ -10,6 +10,7 @@ import { OptionItem } from '../../types';
 import styles from './index.module.css';
 import { Icon } from '../BaseIcon';
 import { Button } from '../Button';
+import { useClickOutside } from '../../containers/hooks';
 
 export interface SelectProps {
   value?: string | number;
@@ -158,8 +159,12 @@ export const SelectList: FunctionComponent<
     },
     [onChange],
   );
+  const ref = useClickOutside(true, () => {
+    setActive(false);
+  });
   return (
     <div
+      ref={ref}
       className={classnames(styles['select-list-container'], className, {
         [styles.active]: active,
       })}
