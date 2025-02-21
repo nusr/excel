@@ -100,6 +100,7 @@ global.location = {
 };
 
 global.localStorage = new LocalStorageMock();
+global.sessionStorage = new LocalStorageMock();
 // @ts-ignore
 global.Image = ImageMock;
 

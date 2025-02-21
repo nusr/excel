@@ -114,7 +114,7 @@ export class LocalProvider implements IProvider {
     this.callback = callback;
   }
   async getDocumentList() {
-    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const data = sessionStorage.getItem(LOCAL_STORAGE_KEY);
     const list: DocumentItem[] = data ? JSON.parse(data) : [];
     list.sort(
       (a, b) =>
@@ -139,7 +139,7 @@ export class LocalProvider implements IProvider {
       name: '',
       create_time: new Date().toISOString(),
     });
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+    sessionStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
     await this.callback(this, id);
   }
   async updateDocument(
@@ -157,7 +157,7 @@ export class LocalProvider implements IProvider {
     if (data.content) {
       item.content = data.content;
     }
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+    sessionStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
   }
   async getDocument(id: string): Promise<DocumentItem | undefined> {
     const list = await this.getDocumentList();

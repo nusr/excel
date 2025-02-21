@@ -188,7 +188,7 @@ describe('LocalProvider', () => {
 
   beforeEach(() => {
     localProvider = new LocalProvider(mockCallback);
-    localStorage.clear();
+    sessionStorage.clear();
   });
 
   test('getDocumentList should return sorted document list', async () => {
@@ -196,7 +196,7 @@ describe('LocalProvider', () => {
       { id: '1', name: 'Doc 1', create_time: '2023-01-01T00:00:00Z' },
       { id: '2', name: 'Doc 2', create_time: '2023-01-02T00:00:00Z' },
     ];
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(documents));
+    sessionStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(documents));
 
     const result = await localProvider.getDocumentList();
 
@@ -226,7 +226,7 @@ describe('LocalProvider', () => {
     await localProvider.addDocument(id);
 
     const documents = JSON.parse(
-      localStorage.getItem(LOCAL_STORAGE_KEY) || '[]',
+      sessionStorage.getItem(LOCAL_STORAGE_KEY) || '[]',
     );
     expect(documents).toHaveLength(1);
     expect(documents[0].id).toBe(id);
@@ -242,7 +242,7 @@ describe('LocalProvider', () => {
         content: 'Old content',
       },
     ];
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(documents));
+    sessionStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(documents));
 
     await localProvider.updateDocument('1', {
       name: 'Updated Doc 1',
@@ -250,7 +250,7 @@ describe('LocalProvider', () => {
     });
 
     const updatedDocuments = JSON.parse(
-      localStorage.getItem(LOCAL_STORAGE_KEY) || '[]',
+      sessionStorage.getItem(LOCAL_STORAGE_KEY) || '[]',
     );
     expect(updatedDocuments[0].name).toBe('Updated Doc 1');
     expect(updatedDocuments[0].content).toBe('New content');
@@ -260,7 +260,7 @@ describe('LocalProvider', () => {
     const documents = [
       { id: '1', name: 'Doc 1', create_time: '2023-01-01T00:00:00Z' },
     ];
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(documents));
+    sessionStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(documents));
 
     const result = await localProvider.getDocument('1');
 
