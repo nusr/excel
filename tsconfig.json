@@ -16,7 +16,7 @@
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
-    "removeComments": true,
+    "removeComments": false,
     "declaration": true,
     "strict": true,
     "checkJs": true,
