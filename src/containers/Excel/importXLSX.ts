@@ -560,7 +560,7 @@ export function convertXMLDataToModel(
   }
   const sheets = Object.values(result.workbook);
   sheets.sort((a, b) => a.sort - b.sort);
-  result.currentSheetId = result.currentSheetId || sheets[0].sheetId;
+  result.currentSheetId = result.currentSheetId || sheets?.[0]?.sheetId;
   const convertSheetName = (sheetName: string) => {
     const list = Object.values(result.workbook);
     return list.find((v) => v.name === sheetName)?.sheetId || '';
