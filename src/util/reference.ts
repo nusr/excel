@@ -91,7 +91,7 @@ export function parseReference(
   text: string,
   convertSheetName = convertSheetNameToSheetId,
 ): SheetRange | undefined {
-  const [cell1, cell2] = text?.split(':');
+  const [cell1 = '', cell2 = ''] = text?.split(':') || [];
   const startCell = parseCell(cell1, convertSheetName);
   if (!startCell) {
     return undefined;
