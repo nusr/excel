@@ -334,14 +334,14 @@ function getBorder(
   data: BorderDataItem,
   themeData: ThemeData,
 ): BorderItem | undefined {
-  if (!data.style) {
+  if (!data?.style) {
     return undefined;
   }
-  const type = data.style as BorderType;
+  const type = data?.style as BorderType;
   if (typeof BORDER_TYPE_MAP[type] !== 'number') {
     return undefined;
   }
-  const color = convertColor(themeData, data.color);
+  const color = convertColor(themeData, data?.color);
   return {
     type,
     color,
