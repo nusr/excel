@@ -1,26 +1,23 @@
 {
-  "name": "server",
   "private": true,
   "scripts": {
-    "dev": "npx tsx ./src/index.ts",
-    "build": "npx tsc",
-    "postinstall": "npx prisma migrate dev --name init"
+    "start": "tsx ./src/index.ts",
+    "build": "tsc",
+    "type-check": "npm run build",
+    "postinstall": "prisma migrate dev --name init"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.18",
+    "@types/cors": "^2.8.19",
     "@types/koa": "^2.15.0",
     "@types/koa__cors": "^5.0.0",
     "@types/koa__router": "^12.0.4",
-    "@types/node": "^22.15.18",
-    "prisma": "^6.8.1",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "prisma": "^6.10.1"
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "@koa/router": "^13.1.0",
-    "@prisma/client": "^6.8.1",
-    "koa": "^2.16.1",
+    "@prisma/client": "^6.10.1",
+    "koa": "^3.0.0",
     "koa-body": "^6.0.1"
   },
   "prisma": {

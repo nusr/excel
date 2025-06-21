@@ -1,0 +1,64 @@
+{
+  "name": "excel-collab",
+  "version": "0.1.1",
+  "description": "Online Collaboration Excel",
+  "author": "Steve Xu <stevexugc@gmail.com>",
+  "bugs": "https://github.com/nusr/excel/issues",
+  "homepage": "https://github.com/nusr/excel",
+  "repository": "git+https://github.com/nusr/excel.git",
+  "license": "MIT",
+  "main": "./lib/index.cjs.js",
+  "module": "./lib/index.es.js",
+  "types": "./lib/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/src/index.d.ts",
+      "import": "./lib/index.es.js",
+      "module": "./lib/index.es.js",
+      "require": "./lib/index.cjs.js"
+    },
+    "./worker": {
+      "types": "./lib/src/worker.d.ts",
+      "import": "./lib/worker.es.js",
+      "module": "./lib/worker.es.js",
+      "require": "./lib/worker.cjs.js"
+    },
+    "./style.css": "./lib/style.css",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "type-check": "tsc",
+    "build": "vite build",
+    "test": "jest --forceExit --detectOpenHandles"
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "chart.js": "^4.5.0",
+    "comlink": "^4.4.2",
+    "jszip": "^3.10.1",
+    "numfmt": "^3.2.2",
+    "uuid": "^11.1.0",
+    "zustand": "^5.0.5"
+  },
+  "peerDependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.23"
+  },
+  "keywords": [
+    "react",
+    "yjs",
+    "collaboration",
+    "excel",
+    "xlsx",
+    "spreadsheet"
+  ],
+  "files": [
+    "lib",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
