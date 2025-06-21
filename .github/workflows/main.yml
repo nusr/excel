@@ -23,7 +23,7 @@ jobs:
         run: npm run install-font
       - name: Test
         run: |
-          npm i -g pnpm@9.15.4
+          npm i -g pnpm
           pnpm -v
           pnpm i
           npm run type-check
