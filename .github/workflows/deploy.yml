@@ -34,7 +34,7 @@ jobs:
           node-version: 22
       - name: Build
         run: |
-          npm i -g pnpm@9.15.4
+          npm i -g pnpm
           pnpm i
           npm run build
       - name: Setup Pages
