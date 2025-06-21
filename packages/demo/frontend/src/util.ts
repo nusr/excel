@@ -1,5 +1,5 @@
 import { RemoteProvider, LocalProvider, type IProvider } from './provider';
-import mockModal from '../../../scripts/model.json';
+import mockModal from '../../../../scripts/model.json';
 
 export function getDocId(): string {
   const hash = location.hash;
