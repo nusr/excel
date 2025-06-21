@@ -63,7 +63,7 @@ createRoot(document.getElementById('root')!).render(
 4. 启动应用
 
 ```bash
-npm run dev
+npm run start
 ```
 
 ## 示例
@@ -80,9 +80,7 @@ cd excel
 npm i -g pnpm
 pnpm i
 
-cd demo/frontend && pnpm i && cd -
-cd demo/backend && pnpm i && cd -
-npm run dev
+npm run start
 ```
 
 ## 支持的功能
