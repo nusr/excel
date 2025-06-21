@@ -3,7 +3,7 @@
 ```bash
 npm i -g pnpm
 pnpm i
-npm run dev
+npm run start
 ```
 
 ## Database

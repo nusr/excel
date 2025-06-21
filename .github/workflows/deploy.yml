@@ -31,22 +31,18 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - name: Build
         run: |
           npm i -g pnpm@9.15.4
           pnpm i
           npm run build
-          cd demo/frontend
-          pnpm i
-          npm run build
-          cd -
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './demo/frontend/dist'
+          path: './packages/demo/frontend/dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
