@@ -6,7 +6,6 @@ export default defineConfig({
   base: process.env.ROOT_BASE_URL ? process.env.ROOT_BASE_URL : undefined,
   plugins: [react()],
   define: {
-    'process.env.VITE_IS_E2E': JSON.stringify(process.env.VITE_IS_E2E ?? ''),
     'process.env.CI': JSON.stringify(process.env.CI ?? ''),
   },
   build: {

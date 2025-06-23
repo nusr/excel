@@ -28,6 +28,11 @@
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "experimentalDecorators": true,
-    "outDir": "lib"
+    "outDir": "lib",
+    "baseUrl": ".",
+    "paths": {
+      "excel-collab/*": ["./packages/excel-collab/src/*"],
+      "excel-collab": ["./packages/excel-collab/src"]
+    }
   }
 }

@@ -24,7 +24,10 @@ describe('importXLSX.test.ts', () => {
   });
   describe('importXLSX', () => {
     test('normal', async () => {
-      const filePath = path.join(process.cwd(), './scripts/origin.xlsx');
+      const filePath = path.join(
+        __dirname,
+        '../../../../../../scripts/origin.xlsx',
+      );
       const fileData = await fs.readFile(filePath);
       const model = await importXLSX(fileData as any);
       const controller = initController();

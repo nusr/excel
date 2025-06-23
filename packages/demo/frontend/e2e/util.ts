@@ -1,7 +1,9 @@
 import { Page } from '@playwright/test';
 
-export const INDEX_PAGE = '/app';
-export const COLLABORATION_PAGE = '/collab';
+const query = '?is_e2e_test=true';
+
+export const INDEX_PAGE = '/app' + query;
+export const COLLABORATION_PAGE = '/collab' + query;
 export const MAIN_CANVAS = 'canvas-main';
 
 export function getByTestId(selector: string) {
