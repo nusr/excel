@@ -1,6 +1,5 @@
 const path = require('path');
 const scriptDir = path.join(__dirname, '../../scripts/');
-process.env.VITE_IS_E2E = 'true';
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   preset: 'ts-jest',

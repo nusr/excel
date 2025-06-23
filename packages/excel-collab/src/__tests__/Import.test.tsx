@@ -74,7 +74,7 @@ describe('Import.test.tsx', () => {
     test('ok', async () => {
       fireEvent.click(await screen.findByTestId('menubar-excel-trigger'));
       const fileData = await fs.readFile(
-        path.join(process.cwd(), './scripts/origin.xlsx'),
+        path.join(__dirname, '../../../../scripts/origin.xlsx'),
       );
       fireEvent.change(await screen.findByTestId('menubar-import-xlsx-input'), {
         target: { files: [fileData] },

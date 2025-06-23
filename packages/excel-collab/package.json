@@ -8,19 +8,19 @@
   "repository": "git+https://github.com/nusr/excel.git",
   "license": "MIT",
   "main": "./lib/index.cjs.js",
-  "module": "./lib/index.es.js",
+  "module": "./lib/index.js",
   "types": "./lib/src/index.d.ts",
   "exports": {
     ".": {
       "types": "./lib/src/index.d.ts",
-      "import": "./lib/index.es.js",
-      "module": "./lib/index.es.js",
+      "import": "./lib/index.js",
+      "module": "./lib/index.js",
       "require": "./lib/index.cjs.js"
     },
     "./worker": {
       "types": "./lib/src/worker.d.ts",
-      "import": "./lib/worker.es.js",
-      "module": "./lib/worker.es.js",
+      "import": "./lib/worker.js",
+      "module": "./lib/worker.js",
       "require": "./lib/worker.cjs.js"
     },
     "./style.css": "./lib/style.css",
@@ -30,9 +30,6 @@
     "type-check": "tsc",
     "build": "vite build",
     "test": "jest --forceExit --detectOpenHandles"
-  },
-  "devDependencies": {
-    "canvas": "^3.1.1"
   },
   "dependencies": {
     "chart.js": "^4.5.0",
