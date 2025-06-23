@@ -1,4 +1,6 @@
 {
+  "name": "frontend",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "run-p dev:*",
@@ -17,6 +19,8 @@
     "excel-collab": "*",
     "uuid": "^11.1.0",
     "y-websocket": "^3.0.0",
-    "yjs": "^13.6.27"
+    "yjs": "^13.6.27",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   }
 }

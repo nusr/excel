@@ -1,6 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-process.env.VITE_IS_E2E = 'true';
 const permissions = ['clipboard-read', 'clipboard-write'];
 
 /**
@@ -75,7 +74,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
+    command: 'npm run dev:vite',
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: true,
   },

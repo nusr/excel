@@ -17,6 +17,14 @@ export function jumpPage(route: 'collab' | '' | 'app', id?: string) {
     location.origin + import.meta.env.BASE_URL + route + (id ? '#' + id : '');
 }
 
+export function isE2ETest() {
+  const flag = 'is_e2e_test=true';
+
+  return (
+    location.search.includes(flag) || parent.location.search.includes(flag)
+  );
+}
+
 export async function getProvider(
   callback: (p: IProvider, id: string) => Promise<void>,
 ) {
@@ -27,7 +35,7 @@ export async function getProvider(
 
   const docId = getDocId();
   const doc = await provider.getDocument(docId);
-  if (!doc && !process.env.VITE_IS_E2E) {
+  if (!doc && !isE2ETest()) {
     await provider.addDocument(docId);
     const data = { ...mockModal };
     for (const [k, v] of Object.entries(data.drawings)) {
