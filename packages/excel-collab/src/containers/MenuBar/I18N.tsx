@@ -19,9 +19,7 @@ const defaultValue = getLanguage();
 export const I18N: React.FunctionComponent = memo(() => {
   const handleChange = useCallback((c: string | number) => {
     setLanguage(String(c) as LanguageType);
-    if (process.env.NODE_ENV !== 'test') {
-      location.reload();
-    }
+    location.reload();
   }, []);
   return (
     <div className={styles.i18n} data-testid="menubar-i18n">
