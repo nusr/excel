@@ -1,10 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directories:
-      - "/"
-      - "/demo/frontend"
-      - "/demo/backend"
+    directory: '/'
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 0
