@@ -18,16 +18,11 @@ export async function fetchData<T>(
     };
   }
   try {
-    const fetchOptions: RequestInit = {
+    const result = await fetch(url, {
       method,
+      body: method === 'POST' || method === 'PUT' ? data : undefined,
       headers,
-    };
-
-    if (method === 'POST' || method === 'PUT') {
-      fetchOptions.body = data;
-    }
-
-    const result = await fetch(url, fetchOptions);
+    });
     if (!result.ok) {
       return;
     }
