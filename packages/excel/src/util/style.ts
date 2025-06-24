@@ -39,12 +39,14 @@ export function makeFont(
   fontFamily = '',
 ): string {
   const temp = `${fontStyle} ${fontWeight} ${fontSize}px `;
-  const fontFamilyList: string[] = [
-    'Source Code Pro',
-    fontFamily,
-    MUST_FONT_FAMILY,
-  ].filter((v) => v.trim());
-
+  const fontFamilyList: string[] = [MUST_FONT_FAMILY];
+  if (fontFamily) {
+    fontFamilyList.unshift(fontFamily);
+  }
+  // just for test
+  if (process.env.VITE_IS_E2E) {
+    fontFamilyList.unshift('Source Code Pro');
+  }
   return temp + fontFamilyList.join(',');
 }
 

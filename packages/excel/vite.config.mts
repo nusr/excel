@@ -3,8 +3,10 @@ import { version } from './package.json';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
+  root: process.env.NODE_ENV === 'development' ? './playground' : undefined,
   plugins: [dts()],
   define: {
+    'process.env.VITE_IS_E2E': JSON.stringify(process.env.VITE_IS_E2E ?? ''),
     'process.env.VERSION': JSON.stringify(version),
   },
   build: {
@@ -17,12 +19,7 @@ export default defineConfig({
       },
       cssFileName: 'style',
       formats: ['es', 'cjs'],
-      fileName: (format, entryName) => {
-        if (format === 'es') {
-          return `${entryName}.js`;
-        }
-        return `${entryName}.${format}.js`;
-      },
+      fileName: (format, entryName) => `${entryName}.${format}.js`,
     },
 
     rollupOptions: {
