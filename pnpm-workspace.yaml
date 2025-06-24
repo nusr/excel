@@ -1,7 +1,0 @@
-packages:
-  - packages/*
-  - packages/demo/*
-ignoredBuiltDependencies:
-  - canvas
-  - esbuild
-  - unrs-resolver

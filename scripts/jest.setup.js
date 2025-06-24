@@ -90,7 +90,8 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {}
   disconnect() {}
 };
-
+// @ts-ignore
+delete global.location;
 // @ts-ignore
 global.location = {
   reload: () => {},

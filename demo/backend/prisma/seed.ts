@@ -1,6 +1,6 @@
 import { PrismaClient, Prisma } from '@prisma/client';
-import mockModal from '../../../../scripts/model.json';
-import mockImage from '../../../../scripts/image.json';
+import mockModal from '../../../scripts/model.json';
+import mockImage from '../../../scripts/image.json';
 
 const prisma = new PrismaClient();
 
