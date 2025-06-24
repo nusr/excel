@@ -79,7 +79,10 @@ cd excel
 
 npm i -g pnpm
 pnpm i
-npm run start
+
+cd demo/frontend && pnpm i && cd -
+cd demo/backend && pnpm i && cd -
+npm run dev
 ```
 
 ## Supported Features

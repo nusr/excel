@@ -1,4 +1,5 @@
 {
+  "name": "excel",
   "private": true,
   "description": "Online Collaboration Excel",
   "author": "Steve Xu <stevexugc@gmail.com>",
