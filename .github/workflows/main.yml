@@ -1,7 +1,13 @@
 name: CI
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - main
+      - "v[0-9]+" # v1, v2, ...
+      - "v[0-9]+.[0-9]+" # v4.0, v4.1, ...
+  pull_request:
+  workflow_dispatch:
+  
 jobs:
   CI:
     timeout-minutes: 60
