@@ -6,7 +6,8 @@
     "start": "tsx ./src/index.ts",
     "build": "tsc",
     "type-check": "npm run build",
-    "postinstall": "prisma migrate dev --name init"
+    "postinstall": "prisma migrate dev --name init",
+    "websocket": "node ./socket.js"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -19,6 +20,7 @@
     "@koa/cors": "^5.0.0",
     "@koa/router": "^13.1.0",
     "@prisma/client": "^6.10.1",
+    "@y/websocket-server": "^0.1.1",
     "koa": "^3.0.0",
     "koa-body": "^6.0.1"
   },

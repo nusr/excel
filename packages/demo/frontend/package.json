@@ -3,9 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "run-p dev:*",
-    "dev:vite": "vite --host --port 3000",
-    "dev:websocket": "env-cmd -e development -- npx y-websocket",
+    "start": "vite --host --port 3000",
     "e2e": "playwright test",
     "e2e:ui": "npm run e2e -- --ui",
     "build": "vite build",
@@ -13,14 +11,14 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.53.1",
-    "@sentry/react": "^9.30.0"
+    "@sentry/react": "^9.31.0"
   },
   "dependencies": {
     "excel-collab": "*",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "uuid": "^11.1.0",
     "y-websocket": "^3.0.0",
-    "yjs": "^13.6.27",
-    "react": "catalog:",
-    "react-dom": "catalog:"
+    "yjs": "^13.6.27"
   }
 }

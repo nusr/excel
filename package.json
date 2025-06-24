@@ -11,8 +11,10 @@
     "packages/demo/*"
   ],
   "scripts": {
-    "start": "lerna run start --stream",
-    "dev": "lerna run dev:vite --scope frontend",
+    "start": "run-p dev:*",
+    "dev:frontend": "lerna run start --scope frontend",
+    "dev:websocket": "lerna run websocket --scope backend",
+    "dev:backend": "lerna run start --scope backend",
     "type-check": "lerna run type-check",
     "build": "lerna run build",
     "test": "lerna run test",
@@ -36,7 +38,6 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "canvas": "^3.1.1",
-    "env-cmd": "^10.1.0",
     "husky": "^9.1.7",
     "jest": "^30.0.2",
     "jest-environment-jsdom": "^30.0.2",
@@ -44,12 +45,18 @@
     "npm-run-all": "^4.1.5",
     "pixelmatch": "catalog:",
     "pngjs": "^7.0.0",
-    "react": "catalog:",
-    "react-dom": "catalog:",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "ts-jest": "^29.4.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
-    "vite": "^6.3.5",
+    "vite": "^7.0.0",
     "vite-plugin-dts": "^4.5.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "^19.1.0",
+      "react-dom": "^19.1.0"
+    }
   }
 }
