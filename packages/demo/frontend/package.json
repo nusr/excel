@@ -1,0 +1,25 @@
+{
+  "name": "frontend",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "vite --host --port 3000",
+    "e2e": "playwright test",
+    "e2e:ui": "npm run e2e -- --ui",
+    "build": "vite build",
+    "type-check": "tsc",
+    "test": "jest --forceExit --detectOpenHandles"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.53.1",
+    "@sentry/react": "^9.32.0"
+  },
+  "dependencies": {
+    "excel-collab": "*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "uuid": "^11.1.0",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.27"
+  }
+}

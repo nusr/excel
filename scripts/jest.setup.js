@@ -90,14 +90,24 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {}
   disconnect() {}
 };
-// @ts-ignore
-delete global.location;
-// @ts-ignore
-global.location = {
-  reload: () => {},
-  // @ts-ignore
-  ancestorOrigins: []
-};
+
+if (!global.location) {
+  global.location = {
+    // @ts-ignore
+    ancestorOrigins: {},
+    href: '',
+    origin: '',
+    protocol: 'https:',
+    host: '',
+    hostname: '',
+    port: '',
+    pathname: '',
+    search: '',
+    hash: '',
+    reload() {},
+  };
+}
+global.location.reload = () => {};
 
 global.localStorage = new LocalStorageMock();
 global.sessionStorage = new LocalStorageMock();

@@ -32,3 +32,4 @@ dev.db
 dev.db-journal
 migrations
 .env.development
+coverage-final.json

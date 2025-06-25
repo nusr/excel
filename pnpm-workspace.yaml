@@ -1,0 +1,6 @@
+packages:
+  - packages/*
+  - packages/demo/*
+
+catalog:
+  pixelmatch: ^5.3.0
