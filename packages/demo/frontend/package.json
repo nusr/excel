@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.53.1",
-    "@sentry/react": "^9.31.0"
+    "@sentry/react": "^9.32.0"
   },
   "dependencies": {
     "excel-collab": "*",

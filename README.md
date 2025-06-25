@@ -52,9 +52,9 @@ const controller = initController({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <div style={{ height: '100vh' }}>
-      <StateContext value={{ controller }}>
+      <StateContext.Provider value={{ controller }}>
         <Excel />
-      </StateContext>
+      </StateContext.Provider>
     </div>
   </StrictMode>,
 );

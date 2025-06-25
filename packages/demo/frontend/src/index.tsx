@@ -44,7 +44,7 @@ async function init() {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <div style={{ height: '100vh' }}>
-        <StateContext
+        <StateContext.Provider
           value={{ provider, controller, awareness: webSocket.awareness }}
         >
           <Excel
@@ -70,7 +70,7 @@ async function init() {
               )
             }
           />
-        </StateContext>
+        </StateContext.Provider>
       </div>
     </StrictMode>,
   );
