@@ -3,4 +3,4 @@ packages:
   - packages/demo/*
 
 catalog:
-  pixelmatch: ^5.3.0
+  pixelmatch: ^7.1.0
