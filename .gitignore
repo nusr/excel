@@ -33,3 +33,4 @@ dev.db-journal
 migrations
 .env.development
 coverage-final.json
+junit.xml

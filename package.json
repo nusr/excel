@@ -27,6 +27,7 @@
     "release:patch": "lerna version patch --conventional-commits --no-private --no-git-tag-version --no-push"
   },
   "devDependencies": {
+    "@codecov/vite-plugin": "^1.9.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -41,6 +42,7 @@
     "husky": "^9.1.7",
     "jest": "^30.0.3",
     "jest-environment-jsdom": "^30.0.2",
+    "jest-junit": "^16.0.0",
     "lcov-result-merger": "^5.0.1",
     "lerna": "^8.2.2",
     "pixelmatch": "catalog:",

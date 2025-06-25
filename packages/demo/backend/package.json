@@ -8,7 +8,7 @@
     "type-check": "npm run build",
     "postinstall": "prisma migrate dev --name init",
     "dev": "node ./socket.js",
-    "test": "jest --forceExit --detectOpenHandles"
+    "test": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

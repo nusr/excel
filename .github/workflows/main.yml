@@ -7,33 +7,41 @@ on:
       - "v[0-9]+.[0-9]+" # v4.0, v4.1, ...
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
   
 jobs:
   CI:
-    timeout-minutes: 60
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install Font
+      - name: Install font
         run: npm run install-font
-      - name: Test
+      - name: Install dependencies
         run: |
           npm i -g pnpm
           pnpm -v
           pnpm i
-          npm run type-check
-          npm run lint
-          npm run build
-          npm run coverage
+      - name: Type check
+        run: npm run type-check
+      - name: Lint
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Unit test
+        run: npm run coverage
       - name: Upload coverage
         uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
-          # files: ./packages/excel-collab/coverage/coverage-final.json
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

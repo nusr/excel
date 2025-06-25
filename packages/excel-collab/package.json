@@ -29,7 +29,7 @@
   "scripts": {
     "type-check": "tsc",
     "build": "vite build",
-    "test": "jest --forceExit --detectOpenHandles"
+    "test": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
   },
   "dependencies": {
     "chart.js": "^4.5.0",
