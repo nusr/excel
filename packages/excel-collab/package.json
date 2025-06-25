@@ -40,8 +40,8 @@
     "zustand": "^5.0.5"
   },
   "peerDependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "y-protocols": "^1.0.6",
     "yjs": "^13.6.23"
   },

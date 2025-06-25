@@ -11,27 +11,28 @@
     "packages/demo/*"
   ],
   "scripts": {
-    "start": "run-p dev:*",
-    "dev:frontend": "lerna run start --scope frontend",
-    "dev:websocket": "lerna run websocket --scope backend",
-    "dev:backend": "lerna run start --scope backend",
+    "start": "lerna run start,dev",
     "type-check": "lerna run type-check",
     "build": "lerna run build",
     "test": "lerna run test",
     "e2e": "lerna run e2e",
     "coverage": "lerna run test -- --coverage",
+    "postcoverage": "node ./scripts/merge-coverage.js",
     "lint": "npx oxlint@latest --fix",
     "update-md": "node ./scripts/update-md.js",
     "prepare": "husky",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" --reporters html --mode strict --min-lines 7 --blame --gitignore --exitCode 1 .",
-    "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv"
+    "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv",
+    "release:major": "lerna version major --conventional-commits --no-private --no-git-tag-version --no-push",
+    "release:minor": "lerna version minor --conventional-commits --no-private --no-git-tag-version --no-push",
+    "release:patch": "lerna version patch --conventional-commits --no-private --no-git-tag-version --no-push"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.0.4",
     "@types/pixelmatch": "^5.2.6",
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19.1.8",
@@ -39,8 +40,9 @@
     "@vitejs/plugin-react": "^4.6.0",
     "canvas": "^3.1.1",
     "husky": "^9.1.7",
-    "jest": "^30.0.2",
+    "jest": "^30.0.3",
     "jest-environment-jsdom": "^30.0.2",
+    "lcov-result-merger": "^5.0.1",
     "lerna": "^8.2.2",
     "npm-run-all": "^4.1.5",
     "pixelmatch": "catalog:",
@@ -55,8 +57,14 @@
   },
   "pnpm": {
     "overrides": {
-      "react": "^19.1.0",
-      "react-dom": "^19.1.0"
-    }
+      "react": "19.0.0",
+      "react-dom": "19.0.0"
+    },
+    "onlyBuiltDependencies": [
+      "canvas",
+      "esbuild",
+      "leveldown",
+      "unrs-resolver"
+    ]
   }
 }

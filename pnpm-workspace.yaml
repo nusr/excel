@@ -4,8 +4,3 @@ packages:
 
 catalog:
   pixelmatch: ^5.3.0
-
-onlyBuiltDependencies:
-  - canvas
-  - esbuild
-  - unrs-resolver

@@ -7,7 +7,8 @@
     "e2e": "playwright test",
     "e2e:ui": "npm run e2e -- --ui",
     "build": "vite build",
-    "type-check": "tsc"
+    "type-check": "tsc",
+    "test": "jest --forceExit --detectOpenHandles"
   },
   "devDependencies": {
     "@playwright/test": "^1.53.1",
@@ -15,8 +16,8 @@
   },
   "dependencies": {
     "excel-collab": "*",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "uuid": "^11.1.0",
     "y-websocket": "^3.0.0",
     "yjs": "^13.6.27"

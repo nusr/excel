@@ -5,5 +5,11 @@
     "packages/*",
     "packages/demo/*"
   ],
-  "npmClient": "pnpm"
+  "npmClient": "pnpm",
+  "command": {
+    "version": {
+      "allowBranch": "main",
+      "message": "chore: publish packages"
+    }
+  }
 }

@@ -10,7 +10,7 @@ app.listen(port, () => {
 const filePath = path.join(__dirname, '../../frontend/.env.development');
 if (!fs.existsSync(filePath)) {
   fs.writeFileSync(
-    path.join(__dirname, '../../frontend/.env.development'),
+    filePath,
     `VITE_BACKEND_URL=http://localhost:4000\nVITE_DEFAULT_EXCEL_ID=`,
   );
 }

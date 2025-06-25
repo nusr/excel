@@ -1,12 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 
-const FORMULA_DIR = path.join(process.cwd(), './src/formula/formula');
+const FORMULA_DIR = path.join(
+  __dirname,
+  '../packages/excel-collab/src/formula/formula',
+);
 const PREFIX_TEXT = 'const formulas = ';
 const FORMULA_TAG = '## Supported Formulas';
 
 function getFormulas() {
   if (!fs.existsSync(FORMULA_DIR)) {
+    console.error('not found formula directory:', FORMULA_DIR);
     return;
   }
   const fileList = fs.readdirSync(FORMULA_DIR);
@@ -56,7 +60,16 @@ function getFormulas() {
   return list.join('\n\n');
 }
 
+/**
+ *
+ * @param {string} filePath
+ * @param {string | undefined} content
+ */
 function updateFile(filePath, content) {
+  if (!content) {
+    console.error('no content to update:', filePath);
+    return;
+  }
   const oldText = fs.readFileSync(filePath, 'utf-8');
   const index = oldText.indexOf(FORMULA_TAG);
   const mdText = `${oldText.slice(
