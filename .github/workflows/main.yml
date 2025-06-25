@@ -10,7 +10,10 @@ on:
 
 permissions:
   contents: read
-  
+
+env:
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
 jobs:
   CI:
     runs-on: ubuntu-latest
