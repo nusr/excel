@@ -17,7 +17,6 @@
     "test": "lerna run test",
     "e2e": "lerna run e2e",
     "coverage": "lerna run test -- --coverage",
-    "postcoverage": "node ./scripts/merge-coverage.js",
     "lint": "npx oxlint@latest --fix",
     "update-md": "node ./scripts/update-md.js",
     "prepare": "husky",
