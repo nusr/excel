@@ -8,12 +8,17 @@ app.listen(port, () => {
 });
 
 const filePath = path.join(__dirname, '../../frontend/.env.development');
+
+const envList = [
+  `VITE_BACKEND_URL=http://localhost:${port}`,
+  'VITE_DEFAULT_EXCEL_ID=',
+  'VITE_WEBSOCKET_URL=ws://localhost:1234',
+];
+
 if (!fs.existsSync(filePath)) {
-  fs.writeFileSync(
-    filePath,
-    `VITE_BACKEND_URL=http://localhost:4000\nVITE_DEFAULT_EXCEL_ID=`,
-  );
+  fs.writeFileSync(filePath, envList.join('\n'));
 }
+
 process.on('exit', () => {
   fs.unlinkSync(filePath);
 });

@@ -7,6 +7,7 @@ import { Excel, StateContext, Button, initController } from 'excel-collab';
 import { Doc } from 'yjs';
 import Worker from 'excel-collab/worker?worker';
 import { jumpPage, getDocId, getProvider } from './util';
+import { VITE_WEBSOCKET_URL } from './constant';
 
 const callback = async (_: any, id: string) => {
   location.hash = `#${id}`;
@@ -20,16 +21,14 @@ async function init() {
   location.hash = `#${docId}`;
   const doc = new Doc({ guid: docId });
 
-  const webSocket = new WebsocketProvider(
-    'ws://localhost:1234',
-    doc.guid,
-    doc,
-    {
+  let webSocket: WebsocketProvider | null = null;
+  if (VITE_WEBSOCKET_URL) {
+    webSocket = new WebsocketProvider(VITE_WEBSOCKET_URL, doc.guid, doc, {
       connect: false,
-    },
-  );
+    });
+  }
 
-  webSocket.connect();
+  webSocket?.connect();
 
   const controller = initController({
     worker: new Worker(),
@@ -45,7 +44,7 @@ async function init() {
     <StrictMode>
       <div style={{ height: '100vh' }}>
         <StateContext.Provider
-          value={{ provider, controller, awareness: webSocket.awareness }}
+          value={{ provider, controller, awareness: webSocket?.awareness }}
         >
           <Excel
             menubarLeftChildren={

@@ -20,7 +20,6 @@ report
 docs
 *.diff.png
 *.lock
-package-lock.json
 /playwright-report/
 /blob-report/
 /playwright/.cache/

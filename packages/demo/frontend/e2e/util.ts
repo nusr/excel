@@ -19,9 +19,6 @@ export async function goto(page: Page, url = INDEX_PAGE) {
     const type = msg.type();
     const text = msg.text();
     if (type === 'error' || type === 'warning') {
-      if (['ws://localhost:1234'].some((v) => text.includes(v))) {
-        return;
-      }
       throw new Error(text);
     }
   });
