@@ -1,6 +1,7 @@
-import { RemoteProvider, LocalProvider, type IProvider } from './provider';
+import { RemoteProvider, LocalProvider } from './provider';
 import mockModal from '../../../../scripts/model.json';
-import { VITE_DEFAULT_EXCEL_ID, BASE_URL, VITE_BACKEND_URL } from './constant';
+import { VITE_DEFAULT_EXCEL_ID, VITE_BACKEND_URL } from './constant';
+import type { ICollaborationProvider } from 'excel-collab';
 
 export function getDocId(): string {
   const hash = location.hash;
@@ -8,10 +9,6 @@ export function getDocId(): string {
     return hash.slice(1);
   }
   return VITE_DEFAULT_EXCEL_ID || '184858c4-be37-41b5-af82-52689004e605';
-}
-
-export function jumpPage(route: 'collab' | '' | 'app', id?: string) {
-  location.href = location.origin + BASE_URL + route + (id ? '#' + id : '');
 }
 
 export function isE2ETest() {
@@ -23,7 +20,7 @@ export function isE2ETest() {
 }
 
 export async function getProvider(
-  callback: (p: IProvider, id: string) => Promise<void>,
+  callback: (p: ICollaborationProvider, id: string) => Promise<void>,
 ) {
   const httpBaseUrl = VITE_BACKEND_URL;
   const provider = httpBaseUrl

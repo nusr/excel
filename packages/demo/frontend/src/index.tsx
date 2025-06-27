@@ -3,10 +3,10 @@ import { StrictMode } from 'react';
 import 'excel-collab/style.css';
 import './sentry';
 import { WebsocketProvider } from 'y-websocket';
-import { Excel, StateContext, Button, initController } from 'excel-collab';
+import { Excel, StateContext, initController } from 'excel-collab';
 import { Doc } from 'yjs';
 import Worker from 'excel-collab/worker?worker';
-import { jumpPage, getDocId, getProvider } from './util';
+import { getDocId, getProvider } from './util';
 import { VITE_WEBSOCKET_URL } from './constant';
 
 const callback = async (_: any, id: string) => {
@@ -18,7 +18,6 @@ async function init() {
   const provider = await getProvider(callback);
 
   const docId = getDocId();
-  location.hash = `#${docId}`;
   const doc = new Doc({ guid: docId });
 
   let webSocket: WebsocketProvider | null = null;
@@ -46,29 +45,7 @@ async function init() {
         <StateContext.Provider
           value={{ provider, controller, awareness: webSocket?.awareness }}
         >
-          <Excel
-            menubarLeftChildren={
-              window.self === window.top && (
-                <div style={{ display: 'flex' }}>
-                  <Button
-                    onClick={() => {
-                      jumpPage('');
-                    }}
-                    style={{ marginLeft: 10, marginRight: 10 }}
-                  >
-                    Home
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      jumpPage('collab', getDocId());
-                    }}
-                  >
-                    Collaboration
-                  </Button>
-                </div>
-              )
-            }
-          />
+          <Excel />
         </StateContext.Provider>
       </div>
     </StrictMode>,

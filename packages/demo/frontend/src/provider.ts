@@ -2,10 +2,6 @@ import type { ICollaborationProvider, DocumentItem } from 'excel-collab';
 
 const LOCAL_STORAGE_KEY = 'excel-collab-docs';
 
-export interface IProvider extends ICollaborationProvider {
-  getDocumentList(): Promise<DocumentItem[]>;
-}
-
 export async function fetchData<T>(
   url: string,
   method: 'POST' | 'GET' | 'PUT' | 'DELETE' = 'GET',
@@ -41,12 +37,18 @@ export async function fetchData<T>(
   }
 }
 
-export class RemoteProvider implements IProvider {
+export class RemoteProvider implements ICollaborationProvider {
   private readonly baseUrl: string;
-  private readonly callback: (p: IProvider, id: string) => Promise<void>;
+  private readonly callback: (
+    p: ICollaborationProvider,
+    id: string,
+  ) => Promise<void>;
   constructor(
     baseUrl: string,
-    callback: (p: IProvider, id: string) => Promise<void> = async () => {},
+    callback: (
+      p: ICollaborationProvider,
+      id: string,
+    ) => Promise<void> = async () => {},
   ) {
     this.baseUrl = baseUrl;
     this.callback = callback;
@@ -105,27 +107,23 @@ export class RemoteProvider implements IProvider {
     const res = await fetchData<DocumentItem>(this.baseUrl + '/document/' + id);
     return res;
   }
-  async getDocumentList(): Promise<DocumentItem[]> {
-    const res = await fetchData<DocumentItem[]>(this.baseUrl + '/documents');
-    return res || [];
-  }
 }
 
-export class LocalProvider implements IProvider {
-  private readonly callback: (p: IProvider, id: string) => Promise<void>;
+export class LocalProvider implements ICollaborationProvider {
+  private readonly callback: (
+    p: ICollaborationProvider,
+    id: string,
+  ) => Promise<void>;
   constructor(
-    callback: (p: IProvider, id: string) => Promise<void> = async () => {},
+    callback: (
+      p: ICollaborationProvider,
+      id: string,
+    ) => Promise<void> = async () => {},
   ) {
     this.callback = callback;
   }
-  async getDocumentList() {
-    const data = sessionStorage.getItem(LOCAL_STORAGE_KEY);
-    const list: DocumentItem[] = data ? JSON.parse(data) : [];
-    list.sort(
-      (a, b) =>
-        new Date(b.create_time).getTime() - new Date(a.create_time).getTime(),
-    );
-    return list;
+  private getKey(id: string) {
+    return `${LOCAL_STORAGE_KEY}_${id}`;
   }
   async uploadFile(
     _docId: string,
@@ -138,35 +136,45 @@ export class LocalProvider implements IProvider {
     return Promise.resolve(filePath);
   }
   async addDocument(id: string) {
-    const list = await this.getDocumentList();
-    list.push({
+    const data: DocumentItem = {
       id,
       name: '',
       create_time: new Date().toISOString(),
-    });
-    sessionStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+    };
+
+    sessionStorage.setItem(this.getKey(id), JSON.stringify(data));
     await this.callback(this, id);
   }
   async updateDocument(
     id: string,
     data: Pick<DocumentItem, 'name' | 'content'>,
   ): Promise<void> {
-    const list = await this.getDocumentList();
-    const item = list.find((item) => item.id === id);
-    if (!item) {
+    const doc = sessionStorage.getItem(this.getKey(id));
+    if (!doc) {
+      const docData: DocumentItem = {
+        ...data,
+        id,
+        create_time: new Date().toISOString(),
+      };
+      sessionStorage.setItem(this.getKey(id), JSON.stringify(docData));
       return;
     }
+
+    const docData = JSON.parse(doc) as DocumentItem;
+
     if (data.name) {
-      item.name = data.name;
+      docData.name = data.name;
     }
     if (data.content) {
-      item.content = data.content;
+      docData.content = data.content;
     }
-    sessionStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+    sessionStorage.setItem(this.getKey(id), JSON.stringify(docData));
   }
   async getDocument(id: string): Promise<DocumentItem | undefined> {
-    const list = await this.getDocumentList();
-    const item = list.find((item) => item.id === id);
-    return item;
+    const doc = sessionStorage.getItem(this.getKey(id));
+    if (!doc) {
+      return;
+    }
+    return JSON.parse(doc) as DocumentItem;
   }
 }

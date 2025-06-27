@@ -75,7 +75,7 @@ describe('Server Index Tests', () => {
 
     expect(mockFs.writeFileSync).toHaveBeenCalledWith(
       '/mocked/path/to/.env.development',
-      'VITE_BACKEND_URL=http://localhost:4000\nVITE_DEFAULT_EXCEL_ID=',
+      'VITE_BACKEND_URL=http://localhost:4000\nVITE_DEFAULT_EXCEL_ID=\nVITE_WEBSOCKET_URL=ws://localhost:1234',
     );
   });
 
