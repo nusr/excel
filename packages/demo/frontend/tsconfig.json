@@ -1,4 +1,12 @@
 {
-  "extends": "../../../tsconfig.json",
-  "include": ["src", "e2e", "vite.config.mts"]
+  "extends": "../../../tsconfig.base.json",
+  "include": [
+    "src",
+    "playwright.config.ts"
+  ],
+  "references": [
+    {
+      "path": "../../../tsconfig.node.json"
+    }
+  ],
 }

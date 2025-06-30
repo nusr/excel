@@ -77,9 +77,8 @@ npm run start
 git clone https://github.com/nusr/excel.git
 cd excel
 
-npm i -g pnpm
-pnpm i
-
+npm i -g yarn
+yarn
 npm run start
 ```
 

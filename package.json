@@ -1,4 +1,6 @@
 {
+  "name": "excel",
+  "version": "0.0.1",
   "private": true,
   "description": "Online Collaboration Excel",
   "author": "Steve Xu <stevexugc@gmail.com>",
@@ -11,7 +13,7 @@
     "packages/demo/*"
   ],
   "scripts": {
-    "start": "lerna run start,dev",
+    "start": "lerna run start",
     "type-check": "lerna run type-check",
     "build": "lerna run build",
     "test": "lerna run test",
@@ -28,11 +30,12 @@
   },
   "devDependencies": {
     "@codecov/vite-plugin": "^1.9.1",
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.0.4",
+    "@types/node": "^24.0.7",
     "@types/pixelmatch": "^5.2.6",
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19.1.8",
@@ -44,7 +47,7 @@
     "jest-environment-jsdom": "^30.0.2",
     "jest-junit": "^16.0.0",
     "lcov-result-merger": "^5.0.1",
-    "lerna": "^8.2.2",
+    "lerna": "^8.2.3",
     "pixelmatch": "7.1.0",
     "pngjs": "^7.0.0",
     "react": "^19.1.0",
@@ -55,17 +58,7 @@
     "vite": "^7.0.0",
     "vite-plugin-dts": "^4.5.4"
   },
-  "pnpm": {
-    "overrides": {
-      "react": "19.0.0",
-      "react-dom": "19.0.0",
-      "pixelmatch": "5.3.0"
-    },
-    "onlyBuiltDependencies": [
-      "canvas",
-      "esbuild",
-      "leveldown",
-      "unrs-resolver"
-    ]
+  "resolutions": {
+    "pixelmatch": "5.3.0"
   }
 }

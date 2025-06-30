@@ -34,7 +34,6 @@ jest.mock('path', () => ({
   extname: mockExtname,
 }));
 
-// Mock console.log to avoid noise in tests
 jest.spyOn(console, 'log').mockImplementation(() => {});
 
 // Import app after mocks are set up

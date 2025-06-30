@@ -33,3 +33,4 @@ migrations
 .env.development
 coverage-final.json
 junit.xml
+tsconfig.tsbuildinfo

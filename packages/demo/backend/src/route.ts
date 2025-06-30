@@ -17,6 +17,7 @@ app.use(koaBody({ multipart: true, json: true }));
 
 app.use(async (ctx, next) => {
   try {
+    console.log(ctx.method, ctx.url);
     await next();
   } catch (err) {
     console.log(err);

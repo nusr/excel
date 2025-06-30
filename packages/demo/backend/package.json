@@ -7,7 +7,6 @@
     "build": "tsc",
     "type-check": "npm run build",
     "postinstall": "prisma migrate dev --name init",
-    "dev": "node ./socket.js",
     "test": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
   },
   "devDependencies": {
@@ -21,9 +20,11 @@
     "@koa/cors": "^5.0.0",
     "@koa/router": "^13.1.0",
     "@prisma/client": "^6.10.1",
+    "@types/ws": "^8.18.1",
     "@y/websocket-server": "^0.1.1",
     "koa": "^3.0.0",
-    "koa-body": "^6.0.1"
+    "koa-body": "^6.0.1",
+    "ws": "^8.18.3"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

@@ -1,4 +1,18 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": ["src", "vite.config.mts"]
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "src",
+    "src/**/*.json"
+  ],
+  "references": [
+    {
+      "path": "../../tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "rootDir": "src",
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "declarationDir": "dist",
+  }
 }

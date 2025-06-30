@@ -7,24 +7,12 @@
   "homepage": "https://github.com/nusr/excel",
   "repository": "git+https://github.com/nusr/excel.git",
   "license": "MIT",
-  "main": "./lib/index.cjs.js",
   "module": "./lib/index.js",
   "types": "./lib/src/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./lib/src/index.d.ts",
-      "import": "./lib/index.js",
-      "module": "./lib/index.js",
-      "require": "./lib/index.cjs.js"
-    },
-    "./worker": {
-      "types": "./lib/src/worker.d.ts",
-      "import": "./lib/worker.js",
-      "module": "./lib/worker.js",
-      "require": "./lib/worker.cjs.js"
-    },
-    "./style.css": "./lib/style.css",
-    "./package.json": "./package.json"
+    ".": "./src/index.ts",
+    "./worker": "./src/worker.ts",
+    "./style.css": "./src/global.css"
   },
   "scripts": {
     "type-check": "tsc",
@@ -42,7 +30,6 @@
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
-    "y-protocols": "^1.0.6",
     "yjs": "^13.6.23"
   },
   "keywords": [

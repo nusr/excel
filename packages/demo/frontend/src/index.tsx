@@ -22,9 +22,7 @@ async function init() {
 
   let webSocket: WebsocketProvider | null = null;
   if (VITE_WEBSOCKET_URL) {
-    webSocket = new WebsocketProvider(VITE_WEBSOCKET_URL, doc.guid, doc, {
-      connect: false,
-    });
+    webSocket = new WebsocketProvider(VITE_WEBSOCKET_URL, doc.guid, doc);
   }
 
   webSocket?.connect();

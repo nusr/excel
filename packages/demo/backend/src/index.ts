@@ -1,10 +1,25 @@
 import app from './route';
 import fs from 'fs';
 import path from 'path';
+import WebSocket from 'ws';
+
+process.env['CALLBACK_URL'] = 'http://localhost:4000/sync';
+process.env['CALLBACK_OBJECTS'] = JSON.stringify({ excel: 'Map' });
+
+import { setupWSConnection } from '@y/websocket-server/utils';
 
 const port = 4000;
-app.listen(port, () => {
-  console.log(`server running on http://localhost:${port}`);
+const server = app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
+  console.log(`WebSocket running on ws://localhost:${port}`);
+});
+
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', (ws, request) => {
+  const docId = request.url?.slice(1) ?? '';
+  console.log(`websocket doc id: ${docId}`);
+  setupWSConnection(ws, request, { gc: true, docName: docId });
 });
 
 const filePath = path.join(__dirname, '../../frontend/.env.development');
@@ -12,7 +27,7 @@ const filePath = path.join(__dirname, '../../frontend/.env.development');
 const envList = [
   `VITE_BACKEND_URL=http://localhost:${port}`,
   'VITE_DEFAULT_EXCEL_ID=',
-  'VITE_WEBSOCKET_URL=ws://localhost:1234',
+  `VITE_WEBSOCKET_URL=ws://localhost:${port}`,
 ];
 
 if (!fs.existsSync(filePath)) {
