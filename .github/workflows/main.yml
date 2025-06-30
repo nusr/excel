@@ -26,9 +26,8 @@ jobs:
         run: npm run install-font
       - name: Install dependencies
         run: |
-          npm i -g pnpm
-          pnpm -v
-          pnpm i
+          npm i -g yarn
+          yarn
       - name: Type check
         run: npm run type-check
       - name: Lint

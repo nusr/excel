@@ -35,8 +35,8 @@ jobs:
           node-version: 22
       - name: Build
         run: |
-          npm i -g pnpm
-          pnpm i
+          npm i -g yarn
+          yarn
           npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v4

@@ -23,8 +23,8 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Build
         run: |
-          npm i -g pnpm
-          pnpm i
+          npm i -g yarn
+          yarn
           npm run build
           cd ./packages/excel
       - name: Publish package on NPM
