@@ -7,11 +7,11 @@
   "homepage": "https://github.com/nusr/excel",
   "repository": "git+https://github.com/nusr/excel.git",
   "license": "MIT",
-  "module": "./lib/index.js",
+  "module": "./lib/index.es.js",
+  "main": "./lib/index.umd.js",
   "types": "./lib/src/index.d.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./worker": "./src/worker.ts",
     "./style.css": "./src/global.css"
   },
   "scripts": {

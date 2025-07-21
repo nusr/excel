@@ -19,27 +19,20 @@ export default defineConfig({
     sourcemap: true,
     outDir: 'lib',
     lib: {
-      entry: {
-        index: './src/index.ts',
-        worker: './src/worker.ts',
-      },
+      entry: './src/index.ts',
       cssFileName: 'style',
-      formats: ['es', 'cjs'],
+      name: 'Excel',
       fileName: (format, entryName) => {
-        if (format === 'es') {
-          return `${entryName}.js`;
-        }
         return `${entryName}.${format}.js`;
       },
     },
 
     rollupOptions: {
-      external: ['react', 'react-dom', 'yjs'],
+      external: ['react', 'react-dom'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
-          yjs: 'Y',
         },
       },
     },
