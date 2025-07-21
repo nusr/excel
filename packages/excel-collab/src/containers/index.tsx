@@ -6,9 +6,9 @@ import CanvasContainer from './canvas';
 import SheetBarContainer from './SheetBar';
 import MenuBarContainer from './MenuBar';
 import { useExcel, useUserInfo } from './store';
-import { Loading } from '../components';
-import { ProviderStatus, UserItem } from '../types';
+import { UserItem } from '../types';
 import { modelToChangeSet } from '../util';
+import { Loading } from '../components';
 
 function useCollaboration() {
   const [isLoading, setIsLoading] = useState(true);
@@ -68,29 +68,30 @@ function useCollaboration() {
 
   return {
     isLoading,
-    providerStatus: navigator.onLine
-      ? ProviderStatus.ONLINE
-      : ProviderStatus.LOCAL,
   };
 }
 
-type Props = {
+export type EditorProps = {
   style?: React.CSSProperties;
-  providerStatus?: ProviderStatus;
   menubarLeftChildren?: React.ReactNode;
   menubarRightChildren?: React.ReactNode;
   toolbarChildren?: React.ReactNode;
   sheetBarChildren?: React.ReactNode;
 };
-const ExcelEditor: React.FunctionComponent<Props> = memo(
+const ExcelEditor: React.FunctionComponent<EditorProps> = memo(
   ({
     style,
-    providerStatus,
     menubarLeftChildren,
     menubarRightChildren,
     toolbarChildren,
     sheetBarChildren,
   }) => {
+    const { isLoading } = useCollaboration();
+
+    if (isLoading) {
+      return <Loading />;
+    }
+
     return (
       <div
         className={styles['app-container']}
@@ -98,7 +99,6 @@ const ExcelEditor: React.FunctionComponent<Props> = memo(
         style={style}
       >
         <MenuBarContainer
-          providerStatus={providerStatus}
           leftChildren={menubarLeftChildren}
           rightChildren={menubarRightChildren}
         />
@@ -113,23 +113,9 @@ const ExcelEditor: React.FunctionComponent<Props> = memo(
 
 ExcelEditor.displayName = 'ExcelEditor';
 
-const Excel: React.FunctionComponent<Omit<Props, 'providerStatus'>> = memo(
-  (props) => {
-    const { isLoading, providerStatus } = useCollaboration();
-    if (isLoading) {
-      return <Loading />;
-    }
-
-    return <ExcelEditor {...props} providerStatus={providerStatus} />;
-  },
-);
-
-Excel.displayName = 'Excel';
-
 export * from './store';
 export * from './MenuBar';
 export {
-  Excel,
   ExcelEditor,
   useCollaboration,
   ToolbarContainer,

@@ -39,23 +39,12 @@ npm i --save excel-collab yjs
 // src/main.tsx
 import { createRoot } from 'react-dom/client';
 import { StrictMode } from 'react';
-import { initController, StateContext, Excel } from 'excel-collab';
-import Worker from 'excel-collab/worker?worker';
+import { Excel } from 'excel-collab';
 import 'excel-collab/style.css';
-import * as Y from 'yjs';
-
-const controller = initController({
-  worker: new Worker(),
-  doc: new Y.Doc(),
-});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <div style={{ height: '100vh' }}>
-      <StateContext.Provider value={{ controller }}>
-        <Excel />
-      </StateContext.Provider>
-    </div>
+    <Excel style={{ height: '100vh' }} />
   </StrictMode>,
 );
 ```

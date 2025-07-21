@@ -8,18 +8,16 @@ import { I18N } from './I18N';
 import { saveAs } from '../../util';
 import { useExcel } from '../store';
 import { User } from './User';
-import { ProviderStatus } from '../../types';
 import { File } from './File';
 import { v4 } from 'uuid';
 
 type Props = {
-  providerStatus?: ProviderStatus;
   leftChildren?: React.ReactNode;
   rightChildren?: React.ReactNode;
 };
 
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
-  ({ providerStatus = ProviderStatus.LOCAL, leftChildren, rightChildren }) => {
+  ({ leftChildren, rightChildren }) => {
     const { controller, provider } = useExcel();
     const [visible, setVisible] = useState(false);
     const handleExportXLSX = useCallback(() => {
@@ -120,7 +118,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
           {leftChildren}
         </div>
         {rightChildren}
-        <User providerStatus={providerStatus} />
+        <User />
         <I18N />
         <Theme />
       </div>
