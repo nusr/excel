@@ -26,7 +26,7 @@ jobs:
           npm i -g yarn
           yarn
           npm run build
-          cd ./packages/excel
+          cd ./packages/excel-collab
       - name: Publish package on NPM
         run: npm publish
         env:
