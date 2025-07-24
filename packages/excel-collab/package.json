@@ -9,7 +9,7 @@
   "license": "MIT",
   "module": "./lib/index.es.js",
   "main": "./lib/index.umd.js",
-  "types": "./lib/src/index.d.ts",
+  "types": "./lib/index.d.ts",
   "exports": {
     ".": "./src/index.ts",
     "./style.css": "./src/global.css"
