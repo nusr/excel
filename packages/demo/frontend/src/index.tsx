@@ -3,10 +3,9 @@ import { StrictMode } from 'react';
 import 'excel-collab/style.css';
 import './sentry';
 import { WebsocketProvider } from 'y-websocket';
-import { Excel } from 'excel-collab';
+import { Excel, Doc } from 'excel-collab';
 import { getDocId, getProvider } from './util';
 import { VITE_WEBSOCKET_URL } from './constant';
-import { Doc } from 'yjs';
 
 const callback = async (_: any, id: string) => {
   location.hash = `#${id}`;

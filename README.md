@@ -30,7 +30,7 @@ npm i
 2. Install the Required Libraries
 
 ```bash
-npm i --save excel-collab yjs
+npm i --save excel-collab
 ```
 
 3. Modify the Main File

@@ -11,8 +11,14 @@
   "main": "./lib/index.umd.js",
   "types": "./lib/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./style.css": "./src/global.css"
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.es.js",
+      "module": "./lib/index.es.js",
+      "require": "./lib/index.umd.js"
+    },
+    "./style.css": "./lib/style.css",
+    "./package.json": "./package.json"
   },
   "scripts": {
     "type-check": "tsc",
@@ -42,9 +48,14 @@
   ],
   "files": [
     "lib",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "README.md",
+    "package.json"
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "y-protocols": "^1.0.6"
   }
 }

@@ -1,4 +1,4 @@
-import './global.css';
+import './style.css';
 export * from './components';
 export * from './containers';
 export { default as workerMethod } from './canvas/worker';
@@ -6,4 +6,4 @@ export { initController } from './controller';
 export * from './util';
 export * from './types';
 export * from './editor';
-export const version = process.env.VERSION;
+export { Doc } from 'yjs';

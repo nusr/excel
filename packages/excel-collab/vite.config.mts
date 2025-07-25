@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite';
-import { version } from './package.json';
 import dts from 'vite-plugin-dts';
 import { codecovVitePlugin } from '@codecov/vite-plugin';
 
@@ -12,9 +11,6 @@ export default defineConfig({
       uploadToken: process.env.CODECOV_TOKEN,
     }),
   ],
-  define: {
-    'process.env.VERSION': JSON.stringify(version),
-  },
   build: {
     sourcemap: true,
     outDir: 'lib',

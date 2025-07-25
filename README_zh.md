@@ -30,7 +30,7 @@ npm i
 2. 安装依赖
 
 ```bash
-npm i --save excel-collab yjs
+npm i --save excel-collab
 ```
 
 3. 修改 main.tsx 文件

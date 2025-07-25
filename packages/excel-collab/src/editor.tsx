@@ -6,7 +6,7 @@ import {
 } from './containers';
 import { memo, useEffect, useState } from 'react';
 import { initController } from './controller';
-import Worker from './worker?worker';
+import Worker from './worker?worker&inline';
 import { Doc } from 'yjs';
 
 export type DocConfig = ConstructorParameters<typeof Doc>[0];
