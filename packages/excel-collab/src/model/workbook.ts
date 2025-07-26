@@ -13,7 +13,7 @@ import {
   XLSX_MAX_COL_COUNT,
   XLSX_MAX_ROW_COUNT,
 } from '../util';
-import { $ } from '../i18n';
+import i18n from '../i18n';
 import { Map } from 'yjs';
 
 export class Workbook implements IWorkbook {
@@ -131,7 +131,7 @@ export class Workbook implements IWorkbook {
     if (!sheetName) {
       this.model.emit('toastMessage', {
         type: 'error',
-        message: $('the-value-cannot-be-empty'),
+        message: i18n.t('the-value-cannot-be-empty'),
       });
       return;
     }
@@ -144,7 +144,7 @@ export class Workbook implements IWorkbook {
       }
       this.model.emit('toastMessage', {
         type: 'error',
-        message: $('sheet-name-is-duplicate'),
+        message: i18n.t('sheet-name-is-duplicate'),
       });
       return;
     }
@@ -191,7 +191,7 @@ export class Workbook implements IWorkbook {
     if (list.length < 2) {
       this.model.emit('toastMessage', {
         type: 'error',
-        message: $('a-workbook-must-contains-at-least-one-visible-worksheet'),
+        message: i18n.t('a-workbook-must-contains-at-least-one-visible-worksheet'),
       });
       return false;
     }

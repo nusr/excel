@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useUserInfo, useExcel, useCoreStore, useScrollStore } from '../store';
 import { UserItem, CanvasOverlayPosition } from '../../types';
 import styles from './index.module.css';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 
 function getBytesFromUint32(num: number) {
   const bytes = [];
@@ -59,7 +59,7 @@ export const User: React.FunctionComponent<
       style={{ ...position, border: `2px solid ${color}` }}
     >
       <div className={styles.userContent} style={{ color }}>
-        {`${$('user-name')} ${clientId}`}
+        {`${i18n.t('user-name')} ${clientId}`}
       </div>
     </div>
   );

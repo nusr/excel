@@ -22,9 +22,8 @@ export function isE2ETest() {
 export async function getProvider(
   callback: (p: ICollaborationProvider, id: string) => Promise<void>,
 ) {
-  const httpBaseUrl = VITE_BACKEND_URL;
-  const provider = httpBaseUrl
-    ? new RemoteProvider(httpBaseUrl, callback)
+  const provider = VITE_BACKEND_URL
+    ? new RemoteProvider(VITE_BACKEND_URL, callback)
     : new LocalProvider(callback);
 
   const docId = getDocId();

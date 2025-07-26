@@ -1,41 +1,59 @@
-import en from './lang/en.json';
-import zh from './lang/zh.json';
+import locales, { TranslationKeys } from './locales';
+import type { LanguageType } from '../types';
+import { LANGUAGE_LIST } from '../util';
 
-let languageKey = 'language';
+let languageKey = 'excel-language';
 
-export const LANGUAGE_LIST = ['en', 'zh'] as const;
+function i18nConfig() {
+  const defaultLanguage = 'en-US';
+  let _currentLanguage: LanguageType = defaultLanguage;
 
-export type LanguageType = (typeof LANGUAGE_LIST)[number];
+  function getLanguage(lang?: LanguageType): LanguageType {
+    const selectedLang = lang || navigator?.language || defaultLanguage;
 
-export function getLanguage(): LanguageType {
-  const defaultLanguage = 'en';
+    if (LANGUAGE_LIST.includes(selectedLang as LanguageType)) {
+      return selectedLang as LanguageType;
+    }
 
-  if (typeof window === 'undefined') {
+    const t = LANGUAGE_LIST.find((v) => v.includes(selectedLang));
+    if (t) {
+      return t;
+    }
+
     return defaultLanguage;
   }
-  let language: LanguageType = defaultLanguage;
-  const l = localStorage.getItem(languageKey);
-  if (l && LANGUAGE_LIST.some((v) => v === l)) {
-    language = l as LanguageType;
-  } else {
-    const lang = navigator?.language || '';
-    const item = LANGUAGE_LIST.find((v) => lang.includes(v));
-    if (item) {
-      language = item;
-    }
-  }
-  document.documentElement.setAttribute('lang', language);
-  return language;
+
+  return {
+    changeLanguage: (lang: LanguageType) => {
+      if (lang === _currentLanguage) {
+        return;
+      }
+      const temp = getLanguage(lang);
+      localStorage.setItem(languageKey, temp);
+    },
+    init: () => {
+      _currentLanguage = getLanguage(localStorage.getItem(languageKey) as any);
+    },
+    t: (
+      key: TranslationKeys,
+      options: Record<string, string | number> = {},
+    ) => {
+      const template = locales[_currentLanguage][key];
+
+      // @ts-ignore
+      return template.replace(/{([a-z]+)}/gi, (_, key) => {
+        if (key in options) {
+          return options[key];
+        }
+        throw new Error(`i18n.t not found key: "${key}"`);
+      });
+    },
+    get current() {
+      return _currentLanguage;
+    },
+  };
 }
 
-export function setLanguage(lang: LanguageType) {
-  localStorage.setItem(languageKey, lang);
-}
+const i18n = i18nConfig();
 
-export function $(key: keyof typeof en) {
-  if (getLanguage() === 'en') {
-    return en[key];
-  } else {
-    return zh[key];
-  }
-}
+export default i18n;

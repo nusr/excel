@@ -7,7 +7,7 @@ import React, {
 import { useExcel, useUserInfo } from '../store';
 import styles from './index.module.css';
 import { Dialog } from '../../components';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 
 type Props = {
   visible: boolean;
@@ -20,7 +20,7 @@ export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
   const fileName = useUserInfo((s) => s.fileName);
   const setFileName = useUserInfo((s) => s.setFileName);
   useEffect(() => {
-    setValue(fileName || $('default-name'));
+    setValue(fileName || i18n.t('default-name'));
   }, [fileName]);
   const handleClick = useCallback(() => {
     setVisible(true);
@@ -42,10 +42,10 @@ export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
   return (
     <React.Fragment>
       <div className={styles.file} onClick={handleClick}>
-        {fileName || $('default-name')}
+        {fileName || i18n.t('default-name')}
       </div>
       <Dialog
-        title={$('change-file-name')}
+        title={i18n.t('change-file-name')}
         visible={visible}
         onCancel={() => setVisible(false)}
         onOk={handleOk}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { IController, ModalProps, ResultType } from '../../../types';
 import { MERGE_CELL_LINE_BREAK } from '../../../util';
-import { $ } from '../../../i18n';
+import i18n from '../../../i18n';
 import styles from './index.module.css';
 import { Button } from '../../../components';
 import { useExcel } from '../../../containers/store';
@@ -51,7 +51,7 @@ function getData(
     if (!map.has(cellValue)) {
       result.push({
         checked: true,
-        label: isUndefined ? $('filter-empty') : String(cellValue),
+        label: isUndefined ? i18n.t('filter-empty') : String(cellValue),
         value: cellValue,
         count: 1,
       });
@@ -82,7 +82,7 @@ export const FilterModal = ({ col, hide }: ModalProps) => {
   }, [controller, col]);
   return (
     <div data-testid="filter-modal">
-      <div className={styles['dialog-title']}>{$('filter')}</div>
+      <div className={styles['dialog-title']}>{i18n.t('filter')}</div>
       <div>
         <div>
           <label htmlFor="modal_all">
@@ -99,7 +99,7 @@ export const FilterModal = ({ col, hide }: ModalProps) => {
                 );
               }}
             />
-            {$('filter-all')}
+            {i18n.t('filter-all')}
           </label>
           <span>({dataList.length})</span>
         </div>
@@ -128,7 +128,7 @@ export const FilterModal = ({ col, hide }: ModalProps) => {
       </div>
 
       <div className={styles['dialog-button']}>
-        <Button onClick={hide}>{$('cancel')}</Button>
+        <Button onClick={hide}>{i18n.t('cancel')}</Button>
         <Button
           className={styles['dialog-cancel']}
           type="primary"
@@ -152,7 +152,7 @@ export const FilterModal = ({ col, hide }: ModalProps) => {
             hide();
           }}
         >
-          {$('confirm')}
+          {i18n.t('confirm')}
         </Button>
       </div>
     </div>

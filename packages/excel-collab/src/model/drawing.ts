@@ -8,7 +8,7 @@ import type {
   TypedMap,
 } from '../types';
 import { CHART_TYPE_LIST, iterateRange, toIRange } from '../util';
-import { $ } from '../i18n';
+import i18n from '../i18n';
 import { Map } from 'yjs';
 
 export class Drawing implements IDrawings {
@@ -71,7 +71,7 @@ export class Drawing implements IDrawings {
     if (oldData) {
       return this.model.emit('toastMessage', {
         type: 'error',
-        message: $('uuid-is-duplicate'),
+        message: i18n.t('uuid-is-duplicate'),
       });
     }
     if (!this.validateDrawing(data)) {
@@ -84,7 +84,7 @@ export class Drawing implements IDrawings {
       if (!info) {
         return this.model.emit('toastMessage', {
           type: 'error',
-          message: $('sheet-is-not-exist'),
+          message: i18n.t('sheet-is-not-exist'),
         });
       }
       iterateRange(
@@ -110,7 +110,7 @@ export class Drawing implements IDrawings {
       if (!check) {
         return this.model.emit('toastMessage', {
           type: 'error',
-          message: $('cells-must-contain-data'),
+          message: i18n.t('cells-must-contain-data'),
         });
       }
       data.chartRange = toIRange(data.chartRange!);
@@ -144,7 +144,7 @@ export class Drawing implements IDrawings {
           if (index < 0) {
             return this.model.emit('toastMessage', {
               type: 'error',
-              message: $('unsupported-chart-types'),
+              message: i18n.t('unsupported-chart-types'),
             });
           }
         }

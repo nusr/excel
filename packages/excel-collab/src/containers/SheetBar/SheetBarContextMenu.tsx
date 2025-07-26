@@ -4,7 +4,7 @@ import { OptionItem } from '../../types';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
 import { SheetItem, useExcel } from '../store';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 
 interface Props {
   position: number;
@@ -36,7 +36,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
       let value = String(hideSheetList[0]?.value) || '';
       info({
         visible: true,
-        title: $('unhide-sheet'),
+        title: i18n.t('unhide-sheet'),
         testId: 'sheet-bar-context-menu-unhide-dialog',
         children: (
           <Select
@@ -52,7 +52,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
         onCancel: hideMenu,
         onOk() {
           if (!value) {
-            return toast.error($('sheet-id-can-not-be-empty'));
+            return toast.error(i18n.t('sheet-id-can-not-be-empty'));
           }
           controller.unhideSheet(value);
           hideMenu();
@@ -77,7 +77,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
             controller.addSheet();
           }}
         >
-          {$('insert')}
+          {i18n.t('insert')}
         </Button>
         <Button
           testId="sheet-bar-context-menu-delete"
@@ -86,7 +86,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
             controller.deleteSheet();
           }}
         >
-          {$('delete')}
+          {i18n.t('delete')}
         </Button>
         <Button
           testId="sheet-bar-context-menu-rename"
@@ -95,7 +95,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
             editSheetName();
           }}
         >
-          {$('rename')}
+          {i18n.t('rename')}
         </Button>
         <Button
           testId="sheet-bar-context-menu-hide"
@@ -104,7 +104,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
             controller.hideSheet();
           }}
         >
-          {$('hide')}
+          {i18n.t('hide')}
         </Button>
         <Button
           testId="sheet-bar-context-menu-unhide"
@@ -112,7 +112,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
           disabled={hideSheetList.length === 0}
           onClick={handleUnhide}
         >
-          {$('unhide')}
+          {i18n.t('unhide')}
         </Button>
         <ColorPicker
           color={tabColor}
@@ -124,7 +124,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
             className={styles['sheet-bar-unhide']}
             testId="sheet-bar-context-menu-tab-color"
           >
-            {$('tab-color')}
+            {i18n.t('tab-color')}
           </Button>
         </ColorPicker>
       </div>

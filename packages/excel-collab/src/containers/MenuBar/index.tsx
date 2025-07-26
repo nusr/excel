@@ -3,7 +3,7 @@ import { Menu, MenuItem } from '../../components';
 import { importXLSX, exportToXLSX, exportToCsv, importCSV } from '../Excel';
 import styles from './index.module.css';
 import { Theme } from './Theme';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 import { I18N } from './I18N';
 import { saveAs } from '../../util';
 import { useExcel } from '../store';
@@ -70,18 +70,18 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
         <div className={styles['menubar-menu']}>
           <File visible={visible} setVisible={setVisible} />
           <Menu
-            label={$('file')}
+            label={i18n.t('file')}
             className={styles.menu}
             testId="menubar-excel"
           >
             <MenuItem onClick={handleAddDocument} testId="menubar-new-excel">
-              {$('new-file')}
+              {i18n.t('new-file')}
             </MenuItem>
             <MenuItem
               onClick={() => setVisible(true)}
               testId="menubar-new-excel"
             >
-              {$('rename-file')}
+              {i18n.t('rename-file')}
             </MenuItem>
             <MenuItem testId="menubar-import-xlsx">
               <input
@@ -92,7 +92,9 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
                 id="import_xlsx"
                 data-testid="menubar-import-xlsx-input"
               />
-              <label htmlFor="import_xlsx">{$('import-xlsx')}</label>
+              <label htmlFor="import_xlsx">
+                {i18n.t('import', { format: 'XLSX' })}
+              </label>
             </MenuItem>
             <MenuItem testId="menubar-import-csv">
               <input
@@ -103,16 +105,18 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
                 id="import_csv"
                 data-testid="menubar-import-csv-input"
               />
-              <label htmlFor="import_csv">{$('import-csv')}</label>
+              <label htmlFor="import_csv">
+                {i18n.t('import', { format: 'CSV' })}
+              </label>
             </MenuItem>
             <MenuItem onClick={handleExportXLSX} testId="menubar-export-xlsx">
-              {$('export-xlsx')}
+              {i18n.t('export', { format: 'XLSX' })}
             </MenuItem>
             <MenuItem testId="menubar-export-csv" onClick={handleExportCSV}>
-              {$('export-csv')}
+              {i18n.t('export', { format: 'CSV' })}
             </MenuItem>
             <MenuItem testId="menubar-export-json" onClick={handleExportJSON}>
-              {$('export-json')}
+              {i18n.t('export', { format: 'JSON' })}
             </MenuItem>
           </Menu>
           {leftChildren}

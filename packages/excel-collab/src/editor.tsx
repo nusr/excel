@@ -8,6 +8,7 @@ import { memo, useEffect, useState } from 'react';
 import { initController } from './controller';
 import Worker from './worker?worker&inline';
 import { Doc } from 'yjs';
+import i18n from './i18n';
 
 export type DocConfig = ConstructorParameters<typeof Doc>[0];
 
@@ -22,6 +23,7 @@ export const Excel: React.FunctionComponent<ExcelProps> = memo((props) => {
   const [value, setValue] = useState<StateContextValue | undefined>(undefined);
 
   useEffect(() => {
+    i18n.init();
     const controller = initController({
       worker: new Worker(),
       doc: doc ? doc : docConfig ? new Doc(docConfig) : new Doc(),

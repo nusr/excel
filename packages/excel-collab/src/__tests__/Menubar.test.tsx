@@ -42,7 +42,7 @@ describe('Menubar.test.ts', () => {
   });
   describe('i18n', () => {
     test('default', () => {
-      expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('en');
+      expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('en-US');
     });
   });
 });
@@ -63,7 +63,7 @@ test('change i18n', () => {
     );
   });
   fireEvent.change(screen.getByTestId('menubar-i18n-select'), {
-    target: { value: 'zh' },
+    target: { value: 'zh-CN' },
   });
   act(() => {
     result.rerender(
@@ -76,7 +76,7 @@ test('change i18n', () => {
       </StateContext>,
     );
   });
-  expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('zh');
+  expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('zh-CN');
 });
 
 describe('change theme', () => {

@@ -4,7 +4,7 @@ import styles from './index.module.css';
 import { ColorPickerPanel } from './ColorPickerPanel';
 import { Button } from '../Button';
 import { useClickOutside } from '../../containers/hooks';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 
 export interface ColorPickerProps {
   color: string;
@@ -89,7 +89,7 @@ export const ColorPicker: FunctionComponent<
               onClick={reset}
               testId={`${testId}-reset`}
             >
-              {$('reset')}
+              {i18n.t('reset')}
             </Button>
           </div>
         </div>

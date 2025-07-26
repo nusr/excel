@@ -5,7 +5,7 @@ import {
   QUERY_ALL_LOCAL_FONT,
 } from '../../util';
 import type { OptionItem } from '../../types';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 
 function createElement(font: string) {
   if (typeof document === 'undefined') {
@@ -78,7 +78,7 @@ export function initFontFamilyList(
   if (typeof window.queryLocalFonts === 'function') {
     list.push({
       value: QUERY_ALL_LOCAL_FONT,
-      label: $('get-all-installed-fonts'),
+      label: i18n.t('get-all-installed-fonts'),
       disabled: false,
     });
   }

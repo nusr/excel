@@ -2,7 +2,7 @@ import React, { useState, memo } from 'react';
 import { Button } from '../../components';
 import styles from './index.module.css';
 import { scrollBar } from '../../canvas';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 import { classnames, MAX_ADD_ROW_THRESHOLD } from '../../util';
 import { useExcel, useScrollStore } from '../store';
 
@@ -43,7 +43,7 @@ export const BottomBar = memo(() => {
       })}
       data-testid="canvas-bottom-bar"
     >
-      <div className={styles['bottom-bar-text']}>{$('add-at-the-bottom')}</div>
+      <div className={styles['bottom-bar-text']}>{i18n.t('add-at-the-bottom')}</div>
       <input
         value={value}
         onChange={handleChange}
@@ -53,13 +53,13 @@ export const BottomBar = memo(() => {
         data-testid="canvas-bottom-bar-input"
         className={styles['bottom-bar-input']}
       />
-      <div className={styles['bottom-bar-text']}>{$('rows')}</div>
+      <div className={styles['bottom-bar-text']}>{i18n.t('rows')}</div>
       <Button
         testId="canvas-bottom-bar-add"
         className={styles['add-button']}
         onClick={handleClick}
       >
-        {$('add')}
+        {i18n.t('add')}
       </Button>
     </div>
   );

@@ -31,6 +31,8 @@ export const FORMULA_EDITOR_ROLE = '__FORMULA_EDITOR_ROLE__';
 export const DEFAULT_FORMAT_CODE = 'General';
 export const DEFAULT_TEXT_FORMAT_CODE = '@';
 
+export const LANGUAGE_LIST = ['en-US', 'zh-CN'] as const;
+
 export const ERROR_SET = new Set([
   '#GETTING_DATA',
   '#DIV/0!',

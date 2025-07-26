@@ -6,7 +6,7 @@ import type {
   YjsModelJson,
 } from '../types';
 import { convertToReference, toIRange } from '../util';
-import { $ } from '../i18n';
+import i18n from '../i18n';
 import { Map } from 'yjs';
 
 export class MergeCell implements IMergeCell {
@@ -53,7 +53,7 @@ export class MergeCell implements IMergeCell {
     if (this.mergeCells?.get(ref)) {
       this.model.emit('toastMessage', {
         type: 'error',
-        message: $('merging-cell-is-duplicate'),
+        message: i18n.t('merging-cell-is-duplicate'),
       });
       return;
     }

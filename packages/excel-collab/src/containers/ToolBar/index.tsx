@@ -21,7 +21,7 @@ import {
 import styles from './index.module.css';
 import { useStyleStore, useCoreStore, useExcel } from '../../containers/store';
 import { InsertFloatingPicture, InsertChart } from '../FloatElement/Toolbar';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 import { BorderToolBar } from './Border';
 import { isSupportFontFamily } from '../canvas/isSupportFontFamily';
 import {
@@ -266,13 +266,13 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
           <Icon name="redo" />
         </Button>
         <Button onClick={copy} testId="toolbar-copy" title="Copy">
-          {$('copy')}
+          {i18n.t('copy')}
         </Button>
         <Button onClick={cut} testId="toolbar-cut" title="Cut">
-          {$('cut')}
+          {i18n.t('cut')}
         </Button>
         <Button onClick={paste} testId="toolbar-paste" title="Paste">
-          {$('paste')}
+          {i18n.t('paste')}
         </Button>
 
         <Select
@@ -413,7 +413,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
           className={styles['wrap-text']}
           title="Wrap Text"
         >
-          {$('wrap-text')}
+          {i18n.t('wrap-text')}
         </Button>
         <SelectList
           data={mergeOptionList}
@@ -430,7 +430,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
             type="plain"
             title="Merge And Center"
           >
-            {$('merge-and-center')}
+            {i18n.t('merge-and-center')}
           </Button>
         </SelectList>
         <SelectList
@@ -454,7 +454,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
           className={styles['wrap-text']}
           title="Filter"
         >
-          {$('filter')}
+          {i18n.t('filter')}
         </Button>
         <InsertFloatingPicture />
         <InsertChart />

@@ -1,44 +1,35 @@
-import { getLanguage, setLanguage, $ } from '../';
+import i18n from '../';
+import { LANGUAGE_LIST } from '../../util';
 
 describe('i18n.test.ts', () => {
   let languageGetter: ReturnType<typeof jest.spyOn>;
   beforeEach(() => {
     languageGetter = jest.spyOn(window.navigator, 'language', 'get');
+    localStorage.clear();
   });
   afterEach(() => {
     jest.clearAllMocks();
   });
   describe('$', () => {
-    it('en', () => {
-      languageGetter.mockReturnValue('en');
-      expect($('copy')).toEqual('Copy');
+    it('en-US', () => {
+      languageGetter.mockReturnValue('en-US');
+      i18n.init();
+      expect(i18n.t('copy')).toEqual('Copy');
     });
 
-    it('zh', () => {
-      languageGetter.mockReturnValue('zh');
-      expect($('copy')).toEqual('复制');
+    it('zh-CN', () => {
+      languageGetter.mockReturnValue('zh-CN');
+      i18n.init();
+      expect(i18n.t('copy')).toEqual('复制');
     });
   });
-  describe('getLanguage', () => {
-    it('mock', () => {
-      languageGetter.mockReturnValue('en');
-      expect(getLanguage()).toEqual('en');
-    });
-    it('mock', () => {
-      languageGetter.mockReturnValue('zh');
-      expect(getLanguage()).toEqual('zh');
-    });
-  });
-
-  describe('setLanguage', () => {
-    it('en', () => {
-      setLanguage('en');
-      expect(getLanguage()).toEqual('en');
-    });
-
-    it('zh', () => {
-      setLanguage('zh');
-      expect(getLanguage()).toEqual('zh');
-    });
+  describe('get current language', () => {
+    for (const item of LANGUAGE_LIST) {
+      it(`mock navigator.language = ${item}`, () => {
+        languageGetter.mockReturnValue(item);
+        i18n.init();
+        expect(i18n.current).toEqual(item);
+      });
+    }
   });
 });

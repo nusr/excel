@@ -4,7 +4,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { Button } from '../Button';
 import styles from './index.module.css';
 import { classnames } from '../../util';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 
 interface DialogProps {
   title: string;
@@ -40,7 +40,7 @@ export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
         <div className={styles['dialog-content']}>{children}</div>
         <div className={styles['dialog-button']}>
           <Button onClick={onCancel} testId={cancelTestId}>
-            {$('cancel')}
+            {i18n.t('cancel')}
           </Button>
           <Button
             onClick={onOk}
@@ -48,7 +48,7 @@ export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
             type="primary"
             testId={confirmTestId}
           >
-            {$('confirm')}
+            {i18n.t('confirm')}
           </Button>
         </div>
       </div>

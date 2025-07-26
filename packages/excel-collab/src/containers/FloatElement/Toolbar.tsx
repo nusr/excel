@@ -1,7 +1,7 @@
 import React, { useRef, memo, useCallback } from 'react';
 import { Button, toast } from '../../components';
 import { getImageSize, convertFileToTextOrBase64, toIRange } from '../../util';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 import { useExcel } from '../store';
 import { v4 } from 'uuid';
 
@@ -82,7 +82,7 @@ export const InsertFloatingPicture = memo(() => {
         id="upload_float_image"
         data-testid="toolbar-floating-picture-input"
       />
-      <label htmlFor="upload_float_image">{$('floating-picture')}</label>
+      <label htmlFor="upload_float_image">{i18n.t('floating-picture')}</label>
     </Button>
   );
 });
@@ -97,7 +97,7 @@ export const InsertChart = memo(() => {
       height: 300,
       originHeight: 300,
       originWidth: 400,
-      title: $('chart-title'),
+      title: i18n.t('chart-title'),
       type: 'chart',
       uuid: v4(),
       sheetId: range.sheetId,
@@ -112,7 +112,7 @@ export const InsertChart = memo(() => {
 
   return (
     <Button testId="toolbar-chart" onClick={handleClick} title="Chart">
-      {$('chart')}
+      {i18n.t('chart')}
     </Button>
   );
 });

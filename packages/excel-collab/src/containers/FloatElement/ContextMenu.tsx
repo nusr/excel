@@ -14,7 +14,7 @@ import {
 } from '../../util';
 import { useExcel, type FloatElementItem } from '../../containers/store';
 import { IWindowSize } from '../../types';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 
 type Props = FloatElementItem & {
   menuLeft: number;
@@ -51,7 +51,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       );
       info({
         visible: true,
-        title: $('edit-data-source'),
+        title: i18n.t('edit-data-source'),
         testId: 'dialog-select-data',
         children: (
           <input
@@ -70,7 +70,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         onOk: () => {
           if (!value) {
             return toast.error(
-              $('reference-is-empty'),
+              i18n.t('reference-is-empty'),
               'select-data-empty-toast',
             );
           }
@@ -84,7 +84,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             (props.chartRange && isSameRange(range, props.chartRange))
           ) {
             return toast.error(
-              $('reference-is-not-valid'),
+              i18n.t('reference-is-not-valid'),
               'select-data-invalid-toast',
             );
           }
@@ -101,7 +101,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       let value = title.trim();
       info({
         visible: true,
-        title: $('change-chart-title'),
+        title: i18n.t('change-chart-title'),
         testId: 'dialog-change-chart-title',
         children: (
           <input
@@ -120,7 +120,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         onOk: () => {
           if (!value) {
             return toast.error(
-              $('the-value-cannot-be-empty'),
+              i18n.t('the-value-cannot-be-empty'),
               'change-chart-title-toast',
             );
           }
@@ -135,7 +135,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
     const changeChartType = () => {
       let newChartType: ChartType = chartType!;
       info({
-        title: $('change-chart-type'),
+        title: i18n.t('change-chart-type'),
         testId: 'dialog-change-chart-type',
         visible: true,
         children: (
@@ -193,7 +193,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             controller.copy();
           }}
         >
-          {$('copy')}
+          {i18n.t('copy')}
         </Button>
 
         <Button
@@ -204,7 +204,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             controller.cut();
           }}
         >
-          {$('cut')}
+          {i18n.t('cut')}
         </Button>
         <Button
           testId="float-element-context-menu-paste"
@@ -213,7 +213,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             controller.paste();
           }}
         >
-          {$('paste')}
+          {i18n.t('paste')}
         </Button>
         <Button
           testId="float-element-context-menu-duplicate"
@@ -225,7 +225,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             controller.setFloatElementUuid('');
           }}
         >
-          {$('duplicate')}
+          {i18n.t('duplicate')}
         </Button>
         {type === 'chart' && (
           <React.Fragment>
@@ -233,19 +233,19 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
               onClick={selectData}
               testId="float-element-context-menu-select-data"
             >
-              {$('select-data')}
+              {i18n.t('select-data')}
             </Button>
             <Button
               onClick={changeChartTitle}
               testId="float-element-context-menu-change-chart-title"
             >
-              {$('change-chart-title')}
+              {i18n.t('change-chart-title')}
             </Button>
             <Button
               onClick={changeChartType}
               testId="float-element-context-menu-change-chart-type"
             >
-              {$('change-chart-type')}
+              {i18n.t('change-chart-type')}
             </Button>
           </React.Fragment>
         )}
@@ -253,7 +253,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
           testId="float-element-context-menu-save-as-picture"
           onClick={saveAsPicture}
         >
-          {$('save-as-picture')}
+          {i18n.t('save-as-picture')}
         </Button>
         <Button
           disabled={width === originWidth && height === originHeight}
@@ -267,7 +267,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             resetResize({ width: originWidth, height: originHeight });
           }}
         >
-          {$('reset-size')}
+          {i18n.t('reset-size')}
         </Button>
         <Button
           testId="float-element-context-menu-delete"
@@ -276,7 +276,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
             controller.deleteDrawing(uuid);
           }}
         >
-          {$('delete')}
+          {i18n.t('delete')}
         </Button>
       </div>
     );

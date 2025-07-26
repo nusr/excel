@@ -8,7 +8,8 @@
     "e2e:ui": "npm run e2e -- --ui",
     "build": "vite build",
     "type-check": "tsc",
-    "test": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
+    "test": "jest --forceExit --detectOpenHandles",
+    "test:ci": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
   },
   "devDependencies": {
     "@playwright/test": "^1.53.1",

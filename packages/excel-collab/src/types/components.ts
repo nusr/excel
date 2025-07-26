@@ -3,6 +3,9 @@ import type { Doc } from 'yjs';
 import type { Remote } from 'comlink';
 import { IRange } from './range';
 import { WorkerMethod } from './event';
+import { LANGUAGE_LIST } from '../util';
+
+export type LanguageType = (typeof LANGUAGE_LIST)[number];
 
 export interface OptionItem {
   value: string | number;

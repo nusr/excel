@@ -10,7 +10,7 @@ import {
 } from '../../components';
 import { BorderItem, IRange, BorderType } from '../../types';
 import { BORDER_TYPE_MAP, isRow, isCol } from '../../util';
-import { $ } from '../../i18n';
+import i18n from '../../i18n';
 import { useExcel } from '../store';
 
 type ShortCutType =
@@ -180,9 +180,9 @@ export const BorderToolBar = memo(() => {
         type="plain"
         className={styles['main']}
         testId="toolbar-border-shortcut"
-        title={$(type)}
+        title={i18n.t(type)}
       >
-        {$(type)}
+        {i18n.t(type)}
       </Button>
       <Menu
         className={styles['menu']}
@@ -194,34 +194,34 @@ export const BorderToolBar = memo(() => {
         portalClassName={styles.portal}
       >
         <MenuItem onClick={handleNoBorder} testId="toolbar-no-border">
-          {$('no-border')}
+          {i18n.t('no-border')}
         </MenuItem>
         <MenuItem onClick={handleAllBorders} testId="toolbar-all-borders">
-          {$('all-borders')}
+          {i18n.t('all-borders')}
         </MenuItem>
         <MenuItem
           onClick={handleOutSideBorders}
           testId="toolbar-outside-borders"
         >
-          {$('outside-borders')}
+          {i18n.t('outside-borders')}
         </MenuItem>
         <MenuItem
           onClick={handleThickBoxBorder}
           testId="toolbar-thick-box-border"
         >
-          {$('thick-box-border')}
+          {i18n.t('thick-box-border')}
         </MenuItem>
         <MenuItem onClick={handleBottomBorder} testId="toolbar-bottom-border">
-          {$('bottom-border')}
+          {i18n.t('bottom-border')}
         </MenuItem>
         <MenuItem onClick={handleTopBorder} testId="toolbar-top-border">
-          {$('top-border')}
+          {i18n.t('top-border')}
         </MenuItem>
         <MenuItem onClick={handleLeftBorder} testId="toolbar-left-border">
-          {$('left-border')}
+          {i18n.t('left-border')}
         </MenuItem>
         <MenuItem onClick={handleRightBorder} testId="toolbar-right-border">
-          {$('right-border')}
+          {i18n.t('right-border')}
         </MenuItem>
         <MenuItem>
           <ColorPicker
@@ -230,10 +230,10 @@ export const BorderToolBar = memo(() => {
             position="right"
             testId="toolbar-border-color"
           >
-            <span style={{ color }}>{$('line-color')} &gt;</span>
+            <span style={{ color }}>{i18n.t('line-color')} &gt;</span>
           </ColorPicker>
         </MenuItem>
-        <SubMenu label={`${$('line-style')} >`} testId="toolbar-border-style">
+        <SubMenu label={`${i18n.t('line-style')} >`} testId="toolbar-border-style">
           {Object.keys(BORDER_TYPE_MAP).map((border) => (
             <MenuItem
               key={border}

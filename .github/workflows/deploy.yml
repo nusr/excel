@@ -37,7 +37,7 @@ jobs:
         run: |
           npm i -g yarn
           yarn
-          npm run build
+          yarn build
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact

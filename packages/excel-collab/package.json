@@ -12,18 +12,24 @@
   "types": "./lib/index.d.ts",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
+      "production": "./lib/index.es.js",
       "types": "./lib/index.d.ts",
       "import": "./lib/index.es.js",
       "module": "./lib/index.es.js",
       "require": "./lib/index.umd.js"
     },
-    "./style.css": "./lib/style.css",
+    "./style.css": {
+      "development": "./src/style.css",
+      "production": "./lib/style.css"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
     "type-check": "tsc",
     "build": "vite build",
-    "test": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
+    "test": "jest --forceExit --detectOpenHandles",
+    "test:ci": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
   },
   "dependencies": {
     "chart.js": "^4.5.0",

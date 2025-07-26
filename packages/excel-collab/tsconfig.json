@@ -13,6 +13,6 @@
     "rootDir": "src",
     "noEmit": false,
     "emitDeclarationOnly": true,
-    "declarationDir": "dist",
+    "declarationDir": "lib",
   }
 }
