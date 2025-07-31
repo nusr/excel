@@ -2,6 +2,18 @@ import type { ICollaborationProvider, DocumentItem } from 'excel-collab';
 
 const LOCAL_STORAGE_KEY = 'excel-collab-docs';
 
+export interface IProvider extends ICollaborationProvider {
+  getDocuments(): Promise<DocumentItem[] | undefined>;
+}
+
+function safeParse<T>(data: any, defaultValue: T | undefined): T | undefined {
+  try {
+    return JSON.parse(data) as T;
+  } catch (error) {
+    return defaultValue;
+  }
+}
+
 export async function fetchData<T>(
   url: string,
   method: 'POST' | 'GET' | 'PUT' | 'DELETE' = 'GET',
@@ -37,7 +49,7 @@ export async function fetchData<T>(
   }
 }
 
-export class RemoteProvider implements ICollaborationProvider {
+export class RemoteProvider implements IProvider {
   private readonly baseUrl: string;
   private readonly callback: (
     p: ICollaborationProvider,
@@ -107,9 +119,13 @@ export class RemoteProvider implements ICollaborationProvider {
     const res = await fetchData<DocumentItem>(this.baseUrl + '/document/' + id);
     return res;
   }
+  async getDocuments() {
+    const res = await fetchData<DocumentItem[]>(this.baseUrl + '/documents');
+    return res;
+  }
 }
 
-export class LocalProvider implements ICollaborationProvider {
+export class LocalProvider implements IProvider {
   private readonly callback: (
     p: ICollaborationProvider,
     id: string,
@@ -124,6 +140,20 @@ export class LocalProvider implements ICollaborationProvider {
   }
   private getKey(id: string) {
     return `${LOCAL_STORAGE_KEY}_${id}`;
+  }
+  async getDocuments() {
+    const list: DocumentItem[] = [];
+    for (const [key, value] of Object.entries(sessionStorage)) {
+      if (!key.startsWith(LOCAL_STORAGE_KEY)) {
+        continue;
+      }
+      const doc = safeParse<DocumentItem>(value, undefined);
+      if (!doc) {
+        continue;
+      }
+      list.push(doc);
+    }
+    return list;
   }
   async uploadFile(
     _docId: string,
@@ -160,7 +190,11 @@ export class LocalProvider implements ICollaborationProvider {
       return;
     }
 
-    const docData = JSON.parse(doc) as DocumentItem;
+    const docData = safeParse<DocumentItem>(doc, undefined);
+
+    if (!docData) {
+      return;
+    }
 
     if (data.name) {
       docData.name = data.name;
@@ -175,6 +209,6 @@ export class LocalProvider implements ICollaborationProvider {
     if (!doc) {
       return;
     }
-    return JSON.parse(doc) as DocumentItem;
+    return safeParse<DocumentItem>(doc, undefined);
   }
 }
