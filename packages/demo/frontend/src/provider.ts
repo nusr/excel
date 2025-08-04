@@ -10,6 +10,7 @@ function safeParse<T>(data: any, defaultValue: T | undefined): T | undefined {
   try {
     return JSON.parse(data) as T;
   } catch (error) {
+    console.log(error)
     return defaultValue;
   }
 }

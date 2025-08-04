@@ -1,4 +1,4 @@
-import locales, { TranslationKeys } from './locales';
+import locales, { type TranslationKeys } from './locales';
 import type { LanguageType } from '../types';
 import { LANGUAGE_LIST } from '../util';
 
@@ -29,6 +29,7 @@ function i18nConfig() {
         return;
       }
       const temp = getLanguage(lang);
+      _currentLanguage = temp;
       localStorage.setItem(languageKey, temp);
     },
     init: () => {

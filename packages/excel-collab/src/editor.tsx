@@ -9,6 +9,7 @@ import { initController } from './controller';
 import Worker from './worker?worker&inline';
 import { Doc } from 'yjs';
 import i18n from './i18n';
+import { RTL_LANGUAGE_LIST } from './util/constant';
 
 export type DocConfig = ConstructorParameters<typeof Doc>[0];
 
@@ -24,6 +25,10 @@ export const Excel: React.FunctionComponent<ExcelProps> = memo((props) => {
 
   useEffect(() => {
     i18n.init();
+    if (RTL_LANGUAGE_LIST.includes(i18n.current as any)) {
+      document.documentElement.setAttribute('data-layout-direction', 'rtl');
+    }
+
     const controller = initController({
       worker: new Worker(),
       doc: doc ? doc : docConfig ? new Doc(docConfig) : new Doc(),
