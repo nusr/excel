@@ -31,12 +31,10 @@ jobs:
           node-version: '22.x'
 
       - name: Setup Yarn
-        run: |
-          npm install -g yarn
-          yarn config set registry https://hub.talkdeskapp.com:8443/repository/talkdesk-npm
+        run: npm install -g yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn
 
       - name: Configure git
         run: |
