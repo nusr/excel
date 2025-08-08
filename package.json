@@ -25,9 +25,9 @@
     "prepare": "husky && npm run build",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" --reporters html --mode strict --min-lines 7 --blame --gitignore --exitCode 1 .",
     "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv",
-    "release:major": "lerna version major --conventional-commits --no-private --no-push",
-    "release:minor": "lerna version minor --conventional-commits --no-private --no-push",
-    "release:patch": "lerna version patch --conventional-commits --no-private --no-push"
+    "release:major": "lerna version major --conventional-commits --no-private --no-push --yes",
+    "release:minor": "lerna version minor --conventional-commits --no-private --no-push --yes",
+    "release:patch": "lerna version patch --conventional-commits --no-private --no-push --yes"
   },
   "devDependencies": {
     "@codecov/vite-plugin": "^1.9.1",
