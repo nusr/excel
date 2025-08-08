@@ -25,10 +25,8 @@ jobs:
         run: |
           npm i -g yarn
           yarn
-          npm run build
+          yarn build
       - name: Publish package on NPM
-        run: |
-          cd ./packages/excel-collab
-          npm publish
+        run: npx lerna publish from-package --no-private --yes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
