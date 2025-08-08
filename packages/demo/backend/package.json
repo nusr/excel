@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
-    "@koa/router": "^13.1.1",
+    "@koa/router": "^14.0.0",
     "@prisma/client": "^6.13.0",
     "@types/ws": "^8.18.1",
     "@y/websocket-server": "^0.1.1",
