@@ -1,8 +1,5 @@
 name: Create Release PR
-run-name: ${{ github.actor }} is creating a new release
-
-permissions:
-  contents: read
+run-name: ${{ github.actor }} is releasing app 🚀
 
 on:
   workflow_dispatch:
@@ -14,8 +11,7 @@ on:
 
 jobs:
   create-pre-release-pull-request:
-    runs-on:
-      group: Production
+    runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
@@ -32,13 +28,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '22.x'
 
       - name: Setup Yarn
-        run: npm install -g yarn
+        run: |
+          npm install -g yarn
+          yarn config set registry https://hub.talkdeskapp.com:8443/repository/talkdesk-npm
 
       - name: Install dependencies
-        run: yarn
+        run: yarn install --frozen-lockfile
 
       - name: Configure git
         run: |
@@ -89,7 +87,7 @@ jobs:
 
       - name: Create new branch for pre-release
         run: |
-          branchName="pre-release/${{ env.package_version }}"
+          branchName="pre-release/${{ env.package_name }}/${{ env.package_version }}"
 
           if git ls-remote --exit-code --heads origin $branchName; then
             echo "Branch $branchName already exists. Please check if this version has been released before."
@@ -157,9 +155,8 @@ jobs:
           echo "Temporary file removed"
 
   release:
-    runs-on:
-      group: Production
-    if: github.event.pull_request.merged && startsWith(github.event.pull_request.head.ref, 'pre-release/')
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged && startsWith(github.event.pull_request.head.ref, 'pre-release/secure-messaging-ui/')
     permissions:
       contents: write
       pull-requests: read
@@ -172,7 +169,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '22.x'
 
       - name: Configure git
         run: |
