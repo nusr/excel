@@ -154,7 +154,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged && startsWith(github.event.pull_request.head.ref, 'pre-release/secure-messaging-ui/')
+    if: github.event.pull_request.merged && startsWith(github.event.pull_request.head.ref, 'pre-release/excel-collab/')
     permissions:
       contents: write
       pull-requests: read
