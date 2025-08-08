@@ -31,7 +31,23 @@ export const FORMULA_EDITOR_ROLE = '__FORMULA_EDITOR_ROLE__';
 export const DEFAULT_FORMAT_CODE = 'General';
 export const DEFAULT_TEXT_FORMAT_CODE = '@';
 
-export const LANGUAGE_LIST = ['en-US', 'zh-CN'] as const;
+export const RTL_LANGUAGE_LIST = ['ar-EG', 'ar-SA'] as const;
+
+export const LANGUAGE_LIST = [
+  'en-US',
+  'zh-CN',
+  'fr-FR',
+  'zh-HK',
+  'ja-JP',
+  'ko-KR',
+  'es-ES',
+  'de-DE',
+  'it-IT',
+  'pt-BR',
+  'pt-PT',
+  'nl-NL',
+  ...RTL_LANGUAGE_LIST,
+] as const;
 
 export const ERROR_SET = new Set([
   '#GETTING_DATA',

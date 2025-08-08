@@ -84,3 +84,7 @@ html[data-theme='dark'] input {
 input[type='number'] {
   border: 1px solid var(--borderColor);
 }
+
+html[data-layout-direction='rtl'] {
+  direction: rtl !important;
+}

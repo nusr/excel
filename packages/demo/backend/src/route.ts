@@ -66,7 +66,7 @@ router.get('/', async (ctx: Koa.Context) => {
 });
 
 router.post('/upload', async (ctx: Koa.Context) => {
-  const list = ctx.request.files?.file;
+  const list = (ctx.request as any).files?.file;
   ctx.assert(list, 401, 'file is required');
   const file = Array.isArray(list) ? list[0] : list;
   const reader = await fs.promises.readFile(file.filepath);
@@ -93,7 +93,7 @@ router.head(`${UPLOAD_PREFIX}:fileId`, async (ctx: Koa.Context) => {
 });
 
 router.post('/document', async (ctx: Koa.Context) => {
-  const { id, name } = ctx.request.body;
+  const { id, name } = (ctx.request as any).body;
   ctx.assert(typeof name === 'string', 401, 'name should be a string');
   ctx.assert(id, 401, 'id should be provided');
   const result = await prisma.document.create({
@@ -110,7 +110,7 @@ router.delete('/document/:id', async (ctx: Koa.Context) => {
 });
 
 router.put('/document/:id', async (ctx: Koa.Context) => {
-  const { name, content } = ctx.request.body;
+  const { name, content } = (ctx.request as any).body;
   const id = ctx.params.id;
   ctx.assert(name || content, 401, 'name or content should be provided');
   ctx.assert(id, 401, 'id should be provided');
@@ -138,7 +138,7 @@ router.get('/documents', async (ctx: Koa.Context) => {
 });
 
 router.post('/sync', async (ctx: Koa.Context) => {
-  const { room: id, data } = ctx.request.body;
+  const { room: id, data } = (ctx.request as any).body;
   const content = data?.excel?.content;
   ctx.assert(content, 401, 'content should be provided');
   const realContent = JSON.stringify(content);
