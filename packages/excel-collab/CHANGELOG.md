@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.1.5 (2025-08-08)
+
+
+### Bug Fixes
+
+* deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
+* i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
+* ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
+* update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
+
+
+### Features
+
+* add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
+* mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
+* support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
+
+
+
+
+
 ## 0.1.4 (2025-07-25)
 
 
