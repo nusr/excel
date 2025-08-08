@@ -6,7 +6,7 @@ permissions:
 on:
   workflow_dispatch:
   release:
-    types: [published, released]
+    types: [created]
 
 env:
   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
