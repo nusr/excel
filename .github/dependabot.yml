@@ -1,9 +1,10 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
+  - package-ecosystem: 'npm'
     directory: '/'
     schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
-    labels:
-      - dependencies
+      interval: 'daily'
+    commit-message:
+      prefix: 'chore'
+      prefix-development: 'chore'
+    open-pull-requests-limit: 5
