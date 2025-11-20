@@ -15,7 +15,7 @@
     "@types/koa": "^3.0.0",
     "@types/koa__cors": "^5.0.0",
     "@types/koa__router": "^12.0.4",
-    "prisma": "^6.13.0"
+    "prisma": "^7.0.0"
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
