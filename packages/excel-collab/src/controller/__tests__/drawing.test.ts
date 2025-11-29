@@ -23,8 +23,8 @@ describe('drawing.test.ts', () => {
         uuid: '1',
         fromCol: 4,
         fromRow: 4,
-      }),
-        expect(controller.getDrawingList()).toHaveLength(0);
+      });
+      expect(controller.getDrawingList()).toHaveLength(0);
     });
     test('not support chartType', () => {
       controller.addDrawing({
@@ -42,8 +42,8 @@ describe('drawing.test.ts', () => {
         uuid: '1',
         fromCol: 4,
         fromRow: 4,
-      }),
-        expect(controller.getDrawingList()).toHaveLength(0);
+      });
+      expect(controller.getDrawingList()).toHaveLength(0);
     });
     test('not support chartRange', () => {
       controller.addDrawing({

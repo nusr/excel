@@ -6,7 +6,7 @@ export function useEventCallback<T>(
 ): (value: T) => void {
   const callbackRef = useRef(handler);
   const fn = useRef((value: T) => {
-    callbackRef.current && callbackRef.current(value);
+    callbackRef.current?.(value);
   });
   callbackRef.current = handler;
 

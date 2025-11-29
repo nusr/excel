@@ -74,7 +74,7 @@ router.post('/upload', async (ctx: Koa.Context) => {
   const { content: _content, ...rest } = await prisma.file.create({
     data: {
       name,
-      content: reader,
+      content: new Uint8Array(reader),
       size: file.size,
       last_modified: file.mtime ?? new Date(),
     },

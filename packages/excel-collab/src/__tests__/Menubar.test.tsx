@@ -101,7 +101,7 @@ describe('change theme', () => {
     const before = document.documentElement.getAttribute('data-theme');
     expect(before).toEqual('light');
     act(() => {
-      func && func({ matches: true });
+      func?.({ matches: true });
     });
     const after = document.documentElement.getAttribute('data-theme');
     expect(after).toEqual('dark');
@@ -128,7 +128,7 @@ describe('change theme', () => {
     const before = document.documentElement.getAttribute('data-theme');
     expect(before).toEqual('dark');
     act(() => {
-      func && func({ matches: false });
+       func?.({ matches: false });
     });
     const after = document.documentElement.getAttribute('data-theme');
     expect(after).toEqual('light');
