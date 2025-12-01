@@ -83,13 +83,12 @@ const rgbaToHsva = ({ r, g, b, a }: RgbaColor): HsvaColor => {
   const max = Math.max(r, g, b);
   const delta = max - Math.min(r, g, b);
 
-  // prettier-ignore
   const hh = delta
     ? max === r
       ? (g - b) / delta
       : max === g
-        ? 2 + (b - r) / delta
-        : 4 + (r - g) / delta
+      ? 2 + (b - r) / delta
+      : 4 + (r - g) / delta
     : 0;
 
   return {

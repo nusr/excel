@@ -1,17 +1,14 @@
 // Mock dependencies before importing the app
-const mockPrismaClient = {
-  file: {
-    findFirst: jest.fn(),
-    create: jest.fn(),
-  },
-  document: {
-    create: jest.fn(),
-    delete: jest.fn(),
-    update: jest.fn(),
-    findFirst: jest.fn(),
-    findMany: jest.fn(),
-    upsert: jest.fn(),
-  },
+const mockDb = {
+  findFile: jest.fn(),
+  createFile: jest.fn(),
+  createDocument: jest.fn(),
+  deleteDocument: jest.fn(),
+  updateDocument: jest.fn(),
+  findDocument: jest.fn(),
+  findAllDocuments: jest.fn(),
+  upsertDocument: jest.fn(),
+  initDatabase: jest.fn().mockResolvedValue(undefined),
 };
 
 const mockReadFile = jest.fn();
@@ -19,9 +16,7 @@ const mockJoin = jest.fn();
 const mockExtname = jest.fn();
 
 // Mock modules before importing
-jest.mock('@prisma/client', () => ({
-  PrismaClient: jest.fn().mockImplementation(() => mockPrismaClient),
-}));
+jest.mock('../db', () => mockDb);
 
 jest.mock('fs', () => ({
   promises: {
@@ -44,26 +39,29 @@ describe('Route Tests', () => {
     jest.clearAllMocks();
   });
 
-  describe('Prisma Client Document Operations', () => {
+  describe('Database Document Operations', () => {
     it('should create a document with correct data', async () => {
       const mockDocument = {
         id: 'doc1',
         name: 'Test Document',
-        create_time: new Date('2023-01-01'),
+        create_time: new Date('2023-01-01').toISOString(),
+        content: null,
       };
 
-      mockPrismaClient.document.create.mockResolvedValue(mockDocument);
+      mockDb.createDocument.mockResolvedValue(mockDocument);
 
       // Test the mock setup
-      expect(mockPrismaClient.document.create).toBeDefined();
+      expect(mockDb.createDocument).toBeDefined();
 
       // Simulate calling the create method
-      const result = await mockPrismaClient.document.create({
-        data: { name: 'Test Document', id: 'doc1' },
+      const result = await mockDb.createDocument({
+        name: 'Test Document',
+        id: 'doc1',
       });
 
-      expect(mockPrismaClient.document.create).toHaveBeenCalledWith({
-        data: { name: 'Test Document', id: 'doc1' },
+      expect(mockDb.createDocument).toHaveBeenCalledWith({
+        name: 'Test Document',
+        id: 'doc1',
       });
       expect(result).toEqual(mockDocument);
     });
@@ -72,18 +70,16 @@ describe('Route Tests', () => {
       const mockDocument = {
         id: 'doc1',
         name: 'Test Document',
+        create_time: new Date('2023-01-01').toISOString(),
+        content: null,
       };
 
-      mockPrismaClient.document.delete.mockResolvedValue(mockDocument);
+      mockDb.deleteDocument.mockResolvedValue(mockDocument);
 
       // Simulate calling the delete method
-      const result = await mockPrismaClient.document.delete({
-        where: { id: 'doc1' },
-      });
+      const result = await mockDb.deleteDocument('doc1');
 
-      expect(mockPrismaClient.document.delete).toHaveBeenCalledWith({
-        where: { id: 'doc1' },
-      });
+      expect(mockDb.deleteDocument).toHaveBeenCalledWith('doc1');
       expect(result).toEqual(mockDocument);
     });
 
@@ -92,19 +88,20 @@ describe('Route Tests', () => {
         id: 'doc1',
         name: 'Updated Document',
         content: 'Updated content',
+        create_time: new Date('2023-01-01').toISOString(),
       };
 
-      mockPrismaClient.document.update.mockResolvedValue(mockDocument);
+      mockDb.updateDocument.mockResolvedValue(mockDocument);
 
       // Simulate calling the update method
-      const result = await mockPrismaClient.document.update({
-        data: { name: 'Updated Document', content: 'Updated content' },
-        where: { id: 'doc1' },
+      const result = await mockDb.updateDocument('doc1', {
+        name: 'Updated Document',
+        content: 'Updated content',
       });
 
-      expect(mockPrismaClient.document.update).toHaveBeenCalledWith({
-        data: { name: 'Updated Document', content: 'Updated content' },
-        where: { id: 'doc1' },
+      expect(mockDb.updateDocument).toHaveBeenCalledWith('doc1', {
+        name: 'Updated Document',
+        content: 'Updated content',
       });
       expect(result).toEqual(mockDocument);
     });
@@ -114,18 +111,15 @@ describe('Route Tests', () => {
         id: 'doc1',
         name: 'Test Document',
         content: 'Document content',
+        create_time: new Date('2023-01-01').toISOString(),
       };
 
-      mockPrismaClient.document.findFirst.mockResolvedValue(mockDocument);
+      mockDb.findDocument.mockResolvedValue(mockDocument);
 
-      // Simulate calling the findFirst method
-      const result = await mockPrismaClient.document.findFirst({
-        where: { id: 'doc1' },
-      });
+      // Simulate calling the findDocument method
+      const result = await mockDb.findDocument('doc1');
 
-      expect(mockPrismaClient.document.findFirst).toHaveBeenCalledWith({
-        where: { id: 'doc1' },
-      });
+      expect(mockDb.findDocument).toHaveBeenCalledWith('doc1');
       expect(result).toEqual(mockDocument);
     });
 
@@ -134,25 +128,23 @@ describe('Route Tests', () => {
         {
           id: 'doc1',
           name: 'Document 1',
-          create_time: new Date('2023-01-02'),
+          create_time: new Date('2023-01-02').toISOString(),
+          content: null,
         },
         {
           id: 'doc2',
           name: 'Document 2',
-          create_time: new Date('2023-01-01'),
+          create_time: new Date('2023-01-01').toISOString(),
+          content: null,
         },
       ];
 
-      mockPrismaClient.document.findMany.mockResolvedValue(mockDocuments);
+      mockDb.findAllDocuments.mockResolvedValue(mockDocuments);
 
-      // Simulate calling the findMany method
-      const result = await mockPrismaClient.document.findMany({
-        orderBy: { create_time: 'desc' },
-      });
+      // Simulate calling the findAllDocuments method
+      const result = await mockDb.findAllDocuments('desc');
 
-      expect(mockPrismaClient.document.findMany).toHaveBeenCalledWith({
-        orderBy: { create_time: 'desc' },
-      });
+      expect(mockDb.findAllDocuments).toHaveBeenCalledWith('desc');
       expect(result).toEqual(mockDocuments);
     });
 
@@ -161,35 +153,21 @@ describe('Route Tests', () => {
       const mockDocument = {
         id: 'room1',
         content: JSON.stringify(mockContent),
+        name: null,
+        create_time: new Date('2023-01-01').toISOString(),
       };
 
-      mockPrismaClient.document.upsert.mockResolvedValue(mockDocument);
+      mockDb.upsertDocument.mockResolvedValue(mockDocument);
 
       // Simulate calling the upsert method
-      const result = await mockPrismaClient.document.upsert({
-        create: {
-          content: JSON.stringify(mockContent),
-          id: 'room1',
-        },
-        update: {
-          content: JSON.stringify(mockContent),
-        },
-        where: {
-          id: 'room1',
-        },
+      const result = await mockDb.upsertDocument('room1', {
+        content: JSON.stringify(mockContent),
+        id: 'room1',
       });
 
-      expect(mockPrismaClient.document.upsert).toHaveBeenCalledWith({
-        create: {
-          content: JSON.stringify(mockContent),
-          id: 'room1',
-        },
-        update: {
-          content: JSON.stringify(mockContent),
-        },
-        where: {
-          id: 'room1',
-        },
+      expect(mockDb.upsertDocument).toHaveBeenCalledWith('room1', {
+        content: JSON.stringify(mockContent),
+        id: 'room1',
       });
       expect(result).toEqual(mockDocument);
     });
@@ -202,20 +180,16 @@ describe('Route Tests', () => {
         name: 'test.txt',
         content: Buffer.from('test content'),
         size: 12,
-        last_modified: new Date('2023-01-01'),
+        last_modified: new Date('2023-01-01').toISOString(),
       };
 
-      mockPrismaClient.file.findFirst.mockResolvedValue(mockFile);
+      mockDb.findFile.mockResolvedValue(mockFile);
       mockExtname.mockReturnValue('.txt');
 
-      // Simulate calling the file findFirst method
-      const result = await mockPrismaClient.file.findFirst({
-        where: { id: 1 },
-      });
+      // Simulate calling the file findFile method
+      const result = await mockDb.findFile(1);
 
-      expect(mockPrismaClient.file.findFirst).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
+      expect(mockDb.findFile).toHaveBeenCalledWith(1);
       expect(result).toEqual(mockFile);
     });
 
@@ -226,28 +200,24 @@ describe('Route Tests', () => {
         name: 'test.txt',
         content: mockBuffer,
         size: 1024,
-        last_modified: new Date('2023-01-01'),
+        last_modified: new Date('2023-01-01').toISOString(),
       };
 
-      mockPrismaClient.file.create.mockResolvedValue(mockFile);
+      mockDb.createFile.mockResolvedValue(mockFile);
 
       // Simulate calling the file create method
-      const result = await mockPrismaClient.file.create({
-        data: {
-          name: 'test.txt',
-          content: mockBuffer,
-          size: 1024,
-          last_modified: new Date('2023-01-01'),
-        },
+      const result = await mockDb.createFile({
+        name: 'test.txt',
+        content: new Uint8Array(mockBuffer),
+        size: 1024,
+        last_modified: new Date('2023-01-01'),
       });
 
-      expect(mockPrismaClient.file.create).toHaveBeenCalledWith({
-        data: {
-          name: 'test.txt',
-          content: mockBuffer,
-          size: 1024,
-          last_modified: new Date('2023-01-01'),
-        },
+      expect(mockDb.createFile).toHaveBeenCalledWith({
+        name: 'test.txt',
+        content: expect.any(Uint8Array),
+        size: 1024,
+        last_modified: new Date('2023-01-01'),
       });
       expect(result).toEqual(mockFile);
     });

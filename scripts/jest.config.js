@@ -9,13 +9,11 @@ module.exports = {
   },
   transformIgnorePatterns: [
     'node_modules/(?!uuid)',
-    'node_modules/(?!pixelmatch)',
   ],
   coverageReporters: ['clover', 'json', 'lcov', 'text', 'html'],
   moduleNameMapper: {
     '\\.css$': path.join(__dirname, './css-mock.js'),
     '^uuid$': require.resolve('uuid'),
-    '^pixelmatch$': require.resolve('pixelmatch'),
   },
   setupFiles: [path.join(__dirname, './jest.setup.js')],
 };

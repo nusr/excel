@@ -9,7 +9,7 @@ import {
 import fs from 'fs';
 import { setDpr } from '../../util';
 import path from 'path';
-import pixelMatch from 'pixelmatch';
+import pixelMatch from './pixelMatch'
 import PNG from 'pngjs';
 
 const defaultWidth = 200;

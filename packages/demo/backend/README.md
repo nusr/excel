@@ -1,3 +1,3 @@
 # Database
 
-[SQL](./prisma/schema.prisma)
+[SQL](./src/db.ts)

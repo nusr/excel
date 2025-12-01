@@ -7,6 +7,16 @@ process.env['CALLBACK_URL'] = 'http://localhost:4000/sync';
 process.env['CALLBACK_OBJECTS'] = JSON.stringify({ excel: 'Map' });
 
 import { setupWSConnection } from '@y/websocket-server/utils';
+import { seedDatabase } from './db'
+
+
+// Initialize on import
+seedDatabase().catch(error => {
+  if (error?.message?.includes('UNIQUE constraint failed')) {
+    return
+  }
+  console.error('Error seeding database:', error);
+});
 
 const port = 4000;
 const server = app.listen(port, () => {

@@ -1,6 +1,6 @@
 import Koa from 'koa';
 import Router from '@koa/router';
-import { PrismaClient } from '@prisma/client';
+import * as db from './db';
 import cors from '@koa/cors';
 import path from 'path';
 import koaBody from 'koa-body';
@@ -8,7 +8,6 @@ import fs from 'fs';
 import stream from 'stream';
 
 const app = new Koa();
-const prisma = new PrismaClient({ log: ['query', 'error', 'info', 'warn'] });
 const router = new Router();
 const UPLOAD_PREFIX = '/upload/';
 
@@ -29,14 +28,12 @@ app.use(async (ctx, next) => {
 async function sendFile(ctx: Koa.Context) {
   const fileId = parseInt(ctx.params.fileId, 10);
   ctx.assert(fileId, 401, 'fileId should be provided');
-  const result = await prisma.file.findFirst({
-    where: { id: fileId },
-  });
+  const result = await db.findFile(fileId);
   if (!result) {
     ctx.throw(404);
   }
   ctx.response.status = 200;
-  ctx.response.lastModified = result.last_modified;
+  ctx.response.lastModified = new Date(result.last_modified ?? new Date());
   ctx.response.length = result.size;
   ctx.type = path.extname(result.name);
 
@@ -71,14 +68,13 @@ router.post('/upload', async (ctx: Koa.Context) => {
   const file = Array.isArray(list) ? list[0] : list;
   const reader = await fs.promises.readFile(file.filepath);
   const name = file.originalFilename ?? '';
-  const { content: _content, ...rest } = await prisma.file.create({
-    data: {
-      name,
-      content: new Uint8Array(reader),
-      size: file.size,
-      last_modified: file.mtime ?? new Date(),
-    },
+  const result = await db.createFile({
+    name,
+    content: reader,
+    size: file.size,
+    last_modified: file.mtime,
   });
+  const { content: _content, ...rest } = result;
   ctx.body = {
     ...rest,
     filePath: UPLOAD_PREFIX + rest.id,
@@ -96,16 +92,14 @@ router.post('/document', async (ctx: Koa.Context) => {
   const { id, name } = (ctx.request as any).body;
   ctx.assert(typeof name === 'string', 401, 'name should be a string');
   ctx.assert(id, 401, 'id should be provided');
-  const result = await prisma.document.create({
-    data: { name, id },
-  });
+  const result = await db.createDocument({ name, id });
   ctx.body = result;
 });
 
 router.delete('/document/:id', async (ctx: Koa.Context) => {
   const id = ctx.params.id;
   ctx.assert(id, 401, 'id should be provided');
-  const result = await prisma.document.delete({ where: { id } });
+  const result = await db.deleteDocument(id);
   ctx.body = result;
 });
 
@@ -114,26 +108,19 @@ router.put('/document/:id', async (ctx: Koa.Context) => {
   const id = ctx.params.id;
   ctx.assert(name || content, 401, 'name or content should be provided');
   ctx.assert(id, 401, 'id should be provided');
-  const result = await prisma.document.update({
-    data: { name, content },
-    where: { id },
-  });
+  const result = await db.updateDocument(id, { name, content });
   ctx.body = result;
 });
 
 router.get('/document/:id', async (ctx: Koa.Context) => {
   const id = ctx.params.id;
   ctx.assert(id, 401, 'id should be provided');
-  const result = await prisma.document.findFirst({
-    where: { id },
-  });
+  const result = await db.findDocument(id);
   ctx.body = result;
 });
 
 router.get('/documents', async (ctx: Koa.Context) => {
-  const result = await prisma.document.findMany({
-    orderBy: { create_time: 'desc' },
-  });
+  const result = await db.findAllDocuments('desc');
   ctx.body = result;
 });
 
@@ -142,17 +129,9 @@ router.post('/sync', async (ctx: Koa.Context) => {
   const content = data?.excel?.content;
   ctx.assert(content, 401, 'content should be provided');
   const realContent = JSON.stringify(content);
-  const result = await prisma.document.upsert({
-    create: {
-      content: realContent,
-      id,
-    },
-    update: {
-      content: realContent,
-    },
-    where: {
-      id,
-    },
+  const result = await db.upsertDocument(id, {
+    content: realContent,
+    id,
   });
   ctx.body = result;
 });
