@@ -17,7 +17,7 @@
     "type-check": "lerna run type-check",
     "build": "lerna run build",
     "test": "lerna run test",
-    "test:ci": "lerna run tes:ci",
+    "test:ci": "lerna run test:ci",
     "e2e": "lerna run e2e",
     "coverage": "lerna run test:ci -- --coverage",
     "lint": "npx oxlint@latest --fix",
