@@ -1,16 +1,30 @@
 coverage:
   ignore:
-    - '**/*.test.tsx'
-    - '**/*.test.ts'
+    - "**/*.test.tsx"
+    - "**/*.test.ts"
   status:
     project:
-      default:
-        target: 60%
-      # threshold: 1%
-      # must:
-      #   target: 100%
-      #   paths:
-      #     - src/controller
-      #     - src/model
-      #     - src/formula
-    patch: off
+      default: off
+      frontend:
+        target: 50%
+        flags:
+          - frontend
+      backend:
+        target: 50%
+        flags:
+          - backend
+      excel-collab:
+        target: 80%
+        flags:
+          - excel-collab
+
+flags:
+  backend:
+    paths:
+      - packages/demo/backend
+  frontend:
+    paths:
+      - packages/demo/frontend
+  excel-collab:
+    paths:
+      - packages/excel-collab
