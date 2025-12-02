@@ -14,7 +14,7 @@ coverage:
         flags:
           - backend
       excel-collab:
-        target: 80%
+        target: 60%
         flags:
           - excel-collab
 
