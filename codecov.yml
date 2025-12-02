@@ -6,7 +6,7 @@ coverage:
     project:
       default:
         target: 60%
-        threshold: 1%
+      # threshold: 1%
       # must:
       #   target: 100%
       #   paths:
