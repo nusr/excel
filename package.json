@@ -24,7 +24,7 @@
     "update-md": "node ./scripts/update-md.js",
     "prepare": "husky && npm run build",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" --reporters html --mode strict --min-lines 7 --blame --gitignore --exitCode 1 .",
-    "install-font": "cp ./scripts/SourceCodePro-VariableFont_wght.ttf /usr/share/fonts/ && fc-cache -fv",
+    "install-font": "mkdir -p $HOME/.fonts && cp ./scripts/SourceCodePro-VariableFont_wght.ttf $HOME/.fonts/ && fc-cache -fv $HOME/.fonts",
     "release:major": "lerna version major --conventional-commits --no-private --no-push --yes --no-git-tag-version",
     "release:minor": "lerna version minor --conventional-commits --no-private --no-push --yes --no-git-tag-version",
     "release:patch": "lerna version patch --conventional-commits --no-private --no-push --yes --no-git-tag-version"
