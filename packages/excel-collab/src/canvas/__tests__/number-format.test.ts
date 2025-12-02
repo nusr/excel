@@ -11,7 +11,7 @@ describe('number-format.test.ts', () => {
     controller.addSheet();
   });
   afterEach(async () => {
-    await compareScreenShot(controller, { maxThreshold: 0.054 });
+    await compareScreenShot(controller);
   });
 
   for (const item of numberFormatOptionList) {
