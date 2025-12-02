@@ -35,7 +35,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: Unit test
-        run: npm run coverage
+        run: yarn coverage --verbose --debug
       - name: Upload coverage
         if: github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v5
