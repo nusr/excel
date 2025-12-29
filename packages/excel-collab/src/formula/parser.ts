@@ -11,8 +11,7 @@ import {
   CellExpression,
   ArrayExpression,
 } from './expression';
-import { CustomError } from './formula';
-import { type ErrorTypes } from '../util';
+import { type ErrorTypes, getCustomError } from '../util';
 import { TokenType } from '../types';
 
 export class Parser {
@@ -123,7 +122,7 @@ export class Parser {
     ) {
       return new CellExpression(expr.value, undefined);
     }
-    throw new CustomError('#NAME?');
+    throw getCustomError('#NAME?');
   }
   private sheetRange(): Expression {
     if (this.match(TokenType.SHEET_NAME)) {
@@ -132,7 +131,7 @@ export class Parser {
       if (expr instanceof CellExpression) {
         return new CellExpression(expr.value, name);
       }
-      throw new CustomError('#REF!');
+      throw getCustomError('#REF!');
     }
     return this.call();
   }
@@ -193,10 +192,10 @@ export class Parser {
       return new CellExpression(token, undefined);
     }
     if (this.match(TokenType.ERROR, TokenType.ERROR_REF)) {
-      throw new CustomError(this.previous().value as ErrorTypes);
+      throw getCustomError(this.previous().value as ErrorTypes);
     }
 
-    throw new CustomError('#VALUE!');
+    throw getCustomError('#VALUE!');
   }
   private match(...types: TokenType[]): boolean {
     const { type } = this.peek();
@@ -217,7 +216,7 @@ export class Parser {
       this.next();
       return this.previous();
     } else {
-      throw new CustomError('#VALUE!');
+      throw getCustomError('#VALUE!');
     }
   }
   private next() {

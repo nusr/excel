@@ -1,10 +1,5 @@
 import { Scanner } from './scanner';
 import { Parser } from './parser';
-import allFormulas, {
-  CustomError,
-  roundNumber,
-  type FormulaKeys,
-} from './formula';
 import { Interpreter } from './interpreter';
 import type {
   CellDataMap,
@@ -17,8 +12,15 @@ import type {
   RequestFormulas,
   ResponseFormulas,
 } from '../types';
-import { isFormula, getWorksheetKey, convertWorksheetKey } from '../util';
-import { SheetRange } from '../util';
+import {
+  isFormula,
+  getWorksheetKey,
+  convertWorksheetKey,
+  SheetRange,
+  getFunction,
+  getCustomError,
+  anyError
+} from '../util';
 
 export function parseFormula(
   formula: string,
@@ -71,18 +73,15 @@ export function parseFormula(
       strList.push(item.toString());
     }
     result.expressionStr = strList.join('');
-    for (const item of resultList) {
-      if (typeof item === 'number' && !isNaN(item)) {
-        result.result.push(roundNumber(item));
-      } else {
-        result.result.push(item);
-      }
-    }
+    result.result = resultList;
+
     return result;
   } catch (error) {
-    if (error instanceof CustomError) {
+    const value = anyError(error);
+
+    if (value) {
       const result: InterpreterResult = {
-        result: [error.value],
+        result: [value],
       };
       cache.set(formula, result);
       return result;
@@ -110,9 +109,7 @@ export class CellDataMapImpl implements CellDataMap {
     const key = `${row}_${col}_${sheetId || defaultSheetId}`;
     return key;
   }
-  getFunction = (name: string) => {
-    return allFormulas[name as FormulaKeys];
-  };
+  getFunction = getFunction;
   setSheetList(list: WorksheetType[]) {
     this.sheetList = list;
   }
@@ -171,16 +168,14 @@ export function computeFormulas(
     handleCell: () => {
       return [];
     },
-    getFunction: (name: string) => {
-      return allFormulas[name as FormulaKeys];
-    },
+    getFunction,
     getCell: (range: IRange) => {
       const { row, col, sheetId } = range;
       const key = getWorksheetKey(sheetId || currentSheetId, row, col);
       return worksheets[key];
     },
     set: () => {
-      throw new CustomError('#REF!');
+      throw getCustomError('#REF!');
     },
     getSheetInfo: (sheetId?: string, sheetName?: string) => {
       if (sheetName) {
@@ -190,7 +185,7 @@ export function computeFormulas(
       return workbook.find((v) => v.sheetId === realSheetId);
     },
     setDefinedName: () => {
-      throw new CustomError('#REF!');
+      throw getCustomError('#REF!');
     },
     getDefinedName: (name: string) => {
       const r = definedNames[name];

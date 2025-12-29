@@ -1,9 +1,4 @@
-import {
-  IRange,
-  WorksheetType,
-  ModelCellType,
-  FormulaFunction,
-} from '../types';
+import { IRange, WorksheetType, ModelCellType } from '../types';
 import { type SheetRange } from '../util/range';
 
 export type ResultType = boolean | string | number;
@@ -257,7 +252,7 @@ export interface CellDataMap {
    * @param name - The name of the function to retrieve.
    * @returns The function associated with the specified name, or undefined if the function does not exist.
    */
-  getFunction: (name: string) => FormulaFunction | undefined;
+  getFunction: (name: string) => any;
 }
 
 /**

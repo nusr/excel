@@ -1,17 +1,17 @@
 import { Token } from './token';
-import { CustomError } from './formula';
+
 import {
   FORMULA_PREFIX,
-  ERROR_SET,
   BUILT_IN_FUNCTION_SET,
   CELL_REG_EXP,
   COLUMN_REG_EXP,
   DEFINED_NAME_REG_EXP,
   type BuiltInFormulas,
   ROW_REG_EXP,
-  type ErrorTypes,
   isDigit,
   isAlpha,
+  getCustomError,
+  anyError,
 } from '../util';
 import { TokenType } from '../types';
 
@@ -67,7 +67,7 @@ export class Scanner {
       this.next();
     }
     if (this.peek() !== end) {
-      throw new CustomError('#VALUE!');
+      throw getCustomError('#VALUE!');
     } else {
       this.next();
     }
@@ -94,10 +94,10 @@ export class Scanner {
       if (isDigit(this.peek())) {
         this.getDigits();
       } else {
-        throw new CustomError('#VALUE!');
+        throw getCustomError('#VALUE!');
       }
       if (this.peek() !== ']') {
-        throw new CustomError('#VALUE!');
+        throw getCustomError('#VALUE!');
       } else {
         this.next();
       }
@@ -119,7 +119,7 @@ export class Scanner {
         return true;
       }
       // 1E or 1.1E not valid
-      throw new CustomError('#VALUE!');
+      throw getCustomError('#VALUE!');
     }
     return false;
   }
@@ -164,7 +164,7 @@ export class Scanner {
     if (t === 'TRUE' || t === 'FALSE') {
       text = t;
       type = TokenType.BOOL;
-    } else if (ERROR_SET.has(t as ErrorTypes)) {
+    } else if (anyError(t)) {
       text = t;
       type = t === '#REF!' ? TokenType.ERROR_REF : TokenType.ERROR;
     } else if (CELL_REG_EXP.test(t)) {
@@ -176,7 +176,7 @@ export class Scanner {
     } else if (DEFINED_NAME_REG_EXP.test(t)) {
       type = TokenType.DEFINED_NAME;
     } else {
-      throw new CustomError('#NAME?');
+      throw getCustomError('#NAME?');
     }
 
     this.tokens.push(new Token(type, text));

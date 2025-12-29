@@ -2,23 +2,23 @@ import app from './route';
 import fs from 'fs';
 import path from 'path';
 import WebSocket from 'ws';
+import dotenv from 'dotenv';
+import { seedDatabase } from './db';
 
-process.env['CALLBACK_URL'] = 'http://localhost:4000/sync';
+dotenv.config({ path: path.join(__dirname, '..', '.env'), debug: true });
+
 process.env['CALLBACK_OBJECTS'] = JSON.stringify({ excel: 'Map' });
 
 import { setupWSConnection } from '@y/websocket-server/utils';
-import { seedDatabase } from './db'
 
-
-// Initialize on import
-seedDatabase().catch(error => {
+seedDatabase().catch((error) => {
   if (error?.message?.includes('UNIQUE constraint failed')) {
-    return
+    return;
   }
   console.error('Error seeding database:', error);
 });
 
-const port = 4000;
+const port = Number(process.env['SERVER_PORT']) || 4000;
 const server = app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
   console.log(`WebSocket running on ws://localhost:${port}`);

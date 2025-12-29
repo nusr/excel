@@ -18,8 +18,9 @@ describe('parseFormula function', () => {
     expectFormula('@SUM(1)', ['#NAME?']);
   });
   it('function ABS', () => {
-    expectFormula('ABS()', ['#VALUE!']);
+    expectFormula('ABS()', [0]);
     expectFormula('ABS("ff")', ['#VALUE!']);
+    expectFormula('ABS("ff") + SUM(1,2)', ['#VALUE!']);
 
     expectFormula('ABS(1)', [1]);
     expectFormula('ABS(-1)', [1]);

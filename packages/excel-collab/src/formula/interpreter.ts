@@ -24,7 +24,7 @@ import {
   GroupExpression,
   ArrayExpression,
 } from './expression';
-import { CustomError } from './formula';
+import { getCustomError, anyError } from '../util';
 
 export class Interpreter implements Visitor {
   private readonly expressions: Expression[];
@@ -78,7 +78,7 @@ export class Interpreter implements Visitor {
         return left + right;
       case TokenType.SLASH: {
         if (right === 0) {
-          throw new CustomError('#DIV/0!');
+          throw getCustomError('#DIV/0!');
         }
         return left / right;
       }
@@ -101,7 +101,7 @@ export class Interpreter implements Visitor {
       case TokenType.CONCATENATE:
         return `${left}${right}`;
       default:
-        throw new CustomError('#TEXT');
+        throw getCustomError('#GETTING_DATA');
     }
   }
   visitCallExpression(expr: CallExpression) {
@@ -117,16 +117,22 @@ export class Interpreter implements Visitor {
           params.push(t);
         }
       }
-      return callee(...params);
+      const res = callee(...params);
+
+      const t = anyError(res);
+      if (t) {
+        throw getCustomError(t);
+      }
+      return res;
     }
-    throw new CustomError('#NAME?');
+    throw getCustomError('#NAME?');
   }
   visitCellExpression(data: CellExpression) {
     let sheetId = '';
     if (data.sheetName) {
       const sheetInfo = this.cellDataMap.getSheetInfo('', data.sheetName.value);
       if (!sheetInfo?.sheetId) {
-        throw new CustomError('#REF!');
+        throw getCustomError('#REF!');
       }
       sheetId = sheetInfo.sheetId;
     }
@@ -149,7 +155,7 @@ export class Interpreter implements Visitor {
       }
     }
     if (!range) {
-      throw new CustomError('#REF!');
+      throw getCustomError('#REF!');
     }
     if (sheetId) {
       range.sheetId = sheetId;
@@ -166,12 +172,12 @@ export class Interpreter implements Visitor {
         if (check) {
           return num;
         }
-        throw new CustomError('#VALUE!');
+        throw getCustomError('#VALUE!');
       }
       case TokenType.BOOL:
         return value === 'TRUE';
       default:
-        throw new CustomError('#VALUE!');
+        throw getCustomError('#VALUE!');
     }
   }
   visitUnaryExpression(data: UnaryExpression): any {
@@ -183,7 +189,7 @@ export class Interpreter implements Visitor {
       case TokenType.PLUS:
         return result;
       default:
-        throw new CustomError('#VALUE!');
+        throw getCustomError('#VALUE!');
     }
   }
 
@@ -194,12 +200,12 @@ export class Interpreter implements Visitor {
         const b = this.visitCellExpression(expr.right);
         const result = mergeRange(a, b);
         if (!result) {
-          throw new CustomError('#NAME?');
+          throw getCustomError('#NAME?');
         }
         return result;
       }
       default:
-        throw new CustomError('#NAME?');
+        throw getCustomError('#NAME?');
     }
   }
   visitGroupExpression(expr: GroupExpression): any {
@@ -219,7 +225,7 @@ export class Interpreter implements Visitor {
       case TokenType.PERCENT:
         return result * 0.01;
       default:
-        throw new CustomError('#VALUE!');
+        throw getCustomError('#VALUE!');
     }
   }
   private evaluate(expr: Expression) {
@@ -230,7 +236,7 @@ export class Interpreter implements Visitor {
       if (value.colCount === value.rowCount && value.colCount === 1) {
         return this.getCellValue(value, true);
       }
-      throw new CustomError('#REF!');
+      throw getCustomError('#REF!');
     }
     return value;
   }
@@ -246,7 +252,7 @@ export class Interpreter implements Visitor {
   private parseNumber(value: any) {
     const [check, result] = parseNumber(value);
     if (!check) {
-      throw new CustomError('#VALUE!');
+      throw getCustomError('#VALUE!');
     }
     return result;
   }
@@ -266,7 +272,7 @@ export class Interpreter implements Visitor {
     const { row, col, sheetId } = range;
     const sheetInfo = this.cellDataMap.getSheetInfo(sheetId);
     if (!sheetInfo || row >= sheetInfo.rowCount || col >= sheetInfo.colCount) {
-      throw new CustomError('#REF!');
+      throw getCustomError('#REF!');
     }
     iterateRange(range, sheetInfo.rowCount, sheetInfo.colCount, (r, c) => {
       const t = this.cellDataMap.getCell({

@@ -4,13 +4,12 @@ import { npx, dpr } from '../util';
 import { makeFont } from '../util';
 import {
   DEFAULT_FONT_SIZE,
-  ERROR_SET,
   MERGE_CELL_LINE_BREAK,
   DEFAULT_FORMAT_CODE,
   DEFAULT_LINE_WIDTH,
   BORDER_TYPE_MAP,
-  type ErrorTypes,
   isEmpty,
+  anyError
 } from '../util';
 import {
   CanvasOverlayPosition,
@@ -285,7 +284,7 @@ export function renderCell(
   }
   // error text
   let fillStyle = cellInfo?.fontColor || getThemeColor('contentColor', theme);
-  if (ERROR_SET.has(text as ErrorTypes)) {
+  if (anyError(text)) {
     fillStyle = getThemeColor('errorFormulaColor', theme);
   }
 

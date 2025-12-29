@@ -14,15 +14,16 @@
     "@types/koa": "^3.0.1",
     "@types/koa__cors": "^5.0.1",
     "@types/koa__router": "^12.0.5",
-    "@types/sqlite3": "^5.1.0"
+    "@types/sqlite3": "^5.1.0",
+    "dotenv": "^17.2.3"
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
-    "@koa/router": "^15.0.0",
+    "@koa/router": "^15.1.1",
     "@types/ws": "^8.18.1",
     "@y/websocket-server": "^0.1.1",
     "koa": "^3.1.1",
-    "koa-body": "^7.0.0",
+    "koa-body": "^7.0.1",
     "sqlite3": "^5.1.7",
     "ws": "^8.18.3"
   }

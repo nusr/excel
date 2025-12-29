@@ -13,14 +13,14 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
-    "@sentry/react": "^10.27.0"
+    "@sentry/react": "^10.32.1"
   },
   "dependencies": {
     "excel-collab": "*",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "uuid": "^13.0.0",
     "y-websocket": "^3.0.0",
-    "yjs": "^13.6.27"
+    "yjs": "^13.6.28"
   }
 }

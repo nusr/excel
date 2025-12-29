@@ -16,4 +16,5 @@ export * from './saveAs';
 export * from './color';
 export * from './EventEmitter';
 export * from './image';
-export * from './split'
+export * from './split';
+export * from './formula';

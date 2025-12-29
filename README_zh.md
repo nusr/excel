@@ -122,41 +122,6 @@ npm run start
 - [x] 暗黑模式
 - [x] 国际化
 
-## Supported Formulas
+## 支持的公式
 
-### Math
-
-- [x] ABS
-- [x] ACOS
-- [x] ACOSH
-- [x] ACOT
-- [x] ACOTH
-- [x] ASIN
-- [x] ASINH
-- [x] ATAN
-- [x] ATAN2
-- [x] ATANH
-- [x] AVERAGE
-- [x] COS
-- [x] COT
-- [x] EXP
-- [x] INT
-- [x] PI
-- [x] SIN
-- [x] SUM
-
-### Text
-
-- [x] CHAR
-- [x] CODE
-- [x] CONCAT
-- [x] CONCATENATE
-- [x] LEN
-- [x] LOWER
-- [x] SPLIT
-- [x] T
-- [x] TEXT
-- [x] TRIM
-- [x] UNICHAR
-- [x] UNICODE
-- [x] UPPER
+支持的公式由 [formulajs](https://github.com/formulajs/formulajs) 提供

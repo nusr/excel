@@ -49,8 +49,9 @@ export const LANGUAGE_LIST = [
   ...RTL_LANGUAGE_LIST,
 ] as const;
 
+export const TEXT_FLAG = '#GETTING_DATA' as const;
+
 export const ERROR_SET = new Set([
-  '#GETTING_DATA',
   '#DIV/0!',
   '#NULL!',
   '#NUM!',
@@ -58,6 +59,7 @@ export const ERROR_SET = new Set([
   '#VALUE!',
   '#N/A',
   '#NAME?',
+  TEXT_FLAG,
 ] as const);
 
 export type ErrorTypes = typeof ERROR_SET extends Set<infer T> ? T : never;
@@ -171,8 +173,6 @@ export const COLOR_PICKER_COLOR_LIST = [
   '#FBD0E8',
   '#FDE8F3',
 ];
-
-export const TEXT_FLAG = '#TEXT' as const;
 
 export const CELL_REG_EXP = /^[$]?[A-Za-z]{1,3}[$]?[1-9][0-9]*$/;
 export const COLUMN_REG_EXP = /^[$]?[A-Za-z]{1,3}$/;

@@ -18,6 +18,7 @@ export default defineConfig({
       entry: './src/index.ts',
       cssFileName: 'style',
       name: 'Excel',
+      formats: ['es', 'umd'],
       fileName: (format, entryName) => {
         return `${entryName}.${format}.js`;
       },
