@@ -5,8 +5,9 @@ permissions:
 
 on:
   workflow_dispatch:
-  release:
-    types: [published]
+  push:
+    tags:
+      - '*'
 
 env:
   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -16,26 +17,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-          
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
-          
+
       - name: Setup Yarn
         run: npm install -g yarn
-        
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-        
+
       - name: Build packages
         run: yarn build
-        
+
       - name: Publish to NPM
         run: npx lerna publish from-package --no-private --yes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          
+
       - name: Show publish result
         run: |
           echo "Publish completed successfully!"

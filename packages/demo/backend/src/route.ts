@@ -125,8 +125,13 @@ router.get('/documents', async (ctx: Koa.Context) => {
 });
 
 router.post('/sync', async (ctx: Koa.Context) => {
-  const { room: id, data } = (ctx.request as any).body;
+  const body = (ctx.request as any).body;
+  const { room: id, data } = body;
   const content = data?.excel?.content;
+  if (!content) {
+    ctx.body = { message: 'content should be provided' };
+    return;
+  }
   ctx.assert(content, 401, 'content should be provided');
   const realContent = JSON.stringify(content);
   const result = await db.upsertDocument(id, {

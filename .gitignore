@@ -4,8 +4,6 @@ node_modules/**
 dist
 .vscode
 .idea
-yarn.lock
-package-lock.json
 coverage
 dist
 .DS_Store
@@ -19,7 +17,6 @@ playwright
 report
 docs
 *.diff.png
-*.lock
 /playwright-report/
 /blob-report/
 /playwright/.cache/
