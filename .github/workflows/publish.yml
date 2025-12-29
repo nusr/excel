@@ -8,6 +8,9 @@ on:
   push:
     tags:
       - '*'
+  create:
+    tags:
+      - '*'
 
 env:
   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
