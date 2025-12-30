@@ -4,7 +4,7 @@ coverage:
     - "**/*.test.ts"
   status:
     project:
-      default: off
+      default: true
       frontend:
         target: 50%
         flags:
