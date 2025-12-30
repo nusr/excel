@@ -3,46 +3,75 @@ on:
   push:
     branches:
       - main
-      - "v[0-9]+" # v1, v2, ...
-      - "v[0-9]+.[0-9]+" # v4.0, v4.1, ...
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 env:
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  VITE_DEFAULT_EXCEL_ID: ${{ vars.VITE_DEFAULT_EXCEL_ID }}
+  ROOT_BASE_URL: ${{ vars.ROOT_BASE_URL }}
 
 jobs:
   CI:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - name: Install font
         run: sudo npm run install-font
+
+      - name: Setup Yarn
+        run: npm install -g yarn
+
       - name: Install dependencies
-        run: |
-          npm i -g yarn
-          yarn
+        run: yarn install --frozen-lockfile
+
       - name: Type check
         run: npm run type-check
+
       - name: Lint
         run: npm run lint
+
       - name: Build
         run: npm run build
+
       - name: Unit test
         run: yarn coverage --verbose --debug
+
       - name: Upload coverage
         if: github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Upload test results to Codecov
         if: github.ref == 'refs/heads/main' && !cancelled()
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Setup Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./packages/demo/frontend/dist"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        if: github.ref == 'refs/heads/main'
+        uses: actions/deploy-pages@v4

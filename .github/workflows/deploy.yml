@@ -1,18 +1,14 @@
 name: Deploy to Github Pages
 on:
-  workflow_run:
-    workflows: [CI]
-    types:
-      - completed
-    branches: ['main']
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
-  
+
 concurrency:
-  group: 'pages'
+  group: "pages"
   cancel-in-progress: true
 
 env:
@@ -43,7 +39,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './packages/demo/frontend/dist'
+          path: "./packages/demo/frontend/dist"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
