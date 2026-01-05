@@ -748,9 +748,9 @@
   integrity sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==
 
 "@formulajs/formulajs@^4.5.5":
-  version "4.5.5"
-  resolved "https://registry.yarnpkg.com/@formulajs/formulajs/-/formulajs-4.5.5.tgz#f24e99669e15ed187691b50e0f909f780f0646c0"
-  integrity sha512-Brtye/l1yn5B/q3hcOPo7EIVd7m8bIoE401me4TAGFRyGGJYKJSf9+vRZCI+qOsK1wqpl3whj+24YAE4D/bC7Q==
+  version "4.5.6"
+  resolved "https://registry.yarnpkg.com/@formulajs/formulajs/-/formulajs-4.5.6.tgz#32b7a753444102cf8d1c0e163b203e698cd0e3a8"
+  integrity sha512-TAP0iNad2lPQz+mN2mAzpF9/EtclmiReKWoM4vx4hZC6Rw8Kfev4lqC7OmL0bqCDHj4mqYe3VwC2blb9vUEbPw==
   dependencies:
     bessel "^1.0.2"
     jstat "^1.9.6"
