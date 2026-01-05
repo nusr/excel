@@ -30,6 +30,7 @@ export default defineConfig((env) => {
     build: {
       sourcemap: true,
       outDir: './dist',
+      manifest: true
     },
     resolve: {
       alias,
