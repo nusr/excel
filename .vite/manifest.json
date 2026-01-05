@@ -1,0 +1,34 @@
+{
+  "../../excel-collab/lib/Chart-CCvnl4p2.mjs": {
+    "file": "assets/Chart-CCvnl4p2-q3d-BhjI.js",
+    "name": "Chart-CCvnl4p2",
+    "src": "../../excel-collab/lib/Chart-CCvnl4p2.mjs",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html"
+    ]
+  },
+  "../../excel-collab/lib/jszip.min-Ch-FpAW2.mjs": {
+    "file": "assets/jszip.min-Ch-FpAW2-DkO7K0UB.js",
+    "name": "jszip.min-Ch-FpAW2",
+    "src": "../../excel-collab/lib/jszip.min-Ch-FpAW2.mjs",
+    "isDynamicEntry": true,
+    "imports": [
+      "index.html"
+    ]
+  },
+  "index.html": {
+    "file": "assets/index-Dyo5Dmv7.js",
+    "name": "index",
+    "src": "index.html",
+    "isEntry": true,
+    "dynamicImports": [
+      "../../excel-collab/lib/Chart-CCvnl4p2.mjs",
+      "../../excel-collab/lib/jszip.min-Ch-FpAW2.mjs",
+      "../../excel-collab/lib/jszip.min-Ch-FpAW2.mjs"
+    ],
+    "css": [
+      "assets/index-U8KpMN2_.css"
+    ]
+  }
+}
