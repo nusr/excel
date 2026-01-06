@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.1.10 (2026-01-06)
+
+
+### Bug Fixes
+
+* CI ([2cffb94](https://github.com/nusr/excel/commit/2cffb94719b169d70e50b7861b13021f1e9dcf29))
+
+
+
+
+
 ## 0.1.9 (2025-12-29)
 
 
