@@ -178,13 +178,28 @@ jobs:
             exit 1
           fi
           
-          echo "🚀 Creating release: $TAG_NAME"
+          echo "🚀 Creating release via GitHub API: $TAG_NAME"
           
-          # Create release
-          gh release create "$TAG_NAME" \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "$TAG_NAME" \
-            --target "$COMMIT_ID" \
-            --notes "$PR_BODY"
+          # Create release using GitHub REST API (this will trigger the release event)
+          RELEASE_RESPONSE=$(curl -s -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{
+              \"tag_name\": \"$TAG_NAME\",
+              \"target_commitish\": \"$COMMIT_ID\",
+              \"name\": \"$TAG_NAME\",
+              \"body\": \"$PR_BODY\",
+              \"draft\": false,
+              \"prerelease\": false
+            }" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/releases")
           
-          echo "✅ Release created successfully: $TAG_NAME"
+          # Check if release was created successfully
+          RELEASE_ID=$(echo "$RELEASE_RESPONSE" | jq -r '.id')
+          if [ "$RELEASE_ID" == "null" ] || [ -z "$RELEASE_ID" ]; then
+            echo "❌ Failed to create release"
+            echo "Response: $RELEASE_RESPONSE"
+            exit 1
+          fi
+          
+          echo "✅ Release created successfully via GitHub API: $TAG_NAME (ID: $RELEASE_ID)"

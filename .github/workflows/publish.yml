@@ -8,9 +8,6 @@ on:
   release:
     types:
       - published
-  push:
-    tags:
-      - "*"
 
 concurrency:
   group: "publish"
