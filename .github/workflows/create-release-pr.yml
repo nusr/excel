@@ -22,135 +22,112 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: main
-          fetch-depth: 1000
-          submodules: true
+          fetch-depth: 1
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
 
-      - name: Setup Yarn
+      - name: Install Yarn
         run: npm install -g yarn
-
-      - name: Install dependencies
-        run: yarn
 
       - name: Configure git
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor.email }}"
 
-      - name: Execute release packages command
-        run: yarn release:patch && git status
-
-      - name: Set environment variables
-        id: set-env
+      - name: Install dependencies and execute release
         run: |
-          echo "Checking staged files..."
-          modified_files=$(git ls-files -m -o --exclude-standard)
-          echo "Modified files: $modified_files"
+          yarn
+          yarn release:patch
 
+      - name: Get modified files and validate
+        id: validate-files
+        run: |
+          echo "🔍 Checking staged files..."
+          modified_files=$(git ls-files -m -o --exclude-standard)
+          
+          if [ -z "$modified_files" ]; then
+            echo "❌ No modified files found"
+            exit 1
+          fi
+          
+          # Extract package.json and CHANGELOG.md paths
           package_json_path=$(echo "$modified_files" | grep "package.json" | head -n 1)
           changelog_path=$(echo "$modified_files" | grep "CHANGELOG.md" | head -n 1)
-
+          
           if [ -z "$package_json_path" ]; then
-            echo "package.json not found among modified files."
+            echo "❌ package.json not found among modified files"
             exit 1
           fi
+          
           if [ -z "$changelog_path" ]; then
-            echo "CHANGELOG.md not found among modified files."
+            echo "❌ CHANGELOG.md not found among modified files"
             exit 1
           fi
-
+          
+          # Extract changelog content
           latest_changelog=$(git diff --no-color "$changelog_path" | grep -E '^(\+[^+]|-)' | grep -Ev '^--- a/' | sed 's/^+//;s/^-//')
-
+          
           if [ -z "$latest_changelog" ]; then
-            echo "CHANGELOG.md has no changes."
+            echo "❌ CHANGELOG.md has no changes"
             exit 1
           fi
-
+          
+          # Save to temp file
           changelog_temp_file=$(mktemp)
-          echo "$latest_changelog" > $changelog_temp_file
-          echo "changelog_temp_file=$changelog_temp_file" >> $GITHUB_ENV
-
-          package_name=$(jq -r '.name' $package_json_path)
+          echo "$latest_changelog" > "$changelog_temp_file"
+          
+          # Extract package info
+          package_name=$(jq -r '.name' "$package_json_path")
           package_name="${package_name//@/}"
-          package_version=$(jq -r '.version' $package_json_path)
-          echo "package_name=$package_name" >> $GITHUB_ENV
-          echo "package_version=$package_version" >> $GITHUB_ENV
+          package_version=$(jq -r '.version' "$package_json_path")
+          
+          echo "📦 Package: $package_name"
+          echo "🏷️ Version: $package_version"
+          
+          # Set outputs
+          echo "package_name=$package_name" >> $GITHUB_OUTPUT
+          echo "package_version=$package_version" >> $GITHUB_OUTPUT
+          echo "changelog_temp_file=$changelog_temp_file" >> $GITHUB_OUTPUT
+          echo "branchName=pre-release/$package_name/$package_version" >> $GITHUB_OUTPUT
 
-          pre_release_tag_name="${package_version}"
-          echo "pre_release_tag_name=$pre_release_tag_name" >> $GITHUB_ENV
-
-      - name: Create new branch for pre-release
+      - name: Check branch and create commit
         run: |
-          branchName="pre-release/${{ env.package_name }}/${{ env.package_version }}"
-
-          if git ls-remote --exit-code --heads origin $branchName; then
-            echo "Branch $branchName already exists. Please check if this version has been released before."
+          branchName="${{ steps.validate-files.outputs.branchName }}"
+          
+          echo "🌿 Branch: $branchName"
+          
+          if git ls-remote --exit-code --heads origin "$branchName"; then
+            echo "❌ Branch already exists"
             exit 1
           fi
+          
           git checkout -B "$branchName"
-          git push --set-upstream origin $branchName
+          git add -A
+          git commit -m "chore(RELEASE): ${{ steps.validate-files.outputs.package_version }}"
+          git push --set-upstream origin "$branchName"
+          echo "✅ Branch and commit created"
 
-          echo "branchName=$branchName" >> $GITHUB_ENV
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22.0"
-          cache: false
-
-      - name: "Install ghcommit"
-        run: go install github.com/planetscale/ghcommit@v0.1.31
-
-      - name: Open PR
+      - name: Create PR
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          changed_files=$(git ls-files -m -o --exclude-standard)
-
-          echo "Changed files:"
-          echo "$changed_files"
-
-          echo "pre/release branch: ${{ env.branchName }}"
-
-          if [ -n "$changed_files" ]; then
-              CMD="ghcommit --empty -r ${{github.repository}} -b ${{ env.branchName }} -m \"chore(RELEASE): ${{ env.pre_release_tag_name }}\""
-              for file in $changed_files; do
-                  CMD+=" -a '${file#./}'"
-              done
-
-              echo "CMD: $CMD"
-              eval $CMD
-          else
-              echo "No changes detected."
-              exit 1
-          fi
-
-          changelog_temp_file="${{ env.changelog_temp_file }}"
-          change_content=$(cat "$changelog_temp_file")
-          echo "changelog_temp_file content: "
-          echo "$change_content"
-
+          changelog_content=$(cat "${{ steps.validate-files.outputs.changelog_temp_file }}")
           default_branch=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
-          pr_title="chore(RELEASE): ${{ env.pre_release_tag_name }}"
-          pr_body="$change_content"
-
-          echo "PR Title: $pr_title"
-          echo "PR Body: $pr_body"
-
-          result=$(gh pr create --title "$pr_title" --body "$pr_body" --base "$default_branch" --head "${{ env.branchName }}")
-
-          pr_url=$(echo "$result" | grep -oE "https://github.com/.*?/pull/[0-9]+" | head -n 1)
-          echo "pr_url=$pr_url" >> $GITHUB_ENV
-
-          echo "PR URL: $pr_url"
-          echo "PR created successfully"
-
-          rm "$changelog_temp_file"
-          echo "Temporary file removed"
+          
+          echo "🔗 Creating PR..."
+          pr_url=$(gh pr create \
+            --title "chore(RELEASE): ${{ steps.validate-files.outputs.package_version }}" \
+            --body "$changelog_content" \
+            --base "$default_branch" \
+            --head "${{ steps.validate-files.outputs.branchName }}")
+          
+          echo "✅ PR created: $pr_url"
+          
+          # Cleanup
+          rm -f "${{ steps.validate-files.outputs.changelog_temp_file }}"
 
   release:
     runs-on: ubuntu-latest
@@ -163,6 +140,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: "main"
+          fetch-depth: 1
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -174,75 +152,39 @@ jobs:
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
 
-      - name: Fetch PR Meta Data
-        id: pr_meta
+      - name: Fetch PR metadata and create release
+        id: release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PR_META=$(gh pr view ${{ github.event.pull_request.number }} --json number,title,body,mergeCommit)
-
-          PR_NUMBER=$(echo $PR_META | jq -r '.number')
-          PR_TITLE=$(echo $PR_META | jq -r '.title')
-          PR_BODY=$(echo $PR_META | jq -r '.body')
-          TAG_NAME=$(echo $PR_TITLE | sed -e 's/^chore(RELEASE): *//' -e 's/ *$//')
-          COMMIT_ID=$(echo $PR_META | jq -r '.mergeCommit.oid')
-
-          echo "PR_NUMBER: $PR_NUMBER"
-          echo "PR_TITLE: $PR_TITLE"
-          echo "PR_BODY: "
-          echo "$PR_BODY"
-          echo "TAG_NAME: $TAG_NAME"
-          echo "COMMIT_ID: $COMMIT_ID"
-
-          echo pr_number=$PR_NUMBER >> $GITHUB_OUTPUT
-          echo pr_title=$PR_TITLE >> $GITHUB_OUTPUT
-          echo tag_name=$TAG_NAME >> $GITHUB_OUTPUT
-          echo commit_id=$COMMIT_ID >> $GITHUB_OUTPUT
-
-          # Use a temporary file to store the release notes as the text is quite long.
-          releaseId=$(mktemp)
-          echo "$PR_BODY" > $releaseId.md
-          echo releaseFile=$releaseId.md >> $GITHUB_OUTPUT
-
-      - name: Validate PR tagName and commit
-        id: validate_pr
-        if: ${{ !steps.pr_meta.outputs.commit_id || !steps.pr_meta.outputs.tag_name }}
-        run: |
-          echo "PR TITLE: ${{ steps.pr_meta.outputs.pr_title }}"
-          echo "PR BODY: ${{ steps.pr_meta.outputs.pr_body }}"
-          echo "TAG NAME: ${{ steps.pr_meta.outputs.tag_name }}"
-          echo "COMMIT ID: ${{ steps.pr_meta.outputs.commit_id }}"
-
-          echo "::error::Invalid PR tagName or commit id, stopping the step"
-          exit 1
-
-      - name: Validate version format
-        id: validate_version
-        run: |
-          if [[ "${{ steps.pr_meta.outputs.tag_name }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "is_valid_version=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_valid_version=false" >> $GITHUB_OUTPUT
+          echo "🔍 Fetching PR metadata..."
+          
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          PR_META=$(gh pr view "$PR_NUMBER" --json number,title,body,mergeCommit)
+          
+          PR_TITLE=$(echo "$PR_META" | jq -r '.title')
+          PR_BODY=$(echo "$PR_META" | jq -r '.body')
+          TAG_NAME=$(echo "$PR_TITLE" | sed -e 's/^chore(RELEASE): *//' -e 's/ *$//')
+          COMMIT_ID=$(echo "$PR_META" | jq -r '.mergeCommit.oid')
+          
+          if [ -z "$COMMIT_ID" ]; then
+            echo "❌ No merge commit found"
+            exit 1
           fi
-
-      - name: Create a new release
-        if: steps.pr_meta.outputs.commit_id && (contains(steps.pr_meta.outputs.tag_name, '-hotfix-') || steps.validate_version.outputs.is_valid_version == 'true')
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Creating release for commit id: ${{ steps.pr_meta.outputs.commit_id }} with tra: ${{ steps.pr_meta.outputs.tag_name }}"
-
-          echo "Release notes file is: ${{ steps.pr_meta.outputs.releaseFile }}"
-          echo "Release notes:"
-          cat "${{ steps.pr_meta.outputs.releaseFile }}"
-
-          echo "------------ Creating release ------------"
-
-          gh release create "${{ steps.pr_meta.outputs.tag_name }}" \
+          
+          # Validate version format
+          if [[ ! "$TAG_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-hotfix-[0-9]+)?$ ]]; then
+            echo "❌ Invalid version format: $TAG_NAME"
+            exit 1
+          fi
+          
+          echo "🚀 Creating release: $TAG_NAME"
+          
+          # Create release
+          gh release create "$TAG_NAME" \
             --repo "$GITHUB_REPOSITORY" \
-            --title "${{ steps.pr_meta.outputs.tag_name }}" \
-            --target ${{ steps.pr_meta.outputs.commit_id }} \
-            --notes-file "${{ steps.pr_meta.outputs.releaseFile }}"
-
-          rm "${{ steps.pr_meta.outputs.releaseFile }}"
-          echo "Release created successfully"
+            --title "$TAG_NAME" \
+            --target "$COMMIT_ID" \
+            --notes "$PR_BODY"
+          
+          echo "✅ Release created successfully: $TAG_NAME"
