@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.1.11 (2026-01-06)
+
+
+### Bug Fixes
+
+* publish to NPM ([b10c402](https://github.com/nusr/excel/commit/b10c4028a56dbb22002cb6e7d53920494246c4dc))
+
+
+
+
+
 ## 0.1.10 (2026-01-06)
 
 
