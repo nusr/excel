@@ -14,25 +14,86 @@ const UPLOAD_PREFIX = '/upload/';
 app.use(cors());
 app.use(koaBody({ multipart: true, json: true }));
 
-app.use(async (ctx, next) => {
+// Error handling middleware
+export async function errorHandler(
+  ctx: Koa.Context,
+  next: () => Promise<void>,
+) {
   try {
-    console.log(ctx.method, ctx.url);
+    console.log(`${ctx.method} ${ctx.url}`);
     await next();
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = { message: (err as Error).message, stack: (err as Error).stack };
-  }
-});
 
-async function sendFile(ctx: Koa.Context) {
+    if (ctx.status === 404 && !ctx.body) {
+      ctx.status = 404;
+      ctx.body = { error: 'Not Found', message: `Path ${ctx.url} not found` };
+    }
+  } catch (err) {
+    const error = err as Error & { status?: number };
+
+    // Check if error has a custom status code
+    if (error.status) {
+      ctx.status = error.status;
+      ctx.body = { error: error.message || 'Error', message: error.message };
+    } else if (ctx.status >= 400) {
+      ctx.body = { error: 'Bad Request', message: error.message };
+    } else {
+      ctx.status = 500;
+      ctx.body = {
+        error: 'Internal Server Error',
+        message: 'An unexpected error occurred',
+      };
+    }
+  }
+}
+
+app.use(errorHandler);
+
+export function assertParam(
+  ctx: Koa.Context,
+  param: any,
+  message: string,
+): asserts param {
+  if (!param) {
+    ctx.throw(400, message);
+  }
+}
+
+export function assertString(
+  ctx: Koa.Context,
+  param: any,
+  message: string,
+): asserts param is string {
+  if (typeof param !== 'string') {
+    ctx.throw(400, message);
+  }
+}
+
+export function assertNumber(
+  ctx: Koa.Context,
+  param: any,
+  message: string,
+): asserts param is number {
+  if (typeof param !== 'number' || isNaN(param)) {
+    ctx.throw(400, message);
+  }
+}
+
+export async function sendFile(ctx: Koa.Context) {
   const fileId = parseInt(ctx.params.fileId, 10);
-  ctx.assert(fileId, 401, 'fileId should be provided');
+
+  // Validate fileId is a valid number before proceeding
+  if (isNaN(fileId)) {
+    ctx.throw(400, 'fileId should be a valid number');
+    return; // Return after throwing to ensure no further execution
+  }
+  assertNumber(ctx, fileId, 'fileId should be a valid number');
+
   const result = await db.findFile(fileId);
   if (!result) {
-    ctx.throw(404);
+    ctx.throw(404, `File with ID ${fileId} not found`);
+    return; // Return after throwing to ensure no further execution
   }
-  ctx.response.status = 200;
+
   ctx.response.lastModified = new Date(result.last_modified ?? new Date());
   ctx.response.length = result.size;
   ctx.type = path.extname(result.name);
@@ -64,16 +125,21 @@ router.get('/', async (ctx: Koa.Context) => {
 
 router.post('/upload', async (ctx: Koa.Context) => {
   const list = (ctx.request as any).files?.file;
-  ctx.assert(list, 401, 'file is required');
+  assertParam(ctx, list, 'No file uploaded');
+
   const file = Array.isArray(list) ? list[0] : list;
+
+  assertString(ctx, file.originalFilename, 'File name is required');
+  assertNumber(ctx, file.size, 'File size must be a number');
+
   const reader = await fs.promises.readFile(file.filepath);
-  const name = file.originalFilename ?? '';
   const result = await db.createFile({
-    name,
+    name: file.originalFilename ?? '',
     content: reader,
     size: file.size,
     last_modified: file.mtime,
   });
+
   const { content: _content, ...rest } = result;
   ctx.body = {
     ...rest,
@@ -88,58 +154,90 @@ router.head(`${UPLOAD_PREFIX}:fileId`, async (ctx: Koa.Context) => {
   await sendFile(ctx);
 });
 
-router.post('/document', async (ctx: Koa.Context) => {
+// POST create document
+export const createDocument = async (ctx: Koa.Context) => {
   const { id, name } = (ctx.request as any).body;
-  ctx.assert(typeof name === 'string', 401, 'name should be a string');
-  ctx.assert(id, 401, 'id should be provided');
-  const result = await db.createDocument({ name, id });
-  ctx.body = result;
-});
+  assertString(ctx, id, 'Document ID must be a string');
+  assertString(ctx, name, 'Document name must be a string');
 
-router.delete('/document/:id', async (ctx: Koa.Context) => {
+  const result = await db.createDocument({ name, id });
+  ctx.status = 201;
+  ctx.body = result;
+};
+
+// DELETE document
+export const deleteDocument = async (ctx: Koa.Context) => {
   const id = ctx.params.id;
-  ctx.assert(id, 401, 'id should be provided');
+  assertString(ctx, id, 'Document ID must be a string');
+
   const result = await db.deleteDocument(id);
   ctx.body = result;
-});
+};
 
-router.put('/document/:id', async (ctx: Koa.Context) => {
+// PUT update document
+export const updateDocument = async (ctx: Koa.Context) => {
   const { name, content } = (ctx.request as any).body;
   const id = ctx.params.id;
-  ctx.assert(name || content, 401, 'name or content should be provided');
-  ctx.assert(id, 401, 'id should be provided');
+
+  assertString(ctx, id, 'Document ID must be a string');
+  assertParam(ctx, name || content, 'Either name or content must be provided');
+
   const result = await db.updateDocument(id, { name, content });
   ctx.body = result;
-});
+};
 
-router.get('/document/:id', async (ctx: Koa.Context) => {
+// GET document by id
+export const findDocument = async (ctx: Koa.Context) => {
   const id = ctx.params.id;
-  ctx.assert(id, 401, 'id should be provided');
+  assertString(ctx, id, 'Document ID must be a string');
+
   const result = await db.findDocument(id);
+  if (!result) {
+    ctx.throw(404, `Document with ID ${id} not found`);
+  }
   ctx.body = result;
-});
+};
 
-router.get('/documents', async (ctx: Koa.Context) => {
-  const result = await db.findAllDocuments('desc');
+// GET all documents
+export const listDocuments = async (ctx: Koa.Context) => {
+  const orderBy = (ctx.query.orderBy as 'asc' | 'desc') || 'desc';
+
+  if (orderBy !== 'asc' && orderBy !== 'desc') {
+    ctx.throw(400, 'orderBy must be either "asc" or "desc"');
+  }
+
+  const result = await db.findAllDocuments(orderBy);
   ctx.body = result;
-});
+};
 
-router.post('/sync', async (ctx: Koa.Context) => {
+// Sync document
+export const sync = async (ctx: Koa.Context) => {
   const body = (ctx.request as any).body;
   const { room: id, data } = body;
+
   const content = data?.excel?.content;
+
   if (!content) {
     ctx.body = { message: 'content should be provided' };
     return;
   }
-  ctx.assert(content, 401, 'content should be provided');
+  assertString(ctx, id, 'Room ID must be a string');
   const realContent = JSON.stringify(content);
   const result = await db.upsertDocument(id, {
     content: realContent,
     id,
   });
+
   ctx.body = result;
-});
+};
+
+// Route definitions
+router.post('/document', createDocument);
+router.delete('/document/:id', deleteDocument);
+router.put('/document/:id', updateDocument);
+router.get('/document/:id', findDocument);
+router.get('/documents', listDocuments);
+router.post('/sync', sync);
 
 app.use(router.routes()).use(router.allowedMethods());
 

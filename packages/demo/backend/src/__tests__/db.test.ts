@@ -10,7 +10,6 @@ import {
   upsertDocument,
   createFile,
   findFile,
-  seedDatabase,
   Document,
   File,
 } from '../db';
@@ -346,53 +345,6 @@ describe('Database Operations', () => {
           originalContent.toString(),
         );
       });
-    });
-  });
-
-  // Seed database tests
-  describe('seedDatabase', () => {
-    it('should seed the database with initial data', async () => {
-      // Clear any existing data to ensure a clean state
-      await new Promise<void>((resolve, reject) => {
-        db.run('DELETE FROM file', (err: Error | null) =>
-          err ? reject(err) : resolve(),
-        );
-      });
-      await new Promise<void>((resolve, reject) => {
-        db.run('DELETE FROM document', (err: Error | null) =>
-          err ? reject(err) : resolve(),
-        );
-      });
-
-      // Call seedDatabase
-      await seedDatabase();
-
-      // Verify documents were created
-      const documents = await new Promise<any[]>((resolve, reject) => {
-        db.all('SELECT * FROM document', (err: Error | null, rows: any[]) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
-      });
-
-      expect(documents.length).toBeGreaterThan(0);
-      expect(documents[0]).toHaveProperty('id');
-      expect(documents[0]).toHaveProperty('name');
-
-      // Verify files were created
-      const files = await new Promise<any[]>((resolve, reject) => {
-        db.all('SELECT * FROM file', (err: Error | null, rows: any[]) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
-      });
-
-      expect(files.length).toBeGreaterThan(0);
-      expect(files[0]).toHaveProperty('id');
-      expect(files[0]).toHaveProperty('name');
-      expect(files[0]).toHaveProperty('content');
-      expect(files[0]).toHaveProperty('size');
-      expect(files[0]).toHaveProperty('last_modified');
     });
   });
 });

@@ -19,17 +19,24 @@ export interface File {
   size: number;
 }
 
-const db = new sqlite3.Database('./dev.db');
+// Database connection
+const db = new sqlite3.Database('./dev.db', (err) => {
+  if (err) {
+    console.error('Error opening database:', err);
+    throw err;
+  }
+  console.log('Connected to SQLite database');
+});
 
 // Enable verbose mode for debugging
 sqlite3.verbose();
 
 // Promisify database operations
-function runAsync(sql: string, params: any[] = []): Promise<void> {
+function runAsync(sql: string, params: any[] = []): Promise<sqlite3.RunResult> {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (this: sqlite3.RunResult, err: Error | null) {
       if (err) reject(err);
-      else resolve();
+      else resolve(this);
     });
   });
 }
@@ -72,6 +79,11 @@ export async function initDatabase(): Promise<void> {
       size INTEGER NOT NULL
     )
   `);
+
+  // Add indexes for better performance
+  await runAsync(`CREATE INDEX IF NOT EXISTS idx_document_create_time ON document(create_time)`);
+  await runAsync(`CREATE INDEX IF NOT EXISTS idx_file_name ON file(name)`);
+  await runAsync(`CREATE INDEX IF NOT EXISTS idx_file_last_modified ON file(last_modified)`);
 }
 
 export async function createDocument(data: Document): Promise<Document> {
@@ -166,33 +178,21 @@ export async function upsertDocument(
 }
 
 export async function createFile(data: File): Promise<File> {
-  return new Promise((resolve, reject) => {
-    db.run(
-      'INSERT INTO file (id, name, content, size, last_modified) VALUES (?, ?, ?, ?, ?)',
-      [
-        data.id,
-        data.name,
-        Buffer.from(data.content),
-        data.size,
-        data.last_modified ?? new Date().toISOString(),
-      ],
-      function (this: sqlite3.RunResult, err: Error | null) {
-        if (err) {
-          reject(err);
-        } else {
-          getAsync<File>('SELECT * FROM file WHERE id = ?', [this.lastID])
-            .then((result) => {
-              if (!result) {
-                reject(new Error('Failed to create file'));
-              } else {
-                resolve(result);
-              }
-            })
-            .catch(reject);
-        }
-      },
-    );
-  });
+  const result = await runAsync(
+    'INSERT INTO file (id, name, content, size, last_modified) VALUES (?, ?, ?, ?, ?)',
+    [
+      data.id,
+      data.name,
+      Buffer.from(data.content),
+      data.size,
+      data.last_modified ?? new Date().toISOString(),
+    ],
+  );
+  const file = await getAsync<File>('SELECT * FROM file WHERE id = ?', [result.lastID]);
+  if (!file) {
+    throw new Error('Failed to create file');
+  }
+  return file;
 }
 
 export async function findFile(id: number): Promise<File | null> {
@@ -233,10 +233,32 @@ export async function seedDatabase() {
   console.log(`Start seeding ...`);
   await initDatabase();
 
-  await Promise.all([
-    ...documents.map((doc) => createDocument(doc)),
-    ...files.map((file) => createFile(file)),
-  ]);
+  // Insert documents if not already exists
+  for (const doc of documents) {
+    try {
+      await createDocument(doc);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+        console.log(`Document with id ${doc.id} already exists`);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  // Insert files if not already exists
+  for (const file of files) {
+    try {
+      await createFile(file);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+        console.log(`File with id ${file.id} already exists`);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   console.log(`Seeding finished.`);
 }
 
