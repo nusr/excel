@@ -180,10 +180,6 @@ jobs:
           
           echo "🚀 Creating release: $TAG_NAME"
           
-          # Create git tag and push it to trigger publish.yml via push: tags
-          git tag "$TAG_NAME" "$COMMIT_ID"
-          git push origin "$TAG_NAME"
-          
           # Create release using gh CLI
           gh release create "$TAG_NAME" \
             --repo "$GITHUB_REPOSITORY" \
@@ -192,3 +188,24 @@ jobs:
             --notes "$PR_BODY"
           
           echo "✅ Release created successfully: $TAG_NAME"
+          
+      - name: Trigger publish workflow
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🚀 Triggering publish workflow..."
+          
+          # Check if release was created successfully
+          if [ "${{ job.status }}" != "success" ]; then
+            echo "❌ Release job failed, skipping publish trigger"
+            exit 0
+          fi
+          
+          # Trigger publish workflow using workflow_dispatch event
+          gh workflow run publish.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "main" \
+            || echo "⚠️ Failed to trigger publish workflow"
+          
+          echo "✅ Publish workflow triggered"
