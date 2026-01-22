@@ -13,6 +13,9 @@ export async function goto(page: Page, url = INDEX_PAGE) {
   });
 
   page.on('console', (msg) => {
+    if (process.env.E2E_TEST) {
+      return;
+    }
     const type = msg.type();
     const text = msg.text();
     if (type === 'error') {
