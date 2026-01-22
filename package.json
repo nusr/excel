@@ -59,7 +59,7 @@
     "vite-plugin-dts": "^4.5.4"
   },
   "resolutions": {
-    "tar": "^7.5.3"
+    "tar": "^7.5.4"
   },
   "packageManager": "yarn@1.22.22"
 }
