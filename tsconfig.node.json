@@ -14,6 +14,8 @@
     "vitest.config.ts",
     "vitest.workspace.ts",
     "packages/**/vite.config.ts",
-    "packages/**/vitest.config.ts"
+    "packages/**/vitest.config.ts",
+    "e2e",
+    "playwright.config.ts"
   ]
 }

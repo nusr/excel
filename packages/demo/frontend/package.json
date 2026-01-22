@@ -4,16 +4,13 @@
   "private": true,
   "scripts": {
     "start": "vite --host --port 3000",
-    "e2e": "playwright test",
-    "e2e:ui": "npm run e2e -- --ui",
     "build": "vite build",
     "type-check": "tsc",
     "test": "jest --forceExit --detectOpenHandles",
     "test:ci": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
-    "@sentry/react": "^10.32.1"
+    "@sentry/react": "^10.36.0"
   },
   "dependencies": {
     "excel-collab": "*",
@@ -21,6 +18,6 @@
     "react-dom": "^19.2.3",
     "uuid": "^13.0.0",
     "y-websocket": "^3.0.0",
-    "yjs": "^13.6.28"
+    "yjs": "^13.6.29"
   }
 }

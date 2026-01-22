@@ -25,9 +25,10 @@ export default defineConfig((env) => {
       }),
     ],
     define: {
-      'process.env.CI': JSON.stringify(process.env.CI ?? ''),
+      'process.env.E2E_TEST': JSON.stringify(process.env.E2E_TEST ?? ''),
     },
     build: {
+      modulePreload: true,
       sourcemap: true,
       outDir: './dist',
       manifest: true

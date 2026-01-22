@@ -8,7 +8,6 @@ import { getDocId, getProvider } from './util';
 import { VITE_WEBSOCKET_URL } from './constant';
 import { List } from './List';
 import { type IProvider } from './provider';
-import 'vite/modulepreload-polyfill';
 
 const callback = async (_: any, id: string) => {
   location.hash = `#${id}`;

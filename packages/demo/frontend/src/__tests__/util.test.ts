@@ -17,11 +17,17 @@ jest.mock('../constant', () => {
     BASE_URL: '/',
     VITE_BACKEND_URL: '',
   };
-  
+
   return {
-    get VITE_DEFAULT_EXCEL_ID() { return mockConstants.VITE_DEFAULT_EXCEL_ID; },
-    get BASE_URL() { return mockConstants.BASE_URL; },
-    get VITE_BACKEND_URL() { return mockConstants.VITE_BACKEND_URL; },
+    get VITE_DEFAULT_EXCEL_ID() {
+      return mockConstants.VITE_DEFAULT_EXCEL_ID;
+    },
+    get BASE_URL() {
+      return mockConstants.BASE_URL;
+    },
+    get VITE_BACKEND_URL() {
+      return mockConstants.VITE_BACKEND_URL;
+    },
     __setMockConstants: (newConstants: any) => {
       Object.assign(mockConstants, newConstants);
     },
@@ -58,29 +64,29 @@ const getDocId = jest.fn().mockImplementation(() => {
   if (hash.startsWith('#')) {
     return hash.slice(1);
   }
-  return constantsModule.VITE_DEFAULT_EXCEL_ID || '184858c4-be37-41b5-af82-52689004e605';
-});
-
-const jumpPage = jest.fn().mockImplementation((route: 'collab' | '' | 'app', id?: string) => {
-  mockLocation.href = mockLocation.origin + constantsModule.BASE_URL + route + (id ? '#' + id : '');
-});
-
-const isE2ETest = jest.fn().mockImplementation(() => {
-  const flag = 'is_e2e_test=true';
   return (
-    mockLocation.search.includes(flag) || mockParent?.location?.search?.includes?.(flag)
+    constantsModule.VITE_DEFAULT_EXCEL_ID ||
+    '184858c4-be37-41b5-af82-52689004e605'
   );
 });
 
+const jumpPage = jest
+  .fn()
+  .mockImplementation((route: 'collab' | '' | 'app', id?: string) => {
+    mockLocation.href =
+      mockLocation.origin +
+      constantsModule.BASE_URL +
+      route +
+      (id ? '#' + id : '');
+  });
+
 const getProvider = jest.fn().mockImplementation(async (_callback: any) => {
   const httpBaseUrl = constantsModule.VITE_BACKEND_URL;
-  const provider = httpBaseUrl
-    ? mockRemoteProvider
-    : mockLocalProvider;
+  const provider = httpBaseUrl ? mockRemoteProvider : mockLocalProvider;
 
   const docId = getDocId();
   const doc = await provider.getDocument(docId);
-  if (!doc && !isE2ETest()) {
+  if (!doc) {
     await provider.addDocument(docId);
     const mockData = { drawings: {} }; // Simplified mock data
     await provider.updateDocument(docId, {
@@ -204,35 +210,6 @@ describe('Util Functions Tests (Clean)', () => {
     });
   });
 
-  describe('isE2ETest', () => {
-    it('should return true when flag is in current location search', () => {
-      mockLocation.search = '?is_e2e_test=true&other=param';
-      mockParent.location.search = '';
-
-      const result = isE2ETest();
-
-      expect(result).toBe(true);
-    });
-
-    it('should return true when flag is in parent location search', () => {
-      mockLocation.search = '';
-      mockParent.location.search = '?is_e2e_test=true&other=param';
-
-      const result = isE2ETest();
-
-      expect(result).toBe(true);
-    });
-
-    it('should return false when flag is not present', () => {
-      mockLocation.search = '?other=param';
-      mockParent.location.search = '?another=value';
-
-      const result = isE2ETest();
-
-      expect(result).toBe(false);
-    });
-  });
-
   describe('getProvider', () => {
     const mockCallback = jest.fn();
 
@@ -297,19 +274,6 @@ describe('Util Functions Tests (Clean)', () => {
             name: 'Template',
           },
         );
-      });
-
-      it('should not create document when not found but is E2E test', async () => {
-        mockRemoteProvider.getDocument.mockResolvedValue(null);
-        mockLocation.search = '?is_e2e_test=true';
-
-        await getProvider(mockCallback);
-
-        expect(mockRemoteProvider.getDocument).toHaveBeenCalledWith(
-          'test-doc-id',
-        );
-        expect(mockRemoteProvider.addDocument).not.toHaveBeenCalled();
-        expect(mockRemoteProvider.updateDocument).not.toHaveBeenCalled();
       });
     });
 

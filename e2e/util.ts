@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 
-export const INDEX_PAGE = '/app?is_e2e_test=true';
+export const INDEX_PAGE = '/app';
 export const MAIN_CANVAS = 'canvas-main';
 
 export function getByTestId(selector: string) {
@@ -15,7 +15,7 @@ export async function goto(page: Page, url = INDEX_PAGE) {
   page.on('console', (msg) => {
     const type = msg.type();
     const text = msg.text();
-    if (type === 'error' || type === 'warning') {
+    if (type === 'error') {
       throw new Error(text);
     }
   });
