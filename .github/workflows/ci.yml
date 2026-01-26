@@ -18,10 +18,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version: lts/*
 
       - name: Install font
         run: sudo npm run install-font
@@ -35,10 +38,10 @@ jobs:
           yarn playwright install --with-deps
 
       - name: Type check
-        run: npm run type-check
+        run: yarn type-check
 
       - name: Lint
-        run: npm run lint
+        run: yarn lint
 
       - name: Unit test
         run: yarn coverage --verbose --debug
@@ -63,7 +66,7 @@ jobs:
           retention-days: 5
 
       - name: Build
-        run: npm run build
+        run: yarn build
 
       - name: Deploy to GitHub Pages
         if: github.ref == 'refs/heads/main'

@@ -1,7 +1,7 @@
 import { defineConfig, AliasOptions } from 'vite';
 import react from '@vitejs/plugin-react';
 import { codecovVitePlugin } from '@codecov/vite-plugin';
-import { resolve } from 'path';
+import { join } from 'path';
 
 export default defineConfig((env) => {
   const isDev = env.mode === 'development';
@@ -10,7 +10,7 @@ export default defineConfig((env) => {
 
   if (isDev) {
     alias = {
-      'excel-collab': resolve(__dirname, '../../excel-collab/src'),
+      'excel-collab': join(__dirname, '..', '..', 'excel-collab', 'src'),
     };
   }
 
