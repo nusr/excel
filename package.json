@@ -20,7 +20,7 @@
     "test:ci": "lerna run test:ci",
     "coverage": "lerna run test:ci -- --coverage",
     "lint": "npx oxlint@latest --fix",
-    "prepare": "husky",
+    "prepare": "husky && npm run build",
     "repeat": "jscpd --ignore \"**/*.test.tsx,**/*.test.ts\" --reporters html --mode strict --min-lines 7 --blame --gitignore --exitCode 1 .",
     "install-font": "mkdir -p $HOME/.fonts && cp ./scripts/SourceCodePro-VariableFont_wght.ttf $HOME/.fonts/ && fc-cache -fv $HOME/.fonts",
     "release:major": "lerna version major --conventional-commits --no-private --no-push --yes --no-git-tag-version",
