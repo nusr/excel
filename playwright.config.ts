@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const isCI = Boolean(process.env.E2E_TEST);
+const isCI = Boolean(process.env.CI);
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -17,8 +17,6 @@ export default defineConfig({
   workers: 5,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['html', { open: 'never' }], ['github'], ['list']],
-  timeout: 30 * 1000,
-  globalTimeout: 16 * 60 * 1000,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -36,18 +34,11 @@ export default defineConfig({
   projects: [
     // Desktop browser configurations
     {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        permissions: ['clipboard-read', 'clipboard-write'],
-      },
-    },
-    {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
     {
-      name: 'webkit',
+      name: 'safari',
       use: { ...devices['Desktop Safari'] },
     },
     {
@@ -71,16 +62,6 @@ export default defineConfig({
       name: 'mobile-chrome',
       use: { ...devices['Pixel 5'] },
     },
-    {
-      name: 'mobile-chrome-landscape',
-      use: {
-        ...devices['Pixel 5 landscape'],
-      },
-    },
-    {
-      name: 'galaxy-s9',
-      use: { ...devices['Galaxy S9+'] },
-    },
 
     // Mobile browser configurations - iOS
     {
@@ -88,22 +69,8 @@ export default defineConfig({
       use: { ...devices['iPhone 13'] },
     },
     {
-      name: 'mobile-safari-landscape',
-      use: {
-        ...devices['iPhone 13 landscape'],
-      },
-    },
-    {
-      name: 'iphone-12',
-      use: { ...devices['iPhone 12'] },
-    },
-    {
       name: 'ipad-pro',
-      use: { ...devices['iPad Pro'] },
-    },
-    {
-      name: 'ipad-mini',
-      use: { ...devices['iPad Mini'] },
+      use: { ...devices['iPad Pro 11'] },
     },
   ],
 

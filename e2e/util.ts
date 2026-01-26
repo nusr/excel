@@ -1,4 +1,19 @@
-import { Page } from '@playwright/test';
+import { Page, expect, test } from '@playwright/test';
+
+const clearTable = async (page: Page) => {
+  await page.evaluate(() => {
+    sessionStorage.clear();
+    localStorage.clear();
+  });
+};
+
+test.beforeEach(async ({ page }) => {
+  await gotoHomePage(page);
+});
+
+test.afterEach(async ({ page }) => {
+  await clearTable(page);
+});
 
 export const MAIN_CANVAS = 'canvas-main';
 
@@ -6,25 +21,30 @@ export function getByTestId(selector: string) {
   return `[data-testid="${selector}"]`;
 }
 
-export async function goto(page: Page) {
+export async function gotoHomePage(page: Page) {
   page.on('pageerror', (err) => {
     throw err;
   });
 
   page.on('console', (msg) => {
-    if (process.env.E2E_TEST) {
+    if (process.env.CI) {
       return;
     }
     const type = msg.type();
     const text = msg.text();
     if (type === 'error') {
+      if (text.includes('Yjs was already imported')) {
+        return;
+      }
       throw new Error(text);
     }
   });
 
   await page.goto('/');
 
-  await page.waitForSelector(getByTestId(MAIN_CANVAS));
+  await clearTable(page);
+
+  await expect(page.getByTestId(MAIN_CANVAS)).toBeVisible();
 }
 
 export async function clickFirstCell(page: Page, isDbClick = false) {

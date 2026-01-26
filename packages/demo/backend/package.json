@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
-    "@koa/router": "^15.2.0",
+    "@koa/router": "^15.3.0",
     "@types/ws": "^8.18.1",
     "@y/websocket-server": "^0.1.1",
     "koa": "^3.1.1",

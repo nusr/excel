@@ -24,17 +24,19 @@ export default defineConfig((env) => {
         uploadToken: process.env.CODECOV_TOKEN,
       }),
     ],
-    define: {
-      'process.env.E2E_TEST': JSON.stringify(process.env.E2E_TEST ?? ''),
-    },
     build: {
       modulePreload: true,
       sourcemap: true,
       outDir: './dist',
-      manifest: true
+      manifest: true,
     },
     resolve: {
       alias,
+    },
+    server: {
+      port: 3000,
+      open: false,
+      host: true,
     },
   };
 });

@@ -53,7 +53,7 @@ jobs:
       - name: E2E tests
         run: yarn e2e
         env:
-          E2E_TEST: true
+          CI: true
 
       - name: Upload Playwright test report
         uses: actions/upload-artifact@v4

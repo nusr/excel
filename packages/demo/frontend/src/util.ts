@@ -20,7 +20,7 @@ export async function getProvider(
 
   const docId = getDocId();
   const doc = await provider.getDocument(docId);
-  if (!doc && !process.env.E2E_TEST) {
+  if (!doc && import.meta.env.MODE !== 'e2e') {
     await provider.addDocument(docId);
     const data = { ...mockModal };
     for (const [k, v] of Object.entries(data.drawings)) {
