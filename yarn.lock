@@ -6481,9 +6481,9 @@ npmlog@^6.0.0:
     set-blocking "^2.0.0"
 
 numfmt@^3.2.3:
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-3.2.3.tgz#5e3ea0de4f1b962271b295199cf5f6c7ad4332c4"
-  integrity sha512-q5vjJSiuomxYNNVhB/TWqjtctZz+fnscUchvwonutXZ/neY2XLw6z4q3DS4ijLDrP5Y/tgrVeP1/7PjgHRoZuw==
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-3.2.4.tgz#5946abfa475fda1c90be9357e1584224df938637"
+  integrity sha512-jtWPEIZwQgKudd/bRfslnLQdSvZpHOScrDRJoQO2NSrtRDM2gyaL6HGn2xJOjZuRh5ffCz10IX3puVHiz/qI/A==
 
 nwsapi@^2.2.16:
   version "2.2.23"
