@@ -81,8 +81,8 @@ jobs:
         run: |
           echo "Checking if site is accessible..."
           commit_id="${{ github.sha }}"
-          max_retries=3
-          retry_interval=20
+          max_retries=5
+          retry_interval=5
           for i in $(seq 1 $max_retries); do
             echo "Attempt $i/$max_retries: Waiting ${retry_interval}s for deployment to propagate..."
             sleep $retry_interval
