@@ -11,6 +11,7 @@ env:
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   VITE_DEFAULT_EXCEL_ID: ${{ vars.VITE_DEFAULT_EXCEL_ID }}
   ROOT_BASE_URL: ${{ vars.ROOT_BASE_URL }}
+  COMMIT_ID: ${{ github.sha }}
 
 jobs:
   CI:
@@ -82,9 +83,12 @@ jobs:
           sleep 20
           echo "Checking if site is accessible..."
           response=$(curl -sL https://nusr.github.io/excel)
-          if echo "$response" | grep -q "excel/assets"; then
-            echo "✓ Deployment successful!"
+          echo "Verifying COMMIT_ID injection..."
+          commit_id="${{ github.sha }}"
+          if echo "$response" | grep -q "$commit_id"; then
+            echo "✓ COMMIT_ID ($commit_id) successfully injected into HTML"
           else
-            echo "✗ Deployment check failed!"
+            echo "✗ COMMIT_ID verification failed - commit ID not found in HTML!"
             exit 1
           fi
+          echo "✓ Deployment successful!"
