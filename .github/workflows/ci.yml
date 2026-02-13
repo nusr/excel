@@ -79,16 +79,20 @@ jobs:
       - name: Verify deployment
         if: github.ref == 'refs/heads/main'
         run: |
-          echo "Waiting 20 seconds for deployment to propagate..."
-          sleep 20
           echo "Checking if site is accessible..."
-          response=$(curl -sL https://nusr.github.io/excel)
-          echo "Verifying COMMIT_ID injection..."
           commit_id="${{ github.sha }}"
-          if echo "$response" | grep -q "$commit_id"; then
-            echo "✓ COMMIT_ID ($commit_id) successfully injected into HTML"
-          else
-            echo "✗ COMMIT_ID verification failed - commit ID not found in HTML!"
-            exit 1
-          fi
-          echo "✓ Deployment successful!"
+          max_retries=3
+          retry_interval=20
+          for i in $(seq 1 $max_retries); do
+            echo "Attempt $i/$max_retries: Waiting ${retry_interval}s for deployment to propagate..."
+            sleep $retry_interval
+            response=$(curl -sL https://nusr.github.io/excel)
+            if echo "$response" | grep -q "$commit_id"; then
+              echo "✓ COMMIT_ID ($commit_id) successfully injected into HTML"
+              echo "✓ Deployment successful!"
+              exit 0
+            fi
+            echo "Commit ID ($commit_id) not found yet, retrying..."
+          done
+          echo "✗ COMMIT_ID ($commit_id) verification failed after $max_retries attempts - commit ID not found in HTML!"
+          exit 1
