@@ -38,17 +38,17 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.2.3",
+    "@types/node": "^25.5.0",
     "@types/pngjs": "^6.0.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@vitejs/plugin-react": "^5.2.0",
     "canvas": "^3.2.1",
     "husky": "^9.1.7",
-    "jest": "^30.2.0",
-    "jest-environment-jsdom": "^30.2.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
     "jest-junit": "^16.0.0",
-    "lerna": "^9.0.4",
+    "lerna": "^9.0.7",
     "pngjs": "^7.0.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -59,7 +59,7 @@
     "vite-plugin-dts": "^4.5.4"
   },
   "resolutions": {
-    "tar": "^7.5.7"
+    "tar": "^7.5.11"
   },
   "packageManager": "yarn@1.22.22"
 }

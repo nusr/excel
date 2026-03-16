@@ -19,10 +19,10 @@
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
-    "@koa/router": "^15.3.0",
+    "@koa/router": "^15.4.0",
     "@types/ws": "^8.18.1",
-    "@y/websocket-server": "^0.1.1",
-    "koa": "^3.1.1",
+    "@y/websocket-server": "^0.1.5",
+    "koa": "^3.1.2",
     "koa-body": "^7.0.1",
     "sqlite3": "^5.1.7",
     "ws": "^8.19.0"

@@ -33,8 +33,8 @@
     "jszip": "^3.10.1",
     "numfmt": "^3.2.4",
     "uuid": "^13.0.0",
-    "yjs": "^13.6.29",
-    "zustand": "^5.0.11"
+    "yjs": "^13.6.30",
+    "zustand": "^5.0.12"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

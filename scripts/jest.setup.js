@@ -107,7 +107,28 @@ if (!global.location) {
     reload() {},
   };
 }
-global.location.reload = () => {};
+try {
+  Object.defineProperty(global, 'location', {
+    value: {
+      // @ts-ignore
+      ancestorOrigins: global.location.ancestorOrigins,
+      href: global.location.href,
+      origin: global.location.origin,
+      protocol: global.location.protocol,
+      host: global.location.host,
+      hostname: global.location.hostname,
+      port: global.location.port,
+      pathname: global.location.pathname,
+      search: global.location.search,
+      hash: global.location.hash,
+      reload: () => {},
+    },
+    writable: true,
+    configurable: true,
+  });
+} catch (e) {
+  // location is non-configurable in this environment; ignore
+}
 
 global.localStorage = new LocalStorageMock();
 global.sessionStorage = new LocalStorageMock();
