@@ -2,27 +2,14 @@ import { defineConfig, AliasOptions } from 'vite';
 import react from '@vitejs/plugin-react';
 import { codecovVitePlugin } from '@codecov/vite-plugin';
 import { join } from 'path';
-import { version } from './package.json'
+import { version } from './package.json';
 
-type Options = {
-  rules: {
-    slot: string;
-    html: string;
-  }[];
-};
-
-function htmlSlot(options: Options) {
-  const { rules } = options;
-
+function htmlSlot(options: Record<string, string>) {
   return {
     name: 'html-slot',
     transformIndexHtml(indexHtml: string) {
-      if (rules.length === 0) {
-        return indexHtml;
-      }
-      for (const item of rules) {
-        const { slot, html } = item;
-        indexHtml = indexHtml.replace(slot, html);
+      for (const [key, value] of Object.entries(options)) {
+        indexHtml = indexHtml.replace(key, value);
       }
 
       return indexHtml;
@@ -35,7 +22,7 @@ export default defineConfig((env) => {
 
   let alias: AliasOptions = {};
 
-  if (isDev) {
+  if (isDev || env.mode === 'e2e') {
     alias = {
       'excel-collab': join(__dirname, '..', '..', 'excel-collab', 'src'),
     };
@@ -51,12 +38,7 @@ export default defineConfig((env) => {
         uploadToken: process.env.CODECOV_TOKEN,
       }),
       htmlSlot({
-        rules: [
-          {
-            slot: '<!--BUNDLE_INFO-->',
-            html: `<script>window.__bundle_info = ${JSON.stringify({ time: new Date().toISOString(), commit_id: process.env.COMMIT_ID ?? `v${version}` })}</script>`,
-          },
-        ],
+        '<!--BUNDLE_INFO-->': `<script>window.__bundle_info = ${JSON.stringify({ time: new Date().toISOString(), commit_id: process.env.COMMIT_ID ?? `v${version}` })}</script>`,
       }),
     ],
     build: {

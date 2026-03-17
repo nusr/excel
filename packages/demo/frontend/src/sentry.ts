@@ -4,15 +4,6 @@ import {
   replayIntegration,
 } from '@sentry/react';
 
-declare global {
-  interface Window {
-    __bundle_info?: {
-      time?: string;
-      commit_id?: string;
-    };
-  }
-}
-
 if (location.hostname === 'nusr.github.io') {
   init({
     dsn: 'https://b292d91ba509038c141ecfc7d10e7bb7@o4506851168092160.ingest.sentry.io/4506851171041280',

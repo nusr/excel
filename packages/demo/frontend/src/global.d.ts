@@ -7,4 +7,8 @@ declare interface Window {
       style: string;
     }>
   >;
+  __bundle_info?: {
+    time?: string;
+    commit_id?: string;
+  };
 }
