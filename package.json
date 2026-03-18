@@ -59,7 +59,11 @@
     "vite-plugin-dts": "^4.5.4"
   },
   "resolutions": {
-    "tar": "^7.5.11"
+    "tar": "^7.5.11",
+    "@isaacs/brace-expansion": "^5.0.1",
+    "axios": "^1.13.6",
+    "ajv": "^8.18.0",
+    "undici": "^7.24.4"
   },
   "packageManager": "yarn@1.22.22"
 }

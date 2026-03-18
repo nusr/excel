@@ -127,8 +127,6 @@ try {
     configurable: true,
   });
 } catch (e) {
-  // location is non-configurable in this environment; ignore
-  console.log(e)
 }
 
 global.localStorage = new LocalStorageMock();
