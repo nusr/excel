@@ -2157,9 +2157,9 @@
     "@types/koa" "*"
 
 "@types/koa@*", "@types/koa@^3.0.0", "@types/koa@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/koa/-/koa-3.0.1.tgz#2c9ace20ecb33d0cf84d63492af231185eb2aefa"
-  integrity sha512-VkB6WJUQSe0zBpR+Q7/YIUESGp5wPHcaXr0xueU5W0EOUWtlSbblsl+Kl31lyRQ63nIILh0e/7gXjQ09JXJIHw==
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@types/koa/-/koa-3.0.2.tgz#e788aeb46bfadb5e043abfe3528b55bfd11fed12"
+  integrity sha512-7TRzVOBcH/q8CfPh9AmHBQ8TZtimT4Sn+rw8//hXveI6+F41z93W8a+0B0O8L7apKQv+vKBIEZSECiL0Oo1JFA==
   dependencies:
     "@types/accepts" "*"
     "@types/content-disposition" "*"
