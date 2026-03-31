@@ -2949,9 +2949,9 @@ caniuse-lite@^1.0.30001759:
   integrity sha512-LWcNtSyZrakjECqmpP4qdg0MMGdN368D7X8XvvAqOcqMv0RxnlqVKZl2V6/mBR68oYMxOZPLw/gO7DuisMHUvQ==
 
 canvas@^3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/canvas/-/canvas-3.2.1.tgz#8f0390569f36b94bffba9c0e7aed6948875aec7b"
-  integrity sha512-ej1sPFR5+0YWtaVp6S1N1FVz69TQCqmrkGeRvQxZeAB1nAIcjNTHVwrZtYtWFFBmQsF40/uDLehsW5KuYC99mg==
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/canvas/-/canvas-3.2.2.tgz#56d6f2177b7f729a1f83d651e0ae384f19786b30"
+  integrity sha512-duEt4h1HHu9sJZyVKfLRXR6tsKPY7cEELzxSRJkwddOXYvQT3P/+es98SV384JA0zMOZ5s+9gatnGfM6sL4Drg==
   dependencies:
     node-addon-api "^7.0.0"
     prebuild-install "^7.1.3"
