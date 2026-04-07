@@ -6126,9 +6126,9 @@ npm-run-path@^4.0.1:
     path-key "^3.0.0"
 
 numfmt@^3.2.4:
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-3.2.4.tgz#5946abfa475fda1c90be9357e1584224df938637"
-  integrity sha512-jtWPEIZwQgKudd/bRfslnLQdSvZpHOScrDRJoQO2NSrtRDM2gyaL6HGn2xJOjZuRh5ffCz10IX3puVHiz/qI/A==
+  version "3.2.6"
+  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-3.2.6.tgz#6d17b8072dd97a8fed4975986cc7b482c7c5128e"
+  integrity sha512-MXc2KP3j+2usdHTY5/ENUc2S+3BRF/cJqnR6RHeq6LBqKoIZOAQ62DQw974nnaZOencbfkmkTPyTmMnlkCpjzg==
 
 nwsapi@^2.2.16:
   version "2.2.23"
@@ -7681,9 +7681,9 @@ undici-types@~7.18.0:
   integrity sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==
 
 undici@^5.25.4, undici@^5.28.5, undici@^7.24.4:
-  version "7.24.6"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-7.24.6.tgz#b7e977e1bab53d0aab3fa5722fc1efff093aa5e9"
-  integrity sha512-Xi4agocCbRzt0yYMZGMA6ApD7gvtUFaxm4ZmeacWI4cZxaF6C+8I8QfofC20NAePiB/IcvZmzkJ7XPa471AEtA==
+  version "7.24.7"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-7.24.7.tgz#af9535341bbe80625ca403a02418477a5c6a8760"
+  integrity sha512-H/nlJ/h0ggGC+uRL3ovD+G0i4bqhvsDOpbDv7At5eFLlj2b41L8QliGbnl2H7SnDiYhENphh1tQFJZf+MyfLsQ==
 
 unique-filename@^5.0.0:
   version "5.0.0"
