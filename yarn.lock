@@ -2470,11 +2470,11 @@
     yjs "^14.0.0-7"
 
 "@y/y@^14.0.0-16":
-  version "14.0.0-16"
-  resolved "https://registry.yarnpkg.com/@y/y/-/y-14.0.0-16.tgz#b79914426e7aca2691c3bf13b5339e7231edab14"
-  integrity sha512-4zwbLnLannzUiEdJn9r3IS2FCVdHqADZHLqAivzAuKeoCGZ55JUFebp/YUtrYuTE2ZaBgctxpzulqAAHaahtIA==
+  version "14.0.0-22"
+  resolved "https://registry.yarnpkg.com/@y/y/-/y-14.0.0-22.tgz#dd8fe687ba6ed9b9d629479d06c90bc9ea9d8dcc"
+  integrity sha512-3H68pfBC1bx7yxQpGEGSLRgWOg2Rdgyz7VikEekW1zdcNtVTJQuCECLlLxVkpAqVx2JWMZFry1laxO3PluNMKQ==
   dependencies:
-    lib0 "^0.2.115-6"
+    lib0 "^1.0.0-0"
 
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"
@@ -5316,10 +5316,10 @@ lib0@^0.2.102, lib0@^0.2.115-6, lib0@^0.2.85, lib0@^0.2.99:
   dependencies:
     isomorphic.js "^0.2.4"
 
-lib0@^1.0.0-rc.1:
-  version "1.0.0-rc.1"
-  resolved "https://registry.yarnpkg.com/lib0/-/lib0-1.0.0-rc.1.tgz#a1eb1393e13699fae3ea07663735c2e5c889c1b4"
-  integrity sha512-UN5phQQuoCsP8zaXAbTNR2h5GneN6bliHQ57XkNvhRBG/qT6ce6z7yGr67osccefM1iXiLb/drYp6+msDvs4hQ==
+lib0@^1.0.0-0, lib0@^1.0.0-rc.1:
+  version "1.0.0-rc.8"
+  resolved "https://registry.yarnpkg.com/lib0/-/lib0-1.0.0-rc.8.tgz#4c8fa8668ac59591de733e550e9f6d4a91197116"
+  integrity sha512-yKXSAx4A0EmINGyvpK/d1b8bQfk2k1vMHaigfGAkc3lD/ooewBbadi2kFbIqcXcYej6U1B/6III9LeGPH2mJ1A==
 
 libnpmaccess@10.0.3:
   version "10.0.3"
