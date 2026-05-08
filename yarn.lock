@@ -6126,9 +6126,9 @@ npm-run-path@^4.0.1:
     path-key "^3.0.0"
 
 numfmt@^3.2.4:
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-3.2.4.tgz#5946abfa475fda1c90be9357e1584224df938637"
-  integrity sha512-jtWPEIZwQgKudd/bRfslnLQdSvZpHOScrDRJoQO2NSrtRDM2gyaL6HGn2xJOjZuRh5ffCz10IX3puVHiz/qI/A==
+  version "3.2.6"
+  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-3.2.6.tgz#6d17b8072dd97a8fed4975986cc7b482c7c5128e"
+  integrity sha512-MXc2KP3j+2usdHTY5/ENUc2S+3BRF/cJqnR6RHeq6LBqKoIZOAQ62DQw974nnaZOencbfkmkTPyTmMnlkCpjzg==
 
 nwsapi@^2.2.16:
   version "2.2.23"
