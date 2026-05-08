@@ -17,7 +17,7 @@
     "excel-collab": "*",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.0",
     "y-websocket": "^3.0.0"
   }
 }
