@@ -1115,14 +1115,14 @@
     vary "^1.1.2"
 
 "@koa/router@^15.4.0":
-  version "15.4.0"
-  resolved "https://registry.yarnpkg.com/@koa/router/-/router-15.4.0.tgz#8c5064919c14acd6a0283e53c3b7ff63bc401c79"
-  integrity sha512-vKYlXtoCfcAN8z4dHiveYX55rTYOgHEYJNumK1WM9ZAwaArhreGVkyC1LTMGfUQUJyIO/SbwRFBOHeOCY8/MaQ==
+  version "15.5.0"
+  resolved "https://registry.yarnpkg.com/@koa/router/-/router-15.5.0.tgz#a3ba43d324145d701984dac97f28f31af918f132"
+  integrity sha512-KSC0oG/5t6ITu5wqX4lJseA/dngoj14hEaohrLZEXtlUT2RRyJvwaJ0KV+5uQoaWrY3A8ClHOrBEU4g8dujn8Q==
   dependencies:
     debug "^4.4.3"
     http-errors "^2.0.1"
     koa-compose "^4.1.0"
-    path-to-regexp "^8.3.0"
+    path-to-regexp "^8.4.2"
 
 "@kurkle/color@^0.3.0":
   version "0.3.4"
@@ -6497,10 +6497,10 @@ path-scurry@^2.0.0:
     lru-cache "^11.0.0"
     minipass "^7.1.2"
 
-path-to-regexp@^8.3.0:
-  version "8.4.0"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-8.4.0.tgz#8e98fcd94826aff01a90c544ef74ffbaca3a78ed"
-  integrity sha512-PuseHIvAnz3bjrM2rGJtSgo1zjgxapTLZ7x2pjhzWwlp4SJQgK3f3iZIQwkpEnBaKz6seKBADpM4B4ySkuYypg==
+path-to-regexp@^8.4.2:
+  version "8.4.2"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-8.4.2.tgz#795c420c4f7ca45c5b887366f622ee0c9852cccd"
+  integrity sha512-qRcuIdP69NPm4qbACK+aDogI5CBDMi1jKe0ry5rSQJz8JVLsC7jV8XpiJjGRLLol3N+R5ihGYcrPLTno6pAdBA==
 
 path-type@^3.0.0:
   version "3.0.0"
