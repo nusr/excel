@@ -3,7 +3,9 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: 'weekly'
+      day: 'sunday'
+      time: '16:00'
     labels:
       - 'dependencies'
     commit-message:
