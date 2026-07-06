@@ -1,38 +1,30 @@
 {
-  "../../excel-collab/lib/Chart-CQVApHN6.mjs": {
-    "file": "assets/Chart-CQVApHN6-B66h5otv.js",
-    "name": "Chart-CQVApHN6",
-    "src": "../../excel-collab/lib/Chart-CQVApHN6.mjs",
+  "../../excel-collab/lib/Chart-CUgyHY8p.mjs": {
+    "file": "assets/Chart-CUgyHY8p-DbgLKXL1.js",
+    "name": "Chart-CUgyHY8p",
+    "src": "../../excel-collab/lib/Chart-CUgyHY8p.mjs",
     "isDynamicEntry": true,
     "imports": [
-      "_chunk-B1kNJ9kU-LiT5gGkH.js",
       "index.html"
     ]
   },
-  "../../excel-collab/lib/jszip.min-CwOgNrqu.mjs": {
-    "file": "assets/jszip.min-CwOgNrqu-DxC7aO29.js",
-    "name": "jszip.min-CwOgNrqu",
-    "src": "../../excel-collab/lib/jszip.min-CwOgNrqu.mjs",
+  "../../excel-collab/lib/jszip.min-to6QqtUm.mjs": {
+    "file": "assets/jszip.min-to6QqtUm-C3V_7wiw.js",
+    "name": "jszip.min-to6QqtUm",
+    "src": "../../excel-collab/lib/jszip.min-to6QqtUm.mjs",
     "isDynamicEntry": true,
     "imports": [
-      "_chunk-B1kNJ9kU-LiT5gGkH.js"
+      "index.html"
     ]
   },
-  "_chunk-B1kNJ9kU-LiT5gGkH.js": {
-    "file": "assets/chunk-B1kNJ9kU-LiT5gGkH.js",
-    "name": "chunk-B1kNJ9kU"
-  },
   "index.html": {
-    "file": "assets/index-CCwpc_qY.js",
+    "file": "assets/index-TsQY-98-.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
-    "imports": [
-      "_chunk-B1kNJ9kU-LiT5gGkH.js"
-    ],
     "dynamicImports": [
-      "../../excel-collab/lib/Chart-CQVApHN6.mjs",
-      "../../excel-collab/lib/jszip.min-CwOgNrqu.mjs"
+      "../../excel-collab/lib/Chart-CUgyHY8p.mjs",
+      "../../excel-collab/lib/jszip.min-to6QqtUm.mjs"
     ],
     "css": [
       "assets/index-vJ-7kgkU.css"
