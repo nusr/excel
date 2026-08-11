@@ -1,6 +1,6 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useRef } from 'react';
 import { Menu, MenuItem } from '../../components';
-import { importXLSX, exportToXLSX, exportToCsv, importCSV } from '../Excel';
+import { importExcel, exportExcel, type ExportExtension } from '../Excel';
 import styles from './index.module.css';
 import { Theme } from './Theme';
 import i18n from '../../i18n';
@@ -19,42 +19,27 @@ type Props = {
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
   ({ leftChildren, rightChildren }) => {
     const { controller, provider } = useExcel();
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [visible, setVisible] = useState(false);
-    const handleExportXLSX = useCallback(() => {
-      exportToXLSX(`excel_${Date.now()}.xlsx`, controller);
+    const handleExportExcel = useCallback((format: ExportExtension) => {
+      exportExcel(`excel_${Date.now()}`, controller, format);
     }, []);
-    const handleExportCSV = useCallback(() => {
-      const text = exportToCsv(controller);
-      const blob = new Blob([text], {
-        type: 'text/csv;charset=utf-8;',
-      });
-      saveAs(blob, `excel_${Date.now()}.csv`);
-    }, []);
-    const handleImportXLSX = useCallback(
+    const handleImportExcel = useCallback(
       async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file) {
           return;
         }
-        const model = await importXLSX(file);
-        await controller.fromJSON(model);
+        const model = await importExcel(file);
+        controller.fromJSON(model);
         event.target.value = '';
         event.target.blur();
       },
       [],
     );
-    const handleImportCSV = useCallback(
-      async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) {
-          return;
-        }
-        await importCSV(file, controller);
-        event.target.value = '';
-        event.target.blur();
-      },
-      [],
-    );
+    const triggerInput = useCallback(async () => {
+      fileInputRef.current?.click();
+    }, []);
     const handleExportJSON = useCallback(() => {
       const blob = new Blob([JSON.stringify(controller.toJSON())], {
         type: 'application/json',
@@ -66,66 +51,62 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       provider?.addDocument?.(docId);
     }, []);
     return (
-      <div className={styles['menubar-container']} data-testid="menubar">
-        <div className={styles['menubar-menu']}>
-          <File visible={visible} setVisible={setVisible} />
-          <Menu
-            label={i18n.t('file')}
-            className={styles.menu}
-            testId="menubar-excel"
-          >
-            <MenuItem onClick={handleAddDocument} testId="menubar-new-excel">
-              {i18n.t('new-file')}
-            </MenuItem>
-            <MenuItem
-              onClick={() => setVisible(true)}
-              testId="menubar-new-excel"
+      <>
+        <input
+          type="file"
+          hidden
+          onChange={handleImportExcel}
+          accept=".xlsx,.csv"
+          data-testid="menubar-import-input"
+          ref={fileInputRef}
+        />
+        <div className={styles['menubar-container']} data-testid="menubar">
+          <div className={styles['menubar-menu']}>
+            <File visible={visible} setVisible={setVisible} />
+            <Menu
+              label={i18n.t('file')}
+              className={styles.menu}
+              testId="menubar-excel"
             >
-              {i18n.t('rename-file')}
-            </MenuItem>
-            <MenuItem testId="menubar-import-xlsx">
-              <input
-                type="file"
-                hidden
-                onChange={handleImportXLSX}
-                accept=".xlsx"
-                id="import_xlsx"
-                data-testid="menubar-import-xlsx-input"
-              />
-              <label htmlFor="import_xlsx">
+              <MenuItem onClick={handleAddDocument} testId="menubar-new-excel">
+                {i18n.t('new-file')}
+              </MenuItem>
+              <MenuItem
+                onClick={() => setVisible(true)}
+                testId="menubar-new-excel"
+              >
+                {i18n.t('rename-file')}
+              </MenuItem>
+              <MenuItem testId="menubar-import-xlsx" onClick={triggerInput}>
                 {i18n.t('import', { format: 'XLSX' })}
-              </label>
-            </MenuItem>
-            <MenuItem testId="menubar-import-csv">
-              <input
-                type="file"
-                hidden
-                onChange={handleImportCSV}
-                accept=".csv"
-                id="import_csv"
-                data-testid="menubar-import-csv-input"
-              />
-              <label htmlFor="import_csv">
+              </MenuItem>
+              <MenuItem testId="menubar-import-csv" onClick={triggerInput}>
                 {i18n.t('import', { format: 'CSV' })}
-              </label>
-            </MenuItem>
-            <MenuItem onClick={handleExportXLSX} testId="menubar-export-xlsx">
-              {i18n.t('export', { format: 'XLSX' })}
-            </MenuItem>
-            <MenuItem testId="menubar-export-csv" onClick={handleExportCSV}>
-              {i18n.t('export', { format: 'CSV' })}
-            </MenuItem>
-            <MenuItem testId="menubar-export-json" onClick={handleExportJSON}>
-              {i18n.t('export', { format: 'JSON' })}
-            </MenuItem>
-          </Menu>
-          {leftChildren}
+              </MenuItem>
+              <MenuItem
+                onClick={() => handleExportExcel('xlsx')}
+                testId="menubar-export-xlsx"
+              >
+                {i18n.t('export', { format: 'XLSX' })}
+              </MenuItem>
+              <MenuItem
+                testId="menubar-export-csv"
+                onClick={() => handleExportExcel('csv')}
+              >
+                {i18n.t('export', { format: 'CSV' })}
+              </MenuItem>
+              <MenuItem testId="menubar-export-json" onClick={handleExportJSON}>
+                {i18n.t('export', { format: 'JSON' })}
+              </MenuItem>
+            </Menu>
+            {leftChildren}
+          </div>
+          {rightChildren}
+          <User />
+          <I18N />
+          <Theme />
         </div>
-        {rightChildren}
-        <User />
-        <I18N />
-        <Theme />
-      </div>
+      </>
     );
   },
 );

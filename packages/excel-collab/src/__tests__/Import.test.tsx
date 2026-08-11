@@ -33,7 +33,7 @@ describe('Import.test.tsx', () => {
         type: 'image/png',
       });
 
-      fireEvent.change(screen.getByTestId('menubar-import-csv-input'), {
+      fireEvent.change(screen.getByTestId('menubar-import-input'), {
         target: { files: [file] },
       });
 
@@ -46,7 +46,7 @@ describe('Import.test.tsx', () => {
       const file = new File(['test,1\n2,3'], 'test.csv', {
         type: 'text/csv',
       });
-      fireEvent.change(await screen.findByTestId('menubar-import-csv-input'), {
+      fireEvent.change(await screen.findByTestId('menubar-import-input'), {
         target: { files: [file] },
       });
       await waitFor(() => {
@@ -61,7 +61,7 @@ describe('Import.test.tsx', () => {
         type: 'text/csv',
       });
 
-      fireEvent.change(screen.getByTestId('menubar-import-csv-input'), {
+      fireEvent.change(screen.getByTestId('menubar-import-input'), {
         target: { files: [file] },
       });
 
@@ -76,7 +76,7 @@ describe('Import.test.tsx', () => {
       const fileData = await fs.readFile(
         path.join(__dirname, '../../../../scripts/origin.xlsx'),
       );
-      fireEvent.change(await screen.findByTestId('menubar-import-xlsx-input'), {
+      fireEvent.change(await screen.findByTestId('menubar-import-input'), {
         target: { files: [fileData] },
       });
       await waitFor(() => {
@@ -88,7 +88,7 @@ describe('Import.test.tsx', () => {
     test('empty', async () => {
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
 
-      fireEvent.change(screen.getByTestId('menubar-import-xlsx-input'), {
+      fireEvent.change(screen.getByTestId('menubar-import-input'), {
         target: { files: [] },
       });
 

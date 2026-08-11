@@ -1,4 +1,8 @@
-export { exportXLSX as exportToXLSX } from './exportXLSX';
-export { exportToCsv } from './exportCSV';
-export { importXLSX } from './importXLSX';
-export { importCSV } from './ImportCSV';
+export { importExcel, convertWorkbookToModel } from './importExcel';
+export {
+  exportExcel,
+  exportToCsv,
+  convertToWorkbook,
+  convertToXLSXData,
+  type ExportExtension,
+} from './exportExcel';
