@@ -57,8 +57,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
           hidden
           onChange={handleImportExcel}
           accept=".xlsx,.csv"
-          id="import_xlsx"
-          data-testid="menubar-import-xlsx-input"
+          data-testid="menubar-import-input"
           ref={fileInputRef}
         />
         <div className={styles['menubar-container']} data-testid="menubar">
