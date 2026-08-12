@@ -64,7 +64,7 @@ describe('Export.test.ts', () => {
     test('ok', async () => {
       type('test');
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
-      fireEvent.click(screen.getByTestId('menubar-export-xlsx'));
+      fireEvent.click(screen.getByTestId('menubar-export-more-xlsx'));
       await waitFor(() => {
         expect(mockSaveAs).toHaveBeenCalled();
       });
@@ -74,8 +74,28 @@ describe('Export.test.ts', () => {
     test('ok', async () => {
       type('test');
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
-      fireEvent.click(screen.getByTestId('menubar-export-csv'));
+      fireEvent.click(screen.getByTestId('menubar-export-more-csv'));
       expect(mockSaveAs).toHaveBeenCalled();
     });
+  });
+  describe('download json', () => {
+    test('ok', async () => {
+      type('test');
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
+      fireEvent.click(screen.getByTestId('menubar-export-json'));
+      expect(mockSaveAs).toHaveBeenCalled();
+    });
+  });
+  describe('download other formats', () => {
+    for (const ext of ['xlsb', 'xls', 'ods', 'html', 'dbf'] as const) {
+      test(ext, async () => {
+        type('test');
+        fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
+        fireEvent.click(screen.getByTestId(`menubar-export-more-${ext}`));
+        await waitFor(() => {
+          expect(mockSaveAs).toHaveBeenCalled();
+        });
+      });
+    }
   });
 });

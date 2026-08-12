@@ -1,8 +1,7 @@
-import { convertToXLSXData } from '../exportExcel';
+import { convertToXLSXData, convertToData } from '../exportExcel';
 import { importExcel } from '../importExcel';
 import { initController } from '../../../controller';
 import { getWorksheetKey, getCustomWidthOrHeightKey } from '../../../util';
-
 describe('exportXLSX.test.ts', () => {
   test('round trip preserves values, formulas, number formats, merges, defined names and sheets', async () => {
     const controller = initController();
@@ -67,4 +66,25 @@ describe('exportXLSX.test.ts', () => {
 
     expect(model.definedNames.foo).toMatchObject({ row: 0, col: 0 });
   });
+
+  test.each(['xlsb', 'xls', 'ods', 'html', 'dbf'] as const)(
+    'round trips values through %s',
+    async (bookType) => {
+      const controller = initController();
+      controller.addSheet();
+      const sheetId = controller.getCurrentSheetId();
+      controller.setCell(
+        [[42, 'hello']],
+        [[{}, {}]],
+        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId },
+      );
+
+      const data = convertToData(controller, bookType);
+      const model = await importExcel(data);
+
+      const cells = Object.values(model.worksheets);
+      expect(cells.some((c) => String(c.value) === '42')).toBe(true);
+      expect(cells.some((c) => c.value === 'hello')).toBe(true);
+    },
+  );
 });

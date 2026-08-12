@@ -246,15 +246,21 @@ function readSheetSizes(
     }
     return undefined;
   });
-  readSizes(sheet['!rows'], sheetId, result.customHeight, CELL_HEIGHT, (row) => {
-    if (typeof row.hpx === 'number') {
-      return Math.round(row.hpx);
-    }
-    if (typeof row.hpt === 'number') {
-      return Math.round((row.hpt * 96) / 72);
-    }
-    return undefined;
-  });
+  readSizes(
+    sheet['!rows'],
+    sheetId,
+    result.customHeight,
+    CELL_HEIGHT,
+    (row) => {
+      if (typeof row.hpx === 'number') {
+        return Math.round(row.hpx);
+      }
+      if (typeof row.hpt === 'number') {
+        return Math.round((row.hpt * 96) / 72);
+      }
+      return undefined;
+    },
+  );
 }
 
 export function convertWorkbookToModel(workbook: XLSX.WorkBook): ModelJSON {
@@ -329,11 +335,6 @@ function isCsvFile(file: ExcelInput): file is File {
   );
 }
 
-/**
- * Read a spreadsheet file into a `ModelJSON`. Handles both `.xlsx` and `.csv`:
- * CSV files are read as text, everything else as binary, then mapped through
- * the same workbook -> model conversion.
- */
 export async function importExcel(file: ExcelInput): Promise<ModelJSON> {
   const workbook = isCsvFile(file)
     ? XLSX.read(await convertFileToTextOrBase64(file, false), {
