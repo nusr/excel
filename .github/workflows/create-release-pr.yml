@@ -9,9 +9,17 @@ on:
     branches:
       - "main"
 
+concurrency:
+  group: create-release-pr
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
   create-pre-release-pull-request:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
@@ -28,9 +36,7 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: lts/*
-
-      - name: Install Yarn
-        run: npm install -g yarn
+          cache: yarn
 
       - name: Configure git
         run: |
@@ -131,6 +137,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: github.event.pull_request.merged && startsWith(github.event.pull_request.head.ref, 'pre-release/excel-collab/')
     permissions:
       contents: write
