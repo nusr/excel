@@ -45,6 +45,18 @@ describe('Menubar.test.ts', () => {
       expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('en-US');
     });
   });
+  describe('file menu', () => {
+    test('new file handler runs without a provider', () => {
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
+      fireEvent.click(screen.getByTestId('menubar-new-excel'));
+      expect(screen.getByTestId('menubar')).toBeInTheDocument();
+    });
+    test('rename file entry is clickable', () => {
+      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
+      fireEvent.click(screen.getByTestId('menubar-rename-excel'));
+      expect(screen.getByTestId('menubar')).toBeInTheDocument();
+    });
+  });
 });
 
 test('change i18n', () => {
