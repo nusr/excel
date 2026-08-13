@@ -1,21 +1,21 @@
-import React, { memo, useCallback, useState } from 'react';
-import { Menu, MenuItem, SubMenu } from '../../components';
+import React, { memo, useCallback, useState } from "react";
+import { Menu, MenuItem, SubMenu } from "../../components";
 import {
   importExcel,
   exportExcel,
   EXPORT_EXTENSIONS,
   EXPORT_FORMATS,
   type ExportExtension,
-} from '../Excel';
-import styles from './index.module.css';
-import { Theme } from './Theme';
-import i18n from '../../i18n';
-import { I18N } from './I18N';
-import { saveAs } from '../../util';
-import { useExcel } from '../store';
-import { User } from './User';
-import { File } from './File';
-import { v4 } from 'uuid';
+} from "../Excel";
+import styles from "./index.module.css";
+import { Theme } from "./Theme";
+import i18n from "../../i18n";
+import { I18N } from "./I18N";
+import { saveAs } from "../../util";
+import { useExcel } from "../store";
+import { User } from "./User";
+import { File } from "./File";
+import { v4 } from "uuid";
 
 type Props = {
   leftChildren?: React.ReactNode;
@@ -24,7 +24,7 @@ type Props = {
 
 const ACCEPT = Object.values(EXPORT_FORMATS)
   .map((v) => v.mime)
-  .join(',');
+  .join(",");
 
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
   ({ leftChildren, rightChildren }) => {
@@ -41,14 +41,14 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
         }
         const model = await importExcel(file);
         controller.fromJSON(model);
-        event.target.value = '';
+        event.target.value = "";
         event.target.blur();
       },
       [],
     );
     const handleExportJSON = useCallback(() => {
       const blob = new Blob([JSON.stringify(controller.toJSON())], {
-        type: 'application/json',
+        type: "application/json",
       });
       saveAs(blob, `excel_${Date.now()}.json`);
     }, []);
@@ -57,22 +57,22 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       provider?.addDocument?.(docId);
     }, []);
     return (
-      <div className={styles['menubar-container']} data-testid="menubar">
-        <div className={styles['menubar-menu']}>
+      <div className={styles["menubar-container"]} data-testid="menubar">
+        <div className={styles["menubar-menu"]}>
           <File visible={visible} setVisible={setVisible} />
           <Menu
-            label={i18n.t('file')}
+            label={i18n.t("file")}
             className={styles.menu}
             testId="menubar-excel"
           >
             <MenuItem onClick={handleAddDocument} testId="menubar-new-excel">
-              {i18n.t('new-file')}
+              {i18n.t("new-file")}
             </MenuItem>
             <MenuItem
               onClick={() => setVisible(true)}
               testId="menubar-rename-excel"
             >
-              {i18n.t('rename-file')}
+              {i18n.t("rename-file")}
             </MenuItem>
             <MenuItem testId="menubar-import-excel">
               <input
@@ -84,11 +84,11 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
                 id="menubar-import-input"
               />
               <label htmlFor="menubar-import-input">
-                {i18n.t('import', { format: 'File' })}
+                {i18n.t("import", { format: "File" })}
               </label>
             </MenuItem>
             <SubMenu
-              label={i18n.t('export', { format: '...' })}
+              label={i18n.t("export", { format: "..." })}
               testId="menubar-export-more"
             >
               {EXPORT_EXTENSIONS.map((ext) => (
@@ -106,7 +106,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
                 onClick={handleExportJSON}
                 key="json"
               >
-                {i18n.t('export', { format: 'JSON' })}
+                JSON
               </MenuItem>
             </SubMenu>
           </Menu>
@@ -121,6 +121,6 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
   },
 );
 
-MenuBarContainer.displayName = 'MenuBarContainer';
+MenuBarContainer.displayName = "MenuBarContainer";
 
 export default MenuBarContainer;
