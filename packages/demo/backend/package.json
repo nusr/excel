@@ -10,11 +10,8 @@
     "test:ci": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.19",
     "@types/koa": "^3.0.1",
     "@types/koa__cors": "^5.0.1",
-    "@types/koa__router": "^12.0.5",
-    "@types/sqlite3": "^5.1.0",
     "dotenv": "^17.3.1"
   },
   "dependencies": {
@@ -22,7 +19,6 @@
     "@koa/router": "^15.4.0",
     "@types/ws": "^8.18.1",
     "@y/websocket-server": "^0.1.5",
-    "@y/y": "^14.0.0-16",
     "koa": "^3.1.2",
     "koa-body": "^8.0.0",
     "sqlite3": "^6.0.1",

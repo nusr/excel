@@ -30,7 +30,6 @@
     "@formulajs/formulajs": "^4.5.6",
     "chart.js": "^4.5.1",
     "comlink": "^4.4.2",
-    "jszip": "^3.10.1",
     "numfmt": "^3.2.4",
     "uuid": "^14.0.0",
     "xlsx": "^0.18.5",
