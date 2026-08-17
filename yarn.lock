@@ -8134,9 +8134,9 @@ y-protocols@^1.0.5, y-protocols@^1.0.7:
     lib0 "^0.2.85"
 
 y-websocket@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/y-websocket/-/y-websocket-3.0.0.tgz#e86bdb29cc0a53cb8d6e33ec8d24614a723832af"
-  integrity sha512-mUHy7AzkOZ834T/7piqtlA8Yk6AchqKqcrCXjKW8J1w2lPtRDjz8W5/CvXz9higKAHgKRKqpI3T33YkRFLkPtg==
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/y-websocket/-/y-websocket-3.1.0.tgz#c6f6786ca1c0170b9a20f13c9cfc2cdb5c27d683"
+  integrity sha512-ZNzwH84Ysxv7zjpFNZHjTJvrBZgcAqMljTe+6zrWciAML9LQ18aVylyPNH9faxCXqEOV8I0JY4TGtrIHFX+Xwg==
   dependencies:
     lib0 "^0.2.102"
     y-protocols "^1.0.5"
