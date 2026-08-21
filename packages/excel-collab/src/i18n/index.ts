@@ -42,7 +42,7 @@ function i18nConfig() {
       const template = locales[_currentLanguage][key];
 
       // @ts-ignore
-      return template.replace(/{([a-z]+)}/gi, (_, key) => {
+      return template.replace(/{{([a-z]+)}}/gi, (_, key) => {
         if (key in options) {
           return options[key];
         }

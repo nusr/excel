@@ -7,6 +7,14 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Cancel superseded runs on the same ref (main runs are kept so deploy is not interrupted).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
 env:
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   VITE_DEFAULT_EXCEL_ID: ${{ vars.VITE_DEFAULT_EXCEL_ID }}
@@ -16,6 +24,7 @@ env:
 jobs:
   CI:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -26,17 +35,32 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: lts/*
+          cache: yarn
 
       - name: Install font
         run: sudo npm run install-font
 
-      - name: Setup Yarn
-        run: npm install -g yarn
-
       - name: Install dependencies
-        run: |
-          yarn install --frozen-lockfile
-          yarn playwright install --with-deps
+        run: yarn install --frozen-lockfile
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(yarn --silent playwright --version | awk '{print $NF}')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: yarn playwright install --with-deps
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: yarn playwright install-deps
 
       - name: Type check
         run: yarn type-check
@@ -60,6 +84,7 @@ jobs:
           CI: true
 
       - name: Upload Playwright test report
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report

@@ -11,9 +11,45 @@ import {
 } from '../../util';
 import { numberFormat } from '../../formula';
 
-const XLSX_MIME =
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-const CSV_MIME = 'text/csv;charset=utf-8;';
+const TEXT_MIME = 'text/plain;charset=utf-8;';
+
+type ExportFormat = { bookType: XLSX.BookType; mime: string };
+
+export const EXPORT_FORMATS: Record<string, ExportFormat> = {
+  xlsx: {
+    bookType: 'xlsx',
+    mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  },
+  xlsm: {
+    bookType: 'xlsm',
+    mime: 'application/vnd.ms-excel.sheet.macroEnabled.12',
+  },
+  xlsb: {
+    bookType: 'xlsb',
+    mime: 'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
+  },
+  xls: { bookType: 'biff8', mime: 'application/vnd.ms-excel' },
+  xla: { bookType: 'xla', mime: 'application/vnd.ms-excel' },
+  xml: { bookType: 'xlml', mime: 'application/xml' },
+  ods: {
+    bookType: 'ods',
+    mime: 'application/vnd.oasis.opendocument.spreadsheet',
+  },
+  fods: {
+    bookType: 'fods',
+    mime: 'application/vnd.oasis.opendocument.spreadsheet',
+  },
+  csv: { bookType: 'csv', mime: 'text/csv;charset=utf-8;' },
+  txt: { bookType: 'txt', mime: TEXT_MIME },
+  sylk: { bookType: 'sylk', mime: TEXT_MIME },
+  slk: { bookType: 'slk', mime: TEXT_MIME },
+  html: { bookType: 'html', mime: 'text/html;charset=utf-8;' },
+  dif: { bookType: 'dif', mime: TEXT_MIME },
+  rtf: { bookType: 'rtf', mime: 'application/rtf' },
+  prn: { bookType: 'prn', mime: TEXT_MIME },
+  eth: { bookType: 'eth', mime: TEXT_MIME },
+  dbf: { bookType: 'dbf', mime: 'application/dbf' },
+};
 
 function buildCell(cell: ModelCellType): XLSX.CellObject | undefined {
   const { value, formula, numberFormat: numFmt } = cell;
@@ -199,6 +235,18 @@ export function convertToXLSXData(controller: IController): Uint8Array {
 }
 
 /**
+ * Serialize the whole workbook to any SheetJS-supported format, returned as raw
+ * bytes ready to be wrapped in a `Blob`.
+ */
+export function convertToData(
+  controller: IController,
+  bookType: XLSX.BookType,
+): Uint8Array {
+  const workbook = convertToWorkbook(controller);
+  return XLSX.write(workbook, { bookType, type: 'array' });
+}
+
+/**
  * Serialize the current sheet to CSV text, using the grid's display formatting.
  */
 export function exportToCsv(controller: IController): string {
@@ -237,23 +285,23 @@ export function exportToCsv(controller: IController): string {
   return csv.endsWith(LINE_BREAK) ? csv.slice(0, -LINE_BREAK.length) : csv;
 }
 
-export type ExportExtension = 'xlsx' | 'csv';
+export type ExportExtension = keyof typeof EXPORT_FORMATS;
 
-/**
- * Export the workbook to a file and trigger a download. `ext` selects the
- * format: `csv` writes the current sheet as CSV, `xlsx` writes the whole
- * workbook.
- */
+export const EXPORT_EXTENSIONS = Object.keys(
+  EXPORT_FORMATS,
+) as ExportExtension[];
+
 export function exportExcel(
   fileName: string,
   controller: IController,
   ext: ExportExtension,
 ): void {
+  const format = EXPORT_FORMATS[ext] ?? EXPORT_FORMATS.xlsx;
   const blob =
     ext === 'csv'
-      ? new Blob([exportToCsv(controller)], { type: CSV_MIME })
-      : new Blob([convertToXLSXData(controller) as unknown as BlobPart], {
-          type: XLSX_MIME,
+      ? new Blob([exportToCsv(controller)], { type: format.mime })
+      : new Blob([convertToData(controller, format.bookType) as BlobPart], {
+          type: format.mime,
         });
   saveAs(blob, `${fileName}.${ext}`);
 }

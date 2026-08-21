@@ -1,8 +1,8 @@
 import { defineConfig, AliasOptions } from 'vite';
 import react from '@vitejs/plugin-react';
 import { codecovVitePlugin } from '@codecov/vite-plugin';
-import { join } from 'path';
-import { version } from './package.json';
+import { join } from 'node:path';
+import { version } from './package.json' with { type: 'json' };
 
 function htmlSlot(options: Record<string, string>) {
   return {
@@ -23,8 +23,16 @@ export default defineConfig((env) => {
   let alias: AliasOptions = {};
 
   if (isDev || env.mode === 'e2e') {
+    const dirPath = join(
+      import.meta.dirname,
+      '..',
+      '..',
+      'excel-collab',
+      'src',
+    );
+
     alias = {
-      'excel-collab': join(__dirname, '..', '..', 'excel-collab', 'src'),
+      'excel-collab': dirPath,
     };
   }
 
