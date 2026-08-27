@@ -1,5 +1,5 @@
-import WebSocket, { Server as WebSocketServer } from 'ws';
-import http from 'http';
+import WebSocket, { WebSocketServer  } from 'ws';
+import http from 'node:http';
 import { setupWSConnection } from '@y/websocket-server/utils';
 
 export class WebSocketManager {

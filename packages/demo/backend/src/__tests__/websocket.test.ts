@@ -10,7 +10,7 @@ jest.mock('ws', () => {
       close: jest.fn(),
       send: jest.fn(),
     })),
-    Server: jest.fn().mockImplementation(() => ({
+    WebSocketServer: jest.fn().mockImplementation(() => ({
       on: jest.fn(),
       close: jest.fn(),
     })),
@@ -64,8 +64,8 @@ describe('WebSocketManager Tests', () => {
     };
     
     // Import ws module to access the mocked Server constructor
-    const { Server: WSServer } = require('ws');
-    
+    const { WebSocketServer: WSServer } = require('ws');
+
     // Mock the WebSocketServer constructor to return our mockWss
     (WSServer as jest.Mock).mockReturnValue(mockWss);
     
@@ -76,7 +76,7 @@ describe('WebSocketManager Tests', () => {
   describe('Constructor', () => {
     it('should create a WebSocketServer with the provided HTTP server', () => {
       // Import ws module to access the mocked Server constructor
-      const { Server: WSServer } = require('ws');
+      const { WebSocketServer: WSServer } = require('ws');
       expect(WSServer).toHaveBeenCalledWith({ server: mockServer });
     });
 

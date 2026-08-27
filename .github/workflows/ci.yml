@@ -65,6 +65,9 @@ jobs:
       - name: Type check
         run: yarn type-check
 
+      - name: Check dependencies
+        run: yarn check:dependencies
+
       - name: Lint
         run: yarn lint
 

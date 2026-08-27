@@ -26,12 +26,20 @@ export const Excel: React.FunctionComponent<ExcelProps> = memo((props) => {
   useEffect(() => {
     i18n.init();
     if (RTL_LANGUAGE_LIST.includes(i18n.current as any)) {
-      document.documentElement.setAttribute('data-layout-direction', 'rtl');
+      document.documentElement.dataset.layoutDirection = 'rtl';
+    }
+
+    let realDoc: Doc | undefined = undefined;
+
+    if (doc) {
+      realDoc = doc;
+    } else {
+      realDoc = docConfig ? new Doc(docConfig) : new Doc();
     }
 
     const controller = initController({
       worker: new Worker(),
-      doc: doc ? doc : docConfig ? new Doc(docConfig) : new Doc(),
+      doc: realDoc,
     });
 
     setValue({ controller, provider, awareness });

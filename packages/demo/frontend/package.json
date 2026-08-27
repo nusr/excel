@@ -11,13 +11,11 @@
     "test:ci": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
   },
   "devDependencies": {
-    "@sentry/react": "^10.43.0"
+    "@sentry/react": "^10.71.0"
   },
   "dependencies": {
     "excel-collab": "*",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "uuid": "^14.0.0",
-    "y-websocket": "^3.0.0"
+    "uuid": "^14.0.2",
+    "y-websocket": "^3.1.0"
   }
 }

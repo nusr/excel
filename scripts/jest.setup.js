@@ -127,6 +127,7 @@ try {
     configurable: true,
   });
 } catch (e) {
+  console.log(e);
 }
 
 global.localStorage = new LocalStorageMock();

@@ -27,14 +27,14 @@
     "test:ci": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
   },
   "dependencies": {
-    "@formulajs/formulajs": "^4.5.6",
+    "@formulajs/formulajs": "^4.6.1",
     "chart.js": "^4.5.1",
     "comlink": "^4.4.2",
-    "numfmt": "^3.2.4",
-    "uuid": "^14.0.0",
+    "numfmt": "^3.2.6",
+    "uuid": "^14.0.2",
     "xlsx": "^0.18.5",
-    "yjs": "^13.6.30",
-    "zustand": "^5.0.12"
+    "yjs": "^13.6.32",
+    "zustand": "^5.0.15"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -58,8 +58,6 @@
     "access": "public"
   },
   "devDependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
     "y-protocols": "^1.0.7"
   }
 }

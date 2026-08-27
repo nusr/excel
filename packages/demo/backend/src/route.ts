@@ -2,10 +2,10 @@ import Koa from 'koa';
 import Router from '@koa/router';
 import * as db from './db';
 import cors from '@koa/cors';
-import path from 'path';
+import path from 'node:path';
 import koaBody from 'koa-body';
-import fs from 'fs';
-import stream from 'stream';
+import fs from 'node:fs';
+import stream from 'node:stream';
 
 const app = new Koa();
 const router = new Router();
@@ -84,14 +84,12 @@ export async function sendFile(ctx: Koa.Context) {
   // Validate fileId is a valid number before proceeding
   if (isNaN(fileId)) {
     ctx.throw(400, 'fileId should be a valid number');
-    return; // Return after throwing to ensure no further execution
   }
   assertNumber(ctx, fileId, 'fileId should be a valid number');
 
   const result = await db.findFile(fileId);
   if (!result) {
     ctx.throw(404, `File with ID ${fileId} not found`);
-    return; // Return after throwing to ensure no further execution
   }
 
   ctx.response.lastModified = new Date(result.last_modified ?? new Date());
