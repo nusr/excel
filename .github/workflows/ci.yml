@@ -7,12 +7,10 @@ on:
   pull_request:
   workflow_dispatch:
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 env:
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -23,26 +21,28 @@ env:
 jobs:
   CI:
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.62.1
-      options: --user root
     timeout-minutes: 30
-    permissions:
-      contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Node
-        run: |
-          node --version
-          yarn --version
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: yarn
 
       - name: Install font
-        run: sudo npm run install-font
+        run: |
+          sudo mkdir -p $HOME/.fonts 
+          cp ./scripts/SourceCodePro-VariableFont_wght.ttf $HOME/.fonts/
+          fc-cache -fv $HOME/.fonts
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: yarn playwright install --with-deps
 
       - name: Type check
         run: yarn type-check
@@ -58,7 +58,7 @@ jobs:
 
       - name: Upload coverage
         if: github.ref == 'refs/heads/main'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           report_type: test_results
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -70,7 +70,7 @@ jobs:
 
       - name: Upload Playwright test report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: playwright-report/
