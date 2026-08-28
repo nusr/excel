@@ -84,12 +84,14 @@ export async function sendFile(ctx: Koa.Context) {
   // Validate fileId is a valid number before proceeding
   if (isNaN(fileId)) {
     ctx.throw(400, 'fileId should be a valid number');
+    return
   }
   assertNumber(ctx, fileId, 'fileId should be a valid number');
 
   const result = await db.findFile(fileId);
   if (!result) {
     ctx.throw(404, `File with ID ${fileId} not found`);
+    return
   }
 
   ctx.response.lastModified = new Date(result.last_modified ?? new Date());
