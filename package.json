@@ -44,6 +44,7 @@
     "@types/react-dom": ">=18.0.0",
     "@vitejs/plugin-react": "^6.1.0",
     "canvas": "^3.2.3",
+    "check-dependency-version-consistency": "^6.0.0",
     "husky": "^9.1.7",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
