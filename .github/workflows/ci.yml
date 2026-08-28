@@ -33,10 +33,7 @@ jobs:
           cache: yarn
 
       - name: Install font
-        run: |
-          sudo mkdir -p $HOME/.fonts 
-          cp ./scripts/SourceCodePro-VariableFont_wght.ttf $HOME/.fonts/
-          fc-cache -fv $HOME/.fonts
+        run: sudo npm run install-font
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
