@@ -54,7 +54,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v7
         with:
-          report_type: test_results
+          report_type: coverage
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: E2E tests
