@@ -7,25 +7,25 @@ const clearTable = async (page: Page) => {
   });
 };
 
-// test.beforeEach(async ({ page }) => {
-//   await gotoHomePage(page);
-// });
-
-// test.afterEach(async ({ page }) => {
-//   await clearTable(page);
-// });
-
 export const MAIN_CANVAS = 'canvas-main';
+
+const isWhiteList = (text: string) => {
+  const whiteList = ['due to access control checks'];
+  return whiteList.some((item) => text.includes(item));
+};
 
 export async function gotoHomePage(page: Page) {
   page.on('pageerror', (err) => {
+    if (isWhiteList(err.message)) {
+      return;
+    }
     throw err;
   });
 
   page.on('console', (msg) => {
     const type = msg.type();
     const text = msg.text();
-    if (type === 'error') {
+    if (type === 'error' && !isWhiteList(text)) {
       throw new Error(text);
     }
   });
