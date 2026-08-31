@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { sleep } from './util';
+import { sleep, test, expect } from './util';
 
 test('copy and paste value', async ({ page }) => {
   await page.keyboard.press('Escape');

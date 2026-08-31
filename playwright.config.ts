@@ -1,85 +1,43 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices } from '@playwright/test';
 
 const isCI = Boolean(process.env.CI);
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+// See https://playwright.dev/docs/test-configuration.
 export default defineConfig({
-  /* Fail the whole run (and thus CI) if any test is flaky, so a failed Playwright test never passes CI. */
   failOnFlakyTests: false,
-  testDir: "./e2e",
-  /* Run tests in files in parallel */
+  testDir: './e2e',
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!isCI,
-  /* Retry on CI only */
   retries: isCI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
   workers: 5,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [["html", { open: "never" }], ["github"], ["list"]],
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  reporter: [['html', { open: 'never' }], ['github'], ['list']],
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: "http://localhost:3000",
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: "on-first-retry",
-    screenshot: "only-on-failure",
+    baseURL: 'http://localhost:3000',
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
     navigationTimeout: 10 * 1000,
     actionTimeout: 10 * 1000,
-    locale: "en-US",
-    timezoneId: "Asia/Shanghai",
+    locale: 'en-US',
+    timezoneId: 'Asia/Shanghai',
     headless: true,
   },
-  /* Configure projects for major browsers */
   projects: [
-    // Desktop browser configurations
     {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-    {
-      name: "safari",
-      use: { ...devices["Desktop Safari"] },
-    },
-    {
-      name: "edge",
+      name: 'chromium',
       use: {
-        ...devices["Desktop Edge"],
-        channel: "msedge",
+        ...devices['Desktop Chrome'],
+        permissions: ['clipboard-read', 'clipboard-write'],
       },
     },
-    {
-      name: "chrome",
-      use: {
-        ...devices["Desktop Chrome"],
-        channel: "chrome",
-        permissions: ["clipboard-read", "clipboard-write"],
-      },
-    },
-
-    // Mobile browser configurations - Android
-    {
-      name: "mobile-chrome",
-      use: { ...devices["Pixel 5"] },
-    },
-
-    // Mobile browser configurations - iOS
-    {
-      name: "mobile-safari",
-      use: { ...devices["iPhone 13"] },
-    },
-    {
-      name: "ipad-pro",
-      use: { ...devices["iPad Pro 11"] },
-    },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    { name: 'mobile-chrome', use: { ...devices['Pixel 5'] } },
+    { name: 'mobile-safari', use: { ...devices['iPhone 13'] } },
+    { name: 'ipad-pro', use: { ...devices['iPad Pro 11'] } },
   ],
-
-  /* Run your local dev server before starting the tests */
   webServer: {
-    command: "yarn start:e2e",
-    url: "http://localhost:3000",
+    command: 'yarn start:e2e',
+    url: 'http://localhost:3000',
     reuseExistingServer: !isCI,
     timeout: 120 * 1000,
   },

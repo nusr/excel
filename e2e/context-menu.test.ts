@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { sleep, MAIN_CANVAS } from './util';
+import { sleep, MAIN_CANVAS, test, expect } from './util';
 
 test('open context menu with right click', async ({ page }) => {
   await page.keyboard.press('Escape');

@@ -1,12 +1,7 @@
-import { test, expect } from '@playwright/test';
-import { clickFirstCell, sleep } from './util';
-import './util';
+import { clickFirstCell, sleep, test, expect } from './util';
 
 function skipTest(browserName: string) {
-  test.skip(
-    browserName === 'firefox',
-    'Skip test on Firefox',
-  );
+  test.skip(browserName === 'firefox', 'Skip test on Firefox');
 }
 
 test.describe('undo and redo', () => {

@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import './util';
+import { test, expect } from './util';
 
 test('input text', async ({ page }) => {
   await page.keyboard.press('Escape');

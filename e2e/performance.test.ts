@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { gotoHomePage } from './util';
+import { gotoHomePage, test, expect } from './util';
 
 test('Page load time should be less then 4000 ms', async ({ page }) => {
   const startTime = Date.now();

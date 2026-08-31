@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { sleep } from './util';
+import { sleep, test, expect } from './util';
 
 test('merge cells button is clickable', async ({ page }) => {
   await page.keyboard.press('Escape');

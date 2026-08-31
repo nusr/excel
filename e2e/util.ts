@@ -1,4 +1,4 @@
-import { Page, expect, test } from '@playwright/test';
+import { Page, expect, test as base } from '@playwright/test';
 
 const clearTable = async (page: Page) => {
   await page.evaluate(() => {
@@ -7,19 +7,15 @@ const clearTable = async (page: Page) => {
   });
 };
 
-test.beforeEach(async ({ page }) => {
-  await gotoHomePage(page);
-});
+// test.beforeEach(async ({ page }) => {
+//   await gotoHomePage(page);
+// });
 
-test.afterEach(async ({ page }) => {
-  await clearTable(page);
-});
+// test.afterEach(async ({ page }) => {
+//   await clearTable(page);
+// });
 
 export const MAIN_CANVAS = 'canvas-main';
-
-export function getByTestId(selector: string) {
-  return `[data-testid="${selector}"]`;
-}
 
 export async function gotoHomePage(page: Page) {
   page.on('pageerror', (err) => {
@@ -27,15 +23,9 @@ export async function gotoHomePage(page: Page) {
   });
 
   page.on('console', (msg) => {
-    if (process.env.CI) {
-      return;
-    }
     const type = msg.type();
     const text = msg.text();
     if (type === 'error') {
-      if (text.includes('Yjs was already imported')) {
-        return;
-      }
       throw new Error(text);
     }
   });
@@ -66,3 +56,15 @@ export async function clickFirstCell(page: Page, isDbClick = false) {
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export const test = base.extend({
+  page: async ({ page }, use) => {
+    await gotoHomePage(page);
+
+    await use(page);
+
+    await clearTable(page);
+  },
+});
+
+export { expect };
