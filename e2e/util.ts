@@ -9,6 +9,8 @@ const clearTable = async (page: Page) => {
 
 export const MAIN_CANVAS = 'canvas-main';
 
+const baseURL = process.env.BASE_URL ?? '';
+
 const isWhiteList = (text: string) => {
   const whiteList = ['due to access control checks'];
   return whiteList.some((item) => text.includes(item));
@@ -30,11 +32,19 @@ export async function gotoHomePage(page: Page) {
     }
   });
 
-  await page.goto('/');
+  console.log(`Navigating to baseURL: ${baseURL}`);
+
+  if (!baseURL) {
+    throw new Error('process.env.BASE_URL is not defined');
+  }
+
+  await page.goto(baseURL);
 
   await clearTable(page);
 
-  await expect(page.getByTestId(MAIN_CANVAS)).toBeVisible();
+  await expect(page.getByTestId(MAIN_CANVAS)).toBeVisible({
+    timeout: 10 * 1000,
+  });
 }
 
 export async function clickFirstCell(page: Page, isDbClick = false) {
