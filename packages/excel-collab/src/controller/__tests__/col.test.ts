@@ -46,6 +46,33 @@ describe('col.test.ts', () => {
         controller.getSheetInfo(controller.getCurrentSheetId())!.colCount,
       ).toEqual(old + 10);
     });
+    test('add and delete do not modify cells on another sheet', () => {
+      const firstSheetId = controller.getCurrentSheetId();
+      const cell = {
+        row: 0,
+        col: 3,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: firstSheetId,
+      };
+      controller.setCell([[1]], [], cell);
+
+      const secondSheetId = controller.addSheet()!.sheetId;
+      controller.setCell([[2]], [], { ...cell, sheetId: secondSheetId });
+
+      controller.setCurrentSheetId(firstSheetId);
+      controller.addCol(1, 1);
+      expect(controller.getCell({ ...cell, col: 4 })?.value).toEqual(1);
+      expect(
+        controller.getCell({ ...cell, sheetId: secondSheetId })?.value,
+      ).toEqual(2);
+
+      controller.deleteCol(1, 1);
+      expect(controller.getCell(cell)?.value).toEqual(1);
+      expect(
+        controller.getCell({ ...cell, sheetId: secondSheetId })?.value,
+      ).toEqual(2);
+    });
     test('delete', () => {
       const old = controller.getSheetInfo(controller.getCurrentSheetId())!;
       controller.deleteCol(20, 10);

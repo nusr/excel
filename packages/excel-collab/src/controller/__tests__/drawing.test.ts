@@ -8,6 +8,35 @@ describe('drawing.test.ts', () => {
     controller.addSheet();
   });
   describe('addDrawing', () => {
+    test('row and column changes do not move drawings on another sheet', () => {
+      const firstSheetId = controller.getCurrentSheetId();
+      const secondSheetId = controller.addSheet()!.sheetId;
+      controller.addDrawing({
+        title: 'picture',
+        type: 'floating-picture',
+        uuid: 'second-sheet-picture',
+        sheetId: secondSheetId,
+        width: 300,
+        height: 300,
+        originHeight: 300,
+        originWidth: 300,
+        imageSrc: 'data:image/png;base64,',
+        fromRow: 10,
+        fromCol: 10,
+        marginX: 0,
+        marginY: 0,
+      });
+
+      controller.setCurrentSheetId(firstSheetId);
+      controller.addRow(1, 1);
+      controller.addCol(1, 1);
+      controller.deleteRow(1, 1);
+      controller.deleteCol(1, 1);
+
+      const drawing = controller.getDrawingList(secondSheetId)[0];
+      expect(drawing.fromRow).toEqual(10);
+      expect(drawing.fromCol).toEqual(10);
+    });
     test('empty chartType', () => {
       controller.addDrawing({
         title: 'chart',

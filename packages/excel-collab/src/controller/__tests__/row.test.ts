@@ -47,6 +47,50 @@ describe('row.test.ts', () => {
         controller.getSheetInfo(controller.getCurrentSheetId())!.rowCount,
       ).toEqual(old + 10);
     });
+    test('add does not modify cells on another sheet', () => {
+      const firstSheetId = controller.getCurrentSheetId();
+      const cell = {
+        row: 3,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: firstSheetId,
+      };
+      controller.setCell([[1]], [], cell);
+
+      const secondSheetId = controller.addSheet()!.sheetId;
+      controller.setCell([[2]], [], { ...cell, sheetId: secondSheetId });
+
+      controller.setCurrentSheetId(firstSheetId);
+      controller.addRow(1, 1);
+
+      expect(controller.getCell({ ...cell, row: 4 })?.value).toEqual(1);
+      expect(
+        controller.getCell({ ...cell, sheetId: secondSheetId })?.value,
+      ).toEqual(2);
+    });
+    test('delete does not modify cells on another sheet', () => {
+      const firstSheetId = controller.getCurrentSheetId();
+      const cell = {
+        row: 3,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: firstSheetId,
+      };
+      controller.setCell([[1]], [], cell);
+
+      const secondSheetId = controller.addSheet()!.sheetId;
+      controller.setCell([[2]], [], { ...cell, sheetId: secondSheetId });
+
+      controller.setCurrentSheetId(firstSheetId);
+      controller.deleteRow(1, 1);
+
+      expect(controller.getCell({ ...cell, row: 2 })?.value).toEqual(1);
+      expect(
+        controller.getCell({ ...cell, sheetId: secondSheetId })?.value,
+      ).toEqual(2);
+    });
     test('delete', () => {
       const old = controller.getSheetInfo(controller.getCurrentSheetId())!;
       controller.deleteRow(20, 10);

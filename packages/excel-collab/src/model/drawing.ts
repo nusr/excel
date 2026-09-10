@@ -174,6 +174,9 @@ export class Drawing implements IDrawings {
     const colCount = sheetInfo.colCount;
     for (const [uuid, v] of this.drawings.entries()) {
       const item = v.toJSON();
+      if (item.sheetId !== this.model.getCurrentSheetId()) {
+        continue;
+      }
       const result: Partial<DrawingElement> = {};
       const startIndex = isRight ? colIndex + 1 : colIndex;
 
@@ -214,6 +217,9 @@ export class Drawing implements IDrawings {
     const rowCount = sheetInfo.rowCount;
     for (const [uuid, v] of this.drawings.entries()) {
       const item = v.toJSON();
+      if (item.sheetId !== this.model.getCurrentSheetId()) {
+        continue;
+      }
       const result: Partial<DrawingElement> = {};
       const startIndex = isAbove ? rowIndex : rowIndex + 1;
 
@@ -245,6 +251,9 @@ export class Drawing implements IDrawings {
     }
     for (const [uuid, v] of this.drawings.entries()) {
       const item = v.toJSON();
+      if (item.sheetId !== this.model.getCurrentSheetId()) {
+        continue;
+      }
       const result: Partial<DrawingElement> = {};
       if (item.fromCol >= colIndex) {
         result.fromCol = Math.max(item.fromCol - count, 0);
@@ -272,6 +281,9 @@ export class Drawing implements IDrawings {
     }
     for (const [uuid, v] of this.drawings.entries()) {
       const item = v.toJSON();
+      if (item.sheetId !== this.model.getCurrentSheetId()) {
+        continue;
+      }
       const result: Partial<DrawingElement> = {};
       if (item.fromRow >= rowIndex) {
         result.fromRow = Math.max(item.fromRow - count, 0);

@@ -228,7 +228,7 @@ export class Worksheet implements IWorksheet {
     return this.getWorkData(id);
   }
 
-  private getWorkData(sheetId: string = '') {
+  private getWorkData(sheetId: string) {
     const result: WorksheetData = [];
     if (!this.worksheets) {
       return result;
@@ -239,9 +239,7 @@ export class Worksheet implements IWorksheet {
         continue;
       }
       const t = value.toJSON() as ModelCellType;
-      if (sheetId && data.sheetId === sheetId) {
-        result.push({ ...data, ...t });
-      } else {
+      if (data.sheetId === sheetId) {
         result.push({ ...data, ...t });
       }
     }
