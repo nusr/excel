@@ -3,6 +3,7 @@ const path = require('path');
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
+  clearMocks: true,
   testMatch: ['**/__tests__/**/*.test.ts?(x)'],
   transform: {
     '^.+\\.css$': path.join(__dirname, './css-transform.js'),

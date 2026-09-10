@@ -1,4 +1,5 @@
-import { defineConfig, AliasOptions } from 'vite';
+import { defineConfig } from 'vite';
+import type { AliasOptions } from 'vite';
 import react from '@vitejs/plugin-react';
 import { codecovVitePlugin } from '@codecov/vite-plugin';
 import { join } from 'node:path';
@@ -18,26 +19,16 @@ function htmlSlot(options: Record<string, string>) {
 }
 
 export default defineConfig((env) => {
-  const isDev = env.mode === 'development';
-
-  let alias: AliasOptions = {};
-
-  if (isDev || env.mode === 'e2e') {
-    const dirPath = join(
-      import.meta.dirname,
-      '..',
-      '..',
-      'excel-collab',
-      'src',
-    );
-
-    alias = {
-      'excel-collab': dirPath,
-    };
-  }
+  const isLocalMode = env.mode === 'development';
+  const dirPath = join(import.meta.dirname, '..', '..', 'excel-collab', 'src');
+  const alias: AliasOptions = isLocalMode
+    ? {
+        'excel-collab': dirPath,
+      }
+    : {};
 
   return {
-    base: process.env.ROOT_BASE_URL ? process.env.ROOT_BASE_URL : undefined,
+    base: process.env.ROOT_BASE_URL || undefined,
     plugins: [
       react(),
       codecovVitePlugin({
@@ -52,11 +43,12 @@ export default defineConfig((env) => {
     build: {
       modulePreload: true,
       sourcemap: true,
-      outDir: './dist',
+      outDir: 'dist',
       manifest: true,
     },
     resolve: {
       alias,
+      dedupe: ['yjs'],
     },
     server: {
       port: 3000,

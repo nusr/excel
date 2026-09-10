@@ -2,6 +2,15 @@ import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import { codecovVitePlugin } from '@codecov/vite-plugin';
 
+const external = [
+  'react',
+  'react-dom',
+  'react/jsx-runtime',
+  'react/jsx-dev-runtime',
+  'react-dom/client',
+  'yjs',
+];
+
 export default defineConfig({
   plugins: [
     dts(),
@@ -25,7 +34,7 @@ export default defineConfig({
     },
 
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime', 'react-dom/client'],
+      external,
       output: {
         globals: {
           react: 'React',
@@ -33,8 +42,12 @@ export default defineConfig({
           'react/jsx-runtime': 'ReactJsxRuntime',
           'react/jsx-dev-runtime': 'ReactJsxDevRuntime',
           'react-dom/client': 'ReactDOMClient',
+          yjs: 'Y',
         },
       },
     },
+  },
+  resolve: {
+    dedupe: ['yjs'],
   },
 });

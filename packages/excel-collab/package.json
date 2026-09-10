@@ -33,12 +33,12 @@
     "numfmt": "^3.2.6",
     "uuid": "^14.0.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
-    "yjs": "^13.6.32",
     "zustand": "^5.0.15"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react-dom": ">=18.0.0",
+    "yjs": "^13.6.32"
   },
   "keywords": [
     "react",
@@ -58,6 +58,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "y-protocols": "^1.0.7"
+    "y-protocols": "^1.0.7",
+    "yjs": "^13.6.32"
   }
 }

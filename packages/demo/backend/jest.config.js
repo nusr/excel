@@ -2,6 +2,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  clearMocks: true,
   testMatch: ['**/__tests__/**/*.test.ts?(x)'],
   coverageReporters: ['clover', 'json', 'lcov', 'text', 'html'],
 };

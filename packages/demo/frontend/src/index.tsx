@@ -8,6 +8,7 @@ import { getDocId, getProvider } from './util';
 import { VITE_WEBSOCKET_URL } from './constant';
 import { List } from './List';
 import { type IProvider } from './provider';
+import * as Sentry from '@sentry/react';
 
 const callback = async (_: any, id: string) => {
   location.hash = `#${id}`;
@@ -57,7 +58,20 @@ async function init() {
   (window as any).provider = provider;
   (window as any).webSocket = webSocket;
 
-  createRoot(document.getElementById('root')!).render(
+  const container = document.getElementById('root')!;
+
+  const root = createRoot(container, {
+    // Callback called when an error is thrown and not caught by an ErrorBoundary.
+    onUncaughtError: Sentry.reactErrorHandler((error, errorInfo) => {
+      console.warn('Uncaught error', error, errorInfo.componentStack);
+    }),
+    // Callback called when React catches an error in an ErrorBoundary.
+    onCaughtError: Sentry.reactErrorHandler(),
+    // Callback called when React automatically recovers from errors.
+    onRecoverableError: Sentry.reactErrorHandler(),
+  });
+
+  root.render(
     <StrictMode>
       <App
         provider={provider}
