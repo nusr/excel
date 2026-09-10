@@ -27,12 +27,10 @@ export async function gotoHomePage(page: Page) {
   page.on('console', (msg) => {
     const type = msg.type();
     const text = msg.text();
-    if (type === 'error' && !isWhiteList(text)) {
+    if ((type === 'error' || type === 'warning') && !isWhiteList(text)) {
       throw new Error(text);
     }
   });
-
-  console.log(`Navigating to baseURL: ${baseURL}`);
 
   if (!baseURL) {
     throw new Error('process.env.BASE_URL is not defined');

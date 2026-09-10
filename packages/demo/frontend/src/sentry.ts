@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react';
 
-if (location.hostname === 'nusr.github.io') {
+if (location.hostname.includes('nusr.github.io')) {
   Sentry.init({
     dsn: 'https://b292d91ba509038c141ecfc7d10e7bb7@o4506851168092160.ingest.us.sentry.io/4506851171041280',
     integrations: [
@@ -20,7 +20,11 @@ if (location.hostname === 'nusr.github.io') {
     // https://docs.sentry.io/platforms/javascript/configuration/options/#traces-sample-rate
     tracesSampleRate: 1.0,
     // Set `tracePropagationTargets` to control for which URLs trace propagation should be enabled
-    tracePropagationTargets: [/^\//, /^https:\/\/nusr.github.io\/api/, 'nusr.github.io'],
+    tracePropagationTargets: [
+      /^\//,
+      /^https:\/\/nusr.github.io\//,
+      'nusr.github.io',
+    ],
     // Capture Replay for 10% of all sessions,
     // plus for 100% of sessions with an error
     // Learn more at

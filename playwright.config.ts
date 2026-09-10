@@ -8,7 +8,7 @@ const isLocal = testEnv === 'local';
 
 const baseURL = isLocal
   ? 'http://localhost:3000'
-  : 'https://nusr.github.io?mode=e2e';
+  : 'https://nusr.github.io/excel?mode=e2e';
 
 process.env.BASE_URL = baseURL;
 

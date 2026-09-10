@@ -51,7 +51,7 @@ jobs:
         run: yarn coverage --verbose --debug
 
       - name: Upload coverage
-        if: github.ref == 'refs/heads/main'
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
         uses: codecov/codecov-action@v7
         with:
           report_type: coverage
@@ -74,14 +74,14 @@ jobs:
         run: yarn build
 
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./packages/demo/frontend/dist
 
       - name: Verify deployment
-        if: github.ref == 'refs/heads/main'
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
         run: |
           echo "Checking if site is accessible..."
           commit_id="${{ github.sha }}"
@@ -100,3 +100,18 @@ jobs:
           done
           echo "✗ COMMIT_ID ($commit_id) verification failed after $max_retries attempts - commit ID not found in HTML!"
           exit 1
+
+      - name: production E2E tests
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
+        run: rm -rf playwright-report && yarn e2e
+        env:
+          CI: true
+          TEST_ENV: production
+
+      - name: Upload Playwright test report
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-prod-report
+          path: playwright-report/
+          retention-days: 5
