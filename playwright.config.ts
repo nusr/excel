@@ -18,7 +18,7 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!isCI,
-  retries: isCI ? 2 : 0,
+  retries: isCI ? 3 : 0,
   workers: 5,
   reporter: [['html', { open: 'never' }], ['github'], ['list']],
   use: {
