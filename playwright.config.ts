@@ -14,7 +14,7 @@ process.env.BASE_URL = baseURL;
 
 // See https://playwright.dev/docs/test-configuration.
 export default defineConfig({
-  failOnFlakyTests: false,
+  failOnFlakyTests: true,
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!isCI,
