@@ -32,6 +32,18 @@ export async function gotoHomePage(page: Page) {
     }
   });
 
+  page.on('requestfailed', (req) => {
+    throw new Error(
+      `Request failed: ${req.url()} - ${req.failure()?.errorText}`,
+    );
+  });
+
+  page.on('response', (res) => {
+    if (!res.ok() && res.status() >= 400) {
+      throw new Error(`Response failed: ${res.url()} - ${res.status()}`);
+    }
+  });
+
   if (!baseURL) {
     throw new Error('process.env.BASE_URL is not defined');
   }
