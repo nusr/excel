@@ -12,7 +12,7 @@ export const MAIN_CANVAS = 'canvas-main';
 const baseURL = process.env.BASE_URL ?? '';
 
 const isWhiteList = (text: string) => {
-  const whiteList = ['due to access control checks'];
+  const whiteList = ['due to access control checks', 'ingest.us.sentry.io'];
   return whiteList.some((item) => text.includes(item));
 };
 
@@ -33,6 +33,9 @@ export async function gotoHomePage(page: Page) {
   });
 
   page.on('requestfailed', (req) => {
+    if (isWhiteList(req.url())) {
+      return;
+    }
     throw new Error(
       `Request failed: ${req.url()} - ${req.failure()?.errorText}`,
     );
