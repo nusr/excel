@@ -1,20 +1,20 @@
 {
-  "../../excel-collab/lib/Chart-BH4K__rR.mjs": {
-    "file": "assets/Chart-BH4K__rR-BGyZwNCw.js",
-    "name": "Chart-BH4K__rR",
-    "src": "../../excel-collab/lib/Chart-BH4K__rR.mjs",
+  "../../excel-collab/lib/Chart-RJAIp3Zm.mjs": {
+    "file": "assets/Chart-RJAIp3Zm-BSSh89WV.js",
+    "name": "Chart-RJAIp3Zm",
+    "src": "../../excel-collab/lib/Chart-RJAIp3Zm.mjs",
     "isDynamicEntry": true,
     "imports": [
       "index.html"
     ]
   },
   "index.html": {
-    "file": "assets/index-5GRwZKsn.js",
+    "file": "assets/index-CPueeJpV.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "dynamicImports": [
-      "../../excel-collab/lib/Chart-BH4K__rR.mjs"
+      "../../excel-collab/lib/Chart-RJAIp3Zm.mjs"
     ],
     "css": [
       "assets/index-vJ-7kgkU.css"
