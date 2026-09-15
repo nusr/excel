@@ -19,7 +19,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!isCI,
   retries: isCI ? 3 : 0,
-  workers: 5,
+  workers: isCI ? 1 : 5,
   reporter: [['html', { open: 'never' }], ['github'], ['list']],
   use: {
     baseURL,
