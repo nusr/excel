@@ -7416,10 +7416,10 @@ unpipe@~1.0.0:
   resolved "https://registry.yarnpkg.com/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
   integrity sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==
 
-unplugin-dts@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/unplugin-dts/-/unplugin-dts-1.1.0.tgz#3bf952e508b07d21f8b81128928d18a71d366f15"
-  integrity sha512-KZJ+qk+lmd9dJY/PJvDRFL9BUtVubKDiX7Ai/X6mlkCArcQNzwmupKjVqHbRA42uqO5ZfFRFc+o8/OCbQ1GonQ==
+unplugin-dts@1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/unplugin-dts/-/unplugin-dts-1.1.1.tgz#5f10435718f245bd4eec846dc445078ec8b5ce05"
+  integrity sha512-Z2VcabC0hjYuzF62oWmZXVoxagkM8bUWgqUy+dotoJTPnooR5mNaxbpv63JCmcaxdGCW2Bb75omK6FOryOYCRg==
   dependencies:
     "@rollup/pluginutils" "^5.1.4"
     "@volar/typescript" "^2.4.26"
@@ -7535,11 +7535,11 @@ vary@^1.1.2:
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
 
 vite-plugin-dts@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/vite-plugin-dts/-/vite-plugin-dts-5.1.0.tgz#45eb607ad0edf6904b2391b88397cf8ffa0bb0b0"
-  integrity sha512-MfLc2G+mXPUDGGxpHQeYbdunavFP9UpT9yxiAsTgUXRxfEd3HqysSAM4E72jhz5eIz3OOexCHkqiVlQq8ok9/A==
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/vite-plugin-dts/-/vite-plugin-dts-5.1.1.tgz#ae96f327fe477f9d91dbee012333e424c1c89c1c"
+  integrity sha512-U5dyX3DPFvHB+gaJIULn90kKGsXNYllyJ3vn491Y+LGu2nL5Fb8z7YgurN/Pi6ZFlnGljh2wSM0ZbFogSh4yAg==
   dependencies:
-    unplugin-dts "1.1.0"
+    unplugin-dts "1.1.1"
 
 vite@^8.3.0:
   version "8.3.0"
