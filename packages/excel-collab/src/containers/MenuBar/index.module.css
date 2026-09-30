@@ -1,6 +1,6 @@
 .menubar-container {
   border-bottom: 1px solid var(--border-color);
-  padding: var(--spacing-2) var(--spacing-5);
+  padding: var(--spacing-2);
   display: flex;
   align-items: center;
   flex-wrap: wrap;

@@ -65,9 +65,15 @@ export const File: FunctionComponent<Props> = ({ visible, setVisible }) => {
               value={value}
               onChange={handleChange}
               aria-label="File Name Input"
+              spellCheck="true"
             />
             <div style={{ display: 'flex', gap: 8, alignSelf: 'end' }}>
-              <Button slot="close" variant="secondary" aria-label="Cancel">
+              <Button
+                slot="close"
+                variant="secondary"
+                aria-label="Cancel"
+                onPress={() => setVisible(false)}
+              >
                 {i18n.t('cancel')}
               </Button>
               <Button onPress={handleOk} aria-label="Confirm">

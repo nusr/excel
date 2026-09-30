@@ -1,9 +1,5 @@
 .select-list-container {
-  height: 100%;
-  text-align: center;
-  user-select: none;
   display: flex;
   align-items: center;
   position: relative;
-  box-sizing: border-box;
 }

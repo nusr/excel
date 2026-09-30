@@ -33,7 +33,10 @@ export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
           <Button
             slot="close"
             variant="secondary"
-            onPress={onCancel}
+            onPress={() => {
+              onCancel?.();
+              onOpenChange?.(false);
+            }}
             data-testid="dialog-cancel-button"
             aria-label="Cancel"
           >

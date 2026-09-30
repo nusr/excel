@@ -1,4 +1,10 @@
-import React, { FunctionComponent, memo, useEffect, useState } from 'react';
+import React, {
+  FunctionComponent,
+  memo,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { classnames } from '../../util';
 import { OptionItem } from '../../types';
 import styles from './index.module.css';
@@ -23,6 +29,8 @@ export const SelectList: FunctionComponent<
     setSelected(value);
   }, [value]);
 
+  const selectedKeys = useMemo(() => [selected], [selected]);
+
   return (
     <div
       className={classnames(styles['select-list-container'], className)}
@@ -33,7 +41,6 @@ export const SelectList: FunctionComponent<
         <Button
           className={styles['select-list-trigger']}
           data-testid={`${testId}-trigger`}
-          variant="quiet"
           aria-label="Select list trigger"
         >
           <ChevronDown />
@@ -41,7 +48,7 @@ export const SelectList: FunctionComponent<
         <Menu
           data-testid={`${testId}-popup`}
           selectionMode="single"
-          selectedKeys={[selected]}
+          selectedKeys={selectedKeys}
           onSelectionChange={(v) => {
             const selectedKey = typeof v === 'string' ? v : Array.from(v)[0];
             if (selectedKey == null) {
@@ -58,6 +65,7 @@ export const SelectList: FunctionComponent<
               id={item.value}
               key={item.value}
               isDisabled={item.disabled}
+              textValue={item.label}
             >
               {item.label}
             </MenuItem>

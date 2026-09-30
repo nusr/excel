@@ -55,6 +55,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
                 hideMenu();
                 controller.addSheet();
               }}
+              textValue={i18n.t('insert')}
             >
               {i18n.t('insert')}
             </MenuItem>
@@ -64,6 +65,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
                 hideMenu();
                 controller.deleteSheet();
               }}
+              textValue={i18n.t('delete')}
             >
               {i18n.t('delete')}
             </MenuItem>
@@ -73,6 +75,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
                 hideMenu();
                 editSheetName();
               }}
+              textValue={i18n.t('rename')}
             >
               {i18n.t('rename')}
             </MenuItem>
@@ -82,6 +85,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
                 hideMenu();
                 controller.hideSheet();
               }}
+              textValue={i18n.t('hide')}
             >
               {i18n.t('hide')}
             </MenuItem>
@@ -89,11 +93,12 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
               data-testid="sheet-bar-context-menu-unhide"
               isDisabled={hideSheetList.length === 0}
               onPress={handleUnhide}
+              textValue={i18n.t('unhide')}
             >
               {i18n.t('unhide')}
             </MenuItem>
             <SubmenuTrigger>
-              <MenuItem data-testid="sheet-bar-context-menu-tab-color">
+              <MenuItem data-testid="sheet-bar-context-menu-tab-color" textValue={i18n.t('tab-color')}>
                 {i18n.t('tab-color')}
               </MenuItem>
               <Menu aria-label="Tab Color Menu">
@@ -102,6 +107,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
                     key={color}
                     id={color}
                     onPress={() => handleTabColorChange(color)}
+                    textValue={color}
                   >
                     <span
                       aria-hidden="true"

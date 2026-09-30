@@ -100,6 +100,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.copy();
             }}
             data-testid="context-menu-copy"
+            textValue={i18n.t('copy')}
           >
             {i18n.t('copy')}
           </MenuItem>
@@ -110,11 +111,13 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               controller.cut();
             }}
             data-testid="context-menu-cut"
+            textValue={i18n.t('cut')}
           >
             {i18n.t('cut')}
           </MenuItem>
           <MenuItem
             data-testid="context-menu-paste"
+            textValue={i18n.t('paste')}
             onPress={() => {
               hideContextMenu();
               controller.paste();
@@ -131,6 +134,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                   hideContextMenu();
                   controller.addRow(row, rowCount, true);
                 }}
+                textValue={i18n.t('insert-row-above')}
               >
                 {i18n.t('insert-row-above')}
               </MenuItem>
@@ -140,6 +144,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                   hideContextMenu();
                   controller.addRow(row, rowCount);
                 }}
+                textValue={i18n.t('insert-row-below')}
               >
                 {i18n.t('insert-row-below')}
               </MenuItem>
@@ -154,6 +159,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                   hideContextMenu();
                   controller.addCol(col, colCount);
                 }}
+                textValue={i18n.t('insert-column-left')}
               >
                 {i18n.t('insert-column-left')}
               </MenuItem>
@@ -163,6 +169,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                   hideContextMenu();
                   controller.addCol(col, colCount, true);
                 }}
+                textValue={i18n.t('insert-column-right')}
               >
                 {i18n.t('insert-column-right')}
               </MenuItem>
@@ -175,6 +182,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                 hideContextMenu();
                 controller.deleteAll(controller.getCurrentSheetId());
               }}
+              textValue={i18n.t('delete')}
             >
               {i18n.t('delete')}
             </MenuItem>
@@ -187,6 +195,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                   hideContextMenu();
                   controller.deleteCol(col, colCount);
                 }}
+                textValue={i18n.t('delete-columns')}
               >
                 {i18n.t('delete-columns')}
               </MenuItem>
@@ -196,6 +205,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                   hideContextMenu();
                   controller.hideCol(col, colCount);
                 }}
+                textValue={i18n.t('hide-columns')}
               >
                 {i18n.t('hide-columns')}
               </MenuItem>
@@ -205,6 +215,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                   hideContextMenu();
                   controller.unhideCol(col, colCount);
                 }}
+                textValue={i18n.t('unhide-columns')}
               >
                 {i18n.t('unhide-columns')}
               </MenuItem>
@@ -213,6 +224,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                 onAction={() => {
                   handleDialog(false);
                 }}
+                textValue={i18n.t('column-width')}
               >
                 {i18n.t('column-width')}
               </MenuItem>
@@ -226,10 +238,12 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                   hideContextMenu();
                   controller.deleteRow(row, rowCount);
                 }}
+                textValue={i18n.t('delete-rows')}
               >
                 {i18n.t('delete-rows')}
               </MenuItem>
               <MenuItem
+                textValue={i18n.t('hide-rows')}
                 onPress={() => {
                   hideContextMenu();
                   controller.hideRow(row, rowCount);
@@ -239,6 +253,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                 {i18n.t('hide-rows')}
               </MenuItem>
               <MenuItem
+                textValue={i18n.t('unhide-rows')}
                 data-testid="context-menu-unhide-row"
                 onPress={() => {
                   hideContextMenu();
@@ -248,6 +263,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
                 {i18n.t('unhide-rows')}
               </MenuItem>
               <MenuItem
+                textValue={i18n.t('row-height')}
                 data-testid="context-menu-row-height"
                 onAction={() => {
                   handleDialog(true);

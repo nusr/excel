@@ -208,6 +208,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
                 id={item.type}
                 isDisabled={item.disabled}
                 key={item.type}
+                textValue={i18n.t(item.type)}
               >
                 {i18n.t(item.type)}
               </MenuItem>
@@ -270,6 +271,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
               maxLength={MAX_NAME_LENGTH * 2}
               data-testid="dialog-select-data-input"
               aria-label="Select Data Input"
+              spellCheck="true"
             />
           )}
           {modalType === 'changeChartTitle' && (
@@ -281,6 +283,7 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
               maxLength={MAX_NAME_LENGTH}
               data-testid="dialog-change-chart-title-input"
               aria-label="Change Chart Title Input"
+              spellCheck="true"
             />
           )}
           {modalType === 'changeChartType' && (

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, memo, useCallback, Key } from 'react';
+import React, { useState, useMemo, memo, useCallback } from 'react';
 import {
   classnames,
   DEFAULT_POSITION,
@@ -8,11 +8,10 @@ import {
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
 import { useCoreStore, useExcel } from '../../containers/store';
-import { DialogTrigger } from 'react-aria-components/Popover';
 import { Popover } from '../../component/Popover';
-import { Select, SelectItem } from '../../component/Select';
 import { Button } from '../../component/Button';
-import { Menu, Plus } from 'lucide-react';
+import { Menu as MenuIcon, Plus } from 'lucide-react';
+import { MenuTrigger, Menu, MenuItem } from '../../component/Menu';
 
 export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren> =
   memo(({ children }) => {
@@ -30,6 +29,7 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
     const currentSheetId = useCoreStore((s) => s.currentSheetId);
     const [menuPosition, setMenuPosition] = useState(DEFAULT_POSITION);
     const [editing, setEditing] = useState(false);
+
     const handleContextMenu = useCallback(
       (event: React.MouseEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -53,9 +53,6 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
       },
       [],
     );
-    const handleChange = useCallback((value: Key | null) => {
-      controller.setCurrentSheetId(String(value));
-    }, []);
     const addSheet = useCallback(() => {
       controller.addSheet();
     }, []);
@@ -68,33 +65,37 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
 
     return (
       <div className={styles['sheet-bar-wrapper']} data-testid="sheet-bar">
-        <DialogTrigger>
+        <MenuTrigger>
           <Button
             className={styles['menu-button']}
             data-testid="sheet-bar-select-sheet"
             aria-label="Select sheet"
           >
-            <Menu />
+            <MenuIcon />
           </Button>
           <Popover>
-            <Select
-              data-testid="toolbar-underline"
+            <Menu
               aria-label="Select sheet"
-              value={currentSheetId}
-              onChange={handleChange}
+              data-testid="sheet-bar-select-sheet"
             >
               {popupList.map((item) => (
-                <SelectItem
-                  key={item.value}
+                <MenuItem
                   id={item.value}
-                  aria-label={item.label}
+                  key={item.value}
+                  textValue={item.value}
+                  onClick={() => {
+                    if (currentSheetId === item.value) {
+                      return;
+                    }
+                    controller.setCurrentSheetId(item.value);
+                  }}
                 >
                   {item.label}
-                </SelectItem>
+                </MenuItem>
               ))}
-            </Select>
+            </Menu>
           </Popover>
-        </DialogTrigger>
+        </MenuTrigger>
         <div className={styles['sheet-bar-list']} data-testid="sheet-bar-list">
           {realSheetList.map((item) => {
             const isActive = currentSheetId === item.sheetId;

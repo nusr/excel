@@ -23,6 +23,7 @@ export default defineConfig({
   build: {
     sourcemap: true,
     outDir: 'lib',
+    minify: false,
     lib: {
       entry: './src/index.ts',
       cssFileName: 'style',

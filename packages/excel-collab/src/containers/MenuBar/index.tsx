@@ -77,17 +77,22 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
               <MenuItem
                 data-testid="menubar-new-excel"
                 onPress={handleAddDocument}
+                textValue={i18n.t('new-file')}
               >
                 {i18n.t('new-file')}
               </MenuItem>
               <MenuItem
                 data-testid="menubar-rename-excel"
                 onPress={() => setVisible(true)}
+                textValue={i18n.t('rename-file')}
               >
                 {i18n.t('rename-file')}
               </MenuItem>
 
-              <MenuItem data-testid="menubar-import-excel">
+              <MenuItem
+                data-testid="menubar-import-excel"
+                textValue={i18n.t('import', { format: 'File' })}
+              >
                 <input
                   type="file"
                   hidden
@@ -101,13 +106,17 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
                 </label>
               </MenuItem>
               <SubmenuTrigger data-testid="menubar-export-more">
-                <MenuItem> {i18n.t('export', { format: '...' })}</MenuItem>
+                <MenuItem textValue={i18n.t('export', { format: '...' })}>
+                  {' '}
+                  {i18n.t('export', { format: '...' })}
+                </MenuItem>
                 <Menu aria-label="Export Menu">
                   {EXPORT_EXTENSIONS.map((ext) => (
                     <MenuItem
                       key={ext}
                       data-testid={`menubar-export-more-${ext}`}
                       onPress={() => handleExportExcel(ext)}
+                      textValue={ext.toUpperCase()}
                     >
                       {ext.toUpperCase()}
                     </MenuItem>
@@ -117,6 +126,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
                     data-testid="menubar-export-json"
                     onPress={handleExportJSON}
                     key="json"
+                    textValue="JSON"
                   >
                     JSON
                   </MenuItem>

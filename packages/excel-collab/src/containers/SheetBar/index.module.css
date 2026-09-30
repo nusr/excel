@@ -1,10 +1,11 @@
 .sheet-bar-wrapper {
   width: 100%;
   box-sizing: border-box;
-  padding: 0 8px;
+  padding: 0 var(--spacing-2);
   display: flex;
   align-items: center;
   position: relative;
+  gap: var(--spacing-2);
 }
 
 .sheet-bar-list {

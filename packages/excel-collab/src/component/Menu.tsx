@@ -1,5 +1,5 @@
 'use client';
-import {Check, ChevronRight, Dot} from 'lucide-react';
+import { Check, ChevronRight, Dot } from 'lucide-react';
 import {
   Menu as AriaMenu,
   MenuItem as AriaMenuItem,
@@ -15,18 +15,18 @@ import {
   type MenuProps,
   type MenuSectionProps,
   type MenuTriggerProps,
-  type SubmenuTriggerProps
+  type SubmenuTriggerProps,
 } from 'react-aria-components/Menu';
-import {Popover} from './Popover';
-import {ProgressCircle} from './ProgressCircle';
-import {Text} from './Content';
+import { Popover } from './Popover';
+import { ProgressCircle } from './ProgressCircle';
+import { Text } from './Content';
 import React from 'react';
 import './Menu.css';
 
 export function MenuTrigger(props: MenuTriggerProps) {
   let [trigger, menu] = React.Children.toArray(props.children) as [
     React.ReactElement,
-    React.ReactElement
+    React.ReactElement,
   ];
   return (
     <AriaMenuTrigger {...props}>
@@ -48,15 +48,15 @@ export function MenuLoadMoreItem(props: MenuLoadMoreItemProps) {
   );
 }
 
-export function MenuItem(props: Omit<MenuItemProps, 'children'> & {children?: React.ReactNode}) {
-  let textValue =
-    props.textValue || (typeof props.children === 'string' ? props.children : undefined);
+export function MenuItem(
+  props: Omit<MenuItemProps, 'children' | 'textValue'> & {
+    children?: React.ReactNode;
+    textValue: string;
+  },
+) {
   return (
-    <AriaMenuItem
-      {...props}
-      textValue={textValue}
-    >
-      {({hasSubmenu, isSelected, selectionMode}) => (
+    <AriaMenuItem {...props}>
+      {({ hasSubmenu, isSelected, selectionMode }) => (
         <>
           {isSelected && selectionMode === 'multiple' ? <Check /> : null}
           {isSelected && selectionMode === 'single' ? <Dot /> : null}
@@ -79,7 +79,7 @@ export function MenuSection<T>(props: MenuSectionProps<T>) {
 export function SubmenuTrigger(props: SubmenuTriggerProps) {
   let [trigger, menu] = React.Children.toArray(props.children) as [
     React.ReactElement,
-    React.ReactElement
+    React.ReactElement,
   ];
   return (
     <AriaSubmenuTrigger {...props}>
@@ -91,4 +91,4 @@ export function SubmenuTrigger(props: SubmenuTriggerProps) {
   );
 }
 
-export {Text, Header, Separator, Keyboard};
+export { Text, Header, Separator, Keyboard };

@@ -1,12 +1,12 @@
 .formula-bar-wrapper {
   width: 100%;
-  padding: 8px 20px;
+  padding: var(--spacing-2);
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-color);
   height: 25px;
-  box-sizing: content-box;
+  gap: var(--spacing-2);
 }
 
 .defined-name-editor {
@@ -17,15 +17,15 @@
   border: none;
   text-align: center;
   overflow: hidden;
-  box-sizing: border-box;
   padding: 4px;
+  color: var(--field-text-color);
+  background-color: var(--background-color);
 }
 
 .formula-bar-editor-wrapper {
   border: 1px solid var(--border-color);
   flex: 1;
   height: 100%;
-  box-sizing: content-box;
   border-radius: 2px;
   background-color: var(--background-color);
   position: relative;
@@ -36,7 +36,6 @@
   margin: 0;
   display: none;
   width: 100%;
-  box-sizing: border-box;
   background-color: var(--background-color);
   z-index: 3;
   position: relative;
@@ -61,7 +60,6 @@
   outline: none;
   background-color: var(--background-color);
   position: absolute;
-  box-sizing: border-box;
   z-index: 3;
   resize: none;
 }
@@ -69,4 +67,8 @@
 .formula-editor.edit-cell {
   position: fixed;
   min-height: unset;
+}
+
+.defined-name-select {
+  border: 1px solid var(--border-color);
 }

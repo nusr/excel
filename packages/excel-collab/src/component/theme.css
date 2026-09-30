@@ -72,7 +72,7 @@
 
 /* light mode colors */
 :root {
-  --background-color: #f8f8f8;
+  --background-color: #ffffff;
   --gray-50: #ffffff;
 
   --lightness-100: 98.1187%;
@@ -117,65 +117,32 @@
   --popover-shadow: 0 8px 20px rgba(0 0 0 / 0.12);
 }
 
-/* dark mode colors */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-color: #1b1b1b;
-    --gray-50: oklch(22% 0 0);
+html[data-theme='dark'] {
+  --background-color: #1a1a1a;
+  --gray-50: oklch(22% 0 0);
 
-    --lightness-100: 29.6725%;
-    --lightness-200: 35.3616%;
-    --lightness-300: 41.0821%;
-    --lightness-400: 46.9058%;
-    --lightness-500: 51.9076%;
-    --lightness-600: 57.9699%;
-    --lightness-700: 56.1347%;
-    --lightness-800: 59.2866%;
-    --lightness-900: 62.3039%;
-    --lightness-1000: 67.0121%;
-    --lightness-1100: 72.3297%;
-    --lightness-1200: 79.1773%;
-    --lightness-1300: 85.1751%;
-    --lightness-1400: 91.1434%;
-    --lightness-1500: 95.2045%;
-    --lightness-1600: 100%;
+  --lightness-100: 29.6725%;
+  --lightness-200: 35.3616%;
+  --lightness-300: 41.0821%;
+  --lightness-400: 46.9058%;
+  --lightness-500: 51.9076%;
+  --lightness-600: 57.9699%;
+  --lightness-700: 56.1347%;
+  --lightness-800: 59.2866%;
+  --lightness-900: 62.3039%;
+  --lightness-1000: 67.0121%;
+  --lightness-1100: 72.3297%;
+  --lightness-1200: 79.1773%;
+  --lightness-1300: 85.1751%;
+  --lightness-1400: 91.1434%;
+  --lightness-1500: 95.2045%;
+  --lightness-1600: 100%;
 
-    --highlight-hover: rgb(255 255 255 / 0.1);
-    --highlight-pressed: rgb(255 255 255 / 0.2);
-    --overlay-background: var(--gray-100);
-    --overlay-border: rgb(255 255 255 / 0.2);
-    --popover-shadow: 0 8px 20px rgba(0 0 0 / 0.5);
-  }
-}
-
-[data-theme='dark'] {
-  :root {
-    --background-color: #1b1b1b;
-    --gray-50: oklch(22% 0 0);
-
-    --lightness-100: 29.6725%;
-    --lightness-200: 35.3616%;
-    --lightness-300: 41.0821%;
-    --lightness-400: 46.9058%;
-    --lightness-500: 51.9076%;
-    --lightness-600: 57.9699%;
-    --lightness-700: 56.1347%;
-    --lightness-800: 59.2866%;
-    --lightness-900: 62.3039%;
-    --lightness-1000: 67.0121%;
-    --lightness-1100: 72.3297%;
-    --lightness-1200: 79.1773%;
-    --lightness-1300: 85.1751%;
-    --lightness-1400: 91.1434%;
-    --lightness-1500: 95.2045%;
-    --lightness-1600: 100%;
-
-    --highlight-hover: rgb(255 255 255 / 0.1);
-    --highlight-pressed: rgb(255 255 255 / 0.2);
-    --overlay-background: var(--gray-100);
-    --overlay-border: rgb(255 255 255 / 0.2);
-    --popover-shadow: 0 8px 20px rgba(0 0 0 / 0.5);
-  }
+  --highlight-hover: rgb(255 255 255 / 0.1);
+  --highlight-pressed: rgb(255 255 255 / 0.2);
+  --overlay-background: var(--gray-100);
+  --overlay-border: rgb(255 255 255 / 0.2);
+  --popover-shadow: 0 8px 20px rgba(0 0 0 / 0.5);
 }
 
 /* Semantic colors */

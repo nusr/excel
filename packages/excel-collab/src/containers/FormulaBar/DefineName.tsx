@@ -100,6 +100,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(
         value={defineName}
         data={popupList}
         onChange={handleSelect}
+        className={styles['defined-name-select']}
       >
         <input
           value={value}

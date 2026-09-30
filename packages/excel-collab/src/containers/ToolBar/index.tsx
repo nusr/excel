@@ -464,7 +464,6 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
             onClick={toggleMergeCell}
             data-testid="toolbar-merge-cell"
             className={styles['merge-cell-button']}
-            variant="quiet"
             aria-label="Merge And Center"
           >
             {i18n.t('merge-and-center')}
@@ -476,9 +475,12 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
           onChange={handleNumberFormat}
           testId="toolbar-number-format"
         >
-          <div data-testid="toolbar-number-format-value">
+          <Button
+            aria-label="Number Format"
+            data-testid="toolbar-number-format-value"
+          >
             {numberFormatLabel}
-          </div>
+          </Button>
         </SelectList>
         <ToggleButton
           isSelected={isFilter}

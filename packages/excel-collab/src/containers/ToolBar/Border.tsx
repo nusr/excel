@@ -191,50 +191,64 @@ export const BorderToolBar = memo(() => {
           <ChevronDown />
         </Button>
         <Menu data-testid="toolbar-border" aria-label="Toolbar Border Menu">
-          <MenuItem onPress={handleNoBorder} data-testid="toolbar-no-border">
+          <MenuItem
+            onPress={handleNoBorder}
+            data-testid="toolbar-no-border"
+            textValue={i18n.t('no-border')}
+          >
             {i18n.t('no-border')}
           </MenuItem>
           <MenuItem
             onPress={handleAllBorders}
             data-testid="toolbar-all-borders"
+            textValue={i18n.t('all-borders')}
           >
             {i18n.t('all-borders')}
           </MenuItem>
           <MenuItem
             onPress={handleOutSideBorders}
             data-testid="toolbar-outside-borders"
+            textValue={i18n.t('outside-borders')}
           >
             {i18n.t('outside-borders')}
           </MenuItem>
           <MenuItem
             onPress={handleThickBoxBorder}
             data-testid="toolbar-thick-box-border"
+            textValue={i18n.t('thick-box-border')}
           >
             {i18n.t('thick-box-border')}
           </MenuItem>
           <MenuItem
             onPress={handleBottomBorder}
             data-testid="toolbar-bottom-border"
+            textValue={i18n.t('bottom-border')}
           >
             {i18n.t('bottom-border')}
           </MenuItem>
-          <MenuItem onPress={handleTopBorder} data-testid="toolbar-top-border">
+          <MenuItem
+            onPress={handleTopBorder}
+            data-testid="toolbar-top-border"
+            textValue={i18n.t('top-border')}
+          >
             {i18n.t('top-border')}
           </MenuItem>
           <MenuItem
             onPress={handleLeftBorder}
             data-testid="toolbar-left-border"
+            textValue={i18n.t('left-border')}
           >
             {i18n.t('left-border')}
           </MenuItem>
           <MenuItem
             onPress={handleRightBorder}
             data-testid="toolbar-right-border"
+            textValue={i18n.t('right-border')}
           >
             {i18n.t('right-border')}
           </MenuItem>
           <SubmenuTrigger>
-            <MenuItem data-testid="toolbar-border-color-trigger">
+            <MenuItem data-testid="toolbar-border-color-trigger" textValue={i18n.t('line-color')}>
               {i18n.t('line-color')}
             </MenuItem>
             <Menu aria-label="Toolbar Border Color Menu">
@@ -243,6 +257,7 @@ export const BorderToolBar = memo(() => {
                   key={item}
                   id={item}
                   onPress={() => handleColorChange(item)}
+                  textValue={item}
                 >
                   {item}
                 </MenuItem>
@@ -250,7 +265,7 @@ export const BorderToolBar = memo(() => {
             </Menu>
           </SubmenuTrigger>
           <SubmenuTrigger>
-            <MenuItem data-testid="toolbar-border-style">
+            <MenuItem data-testid="toolbar-border-style" textValue={i18n.t('line-style')}>
               {i18n.t('line-style')}
             </MenuItem>
             <Menu aria-label="Toolbar Border Style Menu">
@@ -260,6 +275,7 @@ export const BorderToolBar = memo(() => {
                   id={border}
                   onPress={() => handleBorderStyle(border as BorderType)}
                   data-testid={`toolbar-border-style-${border}`}
+                  textValue={border}
                 >
                   {border}
                 </MenuItem>
