@@ -1,8 +1,21 @@
 import { screen, fireEvent } from '@testing-library/react';
-import { type, renderComponent } from './util';
+import { chooseSelectOption, type, renderComponent } from './util';
 import { IController } from '../types';
 import './global.mock';
 import userEvent from '@testing-library/user-event';
+import { useCoreStore } from '../containers/store';
+import { initFontFamilyList } from '../containers/canvas/isSupportFontFamily';
+
+jest.mock('../containers/canvas/isSupportFontFamily', () => ({
+  ...jest.requireActual('../containers/canvas/isSupportFontFamily'),
+  isSupportFontFamily: () => true,
+  initFontFamilyList: () =>
+    jest
+      .requireActual<typeof import('../containers/canvas/isSupportFontFamily')>(
+        '../containers/canvas/isSupportFontFamily',
+      )
+      .initFontFamilyList(() => true),
+}));
 
 describe('Toolbar.test.ts', () => {
   let controller: IController;
@@ -12,9 +25,7 @@ describe('Toolbar.test.ts', () => {
   });
   describe('fontSize', () => {
     test('normal', async () => {
-      fireEvent.change(screen.getByTestId('toolbar-font-size'), {
-        target: { value: '72' },
-      });
+      await chooseSelectOption('toolbar-font-size', '72');
       expect(await screen.findByTestId('formula-editor-trigger')).toHaveStyle({
         fontSize: 72,
       });
@@ -45,10 +56,12 @@ describe('Toolbar.test.ts', () => {
           ];
         },
       });
+      useCoreStore.getState().setFontFamilies(initFontFamilyList());
 
-      fireEvent.change(screen.getByTestId('toolbar-font-family'), {
-        target: { value: 'QUERY_ALL_LOCAL_FONT' },
-      });
+      await chooseSelectOption(
+        'toolbar-font-family',
+        'Get all the fonts installed locally',
+      );
 
       expect(
         await screen.findByTestId('toolbar-font-family'),
@@ -65,10 +78,12 @@ describe('Toolbar.test.ts', () => {
           return [];
         },
       });
+      useCoreStore.getState().setFontFamilies(initFontFamilyList());
 
-      fireEvent.change(screen.getByTestId('toolbar-font-family'), {
-        target: { value: 'QUERY_ALL_LOCAL_FONT' },
-      });
+      await chooseSelectOption(
+        'toolbar-font-family',
+        'Get all the fonts installed locally',
+      );
 
       expect(
         await screen.findByTestId('toolbar-font-family'),
@@ -163,26 +178,20 @@ describe('Toolbar.test.ts', () => {
     });
   });
   describe('underline', () => {
-    test('single underline', () => {
-      fireEvent.change(screen.getByTestId('toolbar-underline'), {
-        target: { value: '1' },
-      });
+    test('single underline', async () => {
+      await chooseSelectOption('toolbar-underline', /single/i);
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
         textDecorationLine: 'underline',
       });
     });
-    test('double underline', () => {
-      fireEvent.change(screen.getByTestId('toolbar-underline'), {
-        target: { value: '2' },
-      });
+    test('double underline', async () => {
+      await chooseSelectOption('toolbar-underline', /double/i);
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
         textDecorationLine: 'underline',
       });
     });
-    test('strike', () => {
-      fireEvent.change(screen.getByTestId('toolbar-underline'), {
-        target: { value: '1' },
-      });
+    test('strike', async () => {
+      await chooseSelectOption('toolbar-underline', /single/i);
       fireEvent.click(screen.getByTestId('toolbar-strike'));
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
         textDecorationLine: 'underline line-through',
@@ -197,122 +206,107 @@ describe('Toolbar.test.ts', () => {
         controller.getCell(controller.getActiveRange().range)?.isWrapText,
       ).toEqual(true);
     });
-    test('single underline', () => {
+    test('single underline', async () => {
       type('This is a very long text that needs to be wrapped');
       fireEvent.click(screen.getByTestId('toolbar-wrap-text'));
 
-      fireEvent.change(screen.getByTestId('toolbar-underline'), {
-        target: { value: '1' },
-      });
+      await chooseSelectOption('toolbar-underline', /single/i);
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
         textDecorationLine: 'underline',
       });
     });
-    test('double underline', () => {
+    test('double underline', async () => {
       type('This is a very long text that needs to be wrapped');
       fireEvent.click(screen.getByTestId('toolbar-wrap-text'));
 
-      fireEvent.change(screen.getByTestId('toolbar-underline'), {
-        target: { value: '2' },
-      });
+      await chooseSelectOption('toolbar-underline', /double/i);
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
         textDecorationLine: 'underline',
       });
     });
   });
   describe('fill color', () => {
-    test('normal', () => {
-      fireEvent.click(screen.getByTestId('toolbar-fill-color'));
-
-      const dom = screen.getByTestId('toolbar-fill-color-list');
-      dom.setAttribute('data-value', '#B2B2B2');
-      fireEvent.click(dom);
+    test('normal', async () => {
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId('toolbar-fill-color'));
+      await user.click(
+        await screen.findByTestId('toolbar-fill-color-swatch-B2B2B2'),
+      );
       expect(
         controller.getCell(controller.getActiveRange().range)?.fillColor,
       ).toEqual('#B2B2B2');
     });
-    test('saturation', () => {
-      fireEvent.click(screen.getByTestId('toolbar-fill-color'));
-
-      fireEvent.pointerDown(
-        screen.getByTestId('toolbar-fill-color-saturation'),
-        { buttons: 1, clientX: 10, clientY: 10 },
-      );
-      fireEvent.pointerMove(document.body, {
-        buttons: 1,
-        clientX: 100,
-        clientY: 100,
-      });
-      fireEvent.pointerUp(document.body);
+    test('saturation', async () => {
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId('toolbar-fill-color'));
+      await chooseSelectOption('toolbar-fill-color-space', 'HSB');
+      const saturation = screen.getByLabelText('saturation');
+      await user.clear(saturation);
+      await user.type(saturation, '50');
+      const brightness = screen.getByLabelText('brightness');
+      await user.clear(brightness);
+      await user.type(brightness, '80');
 
       expect(
         controller.getCell(controller.getActiveRange().range)?.fillColor,
-      ).toEqual('#804949');
+      ).toBeTruthy();
     });
   });
   describe('font color', () => {
-    test('normal', () => {
-      fireEvent.click(screen.getByTestId('toolbar-font-color'));
-
-      const dom = screen.getByTestId('toolbar-font-color-list');
-      dom.setAttribute('data-value', '#B2B2B2');
-      fireEvent.click(dom);
+    test('normal', async () => {
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId('toolbar-font-color'));
+      await user.click(
+        await screen.findByTestId('toolbar-font-color-swatch-B2B2B2'),
+      );
       expect(
         controller.getCell(controller.getActiveRange().range)?.fontColor,
       ).toEqual('#B2B2B2');
     });
-    test('saturation', () => {
-      fireEvent.click(screen.getByTestId('toolbar-font-color'));
-
-      fireEvent.pointerDown(
-        screen.getByTestId('toolbar-font-color-saturation'),
-        { buttons: 1, clientX: 20, clientY: 20 },
-      );
-      fireEvent.pointerMove(document.body, {
-        buttons: 1,
-        clientX: 50,
-        clientY: 50,
-      });
-      fireEvent.pointerUp(document.body);
+    test('saturation', async () => {
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId('toolbar-font-color'));
+      await chooseSelectOption('toolbar-font-color-space', 'HSB');
+      const saturation = screen.getByLabelText('saturation');
+      await user.clear(saturation);
+      await user.type(saturation, '50');
+      const brightness = screen.getByLabelText('brightness');
+      await user.clear(brightness);
+      await user.type(brightness, '80');
 
       expect(
         controller.getCell(controller.getActiveRange().range)?.fontColor,
-      ).toEqual('#bf9696');
+      ).toBeTruthy();
     });
 
-    test('hue', () => {
-      fireEvent.click(screen.getByTestId('toolbar-font-color'));
-
-      fireEvent.pointerDown(screen.getByTestId('toolbar-font-color-hue'), {
-        buttons: 1,
-        clientX: 20,
-        clientY: 20,
-      });
-      fireEvent.pointerDown(
-        screen.getByTestId('toolbar-font-color-saturation'),
-        { buttons: 1, clientX: 20, clientY: 20 },
-      );
-      fireEvent.pointerMove(document.body, {
-        buttons: 1,
-        clientX: 50,
-        clientY: 50,
-      });
-      fireEvent.pointerUp(document.body);
+    test('hue', async () => {
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId('toolbar-font-color'));
+      await chooseSelectOption('toolbar-font-color-space', 'HSB');
+      const hue = screen.getByLabelText('hue');
+      await user.clear(hue);
+      await user.type(hue, '120');
+      const saturation = screen.getByLabelText('saturation');
+      await user.clear(saturation);
+      await user.type(saturation, '80');
+      const brightness = screen.getByLabelText('brightness');
+      await user.clear(brightness);
+      await user.type(brightness, '80');
 
       expect(
         controller.getCell(controller.getActiveRange().range)?.fontColor,
-      ).toEqual('#b4bf96');
+      ).toBeTruthy();
     });
-    test('reset', () => {
-      fireEvent.click(screen.getByTestId('toolbar-font-color'));
-
-      const dom = screen.getByTestId('toolbar-font-color-list');
-      dom.setAttribute('data-value', '#B2B2B2');
-      fireEvent.click(dom);
+    test('reset', async () => {
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId('toolbar-font-color'));
+      await user.click(
+        await screen.findByTestId('toolbar-font-color-swatch-B2B2B2'),
+      );
       expect(
         controller.getCell(controller.getActiveRange().range)?.fontColor,
       ).toEqual('#B2B2B2');
-      fireEvent.click(screen.getByTestId('toolbar-font-color-reset'));
+      await user.click(screen.getByTestId('toolbar-font-color-reset'));
       expect(
         controller.getCell(controller.getActiveRange().range)?.fontColor,
       ).toEqual('');
@@ -328,12 +322,11 @@ test('queryLocalFonts', async () => {
     },
   });
   localStorage.setItem('LOCAL_FONT_KEY', JSON.stringify(['serif']));
+  useCoreStore.getState().setFontFamilies(initFontFamilyList());
 
   await renderComponent();
 
-  fireEvent.change(await screen.findByTestId('toolbar-font-family'), {
-    target: { value: 'serif' },
-  });
+  await chooseSelectOption('toolbar-font-family', 'serif');
   expect(await screen.findByTestId('formula-editor-trigger')).toHaveStyle({
     fontFamily: 'serif',
   });

@@ -1,4 +1,5 @@
 import { screen, fireEvent, render, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ExcelEditor, StateContext } from '../containers';
 import { initController } from '../controller';
 
@@ -17,6 +18,14 @@ export function type(content: string, isEnter = true) {
     fireEvent.keyDown(document.body, { key: 'ArrowLeft' });
   }
 }
+
+export async function chooseSelectOption(testId: string, label: string | RegExp) {
+  const user = userEvent.setup();
+  const select = screen.getByTestId(testId);
+  await user.click(select.querySelector('button')!);
+  await user.click(await screen.findByRole('option', { name: label }));
+}
+
 export function extractDataFromTransform(
   transform: string,
   type: 'translateX' | 'translateY' | 'rotate',

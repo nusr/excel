@@ -4,8 +4,9 @@ import {
   render,
   fireEvent,
   act,
-  RenderResult,
+  within,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import './global.mock';
 import { renderComponent } from './util';
 import { initController } from '../controller';
@@ -42,7 +43,9 @@ describe('Menubar.test.ts', () => {
   });
   describe('i18n', () => {
     test('default', () => {
-      expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('en-US');
+      expect(
+        within(screen.getByTestId('menubar-i18n-select')).getByRole('button'),
+      ).toHaveTextContent('en-US');
     });
   });
   describe('file menu', () => {
@@ -59,12 +62,12 @@ describe('Menubar.test.ts', () => {
   });
 });
 
-test('change i18n', () => {
-  let result: RenderResult;
+test('change i18n', async () => {
+  const user = userEvent.setup();
   const controller = initController();
   controller.addFirstSheet();
   act(() => {
-    result = render(
+    render(
       <StateContext
         value={{
           controller,
@@ -74,21 +77,10 @@ test('change i18n', () => {
       </StateContext>,
     );
   });
-  fireEvent.change(screen.getByTestId('menubar-i18n-select'), {
-    target: { value: 'zh-CN' },
-  });
-  act(() => {
-    result.rerender(
-      <StateContext
-        value={{
-          controller,
-        }}
-      >
-        <ExcelEditor />
-      </StateContext>,
-    );
-  });
-  expect(screen.getByTestId('menubar-i18n-select')).toHaveValue('zh-CN');
+  const languageSelect = screen.getByTestId('menubar-i18n-select');
+  await user.click(within(languageSelect).getByRole('button'));
+  await user.click(await screen.findByRole('option', { name: 'zh-CN' }));
+  expect(within(languageSelect).getByRole('button')).toHaveTextContent('zh-CN');
 });
 
 describe('change theme', () => {

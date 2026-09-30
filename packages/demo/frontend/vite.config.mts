@@ -19,7 +19,7 @@ function htmlSlot(options: Record<string, string>) {
 }
 
 export default defineConfig((env) => {
-  const isLocalMode = env.mode === 'development';
+  const isLocalMode = env.mode === 'development' || env.mode === 'e2e';
   const dirPath = join(import.meta.dirname, '..', '..', 'excel-collab', 'src');
   const alias: AliasOptions = isLocalMode
     ? {

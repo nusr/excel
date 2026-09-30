@@ -12,8 +12,9 @@ describe('HorizontalAlign.test.tsx', () => {
 
       fireEvent.click(screen.getByTestId('toolbar-horizontal-left'));
 
-      expect(screen.getByTestId('toolbar-horizontal-left')).toHaveClass(
-        'active',
+      expect(screen.getByTestId('toolbar-horizontal-left')).toHaveAttribute(
+        'aria-pressed',
+        'true',
       );
     });
   });
@@ -23,8 +24,9 @@ describe('HorizontalAlign.test.tsx', () => {
 
       fireEvent.click(screen.getByTestId('toolbar-horizontal-center'));
 
-      expect(screen.getByTestId('toolbar-horizontal-center')).toHaveClass(
-        'active',
+      expect(screen.getByTestId('toolbar-horizontal-center')).toHaveAttribute(
+        'aria-pressed',
+        'true',
       );
     });
   });
@@ -34,8 +36,9 @@ describe('HorizontalAlign.test.tsx', () => {
 
       fireEvent.click(screen.getByTestId('toolbar-horizontal-right'));
 
-      expect(screen.getByTestId('toolbar-horizontal-right')).toHaveClass(
-        'active',
+      expect(screen.getByTestId('toolbar-horizontal-right')).toHaveAttribute(
+        'aria-pressed',
+        'true',
       );
     });
   });

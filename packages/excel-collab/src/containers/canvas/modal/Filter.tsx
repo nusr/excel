@@ -3,7 +3,7 @@ import type { IController, ModalProps, ResultType } from '../../../types';
 import { MERGE_CELL_LINE_BREAK } from '../../../util';
 import i18n from '../../../i18n';
 import styles from './index.module.css';
-import { Button } from '../../../components';
+import { Button } from '../../../component/Button';
 import { useExcel } from '../../../containers/store';
 
 type FilterItem = {
@@ -128,10 +128,13 @@ export const FilterModal = ({ col, hide }: ModalProps) => {
       </div>
 
       <div className={styles['dialog-button']}>
-        <Button onClick={hide}>{i18n.t('cancel')}</Button>
+        <Button onClick={hide} aria-label="Cancel">
+          {i18n.t('cancel')}
+        </Button>
         <Button
+          aria-label="Confirm"
           className={styles['dialog-cancel']}
-          type="primary"
+          variant="primary"
           onClick={() => {
             const data = dataList.filter((v) => v.checked).map((v) => v.value);
             if (data.length === dataList.length) {

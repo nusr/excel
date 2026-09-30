@@ -1,5 +1,5 @@
 import { splitToWords } from '../util';
-import { getThemeColor, sizeConfig } from '../theme';
+import { getThemeColor } from '../theme';
 import { npx, dpr } from '../util';
 import { makeFont } from '../util';
 import {
@@ -9,7 +9,7 @@ import {
   DEFAULT_LINE_WIDTH,
   BORDER_TYPE_MAP,
   isEmpty,
-  anyError
+  anyError,
 } from '../util';
 import {
   CanvasOverlayPosition,
@@ -320,7 +320,7 @@ export function renderCell(
     isMergeContent(Boolean(isMergeCell), text),
   );
   if (width > 0 && height > 0) {
-    const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
+    const lineGap = Math.ceil((fontSize * (1.5 - 1)) / 2);
     let list: Point[] = [];
     for (const item of resultList) {
       fillText(ctx, item.text, item.x, item.y);
@@ -362,7 +362,7 @@ function computeCell(
   isMergeContent?: boolean,
 ) {
   const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
-  const lineGap = Math.ceil((fontSize * (sizeConfig.lineHeight - 1)) / 2);
+  const lineGap = Math.ceil((fontSize * (1.5 - 1)) / 2);
   const verticalAlign = style?.verticalAlign ?? EVerticalAlign.MIDDLE;
   const { left, top, height } = cellInfo;
   const width = Math.max(cellInfo.width, ...texts.map((v) => v.width));
@@ -446,7 +446,7 @@ function computeCell(
       height: textHeight,
     });
   }
-  textHeight = Math.max(textHeight, fontSize * sizeConfig.lineHeight);
+  textHeight = Math.max(textHeight, fontSize * 1.5);
   textWidth += lineGap;
   textHeight += lineGap;
   if (textWidth <= width && textHeight <= height) {

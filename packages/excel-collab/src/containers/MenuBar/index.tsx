@@ -1,21 +1,27 @@
-import React, { memo, useCallback, useState } from "react";
-import { Menu, MenuItem, SubMenu } from "../../components";
+import React, { memo, useCallback, useState } from 'react';
 import {
   importExcel,
   exportExcel,
   EXPORT_EXTENSIONS,
   EXPORT_FORMATS,
   type ExportExtension,
-} from "../Excel";
-import styles from "./index.module.css";
-import { Theme } from "./Theme";
-import i18n from "../../i18n";
-import { I18N } from "./I18N";
-import { saveAs } from "../../util";
-import { useExcel } from "../store";
-import { User } from "./User";
-import { File } from "./File";
-import { v4 } from "uuid";
+} from '../Excel';
+import styles from './index.module.css';
+import { Theme } from './Theme';
+import i18n from '../../i18n';
+import { I18N } from './I18N';
+import { saveAs } from '../../util';
+import { useExcel } from '../store';
+import { User } from './User';
+import { File } from './File';
+import { v4 } from 'uuid';
+import {
+  MenuTrigger,
+  SubmenuTrigger,
+  Menu,
+  MenuItem,
+} from '../../component/Menu';
+import { Button } from '../../component/Button';
 
 type Props = {
   leftChildren?: React.ReactNode;
@@ -24,7 +30,7 @@ type Props = {
 
 const ACCEPT = Object.values(EXPORT_FORMATS)
   .map((v) => v.mime)
-  .join(",");
+  .join(',');
 
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
   ({ leftChildren, rightChildren }) => {
@@ -41,14 +47,14 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
         }
         const model = await importExcel(file);
         controller.fromJSON(model);
-        event.target.value = "";
+        event.target.value = '';
         event.target.blur();
       },
       [],
     );
     const handleExportJSON = useCallback(() => {
       const blob = new Blob([JSON.stringify(controller.toJSON())], {
-        type: "application/json",
+        type: 'application/json',
       });
       saveAs(blob, `excel_${Date.now()}.json`);
     }, []);
@@ -57,59 +63,77 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       provider?.addDocument?.(docId);
     }, []);
     return (
-      <div className={styles["menubar-container"]} data-testid="menubar">
-        <div className={styles["menubar-menu"]}>
+      <div className={styles['menubar-container']} data-testid="menubar">
+        <div className={styles['menubar-menu']}>
           <File visible={visible} setVisible={setVisible} />
-          <Menu
-            label={i18n.t("file")}
-            className={styles.menu}
-            testId="menubar-excel"
-          >
-            <MenuItem onClick={handleAddDocument} testId="menubar-new-excel">
-              {i18n.t("new-file")}
-            </MenuItem>
-            <MenuItem
-              onClick={() => setVisible(true)}
-              testId="menubar-rename-excel"
+          <MenuTrigger data-testid="menubar-excel">
+            <Button
+              data-testid="menubar-excel-trigger"
+              aria-label="Excel Menu Trigger"
             >
-              {i18n.t("rename-file")}
-            </MenuItem>
-            <MenuItem testId="menubar-import-excel">
-              <input
-                type="file"
-                hidden
-                onChange={handleImportExcel}
-                accept={ACCEPT}
-                data-testid="menubar-import-input"
-                id="menubar-import-input"
-              />
-              <label htmlFor="menubar-import-input">
-                {i18n.t("import", { format: "File" })}
-              </label>
-            </MenuItem>
-            <SubMenu
-              label={i18n.t("export", { format: "..." })}
-              testId="menubar-export-more"
-            >
-              {EXPORT_EXTENSIONS.map((ext) => (
-                <MenuItem
-                  key={ext}
-                  testId={`menubar-export-more-${ext}`}
-                  onClick={() => handleExportExcel(ext)}
-                >
-                  {ext.toUpperCase()}
-                </MenuItem>
-              ))}
+              {i18n.t('file')}
+            </Button>
+            <Menu aria-label="Excel Menu">
+              <MenuItem
+                data-testid="menubar-new-excel"
+                onPress={handleAddDocument}
+                textValue={i18n.t('new-file')}
+              >
+                {i18n.t('new-file')}
+              </MenuItem>
+              <MenuItem
+                data-testid="menubar-rename-excel"
+                onPress={() => setVisible(true)}
+                textValue={i18n.t('rename-file')}
+              >
+                {i18n.t('rename-file')}
+              </MenuItem>
 
               <MenuItem
-                testId="menubar-export-json"
-                onClick={handleExportJSON}
-                key="json"
+                data-testid="menubar-import-excel"
+                textValue={i18n.t('import', { format: 'File' })}
               >
-                JSON
+                <input
+                  type="file"
+                  hidden
+                  onChange={handleImportExcel}
+                  accept={ACCEPT}
+                  data-testid="menubar-import-input"
+                  id="menubar-import-input"
+                />
+                <label htmlFor="menubar-import-input">
+                  {i18n.t('import', { format: 'File' })}
+                </label>
               </MenuItem>
-            </SubMenu>
-          </Menu>
+              <SubmenuTrigger data-testid="menubar-export-more">
+                <MenuItem textValue={i18n.t('export', { format: '...' })}>
+                  {' '}
+                  {i18n.t('export', { format: '...' })}
+                </MenuItem>
+                <Menu aria-label="Export Menu">
+                  {EXPORT_EXTENSIONS.map((ext) => (
+                    <MenuItem
+                      key={ext}
+                      data-testid={`menubar-export-more-${ext}`}
+                      onPress={() => handleExportExcel(ext)}
+                      textValue={ext.toUpperCase()}
+                    >
+                      {ext.toUpperCase()}
+                    </MenuItem>
+                  ))}
+
+                  <MenuItem
+                    data-testid="menubar-export-json"
+                    onPress={handleExportJSON}
+                    key="json"
+                    textValue="JSON"
+                  >
+                    JSON
+                  </MenuItem>
+                </Menu>
+              </SubmenuTrigger>
+            </Menu>
+          </MenuTrigger>
           {leftChildren}
         </div>
         {rightChildren}
@@ -121,6 +145,6 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
   },
 );
 
-MenuBarContainer.displayName = "MenuBarContainer";
+MenuBarContainer.displayName = 'MenuBarContainer';
 
 export default MenuBarContainer;

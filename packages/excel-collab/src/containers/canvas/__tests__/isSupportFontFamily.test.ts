@@ -13,7 +13,7 @@ describe('isSupportFontFamily.test.ts', () => {
           return [];
         },
       });
-      expect(initFontFamilyList()).toHaveLength(1);
+      expect(initFontFamilyList()).toHaveLength(17);
     });
   });
 });

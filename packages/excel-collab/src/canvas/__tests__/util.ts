@@ -9,7 +9,7 @@ import {
 import fs from 'fs';
 import { setDpr } from '../../util';
 import path from 'path';
-import pixelMatch from './pixelMatch'
+import pixelMatch from './pixelMatch';
 import PNG from 'pngjs';
 
 const defaultWidth = 200;
@@ -73,8 +73,14 @@ async function compareImage(
   const threshold = Math.sqrt(result / (width * height));
   if (threshold > maxThreshold) {
     console.log(`threshold: ${threshold},maxThreshold: ${maxThreshold}`);
-    const diffPath = basePath.replace('.png', '.diff.png');
-    await fs.promises.writeFile(diffPath, PNG.PNG.sync.write(diff) as any);
+    await fs.promises.writeFile(
+      basePath.replace('.png', '.diff.png'),
+      PNG.PNG.sync.write(diff) as any,
+    );
+    await fs.promises.writeFile(
+      basePath.replace('.png', '.actual.png'),
+      newImageBuffer,
+    );
     return 1;
   } else {
     return 0;

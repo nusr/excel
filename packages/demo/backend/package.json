@@ -18,6 +18,7 @@
     "@koa/router": "^15.7.0",
     "@types/ws": "^8.18.1",
     "@y/websocket-server": "^0.1.5",
+    "@y/y": "^14.0.0-rc.7",
     "dotenv": "^17.4.2",
     "koa": "^3.2.1",
     "koa-body": "^8.0.1",

@@ -3,6 +3,7 @@ import { BORDER_TYPE_MAP } from '../util';
 import { BorderItem, IController } from '../types';
 import { renderComponent } from './util';
 import './global.mock';
+import userEvent from '@testing-library/user-event';
 
 describe('Border.test.tsx', () => {
   let controller: IController;
@@ -11,12 +12,11 @@ describe('Border.test.tsx', () => {
     controller = result.controller;
   });
   describe('Line Color', () => {
-    test('ok', () => {
-      fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
-      fireEvent.click(screen.getByTestId('toolbar-border-color-trigger'));
-      const dom = screen.getByTestId('toolbar-border-color-list');
-      dom.setAttribute('data-value', '#B2B2B2');
-      fireEvent.click(dom);
+    test('ok', async () => {
+      const user = userEvent.setup();
+      await user.click(screen.getByTestId('toolbar-border-trigger'));
+      await user.hover(screen.getByTestId('toolbar-border-color-trigger'));
+      await user.click(await screen.findByRole('menuitem', { name: '#B2B2B2' }));
       expect(
         controller.getCell(controller.getActiveRange().range)?.borderLeft,
       ).toEqual({
@@ -27,14 +27,16 @@ describe('Border.test.tsx', () => {
   });
   describe('Line Style', () => {
     for (const item of Object.keys(BORDER_TYPE_MAP)) {
-      test(item, () => {
+      test(item, async () => {
+        const user = userEvent.setup();
         const selector = `toolbar-border-style-${item}`;
-        fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
-        fireEvent.click(screen.getByTestId('toolbar-border-style'));
-        fireEvent.click(screen.getByTestId(selector));
-
-        fireEvent.click(screen.getByTestId('toolbar-border-style'));
-        expect(screen.getByTestId(selector)).toHaveClass('active');
+        await user.click(screen.getByTestId('toolbar-border-trigger'));
+        await user.hover(screen.getByTestId('toolbar-border-style'));
+        await user.click(await screen.findByTestId(selector));
+        expect(
+          controller.getCell(controller.getActiveRange().range)?.borderTop
+            ?.type,
+        ).toBe(item);
       });
     }
   });
@@ -73,6 +75,7 @@ describe('Border.test.tsx', () => {
         borderBottom: item,
       });
 
+      fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-no-border'));
 
       expect(

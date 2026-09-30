@@ -1,10 +1,13 @@
-import React, { useMemo, memo } from 'react';
-import { Button, Select, info, ColorPicker, toast } from '../../components';
-import { OptionItem } from '../../types';
+import React, { memo, Fragment, useMemo, useState } from 'react';
+import { Dialog } from '../../components';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
 import { SheetItem, useExcel } from '../store';
 import i18n from '../../i18n';
+import { Select, SelectItem } from '../../component/Select';
+import { queue } from '../../component/Toast';
+import { COLOR_PICKER_COLOR_LIST } from '../../util';
+import { Menu, MenuItem, SubmenuTrigger } from '../../component/Menu';
 
 interface Props {
   position: number;
@@ -15,119 +18,148 @@ interface Props {
 }
 
 export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
-  ({ position, sheetList, currentSheetId, hideMenu, editSheetName }) => {
+  ({ position, sheetList, hideMenu, editSheetName }) => {
     const { controller } = useExcel();
+    const [isOpen, onOpenChange] = useState(false);
+    const [sheetId, setSheetId] = useState('');
     const ref = useClickOutside(true, hideMenu);
-    const tabColor = useMemo(() => {
-      return (
-        sheetList.find((v) => v.sheetId === currentSheetId)?.tabColor || ''
-      );
-    }, [sheetList, currentSheetId]);
-    const hideSheetList: OptionItem[] = useMemo(() => {
+    const hideSheetList = useMemo(() => {
       return sheetList
         .filter((v) => v.isHide)
         .map((item) => ({
           value: String(item.sheetId),
           label: item.name,
-          disabled: false,
         }));
     }, [sheetList]);
     const handleUnhide = () => {
-      let value = String(hideSheetList[0]?.value) || '';
-      info({
-        visible: true,
-        title: i18n.t('unhide-sheet'),
-        testId: 'sheet-bar-context-menu-unhide-dialog',
-        children: (
-          <Select
-            data={hideSheetList}
-            onChange={(v) => {
-              value = String(v);
-            }}
-            className={styles['unhide-select']}
-            defaultValue={value}
-            testId="sheet-bar-context-menu-unhide-dialog-select"
-          />
-        ),
-        onCancel: hideMenu,
-        onOk() {
-          if (!value) {
-            return toast.error(i18n.t('sheet-id-can-not-be-empty'));
-          }
-          controller.unhideSheet(value);
-          hideMenu();
-        },
-      });
+      const t = String(hideSheetList[0]?.value) || '';
+      setSheetId(t);
+      onOpenChange(true);
     };
-    const handleTabColorChange = (color: string) => {
-      controller.updateSheetInfo({ tabColor: color });
+    const handleTabColorChange = (color: unknown) => {
+      controller.updateSheetInfo({ tabColor: String(color) });
       hideMenu();
     };
     return (
-      <div
-        className={styles['sheet-bar-context-menu']}
-        style={{ left: position }}
-        ref={ref}
-        data-testid="sheet-bar-context-menu"
-      >
-        <Button
-          testId="sheet-bar-context-menu-insert"
-          onClick={() => {
-            hideMenu();
-            controller.addSheet();
+      <Fragment>
+        <div
+          className={styles['sheet-bar-context-menu']}
+          style={{ left: position }}
+          ref={ref}
+          data-testid="sheet-bar-context-menu"
+        >
+          <Menu aria-label="Sheet Bar Context Menu">
+            <MenuItem
+              data-testid="sheet-bar-context-menu-insert"
+              onPress={() => {
+                hideMenu();
+                controller.addSheet();
+              }}
+              textValue={i18n.t('insert')}
+            >
+              {i18n.t('insert')}
+            </MenuItem>
+            <MenuItem
+              data-testid="sheet-bar-context-menu-delete"
+              onPress={() => {
+                hideMenu();
+                controller.deleteSheet();
+              }}
+              textValue={i18n.t('delete')}
+            >
+              {i18n.t('delete')}
+            </MenuItem>
+            <MenuItem
+              data-testid="sheet-bar-context-menu-rename"
+              onPress={() => {
+                hideMenu();
+                editSheetName();
+              }}
+              textValue={i18n.t('rename')}
+            >
+              {i18n.t('rename')}
+            </MenuItem>
+            <MenuItem
+              data-testid="sheet-bar-context-menu-hide"
+              onPress={() => {
+                hideMenu();
+                controller.hideSheet();
+              }}
+              textValue={i18n.t('hide')}
+            >
+              {i18n.t('hide')}
+            </MenuItem>
+            <MenuItem
+              data-testid="sheet-bar-context-menu-unhide"
+              isDisabled={hideSheetList.length === 0}
+              onPress={handleUnhide}
+              textValue={i18n.t('unhide')}
+            >
+              {i18n.t('unhide')}
+            </MenuItem>
+            <SubmenuTrigger>
+              <MenuItem data-testid="sheet-bar-context-menu-tab-color" textValue={i18n.t('tab-color')}>
+                {i18n.t('tab-color')}
+              </MenuItem>
+              <Menu aria-label="Tab Color Menu">
+                {COLOR_PICKER_COLOR_LIST.map((color) => (
+                  <MenuItem
+                    key={color}
+                    id={color}
+                    onPress={() => handleTabColorChange(color)}
+                    textValue={color}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        backgroundColor: color,
+                        border: '1px solid currentColor',
+                        display: 'inline-block',
+                        height: 14,
+                        marginRight: 8,
+                        width: 14,
+                      }}
+                    />
+                    {color}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </SubmenuTrigger>
+          </Menu>
+        </div>
+        <Dialog
+          title={i18n.t('unhide-sheet')}
+          isOpen={isOpen}
+          onOpenChange={onOpenChange}
+          onOk={() => {
+            if (!sheetId) {
+              queue.add({ title: i18n.t('sheet-id-can-not-be-empty') });
+              return false;
+            }
+            controller.unhideSheet(sheetId);
+            return true;
           }}
         >
-          {i18n.t('insert')}
-        </Button>
-        <Button
-          testId="sheet-bar-context-menu-delete"
-          onClick={() => {
-            hideMenu();
-            controller.deleteSheet();
-          }}
-        >
-          {i18n.t('delete')}
-        </Button>
-        <Button
-          testId="sheet-bar-context-menu-rename"
-          onClick={() => {
-            hideMenu();
-            editSheetName();
-          }}
-        >
-          {i18n.t('rename')}
-        </Button>
-        <Button
-          testId="sheet-bar-context-menu-hide"
-          onClick={() => {
-            hideMenu();
-            controller.hideSheet();
-          }}
-        >
-          {i18n.t('hide')}
-        </Button>
-        <Button
-          testId="sheet-bar-context-menu-unhide"
-          className={styles['sheet-bar-unhide']}
-          disabled={hideSheetList.length === 0}
-          onClick={handleUnhide}
-        >
-          {i18n.t('unhide')}
-        </Button>
-        <ColorPicker
-          color={tabColor}
-          onChange={handleTabColorChange}
-          position="top"
-          testId="sheet-bar-context-menu-tab-color"
-        >
-          <Button
-            className={styles['sheet-bar-unhide']}
-            testId="sheet-bar-context-menu-tab-color"
+          <Select
+            data-testid="sheet-bar-context-menu-unhide-dialog-select"
+            value={sheetId}
+            onChange={(v) => {
+              setSheetId(String(v));
+            }}
+            aria-label="Select sheet to unhide"
           >
-            {i18n.t('tab-color')}
-          </Button>
-        </ColorPicker>
-      </div>
+            {hideSheetList.map((item) => (
+              <SelectItem
+                key={item.value}
+                id={item.value}
+                aria-label={item.label}
+              >
+                {item.label}
+              </SelectItem>
+            ))}
+          </Select>
+        </Dialog>
+      </Fragment>
     );
   },
 );

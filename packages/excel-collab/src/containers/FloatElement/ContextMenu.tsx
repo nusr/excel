@@ -1,7 +1,5 @@
-import React, { memo } from 'react';
-import { Button, info, Select, toast } from '../../components';
-import styles from './FloatElement.module.css';
-import { useClickOutside } from '../hooks';
+import React, { memo, useMemo, Fragment, useState } from 'react';
+import { Dialog } from '../../components';
 import type { ChartType } from 'chart.js';
 import {
   saveAs,
@@ -14,150 +12,69 @@ import {
 } from '../../util';
 import { useExcel, type FloatElementItem } from '../../containers/store';
 import { IWindowSize } from '../../types';
-import i18n from '../../i18n';
+import i18n, { type TranslationKeys } from '../../i18n';
+import { Menu, MenuItem } from '../../component/Menu';
+import { Select, SelectItem } from '../../component/Select';
+import { useClickOutside } from '../hooks';
+import styles from './FloatElement.module.css';
+import { queue } from '../../component/Toast';
+import { TextField } from '../../component/TextField';
+
+type ModalType = 'selectData' | 'changeChartTitle' | 'changeChartType';
 
 type Props = FloatElementItem & {
   menuLeft: number;
   menuTop: number;
-  resetResize: (size: IWindowSize) => void;
   hideContextMenu: () => void;
+  resetResize: (size: IWindowSize) => void;
 };
 
 export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
   (props) => {
     const {
-      menuLeft,
       menuTop,
+      menuLeft,
       uuid,
       type,
       chartType,
       title,
       resetResize,
-      hideContextMenu,
       originHeight,
       originWidth,
       width,
       height,
+      hideContextMenu,
     } = props;
     const { controller } = useExcel();
-    const ref = useClickOutside(true, hideContextMenu);
+    const [dataSource, setDataSource] = useState('');
+    const [isOpen, onOpenChange] = useState(false);
+    const ref = useClickOutside(!isOpen, hideContextMenu);
+    const [modalType, setModalType] = useState<ModalType>('selectData');
+
     const selectData = () => {
-      let value = convertToReference(
+      const value = convertToReference(
         props.chartRange!,
         'absolute',
         (sheetId: string) => {
           return controller.getSheetInfo(sheetId)?.name || '';
         },
       );
-      info({
-        visible: true,
-        title: i18n.t('edit-data-source'),
-        testId: 'dialog-select-data',
-        children: (
-          <input
-            type="text"
-            spellCheck
-            style={{ width: '400px' }}
-            defaultValue={value}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              value = event.target.value.trim();
-              event.stopPropagation();
-            }}
-            maxLength={MAX_NAME_LENGTH * 2}
-            data-testid="dialog-select-data-input"
-          />
-        ),
-        onOk: () => {
-          if (!value) {
-            return toast.error(
-              i18n.t('reference-is-empty'),
-              'select-data-empty-toast',
-            );
-          }
-          const sheetList = controller.getSheetList();
-          const range = parseReference(value, (sheetName: string) => {
-            return sheetList.find((v) => v.name === sheetName)?.sheetId || '';
-          });
-          if (
-            !range ||
-            !controller.validateRange(range) ||
-            (props.chartRange && isSameRange(range, props.chartRange))
-          ) {
-            return toast.error(
-              i18n.t('reference-is-not-valid'),
-              'select-data-invalid-toast',
-            );
-          }
-          range.sheetId = range.sheetId || controller.getCurrentSheetId();
-          controller.updateDrawing(uuid, { chartRange: range });
-          hideContextMenu();
-        },
-        onCancel: () => {
-          hideContextMenu();
-        },
-      });
+
+      setDataSource(value);
+      setModalType('selectData');
+      onOpenChange(true);
     };
     const changeChartTitle = () => {
-      let value = title.trim();
-      info({
-        visible: true,
-        title: i18n.t('change-chart-title'),
-        testId: 'dialog-change-chart-title',
-        children: (
-          <input
-            type="text"
-            spellCheck
-            style={{ width: '200px' }}
-            defaultValue={value}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              value = event.target.value.trim();
-              event.stopPropagation();
-            }}
-            maxLength={MAX_NAME_LENGTH}
-            data-testid="dialog-change-chart-title-input"
-          />
-        ),
-        onOk: () => {
-          if (!value) {
-            return toast.error(
-              i18n.t('the-value-cannot-be-empty'),
-              'change-chart-title-toast',
-            );
-          }
-          controller.updateDrawing(uuid, { title: value });
-          hideContextMenu();
-        },
-        onCancel: () => {
-          hideContextMenu();
-        },
-      });
+      setDataSource(title.trim());
+      setModalType('changeChartTitle');
+      onOpenChange(true);
     };
     const changeChartType = () => {
-      let newChartType: ChartType = chartType!;
-      info({
-        title: i18n.t('change-chart-type'),
-        testId: 'dialog-change-chart-type',
-        visible: true,
-        children: (
-          <Select
-            className={styles['chart-type-select']}
-            defaultValue={newChartType}
-            data={CHART_TYPE_LIST.map((v) => ({ ...v, disabled: false }))}
-            onChange={(v) => (newChartType = String(v) as ChartType)}
-            testId="dialog-change-chart-type-select"
-          />
-        ),
-        onCancel() {
-          hideContextMenu();
-        },
-        onOk() {
-          controller.updateDrawing(uuid, { chartType: newChartType });
-          hideContextMenu();
-        },
-      });
+      setDataSource(chartType ?? CHART_TYPE_LIST[0].value);
+      setModalType('changeChartType');
+      onOpenChange(true);
     };
     const saveAsPicture = () => {
-      hideContextMenu();
       const list = controller.getDrawingList(controller.getCurrentSheetId());
       const item = list.find((v) => v.uuid === uuid);
       if (!item) {
@@ -178,107 +95,219 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
         saveAs(chartData, item.title + '.png');
       }
     };
-    return (
-      <div
-        className={styles['context-menu']}
-        data-testid="float-element-context-menu"
-        ref={ref}
-        style={{ top: menuTop, left: menuLeft }}
-      >
-        <Button
-          testId="float-element-context-menu-copy"
-          onClick={() => {
-            hideContextMenu();
+
+    const actionList = useMemo(() => {
+      const actions: {
+        type: TranslationKeys;
+        action: () => void;
+        disabled?: boolean;
+      }[] = [
+        {
+          type: 'copy',
+          action: () => {
             controller.setFloatElementUuid(uuid);
             controller.copy();
-          }}
-        >
-          {i18n.t('copy')}
-        </Button>
-
-        <Button
-          testId="float-element-context-menu-cut"
-          onClick={() => {
-            hideContextMenu();
+          },
+        },
+        {
+          type: 'cut',
+          action: () => {
             controller.setFloatElementUuid(uuid);
             controller.cut();
-          }}
-        >
-          {i18n.t('cut')}
-        </Button>
-        <Button
-          testId="float-element-context-menu-paste"
-          onClick={() => {
-            hideContextMenu();
+          },
+        },
+        {
+          type: 'paste',
+          action: () => {
             controller.paste();
-          }}
-        >
-          {i18n.t('paste')}
-        </Button>
-        <Button
-          testId="float-element-context-menu-duplicate"
-          onClick={() => {
-            hideContextMenu();
+          },
+        },
+        {
+          type: 'duplicate',
+          action: () => {
             controller.setFloatElementUuid(uuid);
             controller.copy();
             controller.paste();
             controller.setFloatElementUuid('');
-          }}
-        >
-          {i18n.t('duplicate')}
-        </Button>
-        {type === 'chart' && (
-          <React.Fragment>
-            <Button
-              onClick={selectData}
-              testId="float-element-context-menu-select-data"
-            >
-              {i18n.t('select-data')}
-            </Button>
-            <Button
-              onClick={changeChartTitle}
-              testId="float-element-context-menu-change-chart-title"
-            >
-              {i18n.t('change-chart-title')}
-            </Button>
-            <Button
-              onClick={changeChartType}
-              testId="float-element-context-menu-change-chart-type"
-            >
-              {i18n.t('change-chart-type')}
-            </Button>
-          </React.Fragment>
-        )}
-        <Button
-          testId="float-element-context-menu-save-as-picture"
-          onClick={saveAsPicture}
-        >
-          {i18n.t('save-as-picture')}
-        </Button>
-        <Button
-          disabled={width === originWidth && height === originHeight}
-          testId="float-element-context-reset-size"
-          onClick={() => {
-            hideContextMenu();
+          },
+        },
+      ];
+
+      if (type === 'chart') {
+        actions.push(
+          {
+            type: 'select-data',
+            action: selectData,
+          },
+          {
+            type: 'change-chart-title',
+            action: changeChartTitle,
+          },
+          {
+            type: 'change-chart-type',
+            action: changeChartType,
+          },
+        );
+      }
+
+      actions.push(
+        {
+          type: 'save-as-picture',
+          action: saveAsPicture,
+        },
+        {
+          type: 'reset-size',
+          disabled: width === originWidth && height === originHeight,
+          action: () => {
             controller.updateDrawing(uuid, {
               height: originHeight,
               width: originWidth,
             });
             resetResize({ width: originWidth, height: originHeight });
-          }}
-        >
-          {i18n.t('reset-size')}
-        </Button>
-        <Button
-          testId="float-element-context-menu-delete"
-          onClick={() => {
-            hideContextMenu();
+          },
+        },
+        {
+          type: 'delete',
+          action: () => {
             controller.deleteDrawing(uuid);
+          },
+        },
+      );
+
+      return actions;
+    }, [controller, uuid, type]);
+
+    const modalTitle: Record<ModalType, string> = {
+      changeChartTitle: i18n.t('change-chart-title'),
+      selectData: i18n.t('select-data'),
+      changeChartType: i18n.t('change-chart-type'),
+    };
+
+    return (
+      <Fragment>
+        <div
+          className={styles['context-menu']}
+          data-testid="float-element-context-menu"
+          ref={ref}
+          style={{ top: menuTop, left: menuLeft }}
+        >
+          <Menu aria-label="Float Element Context Menu">
+            {actionList.map((item) => (
+              <MenuItem
+                data-testid={`float-element-context-menu-${item.type}`}
+                onAction={() => {
+                  item.action();
+                  if (
+                    item.type !== 'select-data' &&
+                    item.type !== 'change-chart-title' &&
+                    item.type !== 'change-chart-type'
+                  ) {
+                    hideContextMenu();
+                  }
+                }}
+                id={item.type}
+                isDisabled={item.disabled}
+                key={item.type}
+                textValue={i18n.t(item.type)}
+              >
+                {i18n.t(item.type)}
+              </MenuItem>
+            ))}
+          </Menu>
+        </div>
+        <Dialog
+          title={modalTitle[modalType]}
+          isOpen={isOpen}
+          onOpenChange={onOpenChange}
+          onOk={() => {
+            if (modalType === 'changeChartType') {
+              controller.updateDrawing(uuid, {
+                chartType: dataSource as ChartType,
+              });
+              return;
+            }
+            if (modalType === 'changeChartTitle') {
+              if (!dataSource) {
+                queue.add({ title: i18n.t('the-value-cannot-be-empty') });
+                return;
+              }
+              controller.updateDrawing(uuid, { title: dataSource });
+              return true;
+            }
+
+            if (!dataSource) {
+              queue.add({
+                title: i18n.t('reference-is-empty'),
+              });
+              return;
+            }
+            const sheetList = controller.getSheetList();
+            const range = parseReference(dataSource, (sheetName: string) => {
+              return sheetList.find((v) => v.name === sheetName)?.sheetId || '';
+            });
+            if (
+              !range ||
+              !controller.validateRange(range) ||
+              (props.chartRange && isSameRange(range, props.chartRange))
+            ) {
+              queue.add({
+                title: i18n.t('reference-is-not-valid'),
+              });
+
+              return;
+            }
+            range.sheetId = range.sheetId || controller.getCurrentSheetId();
+            controller.updateDrawing(uuid, { chartRange: range });
+
+            return true;
           }}
         >
-          {i18n.t('delete')}
-        </Button>
-      </div>
+          {modalType === 'selectData' && (
+            <TextField
+              value={dataSource}
+              onChange={(v) => {
+                setDataSource(String(v));
+              }}
+              maxLength={MAX_NAME_LENGTH * 2}
+              data-testid="dialog-select-data-input"
+              aria-label="Select Data Input"
+              spellCheck="true"
+            />
+          )}
+          {modalType === 'changeChartTitle' && (
+            <TextField
+              value={dataSource}
+              onChange={(v) => {
+                setDataSource(String(v));
+              }}
+              maxLength={MAX_NAME_LENGTH}
+              data-testid="dialog-change-chart-title-input"
+              aria-label="Change Chart Title Input"
+              spellCheck="true"
+            />
+          )}
+          {modalType === 'changeChartType' && (
+            <Select
+              data-testid="dialog-change-chart-type-select"
+              value={dataSource}
+              onChange={(value) => {
+                setDataSource(String(value));
+              }}
+              aria-label="Select chart type"
+            >
+              {CHART_TYPE_LIST.map((item) => (
+                <SelectItem
+                  key={item.value}
+                  id={item.value}
+                  aria-label={item.label}
+                >
+                  {item.label}
+                </SelectItem>
+              ))}
+            </Select>
+          )}
+        </Dialog>
+      </Fragment>
     );
   },
 );

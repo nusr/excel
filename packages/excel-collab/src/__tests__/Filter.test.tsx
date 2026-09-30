@@ -21,7 +21,10 @@ describe('Filter.test.tsx', () => {
     });
     fireEvent.click(screen.getByTestId('toolbar-filter'));
 
-    expect(screen.getByTestId('toolbar-filter')).toHaveClass('active');
+    expect(screen.getByTestId('toolbar-filter')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
   });
 
   test('delete filter', async () => {
@@ -36,7 +39,10 @@ describe('Filter.test.tsx', () => {
     });
     fireEvent.click(screen.getByTestId('toolbar-filter'));
 
-    expect(screen.getByTestId('toolbar-filter')).toHaveClass('active');
+    expect(screen.getByTestId('toolbar-filter')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
 
     fireEvent.click(screen.getByTestId('toolbar-filter'));
 

@@ -1,5 +1,5 @@
 import React, { useState, memo } from 'react';
-import { Button } from '../../components';
+import { Button } from '../../component/Button';
 import styles from './index.module.css';
 import { scrollBar } from '../../canvas';
 import i18n from '../../i18n';
@@ -55,9 +55,10 @@ export const BottomBar = memo(() => {
       />
       <div className={styles['bottom-bar-text']}>{i18n.t('rows')}</div>
       <Button
-        testId="canvas-bottom-bar-add"
+        data-testid="canvas-bottom-bar-add"
         className={styles['add-button']}
         onClick={handleClick}
+        aria-label="Add Row"
       >
         {i18n.t('add')}
       </Button>

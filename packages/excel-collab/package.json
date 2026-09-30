@@ -30,7 +30,9 @@
     "@formulajs/formulajs": "^4.6.1",
     "chart.js": "^4.5.1",
     "comlink": "^4.4.2",
+    "lucide-react": "^1.48.0",
     "numfmt": "^3.2.6",
+    "react-aria-components": "^1.21.1",
     "uuid": "^14.0.2",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "^5.0.15"
