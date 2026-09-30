@@ -1,48 +1,22 @@
 .menubar-container {
-  border-bottom: 1px solid var(--borderColor);
-  padding: var(--mediumPadding) var(--largePadding);
-  box-sizing: border-box;
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--spacing-2) var(--spacing-5);
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  gap: var(--spacing-2);
 }
 
 .menubar-menu {
   flex: 1;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
 }
 
-.theme-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.i18n,
-.fps,
-.theme {
-  margin-right: var(--mediumPadding);
-}
 .user {
   display: flex;
   align-items: center;
-}
-
-.status {
-  margin-right: var(--mediumPadding);
-  margin-left: var(--mediumPadding);
-  font-size: 20px;
-}
-.avatar {
-  margin-right: var(--mediumPadding);
-}
-
-.file {
-  margin-right: var(--mediumPadding);
-  cursor: pointer;
-}
-.login {
-  display: flex;
-  align-items: center;
-  color: var(--primaryColor);
+  gap: var(--spacing-2);
 }

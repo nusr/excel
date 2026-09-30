@@ -33,7 +33,7 @@ function App(props: Omit<ExcelProps, 'provider'> & { provider: IProvider }) {
       {...props}
       menubarLeftChildren={
         <div style={{ paddingLeft: 8 }}>
-          <Button onClick={() => setIsList(true)}>Home</Button>
+          <Button onPress={() => setIsList(true)}>Home</Button>
         </div>
       }
     />

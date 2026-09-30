@@ -17,6 +17,7 @@ playwright
 report
 docs
 *.diff.png
+*.actual.png
 /playwright-report/
 /blob-report/
 /playwright/.cache/

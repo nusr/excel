@@ -1,4 +1,5 @@
 import { screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { type, renderComponent } from './util';
 import './global.mock';
 
@@ -62,9 +63,11 @@ describe('Export.test.ts', () => {
   });
   describe('download xlsx', () => {
     test('ok', async () => {
+      const user = userEvent.setup();
       type('test');
-      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
-      fireEvent.click(screen.getByTestId('menubar-export-more-xlsx'));
+      await user.click(screen.getByTestId('menubar-excel-trigger'));
+      await user.hover(screen.getByRole('menuitem', { name: /export/i }));
+      await user.click(await screen.findByTestId('menubar-export-more-xlsx'));
       await waitFor(() => {
         expect(mockSaveAs).toHaveBeenCalled();
       });
@@ -72,26 +75,34 @@ describe('Export.test.ts', () => {
   });
   describe('download csv', () => {
     test('ok', async () => {
+      const user = userEvent.setup();
       type('test');
-      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
-      fireEvent.click(screen.getByTestId('menubar-export-more-csv'));
+      await user.click(screen.getByTestId('menubar-excel-trigger'));
+      await user.hover(screen.getByRole('menuitem', { name: /export/i }));
+      await user.click(await screen.findByTestId('menubar-export-more-csv'));
       expect(mockSaveAs).toHaveBeenCalled();
     });
   });
   describe('download json', () => {
     test('ok', async () => {
+      const user = userEvent.setup();
       type('test');
-      fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
-      fireEvent.click(screen.getByTestId('menubar-export-json'));
+      await user.click(screen.getByTestId('menubar-excel-trigger'));
+      await user.hover(screen.getByRole('menuitem', { name: /export/i }));
+      await user.click(await screen.findByTestId('menubar-export-json'));
       expect(mockSaveAs).toHaveBeenCalled();
     });
   });
   describe('download other formats', () => {
     for (const ext of ['xlsb', 'xls', 'ods', 'html', 'dbf'] as const) {
       test(ext, async () => {
+        const user = userEvent.setup();
         type('test');
-        fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
-        fireEvent.click(screen.getByTestId(`menubar-export-more-${ext}`));
+        await user.click(screen.getByTestId('menubar-excel-trigger'));
+        await user.hover(screen.getByRole('menuitem', { name: /export/i }));
+        await user.click(
+          await screen.findByTestId(`menubar-export-more-${ext}`),
+        );
         await waitFor(() => {
           expect(mockSaveAs).toHaveBeenCalled();
         });

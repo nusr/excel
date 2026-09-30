@@ -57,4 +57,6 @@ function i18nConfig() {
 
 const i18n = i18nConfig();
 
+export type { TranslationKeys };
+
 export default i18n;

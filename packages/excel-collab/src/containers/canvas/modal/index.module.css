@@ -1,8 +1,8 @@
 .modalContainer {
-  background-color: var(--white);
-  padding: var(--padding);
-  border: 1px solid var(--borderColor);
-  border-radius: var(--borderRadius);
+  background-color: var(--background-color);
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
   position: fixed;
   z-index: 4;
   max-width: 320px;
@@ -17,14 +17,14 @@
   display: flex;
 }
 .dialog-title {
-  padding-bottom: var(--mediumPadding);
+  padding-bottom: 8px;
 }
 .dialog-button {
-  padding-top: var(--mediumPadding);
+  padding-top: 8px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
 }
 .dialog-button button {
-  margin-left: var(--mediumPadding);
+  margin-left: 8px;
 }

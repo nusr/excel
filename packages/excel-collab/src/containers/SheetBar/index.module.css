@@ -1,11 +1,10 @@
 .sheet-bar-wrapper {
   width: 100%;
   box-sizing: border-box;
-  padding: 0 var(--mediumPadding);
+  padding: 0 8px;
   display: flex;
   align-items: center;
   position: relative;
-  background-color: var(--backgroundColor);
 }
 
 .sheet-bar-list {
@@ -15,21 +14,21 @@
   flex: 1;
   display: flex;
   flex-wrap: nowrap;
-  border-left: 1px solid var(--borderColor);
-  box-shadow: 0 2px 10px 0 var(--scrollbarHoveColor);
+  border-left: 1px solid var(--border-color);
+  box-shadow: 0 2px 10px 0 var(--gray-400);
 }
 
 .sheet-bar-item {
   padding: 4px 10px;
-  border-right: 1px solid var(--borderColor);
+  border-right: 1px solid var(--border-color);
   user-select: none;
   position: relative;
   display: inline-block;
 }
 
 .sheet-bar-item.active {
-  background-color: var(--white);
-  color: var(--primaryColor);
+  background-color: var(--background-color);
+  color: var(--tint-900);
 }
 
 .sheet-bar-item-text {
@@ -49,15 +48,7 @@
   position: fixed;
   left: 0;
   bottom: 32px;
-  background-color: var(--white);
-  border-radius: var(--borderRadius);
-  width: 100px;
-  z-index: var(--lowZIndex);
-}
-
-.sheet-bar-context-menu > button {
-  width: 100%;
-  background-color: var(--white);
+  z-index: 2;
 }
 
 .sheet-bar-input {
@@ -65,41 +56,13 @@
   height: 100%;
   min-width: 100px;
   overflow: hidden;
-  background-color: var(--white);
+  background-color: var(--background-color);
   outline: none;
   font: inherit;
   border: none;
   border-radius: unset;
 }
 
-.show-block {
-  display: inline-block;
-}
-
-.sheet-bar-unhide {
-  width: 100%;
-  background-color: var(--white);
-}
-.add-button {
-  margin-left: var(--mediumPadding);
-  background-color: var(--buttonActiveColor);
-  display: flex;
-  align-items: center;
-  justify-self: center;
-}
 .menu-button {
-  margin-right: var(--mediumPadding);
-  background-color: var(--buttonActiveColor);
-  display: flex;
-  align-items: center;
-  justify-self: center;
-}
-
-.sheet-bar-wrapper .select-popup {
-  left: var(--largePadding);
-  width: 200px;
-}
-
-.unhide-select {
-  width: 300px;
+  margin-right: 8px;
 }

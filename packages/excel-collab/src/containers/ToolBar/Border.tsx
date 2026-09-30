@@ -1,17 +1,18 @@
 import { memo, useState, useRef } from 'react';
 import styles from './Border.module.css';
-import {
-  Button,
-  Icon,
-  Menu,
-  MenuItem,
-  SubMenu,
-  ColorPicker,
-} from '../../components';
 import { BorderItem, IRange, BorderType } from '../../types';
 import { BORDER_TYPE_MAP, isRow, isCol } from '../../util';
 import i18n from '../../i18n';
 import { useExcel } from '../store';
+import {
+  MenuTrigger,
+  SubmenuTrigger,
+  Menu,
+  MenuItem,
+} from '../../component/Menu';
+import { Button } from '../../component/Button';
+import { ChevronDown } from 'lucide-react';
+import { COLOR_PICKER_COLOR_LIST } from '../../util';
 
 type ShortCutType =
   | 'no-border'
@@ -49,9 +50,9 @@ export const BorderToolBar = memo(() => {
       controller.getActiveRange().range,
     );
   };
-  const handleColorChange = (c: string) => {
-    state.current.color = c;
-    setColor(c);
+  const handleColorChange = (c: unknown) => {
+    state.current.color = String(c);
+    setColor(String(c));
     handleAllBorders();
   };
   const handleBorderStyle = (t: BorderType) => {
@@ -176,76 +177,97 @@ export const BorderToolBar = memo(() => {
   return (
     <div className={styles['container']}>
       <Button
-        onClick={handleShortCut}
-        type="plain"
-        className={styles['main']}
-        testId="toolbar-border-shortcut"
-        title={i18n.t(type)}
+        onPress={handleShortCut}
+        data-testid="toolbar-border-shortcut"
+        aria-label="Border Shortcut"
       >
         {i18n.t(type)}
       </Button>
-      <Menu
-        className={styles['menu']}
-        label={<Icon name="down"></Icon>}
-        isPlain={true}
-        testId="toolbar-border"
-        position="bottom"
-        size="small"
-        portalClassName={styles.portal}
-      >
-        <MenuItem onClick={handleNoBorder} testId="toolbar-no-border">
-          {i18n.t('no-border')}
-        </MenuItem>
-        <MenuItem onClick={handleAllBorders} testId="toolbar-all-borders">
-          {i18n.t('all-borders')}
-        </MenuItem>
-        <MenuItem
-          onClick={handleOutSideBorders}
-          testId="toolbar-outside-borders"
+      <MenuTrigger>
+        <Button
+          data-testid="toolbar-border-trigger"
+          aria-label="Border Trigger"
         >
-          {i18n.t('outside-borders')}
-        </MenuItem>
-        <MenuItem
-          onClick={handleThickBoxBorder}
-          testId="toolbar-thick-box-border"
-        >
-          {i18n.t('thick-box-border')}
-        </MenuItem>
-        <MenuItem onClick={handleBottomBorder} testId="toolbar-bottom-border">
-          {i18n.t('bottom-border')}
-        </MenuItem>
-        <MenuItem onClick={handleTopBorder} testId="toolbar-top-border">
-          {i18n.t('top-border')}
-        </MenuItem>
-        <MenuItem onClick={handleLeftBorder} testId="toolbar-left-border">
-          {i18n.t('left-border')}
-        </MenuItem>
-        <MenuItem onClick={handleRightBorder} testId="toolbar-right-border">
-          {i18n.t('right-border')}
-        </MenuItem>
-        <MenuItem>
-          <ColorPicker
-            color={color}
-            onChange={handleColorChange}
-            position="right"
-            testId="toolbar-border-color"
+          <ChevronDown />
+        </Button>
+        <Menu data-testid="toolbar-border" aria-label="Toolbar Border Menu">
+          <MenuItem onPress={handleNoBorder} data-testid="toolbar-no-border">
+            {i18n.t('no-border')}
+          </MenuItem>
+          <MenuItem
+            onPress={handleAllBorders}
+            data-testid="toolbar-all-borders"
           >
-            <span style={{ color }}>{i18n.t('line-color')} &gt;</span>
-          </ColorPicker>
-        </MenuItem>
-        <SubMenu label={`${i18n.t('line-style')} >`} testId="toolbar-border-style">
-          {Object.keys(BORDER_TYPE_MAP).map((border) => (
-            <MenuItem
-              key={border}
-              onClick={() => handleBorderStyle(border as BorderType)}
-              testId={`toolbar-border-style-${border}`}
-              active={borderType === border}
-            >
-              {border}
+            {i18n.t('all-borders')}
+          </MenuItem>
+          <MenuItem
+            onPress={handleOutSideBorders}
+            data-testid="toolbar-outside-borders"
+          >
+            {i18n.t('outside-borders')}
+          </MenuItem>
+          <MenuItem
+            onPress={handleThickBoxBorder}
+            data-testid="toolbar-thick-box-border"
+          >
+            {i18n.t('thick-box-border')}
+          </MenuItem>
+          <MenuItem
+            onPress={handleBottomBorder}
+            data-testid="toolbar-bottom-border"
+          >
+            {i18n.t('bottom-border')}
+          </MenuItem>
+          <MenuItem onPress={handleTopBorder} data-testid="toolbar-top-border">
+            {i18n.t('top-border')}
+          </MenuItem>
+          <MenuItem
+            onPress={handleLeftBorder}
+            data-testid="toolbar-left-border"
+          >
+            {i18n.t('left-border')}
+          </MenuItem>
+          <MenuItem
+            onPress={handleRightBorder}
+            data-testid="toolbar-right-border"
+          >
+            {i18n.t('right-border')}
+          </MenuItem>
+          <SubmenuTrigger>
+            <MenuItem data-testid="toolbar-border-color-trigger">
+              {i18n.t('line-color')}
             </MenuItem>
-          ))}
-        </SubMenu>
-      </Menu>
+            <Menu aria-label="Toolbar Border Color Menu">
+              {COLOR_PICKER_COLOR_LIST.map((item) => (
+                <MenuItem
+                  key={item}
+                  id={item}
+                  onPress={() => handleColorChange(item)}
+                >
+                  {item}
+                </MenuItem>
+              ))}
+            </Menu>
+          </SubmenuTrigger>
+          <SubmenuTrigger>
+            <MenuItem data-testid="toolbar-border-style">
+              {i18n.t('line-style')}
+            </MenuItem>
+            <Menu aria-label="Toolbar Border Style Menu">
+              {Object.keys(BORDER_TYPE_MAP).map((border) => (
+                <MenuItem
+                  key={border}
+                  id={border}
+                  onPress={() => handleBorderStyle(border as BorderType)}
+                  data-testid={`toolbar-border-style-${border}`}
+                >
+                  {border}
+                </MenuItem>
+              ))}
+            </Menu>
+          </SubmenuTrigger>
+        </Menu>
+      </MenuTrigger>
     </div>
   );
 });

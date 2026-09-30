@@ -1,15 +1,18 @@
-import React, { useState, useMemo, memo, useCallback } from 'react';
+import React, { useState, useMemo, memo, useCallback, Key } from 'react';
 import {
   classnames,
   DEFAULT_POSITION,
   MAX_NAME_LENGTH,
   SHEET_ITEM_TEST_ID_PREFIX,
 } from '../../util';
-import { Button, Icon, SelectPopup } from '../../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
 import { useCoreStore, useExcel } from '../../containers/store';
-import { useClickOutside } from '../hooks';
+import { DialogTrigger } from 'react-aria-components/Popover';
+import { Popover } from '../../component/Popover';
+import { Select, SelectItem } from '../../component/Select';
+import { Button } from '../../component/Button';
+import { Menu, Plus } from 'lucide-react';
 
 export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren> =
   memo(({ children }) => {
@@ -21,10 +24,9 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
     const popupList = useMemo(() => {
       return sheetList
         .filter((v) => !v.isHide)
-        .map((v) => ({ value: v.sheetId, label: v.name, disabled: false }));
+        .map((v) => ({ value: v.sheetId, label: v.name }));
     }, [sheetList]);
 
-    const [popupActive, setPopupActive] = useState(false);
     const currentSheetId = useCoreStore((s) => s.currentSheetId);
     const [menuPosition, setMenuPosition] = useState(DEFAULT_POSITION);
     const [editing, setEditing] = useState(false);
@@ -51,9 +53,8 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
       },
       [],
     );
-    const handleChange = useCallback((value: string) => {
-      setPopupActive(false);
-      controller.setCurrentSheetId(value);
+    const handleChange = useCallback((value: Key | null) => {
+      controller.setCurrentSheetId(String(value));
     }, []);
     const addSheet = useCallback(() => {
       controller.addSheet();
@@ -64,36 +65,36 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
     const editSheetName = useCallback(() => {
       setEditing(true);
     }, []);
-    const togglePopup = useCallback(() => {
-      setPopupActive((v) => !v);
-    }, []);
-
-    const ref = useClickOutside(popupActive, () => {
-      setPopupActive(false);
-    });
 
     return (
       <div className={styles['sheet-bar-wrapper']} data-testid="sheet-bar">
-        <div ref={ref}>
+        <DialogTrigger>
           <Button
-            onClick={togglePopup}
             className={styles['menu-button']}
-            testId="sheet-bar-select-sheet"
+            data-testid="sheet-bar-select-sheet"
+            aria-label="Select sheet"
           >
-            <Icon name="menu" />
+            <Menu />
           </Button>
-          {popupActive && (
-            <SelectPopup
-              data={popupList}
-              onChange={handleChange}
-              active
-              position="top"
+          <Popover>
+            <Select
+              data-testid="toolbar-underline"
+              aria-label="Select sheet"
               value={currentSheetId}
-              testId="sheet-bar-select-sheet-popup"
-              className={styles['select-popup']}
-            />
-          )}
-        </div>
+              onChange={handleChange}
+            >
+              {popupList.map((item) => (
+                <SelectItem
+                  key={item.value}
+                  id={item.value}
+                  aria-label={item.label}
+                >
+                  {item.label}
+                </SelectItem>
+              ))}
+            </Select>
+          </Popover>
+        </DialogTrigger>
         <div className={styles['sheet-bar-list']} data-testid="sheet-bar-list">
           {realSheetList.map((item) => {
             const isActive = currentSheetId === item.sheetId;
@@ -155,11 +156,11 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
         </div>
         <Button
           onClick={addSheet}
-          type="circle"
-          className={styles['add-button']}
-          testId="sheet-bar-add-sheet"
+          style={{ marginLeft: 8 }}
+          data-testid="sheet-bar-add-sheet"
+          aria-label="Add sheet"
         >
-          <Icon name="plus" />
+          <Plus />
         </Button>
         {menuPosition >= 0 && (
           <SheetBarContextMenu

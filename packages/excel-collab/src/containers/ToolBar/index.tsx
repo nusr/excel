@@ -1,12 +1,5 @@
-import React, { useMemo, memo, useCallback } from 'react';
-import {
-  Icon,
-  Button,
-  Select,
-  FillColorIcon,
-  ColorPicker,
-  SelectList,
-} from '../../components';
+import React, { useMemo, memo, useCallback, Key } from 'react';
+import { SelectList } from '../../components';
 import {
   FONT_SIZE_LIST,
   QUERY_ALL_LOCAL_FONT,
@@ -29,6 +22,22 @@ import {
   underlineOptionList,
   mergeOptionList,
 } from './constant';
+import { Select, SelectItem } from '../../component/Select';
+import { ColorPicker } from '../ColorPicker';
+import { ToggleButton } from '../../component/ToggleButton';
+import { Button } from '../../component/Button';
+import {
+  ArrowUpToLine,
+  Baseline,
+  PaintBucket,
+  Redo,
+  TextAlignCenter,
+  TextAlignEnd,
+  TextAlignStart,
+  Undo,
+  ArrowDownToLine,
+  ChevronsDownUp,
+} from 'lucide-react';
 
 export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> =
   memo(({ children }) => {
@@ -62,15 +71,11 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
       }
       return [item.label, String(item.value)];
     }, [cellStyle.numberFormat]);
-    const getItemStyle = useCallback(
-      (value: string | number): React.CSSProperties => {
-        return {
-          fontFamily: String(value),
-        };
-      },
-      [],
-    );
-    const handleFontFamilyChange = useCallback((value: string | number) => {
+
+    const handleFontFamilyChange = useCallback((value: Key | null) => {
+      if (!value) {
+        return;
+      }
       if (
         String(value) === QUERY_ALL_LOCAL_FONT &&
         typeof window.queryLocalFonts === 'function'
@@ -117,7 +122,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
     const paste = useCallback(() => {
       controller.paste();
     }, []);
-    const setFontSize = useCallback((value: string | number) => {
+    const setFontSize = useCallback((value: Key | null) => {
       controller.updateCellStyle(
         { fontSize: Number(value) },
         controller.getActiveRange().range,
@@ -141,7 +146,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
         controller.getActiveRange().range,
       );
     }, [cellStyle.isStrike]);
-    const setUnderline = useCallback((value: string | number) => {
+    const setUnderline = useCallback((value: Key | null) => {
       const t = Number(value);
       let underline = EUnderLine.NONE;
       if (t === EUnderLine.SINGLE) {
@@ -154,15 +159,15 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
         controller.getActiveRange().range,
       );
     }, []);
-    const setFillColor = useCallback((value: string) => {
+    const setFillColor = useCallback((value: unknown) => {
       controller.updateCellStyle(
-        { fillColor: value },
+        { fillColor: String(value) },
         controller.getActiveRange().range,
       );
     }, []);
-    const setFontColor = useCallback((value: string) => {
+    const setFontColor = useCallback((value: unknown) => {
       controller.updateCellStyle(
-        { fontColor: value },
+        { fontColor: String(value) },
         controller.getActiveRange().range,
       );
     }, []);
@@ -247,215 +252,243 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
     }, []);
     return (
       <div className={styles['toolbar-wrapper']} data-testid="toolbar">
-        <Button
-          disabled={!canUndo}
+        <ToggleButton
+          isDisabled={!canUndo}
           onClick={undo}
-          testId="toolbar-undo"
-          title="Undo"
-          className={styles['icon-center']}
+          data-testid="toolbar-undo"
+          aria-label="Undo"
         >
-          <Icon name="undo" />
-        </Button>
-        <Button
-          disabled={!canRedo}
+          <Undo />
+        </ToggleButton>
+        <ToggleButton
+          isDisabled={!canRedo}
           onClick={redo}
-          testId="toolbar-redo"
-          title="Redo"
-          className={styles['icon-center']}
+          aria-label="Redo"
+          data-testid="toolbar-redo"
         >
-          <Icon name="redo" />
-        </Button>
-        <Button onClick={copy} testId="toolbar-copy" title="Copy">
+          <Redo />
+        </ToggleButton>
+        <ToggleButton
+          onClick={copy}
+          data-testid="toolbar-copy"
+          aria-label="Copy"
+        >
           {i18n.t('copy')}
-        </Button>
-        <Button onClick={cut} testId="toolbar-cut" title="Cut">
+        </ToggleButton>
+        <ToggleButton onClick={cut} data-testid="toolbar-cut" aria-label="Cut">
           {i18n.t('cut')}
-        </Button>
-        <Button onClick={paste} testId="toolbar-paste" title="Paste">
+        </ToggleButton>
+        <ToggleButton
+          onClick={paste}
+          data-testid="toolbar-paste"
+          aria-label="Paste"
+        >
           {i18n.t('paste')}
-        </Button>
+        </ToggleButton>
 
         <Select
-          data={fontFamilyList}
+          aria-label="Select font family"
+          data-testid="toolbar-font-family"
           value={cellStyle.fontFamily}
-          getItemStyle={getItemStyle}
           onChange={handleFontFamilyChange}
-          testId="toolbar-font-family"
-          className={styles.fontFamily}
-        />
+        >
+          {fontFamilyList.map((item) => (
+            <SelectItem
+              key={item.value}
+              id={item.value}
+              aria-label={item.label}
+              style={{ fontFamily: String(item.value) }}
+              isDisabled={item.disabled}
+            >
+              {item.label}
+            </SelectItem>
+          ))}
+        </Select>
+
         <Select
-          data={FONT_SIZE_LIST}
+          aria-label="Select font size"
+          data-testid="toolbar-font-size"
           value={cellStyle.fontSize}
           onChange={setFontSize}
-          testId="toolbar-font-size"
-        />
-        <Button
-          active={cellStyle.isBold}
+        >
+          {FONT_SIZE_LIST.map((item) => (
+            <SelectItem key={item} id={item} aria-label={String(item)}>
+              {item}
+            </SelectItem>
+          ))}
+        </Select>
+
+        <ToggleButton
+          isSelected={cellStyle.isBold}
           onClick={toggleBold}
-          testId="toolbar-bold"
-          title="Bold"
+          data-testid="toolbar-bold"
+          aria-label="Bold"
         >
           <span className={styles.bold}>B</span>
-        </Button>
-        <Button
-          active={cellStyle.isItalic}
+        </ToggleButton>
+        <ToggleButton
+          isSelected={cellStyle.isItalic}
           onClick={toggleItalic}
-          testId="toolbar-italic"
-          title="Italic"
+          data-testid="toolbar-italic"
+          aria-label="Italic"
         >
           <span className={styles.italic}>I</span>
-        </Button>
-        <Button
-          active={cellStyle.isStrike}
+        </ToggleButton>
+        <ToggleButton
+          isSelected={cellStyle.isStrike}
           onClick={toggleStrike}
-          testId="toolbar-strike"
-          title="Strike"
+          data-testid="toolbar-strike"
+          aria-label="Strike"
         >
           <span className={styles.strike}>A</span>
-        </Button>
+        </ToggleButton>
+
         <Select
-          data={underlineOptionList}
+          aria-label="Select underline"
+          data-testid="toolbar-underline"
           value={cellStyle.underline}
-          title="Underline"
           onChange={setUnderline}
-          testId="toolbar-underline"
-        />
+        >
+          {underlineOptionList.map((item) => (
+            <SelectItem
+              key={item.value}
+              id={item.value}
+              aria-label={item.label}
+            >
+              {item.label}
+            </SelectItem>
+          ))}
+        </Select>
+
         <BorderToolBar />
         <ColorPicker
           key="fill-color"
-          color={cellStyle.fillColor}
+          value={cellStyle.fillColor}
           onChange={setFillColor}
-          testId="toolbar-fill-color"
+          data-testid="toolbar-fill-color-picker"
         >
           <Button
             style={fillStyle}
-            testId="toolbar-fill-color"
-            className={styles['icon-center']}
-            title="Fill Color"
+            data-testid="toolbar-fill-color"
+            aria-label="Fill Color"
           >
-            <FillColorIcon />
+            <PaintBucket />
           </Button>
         </ColorPicker>
 
         <ColorPicker
           key="font-color"
-          color={cellStyle.fontColor}
+          value={cellStyle.fontColor}
           onChange={setFontColor}
-          testId="toolbar-font-color"
+          onReset={() =>
+            controller.updateCellStyle(
+              { fontColor: '' },
+              controller.getActiveRange().range,
+            )
+          }
+          data-testid="toolbar-font-color-picker"
         >
           <Button
             style={fontStyle}
-            testId="toolbar-font-color"
-            className={styles['icon-center']}
-            title="Font Color"
+            data-testid="toolbar-font-color"
+            aria-label="Font Color"
           >
-            <Icon name="fontColor" />
+            <Baseline />
           </Button>
         </ColorPicker>
-        <Button
-          active={cellStyle.verticalAlign === EVerticalAlign.TOP}
+        <ToggleButton
+          isSelected={cellStyle.verticalAlign === EVerticalAlign.TOP}
           onClick={verticalTop}
-          testId="toolbar-vertical-top"
-          className={styles['icon-center']}
-          title="Top Align"
+          data-testid="toolbar-vertical-top"
+          aria-label="Top Align"
         >
-          <Icon name="verticalTop" />
-        </Button>
-        <Button
-          active={cellStyle.verticalAlign === EVerticalAlign.MIDDLE}
+          <ArrowUpToLine />
+        </ToggleButton>
+        <ToggleButton
+          isSelected={cellStyle.verticalAlign === EVerticalAlign.MIDDLE}
           onClick={verticalMiddle}
-          testId="toolbar-vertical-middle"
-          className={styles['icon-center']}
-          title="Middle Align"
+          data-testid="toolbar-vertical-middle"
+          aria-label="Middle Align"
         >
-          <Icon name="verticalMiddle" />
-        </Button>
-        <Button
-          active={cellStyle.verticalAlign === EVerticalAlign.BOTTOM}
+          <ChevronsDownUp />
+        </ToggleButton>
+        <ToggleButton
+          isSelected={cellStyle.verticalAlign === EVerticalAlign.BOTTOM}
           onClick={verticalBottom}
-          testId="toolbar-vertical-bottom"
-          className={styles['icon-center']}
-          title="Bottom Align"
+          data-testid="toolbar-vertical-bottom"
+          aria-label="Bottom Align"
         >
-          <Icon name="verticalBottom" />
-        </Button>
-        <Button
-          active={cellStyle.horizontalAlign === EHorizontalAlign.LEFT}
+          <ArrowDownToLine />
+        </ToggleButton>
+        <ToggleButton
+          isSelected={cellStyle.horizontalAlign === EHorizontalAlign.LEFT}
           onClick={horizontalLeft}
-          testId="toolbar-horizontal-left"
-          className={styles['icon-center']}
-          title="Align Text Left"
+          data-testid="toolbar-horizontal-left"
+          aria-label="Align Text Left"
         >
-          <Icon name="horizontalLeft" />
-        </Button>
-        <Button
-          active={cellStyle.horizontalAlign === EHorizontalAlign.CENTER}
+          <TextAlignStart />
+        </ToggleButton>
+        <ToggleButton
+          isSelected={cellStyle.horizontalAlign === EHorizontalAlign.CENTER}
           onClick={horizontalCenter}
-          testId="toolbar-horizontal-center"
-          className={styles['icon-center']}
-          title="Align Text Center"
+          data-testid="toolbar-horizontal-center"
+          aria-label="Align Text Center"
         >
-          <Icon name="horizontalCenter" />
-        </Button>
-        <Button
-          active={cellStyle.horizontalAlign === EHorizontalAlign.RIGHT}
+          <TextAlignCenter />
+        </ToggleButton>
+        <ToggleButton
+          isSelected={cellStyle.horizontalAlign === EHorizontalAlign.RIGHT}
           onClick={horizontalRight}
-          testId="toolbar-horizontal-right"
-          className={styles['icon-center']}
-          title="Align Text Right"
+          data-testid="toolbar-horizontal-right"
+          aria-label="Align Text Right"
         >
-          <Icon name="horizontalRight" />
-        </Button>
-        <Button
-          active={cellStyle.isWrapText}
+          <TextAlignEnd />
+        </ToggleButton>
+        <ToggleButton
+          isSelected={cellStyle.isWrapText}
           onClick={toggleWrapText}
-          testId="toolbar-wrap-text"
+          data-testid="toolbar-wrap-text"
           className={styles['wrap-text']}
-          title="Wrap Text"
+          aria-label="Wrap Text"
         >
           {i18n.t('wrap-text')}
-        </Button>
+        </ToggleButton>
         <SelectList
           data={mergeOptionList}
           value={cellStyle.mergeType}
           onChange={handleMergeCell}
-          className={styles['merge-cell']}
           testId="toolbar-merge-cell-select"
         >
-          <Button
-            active={cellStyle.isMergeCell}
+          <ToggleButton
+            isSelected={cellStyle.isMergeCell}
             onClick={toggleMergeCell}
-            testId="toolbar-merge-cell"
+            data-testid="toolbar-merge-cell"
             className={styles['merge-cell-button']}
-            type="plain"
-            title="Merge And Center"
+            variant="quiet"
+            aria-label="Merge And Center"
           >
             {i18n.t('merge-and-center')}
-          </Button>
+          </ToggleButton>
         </SelectList>
         <SelectList
           data={numberFormatOptionList}
           value={numberFormatValue}
           onChange={handleNumberFormat}
-          className={styles['number-format']}
           testId="toolbar-number-format"
         >
-          <div
-            className={styles['number-format-value']}
-            data-testid="toolbar-number-format-value"
-          >
+          <div data-testid="toolbar-number-format-value">
             {numberFormatLabel}
           </div>
         </SelectList>
-        <Button
-          active={isFilter}
+        <ToggleButton
+          isSelected={isFilter}
           onClick={handleFilter}
-          testId="toolbar-filter"
+          data-testid="toolbar-filter"
           className={styles['wrap-text']}
-          title="Filter"
+          aria-label="Filter"
         >
           {i18n.t('filter')}
-        </Button>
+        </ToggleButton>
         <InsertFloatingPicture />
         <InsertChart />
         {children}

@@ -1,10 +1,13 @@
-import React, { Fragment, memo, useMemo } from 'react';
-import { Button, info, toast } from '../../components';
+import React, { Fragment, memo, useMemo, useState } from 'react';
+import { Dialog } from '../../components';
 import styles from './index.module.css';
 import { useClickOutside } from '../hooks';
 import { useActiveCell, useExcel } from '../../containers/store';
 import i18n from '../../i18n';
 import { IController } from '../../types';
+import { queue } from '../../component/Toast';
+import { Menu, MenuItem } from '../../component/Menu';
+import { NumberField } from '../../component/NumberField';
 
 interface Props {
   top: number;
@@ -18,7 +21,6 @@ enum ClickPosition {
   TRIANGLE,
   CONTENT,
 }
-
 const MENU_WIDTH = 110;
 const ITEM_HEIGHT = 20;
 
@@ -65,241 +67,234 @@ const threshold = 10000;
 export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
   const { controller } = useExcel();
   const { top, left, hideContextMenu } = props;
+  const [isRow, setIsRow] = useState(false);
+  const [value, setValue] = useState(0);
   const row = useActiveCell((state) => state.row);
   const col = useActiveCell((state) => state.col);
   const colCount = useActiveCell((state) => state.colCount);
   const rowCount = useActiveCell((state) => state.rowCount);
-  const ref = useClickOutside(true, hideContextMenu);
+  const [isOpen, onOpenChange] = useState(false);
+  const ref = useClickOutside(!isOpen, hideContextMenu);
   const { style, position } = useMemo(() => {
     const temp = computeMenuStyle(top, left, controller);
     return temp;
   }, [top, left]);
   const handleDialog = (isRow: boolean) => {
-    let value = isRow ? controller.getRow(row).len : controller.getCol(col).len;
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const t = parseInt(event.target.value, 10);
-      if (!isNaN(t)) {
-        if (t < 0) {
-          value = 0;
-        } else if (value > threshold) {
-          value = threshold;
-        } else {
-          value = t;
-        }
-      }
-      event.stopPropagation();
-    };
-    info({
-      visible: true,
-      title: isRow ? i18n.t('row-height') : i18n.t('column-width'),
-      testId: 'context-menu-width-height-dialog',
-      children: (
-        <input
-          type="number"
-          min={0}
-          max={threshold}
-          style={{ width: '200px' }}
-          defaultValue={value}
-          onChange={handleChange}
-          data-testid="context-menu-width-height-dialog-input"
-        />
-      ),
-      onOk: () => {
-        if (value < 0) {
-          return toast.error(i18n.t('greater-than-zero'));
-        }
-        if (isRow) {
-          controller.transaction(() => {
-            for (let i = 0; i < rowCount; i++) {
-              controller.setRowHeight(row + i, value);
-            }
-          });
-        } else {
-          controller.transaction(() => {
-            for (let i = 0; i < colCount; i++) {
-              controller.setColWidth(col + i, value);
-            }
-          });
-        }
-        hideContextMenu();
-      },
-      onCancel: () => {
-        hideContextMenu();
-      },
-    });
+    setIsRow(isRow);
+    setValue(isRow ? controller.getRow(row).len : controller.getCol(col).len);
+    onOpenChange(true);
   };
   return (
-    <div
-      className={styles['context-menu']}
-      data-testid="context-menu"
-      style={style}
-      ref={ref}
-    >
-      <Button
-        onClick={() => {
-          hideContextMenu();
-          controller.setFloatElementUuid('');
-          controller.copy();
-        }}
-        testId="context-menu-copy"
+    <Fragment>
+      <div
+        className={styles['context-menu']}
+        data-testid="context-menu"
+        style={style}
+        ref={ref}
       >
-        {i18n.t('copy')}
-      </Button>
-      <Button
-        onClick={() => {
-          hideContextMenu();
-          controller.setFloatElementUuid('');
-          controller.cut();
+        <Menu aria-label="Canvas Context Menu">
+          <MenuItem
+            onPress={() => {
+              hideContextMenu();
+              controller.setFloatElementUuid('');
+              controller.copy();
+            }}
+            data-testid="context-menu-copy"
+          >
+            {i18n.t('copy')}
+          </MenuItem>
+          <MenuItem
+            onPress={() => {
+              hideContextMenu();
+              controller.setFloatElementUuid('');
+              controller.cut();
+            }}
+            data-testid="context-menu-cut"
+          >
+            {i18n.t('cut')}
+          </MenuItem>
+          <MenuItem
+            data-testid="context-menu-paste"
+            onPress={() => {
+              hideContextMenu();
+              controller.paste();
+            }}
+          >
+            {i18n.t('paste')}
+          </MenuItem>
+          {(position === ClickPosition.ROW_HEADER ||
+            position === ClickPosition.CONTENT) && (
+            <Fragment>
+              <MenuItem
+                data-testid="context-menu-insert-row-above"
+                onClick={() => {
+                  hideContextMenu();
+                  controller.addRow(row, rowCount, true);
+                }}
+              >
+                {i18n.t('insert-row-above')}
+              </MenuItem>
+              <MenuItem
+                data-testid="context-menu-insert-row-below"
+                onAction={() => {
+                  hideContextMenu();
+                  controller.addRow(row, rowCount);
+                }}
+              >
+                {i18n.t('insert-row-below')}
+              </MenuItem>
+            </Fragment>
+          )}
+          {(position === ClickPosition.COLUMN_HEADER ||
+            position === ClickPosition.CONTENT) && (
+            <Fragment>
+              <MenuItem
+                data-testid="context-menu-insert-column-left"
+                onPress={() => {
+                  hideContextMenu();
+                  controller.addCol(col, colCount);
+                }}
+              >
+                {i18n.t('insert-column-left')}
+              </MenuItem>
+              <MenuItem
+                data-testid="context-menu-insert-column-right"
+                onPress={() => {
+                  hideContextMenu();
+                  controller.addCol(col, colCount, true);
+                }}
+              >
+                {i18n.t('insert-column-right')}
+              </MenuItem>
+            </Fragment>
+          )}
+          {position === ClickPosition.TRIANGLE && (
+            <MenuItem
+              data-testid="context-menu-delete"
+              onClick={() => {
+                hideContextMenu();
+                controller.deleteAll(controller.getCurrentSheetId());
+              }}
+            >
+              {i18n.t('delete')}
+            </MenuItem>
+          )}
+          {position === ClickPosition.COLUMN_HEADER && (
+            <Fragment>
+              <MenuItem
+                data-testid="context-menu-delete-column"
+                onPress={() => {
+                  hideContextMenu();
+                  controller.deleteCol(col, colCount);
+                }}
+              >
+                {i18n.t('delete-columns')}
+              </MenuItem>
+              <MenuItem
+                data-testid="context-menu-hide-column"
+                onPress={() => {
+                  hideContextMenu();
+                  controller.hideCol(col, colCount);
+                }}
+              >
+                {i18n.t('hide-columns')}
+              </MenuItem>
+              <MenuItem
+                data-testid="context-menu-unhide-column"
+                onPress={() => {
+                  hideContextMenu();
+                  controller.unhideCol(col, colCount);
+                }}
+              >
+                {i18n.t('unhide-columns')}
+              </MenuItem>
+              <MenuItem
+                data-testid="context-menu-column-width"
+                onAction={() => {
+                  handleDialog(false);
+                }}
+              >
+                {i18n.t('column-width')}
+              </MenuItem>
+            </Fragment>
+          )}
+          {position === ClickPosition.ROW_HEADER && (
+            <Fragment>
+              <MenuItem
+                data-testid="context-menu-delete-row"
+                onPress={() => {
+                  hideContextMenu();
+                  controller.deleteRow(row, rowCount);
+                }}
+              >
+                {i18n.t('delete-rows')}
+              </MenuItem>
+              <MenuItem
+                onPress={() => {
+                  hideContextMenu();
+                  controller.hideRow(row, rowCount);
+                }}
+                data-testid="context-menu-hide-row"
+              >
+                {i18n.t('hide-rows')}
+              </MenuItem>
+              <MenuItem
+                data-testid="context-menu-unhide-row"
+                onPress={() => {
+                  hideContextMenu();
+                  controller.unhideRow(row, rowCount);
+                }}
+              >
+                {i18n.t('unhide-rows')}
+              </MenuItem>
+              <MenuItem
+                data-testid="context-menu-row-height"
+                onAction={() => {
+                  handleDialog(true);
+                }}
+              >
+                {i18n.t('row-height')}
+              </MenuItem>
+            </Fragment>
+          )}
+        </Menu>
+      </div>
+      <Dialog
+        title={isRow ? i18n.t('row-height') : i18n.t('column-width')}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onOk={() => {
+          if (value < 0) {
+            queue.add({ title: i18n.t('greater-than-zero') });
+            return false;
+          }
+          if (isRow) {
+            controller.transaction(() => {
+              for (let i = 0; i < rowCount; i++) {
+                controller.setRowHeight(row + i, value);
+              }
+            });
+          } else {
+            controller.transaction(() => {
+              for (let i = 0; i < colCount; i++) {
+                controller.setColWidth(col + i, value);
+              }
+            });
+          }
+          return true;
         }}
-        testId="context-menu-cut"
       >
-        {i18n.t('cut')}
-      </Button>
-      <Button
-        testId="context-menu-paste"
-        onClick={() => {
-          hideContextMenu();
-          controller.paste();
-        }}
-      >
-        {i18n.t('paste')}
-      </Button>
-      {(position === ClickPosition.ROW_HEADER ||
-        position === ClickPosition.CONTENT) && (
-        <Fragment>
-          <Button
-            testId="context-menu-insert-row-above"
-            onClick={() => {
-              hideContextMenu();
-              controller.addRow(row, rowCount, true);
-            }}
-          >
-            {i18n.t('insert-row-above')}
-          </Button>
-          <Button
-            testId="context-menu-insert-row-below"
-            onClick={() => {
-              hideContextMenu();
-              controller.addRow(row, rowCount);
-            }}
-          >
-            {i18n.t('insert-row-below')}
-          </Button>
-        </Fragment>
-      )}
-      {(position === ClickPosition.COLUMN_HEADER ||
-        position === ClickPosition.CONTENT) && (
-        <Fragment>
-          <Button
-            testId="context-menu-insert-column-left"
-            onClick={() => {
-              hideContextMenu();
-              controller.addCol(col, colCount);
-            }}
-          >
-            {i18n.t('insert-column-left')}
-          </Button>
-          <Button
-            testId="context-menu-insert-column-right"
-            onClick={() => {
-              hideContextMenu();
-              controller.addCol(col, colCount, true);
-            }}
-          >
-            {i18n.t('insert-column-right')}
-          </Button>
-        </Fragment>
-      )}
-      {position === ClickPosition.TRIANGLE && (
-        <Button
-          testId="context-menu-delete"
-          onClick={() => {
-            hideContextMenu();
-            controller.deleteAll(controller.getCurrentSheetId());
-          }}
-        >
-          {i18n.t('delete')}
-        </Button>
-      )}
-      {position === ClickPosition.COLUMN_HEADER && (
-        <Fragment>
-          <Button
-            testId="context-menu-delete-column"
-            onClick={() => {
-              hideContextMenu();
-              controller.deleteCol(col, colCount);
-            }}
-          >
-            {i18n.t('delete-columns')}
-          </Button>
-          <Button
-            testId="context-menu-hide-column"
-            onClick={() => {
-              hideContextMenu();
-              controller.hideCol(col, colCount);
-            }}
-          >
-            {i18n.t('hide-columns')}
-          </Button>
-          <Button
-            testId="context-menu-unhide-column"
-            onClick={() => {
-              hideContextMenu();
-              controller.unhideCol(col, colCount);
-            }}
-          >
-            {i18n.t('unhide-columns')}
-          </Button>
-          <Button
-            testId="context-menu-column-width"
-            onClick={() => {
-              handleDialog(false);
-            }}
-          >
-            {i18n.t('column-width')}
-          </Button>
-        </Fragment>
-      )}
-      {position === ClickPosition.ROW_HEADER && (
-        <Fragment>
-          <Button
-            testId="context-menu-delete-row"
-            onClick={() => {
-              hideContextMenu();
-              controller.deleteRow(row, rowCount);
-            }}
-          >
-            {i18n.t('delete-rows')}
-          </Button>
-          <Button
-            testId="context-menu-hide-row"
-            onClick={() => {
-              hideContextMenu();
-              controller.hideRow(row, rowCount);
-            }}
-          >
-            {i18n.t('hide-rows')}
-          </Button>
-          <Button
-            testId="context-menu-unhide-row"
-            onClick={() => {
-              hideContextMenu();
-              controller.unhideRow(row, rowCount);
-            }}
-          >
-            {i18n.t('unhide-rows')}
-          </Button>
-          <Button
-            testId="context-menu-row-height"
-            onClick={() => {
-              handleDialog(true);
-            }}
-          >
-            {i18n.t('row-height')}
-          </Button>
-        </Fragment>
-      )}
-    </div>
+        <NumberField
+          value={value}
+          minValue={0}
+          data-testid="context-menu-width-height-dialog-input"
+          maxValue={threshold}
+          onChange={setValue}
+          formatOptions={{ style: 'decimal' }}
+          aria-label={isRow ? i18n.t('row-height') : i18n.t('column-width')}
+        />
+      </Dialog>
+    </Fragment>
   );
 });
 ContextMenu.displayName = 'CanvasContextMenu';
