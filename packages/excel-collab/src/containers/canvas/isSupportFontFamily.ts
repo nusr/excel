@@ -61,25 +61,30 @@ export function initFontFamilyList(
   if (cacheFont) {
     const list = JSON.parse(cacheFont) as string[];
     if (list.length > 0) {
-      return list.map((v) => ({ value: v, label: v, disabled: false }));
+      return list.map((v) =>
+        v === QUERY_ALL_LOCAL_FONT
+          ? {
+              value: v,
+              label: i18n.t('get-all-installed-fonts'),
+              disabled: false,
+            }
+          : { value: v, label: v, disabled: !check(v) },
+      );
     }
   }
   const list: OptionItem[] = [];
   for (const item of fontList) {
-    if (check(item)) {
-      list.push({
-        label: item,
-        value: item,
-        disabled: false,
-      });
-    }
+    list.push({
+      label: item,
+      value: item,
+      disabled: !check(item),
+    });
   }
 
   if (typeof window.queryLocalFonts === 'function') {
     list.push({
       value: QUERY_ALL_LOCAL_FONT,
       label: i18n.t('get-all-installed-fonts'),
-      disabled: false,
     });
   }
   return list;

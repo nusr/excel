@@ -8,70 +8,65 @@
 
 .vertical-scroll-bar {
   position: absolute;
-  width: var(--largePadding);
+  width: 20px;
   right: 0;
   bottom: 0;
   top: 0;
-  background-color: var(--white);
+  background-color: var(--background-color);
   box-sizing: border-box;
   padding: 0 5px;
-  border: 1px solid var(--borderColor);
-  border-top-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-top-color: var(--background-color);
 }
 
 .vertical-scroll-bar-content {
   position: relative;
   cursor: pointer;
-  border-radius: var(--borderRadius);
-  background-color: var(--scrollbarColor);
-  height: var(--scrollBarContent);
+  border-radius: 4px;
+  background-color: var(--gray-300);
+  height: 30px;
 }
 
 .horizontal-scroll-bar {
   position: absolute;
-  height: var(--largePadding);
+  height: 20px;
   right: 0;
   left: 0;
   bottom: 0;
   box-sizing: border-box;
   padding: 5px 0;
-  border: 1px solid var(--borderColor);
-  border-left-color: var(--white);
-  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-left-color: var(--background-color);
+  background-color: var(--background-color);
 }
 
 .horizontal-scroll-bar-content {
   position: relative;
   cursor: pointer;
-  border-radius: var(--borderRadius);
-  background-color: var(--scrollbarColor);
+  border-radius: 4px;
+  background-color: var(--gray-300);
   height: 100%;
-  width: var(--scrollBarContent);
+  width: 30px;
 }
 
 .horizontal-scroll-bar-content:hover,
 .vertical-scroll-bar-content:hover {
-  background-color: var(--scrollbarHoveColor);
+  background-color: var(--gray-400);
 }
 
 .context-menu {
   position: fixed;
-  background-color: var(--white);
-  border-radius: var(--borderRadius);
+  background-color: var(--background-color);
+  border-radius: 4px;
   min-width: 150px;
   z-index: 4;
-}
-
-.context-menu>button {
-  width: 100%;
-  background-color: var(--white);
 }
 
 .bottom-bar {
   position: absolute;
   display: none;
   align-items: center;
-  padding: var(--tinyPadding) var(--mediumPadding);
+  padding: 4px 8px;
   padding-top: 50px;
   right: 18px;
   bottom: 36px;
@@ -83,17 +78,11 @@
 }
 
 .bottom-bar-text {
-  margin: 0 var(--tinyPadding);
+  margin: 0 4px;
 }
 
 .bottom-bar-input {
   width: 60px;
-}
-
-.add-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .user {
@@ -101,7 +90,7 @@
 }
 
 .userContent {
-  background-color: var(--white);
+  background-color: var(--background-color);
   position: absolute;
   top: -22px;
   left: 0;

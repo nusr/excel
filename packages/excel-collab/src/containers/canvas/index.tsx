@@ -18,6 +18,7 @@ import FloatElementContainer from '../FloatElement';
 import handlerList from './event';
 import Modal from './modal';
 import { Collaboration } from './Collaboration';
+import { MyToastRegion } from '../../component/Toast';
 
 function getEventData(
   event: React.PointerEvent<HTMLCanvasElement>,
@@ -113,6 +114,7 @@ export const CanvasContainer = memo(() => {
   );
   return (
     <Fragment>
+      <MyToastRegion />
       <div
         className={styles['canvas-container']}
         data-testid="canvas-container"

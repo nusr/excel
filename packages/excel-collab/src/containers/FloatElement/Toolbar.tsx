@@ -1,29 +1,31 @@
-import React, { useRef, memo, useCallback } from 'react';
-import { Button, toast } from '../../components';
+import { useRef, memo, useCallback } from 'react';
+import { Button } from '../../component/Button';
 import { getImageSize, convertFileToTextOrBase64, toIRange } from '../../util';
 import i18n from '../../i18n';
 import { useExcel } from '../store';
 import { v4 } from 'uuid';
+import { queue } from '../../component/Toast';
+import { FileTrigger } from 'react-aria-components/FileTrigger';
 
 export const InsertFloatingPicture = memo(() => {
   const { controller, provider } = useExcel();
   const ref = useRef<HTMLInputElement>(null);
 
   const handleImport = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
+    async (files: FileList | null) => {
       const clearUpdate = () => {
         if (ref.current) {
           ref.current.value = '';
           ref.current.blur();
         }
       };
-      const file = event.target.files?.[0];
+      const file = files?.[0];
       if (!file) {
         return;
       }
       const maxSizeInBytes = 25 * 1024 * 1024;
       if (file.size > maxSizeInBytes) {
-        toast.error('max image file size 25MB');
+        queue.add({ title: 'max image file size 25MB' });
         clearUpdate();
         return;
       }
@@ -47,7 +49,7 @@ export const InsertFloatingPicture = memo(() => {
         );
       }
       if (!imageSrc) {
-        toast.warning('choose image file');
+        queue.add({ title: 'choose image file' });
         clearUpdate();
         return;
       }
@@ -72,18 +74,16 @@ export const InsertFloatingPicture = memo(() => {
     [provider],
   );
   return (
-    <Button testId="toolbar-floating-picture" title="Floating Picture">
-      <input
-        type="file"
-        hidden
-        onChange={handleImport}
-        accept="image/*"
-        ref={ref}
-        id="upload_float_image"
-        data-testid="toolbar-floating-picture-input"
-      />
-      <label htmlFor="upload_float_image">{i18n.t('floating-picture')}</label>
-    </Button>
+    <FileTrigger
+      ref={ref}
+      acceptedFileTypes={['image/*']}
+      onSelect={handleImport}
+      data-testid="toolbar-floating-picture-input"
+    >
+      <Button data-testid="toolbar-floating-picture" aria-label="Floating Picture">
+        {i18n.t('floating-picture')}
+      </Button>
+    </FileTrigger>
   );
 });
 InsertFloatingPicture.displayName = 'InsertFloatingPicture';
@@ -111,7 +111,7 @@ export const InsertChart = memo(() => {
   }, []);
 
   return (
-    <Button testId="toolbar-chart" onClick={handleClick} title="Chart">
+    <Button data-testid="toolbar-chart" onPress={handleClick} aria-label="Chart">
       {i18n.t('chart')}
     </Button>
   );

@@ -23,7 +23,7 @@ describe('Canvas.test.ts', () => {
         clientY: 200,
         clientX: 200,
       });
-      expect(screen.getByTestId('context-menu').childNodes).toHaveLength(7);
+      expect(screen.getAllByRole('menuitem')).toHaveLength(7);
     });
   });
   describe('BottomBar', () => {
@@ -245,7 +245,8 @@ describe('Canvas.test.ts', () => {
       });
     });
 
-    test('change column width', () => {
+    test('change column width', async () => {
+      const user = userEvent.setup();
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 395,
@@ -257,17 +258,14 @@ describe('Canvas.test.ts', () => {
         clientY: 154,
       });
 
-      fireEvent.click(screen.getByTestId('context-menu-column-width'));
-      fireEvent.change(
-        screen.getByTestId('context-menu-width-height-dialog-input'),
-        {
-          target: { value: '200' },
-        },
-      );
+      await user.click(await screen.findByTestId('context-menu-column-width'));
+      const input = (
+        await screen.findByTestId('context-menu-width-height-dialog-input')
+      ).querySelector('input')!;
+      await user.clear(input);
+      await user.type(input, '200');
 
-      fireEvent.click(
-        screen.getByTestId('context-menu-width-height-dialog-confirm'),
-      );
+      await user.click(screen.getByTestId('dialog-confirm-button'));
       expect(
         controller.getCol(controller.getActiveRange().range.col).len,
       ).toEqual(200);
@@ -343,7 +341,8 @@ describe('Canvas.test.ts', () => {
       expect(controller.getSheetInfo()!.colCount).toEqual(oldColCount + 1);
     });
 
-    test('change row height', () => {
+    test('change row height', async () => {
+      const user = userEvent.setup();
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 17,
@@ -355,17 +354,14 @@ describe('Canvas.test.ts', () => {
         clientY: 298,
       });
 
-      fireEvent.click(screen.getByTestId('context-menu-row-height'));
-      fireEvent.change(
-        screen.getByTestId('context-menu-width-height-dialog-input'),
-        {
-          target: { value: '200' },
-        },
-      );
+      await user.click(await screen.findByTestId('context-menu-row-height'));
+      const input = (
+        await screen.findByTestId('context-menu-width-height-dialog-input')
+      ).querySelector('input')!;
+      await user.clear(input);
+      await user.type(input, '200');
 
-      fireEvent.click(
-        screen.getByTestId('context-menu-width-height-dialog-confirm'),
-      );
+      await user.click(screen.getByTestId('dialog-confirm-button'));
       expect(
         controller.getRow(controller.getActiveRange().range.row).len,
       ).toEqual(200);
@@ -474,7 +470,8 @@ describe('Canvas.test.ts', () => {
       ).toHaveTextContent('');
     });
 
-    test('change row height cancel', () => {
+    test('change row height cancel', async () => {
+      const user = userEvent.setup();
       const oldHeight = controller.getRow(
         controller.getActiveRange().range.row,
       ).len;
@@ -491,9 +488,7 @@ describe('Canvas.test.ts', () => {
 
       fireEvent.click(screen.getByTestId('context-menu-row-height'));
 
-      fireEvent.click(
-        screen.getByTestId('context-menu-width-height-dialog-cancel'),
-      );
+      await user.click(screen.getByRole('button', { name: /cancel/i }));
       expect(
         controller.getRow(controller.getActiveRange().range.row).len,
       ).toEqual(oldHeight);

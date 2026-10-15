@@ -8,7 +8,7 @@ import MenuBarContainer from './MenuBar';
 import { useExcel, useUserInfo } from './store';
 import { UserItem } from '../types';
 import { modelToChangeSet } from '../util';
-import { Loading } from '../components';
+import { ProgressCircle } from '../component/ProgressCircle';
 
 function useCollaboration() {
   const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +89,14 @@ const ExcelEditor: React.FunctionComponent<EditorProps> = memo(
     const { isLoading } = useCollaboration();
 
     if (isLoading) {
-      return <Loading />;
+      return (
+        <ProgressCircle
+          value={60}
+          size={64}
+          isIndeterminate
+          aria-label="Loading editor"
+        />
+      );
     }
 
     return (

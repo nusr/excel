@@ -9,6 +9,7 @@ dotenv.config({
   path: path.join(__dirname, '..', '.env'),
   debug: true,
   override: true,
+  encoding: 'utf8',
 });
 
 process.env['CALLBACK_OBJECTS'] = JSON.stringify({ excel: 'Map' });
@@ -36,6 +37,7 @@ const envList = [
 ];
 
 if (!fs.existsSync(filePath)) {
+  console.log('update frontend env file: ', filePath);
   fs.writeFileSync(filePath, envList.join('\n'));
 }
 

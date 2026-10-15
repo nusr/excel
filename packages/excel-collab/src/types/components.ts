@@ -10,7 +10,7 @@ export type LanguageType = (typeof LANGUAGE_LIST)[number];
 export interface OptionItem {
   value: string | number;
   label: string;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 export interface CanvasOverlayPosition {

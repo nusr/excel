@@ -1,4 +1,5 @@
-import { screen, fireEvent } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import './global.mock';
 import { type, renderComponent } from './util';
 import { numberFormatOptionList } from '../containers/ToolBar/constant';
@@ -21,30 +22,29 @@ describe('NumberFormat.test.tsx', () => {
         continue;
       }
       test(item.label, async () => {
+        const user = userEvent.setup();
         type('1');
-        fireEvent.click(screen.getByTestId('toolbar-number-format-trigger'));
-        const dom = screen.getByTestId('toolbar-number-format-popup');
-        dom.setAttribute('data-value', item.value);
-
-        fireEvent.click(dom);
-        fireEvent.click(screen.getByTestId('toolbar-number-format-trigger'));
+        const trigger = screen.getByTestId('toolbar-number-format-trigger');
+        await user.click(trigger);
+        await user.click(
+          screen.getByRole('menuitemradio', { name: item.label }),
+        );
+        await user.click(trigger);
 
         expect(
-          screen
-            .getByTestId('toolbar-number-format-popup')
-            .querySelector(`div:nth-child(${i + 1}) > span:nth-child(2)`),
-        ).toBeInTheDocument();
+          screen.getByRole('menuitemradio', { name: item.label }),
+        ).toHaveAttribute('aria-checked', 'true');
       });
     }
   });
   describe('Percentage', () => {
     test('ok', async () => {
+      const user = userEvent.setup();
       type('1.2345');
-      fireEvent.click(screen.getByTestId('toolbar-number-format-trigger'));
-      const dom = screen.getByTestId('toolbar-number-format-popup');
-      dom.setAttribute('data-value', '0.00%');
-
-      fireEvent.click(dom);
+      await user.click(screen.getByTestId('toolbar-number-format-trigger'));
+      await user.click(
+        screen.getByRole('menuitemradio', { name: 'Percentage' }),
+      );
 
       expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
         '123.45%',
