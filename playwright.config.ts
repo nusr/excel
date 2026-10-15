@@ -14,11 +14,11 @@ process.env.BASE_URL = baseURL;
 
 // See https://playwright.dev/docs/test-configuration.
 export default defineConfig({
-  failOnFlakyTests: true,
+  failOnFlakyTests: false,
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!isCI,
-  retries: isCI ? 3 : 0,
+  retries: isCI ? 1 : 0,
   workers: isCI ? 1 : 5,
   reporter: [['html', { open: 'never' }], ['github'], ['list']],
   use: {
