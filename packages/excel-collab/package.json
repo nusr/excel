@@ -30,8 +30,10 @@
     "@formulajs/formulajs": "^4.6.1",
     "chart.js": "^4.5.1",
     "comlink": "^4.4.2",
+    "lucide-react": "^1.55.0",
     "numfmt": "^3.2.6",
-    "uuid": "^14.0.2",
+    "react-aria-components": "^1.22.1",
+    "uuid": "^14.0.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "^5.0.15"
   },
@@ -59,6 +61,6 @@
   },
   "devDependencies": {
     "y-protocols": "^1.0.7",
-    "yjs": "^13.6.32"
+    "yjs": "^13.6.33"
   }
 }

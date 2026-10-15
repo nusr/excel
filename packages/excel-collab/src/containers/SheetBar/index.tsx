@@ -5,11 +5,13 @@ import {
   MAX_NAME_LENGTH,
   SHEET_ITEM_TEST_ID_PREFIX,
 } from '../../util';
-import { Button, Icon, SelectPopup } from '../../components';
 import { SheetBarContextMenu } from './SheetBarContextMenu';
 import styles from './index.module.css';
 import { useCoreStore, useExcel } from '../../containers/store';
-import { useClickOutside } from '../hooks';
+import { Button } from '../../component/Button';
+import { Menu as MenuIcon, Plus } from 'lucide-react';
+import { MenuTrigger, Menu, MenuItem } from '../../component/Menu';
+import { TextField } from '../../component/TextField';
 
 export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren> =
   memo(({ children }) => {
@@ -21,13 +23,14 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
     const popupList = useMemo(() => {
       return sheetList
         .filter((v) => !v.isHide)
-        .map((v) => ({ value: v.sheetId, label: v.name, disabled: false }));
+        .map((v) => ({ value: v.sheetId, label: v.name }));
     }, [sheetList]);
 
-    const [popupActive, setPopupActive] = useState(false);
     const currentSheetId = useCoreStore((s) => s.currentSheetId);
     const [menuPosition, setMenuPosition] = useState(DEFAULT_POSITION);
     const [editing, setEditing] = useState(false);
+    const renameInputRef = React.useRef<HTMLInputElement>(null);
+
     const handleContextMenu = useCallback(
       (event: React.MouseEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -38,10 +41,9 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
       [],
     );
     const handleKeyDown = useCallback(
-      (event: React.KeyboardEvent<HTMLInputElement>) => {
-        event.stopPropagation();
+      (event: React.KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Enter') {
-          const t = event.currentTarget.value;
+          const t = renameInputRef.current?.value ?? '';
           setEditing(false);
           if (!t) {
             return;
@@ -51,10 +53,6 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
       },
       [],
     );
-    const handleChange = useCallback((value: string) => {
-      setPopupActive(false);
-      controller.setCurrentSheetId(value);
-    }, []);
     const addSheet = useCallback(() => {
       controller.addSheet();
     }, []);
@@ -64,36 +62,37 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
     const editSheetName = useCallback(() => {
       setEditing(true);
     }, []);
-    const togglePopup = useCallback(() => {
-      setPopupActive((v) => !v);
-    }, []);
-
-    const ref = useClickOutside(popupActive, () => {
-      setPopupActive(false);
-    });
 
     return (
       <div className={styles['sheet-bar-wrapper']} data-testid="sheet-bar">
-        <div ref={ref}>
+        <MenuTrigger>
           <Button
-            onClick={togglePopup}
             className={styles['menu-button']}
-            testId="sheet-bar-select-sheet"
+            data-testid="sheet-bar-select-sheet"
+            aria-label="Select sheet"
           >
-            <Icon name="menu" />
+            <MenuIcon />
           </Button>
-          {popupActive && (
-            <SelectPopup
-              data={popupList}
-              onChange={handleChange}
-              active
-              position="top"
-              value={currentSheetId}
-              testId="sheet-bar-select-sheet-popup"
-              className={styles['select-popup']}
-            />
-          )}
-        </div>
+          <Menu
+            aria-label="Select sheet"
+            data-testid="sheet-bar-select-sheet"
+            selectionMode="single"
+            selectedKeys={[currentSheetId]}
+            onSelectionChange={(v) => {
+              const selectedKey = typeof v === 'string' ? v : Array.from(v)[0];
+              if (!selectedKey || String(selectedKey) === currentSheetId) {
+                return;
+              }
+              controller.setCurrentSheetId(String(selectedKey));
+            }}
+          >
+            {popupList.map((item) => (
+              <MenuItem id={item.value} key={item.value} textValue={item.value}>
+                {item.label}
+              </MenuItem>
+            ))}
+          </Menu>
+        </MenuTrigger>
         <div className={styles['sheet-bar-list']} data-testid="sheet-bar-list">
           {realSheetList.map((item) => {
             const isActive = currentSheetId === item.sheetId;
@@ -123,14 +122,16 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
                 }}
               >
                 {showInput ? (
-                  <input
+                  <TextField
                     className={styles['sheet-bar-input']}
                     defaultValue={item.name}
                     onKeyDown={handleKeyDown}
                     type="text"
-                    spellCheck
+                    spellCheck="true"
                     maxLength={MAX_NAME_LENGTH}
                     data-testid="sheet-bar-rename-input"
+                    aria-label="Rename sheet"
+                    inputRef={renameInputRef}
                   />
                 ) : (
                   <React.Fragment>
@@ -155,11 +156,11 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
         </div>
         <Button
           onClick={addSheet}
-          type="circle"
-          className={styles['add-button']}
-          testId="sheet-bar-add-sheet"
+          style={{ marginLeft: 8 }}
+          data-testid="sheet-bar-add-sheet"
+          aria-label="Add sheet"
         >
-          <Icon name="plus" />
+          <Plus />
         </Button>
         {menuPosition >= 0 && (
           <SheetBarContextMenu

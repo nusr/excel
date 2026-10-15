@@ -31,7 +31,6 @@ export const DefineName: React.FunctionComponent<Props> = memo(
     const defineNameList = useCoreStore((s) => s.defineNames);
     const popupList = useMemo(() => {
       return defineNameList.map((v) => ({
-        disabled: false,
         value: v,
         label: v,
       }));
@@ -101,7 +100,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(
         value={defineName}
         data={popupList}
         onChange={handleSelect}
-        className={styles['defined-name']}
+        className={styles['defined-name-select']}
       >
         <input
           value={value}

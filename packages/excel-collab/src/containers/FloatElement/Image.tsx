@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import styles from './FloatElement.module.css';
 import { useExcel } from '../store';
-import { Loading } from '../../components';
+import { ProgressCircle } from '../../component/ProgressCircle';
 
 type Props = {
   title: string;
@@ -31,7 +31,14 @@ export const Image: React.FunctionComponent<Props> = memo(
         });
     }, [imageSrc, provider]);
     if (loading || !src) {
-      return <Loading />;
+      return (
+        <ProgressCircle
+          value={60}
+          size={64}
+          isIndeterminate
+          aria-label="Loading image"
+        />
+      );
     }
     return (
       <img

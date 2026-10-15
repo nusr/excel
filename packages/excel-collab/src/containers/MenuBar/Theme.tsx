@@ -1,39 +1,14 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { Button, Icon } from '../../components';
 import styles from './index.module.css';
-import {
-  sizeConfig,
-  darkColor,
-  lightColor,
-  setTheme,
-  getTheme,
-} from '../../theme';
+import { setTheme, getTheme } from '../../theme';
 import { ThemeType } from '../../types';
 import { useExcel } from '../store';
-
-function setCssVariable(data: Record<string, string | number>) {
-  const keyList = Object.keys(data);
-  for (const key of keyList) {
-    const name = `--${key}`;
-    const value = String(data[key] || '');
-    document.documentElement.style.setProperty(name, value);
-  }
-}
-
-function updateCssVariable(value: ThemeType) {
-  if (value === 'dark') {
-    setCssVariable(darkColor);
-  } else {
-    setCssVariable(lightColor);
-  }
-}
+import { Button } from '../../component/Button';
+import { Moon, Sun } from 'lucide-react';
 
 export const Theme: React.FunctionComponent = memo(() => {
   const { controller } = useExcel();
   const [themeData, setThemeData] = useState<ThemeType>('light');
-  useEffect(() => {
-    setCssVariable(sizeConfig);
-  }, []);
   useEffect(() => {
     setThemeData(getTheme());
     if (typeof window.matchMedia === 'function') {
@@ -47,7 +22,6 @@ export const Theme: React.FunctionComponent = memo(() => {
 
   useEffect(() => {
     setTheme(themeData);
-    updateCssVariable(themeData);
     controller.emit('renderChange', {
       changeSet: new Set(['cellStyle']),
     });
@@ -61,11 +35,11 @@ export const Theme: React.FunctionComponent = memo(() => {
   return (
     <div data-testid="menubar-theme" className={styles.theme}>
       <Button
-        onClick={handleClick}
-        className={styles['theme-button']}
-        testId="menubar-theme-toggle"
+        onPress={handleClick}
+        data-testid="menubar-theme-toggle"
+        aria-label="Toggle theme"
       >
-        <Icon name={themeData === 'dark' ? 'sun' : 'moon'} />
+        {themeData === 'dark' ? <Sun /> : <Moon />}
       </Button>
     </div>
   );

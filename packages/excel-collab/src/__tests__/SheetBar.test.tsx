@@ -1,6 +1,7 @@
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import './global.mock';
-import { renderComponent } from './util';
+import { chooseSelectOption, renderComponent } from './util';
 
 describe('SheetBar.test.ts', () => {
   beforeEach(async () => {
@@ -17,6 +18,19 @@ describe('SheetBar.test.ts', () => {
         (await screen.findByTestId('sheet-bar-list')).childNodes,
       ).toHaveLength(3);
     });
+    test('select sheet from menu', async () => {
+      const user = userEvent.setup();
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+
+      await user.click(screen.getByRole('button', { name: 'Select sheet' }));
+      await user.click(
+        await screen.findByRole('menuitemradio', { name: 'Sheet1' }),
+      );
+
+      expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent(
+        'Sheet1',
+      );
+    });
     test('click active', () => {
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
@@ -30,27 +44,27 @@ describe('SheetBar.test.ts', () => {
   });
   describe('tab color', () => {
     test('ok', async () => {
+      const user = userEvent.setup();
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
-      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-tab-color'));
-
-      const dom = screen.getByTestId('sheet-bar-context-menu-tab-color-list');
-      dom.setAttribute('data-value', '#B2B2B2');
-      fireEvent.click(dom);
+      await user.hover(
+        screen.getByTestId('sheet-bar-context-menu-tab-color'),
+      );
+      await user.click(await screen.findByRole('menuitem', { name: '#B2B2B2' }));
       expect(screen.getByTestId('sheet-bar-tab-color-item')).toHaveStyle({
         backgroundColor: '#B2B2B2',
       });
     });
     test('add sheet', async () => {
+      const user = userEvent.setup();
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
-      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-tab-color'));
-
-      const dom = screen.getByTestId('sheet-bar-context-menu-tab-color-list');
-      dom.setAttribute('data-value', '#B2B2B2');
-      fireEvent.click(dom);
+      await user.hover(
+        screen.getByTestId('sheet-bar-context-menu-tab-color'),
+      );
+      await user.click(await screen.findByRole('menuitem', { name: '#B2B2B2' }));
       expect(screen.getByTestId('sheet-bar-tab-color-item')).toHaveStyle({
         backgroundColor: '#B2B2B2',
       });
@@ -63,10 +77,13 @@ describe('SheetBar.test.ts', () => {
       });
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-rename'));
 
-      fireEvent.change(screen.getByTestId('sheet-bar-rename-input'), {
+      const input = screen
+        .getByTestId('sheet-bar-rename-input')
+        .querySelector('input')!;
+      fireEvent.change(input, {
         target: { value: '' },
       });
-      fireEvent.keyDown(screen.getByTestId('sheet-bar-rename-input'), {
+      fireEvent.keyDown(input, {
         key: 'Enter',
       });
       expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent(
@@ -79,10 +96,13 @@ describe('SheetBar.test.ts', () => {
       });
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-rename'));
 
-      fireEvent.change(screen.getByTestId('sheet-bar-rename-input'), {
+      const input = screen
+        .getByTestId('sheet-bar-rename-input')
+        .querySelector('input')!;
+      fireEvent.change(input, {
         target: { value: 'test_sheet_name' },
       });
-      fireEvent.keyDown(screen.getByTestId('sheet-bar-rename-input'), {
+      fireEvent.keyDown(input, {
         key: 'Enter',
       });
       expect(screen.getByTestId('sheet-bar-list')).toHaveTextContent(
@@ -96,7 +116,9 @@ describe('SheetBar.test.ts', () => {
         clientX: 199,
       });
       expect(
-        screen.getByTestId('sheet-bar-context-menu').childNodes,
+        within(screen.getByTestId('sheet-bar-context-menu')).getAllByRole(
+          'menuitem',
+        ),
       ).toHaveLength(6);
     });
     test('hide sheet', async () => {
@@ -154,7 +176,7 @@ describe('SheetBar.test.ts', () => {
       });
       expect(
         screen.getByTestId('sheet-bar-context-menu-unhide'),
-      ).toBeDisabled();
+      ).toHaveAttribute('aria-disabled', 'true');
     });
 
     test('unhide', async () => {
@@ -174,9 +196,7 @@ describe('SheetBar.test.ts', () => {
       ).not.toBeDisabled();
       fireEvent.click(screen.getByTestId('sheet-bar-context-menu-unhide'));
 
-      fireEvent.click(
-        screen.getByTestId('sheet-bar-context-menu-unhide-dialog-confirm'),
-      );
+      fireEvent.click(screen.getByRole('button', { name: /confirm/i }));
 
       expect(
         (await screen.findByTestId('sheet-bar-list')).childNodes,
@@ -202,18 +222,12 @@ describe('SheetBar.test.ts', () => {
       fireEvent.click(
         await screen.findByTestId('sheet-bar-context-menu-unhide'),
       );
-      fireEvent.change(
-        await screen.findByTestId(
-          'sheet-bar-context-menu-unhide-dialog-select',
-        ),
-        { target: { value: '4' } },
+      await chooseSelectOption(
+        'sheet-bar-context-menu-unhide-dialog-select',
+        'Sheet4',
       );
 
-      fireEvent.click(
-        await screen.findByTestId(
-          'sheet-bar-context-menu-unhide-dialog-confirm',
-        ),
-      );
+      fireEvent.click(await screen.findByRole('button', { name: /confirm/i }));
       expect(
         await screen.findByTestId('sheet-bar-active-item'),
       ).toHaveTextContent('Sheet4');
@@ -234,11 +248,7 @@ describe('SheetBar.test.ts', () => {
         await screen.findByTestId('sheet-bar-context-menu-unhide'),
       );
 
-      fireEvent.click(
-        await screen.findByTestId(
-          'sheet-bar-context-menu-unhide-dialog-cancel',
-        ),
-      );
+      fireEvent.click(await screen.findByRole('button', { name: /cancel/i }));
       expect(
         (await screen.findByTestId('sheet-bar-list')).childNodes,
       ).toHaveLength(3);

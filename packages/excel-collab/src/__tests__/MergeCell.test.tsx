@@ -1,4 +1,5 @@
 import { screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { type, renderComponent } from './util';
 import './global.mock';
 
@@ -27,7 +28,10 @@ describe('MergeCell.test.tsx', () => {
       expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
         'test',
       );
-      expect(screen.getByTestId('toolbar-merge-cell')).toHaveClass('active');
+      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
     });
     test('toggle merge cell', async () => {
       type('test');
@@ -46,15 +50,20 @@ describe('MergeCell.test.tsx', () => {
 
       fireEvent.click(screen.getByTestId('toolbar-merge-cell'));
 
-      expect(screen.getByTestId('toolbar-merge-cell')).toHaveClass('active');
+      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
 
       fireEvent.click(screen.getByTestId('toolbar-merge-cell'));
 
-      expect(screen.getByTestId('toolbar-merge-cell')).not.toHaveClass(
-        'active',
+      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute(
+        'aria-pressed',
+        'false',
       );
     });
     test('merge content', async () => {
+      const user = userEvent.setup();
       type('test');
       fireEvent.keyDown(document.body, {
         key: 'Enter',
@@ -72,13 +81,15 @@ describe('MergeCell.test.tsx', () => {
         clientY: 300,
         buttons: 1,
       });
-      fireEvent.click(screen.getByTestId('toolbar-merge-cell-select-trigger'));
-      const dom = screen.getByTestId('toolbar-merge-cell-select-popup');
-      dom.setAttribute('data-value', '2');
+      await user.click(screen.getByTestId('toolbar-merge-cell-select-trigger'));
+      await user.click(
+        screen.getByRole('menuitemradio', { name: 'Merge Content' }),
+      );
 
-      fireEvent.click(dom);
-
-      expect(screen.getByTestId('toolbar-merge-cell')).toHaveClass('active');
+      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
       expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
         'test aa',
       );

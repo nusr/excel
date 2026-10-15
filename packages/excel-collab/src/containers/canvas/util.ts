@@ -34,7 +34,7 @@ import {
 } from '../../canvas';
 import { numberFormat as numberFormatUtil, isDateFormat } from '../../formula';
 import { initFontFamilyList } from './isSupportFontFamily';
-import { toast } from '../../components';
+import { queue } from '../../component/Toast';
 
 function getChartData(
   range: IRange,
@@ -361,14 +361,14 @@ export function initCanvas(
 
   const offToastMessage = controller.on(
     'toastMessage',
-    ({ type, message, duration = 5, testId }) => {
-      toast({ type, message, duration, testId: testId ?? `${type}-toast` });
+    ({ message, duration = 5 }) => {
+      queue.add({ title: message }, { timeout: duration * 1000 });
     },
   );
   const offModelToastMessage = controller.model.on(
     'toastMessage',
-    ({ type, message, duration = 5, testId }) => {
-      toast({ type, message, duration, testId: testId ?? `${type}-toast` });
+    ({ message, duration = 5 }) => {
+      queue.add({ title: message }, { timeout: duration * 1000 });
     },
   );
   return () => {

@@ -1,12 +1,13 @@
-import React, { useState, memo, useCallback, Suspense } from 'react';
+import React, { memo, Suspense, useState, useCallback, Fragment } from 'react';
 import styles from './FloatElement.module.css';
 import type { FloatElementItem } from '../../containers/store';
 import { FloatElementContextMenu } from './ContextMenu';
-import { DEFAULT_POSITION, classnames } from '../../util';
+import { classnames, DEFAULT_POSITION } from '../../util';
 import { ResizePosition } from './util';
-import { Icon, Loading } from '../../components';
 import { IWindowSize } from '../../types';
 import { Image } from './Image';
+import { ProgressCircle } from '../../component/ProgressCircle';
+import { RotateCw } from 'lucide-react';
 
 const Chart = React.lazy(() => import('./Chart'));
 
@@ -31,6 +32,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
       pointerDown,
       resizeDown,
     } = props;
+
     const [contextMenuPosition, setContextMenuPosition] = useState({
       top: DEFAULT_POSITION,
       left: DEFAULT_POSITION,
@@ -62,7 +64,16 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
       );
     } else if (type === 'chart') {
       children = (
-        <Suspense fallback={<Loading />}>
+        <Suspense
+          fallback={
+            <ProgressCircle
+              value={60}
+              size={64}
+              isIndeterminate
+              aria-label="Loading chart"
+            />
+          }
+        >
           <Chart {...props} />
         </Suspense>
       );
@@ -71,10 +82,9 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
       return children;
     }
     return (
-      <React.Fragment>
+      <Fragment>
         <div
           onPointerDown={pointerDown}
-          onContextMenu={handleContextMenu}
           className={classnames(styles['float-element'], {
             [styles['active']]: active,
           })}
@@ -86,6 +96,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
             height,
           }}
           data-testid="float-element"
+          onContextMenu={handleContextMenu}
         >
           {children}
           {active && (
@@ -183,7 +194,7 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
                   data-testid="float-element-rotate"
                 >
                   <div className={styles['rotate-icon']}>
-                    <Icon name="rotate" />
+                    <RotateCw />
                   </div>
                 </div>
               )}
@@ -193,13 +204,13 @@ export const FloatElement: React.FunctionComponent<FloatElementProps> = memo(
         {contextMenuPosition.top >= 0 && contextMenuPosition.left >= 0 && (
           <FloatElementContextMenu
             {...props}
-            resetResize={resetResize}
             menuLeft={contextMenuPosition.left}
             menuTop={contextMenuPosition.top}
+            resetResize={resetResize}
             hideContextMenu={hideContextMenu}
           />
         )}
-      </React.Fragment>
+      </Fragment>
     );
   },
 );

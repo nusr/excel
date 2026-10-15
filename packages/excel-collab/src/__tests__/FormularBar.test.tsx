@@ -1,4 +1,5 @@
 import { screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { type, renderComponent } from './util';
 import './global.mock';
 
@@ -49,6 +50,7 @@ describe('FormulaBar.test.tsx', () => {
     });
 
     test('popup jump', async () => {
+      const user = userEvent.setup();
       fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
         target: { value: 'foo' },
       });
@@ -61,10 +63,10 @@ describe('FormulaBar.test.tsx', () => {
 
       fireEvent.keyDown(document.body, { key: 'Enter' });
 
-      fireEvent.click(await screen.findByTestId('formula-bar-name-trigger'));
-      const dom = await screen.findByTestId('formula-bar-name-popup');
-      dom.setAttribute('data-value', 'foo');
-      fireEvent.click(dom);
+      await user.click(await screen.findByTestId('formula-bar-name-trigger'));
+      await user.click(
+        await screen.findByRole('menuitemradio', { name: 'foo' }),
+      );
       expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
         'foo',
       );

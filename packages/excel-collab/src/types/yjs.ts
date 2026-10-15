@@ -70,20 +70,15 @@ export type YjsModelJson = {
   scroll: YScroll; // key: sheetId
 };
 
-type Convert<T> = T extends Record<string, any>
-  ? T extends TypedMap<infer U>
-    ? Convert<U>
-    : {
-        [K in keyof T]: Convert<T[K]>;
-      }
-  : NonNullable<T>;
+type Convert<T> =
+  T extends Record<string, any>
+    ? T extends TypedMap<infer U>
+      ? Convert<U>
+      : {
+          [K in keyof T]: Convert<T[K]>;
+        }
+    : NonNullable<T>;
 
 export type ModelJSON = Convert<YjsModelJson>;
 
 export type ModelRoot = TypedMap<YjsModelJson>;
-
-export enum ProviderStatus {
-  ONLINE = 'connection',
-  LOCAL = 'disconnection',
-  SYNCING = 'syncing',
-}

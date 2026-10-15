@@ -1,7 +1,14 @@
 import { screen, fireEvent } from '@testing-library/react';
-import { type, extractDataFromTransform, renderComponent } from './util';
+import {
+  type,
+  extractDataFromTransform,
+  renderComponent,
+  chooseSelectOption,
+} from './util';
 import './global.mock';
 import { IController } from '../types';
+import { CHART_TYPE_LIST } from '../util';
+import i18n from '../i18n';
 
 describe('FloatElement.test.ts', () => {
   let controller: IController;
@@ -65,9 +72,7 @@ describe('FloatElement.test.ts', () => {
         clientX: 20,
       });
 
-      expect(
-        screen.getByTestId('float-element-context-menu')?.childNodes,
-      ).toHaveLength(10);
+      expect(screen.getAllByRole('menuitem')).toHaveLength(10);
     });
     test('copy', async () => {
       type('1');
@@ -144,8 +149,8 @@ describe('FloatElement.test.ts', () => {
         clientX: 20,
       });
       expect(
-        screen.getByTestId('float-element-context-reset-size'),
-      ).toBeDisabled();
+        screen.getByTestId('float-element-context-menu-reset-size'),
+      ).toHaveAttribute('aria-disabled', 'true');
     });
     test('reset size', async () => {
       type('1');
@@ -184,7 +189,9 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(screen.getByTestId('float-element-context-reset-size'));
+      fireEvent.click(
+        screen.getByTestId('float-element-context-menu-reset-size'),
+      );
       expect(
         window.getComputedStyle(await screen.findByTestId('float-element'))
           .height,
@@ -203,11 +210,14 @@ describe('FloatElement.test.ts', () => {
       fireEvent.click(
         screen.getByTestId('float-element-context-menu-select-data'),
       );
-      fireEvent.change(screen.getByTestId('dialog-select-data-input'), {
-        target: { value: 'C3' },
-      });
+      fireEvent.change(
+        screen.getByTestId('dialog-select-data-input').querySelector('input')!,
+        {
+          target: { value: 'C3' },
+        },
+      );
 
-      fireEvent.click(screen.getByTestId('dialog-select-data-confirm'));
+      fireEvent.click(screen.getByTestId('dialog-confirm-button'));
       expect(controller.getDrawingList()[0].chartRange!).toEqual({
         row: 2,
         col: 2,
@@ -226,13 +236,16 @@ describe('FloatElement.test.ts', () => {
       fireEvent.click(
         screen.getByTestId('float-element-context-menu-select-data'),
       );
-      fireEvent.change(screen.getByTestId('dialog-select-data-input'), {
-        target: { value: '' },
-      });
+      fireEvent.change(
+        screen.getByTestId('dialog-select-data-input').querySelector('input')!,
+        {
+          target: { value: '' },
+        },
+      );
 
-      fireEvent.click(screen.getByTestId('dialog-select-data-confirm'));
+      fireEvent.click(screen.getByTestId('dialog-confirm-button'));
       expect(
-        screen.getByTestId('select-data-empty-toast'),
+        await screen.findByText(i18n.t('reference-is-empty')),
       ).not.toHaveTextContent('');
     });
 
@@ -246,13 +259,16 @@ describe('FloatElement.test.ts', () => {
       fireEvent.click(
         screen.getByTestId('float-element-context-menu-select-data'),
       );
-      fireEvent.change(screen.getByTestId('dialog-select-data-input'), {
-        target: { value: '_.fe3435' },
-      });
+      fireEvent.change(
+        screen.getByTestId('dialog-select-data-input').querySelector('input')!,
+        {
+          target: { value: '_.fe3435' },
+        },
+      );
 
-      fireEvent.click(screen.getByTestId('dialog-select-data-confirm'));
+      fireEvent.click(screen.getByTestId('dialog-confirm-button'));
       expect(
-        screen.getByTestId('select-data-invalid-toast'),
+        await screen.findByText(i18n.t('reference-is-not-valid')),
       ).not.toHaveTextContent('');
     });
     test('cancel dialog', async () => {
@@ -266,11 +282,14 @@ describe('FloatElement.test.ts', () => {
       fireEvent.click(
         screen.getByTestId('float-element-context-menu-select-data'),
       );
-      fireEvent.change(screen.getByTestId('dialog-select-data-input'), {
-        target: { value: '_.fe3435' },
-      });
+      fireEvent.change(
+        screen.getByTestId('dialog-select-data-input').querySelector('input')!,
+        {
+          target: { value: '_.fe3435' },
+        },
+      );
 
-      fireEvent.click(screen.getByTestId('dialog-select-data-cancel'));
+      fireEvent.click(screen.getByTestId('dialog-cancel-button'));
       expect(controller.getDrawingList()[0].chartRange!).toEqual(oldChartRange);
     });
   });
@@ -285,11 +304,16 @@ describe('FloatElement.test.ts', () => {
       fireEvent.click(
         screen.getByTestId('float-element-context-menu-change-chart-title'),
       );
-      fireEvent.change(screen.getByTestId('dialog-change-chart-title-input'), {
-        target: { value: 'new_chart_title' },
-      });
+      fireEvent.change(
+        screen
+          .getByTestId('dialog-change-chart-title-input')
+          .querySelector('input')!,
+        {
+          target: { value: 'new_chart_title' },
+        },
+      );
 
-      fireEvent.click(screen.getByTestId('dialog-change-chart-title-confirm'));
+      fireEvent.click(screen.getByTestId('dialog-confirm-button'));
       expect(controller.getDrawingList()[0].title).toEqual('new_chart_title');
     });
     test('empty value', async () => {
@@ -302,13 +326,18 @@ describe('FloatElement.test.ts', () => {
       fireEvent.click(
         screen.getByTestId('float-element-context-menu-change-chart-title'),
       );
-      fireEvent.change(screen.getByTestId('dialog-change-chart-title-input'), {
-        target: { value: '' },
-      });
+      fireEvent.change(
+        screen
+          .getByTestId('dialog-change-chart-title-input')
+          .querySelector('input')!,
+        {
+          target: { value: '' },
+        },
+      );
 
-      fireEvent.click(screen.getByTestId('dialog-change-chart-title-confirm'));
+      fireEvent.click(screen.getByTestId('dialog-confirm-button'));
       expect(
-        screen.getByTestId('change-chart-title-toast'),
+        await screen.findByText(i18n.t('the-value-cannot-be-empty')),
       ).not.toHaveTextContent('');
     });
     test('cancel dialog', async () => {
@@ -323,7 +352,7 @@ describe('FloatElement.test.ts', () => {
         screen.getByTestId('float-element-context-menu-change-chart-title'),
       );
 
-      fireEvent.click(screen.getByTestId('dialog-change-chart-title-cancel'));
+      fireEvent.click(screen.getByTestId('dialog-cancel-button'));
       expect(controller.getDrawingList()[0].title).toEqual(oldData);
     });
   });
@@ -346,14 +375,12 @@ describe('FloatElement.test.ts', () => {
         fireEvent.click(
           screen.getByTestId('float-element-context-menu-change-chart-type'),
         );
-        fireEvent.change(
-          screen.getByTestId('dialog-change-chart-type-select'),
-          {
-            target: { value: item },
-          },
+        await chooseSelectOption(
+          'dialog-change-chart-type-select',
+          CHART_TYPE_LIST.find((v) => v.value === item)!.label,
         );
 
-        fireEvent.click(screen.getByTestId('dialog-change-chart-type-confirm'));
+        fireEvent.click(screen.getByTestId('dialog-confirm-button'));
         expect(controller.getDrawingList()[0].chartType!).toEqual(item);
       });
     }
@@ -369,7 +396,7 @@ describe('FloatElement.test.ts', () => {
         screen.getByTestId('float-element-context-menu-change-chart-type'),
       );
 
-      fireEvent.click(screen.getByTestId('dialog-change-chart-type-cancel'));
+      fireEvent.click(screen.getByTestId('dialog-cancel-button'));
       expect(controller.getDrawingList()[0].chartType!).toEqual(oldData);
     });
   });

@@ -1,4 +1,5 @@
 import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import Modal, { type ModalProps } from '../index';
 import { StateContext } from '../../../store';
@@ -59,6 +60,15 @@ describe('Canvas Modal', () => {
     expect(screen.getAllByTestId('filter-model-item').length).toBeGreaterThan(
       1,
     );
+  });
+
+  it('applies selected filter values', async () => {
+    const user = userEvent.setup();
+    renderComponent({}, true);
+
+    await user.click(screen.getByText('4'));
+
+    expect(screen.getByRole('checkbox', { name: '4' })).not.toBeChecked();
   });
 
   it('throws an error for unsupported modal type', () => {

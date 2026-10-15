@@ -1,19 +1,13 @@
 import React, { memo, useCallback } from 'react';
-import { Select } from '../../components';
-import type { OptionItem, LanguageType } from '../../types';
+import type { LanguageType } from '../../types';
 import styles from './index.module.css';
 import i18n from '../../i18n';
 import { LANGUAGE_LIST } from '../../util';
-
-const dataList: OptionItem[] = LANGUAGE_LIST.map((v) => ({
-  value: v,
-  label: v,
-  disabled: false,
-}));
+import { Select, SelectItem } from '../../component/Select';
 
 export const I18N: React.FunctionComponent = memo(() => {
-  const handleChange = useCallback((c: string | number) => {
-    i18n.changeLanguage(String(c) as LanguageType);
+  const handleChange = useCallback((c: LanguageType) => {
+    i18n.changeLanguage(c);
     if (process.env.NODE_ENV !== 'test') {
       location.reload();
     }
@@ -21,11 +15,19 @@ export const I18N: React.FunctionComponent = memo(() => {
   return (
     <div className={styles.i18n} data-testid="menubar-i18n">
       <Select
-        data={dataList}
+        data-testid="menubar-i18n-select"
         defaultValue={i18n.current}
-        onChange={handleChange}
-        testId="menubar-i18n-select"
-      />
+        onChange={(value) => {
+          handleChange(value as LanguageType);
+        }}
+        aria-label="Select language"
+      >
+        {LANGUAGE_LIST.map((item) => (
+          <SelectItem key={item} id={item} aria-label={item}>
+            {item}
+          </SelectItem>
+        ))}
+      </Select>
     </div>
   );
 });

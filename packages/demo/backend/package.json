@@ -16,12 +16,13 @@
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "@koa/router": "^15.7.0",
-    "@types/ws": "^8.18.1",
-    "@y/websocket-server": "^0.1.5",
-    "dotenv": "^17.4.2",
+    "@types/ws": "^8.18.2",
+    "@y/websocket-server": "0.1.1",
+    "dotenv": "^18.0.7",
     "koa": "^3.2.1",
     "koa-body": "^8.0.1",
     "sqlite3": "^6.0.1",
-    "ws": "^8.21.3"
+    "ws": "^8.22.0",
+    "yjs": "^13.6.33"
   }
 }

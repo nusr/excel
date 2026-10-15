@@ -3,16 +3,16 @@
   position: absolute;
   top: 0;
   left: 0;
-  border: 1px solid var(--borderColor);
-  background-color: var(--white);
-  z-index: var(--lowZIndex);
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+  z-index: 2;
 }
 
 .float-element.active {
   border-style: dashed;
   border-style: dashed;
   cursor: move;
-  z-index: var(--middleZIndex);
+  z-index: 3;
 }
 
 .float-element-mask {
@@ -29,15 +29,7 @@
 
 .context-menu {
   position: fixed;
-  background-color: var(--white);
-  border-radius: var(--borderRadius);
-  min-width: 150px;
-  z-index: var(--middleZIndex);
-}
-
-.context-menu > button {
-  width: 100%;
-  background-color: var(--white);
+  z-index: 3;
 }
 
 .title {
@@ -45,8 +37,8 @@
   font-weight: bold;
   width: 98%;
   border: none;
-  padding: var(--tinyPadding);
-  z-index: var(--middleZIndex);
+  padding: 4px;
+  z-index: 3;
 }
 
 .image {
@@ -69,15 +61,15 @@
 }
 .scale-dot {
   border-radius: 50%;
-  background-color: var(--white);
+  background-color: var(--background-color);
   width: 10px;
   height: 10px;
-  border: 1px solid var(--borderColor);
+  border: 1px solid var(--border-color);
   box-sizing: content-box;
 }
 .rotate-icon {
-  color: var(--white);
-  background-color: var(--borderColor);
+  color: var(--background-color);
+  background-color: var(--border-color);
   border-radius: 50%;
   width: 16px;
   height: 16px;
@@ -142,9 +134,5 @@
   top: 14px;
   height: 28px;
   width: 1px;
-  background-color: var(--borderColor);
-}
-
-.chart-type-select {
-  width: 200px;
+  background-color: var(--border-color);
 }

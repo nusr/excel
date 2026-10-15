@@ -7,3 +7,4 @@ export * from './util';
 export * from './types';
 export * from './editor';
 export { Doc } from 'yjs';
+export * from './component';
