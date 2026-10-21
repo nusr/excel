@@ -38,11 +38,15 @@ export function computeScrollRowAndCol(
   top: number,
 ) {
   const oldScroll = controller.getScroll();
+  const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
+  if (!sheetInfo) {
+    return { row: 0, col: 0 };
+  }
   let { row, col } = oldScroll;
   if (oldScroll.top !== top) {
     row = 0;
     let t = top;
-    while (t > 0) {
+    while (t > 0 && row < sheetInfo.rowCount - 1) {
       const a = controller.getRowHeight(row);
       if (a > t) {
         break;
@@ -54,7 +58,7 @@ export function computeScrollRowAndCol(
   if (oldScroll.left !== left) {
     col = 0;
     let t = left;
-    while (t > 0) {
+    while (t > 0 && col < sheetInfo.colCount - 1) {
       const a = controller.getColWidth(col);
       if (a > t) {
         break;
@@ -129,10 +133,10 @@ export function computeScrollPosition(controller: IController) {
   const BOTTOM_BUFF = 200;
   const sheetViewSize = controller.getSheetViewSize();
   const canvasRect = controller.getCanvasSize();
-  const maxHeight = sheetViewSize.height - canvasRect.height + BOTTOM_BUFF;
-  const maxWidth = sheetViewSize.width - canvasRect.width + BOTTOM_BUFF;
-  const maxScrollHeight = canvasRect.height - contentSize;
-  const maxScrollWidth = canvasRect.width - contentSize;
+  const maxHeight = Math.max(0, sheetViewSize.height - canvasRect.height + BOTTOM_BUFF);
+  const maxWidth = Math.max(0, sheetViewSize.width - canvasRect.width + BOTTOM_BUFF);
+  const maxScrollHeight = Math.max(0, canvasRect.height - contentSize);
+  const maxScrollWidth = Math.max(0, canvasRect.width - contentSize);
 
   return {
     maxHeight,
@@ -167,8 +171,8 @@ export function scrollBar(
   } else if (left > maxWidth) {
     left = maxWidth;
   }
-  const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
-  const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
+  const scrollTop = maxHeight > 0 ? Math.floor((top * maxScrollHeight) / maxHeight) : 0;
+  const scrollLeft = maxWidth > 0 ? Math.floor((left * maxScrollWidth) / maxWidth) : 0;
 
   const { row, col } = computeScrollRowAndCol(controller, left, top);
 
@@ -207,7 +211,7 @@ export function recalculateScroll(controller: IController) {
   if (position.left + cellSize.width + buff > domRect.width) {
     if (oldScroll.col <= sheetInfo.colCount - 2) {
       const left = oldScroll.left + controller.getCol(oldScroll.col).len;
-      const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
+      const scrollLeft = maxWidth > 0 ? Math.floor((left * maxScrollWidth) / maxWidth) : 0;
       controller.setScroll({
         ...oldScroll,
         col: oldScroll.col + 1,
@@ -220,7 +224,7 @@ export function recalculateScroll(controller: IController) {
   if (position.left - headerSize.width < domRect.left + buff) {
     if (oldScroll.col >= 1) {
       const left = oldScroll.left - controller.getCol(oldScroll.col).len;
-      const scrollLeft = Math.floor((left * maxScrollWidth) / maxWidth);
+      const scrollLeft = maxWidth > 0 ? Math.floor((left * maxScrollWidth) / maxWidth) : 0;
       controller.setScroll({
         ...oldScroll,
         col: oldScroll.col - 1,
@@ -232,7 +236,7 @@ export function recalculateScroll(controller: IController) {
   if (position.top + cellSize.height + buff > domRect.height) {
     if (oldScroll.row <= sheetInfo.rowCount - 2) {
       const top = oldScroll.top + controller.getRowHeight(oldScroll.row);
-      const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
+      const scrollTop = maxHeight > 0 ? Math.floor((top * maxScrollHeight) / maxHeight) : 0;
       controller.setScroll({
         ...oldScroll,
         row: oldScroll.row + 1,
@@ -245,7 +249,7 @@ export function recalculateScroll(controller: IController) {
   if (position.top - headerSize.height < domRect.top + buff) {
     if (oldScroll.row >= 1) {
       const top = oldScroll.top - controller.getRowHeight(oldScroll.row);
-      const scrollTop = Math.floor((top * maxScrollHeight) / maxHeight);
+      const scrollTop = maxHeight > 0 ? Math.floor((top * maxScrollHeight) / maxHeight) : 0;
       controller.setScroll({
         ...oldScroll,
         row: oldScroll.row - 1,

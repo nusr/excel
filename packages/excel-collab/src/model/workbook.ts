@@ -3,18 +3,16 @@ import type {
   WorksheetType,
   IWorkbook,
   IModel,
-  YjsModelJson,
-  TypedMap,
 } from '../types';
 import {
-  getDefaultSheetInfo,
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
   XLSX_MAX_COL_COUNT,
   XLSX_MAX_ROW_COUNT,
 } from '../util';
 import i18n from '../i18n';
-import { Map } from 'yjs';
+import { v4 } from 'uuid';
+import { createSharedSheet } from '../protocol';
 
 export class Workbook implements IWorkbook {
   private readonly model: IModel;
@@ -40,6 +38,8 @@ export class Workbook implements IWorkbook {
       return false;
     }
     if (
+      !Number.isInteger(data.rowCount) ||
+      !Number.isInteger(data.colCount) ||
       data.rowCount > XLSX_MAX_ROW_COUNT ||
       data.colCount > XLSX_MAX_COL_COUNT ||
       data.rowCount <= 0 ||
@@ -53,16 +53,16 @@ export class Workbook implements IWorkbook {
     const data = json.workbook || {};
     const currentSheetId = json.currentSheetId || '';
 
-    const workbook = new Map() as YjsModelJson['workbook'];
+    const workbook = this.workbook;
+    workbook.clear();
     for (const sheet of Object.values(data)) {
       if (!this.validateSheet(sheet)) {
         continue;
       }
-      const item = new Map(Object.entries(sheet)) as TypedMap<WorksheetType>;
+      const item = createSharedSheet(sheet);
       workbook.set(sheet.sheetId, item);
     }
 
-    this.model.getRoot().set('workbook', workbook);
     let newSheetId = this.getSheetId() || '';
     const sheetInfo = workbook.get(currentSheetId);
     if (sheetInfo && !sheetInfo?.get('isHide')) {
@@ -78,8 +78,21 @@ export class Workbook implements IWorkbook {
     }
     const keyList = Object.keys(data) as Array<keyof Partial<WorksheetType>>;
     for (const key of keyList) {
-      if (key === 'sheetId' || sheetInfo.get(key) === data[key]) {
+      if (key === 'sheetId' || (key !== 'rowCount' && key !== 'colCount' && sheetInfo.get(key) === data[key])) {
         continue;
+      }
+      if (key === 'rowCount' || key === 'colCount') {
+        const order = sheetInfo.get(key === 'rowCount' ? 'rows' : 'cols')!;
+        const length = data[key]!;
+        if (!Number.isInteger(length) || length <= 0 ||
+          length > (key === 'rowCount' ? XLSX_MAX_ROW_COUNT : XLSX_MAX_COL_COUNT)) {
+          throw new RangeError('Invalid worksheet dimensions');
+        }
+        if (length > order.length) {
+          order.insert(order.length, Array.from({ length: length - order.length }, () => v4()));
+        } else if (length < order.length) {
+          order.delete(length, order.length - length);
+        }
       }
       sheetInfo.set(key, data[key]);
     }
@@ -88,29 +101,24 @@ export class Workbook implements IWorkbook {
     if (!this.workbook) {
       return [];
     }
-    const list = Array.from(this.workbook.values()).map((v) => v.toJSON());
-    list.sort((a, b) => a.sort - b.sort);
-    return list.slice();
+    return this.model.getRoot().getSheets();
   }
   addSheet() {
-    if (!this.workbook) {
-      this.model
-        .getRoot()
-        .set('workbook', new Map() as YjsModelJson['workbook']);
-    }
     const list = this.getSheetList();
-    const item = getDefaultSheetInfo(list);
+    const next = Math.max(0, ...list.map((sheet) => sheet.sort)) + 1;
     const sheet: WorksheetType = {
-      ...item,
+      sheetId: v4(),
+      name: `Sheet${next}`,
+      sort: next,
       isHide: false,
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
     };
     this.workbook!.set(
       sheet.sheetId,
-      new Map(Object.entries(sheet)) as TypedMap<WorksheetType>,
+      createSharedSheet(sheet),
     );
-    return sheet;
+    return this.getSheetInfo(sheet.sheetId)!;
   }
 
   deleteSheet(sheetId?: string): void {
@@ -137,11 +145,8 @@ export class Workbook implements IWorkbook {
     }
     const id = sheetId || this.getCurrentSheetId();
     const sheetList = this.getSheetList();
-    const item = sheetList.find((v) => v.name === sheetName);
+    const item = sheetList.find((v) => v.name.toLowerCase() === sheetName.toLowerCase() && v.sheetId !== id);
     if (item) {
-      if (item.sheetId === id) {
-        return;
-      }
       this.model.emit('toastMessage', {
         type: 'error',
         message: i18n.t('sheet-name-is-duplicate'),
@@ -152,11 +157,7 @@ export class Workbook implements IWorkbook {
   }
   getSheetInfo(id?: string): WorksheetType | undefined {
     const sheetId = id || this.getCurrentSheetId();
-    const item = this.workbook?.get(sheetId);
-    if (!item) {
-      return undefined;
-    }
-    return { ...item.toJSON() };
+    return this.getSheetList().find((sheet) => sheet.sheetId === sheetId);
   }
   setCurrentSheetId(newSheetId: string): void {
     if (this.workbook?.get(newSheetId)) {
@@ -188,7 +189,7 @@ export class Workbook implements IWorkbook {
     }
     const sheetList = this.getSheetList();
     const list = sheetList.filter((v) => !v.isHide);
-    if (list.length < 2) {
+    if (!this.getSheetInfo(id)?.isHide && list.length < 2) {
       this.model.emit('toastMessage', {
         type: 'error',
         message: i18n.t('a-workbook-must-contains-at-least-one-visible-worksheet'),

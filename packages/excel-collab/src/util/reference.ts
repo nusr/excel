@@ -19,17 +19,15 @@ function parseCell(
     return undefined;
   }
   const realRef = ref.trim();
-  let [sheetName, other = ''] = realRef.split('!');
-  if (!realRef.includes('!')) {
-    sheetName = '';
-    other = realRef;
-  }
+  const separator = realRef.lastIndexOf('!');
+  let sheetName = separator === -1 ? '' : realRef.slice(0, separator);
+  const other = realRef.slice(separator + 1);
   if (
     sheetName &&
     sheetName[0] === "'" &&
     sheetName[sheetName.length - 1] === "'"
   ) {
-    sheetName = sheetName.slice(1, -1);
+    sheetName = sheetName.slice(1, -1).replace(/''/g, "'");
   }
   let i = 0;
   let rowText = '';
@@ -77,12 +75,14 @@ function parseCell(
   ) {
     return undefined;
   }
+  const sheetId = convertSheetName(sheetName);
+  if (sheetName && !sheetId) return undefined;
   const range = new SheetRange(
     row,
     col,
     rowCount,
     colCount,
-    convertSheetName(sheetName),
+    sheetId,
   );
   return range;
 }
@@ -91,15 +91,16 @@ export function parseReference(
   text: string,
   convertSheetName = convertSheetNameToSheetId,
 ): SheetRange | undefined {
-  const [cell1 = '', cell2 = ''] = text?.split(':') || [];
+  const cells = text?.split(':') || [];
+  if (cells.length > 2) return undefined;
+  const [cell1 = '', cell2 = ''] = cells;
   const startCell = parseCell(cell1, convertSheetName);
   if (!startCell) {
     return undefined;
   }
+  if (cells.length === 1) return startCell;
   const endCell = parseCell(cell2, convertSheetName);
-  if (!endCell) {
-    return startCell;
-  }
+  if (!endCell || (cell2.includes('!') && endCell.sheetId !== startCell.sheetId)) return undefined;
   endCell.sheetId = startCell.sheetId;
   return mergeRange(startCell, endCell);
 }
@@ -129,10 +130,12 @@ export function mergeRange(start: IRange, end: IRange): SheetRange | undefined {
     return undefined;
   }
 
-  const rowCount = Math.abs(start.row - end.row) + 1;
-  const colCount = Math.abs(start.col - end.col) + 1;
   const row = start.row < end.row ? start.row : end.row;
   const col = start.col < end.col ? start.col : end.col;
+  const rowCount = start.rowCount === 0 ? 0
+    : Math.max(start.row + start.rowCount, end.row + end.rowCount) - row;
+  const colCount = start.colCount === 0 ? 0
+    : Math.max(start.col + start.colCount, end.col + end.colCount) - col;
 
   return new SheetRange(row, col, rowCount, colCount, start.sheetId);
 }
@@ -150,10 +153,22 @@ export function convertToReference(
   referenceType: ReferenceType = 'relative',
   convertSheetIdToSheetName = convertSheetNameToSheetId,
 ) {
+  if (range.row < 0 || range.col < 0) return '#REF!';
   let result = convertCell(range.row, range.col, referenceType);
   let sheetName = convertSheetIdToSheetName(range.sheetId);
+  if (sheetName && !/^[A-Za-z_][A-Za-z0-9_]*$/.test(sheetName)) {
+    sheetName = `'${sheetName.replace(/'/g, "''")}'`;
+  }
   sheetName = sheetName ? `${sheetName}!` : '';
-  if (range.colCount > 1 && range.rowCount > 1) {
+  if (range.rowCount === 0 && range.colCount > 0) {
+    const prefix = referenceType === 'relative' ? '' : '$';
+    return `${sheetName}${prefix}${intToColumnName(range.col)}:${prefix}${intToColumnName(range.col + range.colCount - 1)}`;
+  }
+  if (range.colCount === 0 && range.rowCount > 0) {
+    const prefix = referenceType === 'absolute' ? '$' : '';
+    return `${sheetName}${prefix}${range.row + 1}:${prefix}${range.row + range.rowCount}`;
+  }
+  if (range.colCount > 1 || range.rowCount > 1) {
     const end = convertCell(
       range.row + range.rowCount - 1,
       range.col + range.colCount - 1,
@@ -191,7 +206,7 @@ export function parseR1C1(
   },
 ): SheetRange | undefined {
   const text = name.toUpperCase();
-  if (text[0] !== 'R') {
+  if (!R1C1_REG.test(text)) {
     return undefined;
   }
   const list = text.slice(1).split('C');

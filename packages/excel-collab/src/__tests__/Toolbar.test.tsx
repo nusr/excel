@@ -1,4 +1,5 @@
-import { screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { chooseSelectOption, type, renderComponent } from './util';
 import { IController } from '../types';
 import './global.mock';
@@ -6,16 +7,15 @@ import userEvent from '@testing-library/user-event';
 import { useCoreStore } from '../containers/store';
 import { initFontFamilyList } from '../containers/canvas/isSupportFontFamily';
 
-jest.mock('../containers/canvas/isSupportFontFamily', () => ({
-  ...jest.requireActual('../containers/canvas/isSupportFontFamily'),
-  isSupportFontFamily: () => true,
-  initFontFamilyList: () =>
-    jest
-      .requireActual<typeof import('../containers/canvas/isSupportFontFamily')>(
-        '../containers/canvas/isSupportFontFamily',
-      )
-      .initFontFamilyList(() => true),
-}));
+vi.mock('../containers/canvas/isSupportFontFamily', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('../containers/canvas/isSupportFontFamily')>();
+  return {
+    ...actual,
+    isSupportFontFamily: () => true,
+    initFontFamilyList: () => actual.initFontFamilyList(() => true),
+  };
+});
 
 describe('Toolbar.test.ts', () => {
   let controller: IController;
@@ -133,6 +133,23 @@ describe('Toolbar.test.ts', () => {
         await screen.findByTestId('formula-editor-trigger'),
       ).toHaveTextContent('=SUM(1,2)');
     });
+    test.each(['copy', 'cut'] as const)('%s returns keyboard navigation to the worksheet', async (command) => {
+      const user = userEvent.setup();
+      type('hello');
+      const button = screen.getByTestId(`toolbar-${command}`);
+      await user.click(button);
+      expect(button).not.toHaveFocus();
+      await user.keyboard('{Enter}');
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
+      const pasteButton = screen.getByTestId('toolbar-paste');
+      await user.click(pasteButton);
+      expect(pasteButton).not.toHaveFocus();
+      await waitFor(() => {
+        expect(controller.getCell(controller.getActiveRange().range)?.value).toBe('hello');
+      });
+      await user.keyboard('{Enter}');
+      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A3');
+    });
   });
   describe('cut', () => {
     test('toolbar', async () => {
@@ -157,7 +174,7 @@ describe('Toolbar.test.ts', () => {
     test('normal', () => {
       fireEvent.click(screen.getByTestId('toolbar-bold'));
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
-        fontWeight: 'bold',
+        fontWeight: '700',
       });
     });
   });

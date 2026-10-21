@@ -1,64 +1,57 @@
+import './config';
 import app from './route';
 import fs from 'node:fs';
 import path from 'node:path';
-import dotenv from 'dotenv';
-import { seedDatabase } from './db';
+import { seedDatabase, closeDatabase } from './db';
 import { WebSocketManager } from './websocket';
+import { DocumentPersistence } from './persistence';
 
-dotenv.config({
-  path: path.join(__dirname, '..', '.env'),
-  debug: true,
-  override: true,
-  encoding: 'utf8',
-});
-
-process.env['CALLBACK_OBJECTS'] = JSON.stringify({ excel: 'Map' });
-
-seedDatabase().catch((error) => {
-  if (error?.message?.includes('UNIQUE constraint failed')) {
-    return;
+async function start() {
+  await seedDatabase();
+  const persistence = new DocumentPersistence();
+  persistence.install();
+  const port = Number(process.env['SERVER_PORT']) || 4000;
+  const server = app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+    console.log(`WebSocket running on ws://localhost:${port}`);
+  });
+  const wsManager = new WebSocketManager(server, (doc) => persistence.release(doc));
+  const filePath = path.join(__dirname, '../../frontend/.env.development');
+  const createdEnvFile = !fs.existsSync(filePath);
+  if (createdEnvFile) {
+    fs.writeFileSync(filePath, [
+      `VITE_BACKEND_URL=http://localhost:${port}`,
+      'VITE_DEFAULT_EXCEL_ID=',
+      `VITE_WEBSOCKET_URL=ws://localhost:${port}`,
+    ].join('\n'));
   }
-  console.error('Error seeding database:', error);
-});
-
-const port = Number(process.env['SERVER_PORT']) || 4000;
-const server = app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-  console.log(`WebSocket running on ws://localhost:${port}`);
-});
-
-const wsManager = new WebSocketManager(server);
-
-const filePath = path.join(__dirname, '../../frontend/.env.development');
-const envList = [
-  `VITE_BACKEND_URL=http://localhost:${port}`,
-  'VITE_DEFAULT_EXCEL_ID=',
-  `VITE_WEBSOCKET_URL=ws://localhost:${port}`,
-];
-
-if (!fs.existsSync(filePath)) {
-  console.log('update frontend env file: ', filePath);
-  fs.writeFileSync(filePath, envList.join('\n'));
+  const cleanup = () => {
+    if (createdEnvFile && fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  };
+  let shuttingDown = false;
+  const shutdown = () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log('Shutting down server...');
+    (async () => {
+      await wsManager.closeAllConnections();
+      await persistence.flushAll();
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => error ? reject(error) : resolve());
+      });
+      await closeDatabase();
+      cleanup();
+    })().catch((error: unknown) => {
+      console.error('Failed to shut down collaboration server', error);
+      process.exitCode = 1;
+    });
+  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+  process.on('exit', cleanup);
 }
 
-process.on('SIGINT', () => {
-  console.log('Shutting down server...');
-
-  wsManager.closeAllConnections();
-
-  server.close(() => {
-    console.log('HTTP server closed');
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-
-    process.exit(0);
-  });
-});
-
-process.on('exit', () => {
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
+start().catch((error: unknown) => {
+  console.error('Failed to start collaboration server', error);
+  process.exitCode = 1;
 });

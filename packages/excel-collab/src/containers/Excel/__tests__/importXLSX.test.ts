@@ -5,7 +5,7 @@ import path from 'path';
 describe('importXLSX.test.ts', () => {
   test('imports cells, formulas, number formats and merges from a real xlsx', async () => {
     const filePath = path.join(
-      __dirname,
+      import.meta.dirname,
       '../../../../../../scripts/origin.xlsx',
     );
     const fileData = await fs.readFile(filePath);

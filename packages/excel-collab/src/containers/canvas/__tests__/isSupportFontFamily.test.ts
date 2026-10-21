@@ -1,6 +1,13 @@
 import { initFontFamilyList } from '../isSupportFontFamily';
 
 describe('isSupportFontFamily.test.ts', () => {
+  afterEach(() => localStorage.clear());
+  test.each(['{invalid', '{}', '[null]', '42'])('ignores invalid cached fonts: %s', (cache) => {
+    localStorage.setItem('LOCAL_FONT_KEY', cache);
+    expect(initFontFamilyList(() => true, ['Arial'])).toEqual([
+      { label: 'Arial', value: 'Arial', disabled: false },
+    ]);
+  });
   describe('initFontFamilyList', () => {
     test('mock check', () => {
       const check = () => true;

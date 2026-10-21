@@ -30,5 +30,7 @@ dev.db-journal
 migrations
 .env.development
 coverage-final.json
+*.junit.xml
 junit.xml
 tsconfig.tsbuildinfo
+tsconfig.*.tsbuildinfo

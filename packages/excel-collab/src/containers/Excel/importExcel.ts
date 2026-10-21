@@ -1,352 +1,203 @@
-import * as XLSX from 'xlsx';
-import {
-  ModelJSON,
-  ModelCellType,
-  WorksheetType,
-  StyleType,
-  BorderType,
-  BorderItem,
-  EHorizontalAlign,
-  EVerticalAlign,
-  EUnderLine,
-} from '../../types';
+import type { NewFile } from 'excelize-wasm';
+import type { ModelJSON, ModelCellType } from '../../types';
 import {
   getWorksheetKey,
   getCustomWidthOrHeightKey,
   parseReference,
   convertFileToTextOrBase64,
+  intToColumnName,
   FORMULA_PREFIX,
-  CELL_WIDTH,
-  CELL_HEIGHT,
-  CSV_SPLITTER,
+  DEFAULT_ROW_COUNT,
   XLSX_MAX_ROW_COUNT,
   XLSX_MAX_COL_COUNT,
-  BORDER_TYPE_MAP,
 } from '../../util';
-
-// The Meza model defaults every imported sheet to this virtual grid size.
-const DEFAULT_ROW_COUNT = 200;
-const DEFAULT_COL_COUNT = 200;
+import { loadExcelize, checkExcelize, type Excelize } from './excelize';
+import { fromExcelizeStyle } from './excelizeStyle';
 
 type ExcelInput = File | Blob | ArrayBuffer | Uint8Array | ArrayLike<number>;
 
+const DEFAULT_COL_COUNT = 200;
+
+export const IMPORT_ACCEPT = '.xlsx,.xlsm,.xlam,.xltm,.xltx,.csv';
+
+function emptyModel(): ModelJSON {
+  return {
+    workbook: {}, mergeCells: {}, customHeight: {}, customWidth: {},
+    definedNames: {}, currentSheetId: '', drawings: {}, rangeMap: {},
+    worksheets: {}, autoFilter: {}, scroll: {},
+  };
+}
+
 async function toUint8Array(file: ExcelInput): Promise<Uint8Array> {
-  if (file && typeof (file as Blob).arrayBuffer === 'function') {
+  if ('arrayBuffer' in Object(file) && typeof (file as Blob).arrayBuffer === 'function') {
     return new Uint8Array(await (file as Blob).arrayBuffer());
   }
-  if (file instanceof ArrayBuffer) {
-    return new Uint8Array(file);
+  if (typeof Blob !== 'undefined' && file instanceof Blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (reader.result instanceof ArrayBuffer) resolve(new Uint8Array(reader.result));
+        else reject(new TypeError('Expected binary spreadsheet data'));
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsArrayBuffer(file);
+    });
   }
+  if (file instanceof ArrayBuffer) return new Uint8Array(file);
   return new Uint8Array(file as ArrayLike<number>);
 }
 
-function rgbToHex(rgb?: string): string {
-  if (!rgb || typeof rgb !== 'string') {
-    return '';
-  }
-  let hex = rgb;
-  if (hex.length === 8) {
-    hex = hex.slice(2); // strip leading alpha (AARRGGBB -> RRGGBB)
-  }
-  if (hex.length === 6) {
-    return `#${hex.toUpperCase()}`;
-  }
-  return '';
+function coordinates(reference: string): { row: number; col: number } {
+  const range = parseReference(reference);
+  if (!range) throw new Error(`Invalid cell reference: ${reference}`);
+  return { row: range.row, col: range.col };
 }
 
-function getBorderItem(data: any): BorderItem | undefined {
-  const type = data?.style;
-  if (typeof type !== 'string' || !(type in BORDER_TYPE_MAP)) {
-    return undefined;
+function readCell(file: NewFile, api: Excelize, sheet: string, axis: string, mergedFollower: boolean): ModelCellType | undefined {
+  const raw = mergedFollower ? '' : checkExcelize(file.GetCellValue(sheet, axis, { RawCellValue: true })).value;
+  const formula = mergedFollower ? '' : checkExcelize(file.GetCellFormula(sheet, axis)).formula;
+  const styleId = checkExcelize(file.GetCellStyle(sheet, axis)).style;
+  if (raw === '' && !formula && !styleId) return undefined;
+  const type = checkExcelize(file.GetCellType(sheet, axis)).cellType;
+  let value: ModelCellType['value'] = raw;
+  if (type === api.CellTypeBool) value = raw === '1' || raw.toLowerCase() === 'true';
+  else if ((type === api.CellTypeNumber || type === api.CellTypeUnset ||
+    type === api.CellTypeDate || type === api.CellTypeFormula) && raw !== '' && Number.isFinite(Number(raw))) {
+    value = Number(raw);
   }
-  return { type: type as BorderType, color: rgbToHex(data?.color?.rgb) };
-}
-
-function getFontStyle(font: any): Partial<StyleType> {
-  const style: Partial<StyleType> = {};
-  if (typeof font.sz === 'number') {
-    style.fontSize = font.sz;
-  }
-  if (font.name) {
-    style.fontFamily = String(font.name);
-  }
-  if (font.bold) {
-    style.isBold = true;
-  }
-  if (font.italic) {
-    style.isItalic = true;
-  }
-  if (font.strike) {
-    style.isStrike = true;
-  }
-  if (font.underline) {
-    style.underline = EUnderLine.SINGLE;
-  }
-  const fontColor = rgbToHex(font.color?.rgb);
-  if (fontColor) {
-    style.fontColor = fontColor;
-  }
-  return style;
-}
-
-const HORIZONTAL_ALIGN_MAP: Record<string, EHorizontalAlign> = {
-  left: EHorizontalAlign.LEFT,
-  center: EHorizontalAlign.CENTER,
-  right: EHorizontalAlign.RIGHT,
-};
-const VERTICAL_ALIGN_MAP: Record<string, EVerticalAlign> = {
-  top: EVerticalAlign.TOP,
-  center: EVerticalAlign.MIDDLE,
-  bottom: EVerticalAlign.BOTTOM,
-};
-
-function getAlignmentStyle(alignment: any): Partial<StyleType> {
-  const style: Partial<StyleType> = {};
-  if (alignment.horizontal in HORIZONTAL_ALIGN_MAP) {
-    style.horizontalAlign = HORIZONTAL_ALIGN_MAP[alignment.horizontal];
-  }
-  if (alignment.vertical in VERTICAL_ALIGN_MAP) {
-    style.verticalAlign = VERTICAL_ALIGN_MAP[alignment.vertical];
-  }
-  if (alignment.wrapText) {
-    style.isWrapText = true;
-  }
-  return style;
-}
-
-function getBorderStyle(border: any): Partial<StyleType> {
-  const style: Partial<StyleType> = {};
-  const left = getBorderItem(border.left);
-  const right = getBorderItem(border.right);
-  const top = getBorderItem(border.top);
-  const bottom = getBorderItem(border.bottom);
-  if (left) {
-    style.borderLeft = left;
-  }
-  if (right) {
-    style.borderRight = right;
-  }
-  if (top) {
-    style.borderTop = top;
-  }
-  if (bottom) {
-    style.borderBottom = bottom;
-  }
-  return style;
-}
-
-function getCellStyle(cellStyle: any): Partial<StyleType> {
-  if (!cellStyle || typeof cellStyle !== 'object') {
-    return {};
-  }
-  const fill = cellStyle.fill || {};
-  const fillColor =
-    fill.patternType && fill.patternType !== 'none'
-      ? rgbToHex(fill.fgColor?.rgb)
-      : '';
   return {
-    ...getFontStyle(cellStyle.font || {}),
-    ...(fillColor ? { fillColor } : {}),
-    ...getAlignmentStyle(cellStyle.alignment || {}),
-    ...getBorderStyle(cellStyle.border || {}),
+    value,
+    ...(styleId ? fromExcelizeStyle(checkExcelize(file.GetStyle(styleId)).style) : {}),
+    ...(formula ? { formula: formula.startsWith(FORMULA_PREFIX) ? formula : FORMULA_PREFIX + formula } : {}),
   };
 }
 
-function convertCell(cell: XLSX.CellObject): ModelCellType {
-  let value: ModelCellType['value'];
-  switch (cell.t) {
-    case 'b':
-      value = Boolean(cell.v);
-      break;
-    case 'n':
-      value = typeof cell.v === 'number' ? cell.v : Number(cell.v ?? 0);
-      break;
-    case 'e':
-      value = cell.w ?? String(cell.v ?? '');
-      break;
-    case 'z':
-      value = '';
-      break;
-    default:
-      value = cell.v == null ? '' : String(cell.v);
-  }
-
-  const result: ModelCellType = { value, ...getCellStyle(cell.s) };
-  if (cell.f) {
-    result.formula = cell.f.startsWith(FORMULA_PREFIX)
-      ? cell.f
-      : FORMULA_PREFIX + cell.f;
-  }
-  if (cell.z && cell.z !== 'General') {
-    result.numberFormat = String(cell.z);
-  }
-  return result;
-}
-
-function readSheetCells(
-  sheet: XLSX.WorkSheet,
-  sheetId: string,
-  info: WorksheetType,
-  worksheets: ModelJSON['worksheets'],
-): void {
-  const ref = sheet['!ref'];
-  if (!ref) {
-    return;
-  }
-  const range = XLSX.utils.decode_range(ref);
-  const endRow = Math.min(range.e.r, XLSX_MAX_ROW_COUNT - 1);
-  const endCol = Math.min(range.e.c, XLSX_MAX_COL_COUNT - 1);
-  info.rowCount = Math.max(info.rowCount, endRow + 1);
-  info.colCount = Math.max(info.colCount, endCol + 1);
-  for (let r = range.s.r; r <= endRow; r++) {
-    for (let c = range.s.c; c <= endCol; c++) {
-      const cell = sheet[XLSX.utils.encode_cell({ r, c })] as
-        | XLSX.CellObject
-        | undefined;
-      if (cell) {
-        worksheets[getWorksheetKey(sheetId, r, c)] = convertCell(cell);
-      }
+export function convertWorkbookToModel(file: NewFile, api: Excelize): ModelJSON {
+  checkExcelize(file);
+  const result = emptyModel();
+  const names = file.GetSheetList().list;
+  const nameToId = Object.fromEntries(names.map((name, index) => [name, String(index + 1)]));
+  names.forEach((name, index) => {
+    const sheetId = nameToId[name];
+    const rows = checkExcelize(file.GetRows(name, { RawCellValue: true })).result;
+    const dimension = checkExcelize(file.GetSheetDimension(name)).dimension;
+    const end = coordinates(dimension.split(':').at(-1) || 'A1');
+    const props = checkExcelize(file.GetSheetProps(name)).props;
+    let rowCount = Math.max(DEFAULT_ROW_COUNT, rows.length, end.row + 1);
+    let colCount = rows.reduce((count, row) => Math.max(count, row.length),
+      Math.max(DEFAULT_COL_COUNT, end.col + 1));
+    const merges = checkExcelize(file.GetMergeCells(name, true)).mergeCells;
+    const mergedRanges: Array<{ row: number; col: number; endRow: number; endCol: number }> = [];
+    for (const merge of merges) {
+      const start = coordinates(merge.GetStartAxis());
+      const finish = coordinates(merge.GetEndAxis());
+      mergedRanges.push({ ...start, endRow: finish.row, endCol: finish.col });
+      result.mergeCells[`${name}!${merge.GetStartAxis()}:${merge.GetEndAxis()}`] = {
+        row: start.row, col: start.col, rowCount: finish.row - start.row + 1,
+        colCount: finish.col - start.col + 1, sheetId,
+      };
+      rowCount = Math.max(rowCount, finish.row + 1);
+      colCount = Math.max(colCount, finish.col + 1);
     }
-  }
-}
-
-function readSizes<T extends { hidden?: boolean }>(
-  list: T[] | undefined,
-  sheetId: string,
-  target: ModelJSON['customWidth'],
-  fallback: number,
-  getLen: (item: T) => number | undefined,
-): void {
-  (list || []).forEach((item, index) => {
-    if (!item) {
-      return;
-    }
-    const len = getLen(item);
-    if (len === undefined && !item.hidden) {
-      return;
-    }
-    target[getCustomWidthOrHeightKey(sheetId, index)] = {
-      len: len ?? fallback,
-      isHide: Boolean(item.hidden),
+    rowCount = Math.min(rowCount, XLSX_MAX_ROW_COUNT);
+    colCount = Math.min(colCount, XLSX_MAX_COL_COUNT);
+    result.workbook[sheetId] = {
+      sheetId, name, sort: index, rowCount, colCount,
+      isHide: !checkExcelize(file.GetSheetVisible(name)).visible,
+      tabColor: props.TabColorRGB ? `#${props.TabColorRGB.slice(-6)}` : undefined,
     };
-  });
-}
-
-function readSheetSizes(
-  sheet: XLSX.WorkSheet,
-  sheetId: string,
-  result: ModelJSON,
-): void {
-  readSizes(sheet['!cols'], sheetId, result.customWidth, CELL_WIDTH, (col) => {
-    if (typeof col.wpx === 'number') {
-      return Math.round(col.wpx);
-    }
-    if (typeof col.wch === 'number') {
-      return Math.round(col.wch * 7);
-    }
-    return undefined;
-  });
-  readSizes(
-    sheet['!rows'],
-    sheetId,
-    result.customHeight,
-    CELL_HEIGHT,
-    (row) => {
-      if (typeof row.hpx === 'number') {
-        return Math.round(row.hpx);
-      }
-      if (typeof row.hpt === 'number') {
-        return Math.round((row.hpt * 96) / 72);
-      }
-      return undefined;
-    },
-  );
-}
-
-export function convertWorkbookToModel(workbook: XLSX.WorkBook): ModelJSON {
-  const result: ModelJSON = {
-    workbook: {},
-    mergeCells: {},
-    customHeight: {},
-    customWidth: {},
-    definedNames: {},
-    currentSheetId: '',
-    drawings: {},
-    rangeMap: {},
-    worksheets: {},
-    autoFilter: {},
-    scroll: {},
-  };
-
-  const sheetProps = workbook.Workbook?.Sheets || [];
-  const nameToSheetId: Record<string, string> = {};
-
-  workbook.SheetNames.forEach((name, index) => {
-    const sheetId = String(index + 1);
-    nameToSheetId[name] = sheetId;
-    const sheet = workbook.Sheets[name];
-    const info: WorksheetType = {
-      sheetId,
-      name,
-      isHide: Boolean(sheetProps[index]?.Hidden),
-      rowCount: DEFAULT_ROW_COUNT,
-      colCount: DEFAULT_COL_COUNT,
-      sort: index,
-      tabColor: undefined,
-    };
-    if (sheet) {
-      readSheetCells(sheet, sheetId, info, result.worksheets);
-      for (const merge of sheet['!merges'] || []) {
-        result.mergeCells[`${name}!${XLSX.utils.encode_range(merge)}`] = {
-          row: merge.s.r,
-          col: merge.s.c,
-          rowCount: merge.e.r - merge.s.r + 1,
-          colCount: merge.e.c - merge.s.c + 1,
-          sheetId,
+    for (let row = 0; row < rowCount; row++) {
+      const height = checkExcelize(file.GetRowHeight(name, row + 1)).height;
+      const visible = checkExcelize(file.GetRowVisible(name, row + 1)).visible;
+      if (height !== (props.DefaultRowHeight || 15) || !visible) {
+        result.customHeight[getCustomWidthOrHeightKey(sheetId, row)] = {
+          len: Math.round(height * 96 / 72), isHide: !visible,
         };
       }
-      readSheetSizes(sheet, sheetId, result);
+      const usedCols = Math.max(rows[row]?.length ?? 0, row <= end.row ? end.col + 1 : 0);
+      for (let col = 0; col < Math.min(usedCols, colCount); col++) {
+        const mergedFollower = mergedRanges.some((range) => row >= range.row && row <= range.endRow &&
+          col >= range.col && col <= range.endCol && (row !== range.row || col !== range.col));
+        const cell = readCell(file, api, name, `${intToColumnName(col)}${row + 1}`, mergedFollower);
+        if (cell) result.worksheets[getWorksheetKey(sheetId, row, col)] = cell;
+      }
     }
-    result.workbook[sheetId] = info;
+    for (let col = 0; col < colCount; col++) {
+      const column = intToColumnName(col);
+      const width = checkExcelize(file.GetColWidth(name, column)).width;
+      const visible = checkExcelize(file.GetColVisible(name, column)).visible;
+      if (width !== (props.DefaultColWidth || 9.140625) || !visible) {
+        result.customWidth[getCustomWidthOrHeightKey(sheetId, col)] = {
+          len: Math.round(width * 7), isHide: !visible,
+        };
+      }
+    }
   });
-
-  result.currentSheetId = workbook.SheetNames.length
-    ? nameToSheetId[workbook.SheetNames[0]]
-    : '';
-
-  for (const item of workbook.Workbook?.Names || []) {
-    if (!item?.Name || !item.Ref) {
-      continue;
-    }
-    const range = parseReference(item.Ref, (name) => nameToSheetId[name] || '');
-    if (range) {
-      result.definedNames[item.Name.toLowerCase()] = range.toIRange();
-    }
+  const active = checkExcelize(file.GetActiveSheetIndex()).index;
+  result.currentSheetId = nameToId[names[active]] ?? nameToId[names[0]] ?? '';
+  for (const item of checkExcelize(file.GetDefinedName()).definedNames) {
+    if (!item.Name || !item.RefersTo) continue;
+    const range = parseReference(item.RefersTo.replace(/^=/, ''), (name) => nameToId[name] || '');
+    if (range) result.definedNames[item.Name.toLowerCase()] = range.toIRange();
   }
-
   return result;
 }
 
-function isCsvFile(file: ExcelInput): file is File {
-  return (
-    typeof File !== 'undefined' &&
-    file instanceof File &&
-    (/\.csv$/i.test(file.name) || file.type === 'text/csv')
-  );
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = '';
+  let quoted = false;
+  text = text.replace(/^\uFEFF/, '');
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index];
+    if (char === '"') {
+      if (quoted && text[index + 1] === '"') { field += '"'; index++; }
+      else quoted = !quoted;
+    } else if (!quoted && (char === ',' || char === '\r' || char === '\n')) {
+      row.push(field);
+      field = '';
+      if (char !== ',') {
+        rows.push(row);
+        row = [];
+        if (char === '\r' && text[index + 1] === '\n') index++;
+      }
+    } else field += char;
+  }
+  if (quoted) throw new Error('Unclosed quoted CSV field');
+  if (field || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+function importCsv(text: string): ModelJSON {
+  const result = emptyModel();
+  const rows = parseCsv(text);
+  result.currentSheetId = '1';
+  result.workbook['1'] = {
+    sheetId: '1', name: 'Sheet1', isHide: false, sort: 0,
+    rowCount: Math.max(DEFAULT_ROW_COUNT, rows.length),
+    colCount: rows.reduce((count, row) => Math.max(count, row.length), DEFAULT_COL_COUNT),
+  };
+  rows.forEach((row, r) => row.forEach((raw, c) => {
+    if (!raw) return;
+    let value: ModelCellType['value'] = raw;
+    if (/^(true|false)$/i.test(raw)) value = raw.toLowerCase() === 'true';
+    else if (/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(raw) && Number.isFinite(Number(raw))) value = Number(raw);
+    result.worksheets[getWorksheetKey('1', r, c)] = { value };
+  }));
+  return result;
 }
 
 export async function importExcel(file: ExcelInput): Promise<ModelJSON> {
-  const workbook = isCsvFile(file)
-    ? XLSX.read(await convertFileToTextOrBase64(file, false), {
-        type: 'string',
-        FS: CSV_SPLITTER,
-      })
-    : XLSX.read(await toUint8Array(file), {
-        type: 'array',
-        cellFormula: true,
-        cellNF: true,
-        cellStyles: true,
-        cellDates: false,
-      });
-  return convertWorkbookToModel(workbook);
+  if (typeof File !== 'undefined' && file instanceof File) {
+    if (/\.csv$/i.test(file.name) || file.type === 'text/csv') {
+      return importCsv(await convertFileToTextOrBase64(file, false));
+    }
+    if (!/\.(xlsx|xlsm|xlam|xltm|xltx)$/i.test(file.name)) {
+      throw new Error(`Unsupported spreadsheet format: ${file.name}`);
+    }
+  }
+  const bytes = await toUint8Array(file);
+  const api = await loadExcelize();
+  return convertWorkbookToModel(checkExcelize(api.OpenReader(bytes)), api);
 }

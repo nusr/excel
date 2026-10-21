@@ -25,12 +25,12 @@ export function CommandPalette<T>(props: CommandPaletteProps<T>) {
   useEffect(() => {
     let isMacUA = /mac(os|intosh)/i.test(navigator.userAgent);
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented) {
+        return;
+      }
       if (e.key === 'j' && (isMacUA ? e.metaKey : e.ctrlKey)) {
         e.preventDefault();
         onOpenChange(true);
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        onOpenChange(false);
       }
     };
 
@@ -40,7 +40,7 @@ export function CommandPalette<T>(props: CommandPaletteProps<T>) {
 
   return (
     <Modal isDismissable isOpen={isOpen} onOpenChange={onOpenChange}>
-      <Dialog className="command-palette-dialog">
+      <Dialog className="command-palette-dialog" aria-label={props['aria-label'] || 'Commands'}>
         <AriaAutocomplete filter={contains} {...props}>
           <SearchField
             autoFocus

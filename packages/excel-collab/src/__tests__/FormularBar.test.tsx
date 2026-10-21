@@ -1,13 +1,30 @@
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { type, renderComponent } from './util';
 import './global.mock';
+import type { IController } from '../types';
 
 describe('FormulaBar.test.tsx', () => {
+  let controller: IController;
   beforeEach(async () => {
-    await renderComponent();
+    ({ controller } = await renderComponent());
   });
   describe('defined name', () => {
+    test('sheet-qualified jumps resolve mixed-case sheet names', () => {
+      const first = controller.getCurrentSheetId();
+      let target = '';
+      act(() => {
+        target = controller.addSheet()!.sheetId;
+        controller.renameSheet('Mixed Case');
+        controller.setCurrentSheetId(first);
+      });
+      fireEvent.change(screen.getByTestId('formula-bar-name-input'), {
+        target: { value: "'Mixed Case'!C3" },
+      });
+      fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), { key: 'Enter' });
+      expect(controller.getCurrentSheetId()).toBe(target);
+      expect(controller.getActiveRange().range).toMatchObject({ row: 2, col: 2 });
+    });
     test('normal', () => {
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
       expect(screen.getByTestId('formula-bar')!.childNodes).toHaveLength(2);

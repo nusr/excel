@@ -13,8 +13,9 @@
   },
   "include": [
     "vitest.config.ts",
-    "vitest.workspace.ts",
-    "packages/**/vite.config.ts",
+    "scripts/vitest.config.ts",
+    "packages/**/vite*.config.mts",
+    "packages/**/package.json",
     "packages/**/vitest.config.ts",
     "e2e",
     "playwright.config.ts"

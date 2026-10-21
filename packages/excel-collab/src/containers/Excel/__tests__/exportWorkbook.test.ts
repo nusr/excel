@@ -13,7 +13,7 @@ describe('exportWorkbook.test.ts', () => {
     expect(exportToCsv(controller)).toBe('');
   });
 
-  test('empty-valued cells are skipped when building the worksheet', () => {
+  test('empty-valued cells are skipped when building the worksheet', async () => {
     const controller = initController();
     controller.addSheet();
     const sheetId = controller.getCurrentSheetId();
@@ -24,10 +24,9 @@ describe('exportWorkbook.test.ts', () => {
       colCount: 1,
       sheetId,
     });
-    const workbook = convertToWorkbook(controller);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    expect(sheet.A1).toBeUndefined();
-    expect(sheet.B1.v).toBe('keep');
+    const workbook = await convertToWorkbook(controller);
+    expect(workbook.GetCellValue('Sheet1', 'A1').value).toBe('');
+    expect(workbook.GetCellValue('Sheet1', 'B1').value).toBe('keep');
   });
 
   test('round trips custom row heights', async () => {
@@ -42,8 +41,28 @@ describe('exportWorkbook.test.ts', () => {
       sheetId,
     });
     controller.setRowHeight(2, 60);
-    const model = await importExcel(convertToXLSXData(controller));
+    const model = await importExcel(await convertToXLSXData(controller));
     const id = Object.keys(model.workbook)[0];
     expect(model.customHeight[getCustomWidthOrHeightKey(id, 2)]).toBeDefined();
+  });
+
+  test('exports a deleted defined-name target as #REF! rather than an invalid cell address', async () => {
+    const controller = initController();
+    try {
+      controller.addSheet();
+      controller.setDefineName({
+        row: 1, col: 0, rowCount: 1, colCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      }, 'deletedname');
+      controller.deleteRow(1, 1);
+      expect(controller.toJSON().definedNames.deletedname).toMatchObject({ row: -1, col: -1 });
+      const workbook = await convertToWorkbook(controller);
+      expect(workbook.GetDefinedName().definedNames).toContainEqual(
+        expect.objectContaining({ Name: 'deletedname', RefersTo: '#REF!' }),
+      );
+    } finally {
+      controller.destroy();
+      controller.getHooks().doc.destroy();
+    }
   });
 });

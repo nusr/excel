@@ -7,44 +7,52 @@ import SheetBarContainer from './SheetBar';
 import MenuBarContainer from './MenuBar';
 import { useExcel, useUserInfo } from './store';
 import { UserItem } from '../types';
-import { modelToChangeSet } from '../util';
+import i18n from '../i18n';
 import { ProgressCircle } from '../component/ProgressCircle';
 
 function useCollaboration() {
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string>();
   const setFileInfo = useUserInfo((s) => s.setFileInfo);
-  const { provider, controller, awareness } = useExcel();
+  const { provider, controller, awareness, whenSynced, collaborative } = useExcel();
   useEffect(() => {
+    let cancelled = false;
     async function init() {
-      if (!provider) {
-        if (controller.getSheetList().length === 0) {
-          controller.addFirstSheet();
-        }
-        setIsLoading(false);
-        return;
-      }
       setIsLoading(true);
-      const doc = controller.getHooks().doc;
-      const file = await provider?.getDocument?.(doc.guid);
-      const content = file?.content ?? '';
-      if (content) {
-        controller.fromJSON(JSON.parse(content));
+      setError(undefined);
+      if (whenSynced) await whenSynced;
+      if (cancelled) return;
+      if (provider) {
+        const doc = controller.getHooks().doc;
+        const file = await provider.getDocument?.(doc.guid);
+        if (cancelled) return;
+        const content = file?.content ?? '';
+        if (content && !collaborative && controller.getSheetList().length === 0) {
+          controller.fromJSON(JSON.parse(content));
+        }
+        setFileInfo(file?.id ?? doc.guid, file?.name ?? '');
       }
-      setFileInfo(file?.id ?? doc.guid, file?.name ?? '');
       if (controller.getSheetList().length === 0) {
+        if (collaborative) throw new Error('The collaboration server must initialize the workbook before the first sync');
         controller.addFirstSheet();
       }
       setIsLoading(false);
     }
-    init();
-  }, []);
+    init().catch((cause: unknown) => {
+      if (!cancelled) {
+        setError(cause instanceof Error ? cause.message : String(cause));
+        setIsLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [controller, provider, whenSynced, collaborative, setFileInfo]);
 
   useEffect(() => {
     if (!awareness) {
       return;
     }
     const doc = controller.getHooks().doc;
-    awareness.on('update', () => {
+    const handleAwareness = () => {
       const list: UserItem[] = [];
       for (const item of awareness.getStates().entries()) {
         const [key, value] = item;
@@ -54,20 +62,22 @@ function useCollaboration() {
         list.push({ clientId: key, range: value.range });
       }
       useUserInfo.getState().setUsers(list);
-    });
-
-    doc.on('update', (_a, _b, _c, tran) => {
-      const changeSet = modelToChangeSet(tran);
-      controller.emit('renderChange', { changeSet });
-    });
-
-    controller.on('rangeChange', (range) => {
+    };
+    awareness.on('update', handleAwareness);
+    handleAwareness();
+    const offRange = controller.on('rangeChange', (range) => {
       awareness.setLocalStateField('range', range);
     });
-  }, []);
+    return () => {
+      awareness.off('update', handleAwareness);
+      offRange();
+      awareness.setLocalStateField('range', null);
+      useUserInfo.getState().setUsers([]);
+    };
+  }, [controller, awareness]);
 
   return {
-    isLoading,
+    isLoading, error,
   };
 }
 
@@ -86,7 +96,9 @@ const ExcelEditor: React.FunctionComponent<EditorProps> = memo(
     toolbarChildren,
     sheetBarChildren,
   }) => {
-    const { isLoading } = useCollaboration();
+    const { isLoading, error } = useCollaboration();
+
+    if (error) return <div role="alert">{i18n.t('initialization-failed', { message: error })}</div>;
 
     if (isLoading) {
       return (

@@ -1,4 +1,4 @@
-import { useRef, memo, useCallback } from 'react';
+import { useRef, memo, useCallback, useEffect } from 'react';
 import { Button } from '../../component/Button';
 import { getImageSize, convertFileToTextOrBase64, toIRange } from '../../util';
 import i18n from '../../i18n';
@@ -10,6 +10,8 @@ import { FileTrigger } from 'react-aria-components/FileTrigger';
 export const InsertFloatingPicture = memo(() => {
   const { controller, provider } = useExcel();
   const ref = useRef<HTMLInputElement>(null);
+  const generation = useRef(0);
+  useEffect(() => () => { generation.current++; }, [controller]);
 
   const handleImport = useCallback(
     async (files: FileList | null) => {
@@ -29,49 +31,51 @@ export const InsertFloatingPicture = memo(() => {
         clearUpdate();
         return;
       }
-      let fileName = file.name;
-      const fileType = file.type.slice('image/'.length);
-      fileName = fileName.slice(0, -(fileType.length + 1));
-
-      const base64 = await convertFileToTextOrBase64(file, true);
-
-      if (!base64) {
+      const range = { ...controller.getActiveRange().range };
+      const version = generation.current;
+      try {
+        const fileName = file.name.replace(/\.[^.]+$/, '');
+        const base64 = await convertFileToTextOrBase64(file, true);
+        if (!base64 || version !== generation.current) return;
+        const size = await getImageSize(base64);
+        let imageSrc = base64;
+        if (provider?.uploadFile) {
+          imageSrc = await provider.uploadFile(
+            controller.getHooks().doc.guid,
+            file,
+            base64,
+          );
+        }
+        if (version !== generation.current) return;
+        if (!imageSrc) {
+          queue.add({ title: 'choose image file' });
+          return;
+        }
+        if (!controller.getSheetInfo(range.sheetId)) return;
+        controller.addDrawing({
+          width: size.width,
+          height: size.height,
+          originHeight: size.height,
+          originWidth: size.width,
+          title: fileName,
+          type: 'floating-picture',
+          uuid: v4(),
+          imageSrc,
+          sheetId: range.sheetId,
+          fromRow: range.row,
+          fromCol: range.col,
+          marginX: 0,
+          marginY: 0,
+        });
+      } catch (error) {
+        if (version === generation.current) queue.add({ title: i18n.t('import-failed', {
+          message: error instanceof Error ? error.message : String(error),
+        }) });
+      } finally {
         clearUpdate();
-        return;
       }
-      const size = await getImageSize(base64);
-      let imageSrc = base64;
-      if (provider?.uploadFile) {
-        imageSrc = await provider.uploadFile(
-          controller.getHooks().doc.guid,
-          file,
-          base64,
-        );
-      }
-      if (!imageSrc) {
-        queue.add({ title: 'choose image file' });
-        clearUpdate();
-        return;
-      }
-      const range = controller.getActiveRange().range;
-      controller.addDrawing({
-        width: size.width,
-        height: size.height,
-        originHeight: size.height,
-        originWidth: size.width,
-        title: fileName,
-        type: 'floating-picture',
-        uuid: v4(),
-        imageSrc,
-        sheetId: range.sheetId,
-        fromRow: range.row,
-        fromCol: range.col,
-        marginX: 0,
-        marginY: 0,
-      });
-      clearUpdate();
     },
-    [provider],
+    [provider, controller],
   );
   return (
     <FileTrigger

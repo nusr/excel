@@ -35,7 +35,7 @@ npm i --save excel-collab
 
 3. Modify the Main File
 
-```ts src/main.tsx
+```tsx
 // src/main.tsx
 import { createRoot } from 'react-dom/client';
 import { StrictMode } from 'react';
@@ -66,10 +66,11 @@ npm run dev
 git clone https://github.com/nusr/excel.git
 cd excel
 
-npm i -g yarn
-yarn
+yarn install
 npm run start
 ```
+
+The root `start` script starts the demo frontend and backend together.
 
 ## Overview
 
@@ -78,10 +79,10 @@ Excel-collab is a web-based spreadsheet application that supports real-time coll
 ### Key Features
 
 - **Real-time Collaboration**: Multiple users can edit the same spreadsheet simultaneously with conflict resolution
-- **Comprehensive Formulas**: Support for 400+ Excel functions through FormulaJS integration
+- **Formula Calculation**: Excel-style formulas with cross-sheet references and FormulaJS-backed functions
 - **Rich Formatting**: Fonts, colors, borders, alignment, number formats, and more
 - **High Performance**: OffScreenCanvas rendering and Web Worker formula computation
-- **File Compatibility**: Import/Export XLSX and CSV formats
+- **File Compatibility**: Import/export XLSX, XLSM, XLAM, XLTM, XLTX, and CSV
 
 ## Architecture
 
@@ -157,13 +158,10 @@ Formula String → Scanner → Parser → Interpreter → Result
 - Calls Excel functions with proper parameter handling
 - Manages circular dependency detection
 
-**Key Formula Features**:
-
-- 400+ functions from FormulaJS
-- Array formulas and dynamic ranges
-- Defined names and scoped references
-- Cross-sheet references
-- Error handling and propagation
+Formula support includes named ranges, cross-sheet references, rectangular array
+constants, and error propagation. Dynamic array spilling and several advanced
+Excel reference types are not supported. See the [formula compatibility notes](./packages/excel-collab/README.md#formula-compatibility)
+for the supported syntax and limitations.
 
 #### State Management
 
@@ -193,8 +191,8 @@ Built on **Yjs** for CRDT-based real-time collaboration:
 
 ### Formulas
 
-- [x] 400+ Excel Functions
-- [x] Array Formulas
+- [x] FormulaJS-backed functions
+- [x] Rectangular array constants
 - [x] Cross-sheet References
 - [x] Defined Names
 - [x] Circular Reference Detection
@@ -243,7 +241,7 @@ Built on **Yjs** for CRDT-based real-time collaboration:
 ### Import/Export
 
 - [x] Import XLSX
-- [x] Export XLSX
+- [x] Export XLSX, XLSM, XLAM, XLTM, XLTX
 - [x] Import CSV
 - [x] Export CSV
 - [x] Export PDF

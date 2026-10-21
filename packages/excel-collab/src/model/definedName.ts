@@ -4,7 +4,6 @@ import type {
   IRange,
   IModel,
   IDefinedName,
-  YjsModelJson,
 } from '../types';
 import {
   MAX_PARAMS_COUNT,
@@ -12,7 +11,6 @@ import {
   DEFINED_NAME_REG_EXP,
   toIRange,
 } from '../util';
-import { Map } from 'yjs';
 
 export class DefinedName implements IDefinedName {
   private model: IModel;
@@ -49,14 +47,16 @@ export class DefinedName implements IDefinedName {
   }
   fromJSON(json: ModelJSON): void {
     const data = json.definedNames || {};
-    const definedNames = new Map() as YjsModelJson['definedNames'];
+    const definedNames = this.definedNames;
+    definedNames.clear();
     for (const [key, value] of Object.entries(data)) {
-      if (!this.model.validateRange(value) || !this.validateDefinedName(key)) {
+      const deleted = value.row === -1 && value.col === -1;
+      if ((!deleted && !this.model.validateRange(value)) || !this.validateDefinedName(key)) {
         continue;
       }
       definedNames.set(key, toIRange(value));
+      this.model.getRoot().bindRange(`name:${key}`, value);
     }
-    this.model.getRoot().set('definedNames', definedNames);
   }
   getDefineNameList(): DefinedNameItem[] {
     if (!this.definedNames) {
@@ -68,7 +68,8 @@ export class DefinedName implements IDefinedName {
     }
     return list.map((v) => ({
       name: v[0],
-      range: v[1],
+      range: this.model.getRoot().range(`name:${v[0]}`, v[1]) ??
+        { ...v[1], row: -1, col: -1, rowCount: 1, colCount: 1 },
     }));
   }
   getDefineName(range: IRange): string {
@@ -76,7 +77,7 @@ export class DefinedName implements IDefinedName {
       return '';
     }
     const sheetId = range.sheetId || this.model.getCurrentSheetId();
-    for (const [key, t] of this.definedNames.entries()) {
+    for (const { name: key, range: t } of this.getDefineNameList()) {
       if (t.row === range.row && t.col === range.col && t.sheetId === sheetId) {
         return key;
       }
@@ -84,27 +85,23 @@ export class DefinedName implements IDefinedName {
     return '';
   }
   setDefineName(range: IRange, name: string) {
-    if (!name) {
+    if (!name || !this.model.validateRange(range)) {
       return false;
     }
     const oldName = this.getDefineName(range);
     if (oldName === name) {
       return false;
     }
-    if (!this.definedNames) {
-      this.model
-        .getRoot()
-        .set('definedNames', new Map() as YjsModelJson['definedNames']);
-    }
 
     const result: IRange = {
       row: range.row,
       col: range.col,
       sheetId: range.sheetId || this.model.getCurrentSheetId(),
-      colCount: 1,
-      rowCount: 1,
+      colCount: range.colCount,
+      rowCount: range.rowCount,
     };
     this.definedNames!.set(name, result);
+    this.model.getRoot().bindRange(`name:${name}`, result);
     if (oldName) {
       this.definedNames?.delete(oldName);
     }
@@ -112,7 +109,9 @@ export class DefinedName implements IDefinedName {
     return true;
   }
   checkDefineName(name: string): IRange | undefined {
-    const range = this.definedNames?.get(name);
+    const stored = this.definedNames?.get(name);
+    const range = stored && (this.model.getRoot().range(`name:${name}`, stored) ??
+      { ...stored, row: -1, col: -1, rowCount: 1, colCount: 1 });
     if (range) {
       return { ...range };
     }

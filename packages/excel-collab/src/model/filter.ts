@@ -4,7 +4,6 @@ import type {
   AutoFilterItem,
   IFilter,
   IRange,
-  YjsModelJson,
   TypedMap,
 } from '../types';
 import { MERGE_CELL_LINE_BREAK, toIRange } from '../util';
@@ -21,7 +20,8 @@ export class FilterManger implements IFilter {
   }
   fromJSON(json: ModelJSON): void {
     const data = json.autoFilter || {};
-    const autoFilter = new Map() as YjsModelJson['autoFilter'];
+    const autoFilter = this.autoFilter;
+    autoFilter.clear();
     for (const [key, value] of Object.entries(data)) {
       value.range.sheetId = key;
       if (!this.model.validateRange(value.range)) {
@@ -30,9 +30,10 @@ export class FilterManger implements IFilter {
       const temp = new Map(Object.entries(value)) as TypedMap<AutoFilterItem>;
 
       autoFilter.set(key, temp);
+      this.model.getRoot().bindRange(`filter:${key}`, value.range);
+      if (value.col !== undefined) this.model.getRoot().bindFilterColumn(key, value.col);
     }
 
-    this.model.getRoot().set('autoFilter', autoFilter);
   }
 
   deleteAll(sheetId?: string): void {
@@ -47,16 +48,12 @@ export class FilterManger implements IFilter {
     if (range.rowCount === 1 && range.colCount === 1) {
       return;
     }
-    if (!this.autoFilter) {
-      this.model
-        .getRoot()
-        .set('autoFilter', new Map() as YjsModelJson['autoFilter']);
-    }
     const newValue: AutoFilterItem = {
       range: toIRange(range),
     };
     const temp = new Map(Object.entries(newValue)) as TypedMap<AutoFilterItem>;
     this.autoFilter!.set(range.sheetId, temp);
+    this.model.getRoot().bindRange(`filter:${range.sheetId}`, range);
   }
   deleteFilter(sheetId?: string): void {
     this.deleteAll(sheetId);
@@ -69,12 +66,14 @@ export class FilterManger implements IFilter {
     if (!item) {
       return;
     }
+    if (value.range) this.model.getRoot().bindRange(`filter:${id}`, value.range);
+    if (value.col !== undefined) this.model.getRoot().bindFilterColumn(id, value.col);
     for (const key of keyList) {
       if (item.get(key) !== value[key]) {
         item.set(key, value[key]);
       }
     }
-    const range = item.get('range');
+    const range = this.model.getRoot().filter(id)?.range;
     /* jscpd:ignore-end */
     if (range && typeof value.col === 'number' && value.value) {
       this.applyFilter(range, value as Required<AutoFilterItem>);
@@ -93,7 +92,7 @@ export class FilterManger implements IFilter {
     let end =
       range.rowCount === 0 ? sheetInfo.rowCount : range.row + range.rowCount;
     for (; r < end; r++) {
-      this.model.unhideRow(r, 1);
+      this.setRowHidden(range.sheetId, r, false);
     }
   }
   private applyFilter(range: IRange, autoFilter: Required<AutoFilterItem>) {
@@ -117,19 +116,23 @@ export class FilterManger implements IFilter {
         });
         const v = cell ? cell.value : MERGE_CELL_LINE_BREAK;
         if (!set.has(v)) {
-          this.model.hideRow(r, 1);
+          this.setRowHidden(range.sheetId, r, true);
         } else {
-          this.model.unhideRow(r, 1);
+          this.setRowHidden(range.sheetId, r, false);
         }
       }
     }
   }
+  private setRowHidden(sheetId: string, row: number, isHide: boolean) {
+    const key = this.model.getRoot().sizeKey(sheetId, 'rows', row);
+    if (key === undefined) return;
+    const old = this.model.getRow(row, sheetId);
+    if (old.isHide !== isHide) {
+      this.model.getRoot().get('customHeight').set(key, { ...old, isHide });
+    }
+  }
   getFilter(sheetId?: string) {
     const id = sheetId || this.model.getCurrentSheetId();
-    const data = this.autoFilter?.get(id);
-    if (data) {
-      return data.toJSON();
-    }
-    return undefined;
+    return this.model.getRoot().filter(id);
   }
 }

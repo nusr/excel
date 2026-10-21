@@ -1,4 +1,4 @@
-import { setTheme, getTheme } from '../';
+import { setTheme, getTheme, getThemeColor, lightColor, darkColor } from '../';
 import { convertColorToDark } from '../convert'
 
 describe('theme.test.ts', () => {
@@ -24,6 +24,11 @@ describe('theme.test.ts', () => {
   describe('getTheme', () => {
     test('light', () => {
       expect(getTheme()).toEqual('light');
+    });
+    test('an explicit light palette overrides the current dark theme', () => {
+      setTheme('dark');
+      expect(getThemeColor('white', 'light')).toBe(lightColor.white);
+      expect(getThemeColor('white')).toBe(darkColor.white);
     });
     test('mock matchMedia dark', () => {
       Object.defineProperty(global, 'matchMedia', {
@@ -51,7 +56,17 @@ describe('theme.test.ts', () => {
   describe('convertColorToDark', () => {
     test('rgb', () => {
       expect(convertColorToDark('rgba(198,198,198,0.3)')).toEqual(
-        'rgba(0,0,0,0.3)',
+        'rgba(57,57,57,0.3)',
+      );
+    });
+    test('translucent black becomes translucent white', () => {
+      expect(convertColorToDark('rgba(0,0,0,0.1)')).toBe(
+        'rgba(255,255,255,0.1)',
+      );
+    });
+    test('translucent colors use the same RGB channels as opaque colors', () => {
+      expect(convertColorToDark('rgba(200,150,100,0.5)')).toBe(
+        'rgba(150,105,60,0.5)',
       );
     });
     test('rgba', () => {

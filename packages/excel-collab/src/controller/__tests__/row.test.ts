@@ -491,8 +491,8 @@ describe('row.test.ts', () => {
       controller.deleteRow(1, 3);
       const data = controller.getDrawingList().find((v) => v.uuid === uuid)!;
       expect(data.fromRow).toEqual(oldData.fromRow - 3);
-      expect(data.chartRange!.row).toEqual(0);
-      expect(data.chartRange!.rowCount).toEqual(3);
+      expect(data.chartRange!.row).toEqual(1);
+      expect(data.chartRange!.rowCount).toEqual(2);
     });
   });
 });

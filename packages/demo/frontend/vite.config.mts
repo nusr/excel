@@ -3,7 +3,7 @@ import type { AliasOptions } from 'vite';
 import react from '@vitejs/plugin-react';
 import { codecovVitePlugin } from '@codecov/vite-plugin';
 import { join } from 'node:path';
-import { version } from './package.json' with { type: 'json' };
+import packageJson from './package.json' with { type: 'json' };
 
 function htmlSlot(options: Record<string, string>) {
   return {
@@ -37,7 +37,7 @@ export default defineConfig((env) => {
         uploadToken: process.env.CODECOV_TOKEN,
       }),
       htmlSlot({
-        '<!--BUNDLE_INFO-->': `<script>window.__bundle_info = ${JSON.stringify({ time: new Date().toISOString(), commit_id: process.env.COMMIT_ID ?? `v${version}` })}</script>`,
+        '<!--BUNDLE_INFO-->': `<script>window.__bundle_info = ${JSON.stringify({ time: new Date().toISOString(), commit_id: process.env.COMMIT_ID ?? `v${packageJson.version}` })}</script>`,
       }),
     ],
     build: {

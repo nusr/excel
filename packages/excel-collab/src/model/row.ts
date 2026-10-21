@@ -3,14 +3,11 @@ import type {
   IRow,
   CustomItem,
   IModel,
-  YjsModelJson,
 } from '../types';
 import {
-  getCustomWidthOrHeightKey,
   CELL_HEIGHT,
   widthOrHeightKeyToData,
 } from '../util';
-import { Map } from 'yjs';
 
 export class RowManager implements IRow {
   private model: IModel;
@@ -22,31 +19,25 @@ export class RowManager implements IRow {
     return this.model.getRoot().get('customHeight');
   }
   private getModel() {
-    const t = this.customHeight;
-    if (!t) {
-      this.model
-        .getRoot()
-        .set('customHeight', new Map() as YjsModelJson['customHeight']);
-    }
     return this.customHeight!;
   }
   fromJSON(json: ModelJSON): void {
     const data = json.customHeight || {};
-    const customHeight = new Map() as YjsModelJson['customWidth'];
+    const customHeight = this.customHeight;
+    customHeight.clear();
     for (const [key, value] of Object.entries(data)) {
       const { sheetId, rowOrCol: row } = widthOrHeightKeyToData(key);
       if (!sheetId || row < 0) {
         continue;
       }
       const sheetInfo = this.model.getSheetInfo(sheetId);
-      if (!sheetInfo || row >= sheetInfo.rowCount) {
+      if (!sheetInfo || !Number.isInteger(row)) {
         continue;
       }
       if (typeof value.isHide === 'boolean' && typeof value.len === 'number') {
-        customHeight.set(key, value);
+        customHeight.set(this.model.getRoot().sizeKey(sheetId, 'rows', row)!, value);
       }
     }
-    this.model.getRoot().set('customHeight', customHeight);
   }
   hideRow(rowIndex: number, count: number): void {
     this.toggleHideRow(rowIndex, count, true);
@@ -55,7 +46,8 @@ export class RowManager implements IRow {
     const sheetId = this.model.getCurrentSheetId();
     for (let i = 0; i < count; i++) {
       const r = rowIndex + i;
-      const key = getCustomWidthOrHeightKey(sheetId, r);
+      const key = this.model.getRoot().sizeKey(sheetId, 'rows', r);
+      if (key === undefined) throw new RangeError('Row is outside the worksheet');
       const old = this.getRow(r);
 
       if (old.isHide === isHide) {
@@ -71,8 +63,9 @@ export class RowManager implements IRow {
   }
   getRow(row: number, sheetId?: string): CustomItem {
     const id = sheetId || this.model.getCurrentSheetId();
-    const key = getCustomWidthOrHeightKey(id, row);
-    const temp = this.customHeight?.get(key);
+    const key = this.model.getRoot().sizeKey(id, 'rows', row);
+    const temp = key === undefined ? undefined
+      : this.customHeight.get(key) ?? this.customHeight.get(`${id}_overflow:${row}`);
     if (!temp) {
       return {
         len: CELL_HEIGHT,
@@ -84,7 +77,8 @@ export class RowManager implements IRow {
   /* jscpd:ignore-start */
   setRowHeight(row: number, height: number, sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
-    const key = getCustomWidthOrHeightKey(id, row);
+    const key = this.model.getRoot().sizeKey(id, 'rows', row);
+    if (key === undefined) throw new RangeError('Row is outside the worksheet');
 
     const oldData = this.getRow(row, sheetId);
     if (oldData.len === height) {

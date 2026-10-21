@@ -24,17 +24,21 @@ export function containRange(
   sourceRange: IRange,
   targetRange: IRange,
 ): boolean {
+  if (sourceRange.sheetId && targetRange.sheetId && sourceRange.sheetId !== targetRange.sheetId) {
+    return false;
+  }
   if (sourceRange.colCount === 0 && targetRange.colCount !== 0) {
     return false;
   }
   if (sourceRange.rowCount === 0 && targetRange.rowCount !== 0) {
     return false;
   }
-  if (targetRange.colCount === 0 && targetRange.row === sourceRange.row) {
-    return true;
+  if (targetRange.colCount === 0) {
+    return targetRange.rowCount === 0 ||
+      (sourceRange.row >= targetRange.row && sourceRange.row < targetRange.row + targetRange.rowCount);
   }
-  if (targetRange.rowCount === 0 && targetRange.col === sourceRange.col) {
-    return true;
+  if (targetRange.rowCount === 0) {
+    return sourceRange.col >= targetRange.col && sourceRange.col < targetRange.col + targetRange.colCount;
   }
   const { row, col } = sourceRange;
   const check =
@@ -111,17 +115,17 @@ export function iterateRange(
     return;
   }
   if (isRow(range)) {
-    for (let i = 0; i < sheetColCount; i++) {
-      if (fn(row, i)) {
-        return;
+    for (let r = row; r < row + rowCount; r++) {
+      for (let c = 0; c < sheetColCount; c++) {
+        if (fn(r, c)) return;
       }
     }
     return;
   }
   if (isCol(range)) {
-    for (let i = 0; i < sheetRowCount; i++) {
-      if (fn(i, col)) {
-        return;
+    for (let r = 0; r < sheetRowCount; r++) {
+      for (let c = col; c < col + colCount; c++) {
+        if (fn(r, c)) return;
       }
     }
     return;

@@ -94,10 +94,12 @@ jobs:
           echo "🏷️ Version: $package_version"
           
           # Set outputs
-          echo "package_name=$package_name" >> $GITHUB_OUTPUT
-          echo "package_version=$package_version" >> $GITHUB_OUTPUT
-          echo "changelog_temp_file=$changelog_temp_file" >> $GITHUB_OUTPUT
-          echo "branchName=pre-release/$package_name/$package_version" >> $GITHUB_OUTPUT
+          {
+            echo "package_name=$package_name"
+            echo "package_version=$package_version"
+            echo "changelog_temp_file=$changelog_temp_file"
+            echo "branchName=pre-release/$package_name/$package_version"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Check branch and create commit
         run: |
@@ -198,22 +200,14 @@ jobs:
           echo "✅ Release created successfully: $TAG_NAME"
           
       - name: Trigger publish workflow
-        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🚀 Triggering publish workflow..."
           
-          # Check if release was created successfully
-          if [ "${{ job.status }}" != "success" ]; then
-            echo "❌ Release job failed, skipping publish trigger"
-            exit 0
-          fi
-          
           # Trigger publish workflow using workflow_dispatch event
           gh workflow run publish.yml \
             --repo "$GITHUB_REPOSITORY" \
-            --ref "main" \
-            || echo "⚠️ Failed to trigger publish workflow"
+            --ref "main"
           
           echo "✅ Publish workflow triggered"

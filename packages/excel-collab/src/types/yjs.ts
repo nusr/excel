@@ -48,8 +48,9 @@ export interface TypedArray<T> extends Array<any> {
   get(index: number): T | undefined;
 }
 
-export type YWorksheet = TypedMap<Record<string, TypedMap<ModelCellType>>>;
-export type YWorkbook = TypedMap<Record<string, TypedMap<WorksheetType>>>;
+export type YWorksheet = TypedMap<Record<string, boolean>>;
+export type SharedSheet = WorksheetType & { rows: Array<string>; cols: Array<string> };
+export type YWorkbook = TypedMap<Record<string, TypedMap<SharedSheet>>>;
 export type YRange = TypedMap<Record<string, IRange>>;
 export type YCustomSize = TypedMap<Record<string, CustomItem>>;
 export type YDrawings = TypedMap<Record<string, TypedMap<DrawingElement>>>;
@@ -79,6 +80,9 @@ type Convert<T> =
         }
     : NonNullable<T>;
 
-export type ModelJSON = Convert<YjsModelJson>;
+export type ModelJSON = Omit<Convert<YjsModelJson>, 'workbook' | 'worksheets'> & {
+  workbook: Record<string, WorksheetType>;
+  worksheets: Record<string, ModelCellType>;
+};
 
-export type ModelRoot = TypedMap<YjsModelJson>;
+export type ModelRoot = import('../protocol').SharedRoot;

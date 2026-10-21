@@ -5,7 +5,10 @@ import {
   IRange,
   EMergeCellType,
   EHorizontalAlign,
+  EVerticalAlign,
 } from '../../types';
+import type { StoreApi } from 'zustand';
+import { shallow } from 'zustand/shallow';
 import {
   DEFAULT_FONT_SIZE,
   HIDE_CELL,
@@ -36,6 +39,13 @@ import { numberFormat as numberFormatUtil, isDateFormat } from '../../formula';
 import { initFontFamilyList } from './isSupportFontFamily';
 import { queue } from '../../component/Toast';
 
+function updateStore<T>(store: StoreApi<T>, patch: Partial<T>) {
+  store.setState((state) => {
+    const next = { ...state, ...patch };
+    return shallow(state, next) ? state : next;
+  });
+}
+
 function getChartData(
   range: IRange,
   controller: IController,
@@ -50,7 +60,7 @@ function getChartData(
     r < endRow;
     r++, index++
   ) {
-    const rowHeight = controller.getRowHeight(r);
+    const rowHeight = controller.getRowHeight(r, sheetId);
     if (rowHeight === HIDE_CELL) {
       continue;
     }
@@ -63,10 +73,7 @@ function getChartData(
         colCount: 1,
         sheetId,
       });
-      if (!t) {
-        continue;
-      }
-      list.push(parseNumber(t.value)[1]);
+      list.push(parseNumber(t?.value)[1]);
     }
     if (list.length > 0) {
       result.datasets.push({ label: `Series${index}`, data: list });
@@ -80,8 +87,27 @@ function getChartData(
   return result;
 }
 
-function updateActiveCell(controller: IController, canvas: HTMLCanvasElement) {
+function getActiveCellPosition(
+  controller: IController,
+  canvas: HTMLCanvasElement,
+) {
   const pos = computeCanvasSize(canvas);
+  const { range } = controller.getActiveRange();
+  const cellSize = controller.getCellSize(range);
+  const cellPosition = controller.computeCellPosition(range);
+  return {
+    top: cellPosition.top + (pos?.top ?? 0),
+    left: cellPosition.left + (pos?.left ?? 0),
+    width: cellSize.width,
+    height: cellSize.height,
+    row: range.row,
+    col: range.col,
+    rowCount: range.rowCount,
+    colCount: range.colCount,
+  };
+}
+
+function updateActiveCell(controller: IController, canvas: HTMLCanvasElement) {
   const { range: activeCell, isMerged } = controller.getActiveRange();
   const sheetId = activeCell.sheetId || controller.getCurrentSheetId();
   const cell = controller.getCell(activeCell);
@@ -92,9 +118,6 @@ function updateActiveCell(controller: IController, canvas: HTMLCanvasElement) {
     colCount: 1,
     sheetId,
   });
-  const cellSize = controller.getCellSize(activeCell);
-  const cellPosition = controller.computeCellPosition(activeCell);
-  cellPosition.top += pos?.top ?? 0;
   let fontFamily = cell?.fontFamily ?? '';
   if (!fontFamily) {
     let defaultFontFamily = '';
@@ -117,16 +140,14 @@ function updateActiveCell(controller: IController, canvas: HTMLCanvasElement) {
     isWrapText = false,
     underline = EUnderLine.NONE,
     horizontalAlign,
-    verticalAlign,
+    verticalAlign = EVerticalAlign.MIDDLE,
   } = cell || {};
 
   const numberFormat = cell?.numberFormat || DEFAULT_FORMAT_CODE;
   const isRight =
     numberFormat === DEFAULT_FORMAT_CODE && typeof cell?.value === 'number';
-  let horAlign = horizontalAlign;
-  if (horizontalAlign === undefined && isRight) {
-    horAlign = EHorizontalAlign.RIGHT;
-  }
+  const horAlign =
+    horizontalAlign ?? (isRight ? EHorizontalAlign.RIGHT : EHorizontalAlign.LEFT);
   let displayValue = numberFormatUtil(cell?.value, numberFormat);
   let realValue = '';
   if (isDateFormat(numberFormat) || numberFormat === getFormatCode(10)) {
@@ -147,21 +168,14 @@ function updateActiveCell(controller: IController, canvas: HTMLCanvasElement) {
     }
   }
 
-  useActiveCell.setState({
-    top: cellPosition.top,
-    left: cellPosition.left,
-    width: cellSize.width,
-    height: cellSize.height,
-    row: activeCell.row,
-    col: activeCell.col,
-    rowCount: activeCell.rowCount,
-    colCount: activeCell.colCount,
+  updateStore(useActiveCell, {
+    ...getActiveCellPosition(controller, canvas),
     value: cell?.formula || realValue,
     defineName,
     displayValue: cell?.formula || displayValue,
   });
 
-  useStyleStore.setState({
+  updateStore(useStyleStore, {
     isBold,
     isItalic,
     isStrike,
@@ -184,14 +198,29 @@ const handleStateChange = (
   controller: IController,
   canvas: HTMLCanvasElement,
 ) => {
-  if (
+  const activeCellChanged =
     changeSet.has('rangeMap') ||
     changeSet.has('cellStyle') ||
     changeSet.has('worksheets') ||
     changeSet.has('currentSheetId') ||
-    changeSet.has('mergeCells')
-  ) {
+    changeSet.has('mergeCells');
+  const viewportChanged =
+    changeSet.has('scroll') ||
+    changeSet.has('currentSheetId') ||
+    changeSet.has('customHeight') ||
+    changeSet.has('customWidth');
+
+  if (activeCellChanged) {
     updateActiveCell(controller, canvas);
+  } else {
+    if (viewportChanged) {
+      updateStore(useActiveCell, getActiveCellPosition(controller, canvas));
+    }
+    if (changeSet.has('definedNames')) {
+      updateStore(useActiveCell, {
+        defineName: controller.getDefineName(controller.getActiveRange().range),
+      });
+    }
   }
 
   const core: Partial<CoreStore> = {
@@ -223,18 +252,11 @@ const handleStateChange = (
   if (
     changeSet.has('drawings') ||
     changeSet.has('worksheets') ||
-    changeSet.has('customHeight') ||
-    changeSet.has('customWidth') ||
-    changeSet.has('currentSheetId') ||
-    changeSet.has('scroll')
+    viewportChanged
   ) {
-    const scroll = controller.getScroll();
     const canvasSize = controller.getCanvasSize();
-    const minX = scroll.left;
-    const minY = scroll.top;
-    const maxX = canvasSize.width + minX;
-    const maxY = canvasSize.height + minY;
-    const list = controller.getDrawingList(controller.getCurrentSheetId());
+    const sheetId = controller.getCurrentSheetId();
+    const list = controller.getDrawingList(sheetId);
     const result: FloatElementItem[] = [];
     for (const v of list) {
       const p = controller.computeCellPosition({
@@ -242,16 +264,15 @@ const handleStateChange = (
         col: v.fromCol,
         colCount: 1,
         rowCount: 1,
-        sheetId: '',
+        sheetId,
       });
       const top = p.top + v.marginY;
       const left = p.left + v.marginX;
-      // the start point in the box or the end point in the box
       const check =
-        (top > minY && top < maxY) ||
-        (left > minX && left < maxX) ||
-        (top + v.height > minY && top + v.height < maxY) ||
-        (left + v.width > minX && left + v.width < maxX);
+        top < canvasSize.height &&
+        top + v.height > 0 &&
+        left < canvasSize.width &&
+        left + v.width > 0;
       if (check) {
         const t: FloatElementItem = {
           ...v,
@@ -270,12 +291,14 @@ const handleStateChange = (
     }
     core.drawings = result;
   }
-  useCoreStore.setState(core);
+  updateStore(useCoreStore, core);
 
-  if (changeSet.has('scroll')) {
+  if (viewportChanged) {
     const scroll = controller.getScroll();
     const canvasSize = controller.getCanvasSize();
-    useScrollStore.setState({
+    updateStore(useScrollStore, {
+      top: scroll.top,
+      left: scroll.left,
       scrollLeft: scroll.scrollLeft,
       scrollTop: scroll.scrollTop,
       row: scroll.row,
@@ -283,16 +306,6 @@ const handleStateChange = (
       canvasHeight: canvasSize.height,
       canvasWidth: canvasSize.width,
     });
-  }
-
-  if (
-    changeSet.has('currentSheetId') &&
-    useCoreStore.getState().sheetList.length > 5
-  ) {
-    // async update
-    setTimeout(() => {
-      scrollSheetToView(controller.getCurrentSheetId());
-    }, 0);
   }
 };
 
@@ -303,8 +316,8 @@ function computeCanvasSize(canvas: HTMLCanvasElement) {
   }
   const scrollbarSize = 20;
   const size = dom.getBoundingClientRect();
-  const width = dom.clientWidth - scrollbarSize;
-  const height = dom.clientHeight - scrollbarSize;
+  const width = Math.max(0, dom.clientWidth - scrollbarSize);
+  const height = Math.max(0, dom.clientHeight - scrollbarSize);
   const result = {
     top: size.top,
     left: size.left,
@@ -314,6 +327,8 @@ function computeCanvasSize(canvas: HTMLCanvasElement) {
   return result;
 }
 
+const canvasRenderers = new WeakMap<HTMLCanvasElement, { controller: IController; renderer: MainCanvas }>();
+
 export function initCanvas(
   controller: IController,
   canvas: HTMLCanvasElement,
@@ -321,22 +336,39 @@ export function initCanvas(
   useCoreStore.getState().setFontFamilies(initFontFamilyList());
   useUserInfo.getState().setClientId(controller.getHooks().doc.clientID);
 
-  const mainCanvas =
-    MainCanvas.instance ||
-    (MainCanvas.instance = new MainCanvas(controller, canvas));
+  const cached = canvasRenderers.get(canvas);
+  const mainCanvas = cached?.controller === controller
+    ? cached.renderer
+    : new MainCanvas(controller, canvas);
+  canvasRenderers.set(canvas, { controller, renderer: mainCanvas });
+  MainCanvas.instance = mainCanvas;
+  let sheetScrollTimeout: ReturnType<typeof setTimeout> | undefined;
+  const syncState = (changeSet: Set<ChangeEventType>) => {
+    handleStateChange(changeSet, controller, canvas);
+    if (changeSet.has('currentSheetId')) {
+      clearTimeout(sheetScrollTimeout);
+      if (useCoreStore.getState().sheetList.length > 5) {
+        const sheetId = controller.getCurrentSheetId();
+        sheetScrollTimeout = setTimeout(() => {
+          scrollSheetToView(sheetId);
+        }, 0);
+      }
+    }
+  };
   const renderCanvas = (changeSet: Set<ChangeEventType>) => {
     const size = computeCanvasSize(canvas);
     if (size) {
       controller.setCanvasSize(size);
     }
     mainCanvas.resize();
+    syncState(changeSet);
     return mainCanvas.render({ changeSet });
   };
   const resize = () => {
     renderCanvas(new Set<ChangeEventType>(['customWidth']));
   };
   const offRenderChange = controller.on('renderChange', ({ changeSet }) => {
-    handleStateChange(changeSet, controller, canvas);
+    syncState(changeSet);
     mainCanvas.render({ changeSet });
   });
 
@@ -350,11 +382,10 @@ export function initCanvas(
     'undo',
     'redo',
   ]);
-  handleStateChange(changeSet, controller, canvas);
   renderCanvas(changeSet);
+  let initialRender: ReturnType<typeof setTimeout> | undefined;
   if (!isTestEnv()) {
-    setTimeout(() => {
-      handleStateChange(changeSet, controller, canvas);
+    initialRender = setTimeout(() => {
       renderCanvas(changeSet);
     }, 50);
   }
@@ -372,6 +403,9 @@ export function initCanvas(
     },
   );
   return () => {
+    clearTimeout(initialRender);
+    clearTimeout(sheetScrollTimeout);
+    if (MainCanvas.instance === mainCanvas) MainCanvas.instance = undefined;
     offGlobalEvent();
     offRenderChange();
     offToastMessage();

@@ -28,8 +28,8 @@ function getData(
     return;
   }
   const { range } = filter;
-  let set = new Set<ResultType>();
-  if (filter.value) {
+  let set: Set<ResultType> | undefined;
+  if (filter.col === col && filter.value) {
     if (filter.value.type === 'normal') {
       set = new Set(filter.value.value);
     }
@@ -66,7 +66,7 @@ function getData(
   }
   return {
     dataList: result.map((v) => {
-      const checked = set.size === 0 ? true : set.has(v.value);
+      const checked = set ? set.has(v.value) : true;
       return { ...v, count: map.get(v.value) || 0, checked };
     }),
   };

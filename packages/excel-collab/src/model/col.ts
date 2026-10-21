@@ -3,14 +3,11 @@ import type {
   ICol,
   IModel,
   CustomItem,
-  YjsModelJson,
 } from '../types';
 import {
-  getCustomWidthOrHeightKey,
   CELL_WIDTH,
   widthOrHeightKeyToData,
 } from '../util';
-import { Map } from 'yjs';
 
 export class ColManager implements ICol {
   private model: IModel;
@@ -21,31 +18,25 @@ export class ColManager implements ICol {
     return this.model.getRoot().get('customWidth');
   }
   private getModel() {
-    const t = this.customWidth;
-    if (!t) {
-      this.model
-        .getRoot()
-        .set('customWidth', new Map() as YjsModelJson['customWidth']);
-    }
     return this.customWidth!;
   }
   fromJSON(json: ModelJSON): void {
     const data = json.customWidth || {};
-    const customWidth = new Map() as YjsModelJson['customWidth'];
+    const customWidth = this.customWidth;
+    customWidth.clear();
     for (const [key, value] of Object.entries(data)) {
       const { sheetId, rowOrCol: col } = widthOrHeightKeyToData(key);
       if (!sheetId || col < 0) {
         continue;
       }
       const sheetInfo = this.model.getSheetInfo(sheetId);
-      if (!sheetInfo || col >= sheetInfo.colCount) {
+      if (!sheetInfo || !Number.isInteger(col)) {
         continue;
       }
       if (typeof value.isHide === 'boolean' && typeof value.len === 'number') {
-        customWidth.set(key, value);
+        customWidth.set(this.model.getRoot().sizeKey(sheetId, 'cols', col)!, value);
       }
     }
-    this.model.getRoot().set('customWidth', customWidth);
   }
 
   hideCol(colIndex: number, count: number): void {
@@ -55,7 +46,8 @@ export class ColManager implements ICol {
     const id = this.model.getCurrentSheetId();
     for (let i = 0; i < count; i++) {
       const c = colIndex + i;
-      const key = getCustomWidthOrHeightKey(id, c);
+      const key = this.model.getRoot().sizeKey(id, 'cols', c);
+      if (key === undefined) throw new RangeError('Column is outside the worksheet');
       const oldData = this.getCol(c, id);
       if (oldData.isHide === isHide) {
         continue;
@@ -69,8 +61,9 @@ export class ColManager implements ICol {
   }
   getCol(col: number, sheetId?: string): CustomItem {
     const id = sheetId || this.model.getCurrentSheetId();
-    const key = getCustomWidthOrHeightKey(id, col);
-    const temp = this.customWidth?.get(key);
+    const key = this.model.getRoot().sizeKey(id, 'cols', col);
+    const temp = key === undefined ? undefined
+      : this.customWidth.get(key) ?? this.customWidth.get(`${id}_overflow:${col}`);
     if (!temp) {
       return {
         len: CELL_WIDTH,
@@ -81,7 +74,8 @@ export class ColManager implements ICol {
   }
   setColWidth(col: number, width: number, sheetId?: string): void {
     const id = sheetId || this.model.getCurrentSheetId();
-    const key = getCustomWidthOrHeightKey(id, col);
+    const key = this.model.getRoot().sizeKey(id, 'cols', col);
+    if (key === undefined) throw new RangeError('Column is outside the worksheet');
 
     const oldData = this.getCol(col, sheetId);
     if (oldData.len === width) {

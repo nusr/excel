@@ -19,8 +19,35 @@ import {
   SheetRange,
   getFunction,
   getCustomError,
-  anyError
+  anyError,
 } from '../util';
+
+const dataSources = new WeakMap<CellDataMap, number>();
+let nextDataSource = 0;
+const MAX_FORMULA_DEPENDENCY_DEPTH = 1024;
+
+export function renameFormulaSheetReferences(
+  formula: string,
+  oldName: string,
+  newName: string,
+): string {
+  const scanner = new Scanner(formula);
+  try {
+    scanner.scan();
+  } catch (error) {
+    if (anyError(error)) return formula;
+    throw error;
+  }
+  const replacement = /^[A-Za-z_][A-Za-z0-9_]*$/.test(newName)
+    ? newName : `'${newName.replace(/'/g, "''")}'`;
+  let result = formula;
+  for (const reference of [...scanner.sheetReferences].reverse()) {
+    if (reference.name.toLowerCase() === oldName.toLowerCase()) {
+      result = result.slice(0, reference.start) + replacement + result.slice(reference.end);
+    }
+  }
+  return result;
+}
 
 export function parseFormula(
   formula: string,
@@ -31,62 +58,51 @@ export function parseFormula(
   },
   cellData: CellDataMap = new CellDataMapImpl(),
   cache: Map<string, InterpreterResult> = new Map<string, InterpreterResult>(),
+  errorCache: Map<string, Error> = new Map<string, Error>(),
 ): InterpreterResult {
-  if (cache.has(formula)) {
-    const t = cache.get(formula)!;
-    // fix cycle import
-    if (t.result.length === 0) {
-      return { result: [0] };
+  if (!dataSources.has(cellData)) dataSources.set(cellData, ++nextDataSource);
+  const active = new Set<string>();
+  const evaluate = (source: string, coord: typeof currentCoord): InterpreterResult => {
+    const sheetId = coord.sheetId || cellData.getSheetInfo()?.sheetId || '';
+    const key = JSON.stringify([dataSources.get(cellData), sheetId, coord.row, coord.col, source]);
+    if (active.has(key)) throw getCustomError('#REF!');
+    const cachedError = errorCache.get(key);
+    if (cachedError) throw cachedError;
+    const cached = cache.get(key);
+    if (cached) return cached;
+    if (active.size >= MAX_FORMULA_DEPENDENCY_DEPTH) {
+      throw getCustomError('#NUM!');
     }
-    return t;
-  }
+    active.add(key);
+    try {
+      const expressions = new Parser(new Scanner(source).scan()).parse();
+      const result: InterpreterResult = {
+        result: new Interpreter(expressions, { ...coord, sheetId }, cellData).interpret(),
+        expressionStr: expressions.map((item) => item.toString()).join(''),
+      };
+      cache.set(key, result);
+      return result;
+    } catch (error) {
+      const code = anyError(error);
+      if (code) errorCache.set(key, getCustomError(code));
+      throw error;
+    } finally {
+      active.delete(key);
+    }
+  };
+  const handleCell = cellData.handleCell;
+  cellData.handleCell = (value, coord): ResultType[] => {
+    if (!value) return [];
+    return value.formula ? evaluate(value.formula, coord).result : [value.value];
+  };
   try {
-    cellData.handleCell = (
-      value: ModelCellType | undefined,
-      coord: Pick<IRange, 'sheetId' | 'row' | 'col'>,
-    ): ResultType[] => {
-      if (value) {
-        if (value.formula) {
-          const t = parseFormula(value.formula, coord, cellData, cache);
-          return t.result;
-        } else {
-          return [value.value];
-        }
-      }
-      return [];
-    };
-    const result: InterpreterResult = {
-      result: [],
-      expressionStr: '',
-    };
-    cache.set(formula, result);
-    const list = new Scanner(formula).scan();
-    const expressions = new Parser(list).parse();
-    const resultList = new Interpreter(
-      expressions,
-      currentCoord,
-      cellData,
-    ).interpret();
-
-    const strList: string[] = [];
-    for (const item of expressions) {
-      strList.push(item.toString());
-    }
-    result.expressionStr = strList.join('');
-    result.result = resultList;
-
-    return result;
+    return evaluate(formula, currentCoord);
   } catch (error) {
     const value = anyError(error);
-
-    if (value) {
-      const result: InterpreterResult = {
-        result: [value],
-      };
-      cache.set(formula, result);
-      return result;
-    }
+    if (value) return { result: [value] };
     throw error;
+  } finally {
+    cellData.handleCell = handleCell;
   }
 }
 
@@ -94,7 +110,7 @@ const defaultSheetId = '_test_';
 export class CellDataMapImpl implements CellDataMap {
   private readonly map = new Map<string, ModelCellType>();
   private readonly definedNameMap = new Map<string, SheetRange>();
-  private readonly currentSheetId = defaultSheetId;
+  private currentSheetId = defaultSheetId;
   private sheetList: WorksheetType[] = [
     {
       sheetId: defaultSheetId,
@@ -106,12 +122,15 @@ export class CellDataMapImpl implements CellDataMap {
     },
   ];
   private getKey(row: number, col: number, sheetId: string) {
-    const key = `${row}_${col}_${sheetId || defaultSheetId}`;
+    const key = `${row}_${col}_${sheetId || this.currentSheetId}`;
     return key;
   }
   getFunction = getFunction;
   setSheetList(list: WorksheetType[]) {
     this.sheetList = list;
+    if (!list.some((sheet) => sheet.sheetId === this.currentSheetId)) {
+      this.currentSheetId = list[0]?.sheetId ?? defaultSheetId;
+    }
   }
   set(range: IRange, value: ResultType[][]): void {
     const { row, col, sheetId } = range;
@@ -135,7 +154,7 @@ export class CellDataMapImpl implements CellDataMap {
   }
   getSheetInfo(sheetId?: string, sheetName?: string) {
     if (sheetName) {
-      return this.sheetList.find((v) => v.name === sheetName);
+      return this.sheetList.find((v) => v.name.toLowerCase() === sheetName.toLowerCase());
     }
     const realSheetId = sheetId || this.currentSheetId;
     return this.sheetList.find((v) => v.sheetId === realSheetId);
@@ -148,10 +167,11 @@ export class CellDataMapImpl implements CellDataMap {
   };
   setDefinedName(name: string, value: IRange) {
     const r = SheetRange.makeRange(value);
-    this.definedNameMap.set(name, r);
+    this.definedNameMap.set(name.toLowerCase(), r);
   }
   getDefinedName(name: string) {
-    return this.definedNameMap.get(name);
+    const range = this.definedNameMap.get(name.toLowerCase());
+    return range ? SheetRange.makeRange(range) : undefined;
   }
 }
 
@@ -161,6 +181,8 @@ export function computeFormulas(
 ) {
   const { currentSheetId, worksheets, workbook, definedNames } = eventData;
   const formulaCache = new Map<string, InterpreterResult>();
+  const formulaErrorCache = new Map<string, Error>();
+  const names = new Map(Object.entries(definedNames).map(([name, range]) => [name.toLowerCase(), range]));
   const result: ResponseFormulas = {
     list: [],
   };
@@ -179,7 +201,7 @@ export function computeFormulas(
     },
     getSheetInfo: (sheetId?: string, sheetName?: string) => {
       if (sheetName) {
-        return workbook.find((v) => v.name === sheetName);
+        return workbook.find((v) => v.name.toLowerCase() === sheetName.toLowerCase());
       }
       const realSheetId = sheetId || currentSheetId;
       return workbook.find((v) => v.sheetId === realSheetId);
@@ -188,7 +210,7 @@ export function computeFormulas(
       throw getCustomError('#REF!');
     },
     getDefinedName: (name: string) => {
-      const r = definedNames[name];
+      const r = names.get(name.toLowerCase());
       if (!r) {
         return r;
       }
@@ -197,10 +219,10 @@ export function computeFormulas(
   };
   for (const [k, data] of Object.entries(worksheets)) {
     const range = convertWorksheetKey(k);
-    if (!range || range.sheetId !== currentSheetId || !data?.formula) {
+    if (!range || !data?.formula) {
       continue;
     }
-    const temp = parseFormula(data?.formula, range, cellDataMap, formulaCache);
+    const temp = parseFormula(data.formula, range, cellDataMap, formulaCache, formulaErrorCache);
     if (!temp) {
       continue;
     }
@@ -209,7 +231,7 @@ export function computeFormulas(
       result.list.push({
         key: k,
         newValue: r,
-        sheetId: currentSheetId,
+        sheetId: range.sheetId,
       });
     }
   }

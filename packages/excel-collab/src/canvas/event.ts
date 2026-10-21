@@ -9,6 +9,7 @@ import {
 } from '../util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { useCoreStore } from '../containers/store';
+import { flushSync } from 'react-dom';
 
 type EventType = {
   target?: {
@@ -56,7 +57,12 @@ export function registerGlobalEvent(
     if (event.metaKey || event.ctrlKey) {
       return;
     }
-    useCoreStore.getState().setEditorStatus(EditorStatus.EDIT_CELL);
+    if (event.key.length === 1 && !event.altKey && !event.isComposing) {
+      event.preventDefault();
+      flushSync(() => {
+        useCoreStore.getState().setEditorStatus(EditorStatus.EDIT_CELL, event.key);
+      });
+    }
   }
 
   const handleWheel = throttle((event: WheelEvent) => {

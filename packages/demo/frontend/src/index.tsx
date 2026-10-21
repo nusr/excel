@@ -4,6 +4,7 @@ import 'excel-collab/style.css';
 import './sentry';
 import { WebsocketProvider } from 'y-websocket';
 import { Excel, Doc, type ExcelProps, Button } from 'excel-collab';
+import { PROTOCOL_VERSION } from 'excel-collab/protocol';
 import { getDocId, getProvider } from './util';
 import { VITE_WEBSOCKET_URL } from './constant';
 import { List } from './List';
@@ -52,10 +53,23 @@ async function init() {
   let webSocket: WebsocketProvider | null = null;
   if (VITE_WEBSOCKET_URL) {
     doc = new Doc({ guid: docId });
-    webSocket = new WebsocketProvider(VITE_WEBSOCKET_URL, docId, doc);
+    webSocket = new WebsocketProvider(VITE_WEBSOCKET_URL, docId, doc, {
+      params: { protocol: String(PROTOCOL_VERSION) },
+    });
   }
 
   webSocket?.connect();
+  const whenSynced = webSocket ? new Promise<void>((resolve) => {
+    const connection = webSocket;
+    if (connection.synced) { resolve(); return; }
+    const handleSync = (synced: boolean) => {
+      if (synced) {
+        connection.off('sync', handleSync);
+        resolve();
+      }
+    };
+    connection.on('sync', handleSync);
+  }) : undefined;
 
   (window as any).provider = provider;
   (window as any).webSocket = webSocket;
@@ -79,10 +93,16 @@ async function init() {
         provider={provider}
         awareness={webSocket?.awareness}
         doc={doc}
+        whenSynced={whenSynced}
         docConfig={{ guid: docId }}
         style={{ height: '100vh' }}
       />
     </StrictMode>,
   );
+  window.addEventListener('beforeunload', () => {
+    root.unmount();
+    webSocket?.destroy();
+    doc?.destroy();
+  }, { once: true });
 }
 init();

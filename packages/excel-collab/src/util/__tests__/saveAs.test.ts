@@ -1,14 +1,15 @@
+import { vi, type MockInstance } from 'vitest';
 import { saveAs } from '../saveAs';
 
 describe('saveAs', () => {
-  let createElementSpy: jest.SpyInstance;
+  let createElementSpy: MockInstance<typeof document.createElement>;
 
   beforeEach(() => {
-    createElementSpy = jest.spyOn(document, 'createElement');
+    createElementSpy = vi.spyOn(document, 'createElement');
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should create a link element with correct properties', () => {
@@ -46,7 +47,7 @@ describe('saveAs', () => {
   it('should dispatch a click event on the link element', () => {
     const link = document.createElement('a');
     createElementSpy.mockReturnValue(link);
-    const dispatchEventSpy = jest.spyOn(link, 'dispatchEvent');
+    const dispatchEventSpy = vi.spyOn(link, 'dispatchEvent');
 
     saveAs('blob', 'file.txt');
 

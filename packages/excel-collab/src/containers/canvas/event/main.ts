@@ -11,7 +11,7 @@ import { checkFocus, setActiveCellValue } from '../../../canvas';
 const DOUBLE_CLICK_TIME = 300;
 
 export class MainHandler implements EventHandler {
-  private lastTimeStamp = 0;
+  private lastTimeStamp: number | undefined;
   pointerMove(data: EventData) {
     const { controller, x, y, position } = data;
     const headerSize = controller.getHeaderSize();
@@ -105,9 +105,11 @@ export class MainHandler implements EventHandler {
     });
     const activeCell = controller.getActiveRange().range;
     if (isSameRange(activeCell, range)) {
-      const delay = timeStamp - this.lastTimeStamp;
-      if (delay < DOUBLE_CLICK_TIME) {
-        useCoreStore.getState().setEditorStatus(EditorStatus.EDIT_CELL);
+      if (event.button === 0 && this.lastTimeStamp !== undefined) {
+        const delay = timeStamp - this.lastTimeStamp;
+        if (delay >= 0 && delay < DOUBLE_CLICK_TIME) {
+          useCoreStore.getState().setEditorStatus(EditorStatus.EDIT_CELL);
+        }
       }
     } else {
       if (checkFocus()) {
@@ -121,7 +123,7 @@ export class MainHandler implements EventHandler {
         sheetId: '',
       });
     }
-    this.lastTimeStamp = timeStamp;
+    this.lastTimeStamp = event.button === 0 ? timeStamp : undefined;
     return false;
   }
 }

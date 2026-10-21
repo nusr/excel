@@ -6,6 +6,8 @@ export type StateContextValue = {
   controller: IController;
   provider?: Partial<ICollaborationProvider>;
   awareness?: Awareness;
+  whenSynced?: Promise<void>;
+  collaborative?: boolean;
 };
 
 export const StateContext = createContext<StateContextValue | undefined>(

@@ -8,6 +8,25 @@ import { SheetRange } from '../range';
 
 describe('reference.test.ts', () => {
   describe('convertToReference', () => {
+    test.each(['relative', 'absolute', 'mixed'] as const)(
+      'serializes deleted coordinate sentinels as errors (%s)', (referenceType) => {
+        for (const [row, col] of [[-1, -1], [-1, 0], [0, -1]]) {
+          expect(convertToReference(
+            new SheetRange(row, col, 1, 1, 'deleted-sheet'),
+            referenceType,
+            () => { throw new Error('deleted sheet must not be resolved'); },
+          )).toBe('#REF!');
+        }
+      },
+    );
+    test('preserves valid whole-axis zero-count sentinels', () => {
+      const columns = new SheetRange(0, 0, 0, 3, 'test');
+      const rows = new SheetRange(1, 0, 3, 0, 'test');
+      expect(convertToReference(columns)).toBe('test!A:C');
+      expect(convertToReference(columns, 'absolute')).toBe('test!$A:$C');
+      expect(convertToReference(rows)).toBe('test!2:4');
+      expect(convertToReference(rows, 'absolute')).toBe('test!$2:$4');
+    });
     test('single relative', () => {
       expect(
         convertToReference(
@@ -59,6 +78,14 @@ describe('reference.test.ts', () => {
     });
   });
   describe('parseReference', () => {
+    test('does not redirect an unresolved explicit sheet to the current sheet', () => {
+      const resolve = (name: string) => name.toLowerCase() === 'sheet2' ? 'two' : '';
+      expect(parseReference('Sheet2!A1', resolve)).toEqual(new SheetRange(0, 0, 1, 1, 'two'));
+      expect(parseReference('Missing!A1', resolve)).toBeUndefined();
+      expect(parseReference('Missing!A1:B2', resolve)).toBeUndefined();
+      expect(parseReference('Sheet2!A1:Missing!B2', resolve)).toBeUndefined();
+      expect(parseReference('A1', resolve)).toEqual(new SheetRange(0, 0, 1, 1, ''));
+    });
     test('invalid', () => {
       expect(parseReference(':')).toBeUndefined();
       expect(parseReference('A-1')).toBeUndefined();
@@ -141,6 +168,14 @@ describe('reference.test.ts', () => {
     });
   });
   describe('mergeRange', () => {
+    test('includes the full extent of range-valued endpoints', () => {
+      const range = new SheetRange(2, 2, 3, 4, 'one');
+      const cell = new SheetRange(0, 0, 1, 1, 'one');
+      expect(mergeRange(range, cell)).toEqual(new SheetRange(0, 0, 5, 6, 'one'));
+      expect(mergeRange(cell, range)).toEqual(new SheetRange(0, 0, 5, 6, 'one'));
+      expect(mergeRange(new SheetRange(0, 0, 0, 2, ''), new SheetRange(0, 1, 0, 3, '')))
+        .toEqual(new SheetRange(0, 0, 0, 4, ''));
+    });
     test('not same sheetId', () => {
       expect(
         mergeRange(
@@ -216,6 +251,11 @@ describe('reference.test.ts', () => {
     });
   });
   describe('R1C1', () => {
+    test.each(['R1xC1', 'R[1x]C1', 'R[1C1', 'R1C1x', 'R1.5C1', 'R-1C1'])(
+      'rejects malformed references without partially parsing: %s', (reference) => {
+        expect(parseR1C1(reference, { row: 2, col: 2, sheetId: '' })).toBeUndefined();
+      },
+    );
     test('R1C1', () => {
       expect(parseR1C1('r1c1')).toEqual(new SheetRange(0, 0, 1, 1, ''));
       expect(parseR1C1('R1C1')).toEqual(new SheetRange(0, 0, 1, 1, ''));

@@ -12,11 +12,12 @@ export const Theme: React.FunctionComponent = memo(() => {
   useEffect(() => {
     setThemeData(getTheme());
     if (typeof window.matchMedia === 'function') {
-      window
-        .matchMedia('(prefers-color-scheme: dark)')
-        .addEventListener('change', (event) => {
-          setThemeData(event.matches ? 'dark' : 'light');
-        });
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (event: MediaQueryListEvent) => {
+        setThemeData(event.matches ? 'dark' : 'light');
+      };
+      media.addEventListener('change', handleChange);
+      return () => media.removeEventListener?.('change', handleChange);
     }
   }, []);
 

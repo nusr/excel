@@ -12,7 +12,6 @@ import {
   EMergeCellType,
   IHooks,
   AutoFilterItem,
-  ModelRoot,
   ModelScroll,
   SYNC_FLAG,
   ModelEventEmitterType,
@@ -22,7 +21,6 @@ import {
   XLSX_MAX_COL_COUNT,
   EventEmitter,
   containRange,
-  KEY_LIST,
 } from '../util';
 import { Workbook } from './workbook';
 import { RangeMap } from './rangeMap';
@@ -34,7 +32,8 @@ import { RowManager } from './row';
 import { ColManager } from './col';
 import { FilterManger } from './filter';
 import { ScrollManager } from './scroll';
-import { Doc, UndoManager } from 'yjs';
+import { Doc, UndoManager, type Map as YMap } from 'yjs';
+import { SharedRoot, type SharedType } from '../protocol';
 
 export class Model
   extends EventEmitter<ModelEventEmitterType>
@@ -52,18 +51,33 @@ export class Model
   private readonly scrollManager: ScrollManager;
   private readonly doc: Doc;
   private readonly undoManager: UndoManager;
+  private readonly root: SharedRoot;
+  private readonly observedTypes = new Set<SharedType>();
+  private readonly observeTypes = () => {
+    for (const type of this.root.types) this.observeType(type);
+  };
+  private readonly observeType = (type: SharedType) => {
+    if (this.observedTypes.has(type)) return;
+    this.observedTypes.add(type);
+    type.observeDeep(this.handleModelChange);
+    if (type !== this.root.get('worksheets')) this.undoManager.addToScope(type);
+  };
+  private readonly handleModelChange: Parameters<YMap<unknown>['observeDeep']>[0] = (event) => {
+    this.emit('modelChange', { event });
+  };
   constructor(hooks: Pick<IHooks, 'doc' | 'worker'>) {
     super();
     const { doc, worker } = hooks;
     this.doc = doc;
+    this.root = new SharedRoot(doc);
     const root = this.getRoot();
-    root.observeDeep((event) => {
-      this.emit('modelChange', { event });
-    });
-    this.undoManager = new UndoManager(root, {
+    this.undoManager = new UndoManager(root.types.filter((type) => type !== root.get('worksheets')), {
       trackedOrigins: new Set([SYNC_FLAG.MODEL, SYNC_FLAG.SKIP_UPDATE]),
       captureTimeout: 100,
     });
+    this.observeTypes();
+    root.onType(this.observeType);
+    doc.on('afterTransaction', this.observeTypes);
 
     this.workbookManager = new Workbook(this);
     this.rangeMapManager = new RangeMap(this);
@@ -83,7 +97,14 @@ export class Model
     this.undoManager.clear(true, true);
   }
   getRoot() {
-    return this.doc.getMap('excel') as ModelRoot;
+    return this.root;
+  }
+  destroy() {
+    this.doc.off('afterTransaction', this.observeTypes);
+    this.root.onType();
+    this.observedTypes.forEach((type) => type.unobserveDeep(this.handleModelChange));
+    this.undoManager.destroy();
+    this.worksheetManager.destroy();
   }
   computeFormulas() {
     return this.worksheetManager.computeFormulas();
@@ -124,13 +145,21 @@ export class Model
     return result;
   }
   deleteSheet(sheetId?: string): void {
+    const id = sheetId || this.getCurrentSheetId();
+    const info = this.getSheetInfo(id);
+    if (!info) return;
+    if (!info.isHide && this.getSheetList().filter((sheet) => !sheet.isHide).length < 2) {
+      this.workbookManager.deleteSheet(id);
+      return;
+    }
+    const currentSheetId = this.getCurrentSheetId();
     const newSheetId = this.getNextSheetId(sheetId);
     if (!newSheetId) {
       return;
     }
-    this.deleteAll(sheetId);
+    this.deleteAll(sheetId, true);
     this.workbookManager.deleteSheet(sheetId);
-    this.workbookManager.setCurrentSheetId(newSheetId);
+    this.workbookManager.setCurrentSheetId(id === currentSheetId ? newSheetId : currentSheetId);
   }
   updateSheetInfo(data: Partial<WorksheetType>, sheetId?: string): void {
     this.workbookManager.updateSheetInfo(data, sheetId);
@@ -162,7 +191,7 @@ export class Model
   getCurrentSheetId(): string {
     return this.workbookManager.getCurrentSheetId();
   }
-  fromJSON = (json: ModelJSON): void => {
+  fromJSON = (json: ModelJSON): void => this.doc.transact(() => {
     this.workbookManager.fromJSON(json);
     this.rangeMapManager.fromJSON(json);
     this.drawingsManager.fromJSON(json);
@@ -173,22 +202,10 @@ export class Model
     this.colManager.fromJSON(json);
     this.filterManager.fromJSON(json);
     this.scrollManager.fromJSON(json);
-    this.worksheetManager.computeFormulas();
-  };
+  }, SYNC_FLAG.SKIP_UNDO_REDO);
   toJSON = (): ModelJSON => {
-    const temp = this.getRoot().toJSON();
-    const result: any = {};
-    for (const key of KEY_LIST) {
-      const v = temp[key];
-      if (key === 'currentSheetId') {
-        result.currentSheetId = v || '';
-        continue;
-      }
-
-      result[key] = typeof v === 'undefined' ? {} : v;
-    }
     return {
-      ...result,
+      ...this.getRoot().toJSON(),
       rangeMap: this.rangeMapManager.toJSON(),
       scroll: this.scrollManager.toJSON(),
     };
@@ -232,11 +249,10 @@ export class Model
     if (sheetInfo.colCount >= XLSX_MAX_COL_COUNT) {
       return;
     }
-
-    const id = this.getCurrentSheetId();
-    const newCount = sheetInfo.colCount + count;
-    this.workbookManager.updateSheetInfo({ colCount: newCount }, id);
-    this.drawingsManager.addCol(colIndex, count, isRight);
+    if (!Number.isInteger(count) || !Number.isInteger(colIndex) || colIndex < 0 || colIndex >= sheetInfo.colCount) {
+      throw new RangeError('Invalid column insertion');
+    }
+    count = Math.min(count, XLSX_MAX_COL_COUNT - sheetInfo.colCount);
     this.worksheetManager.addCol(colIndex, count, isRight);
   }
   deleteCol(colIndex: number, count: number): void {
@@ -247,10 +263,10 @@ export class Model
     if (!sheetInfo) {
       return;
     }
-    const id = this.getCurrentSheetId();
-    const newCount = sheetInfo.colCount - count;
-    this.workbookManager.updateSheetInfo({ colCount: newCount }, id);
-    this.drawingsManager.deleteCol(colIndex, count);
+    if (!Number.isInteger(count) || !Number.isInteger(colIndex) || colIndex < 0 || colIndex >= sheetInfo.colCount) {
+      throw new RangeError('Invalid column deletion');
+    }
+    count = Math.min(count, sheetInfo.colCount - colIndex, sheetInfo.colCount - 1);
     this.worksheetManager.deleteCol(colIndex, count);
   }
 
@@ -275,10 +291,10 @@ export class Model
     if (sheetInfo.rowCount >= XLSX_MAX_ROW_COUNT) {
       return;
     }
-
-    const newCount = sheetInfo.rowCount + count;
-    this.workbookManager.updateSheetInfo({ rowCount: newCount });
-    this.drawingsManager.addRow(rowIndex, count, isAbove);
+    if (!Number.isInteger(count) || !Number.isInteger(rowIndex) || rowIndex < 0 || rowIndex >= sheetInfo.rowCount) {
+      throw new RangeError('Invalid row insertion');
+    }
+    count = Math.min(count, XLSX_MAX_ROW_COUNT - sheetInfo.rowCount);
     this.worksheetManager.addRow(rowIndex, count, isAbove);
   }
   deleteRow(rowIndex: number, count: number): void {
@@ -289,9 +305,10 @@ export class Model
     if (!sheetInfo) {
       return;
     }
-    const newCount = sheetInfo.rowCount - count;
-    this.workbookManager.updateSheetInfo({ rowCount: newCount });
-    this.drawingsManager.deleteRow(rowIndex, count);
+    if (!Number.isInteger(count) || !Number.isInteger(rowIndex) || rowIndex < 0 || rowIndex >= sheetInfo.rowCount) {
+      throw new RangeError('Invalid row deletion');
+    }
+    count = Math.min(count, sheetInfo.rowCount - rowIndex, sheetInfo.rowCount - 1);
     this.worksheetManager.deleteRow(rowIndex, count);
   }
 
@@ -326,13 +343,13 @@ export class Model
   pasteRange(fromRange: IRange, isCut: boolean): IRange {
     return this.worksheetManager.pasteRange(fromRange, isCut);
   }
-  deleteAll(sheetId?: string): void {
+  deleteAll(sheetId?: string, preserveDefinedNames = false): void {
     this.rowManager.deleteAll(sheetId);
     this.colManager.deleteAll(sheetId);
     this.worksheetManager.deleteAll(sheetId);
     this.mergeCellManager.deleteAll(sheetId);
     this.drawingsManager.deleteAll(sheetId);
-    this.definedNameManager.deleteAll(sheetId);
+    if (!preserveDefinedNames) this.definedNameManager.deleteAll(sheetId);
     this.filterManager.deleteAll(sheetId);
   }
   getDefineNameList(): DefinedNameItem[] {
@@ -366,12 +383,14 @@ export class Model
     return this.mergeCellManager.getMergeCellList(sheetId);
   }
   addMergeCell(range: IRange, type = EMergeCellType.MERGE_CENTER) {
+    if (!this.validateRange(range) || range.rowCount === 0 || range.colCount === 0) return;
     if (range.colCount === 1 && range.rowCount === 1) {
       return;
     }
     range.sheetId = range.sheetId || this.getCurrentSheetId();
-    this.mergeCellManager.addMergeCell(range);
-    this.worksheetManager.addMergeCell(range, type);
+    if (this.mergeCellManager.addMergeCell(range)) {
+      this.worksheetManager.addMergeCell(range, type);
+    }
   }
   deleteMergeCell(range: IRange): void {
     this.mergeCellManager.deleteMergeCell(range);

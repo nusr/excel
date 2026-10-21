@@ -2,20 +2,21 @@ type Params = any[];
 
 export function throttle(fn: (...params: Params) => void, wait: number) {
   let check = false;
-  let lastArgs: Params | undefined = undefined;
-  return function (...args: Params) {
+  let pending: { args: Params; receiver: unknown } | undefined;
+  return function invoke(this: unknown, ...args: Params) {
     if (check) {
-      lastArgs = args;
+      pending = { args, receiver: this };
     } else {
-      // @ts-ignore
-      fn.apply(this, args);
+      check = true;
       setTimeout(() => {
-        if (lastArgs) {
-          // @ts-ignore
-          fn.apply(this, lastArgs);
-        }
         check = false;
+        if (pending) {
+          const call = pending;
+          pending = undefined;
+          invoke.apply(call.receiver, call.args);
+        }
       }, wait);
+      fn.apply(this, args);
     }
   };
 }
@@ -50,15 +51,17 @@ export function deepEqual(x: any, y: any) {
     return true;
   }
   if (x && typeof x === 'object' && y && typeof y === 'object') {
+    if (Array.isArray(x) !== Array.isArray(y) ||
+      (Array.isArray(x) && x.length !== y.length)) {
+      return false;
+    }
     if (Object.keys(x).length !== Object.keys(y).length) {
       return false;
     }
     const keys1 = Object.keys(x);
-    const keys2 = Object.keys(y);
     for (let i = 0; i < keys1.length; i++) {
       const key1 = keys1[i];
-      const key2 = keys2[i];
-      if (key1 !== key2 || !deepEqual(x[key1], y[key2])) {
+      if (!Object.prototype.hasOwnProperty.call(y, key1) || !deepEqual(x[key1], y[key1])) {
         return false;
       }
     }

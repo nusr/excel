@@ -47,7 +47,7 @@ jobs:
         run: yarn lint
 
       - name: Unit test
-        run: yarn coverage --verbose --debug
+        run: yarn coverage
 
       - name: Upload coverage
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -61,15 +61,21 @@ jobs:
         env:
           CI: true
 
+      - name: Build
+        run: yarn build
+
+      - name: Production build smoke tests
+        run: yarn e2e:preview input.test.ts import-export.test.ts
+        env:
+          CI: true
+
       - name: Upload Playwright test report
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 5
-
-      - name: Build
-        run: yarn build
 
       - name: Deploy to GitHub Pages
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -99,17 +105,17 @@ jobs:
           echo "✗ COMMIT_ID ($commit_id) verification failed after $max_retries attempts - commit ID not found in HTML!"
           exit 1
 
-      # - name: production E2E tests
-      #   if: ${{ github.ref == 'refs/heads/main' }}
-      #   run: rm -rf playwright-report && yarn e2e
-      #   env:
-      #     CI: true
-      #     TEST_ENV: production
+      - name: production E2E tests
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: rm -rf playwright-report && yarn e2e
+        env:
+          CI: true
+          TEST_ENV: production
 
-      # - name: Upload Playwright test report
-      #   if: ${{ github.ref == 'refs/heads/main' }}
-      #   uses: actions/upload-artifact@v7
-      #   with:
-      #     name: playwright-prod-report
-      #     path: playwright-report/
-      #     retention-days: 5
+      - name: Upload Playwright test report
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-prod-report
+          path: playwright-report/
+          retention-days: 5

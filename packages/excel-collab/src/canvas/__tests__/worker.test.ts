@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import workerMethod from '../worker';
 import { npx } from '../../util';
 import { RequestInit, RequestFormulas } from '../../types';
@@ -5,7 +6,7 @@ import OffScreenWorker from '../offScreenWorker';
 import { initController } from '../../controller';
 import { getRenderData } from './util';
 
-jest.mock('../offScreenWorker');
+vi.mock('../offScreenWorker');
 
 describe('workerMethod', () => {
   const initData: RequestInit = {
@@ -37,7 +38,7 @@ describe('workerMethod', () => {
     const c = initController();
     c.addSheet();
     const data = await getRenderData(c, 'light');
-    const callback = jest.fn();
+    const callback = vi.fn();
     // @ts-ignore
     const mockInstance = OffScreenWorker.mock.instances[0];
     mockInstance.render.mockReturnValue(undefined);
@@ -52,7 +53,7 @@ describe('workerMethod', () => {
     const c = initController();
     c.addSheet();
     const data = await getRenderData(c, 'light');
-    const callback = jest.fn();
+    const callback = vi.fn();
     callback.mockReturnValue({ rowMap: { 1: 100 } });
     // @ts-ignore
     const mockInstance = OffScreenWorker.mock.instances[0];
@@ -79,7 +80,7 @@ describe('workerMethod', () => {
       currentSheetId: sheetId,
       workbook: c.getSheetList(),
     };
-    const callback = jest.fn();
+    const callback = vi.fn();
     workerMethod.computeFormulas(data, callback);
 
     expect(callback).toHaveBeenCalledWith({

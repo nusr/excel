@@ -2,6 +2,15 @@ import { deepEqual } from '..';
 
 describe('deepEqual.test.ts', () => {
   describe('deepEqual', () => {
+    it('compares object keys independently of insertion order', () => {
+      expect(deepEqual({ a: 1, b: { c: 2, d: 3 } }, { b: { d: 3, c: 2 }, a: 1 })).toBe(true);
+      expect(deepEqual({ a: undefined }, { b: undefined })).toBe(false);
+    });
+    it('distinguishes arrays from objects and compares sparse array lengths', () => {
+      expect(deepEqual([], {})).toBe(false);
+      expect(deepEqual([1], { 0: 1 })).toBe(false);
+      expect(deepEqual(Array(1), Array(2))).toBe(false);
+    });
     it('should be true', () => {
       expect(deepEqual(null, null)).toBeTruthy();
       expect(deepEqual(1, 1)).toBeTruthy();

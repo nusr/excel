@@ -25,6 +25,7 @@ export type ControllerEventEmitterType = {
 export interface IController
   extends IBaseModel,
     IEventEmitter<ControllerEventEmitterType> {
+  destroy(): void;
   readonly model: IModel;
   /**
    * Retrieves the hooks associated with the controller.

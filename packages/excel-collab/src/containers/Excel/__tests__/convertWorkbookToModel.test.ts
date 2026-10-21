@@ -1,370 +1,120 @@
-import * as XLSX from 'xlsx';
+import type { NewFile } from 'excelize-wasm';
 import { convertWorkbookToModel } from '../importExcel';
-import {
-  getWorksheetKey,
-  getCustomWidthOrHeightKey,
-  CELL_WIDTH,
-  CELL_HEIGHT,
-} from '../../../util';
+import { loadExcelize, checkExcelize, type Excelize } from '../excelize';
+import { getWorksheetKey, getCustomWidthOrHeightKey } from '../../../util';
 import { EUnderLine, EHorizontalAlign, EVerticalAlign } from '../../../types';
 
-function makeWorkbook(overrides: Partial<XLSX.WorkBook>): XLSX.WorkBook {
-  return {
-    SheetNames: [],
-    Sheets: {},
-    ...overrides,
-  } as XLSX.WorkBook;
-}
-
-describe('convertWorkbookToModel.test.ts', () => {
-  test('parses every cell type', () => {
-    const sheet: XLSX.WorkSheet = {
-      '!ref': 'A1:A6',
-      A1: { t: 'b', v: true } as XLSX.CellObject,
-      A2: { t: 'n', v: 42 } as XLSX.CellObject,
-      // number type but non-number value -> Number() coercion
-      A3: { t: 'n', v: '7' as unknown as number } as XLSX.CellObject,
-      // error type with display text
-      A4: { t: 'e', v: 0x07, w: '#DIV/0!' } as XLSX.CellObject,
-      // blank type
-      A5: { t: 'z' } as XLSX.CellObject,
-      // string type
-      A6: { t: 's', v: 'hello' } as XLSX.CellObject,
-    };
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: { Sheet1: sheet },
-    });
-    const model = convertWorkbookToModel(workbook);
-    const id = '1';
-    expect(model.worksheets[getWorksheetKey(id, 0, 0)].value).toBe(true);
-    expect(model.worksheets[getWorksheetKey(id, 1, 0)].value).toBe(42);
-    expect(model.worksheets[getWorksheetKey(id, 2, 0)].value).toBe(7);
-    expect(model.worksheets[getWorksheetKey(id, 3, 0)].value).toBe('#DIV/0!');
-    expect(model.worksheets[getWorksheetKey(id, 4, 0)].value).toBe('');
-    expect(model.worksheets[getWorksheetKey(id, 5, 0)].value).toBe('hello');
+describe('convertWorkbookToModel', () => {
+  let api: Excelize;
+  let file: NewFile;
+  beforeEach(async () => {
+    api = await loadExcelize();
+    file = checkExcelize(api.NewFile());
   });
 
-  test('error cell without display text falls back to string value', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: {
-        Sheet1: {
-          '!ref': 'A1:A2',
-          A1: { t: 'e', v: 42 } as XLSX.CellObject,
-          A2: { t: 's', v: null } as unknown as XLSX.CellObject,
-        },
-      },
+  test('preserves booleans, numbers, strings, errors and formula cached values', () => {
+    const values = [true, 42, '007', '#DIV/0!', 'hello', 3];
+    values.forEach((value, index) => checkExcelize(file.SetCellValue('Sheet1', `A${index + 1}`, value)));
+    checkExcelize(file.SetCellFormula('Sheet1', 'A6', '=SUM(1,2)'));
+    const model = convertWorkbookToModel(file, api);
+    values.forEach((value, index) => {
+      expect(model.worksheets[getWorksheetKey('1', index, 0)].value).toBe(value);
     });
-    const model = convertWorkbookToModel(workbook);
-    expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe('42');
-    // string cell with null value becomes empty string
-    expect(model.worksheets[getWorksheetKey('1', 1, 0)].value).toBe('');
+    expect(model.worksheets[getWorksheetKey('1', 5, 0)].formula).toBe('=SUM(1,2)');
   });
 
-  test('parses number type with nullish value as 0', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: {
-        Sheet1: {
-          '!ref': 'A1:A1',
-          A1: { t: 'n' } as XLSX.CellObject,
-        },
-      },
+  test('preserves formulas with no cached value', () => {
+    checkExcelize(file.SetCellFormula('Sheet1', 'B2', '=SUM(1,2)'));
+    const model = convertWorkbookToModel(file, api);
+    expect(model.worksheets[getWorksheetKey('1', 1, 1)]).toMatchObject({
+      value: '', formula: '=SUM(1,2)',
     });
-    const model = convertWorkbookToModel(workbook);
-    expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe(0);
   });
 
-  test('parses formulas with and without leading =', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: {
-        Sheet1: {
-          '!ref': 'A1:A2',
-          A1: { t: 'n', v: 3, f: 'SUM(A2,B2)' } as XLSX.CellObject,
-          A2: { t: 'n', v: 3, f: '=SUM(A3,B3)' } as XLSX.CellObject,
-        },
-      },
-    });
-    const model = convertWorkbookToModel(workbook);
-    expect(model.worksheets[getWorksheetKey('1', 0, 0)].formula).toBe(
-      '=SUM(A2,B2)',
-    );
-    expect(model.worksheets[getWorksheetKey('1', 1, 0)].formula).toBe(
-      '=SUM(A3,B3)',
-    );
-  });
-
-  test('keeps custom number format but drops General', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: {
-        Sheet1: {
-          '!ref': 'A1:A2',
-          A1: { t: 'n', v: 0.5, z: '0.00%' } as XLSX.CellObject,
-          A2: { t: 'n', v: 1, z: 'General' } as XLSX.CellObject,
-        },
-      },
-    });
-    const model = convertWorkbookToModel(workbook);
-    expect(model.worksheets[getWorksheetKey('1', 0, 0)].numberFormat).toBe(
-      '0.00%',
-    );
-    expect(
-      model.worksheets[getWorksheetKey('1', 1, 0)].numberFormat,
-    ).toBeUndefined();
-  });
-
-  test('parses font, fill, alignment and border styles', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: {
-        Sheet1: {
-          '!ref': 'A1:A1',
-          A1: {
-            t: 's',
-            v: 'styled',
-            s: {
-              font: {
-                sz: 18,
-                name: 'Arial',
-                bold: true,
-                italic: true,
-                strike: true,
-                underline: true,
-                color: { rgb: 'FF00FF00' }, // 8-char with alpha
-              },
-              fill: { patternType: 'solid', fgColor: { rgb: 'FFFF00' } },
-              alignment: {
-                horizontal: 'center',
-                vertical: 'center',
-                wrapText: true,
-              },
-              border: {
-                left: { style: 'thin', color: { rgb: '000000' } },
-                right: { style: 'medium' },
-                top: { style: 'thick', color: { rgb: 'FF0000' } },
-                bottom: { style: 'double' },
-              },
-            },
-          } as unknown as XLSX.CellObject,
-        },
-      },
-    });
-    const model = convertWorkbookToModel(workbook);
-    const cell = model.worksheets[getWorksheetKey('1', 0, 0)];
+  test('imports fonts, fills, alignment, borders and custom number formats', () => {
+    checkExcelize(file.SetCellValue('Sheet1', 'A1', 0.5));
+    const style = checkExcelize(file.NewStyle({
+      Font: { Size: 18, Family: 'Arial', Bold: true, Italic: true, Strike: true,
+        Underline: 'double', Color: '00FF00' },
+      Fill: { Type: 'pattern', Pattern: 1, Color: ['FFFF00'] },
+      Alignment: { Horizontal: 'center', Vertical: 'center', WrapText: true },
+      Border: [
+        { Type: 'left', Style: 1, Color: '000000' },
+        { Type: 'right', Style: 2, Color: '112233' },
+        { Type: 'top', Style: 5, Color: 'FF0000' },
+        { Type: 'bottom', Style: 6, Color: '445566' },
+      ],
+      CustomNumFmt: '0.00%',
+    })).style;
+    checkExcelize(file.SetCellStyle('Sheet1', 'A1', 'A1', style));
+    const cell = convertWorkbookToModel(file, api).worksheets[getWorksheetKey('1', 0, 0)];
     expect(cell).toMatchObject({
-      value: 'styled',
-      fontSize: 18,
-      fontFamily: 'Arial',
-      isBold: true,
-      isItalic: true,
-      isStrike: true,
-      underline: EUnderLine.SINGLE,
-      fontColor: '#00FF00',
-      fillColor: '#FFFF00',
-      horizontalAlign: EHorizontalAlign.CENTER,
-      verticalAlign: EVerticalAlign.MIDDLE,
-      isWrapText: true,
-    });
-    expect(cell.borderLeft).toEqual({ type: 'thin', color: '#000000' });
-    expect(cell.borderRight).toEqual({ type: 'medium', color: '' });
-    expect(cell.borderTop).toEqual({ type: 'thick', color: '#FF0000' });
-    expect(cell.borderBottom).toEqual({ type: 'double', color: '' });
-  });
-
-  test('handles left/right horizontal and top/bottom vertical alignment', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: {
-        Sheet1: {
-          '!ref': 'A1:A2',
-          A1: {
-            t: 's',
-            v: 'a',
-            s: { alignment: { horizontal: 'left', vertical: 'top' } },
-          } as unknown as XLSX.CellObject,
-          A2: {
-            t: 's',
-            v: 'b',
-            s: { alignment: { horizontal: 'right', vertical: 'bottom' } },
-          } as unknown as XLSX.CellObject,
-        },
-      },
-    });
-    const model = convertWorkbookToModel(workbook);
-    expect(model.worksheets[getWorksheetKey('1', 0, 0)]).toMatchObject({
-      horizontalAlign: EHorizontalAlign.LEFT,
-      verticalAlign: EVerticalAlign.TOP,
-    });
-    expect(model.worksheets[getWorksheetKey('1', 1, 0)]).toMatchObject({
-      horizontalAlign: EHorizontalAlign.RIGHT,
-      verticalAlign: EVerticalAlign.BOTTOM,
+      value: 0.5, fontSize: 18, fontFamily: 'Arial', isBold: true,
+      isItalic: true, isStrike: true, underline: EUnderLine.DOUBLE,
+      fontColor: '#00FF00', fillColor: '#FFFF00',
+      horizontalAlign: EHorizontalAlign.CENTER, verticalAlign: EVerticalAlign.MIDDLE,
+      isWrapText: true, numberFormat: '0.00%',
+      borderLeft: { type: 'thin', color: '#000000' },
+      borderRight: { type: 'medium', color: '#112233' },
+      borderTop: { type: 'thick', color: '#FF0000' },
+      borderBottom: { type: 'double', color: '#445566' },
     });
   });
 
-  test('ignores invalid colors, borders and none fill pattern', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: {
-        Sheet1: {
-          '!ref': 'A1:A1',
-          A1: {
-            t: 's',
-            v: 'x',
-            s: {
-              font: { color: { rgb: 'ABC' } }, // invalid length -> no color
-              fill: { patternType: 'none', fgColor: { rgb: 'FFFFFF' } },
-              border: {
-                left: {}, // no style -> skipped
-                right: { style: 'unknown-style' }, // not in map -> skipped
-              },
-            },
-          } as unknown as XLSX.CellObject,
-        },
-      },
-    });
-    const model = convertWorkbookToModel(workbook);
-    const cell = model.worksheets[getWorksheetKey('1', 0, 0)];
-    expect(cell.fontColor).toBeUndefined();
-    expect(cell.fillColor).toBeUndefined();
-    expect(cell.borderLeft).toBeUndefined();
-    expect(cell.borderRight).toBeUndefined();
+  test('resolves built-in number formats and retains style-only cells', () => {
+    const style = checkExcelize(file.NewStyle({ NumFmt: 10 })).style;
+    checkExcelize(file.SetCellStyle('Sheet1', 'B2', 'B2', style));
+    checkExcelize(file.SetSheetDimension('Sheet1', 'A1:B2'));
+    const cell = convertWorkbookToModel(file, api).worksheets[getWorksheetKey('1', 1, 1)];
+    expect(cell).toMatchObject({ value: '', numberFormat: '0.00%' });
   });
 
-  test('cell with non-object style is untouched', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: {
-        Sheet1: {
-          '!ref': 'A1:A1',
-          A1: { t: 's', v: 'x', s: 'bogus' } as unknown as XLSX.CellObject,
-        },
-      },
-    });
-    const model = convertWorkbookToModel(workbook);
-    expect(model.worksheets[getWorksheetKey('1', 0, 0)]).toEqual({
-      value: 'x',
-    });
+  test('preserves custom sizes and hidden rows and columns', () => {
+    checkExcelize(file.SetColWidth('Sheet1', 'A', 'A', 120 / 7));
+    checkExcelize(file.SetRowHeight('Sheet1', 3, 45));
+    checkExcelize(file.SetColVisible('Sheet1', 'B', false));
+    checkExcelize(file.SetRowVisible('Sheet1', 2, false));
+    const model = convertWorkbookToModel(file, api);
+    expect(model.customWidth[getCustomWidthOrHeightKey('1', 0)]).toEqual({ len: 120, isHide: false });
+    expect(model.customHeight[getCustomWidthOrHeightKey('1', 2)]).toEqual({ len: 60, isHide: false });
+    expect(model.customWidth[getCustomWidthOrHeightKey('1', 1)].isHide).toBe(true);
+    expect(model.customHeight[getCustomWidthOrHeightKey('1', 1)].isHide).toBe(true);
   });
 
-  test('reads column and row sizes from wpx/wch and hpx/hpt', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: {
-        Sheet1: {
-          '!ref': 'A1:A1',
-          A1: { t: 's', v: 'x' } as XLSX.CellObject,
-          '!cols': [
-            { wpx: 120 },
-            { wch: 10 },
-            { hidden: true }, // no width but hidden -> fallback width
-            {}, // no width, not hidden -> skipped
-            null as unknown as XLSX.ColInfo, // null entry -> skipped
-          ],
-          '!rows': [{ hpx: 40 }, { hpt: 72 }, { hidden: true }],
-        },
-      },
-    });
-    const model = convertWorkbookToModel(workbook);
-    const id = '1';
-    expect(model.customWidth[getCustomWidthOrHeightKey(id, 0)]).toEqual({
-      len: 120,
-      isHide: false,
-    });
-    expect(model.customWidth[getCustomWidthOrHeightKey(id, 1)]).toEqual({
-      len: 70,
-      isHide: false,
-    });
-    expect(model.customWidth[getCustomWidthOrHeightKey(id, 2)]).toEqual({
-      len: CELL_WIDTH,
-      isHide: true,
-    });
-    expect(
-      model.customWidth[getCustomWidthOrHeightKey(id, 3)],
-    ).toBeUndefined();
-
-    expect(model.customHeight[getCustomWidthOrHeightKey(id, 0)]).toEqual({
-      len: 40,
-      isHide: false,
-    });
-    expect(model.customHeight[getCustomWidthOrHeightKey(id, 1)]).toEqual({
-      len: 96,
-      isHide: false,
-    });
-    expect(model.customHeight[getCustomWidthOrHeightKey(id, 2)]).toEqual({
-      len: CELL_HEIGHT,
-      isHide: true,
-    });
+  test('preserves sheet order, visibility, tab color, active sheet, merges and names', () => {
+    checkExcelize(file.NewSheet('Visible'));
+    checkExcelize(file.SetActiveSheet(1));
+    checkExcelize(file.SetSheetVisible('Sheet1', false));
+    checkExcelize(file.SetSheetProps('Visible', { TabColorRGB: 'FF112233' }));
+    checkExcelize(file.MergeCell('Visible', 'A2', 'C4'));
+    checkExcelize(file.SetDefinedName({ Name: 'Foo', RefersTo: "'Visible'!$A$1" }));
+    const model = convertWorkbookToModel(file, api);
+    expect(model.currentSheetId).toBe('2');
+    expect(model.workbook['1'].isHide).toBe(true);
+    expect(model.workbook['2']).toMatchObject({ name: 'Visible', sort: 1, tabColor: '#112233' });
+    expect(Object.values(model.mergeCells)).toEqual([
+      { row: 1, col: 0, rowCount: 3, colCount: 3, sheetId: '2' },
+    ]);
+    expect(model.definedNames.foo).toMatchObject({ row: 0, col: 0, sheetId: '2' });
   });
 
-  test('reads merges and marks hidden sheets', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1', 'Secret'],
-      Sheets: {
-        Sheet1: {
-          '!ref': 'A1:B2',
-          A1: { t: 's', v: 'x' } as XLSX.CellObject,
-          '!merges': [{ s: { r: 0, c: 0 }, e: { r: 1, c: 1 } }],
-        },
-        Secret: { '!ref': 'A1:A1', A1: { t: 's', v: 'y' } as XLSX.CellObject },
-      },
-      Workbook: {
-        Sheets: [{ Hidden: 0 }, { Hidden: 1 }],
-      },
-    });
-    const model = convertWorkbookToModel(workbook);
-    expect(model.workbook['1'].isHide).toBe(false);
-    expect(model.workbook['2'].isHide).toBe(true);
-    const merge = Object.values(model.mergeCells)[0];
-    expect(merge).toMatchObject({
-      row: 0,
-      col: 0,
-      rowCount: 2,
-      colCount: 2,
-      sheetId: '1',
-    });
-  });
-
-  test('skips sheets without a ref and missing sheet entries', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['NoRef', 'Missing'],
-      Sheets: {
-        NoRef: {}, // no '!ref' -> readSheetCells returns early
-        // 'Missing' has no Sheets entry
-      } as XLSX.WorkBook['Sheets'],
-    });
-    const model = convertWorkbookToModel(workbook);
-    expect(model.workbook['1']).toBeDefined();
-    expect(model.workbook['2']).toBeDefined();
+  test('empty sheets retain virtual grid dimensions and no cells', () => {
+    const model = convertWorkbookToModel(file, api);
+    expect(model.workbook['1']).toMatchObject({ rowCount: 200, colCount: 200 });
     expect(Object.keys(model.worksheets)).toHaveLength(0);
   });
 
-  test('parses defined names and skips invalid ones', () => {
-    const workbook = makeWorkbook({
-      SheetNames: ['Sheet1'],
-      Sheets: {
-        Sheet1: { '!ref': 'A1:A1', A1: { t: 's', v: 'x' } as XLSX.CellObject },
-      },
-      Workbook: {
-        Names: [
-          { Name: 'Foo', Ref: 'Sheet1!$A$1' },
-          { Name: '', Ref: 'Sheet1!$A$1' }, // missing name -> skipped
-          { Name: 'Bar', Ref: '' } as XLSX.DefinedName, // missing ref -> skipped
-          { Name: 'Baz', Ref: 'not-a-reference' }, // unparseable -> skipped
-        ],
-      },
-    });
-    const model = convertWorkbookToModel(workbook);
-    expect(model.definedNames.foo).toBeDefined();
-    expect(model.definedNames.bar).toBeUndefined();
-    expect(model.definedNames.baz).toBeUndefined();
+  test('surfaces Excelize errors', () => {
+    expect(() => checkExcelize(file.GetCellValue('Missing', 'A1'))).toThrow();
   });
 
-  test('empty workbook yields empty currentSheetId', () => {
-    const model = convertWorkbookToModel(makeWorkbook({}));
-    expect(model.currentSheetId).toBe('');
-    expect(Object.keys(model.workbook)).toHaveLength(0);
+  test('does not duplicate merged cell values into covered cells', () => {
+    checkExcelize(file.SetCellValue('Sheet1', 'A1', 'merged'));
+    checkExcelize(file.MergeCell('Sheet1', 'A1', 'B2'));
+    const model = convertWorkbookToModel(file, api);
+    expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe('merged');
+    for (const [row, col] of [[0, 1], [1, 0], [1, 1]]) {
+      expect(model.worksheets[getWorksheetKey('1', row, col)]?.value ?? '').toBe('');
+    }
   });
 });

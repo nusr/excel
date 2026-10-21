@@ -3,7 +3,7 @@ import { Collaboration } from '../Collaboration';
 import { useUserInfo, StateContext, useCoreStore } from '../../store';
 import { initController } from '../../../controller';
 import type { UserItem, IController } from '../../../types';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 function renderComponent() {
   const controller = initController();
@@ -31,27 +31,31 @@ describe('Collaboration Component', () => {
     const r = renderComponent();
     controller = r.controller;
     act(() => {
+      const first = controller.getCurrentSheetId();
+      const second = controller.addSheet()!.sheetId;
+      controller.setCurrentSheetId(first);
+      useCoreStore.setState({ currentSheetId: first });
       const mockUsers: UserItem[] = [
         {
           clientId: 1,
-          range: { sheetId: '1', col: 1, row: 1, rowCount: 1, colCount: 1 },
+          range: { sheetId: first, col: 1, row: 1, rowCount: 1, colCount: 1 },
         },
         {
           clientId: 2,
-          range: { sheetId: '2', col: 2, row: 2, rowCount: 1, colCount: 1 },
+          range: { sheetId: second, col: 2, row: 2, rowCount: 1, colCount: 1 },
         },
       ];
       useUserInfo.getState().setUsers(mockUsers);
     });
   });
-  it('should render user when sheetId is 1', () => {
+  it('should render presence on the first sheet', () => {
     expect(screen.queryByText('User 1')).toBeInTheDocument();
     expect(screen.queryByText('User 2')).toBeNull();
   });
 
-  it('should render user when sheetId is 2', () => {
+  it('should render presence after changing sheets', () => {
     act(() => {
-      controller.addSheet();
+      controller.setCurrentSheetId(controller.getSheetList()[1].sheetId);
       useCoreStore.setState({ currentSheetId: controller.getCurrentSheetId() });
     });
 

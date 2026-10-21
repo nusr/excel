@@ -10,6 +10,18 @@
 .fontFamily {
   max-width: 200px;
 }
+
+@media (max-width: 600px) {
+  .toolbar-wrapper {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+
+  .toolbar-wrapper > * {
+    flex-shrink: 0;
+  }
+}
 .bold {
   font-weight: bold;
 }

@@ -5,6 +5,7 @@ import React, {
   useState,
   useRef,
   useEffect,
+  useLayoutEffect,
 } from 'react';
 import { EditorStatus } from '../../types';
 import styles from './index.module.css';
@@ -101,6 +102,12 @@ export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps
     const setEditorStatus = useCoreStore((state) => state.setEditorStatus);
     const ref = useRef<HTMLTextAreaElement>(null);
     const [rowCount, setRowCount] = useState(minRows);
+    useLayoutEffect(() => {
+      const editor = ref.current;
+      if (editor) {
+        editor.setSelectionRange(editor.value.length, editor.value.length);
+      }
+    }, []);
     useEffect(() => {
       if (isMergeCell) {
         const count = initValue.split(MERGE_CELL_LINE_BREAK).length;
@@ -113,7 +120,9 @@ export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps
     const onKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         event.stopPropagation();
+        if (event.nativeEvent.isComposing) return;
         if (event.key === 'Enter' || event.key === 'Tab') {
+          event.preventDefault();
           let value = event.currentTarget.value;
           const { range, isMerged } = controller.getActiveRange();
           const cellData = controller.getCell(range);

@@ -1,9 +1,9 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useState, useEffect, useRef } from 'react';
 import {
   importExcel,
   exportExcel,
   EXPORT_EXTENSIONS,
-  EXPORT_FORMATS,
+  IMPORT_ACCEPT,
   type ExportExtension,
 } from '../Excel';
 import styles from './index.module.css';
@@ -22,46 +22,60 @@ import {
   MenuItem,
 } from '../../component/Menu';
 import { Button } from '../../component/Button';
+import { queue } from '../../component/Toast';
 
 type Props = {
   leftChildren?: React.ReactNode;
   rightChildren?: React.ReactNode;
 };
 
-const ACCEPT = Object.values(EXPORT_FORMATS)
-  .map((v) => v.mime)
-  .join(',');
-
 export const MenuBarContainer: React.FunctionComponent<Props> = memo(
   ({ leftChildren, rightChildren }) => {
     const { controller, provider } = useExcel();
     const [visible, setVisible] = useState(false);
-    const handleExportExcel = useCallback((format: ExportExtension) => {
-      exportExcel(`excel_${Date.now()}`, controller, format);
-    }, []);
+    const importVersion = useRef(0);
+    useEffect(() => () => { importVersion.current++; }, [controller]);
+    const handleExportExcel = useCallback(async (format: ExportExtension) => {
+      try {
+        await exportExcel(`excel_${Date.now()}`, controller, format);
+      } catch (error) {
+        queue.add({ title: i18n.t('export-failed', {
+          message: error instanceof Error ? error.message : String(error),
+        }) });
+      }
+    }, [controller]);
     const handleImportExcel = useCallback(
       async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+        const input = event.currentTarget;
+        const file = input.files?.[0];
         if (!file) {
           return;
         }
-        const model = await importExcel(file);
-        controller.fromJSON(model);
-        event.target.value = '';
-        event.target.blur();
+        const version = ++importVersion.current;
+        try {
+          const model = await importExcel(file);
+          if (version === importVersion.current) controller.fromJSON(model);
+        } catch (error) {
+          if (version === importVersion.current) queue.add({ title: i18n.t('import-failed', {
+            message: error instanceof Error ? error.message : String(error),
+          }) });
+        } finally {
+          input.value = '';
+          input.blur();
+        }
       },
-      [],
+      [controller],
     );
     const handleExportJSON = useCallback(() => {
       const blob = new Blob([JSON.stringify(controller.toJSON())], {
         type: 'application/json',
       });
       saveAs(blob, `excel_${Date.now()}.json`);
-    }, []);
+    }, [controller]);
     const handleAddDocument = useCallback(() => {
       const docId = v4();
       provider?.addDocument?.(docId);
-    }, []);
+    }, [provider]);
     return (
       <div className={styles['menubar-container']} data-testid="menubar">
         <div className={styles['menubar-menu']}>
@@ -97,7 +111,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
                   type="file"
                   hidden
                   onChange={handleImportExcel}
-                  accept={ACCEPT}
+                  accept={IMPORT_ACCEPT}
                   data-testid="menubar-import-input"
                   id="menubar-import-input"
                 />

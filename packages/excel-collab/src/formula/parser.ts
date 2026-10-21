@@ -10,8 +10,9 @@ import {
   CellRangeExpression,
   CellExpression,
   ArrayExpression,
+  MissingExpression,
 } from './expression';
-import { type ErrorTypes, getCustomError } from '../util';
+import { getCustomError } from '../util';
 import { TokenType } from '../types';
 
 export class Parser {
@@ -21,11 +22,9 @@ export class Parser {
     this.tokens = tokens;
   }
   parse(): Expression[] {
-    const result: Expression[] = [];
-    while (!this.isAtEnd()) {
-      result.push(this.expression());
-    }
-    return result;
+    const expression = this.expression();
+    this.expect(TokenType.EOF);
+    return [expression];
   }
   private expression(): Expression {
     return this.comparison();
@@ -95,7 +94,7 @@ export class Parser {
   }
   private postUnary(): Expression {
     let expr = this.cellRange();
-    if (this.match(TokenType.PERCENT)) {
+    while (this.match(TokenType.PERCENT)) {
       const operator = this.previous();
       expr = new PostUnaryExpression(operator, expr);
     }
@@ -112,8 +111,8 @@ export class Parser {
     }
     return expr;
   }
-  private convertToCellExpression(expr: Expression): CellExpression {
-    if (expr instanceof CellExpression) {
+  private convertToCellExpression(expr: Expression): Expression {
+    if (expr instanceof CellExpression || expr instanceof CallExpression || expr instanceof GroupExpression) {
       return expr;
     }
     if (
@@ -128,6 +127,10 @@ export class Parser {
     if (this.match(TokenType.SHEET_NAME)) {
       const name = this.previous();
       let expr = this.call();
+      if (expr instanceof LiteralExpression && expr.value.type === TokenType.NUMBER &&
+        this.check(TokenType.COLON)) {
+        expr = this.convertToCellExpression(expr);
+      }
       if (expr instanceof CellExpression) {
         return new CellExpression(expr.value, name);
       }
@@ -147,11 +150,8 @@ export class Parser {
       const params: Expression[] = [];
       if (!this.check(TokenType.RIGHT_BRACKET)) {
         do {
-          // fix SUM(1,)
-          if (this.peek().type == TokenType.RIGHT_BRACKET) {
-            break;
-          }
-          params.push(this.expression());
+          params.push(this.check(TokenType.COMMA) || this.check(TokenType.RIGHT_BRACKET)
+            ? new MissingExpression() : this.expression());
         } while (this.match(TokenType.COMMA));
       }
       this.expect(TokenType.RIGHT_BRACKET);
@@ -162,21 +162,24 @@ export class Parser {
   private primary(): Expression {
     if (this.match(TokenType.lEFT_BRACE)) {
       const list: Expression[] = [];
+      const widths: number[] = [];
       do {
-        if (this.peek().type == TokenType.RIGHT_BRACE) {
-          break;
-        }
-        list.push(this.expression());
-      } while (this.match(TokenType.COMMA));
+        const start = list.length;
+        do {
+          list.push(this.expression());
+        } while (this.match(TokenType.COMMA));
+        widths.push(list.length - start);
+      } while (this.match(TokenType.SEMICOLON));
       this.expect(TokenType.RIGHT_BRACE);
-      return new ArrayExpression(list);
+      if (widths.some((width) => width !== widths[0])) throw getCustomError('#VALUE!');
+      return new ArrayExpression(list, widths[0]);
     }
     if (this.match(TokenType.LEFT_BRACKET)) {
       const value = this.expression();
       this.expect(TokenType.RIGHT_BRACKET);
       return new GroupExpression(value);
     }
-    if (this.match(TokenType.NUMBER, TokenType.STRING, TokenType.BOOL)) {
+    if (this.match(TokenType.NUMBER, TokenType.STRING, TokenType.BOOL, TokenType.ERROR, TokenType.ERROR_REF)) {
       return new LiteralExpression(this.previous());
     }
     if (
@@ -191,10 +194,6 @@ export class Parser {
       const token = this.previous();
       return new CellExpression(token, undefined);
     }
-    if (this.match(TokenType.ERROR, TokenType.ERROR_REF)) {
-      throw getCustomError(this.previous().value as ErrorTypes);
-    }
-
     throw getCustomError('#VALUE!');
   }
   private match(...types: TokenType[]): boolean {
@@ -221,9 +220,6 @@ export class Parser {
   }
   private next() {
     this.current++;
-  }
-  private isAtEnd() {
-    return this.peek().type === TokenType.EOF;
   }
   private peek(): Token {
     if (this.current < this.tokens.length) {

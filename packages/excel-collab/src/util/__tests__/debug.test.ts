@@ -1,23 +1,24 @@
+import { vi } from 'vitest';
 import { Debug } from '../debug';
 
 describe('debug.test.ts', () => {
   afterEach(() => {
     global.localStorage.clear();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('Debug', () => {
     test('not enable', () => {
-      const consoleLog = jest
+      const consoleLog = vi
         .spyOn(console, 'log')
-        .mockImplementation(jest.fn());
+        .mockImplementation(vi.fn());
       const debug = new Debug('test');
       debug.log('test');
       expect(consoleLog).not.toHaveBeenCalled();
     });
     test('ok', () => {
-      const consoleLog = jest
+      const consoleLog = vi
         .spyOn(console, 'log')
-        .mockImplementation(jest.fn());
+        .mockImplementation(vi.fn());
       global.localStorage.setItem('debug', '*');
       const debug = new Debug('test');
       debug.log('test');

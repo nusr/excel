@@ -13,23 +13,33 @@ export const Image: React.FunctionComponent<Props> = memo(
   ({ title, imageSrc = '', uuid }) => {
     const [src, setSrc] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string>();
     const { provider, controller } = useExcel();
 
     useEffect(() => {
+      let cancelled = false;
+      setError(undefined);
+      setSrc('');
       if (!provider?.downloadFile) {
         setSrc(imageSrc);
+        setLoading(false);
         return;
       }
       setLoading(true);
-      provider
-        .downloadFile(controller.getHooks().doc.guid, imageSrc)
+      Promise.resolve()
+        .then(() => provider.downloadFile!(controller.getHooks().doc.guid, imageSrc))
         .then((data) => {
-          setSrc(data);
+          if (!cancelled) setSrc(data);
+        })
+        .catch((cause: unknown) => {
+          if (!cancelled) setError(cause instanceof Error ? cause.message : String(cause));
         })
         .finally(() => {
-          setLoading(false);
+          if (!cancelled) setLoading(false);
         });
-    }, [imageSrc, provider]);
+      return () => { cancelled = true; };
+    }, [imageSrc, provider, controller]);
+    if (error) return <div role="alert">{error}</div>;
     if (loading || !src) {
       return (
         <ProgressCircle

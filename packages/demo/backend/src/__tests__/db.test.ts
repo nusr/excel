@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import {
   db,
   initDatabase,
@@ -10,12 +11,14 @@ import {
   upsertDocument,
   createFile,
   findFile,
+  loadDocumentState,
+  saveDocumentState,
   Document,
   File,
 } from '../db';
 
 // Mock console.log for testing
-jest.spyOn(console, 'log').mockImplementation(() => {});
+vi.spyOn(console, 'log').mockImplementation(() => {});
 
 describe('Database Operations', () => {
   // Setup database before each test
@@ -44,6 +47,38 @@ describe('Database Operations', () => {
 
   // Document tests
   describe('Document Operations', () => {
+    it('migrates an existing JSON-only document table without losing content', async () => {
+      await new Promise<void>((resolve, reject) => {
+        db.exec(`
+          DROP TABLE document;
+          CREATE TABLE document (
+            id TEXT PRIMARY KEY, name TEXT, create_time TEXT, content TEXT
+          );
+          INSERT INTO document (id, name, content) VALUES ('legacy', 'Legacy', '{"workbook":{}}');
+        `, (error) => error ? reject(error) : resolve());
+      });
+      await initDatabase();
+      expect(await findDocument('legacy')).toMatchObject({
+        name: 'Legacy', content: '{"workbook":{}}',
+      });
+      expect(await loadDocumentState('legacy')).toEqual({
+        state: null, content: '{"workbook":{}}',
+      });
+    });
+
+    it('saves binary state and public JSON together without exposing the binary through REST queries', async () => {
+      await createDocument({ id: 'collaborative', name: 'Keep metadata' });
+      const binary = new Uint8Array([0, 1, 128, 255]);
+      await saveDocumentState('collaborative', binary, '{"workbook":{}}');
+      expect(await loadDocumentState('collaborative')).toEqual({
+        state: Buffer.from(binary), content: '{"workbook":{}}',
+      });
+      const document = await findDocument('collaborative');
+      expect(document?.name).toBe('Keep metadata');
+      expect(document).not.toHaveProperty('y_state');
+      expect((await findAllDocuments())[0]).not.toHaveProperty('y_state');
+    });
+
     describe('createDocument', () => {
       it('should create a new document successfully', async () => {
         const document: Document = {

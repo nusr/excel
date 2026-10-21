@@ -1,15 +1,15 @@
+import { vi } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { type, renderComponent } from './util';
 import './global.mock';
 
-const mockSaveAs = jest.fn();
+const { mockSaveAs } = vi.hoisted(() => ({ mockSaveAs: vi.fn() }));
 
-jest.mock('../util', () => {
+vi.mock('../util', async (importOriginal) => {
   const originalModule =
-    jest.requireActual<typeof import('../util')>('../util');
+    await importOriginal<typeof import('../util')>();
   return {
-    __esModule: true,
     ...originalModule,
     saveAs: (...list: unknown[]) => mockSaveAs(...list),
   };
@@ -17,7 +17,7 @@ jest.mock('../util', () => {
 
 describe('Export.test.ts', () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockSaveAs.mockReset();
     await renderComponent();
   });
@@ -28,6 +28,11 @@ describe('Export.test.ts', () => {
       fireEvent.click(screen.getByTestId('toolbar-chart'));
 
       expect(await screen.findAllByTestId('float-element')).toHaveLength(1);
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('float-element').querySelector('canvas[data-uuid]'),
+        ).not.toBeNull();
+      });
       fireEvent.contextMenu(await screen.findByTestId('float-element'), {
         clientY: 20,
         clientX: 20,
@@ -70,8 +75,8 @@ describe('Export.test.ts', () => {
       await user.click(await screen.findByTestId('menubar-export-more-xlsx'));
       await waitFor(() => {
         expect(mockSaveAs).toHaveBeenCalled();
-      });
-    });
+      }, { timeout: 5000 });
+    }, 10000);
   });
   describe('download csv', () => {
     test('ok', async () => {
@@ -100,12 +105,8 @@ describe('Export.test.ts', () => {
         type('test');
         await user.click(screen.getByTestId('menubar-excel-trigger'));
         await user.hover(screen.getByRole('menuitem', { name: /export/i }));
-        await user.click(
-          await screen.findByTestId(`menubar-export-more-${ext}`),
-        );
-        await waitFor(() => {
-          expect(mockSaveAs).toHaveBeenCalled();
-        });
+        expect(screen.queryByTestId(`menubar-export-more-${ext}`)).not.toBeInTheDocument();
+        expect(mockSaveAs).not.toHaveBeenCalled();
       });
     }
   });

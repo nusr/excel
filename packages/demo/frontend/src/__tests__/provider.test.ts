@@ -1,3 +1,4 @@
+import { vi, type Mock } from 'vitest';
 import { fetchData, RemoteProvider, LocalProvider } from '../provider';
 
 const BASE_URL = 'http://localhost:4000';
@@ -5,14 +6,14 @@ const LOCAL_STORAGE_KEY = 'excel-collab-docs';
 
 describe('fetchData', () => {
   beforeEach(() => {
-    global.fetch = jest.fn();
+    global.fetch = vi.fn();
   });
 
   it('should fetch data with GET method', async () => {
     const mockResponse = { data: 'test' };
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
-      json: jest.fn().mockResolvedValue(mockResponse),
+      json: vi.fn().mockResolvedValue(mockResponse),
     });
 
     const result = await fetchData('/test-endpoint');
@@ -26,9 +27,9 @@ describe('fetchData', () => {
 
   it('should fetch data with POST method and JSON body', async () => {
     const mockResponse = { data: 'test' };
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
-      json: jest.fn().mockResolvedValue(mockResponse),
+      json: vi.fn().mockResolvedValue(mockResponse),
     });
 
     const data = JSON.stringify({ key: 'value' });
@@ -45,9 +46,9 @@ describe('fetchData', () => {
 
   it('should fetch data with POST method and FormData body', async () => {
     const mockResponse = { data: 'test' };
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
-      json: jest.fn().mockResolvedValue(mockResponse),
+      json: vi.fn().mockResolvedValue(mockResponse),
     });
 
     const formData = new FormData();
@@ -62,7 +63,7 @@ describe('fetchData', () => {
   });
 
   it('should return undefined if fetch response is not ok', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
     });
 
@@ -71,10 +72,19 @@ describe('fetchData', () => {
   });
 
   it('should return undefined if fetch throws an error', async () => {
-    (global.fetch as jest.Mock).mockRejectedValue(new Error('Fetch error'));
+    (global.fetch as Mock).mockRejectedValue(new Error('Fetch error'));
 
     const result = await fetchData('/test-endpoint');
     expect(result).toBeUndefined();
+  });
+
+  it('should return undefined if the response body is not JSON', async () => {
+    (global.fetch as Mock).mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockRejectedValue(new SyntaxError('Invalid JSON')),
+    });
+
+    await expect(fetchData('/test-endpoint')).resolves.toBeUndefined();
   });
 });
 
@@ -83,14 +93,14 @@ describe('RemoteProvider', () => {
 
   beforeEach(() => {
     provider = new RemoteProvider(BASE_URL);
-    global.fetch = jest.fn();
+    global.fetch = vi.fn();
   });
 
   it('should upload a file and return the file path', async () => {
     const mockResponse = { filePath: '/path/to/file' };
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
-      json: jest.fn().mockResolvedValue(mockResponse),
+      json: vi.fn().mockResolvedValue(mockResponse),
     });
 
     const file = new File(['content'], 'test.txt', { type: 'text/plain' });
@@ -104,7 +114,7 @@ describe('RemoteProvider', () => {
   });
 
   it('should return base64 string if upload fails', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
     });
 
@@ -119,9 +129,9 @@ describe('RemoteProvider', () => {
   });
 
   it('should add a document', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
-      json: jest.fn().mockResolvedValue({}),
+      json: vi.fn().mockResolvedValue({}),
     });
 
     await provider.addDocument('docId');
@@ -135,9 +145,9 @@ describe('RemoteProvider', () => {
   });
 
   it('should update a document', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
-      json: jest.fn().mockResolvedValue({}),
+      json: vi.fn().mockResolvedValue({}),
     });
 
     const data = { name: 'new name', content: 'new content' };
@@ -151,6 +161,29 @@ describe('RemoteProvider', () => {
     });
   });
 
+  it('should send empty fields when clearing document metadata and content', async () => {
+    (global.fetch as Mock).mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({}),
+    });
+
+    await provider.updateDocument('docId', { name: '', content: '' });
+
+    expect(global.fetch).toHaveBeenCalledWith(`${BASE_URL}/document/docId`, expect.objectContaining({
+      body: JSON.stringify({ name: '', content: '' }),
+    }));
+  });
+
+  it('should not navigate when document creation fails', async () => {
+    const callback = vi.fn();
+    provider = new RemoteProvider(BASE_URL, callback);
+    (global.fetch as Mock).mockResolvedValue({ ok: false });
+
+    await provider.addDocument('docId');
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
   it('should get a document', async () => {
     const mockResponse = {
       id: 'docId',
@@ -158,9 +191,9 @@ describe('RemoteProvider', () => {
       content: 'content',
       create_time: '2021-01-01',
     };
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: true,
-      json: jest.fn().mockResolvedValue(mockResponse),
+      json: vi.fn().mockResolvedValue(mockResponse),
     });
 
     const result = await provider.getDocument('docId');
@@ -173,7 +206,7 @@ describe('RemoteProvider', () => {
   });
 
   it('should return undefined if getDocument fetch response is not ok', async () => {
-    (global.fetch as jest.Mock).mockResolvedValue({
+    (global.fetch as Mock).mockResolvedValue({
       ok: false,
     });
 
@@ -184,7 +217,7 @@ describe('RemoteProvider', () => {
 
 describe('LocalProvider', () => {
   let localProvider: LocalProvider;
-  const mockCallback = jest.fn();
+  const mockCallback = vi.fn();
 
   beforeEach(() => {
     localProvider = new LocalProvider(mockCallback);
@@ -240,6 +273,16 @@ describe('LocalProvider', () => {
     );
     expect(updatedDocuments.name).toBe('Updated Doc 1');
     expect(updatedDocuments.content).toBe('New content');
+  });
+
+  test('updateDocument should allow clearing existing fields', async () => {
+    sessionStorage.setItem(LOCAL_STORAGE_KEY + '_1', JSON.stringify({
+      id: '1', name: 'Old name', content: 'Old content',
+    }));
+
+    await localProvider.updateDocument('1', { name: '', content: '' });
+
+    expect(await localProvider.getDocument('1')).toMatchObject({ name: '', content: '' });
   });
 
   test('getDocument should return the document by id', async () => {

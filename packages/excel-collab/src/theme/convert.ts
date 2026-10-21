@@ -35,7 +35,7 @@ function hslaToHex(h: number, s: number, l: number, alpha: number) {
     b = x;
   }
   if (alpha !== 1) {
-    return `rgba(${r},${g},${b},${alpha})`;
+    return `rgba(${Math.round((r + m) * 255)},${Math.round((g + m) * 255)},${Math.round((b + m) * 255)},${alpha})`;
   }
 
   // Adjust RGB values and convert to HEX

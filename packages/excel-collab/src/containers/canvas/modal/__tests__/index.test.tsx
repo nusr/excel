@@ -1,6 +1,7 @@
+import { vi } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import Modal, { type ModalProps } from '../index';
 import { StateContext } from '../../../store';
 import { initController } from '../../../../controller';
@@ -12,7 +13,7 @@ function renderComponent(props: Partial<ModalProps> = {}, addFilter = false) {
     y: 200,
     row: 0,
     col: 0,
-    hide: jest.fn(),
+    hide: vi.fn(),
   };
   const controller = initController();
   controller.addFirstSheet();
@@ -69,6 +70,22 @@ describe('Canvas Modal', () => {
     await user.click(screen.getByText('4'));
 
     expect(screen.getByRole('checkbox', { name: '4' })).not.toBeChecked();
+  });
+
+  it('preserves an explicitly empty filter selection', async () => {
+    const { controller } = renderComponent({}, true);
+    act(() => {
+      controller.updateFilter('', { col: 0, value: { type: 'normal', value: [] } });
+    });
+    // Reopening the popup must not turn "no values" back into "all values".
+    const view = render(
+      <StateContext value={{ controller }}>
+        <Modal type="filter" x={0} y={0} row={0} col={0} hide={vi.fn()} />
+      </StateContext>,
+    );
+    const boxes = view.container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]');
+    expect(boxes.length).toBeGreaterThan(1);
+    boxes.forEach((box) => expect(box).not.toBeChecked());
   });
 
   it('throws an error for unsupported modal type', () => {

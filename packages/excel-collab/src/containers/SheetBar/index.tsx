@@ -112,7 +112,11 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
                 key={item.sheetId}
                 className={cls}
                 style={style}
-                onContextMenu={handleContextMenu}
+                onContextMenu={(event) => {
+                  setEditing(false);
+                  controller.setCurrentSheetId(item.sheetId);
+                  handleContextMenu(event);
+                }}
                 onClick={() => {
                   if (currentSheetId === item.sheetId) {
                     return;

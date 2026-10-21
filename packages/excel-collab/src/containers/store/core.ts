@@ -19,6 +19,7 @@ export type FloatElementItem = DrawingElement & {
 
 export interface CoreStore {
   editorStatus: EditorStatus;
+  editorInitialValue?: string;
   canRedo: boolean;
   canUndo: boolean;
   activeUuid: string;
@@ -32,7 +33,7 @@ export interface CoreStore {
 
 type Action = {
   setActiveUuid(uuid: string): void;
-  setEditorStatus(status: EditorStatus): void;
+  setEditorStatus(status: EditorStatus, initialValue?: string): void;
   setDefineNames(list: string[]): void;
   setFontFamilies(list: OptionItem[]): void;
   setSheetList(list: SheetItem[]): void;
@@ -57,8 +58,8 @@ export const useCoreStore = create<CoreStore & Action>((set) => ({
   setActiveUuid(uuid) {
     set({ activeUuid: uuid });
   },
-  setEditorStatus(status) {
-    set({ editorStatus: status });
+  setEditorStatus(status, initialValue) {
+    set({ editorStatus: status, editorInitialValue: initialValue });
   },
   setDefineNames(list) {
     set({ defineNames: list });

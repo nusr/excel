@@ -38,6 +38,16 @@ describe('range.test.ts', () => {
     });
   });
   describe('containRange', () => {
+    test('recognizes all rows/columns in full-axis spans and checks sheet identity', () => {
+      const point = new SheetRange(3, 4, 1, 1, 'one');
+      expect(containRange(point, new SheetRange(2, 0, 2, 0, 'one'))).toBe(true);
+      expect(containRange(point, new SheetRange(0, 3, 0, 2, 'one'))).toBe(true);
+      expect(containRange(point, new SheetRange(0, 0, 0, 0, 'one'))).toBe(true);
+      expect(containRange(point, new SheetRange(4, 0, 1, 0, 'one'))).toBe(false);
+      expect(containRange(point, new SheetRange(0, 5, 0, 1, 'one'))).toBe(false);
+      expect(containRange(point, new SheetRange(0, 0, 10, 10, 'two'))).toBe(false);
+      expect(containRange(new SheetRange(3, 4, 1, 1, ''), new SheetRange(0, 0, 10, 10, 'one'))).toBe(true);
+    });
     it('should be true', () => {
       expect(
         containRange(

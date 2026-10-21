@@ -25,7 +25,7 @@ export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
     onOpenChange,
   } = props;
   return (
-    <Modal isDismissable={isDismissable} isOpen={isOpen}>
+    <Modal isDismissable={isDismissable} isOpen={isOpen} onOpenChange={onOpenChange}>
       <AriaDialog>
         <Heading slot="title">{title}</Heading>
         {children}
@@ -35,7 +35,6 @@ export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
             variant="secondary"
             onPress={() => {
               onCancel?.();
-              onOpenChange?.(false);
             }}
             data-testid="dialog-cancel-button"
             aria-label="Cancel"

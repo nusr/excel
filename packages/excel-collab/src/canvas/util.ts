@@ -25,7 +25,6 @@ import {
   BorderType,
 } from '../types';
 import { numberFormat, isDateFormat } from '../formula';
-import { isMergeContent } from '../util';
 
 const measureTextMap = new Map<string, IWindowSize>();
 
@@ -147,13 +146,20 @@ function splitWords(
 ): string[] {
   if (isMergeContent) {
     if (isWrapText) {
-      return text.split(MERGE_CELL_LINE_BREAK);
-    } else {
-      return splitToWords(text.replaceAll(MERGE_CELL_LINE_BREAK, ''));
+      return text.split(MERGE_CELL_LINE_BREAK).flatMap((line, index) => [
+        ...(index > 0 ? ['\n'] : []),
+        ...splitByLineBreak(line),
+      ]);
     }
-  } else {
-    return splitToWords(text);
+    text = text.replaceAll(MERGE_CELL_LINE_BREAK, '');
   }
+  return splitByLineBreak(text);
+}
+
+function splitByLineBreak(text: string): string[] {
+  return text.split(/(\r\n|\r|\n)/).flatMap((part) =>
+    /^(\r\n|\r|\n)$/.test(part) ? ['\n'] : splitToWords(part),
+  );
 }
 
 export function drawAntLine(
@@ -254,6 +260,29 @@ export function renderBorderItem(
 }
 
 type TextItem = { str: string; width: number; height: number };
+function splitLongWords(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  textList: TextItem[],
+  maxWidth: number,
+  fontSize: number,
+): TextItem[] {
+  return textList.flatMap((item) => {
+    if (item.str === '\n' || item.width <= maxWidth) return [item];
+    const graphemes = typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'function'
+      ? [...new Intl.Segmenter([], { granularity: 'grapheme' }).segment(item.str)]
+        .map(({ segment }) => segment)
+      : [...item.str];
+    return graphemes.map((grapheme) => {
+      const size = measureText(ctx, grapheme);
+      return {
+        str: grapheme,
+        width: size.width,
+        height: size.height === 0 ? fontSize : size.height,
+      };
+    });
+  });
+}
+
 export function renderCell(
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   position: CanvasOverlayPosition,
@@ -303,7 +332,7 @@ export function renderCell(
   const texts = isDate
     ? [text]
     : splitWords(text, cellInfo?.isWrapText, isMergeCell);
-  const textList: TextItem[] = texts.map((item) => {
+  const measuredTexts: TextItem[] = texts.map((item) => {
     const size = measureText(ctx, item);
     return {
       str: item,
@@ -311,13 +340,20 @@ export function renderCell(
       height: size.height === 0 ? fontSize : size.height,
     };
   });
+  const textList = realStyle?.isWrapText
+    ? splitLongWords(
+        ctx,
+        measuredTexts,
+        Math.max(0, position.width - Math.ceil(fontSize / 4)),
+        fontSize,
+      )
+    : measuredTexts;
 
   // fill text
   const { width, height, resultList } = computeCell(
     textList,
     position,
     realStyle,
-    isMergeContent(Boolean(isMergeCell), text),
   );
   if (width > 0 && height > 0) {
     const lineGap = Math.ceil((fontSize * (1.5 - 1)) / 2);
@@ -359,117 +395,110 @@ function computeCell(
   texts: TextItem[],
   cellInfo: CanvasOverlayPosition,
   style?: Partial<StyleType>,
-  isMergeContent?: boolean,
 ) {
   const fontSize = style?.fontSize ? style.fontSize : DEFAULT_FONT_SIZE;
   const lineGap = Math.ceil((fontSize * (1.5 - 1)) / 2);
   const verticalAlign = style?.verticalAlign ?? EVerticalAlign.MIDDLE;
   const { left, top, height } = cellInfo;
-  const width = Math.max(cellInfo.width, ...texts.map((v) => v.width));
-  const textList: Array<{
+  const width = style?.isWrapText
+    ? cellInfo.width
+    : Math.max(cellInfo.width, ...texts.map((v) => v.width));
+  const lines: Array<{
     text: string;
-    x: number;
-    y: number;
     width: number;
     height: number;
   }> = [];
-  let textWidth = 0;
-  let textHeight = 0;
-  if (style?.isWrapText && isMergeContent) {
-    let y = 0;
-    for (let i = 0; i < texts.length; i++) {
-      const item = texts[i];
-      textWidth = Math.max(textWidth, item.width);
-      const temp = item.height + lineGap * 2;
-      textHeight += temp;
-      textList.push({
-        text: item.str,
-        x: 0,
-        y,
-        width: item.width,
-        height: item.height,
-      });
-      y += temp;
-    }
-  } else if (style?.isWrapText) {
-    let y = 0;
-    for (let i = 0; i < texts.length; ) {
-      let temp = width;
-      let line = '';
-      let w = 0;
-      let h = 0;
-      while (i < texts.length) {
-        const item = texts[i];
-        if (temp >= item.width) {
-          w += item.width;
-          h = Math.max(h, item.height);
-          temp -= item.width;
-          line += item.str;
-          i++;
-        } else {
-          break;
-        }
-      }
-      if (line) {
-        textWidth = Math.max(textWidth, w);
-        const t = h + lineGap * 2;
-        textHeight += t;
-        textList.push({
-          text: line,
-          x: 0,
-          y,
-          width: w,
-          height: h,
-        });
-        y += t;
-      }
-    }
-  } else {
-    let line = '';
-    let temp = width;
-    for (let i = 0; i < texts.length; i++) {
-      const item = texts[i];
-      if (temp >= item.width) {
-        textWidth += item.width;
-        textHeight = Math.max(textHeight, item.height);
-        line += item.str;
-        temp -= item.width;
-      } else {
-        break;
-      }
-    }
-    textList.push({
-      text: line,
-      x: 0,
-      y: 0,
-      width: textWidth,
-      height: textHeight,
-    });
+  const sourceLines: TextItem[][] = [[]];
+  for (const item of texts) {
+    if (item.str === '\n') sourceLines.push([]);
+    else sourceLines[sourceLines.length - 1].push(item);
   }
-  textHeight = Math.max(textHeight, fontSize * 1.5);
-  textWidth += lineGap;
-  textHeight += lineGap;
-  if (textWidth <= width && textHeight <= height) {
-    let x = left + lineGap;
-    let y = top + (height - textHeight) / 2 + lineGap;
-    if (verticalAlign === EVerticalAlign.TOP) {
-      y = top + lineGap;
-    } else if (verticalAlign === EVerticalAlign.BOTTOM) {
-      y = top + (height - textHeight) + lineGap;
+
+  for (const sourceLine of sourceLines) {
+    if (style?.isWrapText) {
+      const maxLineWidth = Math.max(0, width - lineGap);
+      let line = '';
+      let lineWidth = 0;
+      let lineHeight = 0;
+      const addLine = () => {
+        lines.push({
+          text: line,
+          width: lineWidth,
+          height: lineHeight || fontSize,
+        });
+        line = '';
+        lineWidth = 0;
+        lineHeight = 0;
+      };
+      for (const item of sourceLine) {
+        if (line && lineWidth + item.width > maxLineWidth) addLine();
+        line += item.str;
+        lineWidth += item.width;
+        lineHeight = Math.max(lineHeight, item.height);
+      }
+      addLine();
+    } else {
+      let line = '';
+      let lineWidth = 0;
+      let lineHeight = 0;
+      let remainingWidth = width;
+      for (const item of sourceLine) {
+        if (remainingWidth < item.width) break;
+        line += item.str;
+        lineWidth += item.width;
+        lineHeight = Math.max(lineHeight, item.height);
+        remainingWidth -= item.width;
+      }
+      lines.push({
+        text: line,
+        width: lineWidth,
+        height: lineHeight || fontSize,
+      });
     }
-    if (style?.horizontalAlign === EHorizontalAlign.CENTER) {
-      x = left + (width - textWidth) / 2;
-    } else if (style?.horizontalAlign === EHorizontalAlign.RIGHT) {
-      x = left + (width - textWidth) - lineGap;
+  }
+
+  const textWidth = Math.max(0, ...lines.map((line) => line.width)) + lineGap;
+  const contentHeight = lines.reduce((total, line, index) =>
+    total + line.height + (style?.isWrapText || index > 0 ? lineGap * 2 : 0), 0);
+  const textHeight = Math.max(contentHeight, fontSize * 1.5) + lineGap;
+  if (textWidth > width || textHeight > height) {
+    return { width: textWidth, height: textHeight, resultList: [] };
+  }
+
+  let x = left + lineGap;
+  let y = top + (height - textHeight) / 2 + lineGap;
+  if (verticalAlign === EVerticalAlign.TOP) {
+    y = top + lineGap;
+  } else if (verticalAlign === EVerticalAlign.BOTTOM) {
+    y = top + (height - textHeight) + lineGap;
+  }
+  if (style?.horizontalAlign === EHorizontalAlign.CENTER) {
+    x = left + (width - textWidth) / 2;
+  } else if (style?.horizontalAlign === EHorizontalAlign.RIGHT) {
+    x = left + (width - textWidth) - lineGap;
+  }
+  let lineTop = y;
+  const resultList = [];
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
+    if (line.text) {
+      resultList.push({
+        text: line.text,
+        x: x + (style?.horizontalAlign === EHorizontalAlign.CENTER
+          ? (textWidth - lineGap - line.width) / 2
+          : style?.horizontalAlign === EHorizontalAlign.RIGHT
+            ? textWidth - lineGap - line.width
+            : 0),
+        y: lineTop,
+        width: line.width,
+        height: line.height,
+      });
     }
-    for (const item of textList) {
-      item.x = item.x + x;
-      item.y = item.y + y;
-    }
+    lineTop += line.height + (style?.isWrapText || index < lines.length - 1 ? lineGap * 2 : 0);
   }
   return {
     width: textWidth,
     height: textHeight,
-    resultList: textList,
+    resultList,
   };
 }

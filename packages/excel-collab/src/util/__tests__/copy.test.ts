@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import {
   generateHTML,
   extractCustomData,
@@ -104,9 +105,33 @@ describe('extractCustomData', () => {
 describe('paste', () => {
   beforeEach(() => {
     // @ts-ignore
-    jest.spyOn(global, 'Blob').mockImplementation((data: string[]) => {
+    vi.spyOn(global, 'Blob').mockImplementation(function (data: string[]) {
       return { text: () => Promise.resolve(data[0]) };
     });
+  });
+
+  test('copy falls back to execCommand when the async clipboard API is unavailable', async () => {
+    const clipboard = navigator.clipboard;
+    const descriptor = Object.getOwnPropertyDescriptor(document, 'execCommand');
+    const execCommand = vi.fn(() => true);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined });
+      Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
+      await copyOrCut({
+        [PLAIN_FORMAT]: 'fallback content',
+        [HTML_FORMAT]: '',
+        [CUSTOM_FORMAT]: null,
+        [IMAGE_FORMAT]: null,
+      }, 'copy');
+      expect(execCommand).toHaveBeenCalledWith('copy');
+      expect(document.querySelector('textarea')).toBeNull();
+    } finally {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: clipboard });
+      if (descriptor) Object.defineProperty(document, 'execCommand', descriptor);
+      else Reflect.deleteProperty(document, 'execCommand');
+      log.mockRestore();
+    }
   });
   test('empty', async () => {
     const result = await paste();

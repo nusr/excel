@@ -1,5 +1,6 @@
 import { Model } from '../Model';
 import { getMockHooks } from './util';
+import { mergeCellKey } from '../../protocol';
 
 describe('mergeCell.test.ts', () => {
   let model: Model;
@@ -48,7 +49,7 @@ describe('mergeCell.test.ts', () => {
       });
 
       expect(model.toJSON().mergeCells).toEqual({
-        '1!$A$1:$B$2': {
+        [mergeCellKey({ sheetId: '1', row: 0, col: 0, rowCount: 2, colCount: 2 })]: {
           row: 0,
           col: 0,
           colCount: 2,

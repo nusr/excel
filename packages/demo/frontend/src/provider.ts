@@ -40,8 +40,7 @@ export async function fetchData<T>(
     if (!result.ok) {
       return;
     }
-    const res = result.json();
-    return res as T;
+    return await result.json() as T;
   } catch (error) {
     if (process.env.NODE_ENV !== 'test') {
       console.log(error);
@@ -90,23 +89,25 @@ export class RemoteProvider implements IProvider {
     }
     return Promise.resolve(filePath);
   }
-  async addDocument(id: string) {
-    await fetchData<DocumentItem>(
+  async addDocument(id: string, notify = true) {
+    const result = await fetchData<DocumentItem>(
       this.baseUrl + '/document',
       'POST',
       JSON.stringify({ name: '', id }),
     );
-    await this.callback(this, id);
+    if (result !== undefined && notify) {
+      await this.callback(this, id);
+    }
   }
   async updateDocument(
     id: string,
     data: Pick<DocumentItem, 'name' | 'content'>,
   ): Promise<void> {
     const temp: Pick<DocumentItem, 'name' | 'content'> = {};
-    if (data.name) {
+    if (data.name !== undefined) {
       temp.name = data.name;
     }
-    if (data.content) {
+    if (data.content !== undefined) {
       temp.content = data.content;
     }
 
@@ -166,7 +167,7 @@ export class LocalProvider implements IProvider {
   downloadFile(_docId: string, filePath: string): Promise<string> {
     return Promise.resolve(filePath);
   }
-  async addDocument(id: string) {
+  async addDocument(id: string, notify = true) {
     const data: DocumentItem = {
       id,
       name: '',
@@ -174,7 +175,9 @@ export class LocalProvider implements IProvider {
     };
 
     sessionStorage.setItem(this.getKey(id), JSON.stringify(data));
-    await this.callback(this, id);
+    if (notify) {
+      await this.callback(this, id);
+    }
   }
   async updateDocument(
     id: string,
@@ -197,10 +200,10 @@ export class LocalProvider implements IProvider {
       return;
     }
 
-    if (data.name) {
+    if (data.name !== undefined) {
       docData.name = data.name;
     }
-    if (data.content) {
+    if (data.content !== undefined) {
       docData.content = data.content;
     }
     sessionStorage.setItem(this.getKey(id), JSON.stringify(docData));

@@ -116,7 +116,7 @@ function pickCSSStyle(style: Partial<CSSStyleDeclaration>): Partial<StyleType> {
   if (fontStyle === 'italic') {
     result.isItalic = true;
   }
-  if (fontWeight && [700, 800, 900, 'bold'].includes(fontWeight)) {
+  if (fontWeight && (fontWeight === 'bold' || Number(fontWeight) >= 700)) {
     result.isBold = true;
   }
   if (
@@ -175,7 +175,7 @@ function parseStyle(
 }
 
 function convertToCssStyleDeclaration(cssStr: string) {
-  const str = cssStr.replace(/\s+/g, '').replace('<!--', '');
+  const str = cssStr.replace(/<!--|-->/g, '');
   const regex = /([^{}]+)\s*\{([^}]*)\}/g;
   const matches: Record<string, Record<string, string | number>> = {};
   let match;
@@ -217,29 +217,9 @@ export function convertPxToPt(px: number, other = 'pt'): string {
   return String(pt) + other;
 }
 export function parseText(text: string, splitter = '\t') {
-  let list: string[];
-  if (text.indexOf('\r\n') >= 0) {
-    list = text.split('\r\n');
-  } else {
-    list = text.split('\n');
-  }
-  const result = list
-    .map((v) => v.trim())
-    .filter((v) => v)
-    .map((v) =>
-      v
-        .split(splitter)
-        .map((v) => v.trim())
-        .filter((v) => v),
-    );
-  const textList: Array<Array<ResultType>> = [];
-  for (const item of result) {
-    if (item.length === 0) {
-      continue;
-    }
-    textList.push(item);
-  }
-  return textList;
+  const rows = text.split(/\r\n|\r|\n/);
+  while (rows.length && !rows[rows.length - 1].trim()) rows.pop();
+  return rows.map((row) => row.split(splitter).map((value) => value.trim()));
 }
 
 export function parseHTML(html: string) {
@@ -263,20 +243,20 @@ export function parseHTML(html: string) {
   for (const tr of trList) {
     const height = convertToPx(tr.style.height);
     if (height > 0) {
-      rowMap.set(row++, height);
+      rowMap.set(row, height);
     }
     const texts: ResultType[] = [];
     const list: Array<Partial<StyleType>> = [];
     let col = 0;
     for (const td of tr.children) {
-      if (td.tagName !== 'TD') {
+      if (td.tagName !== 'TD' && td.tagName !== 'TH') {
         continue;
       }
 
       let temp = td as HTMLElement;
       const width = convertToPx(temp.style.width);
       if (width > 0 && !colMap.has(col)) {
-        colMap.set(col++, width);
+        colMap.set(col, width);
       }
       let itemStyle: Partial<StyleType> = {};
       while (temp.nodeType !== Node.TEXT_NODE) {
@@ -294,10 +274,12 @@ export function parseHTML(html: string) {
         }
       }
       list.push(itemStyle);
-      texts.push((temp.textContent ?? '').trim());
+      texts.push((td.textContent ?? '').trim());
+      col++;
     }
     textList.push(texts);
     styleList.push(list);
+    row++;
   }
   template = undefined;
   return {

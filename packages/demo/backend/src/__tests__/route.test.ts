@@ -1,37 +1,54 @@
+import { vi } from 'vitest';
 // Mock dependencies before importing the app
-const mockDb = {
-  findFile: jest.fn(),
-  createFile: jest.fn(),
-  createDocument: jest.fn(),
-  deleteDocument: jest.fn(),
-  updateDocument: jest.fn(),
-  findDocument: jest.fn(),
-  findAllDocuments: jest.fn(),
-  upsertDocument: jest.fn(),
-  initDatabase: jest.fn().mockResolvedValue(undefined),
-};
-
-const mockReadFile = jest.fn();
-const mockJoin = jest.fn();
-const mockExtname = jest.fn();
+const { mockDb, mockReadFile, mockJoin, mockExtname } = vi.hoisted(() => ({
+  mockDb: {
+  findFile: vi.fn(),
+  createFile: vi.fn(),
+  createDocument: vi.fn(),
+  deleteDocument: vi.fn(),
+  updateDocument: vi.fn(),
+  findDocument: vi.fn(),
+  findAllDocuments: vi.fn(),
+  upsertDocument: vi.fn(),
+  loadDocumentState: vi.fn().mockResolvedValue(undefined),
+  initDatabase: vi.fn().mockResolvedValue(undefined),
+  },
+  mockReadFile: vi.fn(),
+  mockJoin: vi.fn(),
+  mockExtname: vi.fn(),
+}));
 
 // Mock modules before importing
-jest.mock('../db', () => mockDb);
+vi.mock('../db', () => mockDb);
 
-jest.mock('fs', () => ({
-  promises: {
-    readFile: mockReadFile,
-  },
-}));
+vi.mock('node:fs', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:fs')>();
+  return {
+    ...actual,
+    default: {
+      ...actual,
+      promises: { ...actual.promises, readFile: mockReadFile },
+    },
+    promises: { ...actual.promises, readFile: mockReadFile },
+  };
+});
 
-jest.mock('path', () => ({
-  join: mockJoin,
-  extname: mockExtname,
-}));
+vi.mock('node:path', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:path')>();
+  return {
+    ...actual,
+    default: { ...actual, join: mockJoin, extname: mockExtname },
+    join: mockJoin,
+    extname: mockExtname,
+  };
+});
 
-jest.spyOn(console, 'log').mockImplementation(() => {});
+vi.spyOn(console, 'log').mockImplementation(() => {});
 
 import { Context } from 'koa';
+import http from 'node:http';
+import { once } from 'node:events';
+import { Socket } from 'node:net';
 
 // Type declaration for Koa middleware next function
 type NextFunction = () => Promise<void>;
@@ -51,10 +68,47 @@ import app, {
 
 describe('Route Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Error Handling Middleware', () => {
+    it('should turn unexpected errors into 500 responses even with Koa default 404 status', async () => {
+      const ctx = { status: 404, body: undefined };
+
+      await errorHandler(ctx as unknown as Context, async () => {
+        throw new Error('Database unavailable');
+      });
+
+      expect(ctx.status).toBe(500);
+      expect(ctx.body).toEqual({
+        error: 'Internal Server Error', message: 'An unexpected error occurred',
+      });
+    });
+
+    it('should handle body parser errors with the JSON error middleware', async () => {
+      const server = http.createServer(app.callback());
+      server.listen(0, '127.0.0.1');
+      await once(server, 'listening');
+      try {
+        const address = server.address();
+        if (!address || typeof address === 'string') throw new Error('Expected TCP address');
+        const response = await fetch(`http://127.0.0.1:${address.port}/document`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{broken',
+        });
+
+        expect(response.status).toBe(400);
+        expect(await response.json()).toMatchObject({ error: expect.any(String) });
+        expect(mockDb.createDocument).not.toHaveBeenCalled();
+      } finally {
+        await new Promise<void>((resolve, reject) => {
+          server.close((error) => error ? reject(error) : resolve());
+          server.closeAllConnections();
+        });
+      }
+    });
+
     it('should handle generic errors', async () => {
       const ctx = {
         status: 200,
@@ -66,7 +120,7 @@ describe('Route Tests', () => {
       };
 
       const error = new Error('Test error');
-      const next = jest.fn().mockRejectedValue(error);
+      const next = vi.fn().mockRejectedValue(error);
 
       await errorHandler(ctx as unknown as Context, next as NextFunction);
 
@@ -86,7 +140,7 @@ describe('Route Tests', () => {
 
       const error = new Error('Custom error');
       (error as any).status = 404;
-      const next = jest.fn().mockRejectedValue(error);
+      const next = vi.fn().mockRejectedValue(error);
 
       await errorHandler(ctx as unknown as Context, next as NextFunction);
 
@@ -98,7 +152,7 @@ describe('Route Tests', () => {
       const ctx = {
         body: '' as any,
       };
-      const next = jest.fn();
+      const next = vi.fn();
 
       await errorHandler(ctx as unknown as Context, next as NextFunction);
 
@@ -110,7 +164,7 @@ describe('Route Tests', () => {
     describe('assertParam', () => {
       it('should validate parameter exists', () => {
         const ctx = {
-          throw: jest.fn(),
+          throw: vi.fn(),
           body: '' as any,
         };
 
@@ -126,7 +180,7 @@ describe('Route Tests', () => {
 
       it('should throw an error if parameter does not exist', () => {
         const ctx = {
-          throw: jest.fn(),
+          throw: vi.fn(),
           body: '' as any,
         };
 
@@ -139,7 +193,7 @@ describe('Route Tests', () => {
     describe('assertString', () => {
       it('should validate string parameter', () => {
         const ctx = {
-          throw: jest.fn(),
+          throw: vi.fn(),
           body: '' as any,
         };
 
@@ -155,7 +209,7 @@ describe('Route Tests', () => {
 
       it('should throw an error if parameter is not a string', () => {
         const ctx = {
-          throw: jest.fn(),
+          throw: vi.fn(),
           body: '' as any,
         };
 
@@ -168,7 +222,7 @@ describe('Route Tests', () => {
     describe('assertNumber', () => {
       it('should validate number parameter', () => {
         const ctx = {
-          throw: jest.fn(),
+          throw: vi.fn(),
           body: '' as any,
         };
 
@@ -180,7 +234,7 @@ describe('Route Tests', () => {
 
       it('should throw an error if parameter is not a valid number', () => {
         const ctx = {
-          throw: jest.fn(),
+          throw: vi.fn(),
         };
 
         assertNumber(ctx as unknown as Context, 'abc', 'Must be a number');
@@ -190,7 +244,7 @@ describe('Route Tests', () => {
 
       it('should throw an error if parameter is NaN', () => {
         const ctx = {
-          throw: jest.fn(),
+          throw: vi.fn(),
         };
 
         assertNumber(ctx as unknown as Context, NaN, 'Must be a valid number');
@@ -201,6 +255,26 @@ describe('Route Tests', () => {
   });
 
   describe('sendFile Function', () => {
+    it.each(['GET', 'HEAD'])('should honor conditional %s requests with a real Koa context', async (method) => {
+      const modified = new Date('2023-01-01T00:00:00Z');
+      mockDb.findFile.mockResolvedValue({
+        id: 1, name: 'test.txt', size: 4, content: Buffer.from('test'),
+        last_modified: modified.toISOString(),
+      });
+      mockExtname.mockReturnValue('.txt');
+      const request = new http.IncomingMessage(new Socket());
+      request.method = method;
+      request.headers['if-modified-since'] = modified.toUTCString();
+      const ctx = app.createContext(request, new http.ServerResponse(request));
+      ctx.params = { fileId: '1' };
+      ctx.res.statusCode = 404;
+
+      await sendFile(ctx);
+
+      expect(ctx.status).toBe(304);
+      expect(ctx.body).toBeUndefined();
+    });
+
     it('should set correct headers and body for file download (GET)', async () => {
       const mockFile = {
         id: 1,
@@ -215,7 +289,7 @@ describe('Route Tests', () => {
 
       const ctx = {
         params: { fileId: '1' },
-        set: jest.fn(),
+        set: vi.fn(),
         response: {
           lastModified: null,
           length: null,
@@ -227,7 +301,7 @@ describe('Route Tests', () => {
           method: 'GET',
           fresh: false,
         },
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await sendFile(ctx as unknown as Context);
@@ -262,7 +336,7 @@ describe('Route Tests', () => {
           method: 'HEAD',
           fresh: false,
         },
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await sendFile(ctx as unknown as Context);
@@ -278,7 +352,7 @@ describe('Route Tests', () => {
 
       const ctx = {
         params: { fileId: '1' },
-        throw: jest.fn(),
+        throw: vi.fn(),
         body: '' as any,
       };
 
@@ -290,7 +364,7 @@ describe('Route Tests', () => {
     it('should handle invalid fileId parameter', async () => {
       const ctx = {
         params: { fileId: 'abc' },
-        throw: jest.fn(),
+        throw: vi.fn(),
         body: '' as any,
       };
 
@@ -301,6 +375,18 @@ describe('Route Tests', () => {
         'fileId should be a valid number',
       );
     });
+
+    it.each(['1abc', '1.5', '0', '-1', 'Infinity', '9007199254740992'])(
+      'should reject invalid integer file id %s before querying storage',
+      async (fileId) => {
+        const ctx = { params: { fileId }, throw: vi.fn() };
+
+        await sendFile(ctx as unknown as Context);
+
+        expect(ctx.throw).toHaveBeenCalledWith(400, 'fileId should be a valid number');
+        expect(mockDb.findFile).not.toHaveBeenCalled();
+      },
+    );
 
     it('should handle GET request with fresh cache (304 Not Modified)', async () => {
       const mockFile = {
@@ -327,7 +413,7 @@ describe('Route Tests', () => {
           method: 'GET',
           fresh: true,
         },
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await sendFile(ctx as unknown as Context);
@@ -359,7 +445,7 @@ describe('Route Tests', () => {
           method: 'HEAD',
           fresh: true,
         },
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await sendFile(ctx as unknown as Context);
@@ -392,18 +478,19 @@ describe('Route Tests', () => {
           method: 'GET',
           fresh: false,
         },
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       const now = new Date();
-      jest.spyOn(global, 'Date').mockImplementation(() => now as unknown as Date);
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(now);
 
       await sendFile(ctx as unknown as Context);
 
       expect(ctx.response.lastModified).toEqual(now);
       expect(ctx.status).toBe(200);
 
-      jest.restoreAllMocks();
+      vi.useRealTimers();
     });
   });
 
@@ -416,7 +503,7 @@ describe('Route Tests', () => {
       const ctx = {
         params: { id: 'test-doc' },
         body: '',
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await findDocument(ctx as any);
@@ -431,7 +518,7 @@ describe('Route Tests', () => {
       const ctx = {
         params: { id: 'non-existing' },
         body: '',
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await findDocument(ctx as any);
@@ -447,7 +534,7 @@ describe('Route Tests', () => {
       const ctx = {
         request: { body: { name: 'New Document' } },
         body: '',
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await createDocument(ctx as any);
@@ -457,24 +544,53 @@ describe('Route Tests', () => {
     });
 
     it('should handle document updating with valid data', async () => {
-      const mockDocument = { id: 'update-doc', name: 'Updated Document', content: { updated: true } };
+      const mockDocument = { id: 'update-doc', name: 'Updated Document', content: '{"updated":true}' };
       mockDb.updateDocument.mockResolvedValue(mockDocument);
 
       const ctx = {
         params: { id: 'update-doc' },
-        request: { body: { name: 'Updated Document', content: { updated: true } } },
+        request: { body: { name: 'Updated Document', content: '{"updated":true}' } },
         body: '',
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await updateDocument(ctx as any);
 
       expect(mockDb.updateDocument).toHaveBeenCalledWith('update-doc', {
         name: 'Updated Document',
-        content: { updated: true },
+        content: '{"updated":true}',
       });
       expect(ctx.body).toEqual(mockDocument);
     });
+
+    it('should allow clearing document fields', async () => {
+      const ctx = {
+        params: { id: 'update-doc' },
+        request: { body: { name: '', content: '' } },
+        throw: vi.fn(),
+      };
+
+      await updateDocument(ctx as any);
+
+      expect(ctx.throw).not.toHaveBeenCalled();
+      expect(mockDb.updateDocument).toHaveBeenCalledWith('update-doc', { name: '', content: '' });
+    });
+
+    it.each([{ name: 123 }, { content: {} }, { name: null }])(
+      'should reject non-string document updates %j',
+      async (body) => {
+        const ctx = {
+          params: { id: 'update-doc' },
+          request: { body },
+          throw(status: number, message: string): never {
+            throw Object.assign(new Error(message), { status });
+          },
+        };
+
+        await expect(updateDocument(ctx as any)).rejects.toMatchObject({ status: 400 });
+        expect(mockDb.updateDocument).not.toHaveBeenCalled();
+      },
+    );
 
     it('should handle document deletion with valid ID', async () => {
       mockDb.deleteDocument.mockResolvedValue(1);
@@ -482,7 +598,7 @@ describe('Route Tests', () => {
       const ctx = {
         params: { id: 'delete-doc' },
         body: '',
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await deleteDocument(ctx as any);
@@ -498,7 +614,7 @@ describe('Route Tests', () => {
       const ctx = {
         query: {},
         body: '',
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await listDocuments(ctx as any);
@@ -514,7 +630,7 @@ describe('Route Tests', () => {
       const ctx = {
         query: { orderBy: 'asc' },
         body: '',
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await listDocuments(ctx as any);
@@ -531,7 +647,7 @@ describe('Route Tests', () => {
       const ctx = {
         request: { body: { room: 'test-room', data: { excel: { content: mockContent } } } },
         body: '',
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await sync(ctx as any);
@@ -547,7 +663,7 @@ describe('Route Tests', () => {
       const ctx = {
         request: { body: { room: 'test-room', data: {} } },
         body: '',
-        throw: jest.fn(),
+        throw: vi.fn(),
       };
 
       await sync(ctx as any);

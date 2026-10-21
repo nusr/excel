@@ -42,6 +42,10 @@ function getEventData(
 
 export const CanvasContainer = memo(() => {
   const { controller } = useExcel();
+  const canvasIdentity = useRef({ controller, key: 0 });
+  if (canvasIdentity.current.controller !== controller) {
+    canvasIdentity.current = { controller, key: canvasIdentity.current.key + 1 };
+  }
   const [modalState, setModalState] = useState<ModalValue | null>(null);
   const activeUuid = useCoreStore((s) => s.activeUuid);
   const floatElementList = useCoreStore((s) => s.drawings);
@@ -56,7 +60,7 @@ export const CanvasContainer = memo(() => {
       return;
     }
     return initCanvas(controller, ref.current);
-  }, []);
+  }, [controller]);
   const handleContextMenu = useCallback(
     (event: React.MouseEvent<HTMLCanvasElement>) => {
       event.preventDefault();
@@ -91,7 +95,7 @@ export const CanvasContainer = memo(() => {
       }
       /* jscpd:ignore-end */
     },
-    [],
+    [controller],
   );
   const handlePointerDown = useCallback(
     (event: React.PointerEvent<HTMLCanvasElement>) => {
@@ -110,7 +114,7 @@ export const CanvasContainer = memo(() => {
         }
       }
     },
-    [],
+    [controller],
   );
   return (
     <Fragment>
@@ -120,6 +124,7 @@ export const CanvasContainer = memo(() => {
         data-testid="canvas-container"
       >
         <canvas
+          key={canvasIdentity.current.key}
           className={styles['canvas-content']}
           onContextMenu={handleContextMenu}
           onPointerMove={handlePointerMove}

@@ -12,7 +12,7 @@ import { getTheme } from '../theme';
 import { transfer, proxy } from 'comlink';
 
 export class MainCanvas implements MainView {
-  static instance: MainCanvas;
+  static instance: MainCanvas | undefined;
   private readonly controller: IController;
   private readonly canvas: HTMLCanvasElement;
   constructor(controller: IController, canvas: HTMLCanvasElement) {
@@ -28,7 +28,10 @@ export class MainCanvas implements MainView {
       worker.init(transfer(data, [data.canvas]));
     }
   }
-  private readonly renderCallback = (result: ResponseRender) => {
+  private readonly renderCallback = (result: ResponseRender, sheetId: string) => {
+    if (!this.controller.getSheetInfo(sheetId)) {
+      return;
+    }
     const { rowMap, colMap } = result;
     const rowKeys = Object.keys(rowMap);
     const colKeys = Object.keys(colMap);
@@ -39,21 +42,21 @@ export class MainCanvas implements MainView {
       for (const [row, h] of Object.entries(rowMap)) {
         const r = parseInt(row, 10);
 
-        const old = this.controller.getRowHeight(r);
+        const old = this.controller.getRowHeight(r, sheetId);
         if (old === h) {
           continue;
         }
 
-        this.controller.setRowHeight(r, h);
+        this.controller.setRowHeight(r, h, sheetId);
       }
       for (const [col, w] of Object.entries(colMap)) {
         const c = parseInt(col, 10);
-        const old = this.controller.getColWidth(c);
+        const old = this.controller.getColWidth(c, sheetId);
         if (old === w) {
           continue;
         }
 
-        this.controller.setColWidth(c, w);
+        this.controller.setColWidth(c, w, sheetId);
       }
     });
   };
@@ -84,7 +87,10 @@ export class MainCanvas implements MainView {
 
     return this.controller
       .getHooks()
-      .worker.render(eventData, proxy(this.renderCallback));
+      .worker.render(
+        eventData,
+        proxy((result: ResponseRender) => this.renderCallback(result, currentId)),
+      );
   }
   resize() {
     const { canvas } = this;

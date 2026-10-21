@@ -45,10 +45,13 @@ import {
   copyOrCut,
   paste,
   EventEmitter,
+  modelToChangeSet,
 } from '../util';
+import type { Transaction } from 'yjs';
 import { numberFormat, isDateFormat, convertDateToNumber } from '../formula';
 import { transaction } from './decorator';
 import { v4 } from 'uuid';
+import i18n from '../i18n';
 
 const defaultScrollValue: Omit<ScrollValue, 'row' | 'col'> = {
   top: 0,
@@ -68,6 +71,12 @@ export class Controller
   private copyRange: IRange | undefined = undefined;
   private isCut = false;
   private readonly hooks: IHooks;
+  private disposed = false;
+  private readonly handleTransaction = (transaction: Transaction) => {
+    if (transaction.local) return;
+    for (const key of modelToChangeSet(transaction)) this.changeSet.add(key);
+    this.emitChange();
+  };
   private sheetViewSize: IWindowSize | null = null;
   private readonly = false;
   private canvasSize: CanvasOverlayPosition = {
@@ -80,6 +89,13 @@ export class Controller
     super();
     this.model = model;
     this.hooks = hooks;
+    hooks.doc.on('afterTransaction', this.handleTransaction);
+  }
+  destroy() {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.hooks.doc.off('afterTransaction', this.handleTransaction);
+    this.model.destroy();
   }
   setReadOnly(readOnly: boolean): void {
     this.readonly = readOnly;
@@ -167,14 +183,24 @@ export class Controller
     }
     if (
       changeSet.has('worksheets') ||
+      changeSet.has('workbook') ||
       changeSet.has('definedNames') ||
       changeSet.has('currentSheetId')
     ) {
       this.model.computeFormulas().then((result) => {
-        if (result) {
+        if (result && !this.disposed) {
           controllerLog('computeFormulas');
           this.emit('renderChange', { changeSet: new Set(['worksheets']) });
         }
+      }).catch((cause: unknown) => {
+        if (this.disposed) return;
+        console.error('Formula computation failed', cause);
+        this.emit('toastMessage', {
+          type: 'error',
+          message: i18n.t('formula-computation-failed', {
+            message: cause instanceof Error ? cause.message : String(cause),
+          }),
+        });
       });
     }
     if (changeSet.size > 0) {
@@ -368,7 +394,7 @@ export class Controller
       !isNaN(Date.parse(value))
     ) {
       const v = convertDateToNumber(new Date(value));
-      if (v === null) {
+      if (v === undefined) {
         return;
       }
       this.model.setCellValue(v, range);
@@ -395,14 +421,30 @@ export class Controller
     return this.model.canUndo();
   }
   undo() {
+    if (this.readonly) {
+      this.emit('toastMessage', { type: 'error', message: i18n.t('no-login-editing') });
+      return;
+    }
     this.model.undo();
+    this.invalidateRestoredModel();
     this.changeSet.add('undo');
     this.emitChange();
   }
   redo() {
+    if (this.readonly) {
+      this.emit('toastMessage', { type: 'error', message: i18n.t('no-login-editing') });
+      return;
+    }
     this.model.redo();
+    this.invalidateRestoredModel();
     this.changeSet.add('redo');
     this.emitChange();
+  }
+  private invalidateRestoredModel() {
+    for (const key of [
+      'worksheets', 'workbook', 'customWidth', 'customHeight', 'definedNames',
+      'mergeCells', 'autoFilter', 'drawings', 'cellStyle',
+    ] as const) this.changeSet.add(key);
   }
   getCol(col: number, sheetId?: string) {
     return this.model.getCol(col, sheetId);
@@ -509,24 +551,32 @@ export class Controller
   @transaction()
   addRow(rowIndex: number, count: number, isAbove = false): void {
     this.model.addRow(rowIndex, count, isAbove);
+    this.changeSet.add('worksheets');
+    this.changeSet.add('workbook');
     this.changeSet.add('customHeight');
     this.emitChange();
   }
   @transaction()
   addCol(colIndex: number, count: number, isRight = false): void {
     this.model.addCol(colIndex, count, isRight);
+    this.changeSet.add('worksheets');
+    this.changeSet.add('workbook');
     this.changeSet.add('customWidth');
     this.emitChange();
   }
   @transaction()
   deleteCol(colIndex: number, count: number): void {
     this.model.deleteCol(colIndex, count);
+    this.changeSet.add('worksheets');
+    this.changeSet.add('workbook');
     this.changeSet.add('customWidth');
     this.emitChange();
   }
   @transaction()
   deleteRow(rowIndex: number, count: number): void {
     this.model.deleteRow(rowIndex, count);
+    this.changeSet.add('worksheets');
+    this.changeSet.add('workbook');
     this.changeSet.add('customHeight');
     this.emitChange();
   }
@@ -584,7 +634,7 @@ export class Controller
     const check = this.model.setScroll({
       row,
       col,
-    });
+    }, id);
     if (check) {
       this.changeSet.add('scroll');
     }
@@ -736,12 +786,12 @@ export class Controller
 
     if (isCut) {
       const range = this.getActiveRange().range;
-      this.model.updateDrawing(floatElementUuid, {
+      this.transaction(() => this.model.updateDrawing(floatElementUuid, {
         fromCol: range.col,
         fromRow: range.row,
         marginX: 0,
         marginY: 0,
-      });
+      }));
       this.floatElementUuid = '';
       this.isCut = false;
       this.emitChange();
@@ -879,31 +929,31 @@ export class Controller
       }
     }
     if (custom) {
-      const activeCell = this.model.pasteRange(
+      const activeCell = this.transaction(() => this.model.pasteRange(
         custom.range,
         custom.type === 'cut',
-      );
+      ));
       this.setActiveRange(activeCell);
       return;
     }
     html = html.trim();
     text = text.trim();
     if (html) {
-      const result = this.parseHTML(html);
+      const result = this.transaction(() => this.parseHTML(html));
       if (result) {
         this.setActiveRange(result);
         return;
       }
     }
     if (text) {
-      const result = this.parseText(text);
+      const result = this.transaction(() => this.parseText(text));
       if (result) {
         this.setActiveRange(result);
         return;
       }
     }
     if (this.copyRange) {
-      const activeCell = this.model.pasteRange(this.copyRange, this.isCut);
+      const activeCell = this.transaction(() => this.model.pasteRange(this.copyRange!, this.isCut));
       this.setActiveRange(activeCell);
       if (this.isCut) {
         this.copyRange = undefined;

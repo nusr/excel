@@ -13,11 +13,8 @@ export class FilterHandler implements EventHandler {
     }
     const { controller, position } = data;
     const { row, col, marginX, marginY } = position;
-    if (row !== 0) {
-      return false;
-    }
     const filter = controller.getFilter();
-    if (!filter) {
+    if (!filter || row !== filter.range.row) {
       return false;
     }
     const { range } = filter;

@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { Model } from '..';
 import { SheetRange } from '../../util';
 import { ModelJSON, RequestFormulas, IHooks } from '../../types';
@@ -12,7 +13,7 @@ describe('model.test.ts', () => {
   test('should call computeFormulas', async () => {
     const mockTestHooks: any = {
       worker: {
-        computeFormulas: jest.fn(),
+        computeFormulas: vi.fn(),
       },
       doc: new Doc(),
     };

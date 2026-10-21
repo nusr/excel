@@ -55,6 +55,12 @@ export function SelectListBox<T>(props: ListBoxProps<T>) {
 
 export function SelectItem(props: ListBoxItemProps) {
   return (
-    <DropdownItem {...props} textValue={String(props.textValue || props.id)} />
+    <DropdownItem
+      {...props}
+      textValue={
+        props.textValue ??
+        (typeof props.children === 'string' ? props.children : String(props.id))
+      }
+    />
   );
 }

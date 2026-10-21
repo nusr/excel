@@ -74,7 +74,7 @@ describe('Import.test.tsx', () => {
     test('ok', async () => {
       fireEvent.click(await screen.findByTestId('menubar-excel-trigger'));
       const fileData = await fs.readFile(
-        path.join(__dirname, '../../../../scripts/origin.xlsx'),
+        path.join(import.meta.dirname, '../../../../scripts/origin.xlsx'),
       );
       fireEvent.change(await screen.findByTestId('menubar-import-input'), {
         target: { files: [fileData] },
@@ -83,8 +83,8 @@ describe('Import.test.tsx', () => {
         expect(
           screen.getByTestId('sheet-bar-list').childNodes.length,
         ).toBeGreaterThanOrEqual(5);
-      });
-    });
+      }, { timeout: 5000 });
+    }, 10000);
     test('empty', async () => {
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
 

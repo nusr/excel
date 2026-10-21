@@ -175,7 +175,10 @@ export const FloatElementContextMenu: React.FunctionComponent<Props> = memo(
       );
 
       return actions;
-    }, [controller, uuid, type]);
+    }, [
+      controller, uuid, type, chartType, title, props.chartRange,
+      originHeight, originWidth, width, height, resetResize,
+    ]);
 
     const modalTitle: Record<ModalType, string> = {
       changeChartTitle: i18n.t('change-chart-title'),

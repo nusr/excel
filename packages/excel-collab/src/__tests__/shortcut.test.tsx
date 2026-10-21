@@ -89,7 +89,7 @@ describe('shortcut.test.tsx', () => {
       fireEvent.keyDown(document.body, { key: 'b', [commandKey]: true });
       await waitFor(() => {
         expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
-          fontWeight: 'bold',
+          fontWeight: '700',
         });
       });
     });
@@ -97,13 +97,13 @@ describe('shortcut.test.tsx', () => {
       fireEvent.keyDown(document.body, { key: 'b', [commandKey]: true });
       await waitFor(() => {
         expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
-          fontWeight: 'bold',
+          fontWeight: '700',
         });
       });
       fireEvent.keyDown(document.body, { key: 'b', [commandKey]: true });
       await waitFor(() => {
         expect(screen.getByTestId('formula-editor-trigger')).not.toHaveStyle({
-          fontWeight: 'bold',
+          fontWeight: '700',
         });
       });
     });
@@ -173,7 +173,7 @@ describe('shortcut.test.tsx', () => {
     test('normal', async () => {
       fireEvent.keyDown(document.body, { key: 'b', [commandKey]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
-        fontWeight: 'bold',
+        fontWeight: '700',
       });
 
       fireEvent.copy(document.body, { clipboardData: { setData: () => {} } });
@@ -192,7 +192,7 @@ describe('shortcut.test.tsx', () => {
     test('normal', async () => {
       fireEvent.keyDown(document.body, { key: 'b', [commandKey]: true });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
-        fontWeight: 'bold',
+        fontWeight: '700',
       });
 
       fireEvent.cut(document.body, { clipboardData: { setData: () => {} } });
@@ -209,7 +209,7 @@ describe('shortcut.test.tsx', () => {
       fireEvent.keyDown(document.body, { key: 'ArrowUp' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
       expect(screen.getByTestId('formula-editor-trigger')).not.toHaveStyle({
-        fontWeight: 'bold',
+        fontWeight: '700',
       });
     });
   });

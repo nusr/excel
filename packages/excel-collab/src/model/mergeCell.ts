@@ -3,11 +3,10 @@ import type {
   IRange,
   IMergeCell,
   IModel,
-  YjsModelJson,
 } from '../types';
-import { convertToReference, toIRange } from '../util';
+import { toIRange } from '../util';
+import { mergeCellKey } from '../protocol';
 import i18n from '../i18n';
-import { Map } from 'yjs';
 
 export class MergeCell implements IMergeCell {
   private readonly model: IModel;
@@ -21,20 +20,17 @@ export class MergeCell implements IMergeCell {
   }
   fromJSON(json: ModelJSON): void {
     const data = json.mergeCells || {};
-    const mergeCells = new Map() as YjsModelJson['mergeCells'];
+    const mergeCells = this.mergeCells;
+    mergeCells.clear();
     for (const range of Object.values(data)) {
       range.sheetId = range.sheetId || this.model.getCurrentSheetId();
       if (!this.model.validateRange(range)) {
         continue;
       }
-      const ref = convertToReference(
-        range,
-        'absolute',
-        this.convertSheetIdToName,
-      );
-      mergeCells.set(ref, toIRange(range));
+      const key = this.key(range);
+      mergeCells.set(key, toIRange(range));
+      this.model.getRoot().bindRange(`merge:${key}`, range);
     }
-    this.model.getRoot().set('mergeCells', mergeCells);
   }
 
   getMergeCellList(sheetId?: string) {
@@ -42,37 +38,40 @@ export class MergeCell implements IMergeCell {
       return [];
     }
     const id = sheetId || this.model.getCurrentSheetId();
-    return Array.from(this.mergeCells.values()).filter((v) => v.sheetId === id);
+    return Array.from(this.mergeCells).map(([key, range]) =>
+      this.model.getRoot().range(`merge:${key}`, range))
+      .filter((range): range is IRange => !!range && range.sheetId === id);
   }
   addMergeCell(range: IRange) {
-    const ref = convertToReference(
-      range,
-      'absolute',
-      this.convertSheetIdToName,
-    );
-    if (this.mergeCells?.get(ref)) {
+    const ref = this.key(range);
+    if (this.getMergeCellList(range.sheetId).some((value) => mergeCellKey(value) === mergeCellKey(range))) {
       this.model.emit('toastMessage', {
         type: 'error',
         message: i18n.t('merging-cell-is-duplicate'),
       });
-      return;
-    }
-    if (!this.mergeCells) {
-      this.model
-        .getRoot()
-        .set('mergeCells', new Map() as YjsModelJson['mergeCells']);
+      return false;
     }
     this.mergeCells!.set(ref, toIRange(range));
+    this.model.getRoot().bindRange(`merge:${ref}`, range);
+    return true;
+  }
+  private key(range: IRange) {
+    const anchor = this.model.getRoot().anchorRange(range);
+    return anchor ? JSON.stringify([
+      range.sheetId, anchor.rows.first, anchor.rows.last, anchor.rows.full,
+      anchor.cols.first, anchor.cols.last, anchor.cols.full,
+    ]) : mergeCellKey(range);
   }
   deleteMergeCell(range: IRange): void {
     range.sheetId = range.sheetId || this.model.getCurrentSheetId();
-    const ref = convertToReference(
-      range,
-      'absolute',
-      this.convertSheetIdToName,
-    );
-
-    this.mergeCells?.delete(ref);
+    const ref = mergeCellKey(range);
+    for (const [key, value] of this.mergeCells) {
+      const projected = this.model.getRoot().range(`merge:${key}`, value);
+      if (projected && mergeCellKey(projected) === ref) {
+        this.mergeCells.delete(key);
+        this.model.getRoot().anchors.delete(`merge:${key}`);
+      }
+    }
   }
   deleteAll(sheetId?: string): void {
     if (!this.mergeCells) {
@@ -85,8 +84,4 @@ export class MergeCell implements IMergeCell {
       }
     }
   }
-  private convertSheetIdToName = (sheetId: string) => {
-    const data = this.model.getSheetInfo(sheetId);
-    return data?.name || '';
-  };
 }

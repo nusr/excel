@@ -475,7 +475,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         })?.value,
-      ).toBe(0);
+      ).toBe('#REF!');
       expect(
         controller.getCell({
           row: 1,
@@ -484,7 +484,7 @@ describe('worksheet.test.ts', () => {
           rowCount: 1,
           sheetId: controller.getCurrentSheetId(),
         })?.value,
-      ).toBe(0);
+      ).toBe('#REF!');
     });
   });
 });

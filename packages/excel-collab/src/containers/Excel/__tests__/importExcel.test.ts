@@ -1,56 +1,63 @@
-import * as XLSX from 'xlsx';
 import { importExcel } from '../importExcel';
+import { loadExcelize, checkExcelize } from '../excelize';
 import { getWorksheetKey } from '../../../util';
 
-function makeXlsxArrayBuffer(): ArrayBuffer {
-  const worksheet = XLSX.utils.aoa_to_sheet([['hello', 1]]);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-  // this xlsx build returns an ArrayBuffer for type: 'array'
-  return XLSX.write(workbook, {
-    bookType: 'xlsx',
-    type: 'array',
-  }) as unknown as ArrayBuffer;
+async function makeXlsxBytes(): Promise<Uint8Array> {
+  const api = await loadExcelize();
+  const file = checkExcelize(api.NewFile());
+  checkExcelize(file.SetCellValue('Sheet1', 'A1', 'hello'));
+  checkExcelize(file.SetCellValue('Sheet1', 'B1', 1));
+  const { buffer } = checkExcelize(file.WriteToBuffer());
+  if (!ArrayBuffer.isView(buffer)) throw new Error('Expected a binary buffer');
+  return Uint8Array.from(new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength));
 }
 
-function makeXlsxBytes(): Uint8Array {
-  return new Uint8Array(makeXlsxArrayBuffer());
-}
-
-describe('importExcel.test.ts', () => {
-  test('imports from a Uint8Array (ArrayLike branch)', async () => {
-    const model = await importExcel(makeXlsxBytes());
+describe('importExcel', () => {
+  test('imports a Uint8Array', async () => {
+    const model = await importExcel(await makeXlsxBytes());
     expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe('hello');
   });
 
-  test('imports from a raw ArrayBuffer', async () => {
-    const model = await importExcel(makeXlsxArrayBuffer());
+  test('imports an ArrayBuffer', async () => {
+    const data = await makeXlsxBytes();
+    const model = await importExcel(data.slice().buffer);
+    expect(model.worksheets[getWorksheetKey('1', 0, 1)].value).toBe(1);
+  });
+
+  test('imports a File', async () => {
+    const data = await makeXlsxBytes();
+    const model = await importExcel(new File([data.slice().buffer], 'book.xlsx'));
     expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe('hello');
   });
 
-  test('imports from a Blob-like object via arrayBuffer()', async () => {
-    const buffer = makeXlsxArrayBuffer();
-    const blobLike = {
-      arrayBuffer: async () => buffer,
-    } as unknown as Blob;
-    const model = await importExcel(blobLike);
+  test('imports a Blob-like object via arrayBuffer()', async () => {
+    const buffer = (await makeXlsxBytes()).slice().buffer;
+    const model = await importExcel({ arrayBuffer: async () => buffer } as Blob);
     expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe('hello');
   });
 
-  test('imports a CSV file as text with the field separator', async () => {
-    const file = new File(['name,age\nAlice,30'], 'people.csv', {
-      type: 'text/csv',
-    });
-    const model = await importExcel(file);
+  test.each(['people.csv', 'people.CSV'])('imports CSV %s', async (name) => {
+    const model = await importExcel(new File(['name,age\r\nAlice,30'], name));
     expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe('name');
     expect(model.worksheets[getWorksheetKey('1', 1, 1)].value).toBe(30);
   });
 
-  test('detects csv by extension even without a csv mime type', async () => {
-    const file = new File(['a,b\n1,2'], 'data.CSV', {
-      type: 'application/octet-stream',
-    });
-    const model = await importExcel(file);
-    expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe('a');
+  test('preserves quoted delimiters, escaped quotes, newlines and empty fields', async () => {
+    const model = await importExcel(new File(['\uFEFF"a,b","a""b","line\nbreak",,TRUE\r\n,,1.5'], 'data.csv'));
+    expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe('a,b');
+    expect(model.worksheets[getWorksheetKey('1', 0, 1)].value).toBe('a"b');
+    expect(model.worksheets[getWorksheetKey('1', 0, 2)].value).toBe('line\nbreak');
+    expect(model.worksheets[getWorksheetKey('1', 0, 3)]).toBeUndefined();
+    expect(model.worksheets[getWorksheetKey('1', 0, 4)].value).toBe(true);
+    expect(model.worksheets[getWorksheetKey('1', 1, 2)].value).toBe(1.5);
+  });
+
+  test('rejects malformed CSV and unsupported formats', async () => {
+    await expect(importExcel(new File(['"unclosed'], 'data.csv'))).rejects.toThrow('Unclosed');
+    await expect(importExcel(new File(['old'], 'data.xls'))).rejects.toThrow('Unsupported');
+  });
+
+  test('rejects invalid workbook bytes', async () => {
+    await expect(importExcel(new Uint8Array([1, 2, 3]))).rejects.toThrow();
   });
 });

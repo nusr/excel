@@ -14,7 +14,7 @@ describe('rangeMap.test.ts', () => {
         col: 0,
         rowCount: 1,
         colCount: 1,
-        sheetId: '1',
+        sheetId: controller.getCurrentSheetId(),
       });
       expect(controller.getActiveRange()).toEqual({
         range: {
@@ -22,7 +22,7 @@ describe('rangeMap.test.ts', () => {
           col: 0,
           rowCount: 1,
           colCount: 1,
-          sheetId: '1',
+          sheetId: controller.getCurrentSheetId(),
         },
         isMerged: false,
       });

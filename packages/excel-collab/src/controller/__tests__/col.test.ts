@@ -477,8 +477,8 @@ describe('col.test.ts', () => {
       controller.deleteCol(1, 3);
       const data = controller.getDrawingList().find((v) => v.uuid === uuid)!;
       expect(data.fromCol).toEqual(oldData.fromCol - 3);
-      expect(data.chartRange!.col).toEqual(0);
-      expect(data.chartRange!.colCount).toEqual(3);
+      expect(data.chartRange!.col).toEqual(1);
+      expect(data.chartRange!.colCount).toEqual(2);
     });
     // addCol worksheet drawing
     // deleteCol worksheet drawing

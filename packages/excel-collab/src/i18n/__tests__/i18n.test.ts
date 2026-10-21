@@ -1,14 +1,15 @@
+import { vi } from 'vitest';
 import i18n from '../';
 import { LANGUAGE_LIST } from '../../util';
 
 describe('i18n.test.ts', () => {
-  let languageGetter: ReturnType<typeof jest.spyOn>;
+  let languageGetter: ReturnType<typeof vi.spyOn>;
   beforeEach(() => {
-    languageGetter = jest.spyOn(window.navigator, 'language', 'get');
+    languageGetter = vi.spyOn(window.navigator, 'language', 'get');
     localStorage.clear();
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   describe('$', () => {
     it('en-US', () => {

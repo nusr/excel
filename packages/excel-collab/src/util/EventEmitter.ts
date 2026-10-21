@@ -6,7 +6,7 @@ export class EventEmitter<
 {
   private event: Record<string, Array<(...args: unknown[]) => void>>;
   constructor() {
-    this.event = {};
+    this.event = Object.create(null);
   }
   getEventLength<T extends keyof EventType>(name: T): number {
     // @ts-ignore
@@ -29,7 +29,8 @@ export class EventEmitter<
     if (!list || list.length <= 0) {
       return;
     }
-    for (const item of list) {
+    const snapshot = list.slice();
+    for (const item of snapshot) {
       item(data);
     }
   };
@@ -59,7 +60,10 @@ export class EventEmitter<
     name: T,
     callback: (data: EventType[T]) => void,
   ): VoidFunction => {
+    let called = false;
     const listener = (data: EventType[T]) => {
+      if (called) return;
+      called = true;
       this.off(name, listener);
       callback(data);
     };

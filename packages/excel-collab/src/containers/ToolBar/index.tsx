@@ -39,6 +39,8 @@ import {
   ChevronsDownUp,
 } from 'lucide-react';
 
+type ToolbarClickHandler = NonNullable<React.ComponentProps<typeof ToggleButton>['onClick']>;
+
 export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> =
   memo(({ children }) => {
     const { controller } = useExcel();
@@ -113,15 +115,18 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
     const redo = useCallback(() => {
       controller.redo();
     }, []);
-    const copy = useCallback(() => {
+    const copy = useCallback<ToolbarClickHandler>((event) => {
       controller.copy();
-    }, []);
-    const cut = useCallback(() => {
+      if (event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
+    }, [controller]);
+    const cut = useCallback<ToolbarClickHandler>((event) => {
       controller.cut();
-    }, []);
-    const paste = useCallback(() => {
+      if (event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
+    }, [controller]);
+    const paste = useCallback<ToolbarClickHandler>((event) => {
       controller.paste();
-    }, []);
+      if (event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
+    }, [controller]);
     const setFontSize = useCallback((value: Key | null) => {
       controller.updateCellStyle(
         { fontSize: Number(value) },

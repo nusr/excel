@@ -27,6 +27,14 @@ describe('style.test.ts', () => {
     });
   });
   describe('parseText', () => {
+    test('preserves empty cells and interior rows without shifting pasted coordinates', () => {
+      expect(parseText('\tA\t\tB\t\r\n\r\nC\tD\r\n')).toEqual([
+        ['', 'A', '', 'B', ''],
+        [''],
+        ['C', 'D'],
+      ]);
+      expect(parseText('A\tB\rC\tD')).toEqual([['A', 'B'], ['C', 'D']]);
+    });
     test('ok \n', () => {
       expect(parseText('=SUM(1,2)\t2\ntest\ttrue')).toEqual([
         ['=SUM(1,2)', '2'],
@@ -100,6 +108,21 @@ describe('style.test.ts', () => {
     });
   });
   describe('parseHTML', () => {
+    test('keeps dimension indices even when earlier rows or cells have no dimensions', () => {
+      const result = parseHTML(`<table>
+        <tr><td>A</td><td style="width:80px">B</td></tr>
+        <tr style="height:30px"><td>C</td><td style="width:90px">D</td><td style="width:100px">E</td></tr>
+      </table>`);
+      expect(result.rowMap).toEqual(new Map([[1, 30]]));
+      expect(result.colMap).toEqual(new Map([[1, 80], [2, 100]]));
+    });
+    test('preserves all cell text, header cells and inline numeric bold weights', () => {
+      const result = parseHTML(`<style>.header { font-family: Times New Roman; }</style><table>
+        <tr><th class="header" style="font-weight:700"><b>First</b> and <i>second</i></th></tr>
+      </table>`);
+      expect(result.textList).toEqual([['First and second']]);
+      expect(result.styleList[0][0]).toMatchObject({ fontFamily: 'Times New Roman', isBold: true });
+    });
     test('normal', () => {
       const mockHTML = `<html
       xmlns:v="urn:schemas-microsoft-com:vml"

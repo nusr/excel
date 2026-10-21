@@ -25,8 +25,8 @@ export async function getProvider(
     import.meta.env.MODE === 'e2e';
 
   if (!doc && !isE2e) {
-    await provider.addDocument(docId);
-    const data = { ...mockModal };
+    await provider.addDocument(docId, false);
+    const data = { ...mockModal, drawings: { ...mockModal.drawings } };
     for (const [k, v] of Object.entries(data.drawings)) {
       if (v.type === 'floating-picture') {
         // @ts-ignore

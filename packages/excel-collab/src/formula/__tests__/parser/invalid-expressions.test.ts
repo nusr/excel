@@ -2,13 +2,14 @@ import { buildTree } from './util';
 import { Parser } from '../../parser';
 import { Token } from '../../token';
 import { TokenType } from '../../../types';
+import { LiteralExpression } from '../../expression';
 
 describe('invalid expressions', () => {
   describe('error', () => {
-    test('error type', () => {
-      expect(() => {
-        new Parser([new Token(TokenType.ERROR, '#VALUE!')]).parse();
-      }).toThrow();
+    test('error literals remain in the AST for conditional evaluation', () => {
+      expect(new Parser([new Token(TokenType.ERROR, '#VALUE!')]).parse()).toEqual([
+        new LiteralExpression(new Token(TokenType.ERROR, '#VALUE!')),
+      ]);
     });
     test('cell range', () => {
       expect(() => {
@@ -21,9 +22,7 @@ describe('invalid expressions', () => {
     });
   });
   it('#VALUE!', () => {
-    expect(() => {
-      buildTree('#VALUE!');
-    }).toThrow();
+    expect(buildTree('#VALUE!')).toEqual(new LiteralExpression(new Token(TokenType.ERROR, '#VALUE!')));
   });
 
   it('SUM(', () => {

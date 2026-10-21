@@ -7,11 +7,11 @@
     "start:e2e": "vite dev --mode e2e",
     "build": "vite build",
     "type-check": "tsc",
-    "test": "jest --forceExit --detectOpenHandles",
-    "test:ci": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
+    "test": "vitest run",
+    "test:ci": "vitest run --reporter=default --reporter=junit --outputFile=test-report.junit.xml"
   },
   "dependencies": {
-    "@sentry/react": "^11.6.0",
+    "@sentry/react": "^11.8.0",
     "excel-collab": "*",
     "uuid": "^14.0.3",
     "y-websocket": "^3.1.0",

@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { type IController, type EventData } from '../../../../types';
 import { initController } from '../../../../controller';
 import { FilterHandler } from '../filter';
@@ -14,7 +15,7 @@ describe('filter.test.ts', () => {
 
   test('pointerDown should return false if no position data', () => {
     const event: any = {
-      stopPropagation: jest.fn(),
+      stopPropagation: vi.fn(),
       clientX: 0,
       clientY: 0,
     };
@@ -25,7 +26,7 @@ describe('filter.test.ts', () => {
 
   test('pointerDown should return false if no filter', () => {
     const event: any = {
-      stopPropagation: jest.fn(),
+      stopPropagation: vi.fn(),
       clientX: 0,
       clientY: 0,
     };
@@ -41,7 +42,7 @@ describe('filter.test.ts', () => {
 
   test('pointerDown should return ModalValue if conditions are met', () => {
     const event: any = {
-      stopPropagation: jest.fn(),
+      stopPropagation: vi.fn(),
       clientX: 100,
       clientY: 100,
     };
@@ -73,5 +74,19 @@ describe('filter.test.ts', () => {
   test('pointerMove should return false', () => {
     const result = filterHandler.pointerMove();
     expect(result).toBe(false);
+  });
+
+  test('opens the filter only at its actual header row', () => {
+    controller.addFilter({
+      row: 3, col: 0, rowCount: 5, colCount: 2,
+      sheetId: controller.getCurrentSheetId(),
+    });
+    const event: any = { stopPropagation: vi.fn(), clientX: 100, clientY: 100 };
+    const data: EventData = {
+      controller, position: { row: 3, col: 0, marginX: 95, marginY: 95 }, x: 0, y: 0,
+    };
+    expect(filterHandler.pointerDown(data, event)).toMatchObject({ type: 'filter', row: 3 });
+    data.position!.row = 0;
+    expect(filterHandler.pointerDown(data, event)).toBe(false);
   });
 });

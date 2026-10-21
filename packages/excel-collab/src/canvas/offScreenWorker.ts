@@ -108,40 +108,40 @@ export default class OffScreenWorker implements WorkerMainView {
     }
 
     this.isRendering = true;
-    this.eventData = data;
-    this.clear();
-    const { ctx } = this;
-    ctx.strokeStyle = getThemeColor('primaryColor', data.theme);
-    ctx.fillStyle = getThemeColor('white', data.theme);
-    ctx.lineWidth = DEFAULT_LINE_WIDTH * 2;
+    try {
+      this.eventData = data;
+      this.clear();
+      const { ctx } = this;
+      ctx.strokeStyle = getThemeColor('primaryColor', data.theme);
+      ctx.fillStyle = getThemeColor('white', data.theme);
+      ctx.lineWidth = DEFAULT_LINE_WIDTH * 2;
 
-    const { width, height } = this.eventData.canvasSize;
-    const headerSize = this.eventData.headerSize;
-    const { endRow, contentHeight } = this.renderRowsHeader(height);
-    const { endCol, contentWidth } = this.renderColsHeader(width);
-    this.renderGrid(width - headerSize.width, height - headerSize.height);
-    this.renderTriangle();
+      const { width, height } = this.eventData.canvasSize;
+      const headerSize = this.eventData.headerSize;
+      const { endRow, contentHeight } = this.renderRowsHeader(height);
+      const { endCol, contentWidth } = this.renderColsHeader(width);
+      this.renderGrid(width - headerSize.width, height - headerSize.height);
+      this.renderTriangle();
 
-    this.renderMergeCell();
+      this.renderMergeCell();
 
-    this.ctx.fillStyle = getThemeColor('selectionColor', this.eventData.theme);
-    const result = this.renderSelection({
-      endRow,
-      endCol,
-      contentHeight,
-      contentWidth,
-    });
-    this.renderAntLine(result);
-    this.renderContent({ endRow, endCol, contentHeight, contentWidth });
-    this.ctx.lineWidth = lineWidth;
-    strokeRect(this.ctx, result.left, result.top, result.width, result.height);
+      this.ctx.fillStyle = getThemeColor('selectionColor', this.eventData.theme);
+      const params = { endRow, endCol, contentHeight, contentWidth };
+      const result = this.renderSelection(params);
+      this.renderAntLine(params);
+      this.renderContent(params);
+      this.ctx.lineWidth = lineWidth;
+      this.ctx.strokeStyle = getThemeColor('primaryColor', data.theme);
+      strokeRect(this.ctx, result.left, result.top, result.width, result.height);
 
-    this.isRendering = false;
-    const res: ResponseRender = {
-      rowMap: { ...this.rowMap },
-      colMap: { ...this.colMap },
-    };
-    return res;
+      const res: ResponseRender = {
+        rowMap: { ...this.rowMap },
+        colMap: { ...this.colMap },
+      };
+      return res;
+    } finally {
+      this.isRendering = false;
+    }
   }
   resize(data: IWindowSize) {
     this.width = data.width;
@@ -203,19 +203,18 @@ export default class OffScreenWorker implements WorkerMainView {
     const pointList: Point[] = [];
     this.ctx.save();
     fillRect(this.ctx, headerSize.width, 0, width, headerSize.height);
-    Object.assign(this.ctx, getHeaderStyle());
+    Object.assign(this.ctx, getHeaderStyle(this.eventData.theme));
 
     let x = headerSize.width;
     let i = colIndex;
 
     const autoFilter = this.eventData.autoFilter;
-    let rowHeight = 0;
-    for (let r = startRow; r < this.eventData.currentSheetInfo.rowCount; r++) {
-      rowHeight = this.getRowHeight(startRow);
-      if (rowHeight !== 0) {
-        break;
-      }
-    }
+    const filterRow = autoFilter?.range.row;
+    const filterHeight = filterRow === undefined ? 0 : this.getRowHeight(filterRow);
+    const filterBottom =
+      autoFilter && filterHeight > 0 && autoFilter.range.row >= startRow
+        ? this.computeCellPosition(autoFilter.range).top + filterHeight
+        : 0;
 
     for (; i < colCount && x <= width; i++) {
       const colWidth = this.getColWidth(i);
@@ -238,12 +237,15 @@ export default class OffScreenWorker implements WorkerMainView {
       }
       if (
         autoFilter &&
+        colWidth > 0 &&
+        filterBottom > headerSize.height &&
+        filterBottom <= this.eventData.canvasSize.height &&
         i >= autoFilter.range.col &&
         i < autoFilter.range.col + autoFilter.range.colCount
       ) {
         this.renderFilter(
           x + colWidth,
-          headerSize.height + rowHeight,
+          filterBottom,
           autoFilter.col === i,
         );
       }
@@ -297,6 +299,9 @@ export default class OffScreenWorker implements WorkerMainView {
       while (i < rowCount && this.getRowHeight(i) === 0) {
         i++;
       }
+      if (i >= rowCount) {
+        break;
+      }
       yTemp.push([0, y]);
       const h = this.getRowHeight(i);
       y += h;
@@ -304,6 +309,9 @@ export default class OffScreenWorker implements WorkerMainView {
     for (let i = colIndex; i < colCount && x <= width; i++) {
       while (i < colCount && this.getColWidth(i) === 0) {
         i++;
+      }
+      if (i >= colCount) {
+        break;
       }
       xTemp.push([x, 0]);
       const w = this.getColWidth(i);
@@ -389,19 +397,39 @@ export default class OffScreenWorker implements WorkerMainView {
     return false;
   }
 
-  private renderAntLine(position: CanvasOverlayPosition) {
+  private renderAntLine({ contentWidth, contentHeight }: ContentParams) {
     const range = this.eventData.copyRange;
     if (!range || range.sheetId !== this.eventData.currentSheetInfo.sheetId) {
       return;
+    }
+    const header = this.eventData.headerSize;
+    const position = this.computeCellPosition(range);
+    let left = header.width;
+    let top = header.height;
+    let width = contentWidth - left;
+    let height = contentHeight - top;
+    if (!isSheet(range) && !isRow(range)) {
+      left = position.left;
+      width = 0;
+      for (let col = range.col; col < range.col + range.colCount; col++) {
+        width += this.getColWidth(col);
+      }
+    }
+    if (!isSheet(range) && !isCol(range)) {
+      top = position.top;
+      height = 0;
+      for (let row = range.row; row < range.row + range.rowCount; row++) {
+        height += this.getRowHeight(row);
+      }
     }
     this.ctx.lineWidth = lineWidth;
     this.ctx.strokeStyle = getThemeColor('primaryColor', this.eventData.theme);
     drawAntLine(
       this.ctx,
-      position.left,
-      position.top,
-      position.width,
-      position.height,
+      left,
+      top,
+      width,
+      height,
     );
   }
   private renderMergeCell() {
@@ -462,10 +490,9 @@ export default class OffScreenWorker implements WorkerMainView {
         c++;
       }
     } else {
-      resultX = -size.width;
       while (c > col) {
-        resultX -= this.getColWidth(c);
         c--;
+        resultX -= this.getColWidth(c);
       }
     }
     if (row >= scroll.row) {
@@ -474,10 +501,9 @@ export default class OffScreenWorker implements WorkerMainView {
         r++;
       }
     } else {
-      resultY = -size.height;
       while (r > row) {
-        resultY -= this.getRowHeight(r);
         r--;
+        resultY -= this.getRowHeight(r);
       }
     }
     return {

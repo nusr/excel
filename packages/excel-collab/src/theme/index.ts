@@ -26,7 +26,7 @@ export function getTheme(): ThemeType {
 type ColorType = keyof typeof lightColor;
 
 export function getThemeColor(key: ColorType, type?: ThemeType) {
-  if (type === 'dark' || getTheme() === 'dark') {
+  if ((type ?? getTheme()) === 'dark') {
     return darkColor[key];
   } else {
     return lightColor[key];

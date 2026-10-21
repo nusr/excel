@@ -1,46 +1,52 @@
+import { vi } from 'vitest';
 // Set up mocks before any imports
-const mockRemoteProvider = {
-  getDocument: jest.fn(),
-  addDocument: jest.fn(),
-  updateDocument: jest.fn(),
-};
-
-const mockLocalProvider = {
-  getDocument: jest.fn(),
-  addDocument: jest.fn(),
-  updateDocument: jest.fn(),
-};
-
-jest.mock('../constant', () => {
-  const mockConstants = {
+const { mockRemoteProvider, mockLocalProvider, constantsModule } = vi.hoisted(() => ({
+  mockRemoteProvider: {
+  getDocument: vi.fn(),
+  addDocument: vi.fn(),
+  updateDocument: vi.fn(),
+  },
+  mockLocalProvider: {
+  getDocument: vi.fn(),
+  addDocument: vi.fn(),
+  updateDocument: vi.fn(),
+  },
+  constantsModule: {
     VITE_DEFAULT_EXCEL_ID: '',
     BASE_URL: '/',
     VITE_BACKEND_URL: '',
-  };
+    __setMockConstants(newConstants: {
+      VITE_DEFAULT_EXCEL_ID: string;
+      BASE_URL: string;
+      VITE_BACKEND_URL: string;
+    }) {
+      Object.assign(this, newConstants);
+    },
+  },
+}));
 
+vi.mock('../constant', () => {
   return {
     get VITE_DEFAULT_EXCEL_ID() {
-      return mockConstants.VITE_DEFAULT_EXCEL_ID;
+      return constantsModule.VITE_DEFAULT_EXCEL_ID;
     },
     get BASE_URL() {
-      return mockConstants.BASE_URL;
+      return constantsModule.BASE_URL;
     },
     get VITE_BACKEND_URL() {
-      return mockConstants.VITE_BACKEND_URL;
-    },
-    __setMockConstants: (newConstants: any) => {
-      Object.assign(mockConstants, newConstants);
+      return constantsModule.VITE_BACKEND_URL;
     },
   };
 });
 
-jest.mock('../provider', () => ({
-  RemoteProvider: jest.fn().mockImplementation(() => mockRemoteProvider),
-  LocalProvider: jest.fn().mockImplementation(() => mockLocalProvider),
+vi.mock('../provider', () => ({
+  RemoteProvider: vi.fn().mockImplementation(function () {
+    return mockRemoteProvider;
+  }),
+  LocalProvider: vi.fn().mockImplementation(function () {
+    return mockLocalProvider;
+  }),
 }));
-
-// Import the mocked constants module to access the setter
-const constantsModule = require('../constant');
 
 // Mock location and parent properties
 const mockLocation = {
@@ -59,7 +65,7 @@ const mockParent = {
 // Import the actual module then replace the functions
 
 // Mock the functions with implementations that use our mocked location
-const getDocId = jest.fn().mockImplementation(() => {
+const getDocId = vi.fn().mockImplementation(() => {
   const hash = mockLocation.hash;
   if (hash.startsWith('#')) {
     return hash.slice(1);
@@ -70,7 +76,7 @@ const getDocId = jest.fn().mockImplementation(() => {
   );
 });
 
-const jumpPage = jest
+const jumpPage = vi
   .fn()
   .mockImplementation((route: 'collab' | '' | 'app', id?: string) => {
     mockLocation.href =
@@ -80,7 +86,7 @@ const jumpPage = jest
       (id ? '#' + id : '');
   });
 
-const getProvider = jest.fn().mockImplementation(async (_callback: any) => {
+const getProvider = vi.fn().mockImplementation(async (_callback: any) => {
   const httpBaseUrl = constantsModule.VITE_BACKEND_URL;
   const provider = httpBaseUrl ? mockRemoteProvider : mockLocalProvider;
 
@@ -99,7 +105,7 @@ const getProvider = jest.fn().mockImplementation(async (_callback: any) => {
 
 describe('Util Functions Tests (Clean)', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockLocation.hash = '';
     mockLocation.search = '';
@@ -211,7 +217,7 @@ describe('Util Functions Tests (Clean)', () => {
   });
 
   describe('getProvider', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
 
     beforeEach(() => {
       mockCallback.mockReset();

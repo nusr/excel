@@ -8,6 +8,7 @@ import { ProgressCircle } from './ProgressCircle';
 import './Button.css';
 import { TooltipTrigger } from 'react-aria-components/Tooltip';
 import { Tooltip } from './Tooltip';
+import clsx from 'clsx';
 
 interface ButtonProps extends Omit<RACButtonProps, 'aria-label'> {
   /**
@@ -24,7 +25,9 @@ export function Button(props: ButtonProps) {
     <TooltipTrigger>
       <RACButton
         {...props}
-        className="react-aria-Button button-base"
+        className={composeRenderProps(props.className, (className) =>
+          clsx('react-aria-Button button-base', className),
+        )}
         data-variant={props.variant || 'secondary'}
       >
         {composeRenderProps(props.children, (children, { isPending }) => (

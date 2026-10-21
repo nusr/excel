@@ -57,7 +57,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(
           }
           const r = parseReference(t, (sheetName: string) => {
             const list = controller.getSheetList();
-            const item = list.find((v) => v.name === sheetName);
+            const item = list.find((v) => v.name.toLowerCase() === sheetName.toLowerCase());
             return item?.sheetId || '';
           });
           const sheetInfo = controller.getSheetInfo(

@@ -1,6 +1,7 @@
 export {
   importExcel,
   convertWorkbookToModel,
+  IMPORT_ACCEPT,
 } from './importExcel';
 export {
   exportExcel,

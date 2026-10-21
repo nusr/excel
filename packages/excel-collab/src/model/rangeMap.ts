@@ -16,6 +16,7 @@ export class RangeMap implements IRangeMap {
       return false;
     }
     if (
+      ![range.row, range.col, range.rowCount, range.colCount].every(Number.isInteger) ||
       range.row < 0 ||
       range.col < 0 ||
       range.colCount < 0 ||

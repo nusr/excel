@@ -10,6 +10,9 @@
   "module": "./lib/index.es.js",
   "main": "./lib/index.umd.js",
   "types": "./lib/index.d.ts",
+  "typesVersions": {
+    "*": { "protocol": ["lib/protocol.d.ts"] }
+  },
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
@@ -17,24 +20,30 @@
       "module": "./lib/index.es.js",
       "require": "./lib/index.umd.js"
     },
+    "./protocol": {
+      "types": "./lib/protocol.d.ts",
+      "import": "./lib/protocol.mjs",
+      "require": "./lib/protocol.cjs"
+    },
     "./style.css": "./lib/style.css",
     "./package.json": "./package.json"
   },
   "scripts": {
     "type-check": "tsc",
-    "build": "vite build",
-    "test": "jest --forceExit --detectOpenHandles",
-    "test:ci": "JEST_JUNIT_CLASSNAME=\"{filepath}\" jest --reporters=jest-junit --forceExit --detectOpenHandles"
+    "build": "vite build && vite build --config vite.protocol.config.mts",
+    "test": "vitest run",
+    "test:ci": "vitest run --reporter=default --reporter=junit --outputFile=test-report.junit.xml"
   },
   "dependencies": {
     "@formulajs/formulajs": "^4.6.1",
     "chart.js": "^4.5.1",
     "comlink": "^4.4.2",
-    "lucide-react": "^1.55.0",
-    "numfmt": "^3.2.6",
+    "excelize-wasm": "^0.1.3",
+    "fflate": "^0.8.3",
+    "lucide-react": "^1.59.0",
+    "numfmt": "^4.0.1",
     "react-aria-components": "^1.22.1",
     "uuid": "^14.0.3",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "^5.0.15"
   },
   "peerDependencies": {

@@ -6,7 +6,7 @@
     "target": "ES2022",
     "useDefineForClassFields": true,
     "lib": ["es2022", "DOM", "DOM.Iterable"],
-    "types": ["@types/jest", "@testing-library/jest-dom", "@types/node"],
+    "types": ["vitest/globals", "@testing-library/jest-dom/vitest", "@types/node"],
     "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,

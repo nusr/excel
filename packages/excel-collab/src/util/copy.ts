@@ -57,6 +57,9 @@ function defaultCopy(value: string, type: 'copy' | 'cut') {
 }
 
 async function copy(textData: ClipboardData) {
+  if (!navigator.clipboard?.write) {
+    throw new Error('Clipboard writing is unavailable');
+  }
   const text = new Blob([textData[PLAIN_FORMAT]], { type: PLAIN_FORMAT });
   const html = new Blob([textData[HTML_FORMAT]], { type: HTML_FORMAT });
   const result: Record<string, Blob> = {
@@ -66,7 +69,7 @@ async function copy(textData: ClipboardData) {
   if (textData[IMAGE_FORMAT]) {
     result[IMAGE_FORMAT] = textData[IMAGE_FORMAT];
   }
-  await navigator?.clipboard?.write([new ClipboardItem(result)]);
+  await navigator.clipboard.write([new ClipboardItem(result)]);
 }
 
 export async function copyOrCut(

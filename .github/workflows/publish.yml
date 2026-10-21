@@ -14,7 +14,7 @@ on:
 
 concurrency:
   group: "publish"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -13,6 +13,7 @@ import type {
   ChangeEventType,
 } from '../types';
 import { type Transaction } from 'yjs';
+import { SHARED_KEYS, sharedTypeName } from '../protocol';
 
 export function parseNumber(value: any): [boolean, number] {
   if (typeof value === 'boolean') {
@@ -92,15 +93,18 @@ export function getWorksheetKey(sheetId: string, row: number, col: number) {
 export function convertWorksheetKey(
   key: string,
 ): Pick<IRange, 'sheetId' | 'row' | 'col'> | null {
-  const [sheetId, row, col] = key.split(SPLITTER);
-  const r = parseInt(row, 10);
-  const c = parseInt(col, 10);
+  const parts = key.split(SPLITTER);
+  const col = parts.pop() ?? '';
+  const row = parts.pop() ?? '';
+  const sheetId = parts.join(SPLITTER);
+  const r = /^\d+$/.test(row) ? Number(row) : -1;
+  const c = /^\d+$/.test(col) ? Number(col) : -1;
   const result: Pick<IRange, 'sheetId' | 'row' | 'col'> = {
     row: isNaN(r) ? -1 : r,
     col: isNaN(c) ? -1 : c,
     sheetId,
   };
-  if (result.row < 0 || result.col < 0 || !sheetId) {
+  if (result.row < 0 || result.col < 0 || !Number.isSafeInteger(r) || !Number.isSafeInteger(c) || !sheetId) {
     return null;
   }
   return result;
@@ -114,11 +118,13 @@ export function getCustomWidthOrHeightKey(
 }
 
 export function widthOrHeightKeyToData(key: string) {
-  const [sheetId, num] = key.split(SPLITTER);
-  const r = parseInt(num, 10);
+  const separator = key.lastIndexOf(SPLITTER);
+  const sheetId = separator < 0 ? key : key.slice(0, separator);
+  const num = separator < 0 ? '' : key.slice(separator + 1);
+  const r = /^\d+$/.test(num) ? Number(num) : -1;
   return {
     sheetId,
-    rowOrCol: isNaN(r) ? -1 : r,
+    rowOrCol: Number.isSafeInteger(r) ? r : -1,
   };
 }
 
@@ -206,6 +212,30 @@ export function uint8ArrayToString(bytes: Uint8Array) {
 
 export function modelToChangeSet(list: Transaction) {
   const result = new Set<ChangeEventType>();
+  for (const [name, type] of list.doc.share) {
+    if (!list.changed.has(type) && !list.changedParentTypes.has(type)) continue;
+    if (name.startsWith('excel:cell:')) {
+      result.add('worksheets');
+      result.add('cellStyle');
+    } else if (name === 'excel:anchors') {
+      for (const key of ['mergeCells', 'definedNames', 'autoFilter', 'drawings', 'worksheets'] as const) {
+        result.add(key);
+      }
+    } else if (name === 'excel:formulaBindings') {
+      result.add('worksheets');
+    }
+  }
+  for (const key of SHARED_KEYS) {
+    const type = list.doc.share.get(sharedTypeName(key));
+    if (type && (list.changed.has(type) || list.changedParentTypes.has(type))) {
+      result.add(key);
+      if (key === 'workbook') {
+        for (const item of ['worksheets', 'customHeight', 'customWidth', 'currentSheetId'] as const) {
+          result.add(item);
+        }
+      }
+    }
+  }
   const set: Set<string> = new Set(KEY_LIST);
   for (const item of list.changed.keys()) {
     const key = item._item?.parentSub;

@@ -9,8 +9,8 @@ export interface ProgressCircleProps extends ProgressBarProps {
 
 export function ProgressCircle(props: ProgressCircleProps) {
   // SVG strokes are centered, so subtract half the stroke width from the radius to create an inner stroke.
-  let strokeWidth = 4;
-  let radius = `calc(50% - ${strokeWidth / 2}px)`;
+  const strokeWidth = 4;
+  const radius = (32 - strokeWidth) / 2;
 
   return (
     <ProgressBar
@@ -24,15 +24,15 @@ export function ProgressCircle(props: ProgressCircleProps) {
         <>
           <svg fill="none" width="100%" height="100%" viewBox="0 0 32 32">
             <circle
-              cx="50%"
-              cy="50%"
+              cx={16}
+              cy={16}
               r={radius}
               stroke="var(--highlight-pressed)"
               strokeWidth={strokeWidth}
             />
             <circle
-              cx="50%"
-              cy="50%"
+              cx={16}
+              cy={16}
               r={radius}
               stroke="var(--highlight-background)"
               strokeWidth={strokeWidth}

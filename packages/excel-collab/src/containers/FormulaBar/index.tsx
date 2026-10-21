@@ -18,6 +18,7 @@ export const FormulaBarContainer = memo(() => {
   const activeCell = useActiveCell();
   const cellStyle = useStyleStore();
   const editorStatus = useCoreStore((state) => state.editorStatus);
+  const editorInitialValue = useCoreStore((state) => state.editorInitialValue);
   const setEditorStatus = useCoreStore((state) => state.setEditorStatus);
 
   const displayName = useMemo(() => {
@@ -48,7 +49,7 @@ export const FormulaBarContainer = memo(() => {
       <div className={styles['formula-bar-editor-wrapper']}>
         {editorStatus !== EditorStatus.NONE && (
           <MultipleLineEditor
-            initValue={activeCell.value}
+            initValue={editorInitialValue ?? activeCell.value}
             style={getEditorStyle(activeCell, editorStatus, cellStyle)}
             testId="formula-editor"
             isMergeCell={cellStyle.isMergeCell}

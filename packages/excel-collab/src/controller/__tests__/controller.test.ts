@@ -8,6 +8,7 @@ import {
   IController,
 } from '../../types';
 import { waitFor } from '@testing-library/react';
+import { mergeCellKey } from '../../protocol';
 
 describe('controller.test.ts', () => {
   let controller: IController;
@@ -368,7 +369,7 @@ describe('controller.test.ts', () => {
           },
         },
         mergeCells: {
-          'Sheet1!$U$21:$W$23': {
+          [mergeCellKey({ sheetId, row: 20, col: 20, rowCount: 3, colCount: 3 })]: {
             row: 20,
             col: 20,
             rowCount: 3,

@@ -1,6 +1,7 @@
 import sqlite3 from 'sqlite3';
 import mockModal from '../../../../scripts/model.json';
 import mockImage from '../../../../scripts/image.json';
+import path from 'node:path';
 
 // Document operations
 export interface Document {
@@ -20,7 +21,7 @@ export interface File {
 }
 
 // Database connection
-const db = new sqlite3.Database('./dev.db', (err) => {
+const db = new sqlite3.Database(path.resolve(__dirname, './dev.db'), (err) => {
   if (err) {
     console.error('Error opening database:', err);
     throw err;
@@ -66,9 +67,16 @@ export async function initDatabase(): Promise<void> {
       id TEXT PRIMARY KEY,
       name TEXT,
       create_time TEXT DEFAULT CURRENT_TIMESTAMP,
-      content TEXT
+      content TEXT,
+      y_state BLOB
     )
   `);
+  const columns = await allAsync<{ name: string }>(
+    'PRAGMA table_info(document)',
+  );
+  if (!columns.some((column) => column.name === 'y_state')) {
+    await runAsync('ALTER TABLE document ADD COLUMN y_state BLOB');
+  }
 
   await runAsync(`
     CREATE TABLE IF NOT EXISTS file (
@@ -81,9 +89,13 @@ export async function initDatabase(): Promise<void> {
   `);
 
   // Add indexes for better performance
-  await runAsync(`CREATE INDEX IF NOT EXISTS idx_document_create_time ON document(create_time)`);
+  await runAsync(
+    `CREATE INDEX IF NOT EXISTS idx_document_create_time ON document(create_time)`,
+  );
   await runAsync(`CREATE INDEX IF NOT EXISTS idx_file_name ON file(name)`);
-  await runAsync(`CREATE INDEX IF NOT EXISTS idx_file_last_modified ON file(last_modified)`);
+  await runAsync(
+    `CREATE INDEX IF NOT EXISTS idx_file_last_modified ON file(last_modified)`,
+  );
 }
 
 export async function createDocument(data: Document): Promise<Document> {
@@ -97,7 +109,7 @@ export async function createDocument(data: Document): Promise<Document> {
     ],
   );
   const result = await getAsync<Document>(
-    'SELECT * FROM document WHERE id = ?',
+    'SELECT id, name, create_time, content FROM document WHERE id = ?',
     [data.id],
   );
   if (!result) {
@@ -108,7 +120,7 @@ export async function createDocument(data: Document): Promise<Document> {
 
 export async function findDocument(id: string): Promise<Document | null> {
   const result = await getAsync<Document>(
-    'SELECT * FROM document WHERE id = ?',
+    'SELECT id, name, create_time, content FROM document WHERE id = ?',
     [id],
   );
   return result || null;
@@ -119,7 +131,26 @@ export async function findAllDocuments(
 ): Promise<Document[]> {
   const order = orderBy === 'desc' ? 'DESC' : 'ASC';
   return allAsync<Document>(
-    `SELECT * FROM document ORDER BY create_time ${order}`,
+    `SELECT id, name, create_time, content FROM document ORDER BY create_time ${order}`,
+  );
+}
+
+export function loadDocumentState(id: string) {
+  return getAsync<{ content: string | null; state: Buffer | null }>(
+    'SELECT content, y_state AS state FROM document WHERE id = ?',
+    [id],
+  );
+}
+
+export async function saveDocumentState(
+  id: string,
+  state: Uint8Array,
+  content: string,
+): Promise<void> {
+  await runAsync(
+    `INSERT INTO document (id, content, y_state) VALUES (?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET content = excluded.content, y_state = excluded.y_state`,
+    [id, content, Buffer.from(state)],
   );
 }
 
@@ -188,7 +219,9 @@ export async function createFile(data: File): Promise<File> {
       data.last_modified ?? new Date().toISOString(),
     ],
   );
-  const file = await getAsync<File>('SELECT * FROM file WHERE id = ?', [result.lastID]);
+  const file = await getAsync<File>('SELECT * FROM file WHERE id = ?', [
+    result.lastID,
+  ]);
   if (!file) {
     throw new Error('Failed to create file');
   }
@@ -238,7 +271,10 @@ export async function seedDatabase() {
     try {
       await createDocument(doc);
     } catch (error) {
-      if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+      if (
+        error instanceof Error &&
+        error.message.includes('UNIQUE constraint failed')
+      ) {
         console.log(`Document with id ${doc.id} already exists`);
       } else {
         throw error;
@@ -251,7 +287,10 @@ export async function seedDatabase() {
     try {
       await createFile(file);
     } catch (error) {
-      if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+      if (
+        error instanceof Error &&
+        error.message.includes('UNIQUE constraint failed')
+      ) {
         console.log(`File with id ${file.id} already exists`);
       } else {
         throw error;

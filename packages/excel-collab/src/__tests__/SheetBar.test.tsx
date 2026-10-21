@@ -111,6 +111,14 @@ describe('SheetBar.test.ts', () => {
     });
   });
   describe('context menu', () => {
+    test('right clicking an inactive sheet targets that sheet', async () => {
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
+      fireEvent.contextMenu(screen.getByText('Sheet1'), { clientX: 199 });
+      expect(screen.getByTestId('sheet-bar-active-item')).toHaveTextContent('Sheet1');
+      fireEvent.click(screen.getByTestId('sheet-bar-context-menu-delete'));
+      expect(screen.getByTestId('sheet-bar-list')).not.toHaveTextContent('Sheet1');
+      expect(screen.getByTestId('sheet-bar-list')).toHaveTextContent('Sheet2');
+    });
     test('normal', () => {
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,

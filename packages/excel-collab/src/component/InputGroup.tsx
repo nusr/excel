@@ -19,7 +19,12 @@ export function InputGroup(props: InputGroupProps) {
           {props.label}
         </Label>
       )}
-      <Group {...props} aria-labelledby={id} className="react-aria-Group inset">
+      <Group
+        {...props}
+        aria-labelledby={
+          [props.label ? id : undefined, props['aria-labelledby']].filter(Boolean).join(' ') || undefined
+        }
+        className="react-aria-Group inset">
         {composeRenderProps(props.children, (children, renderProps) => (
           <InputContext.Provider value={{disabled: renderProps.isDisabled}}>
             {children}

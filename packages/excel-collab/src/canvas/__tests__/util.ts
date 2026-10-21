@@ -16,7 +16,7 @@ const defaultWidth = 200;
 const defaultHeight = 100;
 
 beforeAll(async () => {
-  const imageDir = path.join(__dirname, './static');
+  const imageDir = path.join(import.meta.dirname, './static');
   if (!fs.existsSync(imageDir)) {
     await fs.promises.mkdir(imageDir);
   }
@@ -115,9 +115,10 @@ export async function compareScreenShot(
   setDpr(2);
   const canvas = renderCanvas(controller, theme);
   const imageName = (expect.getState().currentTestName || '')
+    .replaceAll(' > ', ' ')
     .replaceAll(' ', '_')
     .toLowerCase();
-  const imageDir = path.join(__dirname, './static');
+  const imageDir = path.join(import.meta.dirname, './static');
   const imagePath = path.join(imageDir, encodeURIComponent(imageName) + '.png');
   const newBuffer = canvas.toBuffer('image/png');
   let baseBuffer: Buffer;

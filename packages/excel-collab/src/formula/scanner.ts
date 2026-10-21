@@ -11,19 +11,35 @@ import {
   isDigit,
   isAlpha,
   getCustomError,
-  anyError,
+  ERROR_SET,
 } from '../util';
 import { TokenType } from '../types';
 
 const emptyData = '';
 
+export interface SheetReference {
+  name: string;
+  /** UTF-16 source offsets; end excludes the following exclamation mark. */
+  start: number;
+  end: number;
+}
+
 export class Scanner {
   private readonly list: string[];
+  private readonly offsets: number[];
+  readonly sheetReferences: SheetReference[] = [];
   private current = 0;
   private start = 0;
   private readonly tokens: Token[] = [];
   constructor(source: string) {
     this.list = [...source];
+    let offset = 0;
+    this.offsets = this.list.map((char) => {
+      const start = offset;
+      offset += char.length;
+      return start;
+    });
+    this.offsets.push(source.length);
   }
   scan(): Token[] {
     while (!this.isAtEnd()) {
@@ -62,18 +78,31 @@ export class Scanner {
     const text = this.list.slice(this.start, this.current).join('');
     this.tokens.push(new Token(type, text));
   }
+  private addSheetName(name: string) {
+    this.tokens.push(new Token(TokenType.SHEET_NAME, name));
+    this.sheetReferences.push({
+      name,
+      start: this.offsets[this.start],
+      end: this.offsets[this.current - 1],
+    });
+  }
   private string(end: string) {
-    while (!this.isAtEnd() && this.peek() !== end) {
-      this.next();
+    let text = '';
+    let closed = false;
+    while (!this.isAtEnd()) {
+      const char = this.next();
+      if (char !== end) {
+        text += char;
+      } else if (this.match(end)) {
+        text += end;
+      } else {
+        closed = true;
+        break;
+      }
     }
-    if (this.peek() !== end) {
-      throw getCustomError('#VALUE!');
-    } else {
-      this.next();
-    }
-    const text = this.list.slice(this.start + 1, this.current - 1).join('');
+    if (!closed) throw getCustomError('#VALUE!');
     if (end === "'" && this.match('!')) {
-      this.tokens.push(new Token(TokenType.SHEET_NAME, text));
+      this.addSheetName(text);
       return;
     }
     this.tokens.push(new Token(TokenType.STRING, text));
@@ -105,36 +134,15 @@ export class Scanner {
       this.getDigits();
     }
   }
-  private matchScientificCounting() {
-    if (this.match('E') || this.match('e')) {
-      // 1E-10 1E+10
-      if (this.match('+') || this.match('-')) {
-        this.getDigits();
-        this.addToken(TokenType.NUMBER);
-        return true;
-      }
-      if (isDigit(this.peek())) {
-        this.getDigits();
-        this.addToken(TokenType.NUMBER);
-        return true;
-      }
-      // 1E or 1.1E not valid
-      throw getCustomError('#VALUE!');
-    }
-    return false;
-  }
   private number() {
     this.getDigits();
-    const check1 = this.matchScientificCounting();
-    if (check1) {
-      return;
-    }
-    if (this.match('.')) {
+    if (this.list[this.start] !== '.' && this.match('.')) {
       this.getDigits();
     }
-    const check2 = this.matchScientificCounting();
-    if (check2) {
-      return;
+    if (this.match('E') || this.match('e')) {
+      if (!this.match('+')) this.match('-');
+      if (!isDigit(this.peek())) throw getCustomError('#VALUE!');
+      this.getDigits();
     }
     this.addToken(TokenType.NUMBER);
   }
@@ -144,29 +152,27 @@ export class Scanner {
     }
     let text = this.list.slice(this.start, this.current).join('');
     const t = text.toUpperCase();
-    if (BUILT_IN_FUNCTION_SET.has(t as BuiltInFormulas) && this.match('(')) {
-      this.tokens.push(new Token(TokenType.EXCEL_FUNCTION, t));
+    const functionName = t.replace(/^_XLFN\./, '').replace(/^_XLWS\./, '');
+    const end = this.current;
+    while (!this.isAtEnd() && this.isWhiteSpace(this.peek())) this.next();
+    if (this.match('(')) {
+      let type = TokenType.EXCEL_FUNCTION;
+      if (!BUILT_IN_FUNCTION_SET.has(functionName as BuiltInFormulas)) {
+        if (['IF', 'CHOOSE'].includes(functionName)) type = TokenType.REF_FUNCTION_COND;
+        if (['INDEX', 'OFFSET', 'INDIRECT'].includes(functionName)) type = TokenType.REF_FUNCTION;
+      }
+      this.tokens.push(new Token(type, functionName));
       return;
     }
-    if (['IF', 'CHOOSE'].includes(t) && this.match('(')) {
-      this.tokens.push(new Token(TokenType.REF_FUNCTION_COND, t));
-      return;
-    }
-    if (['INDEX', 'OFFSET', 'INDIRECT'].includes(t) && this.match('(')) {
-      this.tokens.push(new Token(TokenType.REF_FUNCTION, t));
-      return;
-    }
+    this.current = end;
     if (this.match('!')) {
-      this.tokens.push(new Token(TokenType.SHEET_NAME, text));
+      this.addSheetName(text);
       return;
     }
     let type: TokenType = TokenType.BOOL;
     if (t === 'TRUE' || t === 'FALSE') {
       text = t;
       type = TokenType.BOOL;
-    } else if (anyError(t)) {
-      text = t;
-      type = t === '#REF!' ? TokenType.ERROR_REF : TokenType.ERROR;
     } else if (CELL_REG_EXP.test(t)) {
       type = TokenType.CELL;
     } else if (COLUMN_REG_EXP.test(t)) {
@@ -217,6 +223,11 @@ export class Scanner {
         this.matchR1C1();
         if (this.match('C') || this.match('c')) {
           this.matchR1C1();
+          if (this.peek() === '!' || (!this.isAtEnd() && this.anyChar(this.peek()))) {
+            this.current = this.start + 1;
+            this.addIdentifier();
+            break;
+          }
           const text = this.list
             .slice(this.start, this.current)
             .join('')
@@ -225,6 +236,14 @@ export class Scanner {
         } else {
           this.addIdentifier();
         }
+        break;
+      }
+      case '#': {
+        const remaining = this.list.slice(this.start).join('').toUpperCase();
+        const error = [...ERROR_SET].find((value) => remaining.startsWith(value));
+        if (!error) throw getCustomError('#NAME?');
+        this.current = this.start + error.length;
+        this.tokens.push(new Token(error === '#REF!' ? TokenType.ERROR_REF : TokenType.ERROR, error));
         break;
       }
       case '(':
@@ -308,7 +327,7 @@ export class Scanner {
       case '\n':
         break;
       default:
-        if (isDigit(c)) {
+        if (isDigit(c) || (c === '.' && isDigit(this.peek()))) {
           this.number();
         } else {
           this.addIdentifier();
@@ -317,7 +336,7 @@ export class Scanner {
     }
   }
   private anyChar(c: string) {
-    const text = '(),:=<>+-*/^&%"{}!';
+    const text = '(),;:=<>+-*/^&%"{}!\'';
     return !text.includes(c) && !this.isWhiteSpace(c);
   }
   private isWhiteSpace(c: string) {

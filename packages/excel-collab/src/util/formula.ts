@@ -2,11 +2,13 @@ import { type ErrorTypes, ERROR_SET } from './constant';
 import * as formulajs from '@formulajs/formulajs';
 
 export const getFunction = (name: string) => {
-  const fun = (formulajs as any)[name];
-  if (!fun) {
-    throw getCustomError('#NAME?');
+  let fun: unknown = formulajs;
+  for (const part of name.toUpperCase().replace(/^_XLFN\./, '').replace(/^_XLWS\./, '').split('.')) {
+    if (!fun || (typeof fun !== 'object' && typeof fun !== 'function') ||
+      !Object.prototype.hasOwnProperty.call(fun, part)) throw getCustomError('#NAME?');
+    fun = Reflect.get(fun, part);
   }
-
+  if (typeof fun !== 'function') throw getCustomError('#NAME?');
   return fun;
 };
 
@@ -28,15 +30,6 @@ export const getCustomError = (value: ErrorTypes) => {
 };
 
 export const anyError = (err: unknown) => {
-  let res: ErrorTypes | undefined = undefined;
-
-  if (err instanceof Error && ERROR_SET.has(err.message as ErrorTypes)) {
-    res = err.message as ErrorTypes;
-  }
-
-  if (err instanceof String && ERROR_SET.has(err as ErrorTypes)) {
-    res = err as ErrorTypes;
-  }
-
-  return res;
+  const message = err instanceof Error ? err.message : typeof err === 'string' || err instanceof String ? String(err) : undefined;
+  return [...ERROR_SET].find((value) => value === message);
 };

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, esmExternalRequirePlugin } from 'vite';
 import dts from 'vite-plugin-dts';
 import { codecovVitePlugin } from '@codecov/vite-plugin';
 
@@ -12,7 +12,10 @@ const external = [
 ];
 
 export default defineConfig({
+  base: './',
   plugins: [
+    // Let the plugin externalize peers so bundled CommonJS uses ESM imports.
+    esmExternalRequirePlugin({ external }),
     dts(),
     codecovVitePlugin({
       enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
@@ -35,7 +38,6 @@ export default defineConfig({
     },
 
     rollupOptions: {
-      external,
       output: {
         globals: {
           react: 'React',

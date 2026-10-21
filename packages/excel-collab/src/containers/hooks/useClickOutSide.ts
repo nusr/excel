@@ -28,7 +28,7 @@ export function useClickOutside(
       document.removeEventListener('pointerdown', handleEvent);
       window.removeEventListener('blur', handleEvent);
     };
-  }, [shouldExecute]);
+  }, [shouldExecute, handler]);
 
   return ref;
 }

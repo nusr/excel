@@ -6,13 +6,13 @@ import path from 'node:path';
 import koaBody from 'koa-body';
 import fs from 'node:fs';
 import stream from 'node:stream';
+import { writeJsonContent } from './documentAccess';
 
 const app = new Koa();
 const router = new Router();
 const UPLOAD_PREFIX = '/upload/';
 
 app.use(cors());
-app.use(koaBody({ multipart: true, json: true }));
 
 // Error handling middleware
 export async function errorHandler(
@@ -34,8 +34,6 @@ export async function errorHandler(
     if (error.status) {
       ctx.status = error.status;
       ctx.body = { error: error.message || 'Error', message: error.message };
-    } else if (ctx.status >= 400) {
-      ctx.body = { error: 'Bad Request', message: error.message };
     } else {
       ctx.status = 500;
       ctx.body = {
@@ -47,6 +45,7 @@ export async function errorHandler(
 }
 
 app.use(errorHandler);
+app.use(koaBody({ multipart: true, json: true }));
 
 export function assertParam(
   ctx: Koa.Context,
@@ -79,10 +78,10 @@ export function assertNumber(
 }
 
 export async function sendFile(ctx: Koa.Context) {
-  const fileId = parseInt(ctx.params.fileId, 10);
+  const fileId = Number(ctx.params.fileId);
 
   // Validate fileId is a valid number before proceeding
-  if (isNaN(fileId)) {
+  if (!Number.isSafeInteger(fileId) || fileId <= 0) {
     ctx.throw(400, 'fileId should be a valid number');
     return
   }
@@ -97,6 +96,7 @@ export async function sendFile(ctx: Koa.Context) {
   ctx.response.lastModified = new Date(result.last_modified ?? new Date());
   ctx.response.length = result.size;
   ctx.type = path.extname(result.name);
+  ctx.status = 200;
 
   switch (ctx.request.method) {
     case 'HEAD':
@@ -156,7 +156,7 @@ router.head(`${UPLOAD_PREFIX}:fileId`, async (ctx: Koa.Context) => {
 
 // POST create document
 export const createDocument = async (ctx: Koa.Context) => {
-  const { id, name } = (ctx.request as any).body;
+  const { id, name } = (ctx.request as any).body ?? {};
   assertString(ctx, id, 'Document ID must be a string');
   assertString(ctx, name, 'Document name must be a string');
 
@@ -176,13 +176,20 @@ export const deleteDocument = async (ctx: Koa.Context) => {
 
 // PUT update document
 export const updateDocument = async (ctx: Koa.Context) => {
-  const { name, content } = (ctx.request as any).body;
+  const { name, content } = (ctx.request as any).body ?? {};
   const id = ctx.params.id;
 
   assertString(ctx, id, 'Document ID must be a string');
-  assertParam(ctx, name || content, 'Either name or content must be provided');
+  assertParam(ctx, name !== undefined || content !== undefined, 'Either name or content must be provided');
+  if (name !== undefined) {
+    assertString(ctx, name, 'Document name must be a string');
+  }
+  if (content !== undefined) {
+    assertString(ctx, content, 'Document content must be a string');
+  }
 
-  const result = await db.updateDocument(id, { name, content });
+  const write = () => db.updateDocument(id, { name, content });
+  const result = await (content === undefined ? write() : writeJsonContent(id, write));
   ctx.body = result;
 };
 
@@ -212,7 +219,7 @@ export const listDocuments = async (ctx: Koa.Context) => {
 
 // Sync document
 export const sync = async (ctx: Koa.Context) => {
-  const body = (ctx.request as any).body;
+  const body = (ctx.request as any).body ?? {};
   const { room: id, data } = body;
 
   const content = data?.excel?.content;
@@ -223,10 +230,10 @@ export const sync = async (ctx: Koa.Context) => {
   }
   assertString(ctx, id, 'Room ID must be a string');
   const realContent = JSON.stringify(content);
-  const result = await db.upsertDocument(id, {
+  const result = await writeJsonContent(id, () => db.upsertDocument(id, {
     content: realContent,
     id,
-  });
+  }));
 
   ctx.body = result;
 };

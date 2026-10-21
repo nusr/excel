@@ -13,7 +13,6 @@ export * from './lodash';
 export * from './font';
 export * from './event';
 export * from './saveAs';
-export * from './color';
 export * from './EventEmitter';
 export * from './image';
 export * from './split';

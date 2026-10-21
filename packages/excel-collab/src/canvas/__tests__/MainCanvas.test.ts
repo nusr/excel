@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { MainCanvas } from '../MainCanvas';
 import { initController } from '../../controller';
 import { RequestRender, IWindowSize, ResponseRender } from '../../types';
@@ -6,10 +7,10 @@ import { CELL_HEIGHT, CELL_WIDTH } from '../../util';
 
 describe('MainCanvas.test.ts', () => {
   const mockWorker = {
-    init: jest.fn(),
-    render: jest.fn(),
-    resize: jest.fn(),
-    computeFormulas: jest.fn(),
+    init: vi.fn(),
+    render: vi.fn(),
+    resize: vi.fn(),
+    computeFormulas: vi.fn(),
   };
 
   const hooks = {
@@ -48,7 +49,7 @@ describe('MainCanvas.test.ts', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
   describe('render', () => {
     test('init', () => {
@@ -70,6 +71,8 @@ describe('MainCanvas.test.ts', () => {
       const result: RequestRender = {
         ...resultData,
         changeSet: new Set(['cellStyle']),
+        currentSheetInfo: { ...resultData.currentSheetInfo!, sheetId: c.getCurrentSheetId() },
+        range: { ...resultData.range, sheetId: c.getCurrentSheetId() },
       };
       expect(mockWorker.render).toHaveBeenCalledWith(
         result,
@@ -78,7 +81,7 @@ describe('MainCanvas.test.ts', () => {
     });
     test('render callback ok', async () => {
       // @ts-ignore
-      hooks.worker.render = jest
+      hooks.worker.render = vi
         .fn()
         .mockImplementation(
           (_data: RequestRender, cb: (data: ResponseRender) => void) => {
@@ -98,7 +101,7 @@ describe('MainCanvas.test.ts', () => {
     });
     test('render callback fail', async () => {
       // @ts-ignore
-      hooks.worker.render = jest
+      hooks.worker.render = vi
         .fn()
         .mockImplementation(
           (_data: RequestRender, cb: (data: ResponseRender) => void) => {
@@ -115,6 +118,25 @@ describe('MainCanvas.test.ts', () => {
       await instance.render({ changeSet: new Set(['cellStyle']) });
       expect(c.getRow(1).len).toBe(CELL_HEIGHT);
       expect(c.getCol(1).len).toBe(CELL_WIDTH);
+    });
+    test('an asynchronous callback resizes its originating sheet after switching sheets', async () => {
+      let callback!: (data: ResponseRender) => void;
+      mockWorker.render.mockImplementation((_data, cb) => {
+        callback = cb;
+        return Promise.resolve();
+      });
+      const c = initController({ doc: new Doc(), worker: mockWorker as any });
+      c.addSheet();
+      const firstSheetId = c.getCurrentSheetId();
+      const instance = new MainCanvas(c, {} as HTMLCanvasElement);
+      await instance.render({ changeSet: new Set(['cellStyle']) });
+      c.addSheet();
+      const secondSheetId = c.getCurrentSheetId();
+      callback({ rowMap: { 1: 300 }, colMap: { 1: 600 } });
+      expect(c.getRow(1, firstSheetId).len).toBe(300);
+      expect(c.getCol(1, firstSheetId).len).toBe(600);
+      expect(c.getRow(1, secondSheetId).len).toBe(CELL_HEIGHT);
+      expect(c.getCol(1, secondSheetId).len).toBe(CELL_WIDTH);
     });
   });
   describe('resize', () => {

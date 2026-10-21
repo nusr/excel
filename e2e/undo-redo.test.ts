@@ -1,13 +1,7 @@
 import { clickFirstCell, sleep, test, expect } from './util';
 
-function skipTest(browserName: string) {
-  test.skip(browserName === 'firefox', 'Skip test on Firefox');
-}
-
 test.describe('undo and redo', () => {
-  test('undo and redo basic operations', async ({ page, browserName }) => {
-    skipTest(browserName);
-
+  test('undo and redo basic operations', async ({ page }) => {
     await page.keyboard.press('Escape');
     await sleep(100);
 
@@ -52,8 +46,7 @@ test.describe('undo and redo', () => {
     await expect(page.getByTestId('formula-editor-trigger')).toHaveText('456');
   });
 
-  test('undo multiple operations', async ({ page, browserName }) => {
-    skipTest(browserName);
+  test('undo multiple operations', async ({ page }) => {
     await page.keyboard.press('Escape');
 
     await page.keyboard.type('First');
@@ -93,8 +86,7 @@ test.describe('undo and redo', () => {
     await expect(page.getByTestId('formula-editor-trigger')).toHaveText('');
   });
 
-  test('redo multiple operations', async ({ page, browserName }) => {
-    skipTest(browserName);
+  test('redo multiple operations', async ({ page }) => {
     await page.keyboard.press('Escape');
     await sleep(100);
 

@@ -35,7 +35,7 @@ npm i --save excel-collab
 
 3. 修改 main.tsx 文件
 
-```ts src/main.tsx
+```tsx
 // src/main.tsx
 import { createRoot } from 'react-dom/client';
 import { StrictMode } from 'react';
@@ -66,10 +66,11 @@ npm run start
 git clone https://github.com/nusr/excel.git
 cd excel
 
-npm i -g yarn
-yarn
+yarn install
 npm run start
 ```
+
+根目录的 `start` 脚本会同时启动示例前端和后端。
 
 ## 概述
 
@@ -78,10 +79,10 @@ Excel-collab 是一个基于 Web 的电子表格应用程序，支持实时协�
 ### 主要特性
 
 - **实时协作**：多个用户可以同时编辑同一个电子表格，并具有冲突解决机制
-- **全面公式支持**：通过 FormulaJS 集成支持 400+ Excel 函数
+- **公式计算**：支持 Excel 风格公式、跨工作表引用及 FormulaJS 提供的函数
 - **丰富格式设置**：字体、颜色、边框、对齐、数字格式等
 - **高性能**：使用 OffScreenCanvas 渲染和 Web Worker 公式计算
-- **文件兼容性**：支持导入/导出 XLSX 和 CSV 格式
+- **文件兼容性**：支持导入/导出 XLSX、XLSM、XLAM、XLTM、XLTX 和 CSV
 
 ## 架构设计
 
@@ -157,13 +158,9 @@ Canvas 渲染系统使用 **OffScreenCanvas** 实现高性能渲染：
 - 调用 Excel 函数并正确处理参数
 - 管理循环依赖检测
 
-**公式主要特性**：
-
-- 400+ 个 FormulaJS 函数
-- 数组公式和动态范围
-- 定义名称和作用域引用
-- 跨工作表引用
-- 错误处理和传播
+公式功能包括定义名称、跨工作表引用、矩形数组常量以及错误传播。目前
+不支持动态数组溢出和部分高级 Excel 引用类型。完整语法与限制请参阅
+[公式兼容性说明](./packages/excel-collab/README.md#formula-compatibility)。
 
 #### 状态管理
 
@@ -193,8 +190,8 @@ Canvas 渲染系统使用 **OffScreenCanvas** 实现高性能渲染：
 
 ### 公式
 
-- [x] 400+ Excel 函数
-- [x] 数组公式
+- [x] FormulaJS 支持的函数
+- [x] 矩形数组常量
 - [x] 跨工作表引用
 - [x] 定义名称
 - [x] 循环引用检测
@@ -243,7 +240,7 @@ Canvas 渲染系统使用 **OffScreenCanvas** 实现高性能渲染：
 ### 导入/导出
 
 - [x] 导入 XLSX
-- [x] 导出 XLSX
+- [x] 导出 XLSX、XLSM、XLAM、XLTM、XLTX
 - [x] 导入 CSV
 - [x] 导出 CSV
 - [x] 导出 PDF

@@ -441,7 +441,7 @@ describe('Canvas.test.ts', () => {
       type('test');
       fireEvent.click(screen.getByTestId('toolbar-bold'));
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
-        fontWeight: 'bold',
+        fontWeight: '700',
       });
       expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
         'test',
@@ -463,7 +463,7 @@ describe('Canvas.test.ts', () => {
       expect(
         await screen.findByTestId('formula-editor-trigger'),
       ).not.toHaveStyle({
-        fontWeight: 'bold',
+        fontWeight: '700',
       });
       expect(
         await screen.findByTestId('formula-editor-trigger'),

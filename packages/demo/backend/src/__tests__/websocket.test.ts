@@ -1,65 +1,100 @@
+import { vi } from 'vitest';
 // Mock dependencies
-const mockSetupWSConnection = jest.fn();
+const { mockSetupWSConnection } = vi.hoisted(() => ({
+  mockSetupWSConnection: vi.fn(),
+}));
 
 // Mock modules before importing
-jest.mock('ws', () => {
+vi.mock('ws', () => {
   return {
     __esModule: true,
-    default: jest.fn().mockImplementation(() => ({
-      on: jest.fn(),
-      close: jest.fn(),
-      send: jest.fn(),
-    })),
-    WebSocketServer: jest.fn().mockImplementation(() => ({
-      on: jest.fn(),
-      close: jest.fn(),
-    })),
+    default: Object.assign(
+      vi.fn().mockImplementation(function () {
+        return {
+          on: vi.fn(),
+          close: vi.fn(),
+          send: vi.fn(),
+        };
+      }),
+      { OPEN: 1 },
+    ),
+    WebSocketServer: vi.fn().mockImplementation(function () {
+      return {
+        on: vi.fn(),
+        close: vi.fn(),
+      };
+    }),
   };
 });
 
-jest.mock('@y/websocket-server/utils', () => {
+vi.mock('@y/websocket-server/utils', () => {
   return {
     __esModule: true,
     setupWSConnection: mockSetupWSConnection,
+    getYDoc: vi.fn(() => ({
+      conns: new Map(),
+      whenInitialized: Promise.resolve(),
+    })),
+    docs: new Map(),
   };
 });
 
-jest.spyOn(console, 'log').mockImplementation(() => {});
-jest.spyOn(console, 'error').mockImplementation(() => {});
+vi.spyOn(console, 'log').mockImplementation(() => {});
+vi.spyOn(console, 'error').mockImplementation(() => {});
 
 // Import the WebSocketManager after mocks are set up
 import { WebSocketManager } from '../websocket';
 import http from 'http';
 import { EventEmitter } from 'node:events';
+import WebSocket, { WebSocketServer as WSServer } from 'ws';
+import { PROTOCOL_VERSION } from 'excel-collab/protocol';
 
 describe('Yjs protocol compatibility', () => {
-  it('should complete real sync handshakes and apply Yjs 13 updates', () => {
-    const { setupWSConnection, docs } = jest.requireActual(
-      '@y/websocket-server/utils',
-    );
-    const Y = jest.requireActual<typeof import('yjs')>('yjs');
-    const sync = jest.requireActual('y-protocols/sync');
-    const encoding = jest.requireActual('lib0/encoding');
-    const decoding = jest.requireActual('lib0/decoding');
+  it('should complete real sync handshakes and apply Yjs 13 updates', async () => {
+    const { setupWSConnection, docs } = await vi.importActual<
+      typeof import('@y/websocket-server/utils')
+    >('@y/websocket-server/utils');
+    const Y = await vi.importActual<typeof import('yjs')>('yjs');
+    const sync =
+      await vi.importActual<typeof import('y-protocols/sync')>(
+        'y-protocols/sync',
+      );
+    const encoding =
+      await vi.importActual<typeof import('lib0/encoding')>('lib0/encoding');
+    const decoding =
+      await vi.importActual<typeof import('lib0/decoding')>('lib0/decoding');
     const messages: Uint8Array[] = [];
-    const connection = Object.assign(new EventEmitter(), {
-      readyState: 1,
-      send: jest.fn((message: Uint8Array) => messages.push(message)),
-      close: jest.fn(),
-      ping: jest.fn(),
-    });
+    const connection: EventEmitter &
+      Pick<WebSocket, 'readyState' | 'send' | 'close' | 'ping'> = Object.assign(
+      new EventEmitter(),
+      {
+        readyState: 1 as const,
+        send(message: Parameters<WebSocket['send']>[0]) {
+          if (!(message instanceof Uint8Array)) {
+            throw new TypeError('Expected a binary WebSocket message');
+          }
+          messages.push(message);
+        },
+        close: vi.fn(),
+        ping: vi.fn(),
+      },
+    );
     const docName = 'protocol-compatibility-test';
     const client = new Y.Doc();
     const protocolErrors: Error[] = [];
 
     try {
-      setupWSConnection(connection, { url: `/${docName}` }, { docName });
+      setupWSConnection(
+        connection as WebSocket,
+        { url: `/${docName}` } as http.IncomingMessage,
+        { docName },
+      );
       docs
-        .get(docName)
+        .get(docName)!
         .on('error', (error: Error) => protocolErrors.push(error));
       expect(messages).toHaveLength(1);
 
-      const handshake = decoding.createDecoder(messages.shift());
+      const handshake = decoding.createDecoder(messages.shift()!);
       expect(decoding.readVarUint(handshake)).toBe(0);
       const reply = encoding.createEncoder();
       encoding.writeVarUint(reply, 0);
@@ -72,7 +107,7 @@ describe('Yjs protocol compatibility', () => {
       connection.emit('message', encoding.toUint8Array(request));
       expect(messages).toHaveLength(1);
 
-      const response = decoding.createDecoder(messages.shift());
+      const response = decoding.createDecoder(messages.shift()!);
       expect(decoding.readVarUint(response)).toBe(0);
       sync.readSyncMessage(response, encoding.createEncoder(), client, null);
 
@@ -81,7 +116,7 @@ describe('Yjs protocol compatibility', () => {
       encoding.writeVarUint(update, 0);
       sync.writeUpdate(update, Y.encodeStateAsUpdate(client));
       connection.emit('message', encoding.toUint8Array(update));
-      expect(docs.get(docName).getMap('sheet').get('A1')).toBe('compatible');
+      expect(docs.get(docName)!.getMap('sheet').get('A1')).toBe('compatible');
       expect(protocolErrors).toEqual([]);
     } finally {
       connection.emit('close');
@@ -100,35 +135,42 @@ describe('WebSocketManager Tests', () => {
   let mockRequest: http.IncomingMessage;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    mockSetupWSConnection.mockReset();
 
     // Create mock server
     mockServer = {} as http.Server;
 
     // Create mock WebSocket and request
     mockWs = {
-      on: jest.fn(),
-      close: jest.fn(),
-      send: jest.fn(),
+      readyState: 1,
+      pause: vi.fn(),
+      resume: vi.fn(),
+      on: vi.fn(),
+      close: vi.fn(),
+      send: vi.fn(),
     };
-    mockRequest = { url: '/test-doc-1' } as http.IncomingMessage;
+    mockRequest = {
+      url: `/test-doc-1?protocol=${PROTOCOL_VERSION}`,
+    } as http.IncomingMessage;
 
     // Create mock WebSocketServer with a connection event handler
     mockWss = {
-      on: jest.fn().mockImplementation((event, callback) => {
+      on: vi.fn().mockImplementation((event, callback) => {
         if (event === 'connection') {
           // Store the connection callback for later use
           mockWss.connectionCallback = callback;
         }
       }),
-      close: jest.fn(),
+      close: vi.fn(),
     };
 
     // Import ws module to access the mocked Server constructor
-    const { WebSocketServer: WSServer } = require('ws');
 
     // Mock the WebSocketServer constructor to return our mockWss
-    (WSServer as jest.Mock).mockReturnValue(mockWss);
+    vi.mocked(WSServer).mockImplementation(function () {
+      return mockWss;
+    });
 
     // Create WebSocketManager instance
     wsManager = new WebSocketManager(mockServer);
@@ -137,7 +179,6 @@ describe('WebSocketManager Tests', () => {
   describe('Constructor', () => {
     it('should create a WebSocketServer with the provided HTTP server', () => {
       // Import ws module to access the mocked Server constructor
-      const { WebSocketServer: WSServer } = require('ws');
       expect(WSServer).toHaveBeenCalledWith({ server: mockServer });
     });
 
@@ -148,30 +189,20 @@ describe('WebSocketManager Tests', () => {
         expect.any(Function),
       );
     });
-
-    it('should log environment variables CALLBACK_OBJECTS and CALLBACK_URL', () => {
-      expect(console.log).toHaveBeenCalledWith(
-        'CALLBACK_OBJECTS: ',
-        process.env.CALLBACK_OBJECTS,
-      );
-      expect(console.log).toHaveBeenCalledWith(
-        'CALLBACK_URL: ',
-        process.env.CALLBACK_URL,
-      );
-    });
   });
 
   describe('Connection Handling', () => {
-    it('should handle new connections and register them', () => {
+    it('should handle new connections and register them', async () => {
       // Import ws module to access the mocked WebSocket constructor
-      const WebSocket = require('ws').default;
 
       // Mock the WebSocket constructor to return our mockWs
-      (WebSocket as jest.Mock).mockReturnValue(mockWs);
+      vi.mocked(WebSocket).mockImplementation(function () {
+        return mockWs;
+      });
 
       // Simulate a new connection by calling the stored callback
       if (mockWss.connectionCallback) {
-        mockWss.connectionCallback(mockWs, mockRequest);
+        await mockWss.connectionCallback(mockWs, mockRequest);
       }
 
       // Verify connection was registered
@@ -182,36 +213,41 @@ describe('WebSocketManager Tests', () => {
       });
     });
 
-    it('should generate unique connection IDs', () => {
+    it('should generate unique connection IDs', async () => {
       // Import ws module to access the mocked WebSocket constructor
-      const WebSocket = require('ws').default;
 
       // Mock the WebSocket constructor to return our mockWs
-      (WebSocket as jest.Mock).mockReturnValue(mockWs);
+      vi.mocked(WebSocket).mockImplementation(function () {
+        return mockWs;
+      });
 
       // Create a second mock WebSocket
       const mockWs2 = {
-        on: jest.fn(),
-        close: jest.fn(),
-        send: jest.fn(),
+        readyState: 1,
+        pause: vi.fn(),
+        resume: vi.fn(),
+        on: vi.fn(),
+        close: vi.fn(),
+        send: vi.fn(),
       };
 
       // Simulate two connections
       if (mockWss.connectionCallback) {
-        mockWss.connectionCallback(mockWs, mockRequest);
-        mockWss.connectionCallback(mockWs2, mockRequest);
+        await mockWss.connectionCallback(mockWs, mockRequest);
+        await mockWss.connectionCallback(mockWs2, mockRequest);
       }
 
       // Verify both connections are registered
       expect(wsManager.getConnectionCount()).toBe(2);
     });
 
-    it('should handle connection errors', () => {
+    it('should handle connection errors', async () => {
       // Import ws module to access the mocked WebSocket constructor
-      const WebSocket = require('ws').default;
 
       // Mock the WebSocket constructor to return our mockWs
-      (WebSocket as jest.Mock).mockReturnValue(mockWs);
+      vi.mocked(WebSocket).mockImplementation(function () {
+        return mockWs;
+      });
 
       // Make setupWSConnection throw an error
       mockSetupWSConnection.mockImplementation(() => {
@@ -220,7 +256,7 @@ describe('WebSocketManager Tests', () => {
 
       // Simulate a new connection
       if (mockWss.connectionCallback) {
-        mockWss.connectionCallback(mockWs, mockRequest);
+        await mockWss.connectionCallback(mockWs, mockRequest);
       }
 
       // Verify error was logged and connection was closed
@@ -230,32 +266,34 @@ describe('WebSocketManager Tests', () => {
       expect(mockWs.close).toHaveBeenCalledWith(1011, 'Internal server error');
     });
 
-    it('should handle message events', () => {
+    it('should handle message events', async () => {
       // Import ws module to access the mocked WebSocket constructor
-      const WebSocket = require('ws').default;
 
       // Mock the WebSocket constructor to return our mockWs
-      (WebSocket as jest.Mock).mockReturnValue(mockWs);
+      vi.mocked(WebSocket).mockImplementation(function () {
+        return mockWs;
+      });
 
       // Simulate a new connection
       if (mockWss.connectionCallback) {
-        mockWss.connectionCallback(mockWs, mockRequest);
+        await mockWss.connectionCallback(mockWs, mockRequest);
       }
 
       // Verify message handler was registered
       expect(mockWs.on).toHaveBeenCalledWith('message', expect.any(Function));
     });
 
-    it('should handle close events and remove connections', () => {
+    it('should handle close events and remove connections', async () => {
       // Import ws module to access the mocked WebSocket constructor
-      const WebSocket = require('ws').default;
 
       // Mock the WebSocket constructor to return our mockWs
-      (WebSocket as jest.Mock).mockReturnValue(mockWs);
+      vi.mocked(WebSocket).mockImplementation(function () {
+        return mockWs;
+      });
 
       // Simulate a new connection
       if (mockWss.connectionCallback) {
-        mockWss.connectionCallback(mockWs, mockRequest);
+        await mockWss.connectionCallback(mockWs, mockRequest);
       }
       expect(wsManager.getConnectionCount()).toBe(1);
 
@@ -274,16 +312,17 @@ describe('WebSocketManager Tests', () => {
       );
     });
 
-    it('should handle error events', () => {
+    it('should handle error events', async () => {
       // Import ws module to access the mocked WebSocket constructor
-      const WebSocket = require('ws').default;
 
       // Mock the WebSocket constructor to return our mockWs
-      (WebSocket as jest.Mock).mockReturnValue(mockWs);
+      vi.mocked(WebSocket).mockImplementation(function () {
+        return mockWs;
+      });
 
       // Simulate a new connection
       if (mockWss.connectionCallback) {
-        mockWss.connectionCallback(mockWs, mockRequest);
+        await mockWss.connectionCallback(mockWs, mockRequest);
       }
 
       // Get the error event handler
@@ -330,16 +369,20 @@ describe('WebSocketManager Tests', () => {
       expect(wsManager.getConnectionCount()).toBe(0);
 
       // Import ws module to access the mocked WebSocket constructor
-      const WebSocket = require('ws').default;
 
       // Mock the WebSocket constructor to return our mockWs
-      (WebSocket as jest.Mock).mockReturnValue(mockWs);
+      vi.mocked(WebSocket).mockImplementation(function () {
+        return mockWs;
+      });
 
       // Create a second mock WebSocket
       const mockWs2 = {
-        on: jest.fn(),
-        close: jest.fn(),
-        send: jest.fn(),
+        readyState: 1,
+        pause: vi.fn(),
+        resume: vi.fn(),
+        on: vi.fn(),
+        close: vi.fn(),
+        send: vi.fn(),
       };
 
       // Simulate two connections
@@ -354,7 +397,7 @@ describe('WebSocketManager Tests', () => {
 
     it('should close all connections when closeAllConnections is called', () => {
       // Create a simpler mock for close that doesn't require typing
-      mockWss.close = jest.fn().mockImplementation((cb: any) => {
+      mockWss.close = vi.fn().mockImplementation((cb: any) => {
         if (typeof cb === 'function') cb();
       });
 
@@ -371,42 +414,45 @@ describe('WebSocketManager Tests', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle connections without a docId in URL', () => {
+    it('should reject connections without a protocol version before loading a room', async () => {
       // Import ws module to access the mocked WebSocket constructor
-      const WebSocket = require('ws').default;
 
       // Mock the WebSocket constructor to return our mockWs
-      (WebSocket as jest.Mock).mockReturnValue(mockWs);
+      vi.mocked(WebSocket).mockImplementation(function () {
+        return mockWs;
+      });
 
       // Create request without URL
       const requestWithoutUrl = {} as http.IncomingMessage;
 
       // Simulate a new connection
       if (mockWss.connectionCallback) {
-        mockWss.connectionCallback(mockWs, requestWithoutUrl);
+        await mockWss.connectionCallback(mockWs, requestWithoutUrl);
       }
 
-      // Verify connection was set up with empty docName
-      expect(mockSetupWSConnection).toHaveBeenCalledWith(
-        mockWs,
-        requestWithoutUrl,
-        { gc: true, docName: '' },
+      expect(mockSetupWSConnection).not.toHaveBeenCalled();
+      expect(mockWs.close).toHaveBeenCalledWith(
+        1008,
+        `Collaboration protocol version ${PROTOCOL_VERSION} required`,
       );
     });
 
-    it('should handle connections with empty URL path', () => {
+    it('should handle connections with empty URL path', async () => {
       // Import ws module to access the mocked WebSocket constructor
-      const WebSocket = require('ws').default;
 
       // Mock the WebSocket constructor to return our mockWs
-      (WebSocket as jest.Mock).mockReturnValue(mockWs);
+      vi.mocked(WebSocket).mockImplementation(function () {
+        return mockWs;
+      });
 
       // Create request with empty URL
-      const requestWithEmptyUrl = { url: '/' } as http.IncomingMessage;
+      const requestWithEmptyUrl = {
+        url: `/?protocol=${PROTOCOL_VERSION}`,
+      } as http.IncomingMessage;
 
       // Simulate a new connection
       if (mockWss.connectionCallback) {
-        mockWss.connectionCallback(mockWs, requestWithEmptyUrl);
+        await mockWss.connectionCallback(mockWs, requestWithEmptyUrl);
       }
 
       // Verify connection was set up with empty docName
@@ -421,10 +467,11 @@ describe('WebSocketManager Tests', () => {
   describe('Message Handling', () => {
     it('should log messages received from clients', () => {
       // Import ws module to access the mocked WebSocket constructor
-      const WebSocket = require('ws').default;
 
       // Mock the WebSocket constructor to return our mockWs
-      (WebSocket as jest.Mock).mockReturnValue(mockWs);
+      vi.mocked(WebSocket).mockImplementation(function () {
+        return mockWs;
+      });
 
       // Simulate a new connection
       if (mockWss.connectionCallback) {

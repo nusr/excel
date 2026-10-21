@@ -57,20 +57,24 @@ export function initFontFamilyList(
   check = isSupportFontFamily,
   fontList = FONT_FAMILY_LIST,
 ): OptionItem[] {
-  const cacheFont = localStorage.getItem(LOCAL_FONT_KEY);
-  if (cacheFont) {
-    const list = JSON.parse(cacheFont) as string[];
-    if (list.length > 0) {
-      return list.map((v) =>
-        v === QUERY_ALL_LOCAL_FONT
-          ? {
-              value: v,
-              label: i18n.t('get-all-installed-fonts'),
-              disabled: false,
-            }
-          : { value: v, label: v, disabled: !check(v) },
-      );
+  try {
+    const cacheFont = localStorage.getItem(LOCAL_FONT_KEY);
+    if (cacheFont) {
+      const list: unknown = JSON.parse(cacheFont);
+      if (Array.isArray(list) && list.length > 0 && list.every((v) => typeof v === 'string')) {
+        return list.map((v) =>
+          v === QUERY_ALL_LOCAL_FONT
+            ? {
+                value: v,
+                label: i18n.t('get-all-installed-fonts'),
+                disabled: false,
+              }
+            : { value: v, label: v, disabled: !check(v) },
+        );
+      }
     }
+  } catch {
+    // An unavailable or corrupt optional cache must not prevent editor startup.
   }
   const list: OptionItem[] = [];
   for (const item of fontList) {

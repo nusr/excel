@@ -1,9 +1,22 @@
+import { vi } from 'vitest';
 import { useClickOutside } from '../useClickOutSide';
 import { fireEvent, renderHook } from '@testing-library/react';
 
 describe('useClickOutside', () => {
+  it('uses the latest handler after rerendering an open popup', () => {
+    const first = vi.fn();
+    const second = vi.fn();
+    const { rerender } = renderHook(({ handler }) => useClickOutside(true, handler), {
+      initialProps: { handler: first },
+    });
+    rerender({ handler: second });
+    fireEvent.pointerDown(document);
+    expect(first).not.toHaveBeenCalled();
+    expect(second).toHaveBeenCalledOnce();
+  });
+
   it('should call callback when clicking outside the element', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     const { result } = renderHook(() => useClickOutside(true, callback));
     const ref = result.current;
 
@@ -20,7 +33,7 @@ describe('useClickOutside', () => {
   });
 
   it('should not call callback when clicking inside the element', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     const { result } = renderHook(() => useClickOutside(true, callback));
     const ref = result.current;
 
@@ -37,7 +50,7 @@ describe('useClickOutside', () => {
   });
 
   it('should clean up event listeners on unmount', () => {
-    const callback = jest.fn();
+    const callback = vi.fn();
     const { result, unmount } = renderHook(() =>
       useClickOutside(true, callback),
     );

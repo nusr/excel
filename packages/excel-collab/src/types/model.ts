@@ -805,6 +805,7 @@ export interface IModel
   extends IBaseModel,
     Pick<IScroll, 'getScroll' | 'setScroll'>,
     IEventEmitter<ModelEventEmitterType> {
+  destroy(): void;
   /**
    * Pastes a range of cells.
    *
@@ -839,6 +840,7 @@ export type UserItem = {
 export type MessageType = 'success' | 'error' | 'info' | 'warning';
 
 export enum SYNC_FLAG {
+  FORMULA_RESULT = 'formula-result',
   MODEL = 'model',
   SKIP_UPDATE = 'skip-update',
   SKIP_UNDO_REDO = 'skip-undo-redo',
