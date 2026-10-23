@@ -34,3 +34,4 @@ coverage-final.json
 junit.xml
 tsconfig.tsbuildinfo
 tsconfig.*.tsbuildinfo
+.nx/
