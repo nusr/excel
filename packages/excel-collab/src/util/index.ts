@@ -1,4 +1,5 @@
 export * from './style';
+export * from './filter';
 export * from './dpr';
 export * from './assert';
 export * from './util';

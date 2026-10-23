@@ -15,9 +15,7 @@ test('merge cells button is clickable', async ({ page }) => {
   await sleep(50);
 
   // Verify cell still has content
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    'Merge Test',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Merge Test');
 });
 
 test('merge cell select dropdown exists', async ({ page }) => {
@@ -45,7 +43,5 @@ test('unmerge cells', async ({ page }) => {
   await sleep(50);
 
   // Verify content is still there
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    'Merged Cell',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Merged Cell');
 });

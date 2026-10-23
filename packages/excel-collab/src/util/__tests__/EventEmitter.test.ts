@@ -186,9 +186,7 @@ describe('EventEmitter.test.ts', () => {
       },
     ];
     for (const item of argumentList) {
-      test(`passes ${Object.prototype.toString.apply(
-        item,
-      )} to event listener`, () => {
+      test(`passes ${Object.prototype.toString.apply(item)} to event listener`, () => {
         const emitter = new EventEmitter<EventType>();
         emitter.on('test', function (data) {
           expect(data).toEqual(item);

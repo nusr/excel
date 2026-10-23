@@ -4,10 +4,7 @@ import path from 'path';
 
 describe('importXLSX.test.ts', () => {
   test('imports cells, formulas, number formats and merges from a real xlsx', async () => {
-    const filePath = path.join(
-      import.meta.dirname,
-      '../../../../../../scripts/origin.xlsx',
-    );
+    const filePath = path.join(import.meta.dirname, '../../../../../../scripts/origin.xlsx');
     const fileData = await fs.readFile(filePath);
     const model = await importExcel(fileData);
 
@@ -24,8 +21,7 @@ describe('importXLSX.test.ts', () => {
     expect(mergeKeys.some((k) => k.startsWith('Sheet5!'))).toBe(true);
     expect(
       Object.values(model.mergeCells).some(
-        (m) =>
-          m.row === 1 && m.col === 1 && m.rowCount === 2 && m.colCount === 2,
+        (m) => m.row === 1 && m.col === 1 && m.rowCount === 2 && m.colCount === 2,
       ),
     ).toBe(true);
   });

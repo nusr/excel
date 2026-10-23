@@ -45,15 +45,29 @@ function createFakeElement(value: string) {
 }
 
 function defaultCopy(value: string, type: 'copy' | 'cut') {
-  let fakeElement: HTMLTextAreaElement | undefined = createFakeElement(value);
+  const activeElement = document.activeElement;
+  const selection = document.getSelection();
+  const ranges = selection
+    ? Array.from({ length: selection.rangeCount }, (_, index) =>
+        selection.getRangeAt(index).cloneRange(),
+      )
+    : [];
+  const fakeElement = createFakeElement(value);
   document.body.appendChild(fakeElement);
-  const selectedText = select(fakeElement);
-  if (typeof document.execCommand === 'function') {
-    document.execCommand(type);
+  try {
+    const selectedText = select(fakeElement);
+    if (typeof document.execCommand === 'function') {
+      document.execCommand(type);
+    }
+    return selectedText;
+  } finally {
+    fakeElement.remove();
+    if (activeElement instanceof HTMLElement) activeElement.focus({ preventScroll: true });
+    if (selection) {
+      selection.removeAllRanges();
+      ranges.forEach((range) => selection.addRange(range));
+    }
   }
-  fakeElement.remove();
-  fakeElement = undefined;
-  return selectedText;
 }
 
 async function copy(textData: ClipboardData) {
@@ -72,10 +86,7 @@ async function copy(textData: ClipboardData) {
   await navigator.clipboard.write([new ClipboardItem(result)]);
 }
 
-export async function copyOrCut(
-  textData: ClipboardData,
-  type: 'copy' | 'cut',
-): Promise<void> {
+export async function copyOrCut(textData: ClipboardData, type: 'copy' | 'cut'): Promise<void> {
   try {
     await copy(textData);
     return;
@@ -112,50 +123,53 @@ async function pasteRichText() {
     }
   }
 
-  result[CUSTOM_FORMAT] =
-    result[CUSTOM_FORMAT] || extractCustomData(result[HTML_FORMAT]);
+  result[CUSTOM_FORMAT] = result[CUSTOM_FORMAT] || extractCustomData(result[HTML_FORMAT]);
   return result;
 }
 
 export async function paste(): Promise<ClipboardData> {
-  try {
-    return await pasteRichText();
-  } catch (error) {
-    console.log(error);
-  }
-  return {
+  let result: ClipboardData = {
     [HTML_FORMAT]: '',
     [PLAIN_FORMAT]: '',
     [CUSTOM_FORMAT]: null,
     [IMAGE_FORMAT]: null,
   };
+  try {
+    result = await pasteRichText();
+  } catch (error) {
+    console.log(error);
+  }
+  if (!result[HTML_FORMAT] && !result[PLAIN_FORMAT] && !result[IMAGE_FORMAT]) {
+    try {
+      result[PLAIN_FORMAT] = (await navigator.clipboard?.readText?.()) || '';
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  return result;
 }
 
-export function generateHTML(
-  style: string,
-  content: string,
-  customData: string = '',
-): string {
+export function generateHTML(style: string, content: string, customData: string = ''): string {
   const result = `
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="ProgId" content="Excel.Sheet" />
     <meta name="Generator" content="Microsoft Excel 15" />
-    <style>${style}</style>
+    <style>${style.replaceAll('<', '\\3c ')}</style>
   </head>
     <body>
       <table>${customData}${content}</table>
     </body>
   </html>`;
 
-  return result.replaceAll('\n', '');
+  return result;
 }
 
 export function formatCustomData(customData: string) {
-  return customData
-    ? `${CUSTOM_START_FLAG}${customData}${CUSTOM_END_FLAG}`
-    : '';
+  const element = document.createElement('span');
+  element.textContent = customData;
+  return customData ? `${CUSTOM_START_FLAG}${element.innerHTML}${CUSTOM_END_FLAG}` : '';
 }
 export function extractCustomData(html: string): CustomClipboardData | null {
   const start = html.indexOf(CUSTOM_START_FLAG);
@@ -165,12 +179,31 @@ export function extractCustomData(html: string): CustomClipboardData | null {
     if (!t || t[0] !== '{' || t[t.length - 1] !== '}') {
       return null;
     }
-    try {
-      return JSON.parse(t);
-    } catch (error) {
-      console.log(error);
-      return null;
-    }
+    const element = document.createElement('template');
+    element.innerHTML = t;
+    return parseCustomData(element.content.textContent || '');
   }
   return null;
+}
+
+export function parseCustomData(text: string): CustomClipboardData | null {
+  try {
+    const data: Partial<CustomClipboardData> | null = JSON.parse(text);
+    if (!data || (data.type !== 'copy' && data.type !== 'cut')) return null;
+    const range = data.range;
+    if (
+      !range ||
+      typeof range.sheetId !== 'string' ||
+      ![range.row, range.col, range.rowCount, range.colCount].every(
+        (value) => Number.isSafeInteger(value) && value >= 0,
+      ) ||
+      (data.floatElementUuid !== undefined && typeof data.floatElementUuid !== 'string') ||
+      (data.clipboardId !== undefined && typeof data.clipboardId !== 'string')
+    ) {
+      return null;
+    }
+    return data as CustomClipboardData;
+  } catch {
+    return null;
+  }
 }

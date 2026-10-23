@@ -6,7 +6,10 @@ import * as controllers from '../controller';
 import { Excel } from '../editor';
 import './global.mock';
 
-const { workers, editorMount } = vi.hoisted(() => ({ workers: [] as Worker[], editorMount: vi.fn() }));
+const { workers, editorMount } = vi.hoisted(() => ({
+  workers: [] as Worker[],
+  editorMount: vi.fn(),
+}));
 vi.mock('../worker?worker&inline', () => ({
   default: class extends globalThis.Worker {
     constructor() {
@@ -19,7 +22,12 @@ vi.mock('../worker?worker&inline', () => ({
 vi.mock('../containers', async () => {
   const { createContext, useEffect } = await import('react');
   return {
-    ExcelEditor: () => { useEffect(() => { editorMount(); }, []); return null; },
+    ExcelEditor: () => {
+      useEffect(() => {
+        editorMount();
+      }, []);
+      return null;
+    },
     StateContext: createContext(undefined),
   };
 });
@@ -33,7 +41,11 @@ afterEach(() => {
 test('StrictMode cleanup destroys controllers and workers but preserves an external Doc', () => {
   const doc = new Doc();
   const undo = vi.spyOn(UndoManager.prototype, 'destroy');
-  const view = render(<StrictMode><Excel doc={doc} /></StrictMode>);
+  const view = render(
+    <StrictMode>
+      <Excel doc={doc} />
+    </StrictMode>,
+  );
   expect(workers).toHaveLength(2);
   expect(workers[0].terminate).toHaveBeenCalledOnce();
   expect(workers[1].terminate).not.toHaveBeenCalled();
@@ -47,7 +59,11 @@ test('StrictMode cleanup destroys controllers and workers but preserves an exter
 
 test('StrictMode cleanup also destroys internally owned Docs', () => {
   const init = vi.spyOn(controllers, 'initController');
-  const view = render(<StrictMode><Excel /></StrictMode>);
+  const view = render(
+    <StrictMode>
+      <Excel />
+    </StrictMode>,
+  );
   const docs = init.mock.calls.map(([options]) => options!.doc);
   expect(docs).toHaveLength(2);
   expect(docs[0].isDestroyed).toBe(true);

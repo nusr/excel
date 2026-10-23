@@ -217,10 +217,7 @@ export interface CellDataMap {
    * @param sheetName - The name of the sheet to retrieve information for (optional).
    * @returns The information of the specified worksheet, or undefined if the sheet does not exist.
    */
-  getSheetInfo: (
-    sheetId?: string,
-    sheetName?: string,
-  ) => WorksheetType | undefined;
+  getSheetInfo: (sheetId?: string, sheetName?: string) => WorksheetType | undefined;
 
   /**
    * Sets a defined name for a specific range.

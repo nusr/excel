@@ -2,14 +2,14 @@ import { vi } from 'vitest';
 // Set up mocks before any imports
 const { mockRemoteProvider, mockLocalProvider, constantsModule } = vi.hoisted(() => ({
   mockRemoteProvider: {
-  getDocument: vi.fn(),
-  addDocument: vi.fn(),
-  updateDocument: vi.fn(),
+    getDocument: vi.fn(),
+    addDocument: vi.fn(),
+    updateDocument: vi.fn(),
   },
   mockLocalProvider: {
-  getDocument: vi.fn(),
-  addDocument: vi.fn(),
-  updateDocument: vi.fn(),
+    getDocument: vi.fn(),
+    addDocument: vi.fn(),
+    updateDocument: vi.fn(),
   },
   constantsModule: {
     VITE_DEFAULT_EXCEL_ID: '',
@@ -70,21 +70,12 @@ const getDocId = vi.fn().mockImplementation(() => {
   if (hash.startsWith('#')) {
     return hash.slice(1);
   }
-  return (
-    constantsModule.VITE_DEFAULT_EXCEL_ID ||
-    '184858c4-be37-41b5-af82-52689004e605'
-  );
+  return constantsModule.VITE_DEFAULT_EXCEL_ID || '184858c4-be37-41b5-af82-52689004e605';
 });
 
-const jumpPage = vi
-  .fn()
-  .mockImplementation((route: 'collab' | '' | 'app', id?: string) => {
-    mockLocation.href =
-      mockLocation.origin +
-      constantsModule.BASE_URL +
-      route +
-      (id ? '#' + id : '');
-  });
+const jumpPage = vi.fn().mockImplementation((route: 'collab' | '' | 'app', id?: string) => {
+  mockLocation.href = mockLocation.origin + constantsModule.BASE_URL + route + (id ? '#' + id : '');
+});
 
 const getProvider = vi.fn().mockImplementation(async (_callback: any) => {
   const httpBaseUrl = constantsModule.VITE_BACKEND_URL;
@@ -190,9 +181,7 @@ describe('Util Functions Tests (Clean)', () => {
     it('should navigate to collab route with id', () => {
       jumpPage('collab', 'test-id');
 
-      expect(mockLocation.href).toBe(
-        'http://localhost:3000/app/collab#test-id',
-      );
+      expect(mockLocation.href).toBe('http://localhost:3000/app/collab#test-id');
     });
 
     it('should navigate to route without id', () => {
@@ -210,9 +199,7 @@ describe('Util Functions Tests (Clean)', () => {
 
       jumpPage('collab', 'test-id');
 
-      expect(mockLocation.href).toBe(
-        'http://localhost:3000/custom-base/collab#test-id',
-      );
+      expect(mockLocation.href).toBe('http://localhost:3000/custom-base/collab#test-id');
     });
   });
 
@@ -242,9 +229,7 @@ describe('Util Functions Tests (Clean)', () => {
         const provider = await getProvider(mockCallback);
 
         expect(provider).toBe(mockRemoteProvider);
-        expect(mockRemoteProvider.getDocument).toHaveBeenCalledWith(
-          'test-doc-id',
-        );
+        expect(mockRemoteProvider.getDocument).toHaveBeenCalledWith('test-doc-id');
       });
 
       it('should return existing document when found', async () => {
@@ -253,9 +238,7 @@ describe('Util Functions Tests (Clean)', () => {
 
         const provider = await getProvider(mockCallback);
 
-        expect(mockRemoteProvider.getDocument).toHaveBeenCalledWith(
-          'test-doc-id',
-        );
+        expect(mockRemoteProvider.getDocument).toHaveBeenCalledWith('test-doc-id');
         expect(mockRemoteProvider.addDocument).not.toHaveBeenCalled();
         expect(mockRemoteProvider.updateDocument).not.toHaveBeenCalled();
         expect(provider).toBe(mockRemoteProvider);
@@ -267,19 +250,12 @@ describe('Util Functions Tests (Clean)', () => {
 
         await getProvider(mockCallback);
 
-        expect(mockRemoteProvider.getDocument).toHaveBeenCalledWith(
-          'test-doc-id',
-        );
-        expect(mockRemoteProvider.addDocument).toHaveBeenCalledWith(
-          'test-doc-id',
-        );
-        expect(mockRemoteProvider.updateDocument).toHaveBeenCalledWith(
-          'test-doc-id',
-          {
-            content: expect.any(String),
-            name: 'Template',
-          },
-        );
+        expect(mockRemoteProvider.getDocument).toHaveBeenCalledWith('test-doc-id');
+        expect(mockRemoteProvider.addDocument).toHaveBeenCalledWith('test-doc-id');
+        expect(mockRemoteProvider.updateDocument).toHaveBeenCalledWith('test-doc-id', {
+          content: expect.any(String),
+          name: 'Template',
+        });
       });
     });
 
@@ -301,9 +277,7 @@ describe('Util Functions Tests (Clean)', () => {
         const provider = await getProvider(mockCallback);
 
         expect(provider).toBe(mockLocalProvider);
-        expect(mockLocalProvider.getDocument).toHaveBeenCalledWith(
-          'test-doc-id',
-        );
+        expect(mockLocalProvider.getDocument).toHaveBeenCalledWith('test-doc-id');
       });
 
       it('should create and initialize document with LocalProvider when not found', async () => {
@@ -312,16 +286,11 @@ describe('Util Functions Tests (Clean)', () => {
 
         await getProvider(mockCallback);
 
-        expect(mockLocalProvider.addDocument).toHaveBeenCalledWith(
-          'test-doc-id',
-        );
-        expect(mockLocalProvider.updateDocument).toHaveBeenCalledWith(
-          'test-doc-id',
-          {
-            content: expect.any(String),
-            name: 'Template',
-          },
-        );
+        expect(mockLocalProvider.addDocument).toHaveBeenCalledWith('test-doc-id');
+        expect(mockLocalProvider.updateDocument).toHaveBeenCalledWith('test-doc-id', {
+          content: expect.any(String),
+          name: 'Template',
+        });
       });
     });
 
@@ -338,9 +307,7 @@ describe('Util Functions Tests (Clean)', () => {
         const error = new Error('Failed to get document');
         mockRemoteProvider.getDocument.mockRejectedValue(error);
 
-        await expect(getProvider(mockCallback)).rejects.toThrow(
-          'Failed to get document',
-        );
+        await expect(getProvider(mockCallback)).rejects.toThrow('Failed to get document');
       });
 
       it('should handle addDocument errors when creating new document', async () => {
@@ -349,9 +316,7 @@ describe('Util Functions Tests (Clean)', () => {
         mockRemoteProvider.addDocument.mockRejectedValue(error);
         mockLocation.search = ''; // Not E2E test
 
-        await expect(getProvider(mockCallback)).rejects.toThrow(
-          'Failed to add document',
-        );
+        await expect(getProvider(mockCallback)).rejects.toThrow('Failed to add document');
       });
     });
   });

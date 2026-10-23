@@ -2,9 +2,9 @@
 import {
   OverlayArrow,
   Popover as AriaPopover,
-  type PopoverProps as AriaPopoverProps
+  type PopoverProps as AriaPopoverProps,
 } from 'react-aria-components/Popover';
-import {composeRenderProps} from 'react-aria-components/composeRenderProps';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import clsx from 'clsx';
 import './Popover.css';
 
@@ -13,14 +13,15 @@ export interface PopoverProps extends Omit<AriaPopoverProps, 'children'> {
   hideArrow?: boolean;
 }
 
-export function Popover({children, hideArrow, ...props}: PopoverProps) {
+export function Popover({ children, hideArrow, ...props }: PopoverProps) {
   return (
     <AriaPopover
       {...props}
-      className={composeRenderProps(props.className, className =>
-        clsx('react-aria-Popover', className)
-      )}>
-      {({trigger}) => (
+      className={composeRenderProps(props.className, (className) =>
+        clsx('react-aria-Popover', className),
+      )}
+    >
+      {({ trigger }) => (
         <>
           {!hideArrow && trigger !== 'MenuTrigger' && trigger !== 'SubmenuTrigger' && (
             <OverlayArrow>

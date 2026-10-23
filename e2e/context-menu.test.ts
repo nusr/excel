@@ -49,9 +49,7 @@ test('context menu copy option', async ({ page }) => {
 
   // Verify paste worked
   await expect(page.getByTestId('formula-bar-name-input')).toHaveValue('A2');
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    'Copy Test',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Copy Test');
 });
 
 test('context menu cut option', async ({ page }) => {
@@ -82,9 +80,7 @@ test('context menu cut option', async ({ page }) => {
 
   // Verify paste worked
   await expect(page.getByTestId('formula-bar-name-input')).toHaveValue('A2');
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    'Cut Test',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Cut Test');
 
   // Verify original cell is empty
   await page.keyboard.press('ArrowUp');
@@ -120,9 +116,7 @@ test('context menu paste option', async ({ page }) => {
   await sleep(50);
 
   // Verify paste worked
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    'Paste Test',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Paste Test');
 });
 
 test('context menu has insert row options', async ({ page }) => {
@@ -171,9 +165,7 @@ test('context menu has insert column options', async ({ page }) => {
 
   // Check if insert column options exist
   const insertColumnLeft = page.getByTestId('context-menu-insert-column-left');
-  const insertColumnRight = page.getByTestId(
-    'context-menu-insert-column-right',
-  );
+  const insertColumnRight = page.getByTestId('context-menu-insert-column-right');
 
   await expect(insertColumnLeft).toBeVisible();
   await expect(insertColumnRight).toBeVisible();
@@ -182,20 +174,13 @@ test('context menu has insert column options', async ({ page }) => {
 test('context menu has delete options', async ({ page }) => {
   await page.keyboard.press('Escape');
 
-  // Enter some data to stabilize the canvas
-  await page.keyboard.type('Test');
-  await page.keyboard.press('Enter');
-  await page.keyboard.press('ArrowUp');
-  await sleep(100);
-
   // Right click on the triangle (top-left corner) to open context menu
   await page.getByTestId(MAIN_CANVAS).click({
     button: 'right',
     position: { x: 10, y: 10 },
   });
-  await sleep(200);
 
-  // Check if delete option exists
+  await expect(page.getByTestId('context-menu')).toBeVisible();
   const deleteButton = page.getByTestId('context-menu-delete');
   await expect(deleteButton).toBeVisible();
 });

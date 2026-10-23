@@ -1,16 +1,5 @@
-import type {
-  ModelJSON,
-  DefinedNameItem,
-  IRange,
-  IModel,
-  IDefinedName,
-} from '../types';
-import {
-  MAX_PARAMS_COUNT,
-  parseReference,
-  DEFINED_NAME_REG_EXP,
-  toIRange,
-} from '../util';
+import type { ModelJSON, DefinedNameItem, IRange, IModel, IDefinedName } from '../types';
+import { MAX_PARAMS_COUNT, parseReference, DEFINED_NAME_REG_EXP, toIRange } from '../util';
 
 export class DefinedName implements IDefinedName {
   private model: IModel;
@@ -32,11 +21,7 @@ export class DefinedName implements IDefinedName {
     });
     if (range) {
       const sheetInfo = this.model.getSheetInfo(range.sheetId);
-      if (
-        sheetInfo &&
-        range.col < sheetInfo.colCount &&
-        range.row < sheetInfo.rowCount
-      ) {
+      if (sheetInfo && range.col < sheetInfo.colCount && range.row < sheetInfo.rowCount) {
         return false;
       }
     }
@@ -68,8 +53,13 @@ export class DefinedName implements IDefinedName {
     }
     return list.map((v) => ({
       name: v[0],
-      range: this.model.getRoot().range(`name:${v[0]}`, v[1]) ??
-        { ...v[1], row: -1, col: -1, rowCount: 1, colCount: 1 },
+      range: this.model.getRoot().range(`name:${v[0]}`, v[1]) ?? {
+        ...v[1],
+        row: -1,
+        col: -1,
+        rowCount: 1,
+        colCount: 1,
+      },
     }));
   }
   getDefineName(range: IRange): string {
@@ -110,8 +100,15 @@ export class DefinedName implements IDefinedName {
   }
   checkDefineName(name: string): IRange | undefined {
     const stored = this.definedNames?.get(name);
-    const range = stored && (this.model.getRoot().range(`name:${name}`, stored) ??
-      { ...stored, row: -1, col: -1, rowCount: 1, colCount: 1 });
+    const range =
+      stored &&
+      (this.model.getRoot().range(`name:${name}`, stored) ?? {
+        ...stored,
+        row: -1,
+        col: -1,
+        rowCount: 1,
+        colCount: 1,
+      });
     if (range) {
       return { ...range };
     }

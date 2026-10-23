@@ -11,10 +11,12 @@ declare module '@y/websocket-server/utils' {
   }
   export function getYDoc(name: string): WSSharedDoc;
   export function setContentInitializor(initializer: (doc: WSSharedDoc) => Promise<void>): void;
-  export function setPersistence(persistence: {
-    bindState(name: string, doc: WSSharedDoc): void;
-    writeState(name: string, doc: WSSharedDoc): Promise<void>;
-  } | null): void;
+  export function setPersistence(
+    persistence: {
+      bindState(name: string, doc: WSSharedDoc): void;
+      writeState(name: string, doc: WSSharedDoc): Promise<void>;
+    } | null,
+  ): void;
 
   export function setupWSConnection(
     ws: WebSocket,

@@ -4,14 +4,14 @@ import {
   type DatePickerProps as AriaDatePickerProps,
   type DateValue,
   Group,
-  type ValidationResult
+  type ValidationResult,
 } from 'react-aria-components/DatePicker';
-import {DateInput, DateSegment} from './DateField';
-import {Label, FieldError, Description} from './Form';
-import {FieldButton} from './Form';
-import {Calendar} from './Calendar';
-import {Popover} from './Popover';
-import {ChevronDown} from 'lucide-react';
+import { DateInput, DateSegment } from './DateField';
+import { Label, FieldError, Description } from './Form';
+import { FieldButton } from './Form';
+import { Calendar } from './Calendar';
+import { Popover } from './Popover';
+import { ChevronDown } from 'lucide-react';
 import './DatePicker.css';
 
 export interface DatePickerProps<T extends DateValue> extends AriaDatePickerProps<T> {
@@ -30,7 +30,7 @@ export function DatePicker<T extends DateValue>({
     <AriaDatePicker {...props}>
       <Label>{label}</Label>
       <Group>
-        <DateInput>{segment => <DateSegment segment={segment} />}</DateInput>
+        <DateInput>{(segment) => <DateSegment segment={segment} />}</DateInput>
         <FieldButton>
           <ChevronDown />
         </FieldButton>

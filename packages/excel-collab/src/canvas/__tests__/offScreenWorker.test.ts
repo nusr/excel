@@ -30,8 +30,12 @@ describe('OffScreenWorker rendering regressions', () => {
       canvasSize: { top: 0, left: 0, width: 400, height: 250 },
       headerSize: { width: 38, height: 22 },
       currentSheetInfo: {
-        sheetId: 'sheet', name: 'Sheet1', rowCount: 4, colCount: 4,
-        isHide: false, sort: 0,
+        sheetId: 'sheet',
+        name: 'Sheet1',
+        rowCount: 4,
+        colCount: 4,
+        isHide: false,
+        sort: 0,
       },
       scroll: { row: 0, col: 0, top: 0, left: 0, scrollTop: 0, scrollLeft: 0 },
       range: { sheetId: 'sheet', row: 0, col: 0, rowCount: 1, colCount: 1 },
@@ -72,9 +76,7 @@ describe('OffScreenWorker rendering regressions', () => {
     data.customWidth[getCustomWidthOrHeightKey('sheet', 1)] = { len: 90, isHide: false };
     const stroke = vi.spyOn(ctx, 'strokeRect');
     worker.render(data);
-    expect(stroke).toHaveBeenLastCalledWith(
-      npx(38 - 40), npx(22 - 30), npx(130), npx(80),
-    );
+    expect(stroke).toHaveBeenLastCalledWith(npx(38 - 40), npx(22 - 30), npx(130), npx(80));
   });
 
   test('a render failure does not permanently lock later renders', () => {
@@ -93,7 +95,9 @@ describe('OffScreenWorker rendering regressions', () => {
     worker.render(data);
     const line = vi.spyOn(ctx, 'lineTo');
     worker['renderGrid'](300, 200);
-    expect(line.mock.calls.every(([x, y]) => x <= npx(CELL_WIDTH) && y <= npx(CELL_HEIGHT))).toBe(true);
+    expect(line.mock.calls.every(([x, y]) => x <= npx(CELL_WIDTH) && y <= npx(CELL_HEIGHT))).toBe(
+      true,
+    );
   });
 
   test('filter icons use their header row and disappear when it scrolls out of view', () => {

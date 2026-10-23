@@ -1,8 +1,4 @@
-import {
-  type EventHandler,
-  type EventData,
-  type ModalValue,
-} from '../../../types';
+import { type EventHandler, type EventData, type ModalValue } from '../../../types';
 import { PointerEvent } from 'react';
 import { FILTER_RECT_SIZE } from '../../../util';
 
@@ -18,13 +14,13 @@ export class FilterHandler implements EventHandler {
       return false;
     }
     const { range } = filter;
-    if (col >= range.col && col < range.col + range.colCount) {
+    const endCol = range.colCount
+      ? range.col + range.colCount
+      : controller.getSheetInfo()?.colCount || 0;
+    if (col >= range.col && col < endCol) {
       const height = controller.getRowHeight(row);
       const width = controller.getColWidth(col);
-      if (
-        marginX > width - FILTER_RECT_SIZE &&
-        marginY > height - FILTER_RECT_SIZE
-      ) {
+      if (marginX > width - FILTER_RECT_SIZE && marginY > height - FILTER_RECT_SIZE) {
         event.stopPropagation();
         const result: ModalValue = {
           type: 'filter',

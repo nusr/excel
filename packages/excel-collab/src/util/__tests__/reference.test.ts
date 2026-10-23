@@ -1,21 +1,25 @@
-import {
-  parseReference,
-  mergeRange,
-  convertToReference,
-  parseR1C1,
-} from '../reference';
+import { parseReference, mergeRange, convertToReference, parseR1C1 } from '../reference';
 import { SheetRange } from '../range';
 
 describe('reference.test.ts', () => {
   describe('convertToReference', () => {
     test.each(['relative', 'absolute', 'mixed'] as const)(
-      'serializes deleted coordinate sentinels as errors (%s)', (referenceType) => {
-        for (const [row, col] of [[-1, -1], [-1, 0], [0, -1]]) {
-          expect(convertToReference(
-            new SheetRange(row, col, 1, 1, 'deleted-sheet'),
-            referenceType,
-            () => { throw new Error('deleted sheet must not be resolved'); },
-          )).toBe('#REF!');
+      'serializes deleted coordinate sentinels as errors (%s)',
+      (referenceType) => {
+        for (const [row, col] of [
+          [-1, -1],
+          [-1, 0],
+          [0, -1],
+        ]) {
+          expect(
+            convertToReference(
+              new SheetRange(row, col, 1, 1, 'deleted-sheet'),
+              referenceType,
+              () => {
+                throw new Error('deleted sheet must not be resolved');
+              },
+            ),
+          ).toBe('#REF!');
         }
       },
     );
@@ -45,10 +49,7 @@ describe('reference.test.ts', () => {
     });
     test('single mixed', () => {
       expect(
-        convertToReference(
-          { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: 'test' },
-          'mixed',
-        ),
+        convertToReference({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: 'test' }, 'mixed'),
       ).toEqual('test!$A1');
     });
 
@@ -70,16 +71,13 @@ describe('reference.test.ts', () => {
     });
     test('mixed', () => {
       expect(
-        convertToReference(
-          { row: 0, col: 0, rowCount: 2, colCount: 2, sheetId: 'test' },
-          'mixed',
-        ),
+        convertToReference({ row: 0, col: 0, rowCount: 2, colCount: 2, sheetId: 'test' }, 'mixed'),
       ).toEqual('test!$A1:$B2');
     });
   });
   describe('parseReference', () => {
     test('does not redirect an unresolved explicit sheet to the current sheet', () => {
-      const resolve = (name: string) => name.toLowerCase() === 'sheet2' ? 'two' : '';
+      const resolve = (name: string) => (name.toLowerCase() === 'sheet2' ? 'two' : '');
       expect(parseReference('Sheet2!A1', resolve)).toEqual(new SheetRange(0, 0, 1, 1, 'two'));
       expect(parseReference('Missing!A1', resolve)).toBeUndefined();
       expect(parseReference('Missing!A1:B2', resolve)).toBeUndefined();
@@ -109,9 +107,7 @@ describe('reference.test.ts', () => {
       expect(parseReference('D1:E1')).toEqual(new SheetRange(0, 3, 1, 2, ''));
     });
     it('aa!D1:E1', () => {
-      expect(parseReference('aa!D1:E1')).toEqual(
-        new SheetRange(0, 3, 1, 2, 'aa'),
-      );
+      expect(parseReference('aa!D1:E1')).toEqual(new SheetRange(0, 3, 1, 2, 'aa'));
     });
 
     it('F:F', () => {
@@ -152,19 +148,13 @@ describe('reference.test.ts', () => {
       expect(parseReference('1')).toEqual(new SheetRange(0, 0, 1, 0, ''));
     });
     it('should convert Sheet1!1', () => {
-      expect(parseReference('Sheet1!1')).toEqual(
-        new SheetRange(0, 0, 1, 0, 'Sheet1'),
-      );
+      expect(parseReference('Sheet1!1')).toEqual(new SheetRange(0, 0, 1, 0, 'Sheet1'));
     });
     it('should convert Sheet1!A ', () => {
-      expect(parseReference('Sheet1!A')).toEqual(
-        new SheetRange(0, 0, 0, 1, 'Sheet1'),
-      );
+      expect(parseReference('Sheet1!A')).toEqual(new SheetRange(0, 0, 0, 1, 'Sheet1'));
     });
     it('should convert Sheet1!A1', () => {
-      expect(parseReference('Sheet1!A1')).toEqual(
-        new SheetRange(0, 0, 1, 1, 'Sheet1'),
-      );
+      expect(parseReference('Sheet1!A1')).toEqual(new SheetRange(0, 0, 1, 1, 'Sheet1'));
     });
   });
   describe('mergeRange', () => {
@@ -173,86 +163,61 @@ describe('reference.test.ts', () => {
       const cell = new SheetRange(0, 0, 1, 1, 'one');
       expect(mergeRange(range, cell)).toEqual(new SheetRange(0, 0, 5, 6, 'one'));
       expect(mergeRange(cell, range)).toEqual(new SheetRange(0, 0, 5, 6, 'one'));
-      expect(mergeRange(new SheetRange(0, 0, 0, 2, ''), new SheetRange(0, 1, 0, 3, '')))
-        .toEqual(new SheetRange(0, 0, 0, 4, ''));
+      expect(mergeRange(new SheetRange(0, 0, 0, 2, ''), new SheetRange(0, 1, 0, 3, ''))).toEqual(
+        new SheetRange(0, 0, 0, 4, ''),
+      );
     });
     test('not same sheetId', () => {
       expect(
-        mergeRange(
-          new SheetRange(0, 0, 1, 1, 'a'),
-          new SheetRange(1, 1, 1, 1, '2'),
-        ),
+        mergeRange(new SheetRange(0, 0, 1, 1, 'a'), new SheetRange(1, 1, 1, 1, '2')),
       ).toBeUndefined();
     });
     test('start.rowCount === 0 && end.rowCount !== 0', () => {
       expect(
-        mergeRange(
-          new SheetRange(0, 0, 0, 1, ''),
-          new SheetRange(1, 1, 1, 1, ''),
-        ),
+        mergeRange(new SheetRange(0, 0, 0, 1, ''), new SheetRange(1, 1, 1, 1, '')),
       ).toBeUndefined();
     });
     test('start.rowCount !== 0 && end.rowCount === 0', () => {
       expect(
-        mergeRange(
-          new SheetRange(0, 0, 1, 1, ''),
-          new SheetRange(1, 1, 0, 1, ''),
-        ),
+        mergeRange(new SheetRange(0, 0, 1, 1, ''), new SheetRange(1, 1, 0, 1, '')),
       ).toBeUndefined();
     });
     test('start.colCount === 0 && end.colCount !== 0', () => {
       expect(
-        mergeRange(
-          new SheetRange(0, 0, 1, 0, ''),
-          new SheetRange(1, 1, 1, 1, ''),
-        ),
+        mergeRange(new SheetRange(0, 0, 1, 0, ''), new SheetRange(1, 1, 1, 1, '')),
       ).toBeUndefined();
     });
     test('start.colCount !== 0 && end.colCount === 0', () => {
       expect(
-        mergeRange(
-          new SheetRange(0, 0, 1, 1, ''),
-          new SheetRange(1, 1, 1, 0, ''),
-        ),
+        mergeRange(new SheetRange(0, 0, 1, 1, ''), new SheetRange(1, 1, 1, 0, '')),
       ).toBeUndefined();
     });
     it('A1:B2', () => {
-      expect(
-        mergeRange(
-          new SheetRange(0, 0, 1, 1, ''),
-          new SheetRange(1, 1, 1, 1, ''),
-        ),
-      ).toEqual(new SheetRange(0, 0, 2, 2, ''));
+      expect(mergeRange(new SheetRange(0, 0, 1, 1, ''), new SheetRange(1, 1, 1, 1, ''))).toEqual(
+        new SheetRange(0, 0, 2, 2, ''),
+      );
     });
     it('B:B', () => {
       expect(
-        mergeRange(
-          new SheetRange(0, 1, 200, 0, ''),
-          new SheetRange(0, 1, 200, 0, ''),
-        ),
+        mergeRange(new SheetRange(0, 1, 200, 0, ''), new SheetRange(0, 1, 200, 0, '')),
       ).toEqual(new SheetRange(0, 1, 200, 0, ''));
     });
     it('B:B2', () => {
       expect(
-        mergeRange(
-          new SheetRange(0, 1, 200, 0, ''),
-          new SheetRange(1, 1, 1, 1, ''),
-        ),
+        mergeRange(new SheetRange(0, 1, 200, 0, ''), new SheetRange(1, 1, 1, 1, '')),
       ).toBeUndefined();
     });
 
     it('A1:C1', () => {
-      expect(
-        mergeRange(
-          new SheetRange(0, 0, 1, 1, ''),
-          new SheetRange(0, 2, 1, 1, ''),
-        ),
-      ).toEqual(new SheetRange(0, 0, 1, 3, ''));
+      expect(mergeRange(new SheetRange(0, 0, 1, 1, ''), new SheetRange(0, 2, 1, 1, ''))).toEqual(
+        new SheetRange(0, 0, 1, 3, ''),
+      );
     });
   });
   describe('R1C1', () => {
     test.each(['R1xC1', 'R[1x]C1', 'R[1C1', 'R1C1x', 'R1.5C1', 'R-1C1'])(
-      'rejects malformed references without partially parsing: %s', (reference) => {
+      'rejects malformed references without partially parsing: %s',
+      (reference) => {
         expect(parseR1C1(reference, { row: 2, col: 2, sheetId: '' })).toBeUndefined();
       },
     );
@@ -287,9 +252,9 @@ describe('reference.test.ts', () => {
       );
     });
     test('R[2]C[2]', () => {
-      expect(
-        parseR1C1('R[2]C[2]', { row: 0, col: 0, sheetId: 'test' }),
-      ).toEqual(new SheetRange(2, 2, 1, 1, 'test'));
+      expect(parseR1C1('R[2]C[2]', { row: 0, col: 0, sheetId: 'test' })).toEqual(
+        new SheetRange(2, 2, 1, 1, 'test'),
+      );
     });
 
     test('RC', () => {

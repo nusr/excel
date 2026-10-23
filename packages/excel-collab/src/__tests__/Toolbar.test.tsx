@@ -8,8 +8,7 @@ import { useCoreStore } from '../containers/store';
 import { initFontFamilyList } from '../containers/canvas/isSupportFontFamily';
 
 vi.mock('../containers/canvas/isSupportFontFamily', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('../containers/canvas/isSupportFontFamily')>();
+  const actual = await importOriginal<typeof import('../containers/canvas/isSupportFontFamily')>();
   return {
     ...actual,
     isSupportFontFamily: () => true,
@@ -33,10 +32,7 @@ describe('Toolbar.test.ts', () => {
   });
   describe('fontFamily', () => {
     test('query all', async () => {
-      localStorage.setItem(
-        'LOCAL_FONT_KEY',
-        JSON.stringify(['simsun', 'QUERY_ALL_LOCAL_FONT']),
-      );
+      localStorage.setItem('LOCAL_FONT_KEY', JSON.stringify(['simsun', 'QUERY_ALL_LOCAL_FONT']));
       Object.defineProperty(window, 'queryLocalFonts', {
         writable: true,
         value: async () => {
@@ -58,20 +54,14 @@ describe('Toolbar.test.ts', () => {
       });
       useCoreStore.getState().setFontFamilies(initFontFamilyList());
 
-      await chooseSelectOption(
-        'toolbar-font-family',
+      await chooseSelectOption('toolbar-font-family', 'Get all the fonts installed locally');
+
+      expect(await screen.findByTestId('toolbar-font-family')).not.toHaveTextContent(
         'Get all the fonts installed locally',
       );
-
-      expect(
-        await screen.findByTestId('toolbar-font-family'),
-      ).not.toHaveTextContent('Get all the fonts installed locally');
     });
     test('query all empty', async () => {
-      localStorage.setItem(
-        'LOCAL_FONT_KEY',
-        JSON.stringify(['simsun', 'QUERY_ALL_LOCAL_FONT']),
-      );
+      localStorage.setItem('LOCAL_FONT_KEY', JSON.stringify(['simsun', 'QUERY_ALL_LOCAL_FONT']));
       Object.defineProperty(window, 'queryLocalFonts', {
         writable: true,
         value: async () => {
@@ -80,14 +70,11 @@ describe('Toolbar.test.ts', () => {
       });
       useCoreStore.getState().setFontFamilies(initFontFamilyList());
 
-      await chooseSelectOption(
-        'toolbar-font-family',
+      await chooseSelectOption('toolbar-font-family', 'Get all the fonts installed locally');
+
+      expect(await screen.findByTestId('toolbar-font-family')).not.toHaveTextContent(
         'Get all the fonts installed locally',
       );
-
-      expect(
-        await screen.findByTestId('toolbar-font-family'),
-      ).not.toHaveTextContent('Get all the fonts installed locally');
     });
   });
   describe('undo', () => {
@@ -126,30 +113,29 @@ describe('Toolbar.test.ts', () => {
       fireEvent.keyDown(document.body, { key: 'Enter' });
       await user.click(screen.getByTestId('toolbar-paste'));
 
-      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
-        'A2',
-      );
-      expect(
-        await screen.findByTestId('formula-editor-trigger'),
-      ).toHaveTextContent('=SUM(1,2)');
+      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue('A2');
+      expect(await screen.findByTestId('formula-editor-trigger')).toHaveTextContent('=SUM(1,2)');
     });
-    test.each(['copy', 'cut'] as const)('%s returns keyboard navigation to the worksheet', async (command) => {
-      const user = userEvent.setup();
-      type('hello');
-      const button = screen.getByTestId(`toolbar-${command}`);
-      await user.click(button);
-      expect(button).not.toHaveFocus();
-      await user.keyboard('{Enter}');
-      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
-      const pasteButton = screen.getByTestId('toolbar-paste');
-      await user.click(pasteButton);
-      expect(pasteButton).not.toHaveFocus();
-      await waitFor(() => {
-        expect(controller.getCell(controller.getActiveRange().range)?.value).toBe('hello');
-      });
-      await user.keyboard('{Enter}');
-      expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A3');
-    });
+    test.each(['copy', 'cut'] as const)(
+      '%s returns keyboard navigation to the worksheet',
+      async (command) => {
+        const user = userEvent.setup();
+        type('hello');
+        const button = screen.getByTestId(`toolbar-${command}`);
+        await user.click(button);
+        expect(button).not.toHaveFocus();
+        await user.keyboard('{Enter}');
+        expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A2');
+        const pasteButton = screen.getByTestId('toolbar-paste');
+        await user.click(pasteButton);
+        expect(pasteButton).not.toHaveFocus();
+        await waitFor(() => {
+          expect(controller.getCell(controller.getActiveRange().range)?.value).toBe('hello');
+        });
+        await user.keyboard('{Enter}');
+        expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A3');
+      },
+    );
   });
   describe('cut', () => {
     test('toolbar', async () => {
@@ -159,12 +145,8 @@ describe('Toolbar.test.ts', () => {
       fireEvent.keyDown(document.body, { key: 'Enter' });
       await user.click(screen.getByTestId('toolbar-paste'));
 
-      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
-        'A2',
-      );
-      expect(
-        await screen.findByTestId('formula-editor-trigger'),
-      ).toHaveTextContent('=SUM(1,2)');
+      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue('A2');
+      expect(await screen.findByTestId('formula-editor-trigger')).toHaveTextContent('=SUM(1,2)');
 
       fireEvent.keyDown(document.body, { key: 'ArrowUp' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
@@ -219,9 +201,7 @@ describe('Toolbar.test.ts', () => {
     test('normal', () => {
       type('This is a very long text that needs to be wrapped');
       fireEvent.click(screen.getByTestId('toolbar-wrap-text'));
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.isWrapText,
-      ).toEqual(true);
+      expect(controller.getCell(controller.getActiveRange().range)?.isWrapText).toEqual(true);
     });
     test('single underline', async () => {
       type('This is a very long text that needs to be wrapped');
@@ -246,12 +226,8 @@ describe('Toolbar.test.ts', () => {
     test('normal', async () => {
       const user = userEvent.setup();
       await user.click(screen.getByTestId('toolbar-fill-color'));
-      await user.click(
-        await screen.findByTestId('toolbar-fill-color-swatch-B2B2B2'),
-      );
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.fillColor,
-      ).toEqual('#B2B2B2');
+      await user.click(await screen.findByTestId('toolbar-fill-color-swatch-B2B2B2'));
+      expect(controller.getCell(controller.getActiveRange().range)?.fillColor).toEqual('#B2B2B2');
     });
     test('saturation', async () => {
       const user = userEvent.setup();
@@ -264,21 +240,15 @@ describe('Toolbar.test.ts', () => {
       await user.clear(brightness);
       await user.type(brightness, '80');
 
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.fillColor,
-      ).toBeTruthy();
+      expect(controller.getCell(controller.getActiveRange().range)?.fillColor).toBeTruthy();
     });
   });
   describe('font color', () => {
     test('normal', async () => {
       const user = userEvent.setup();
       await user.click(screen.getByTestId('toolbar-font-color'));
-      await user.click(
-        await screen.findByTestId('toolbar-font-color-swatch-B2B2B2'),
-      );
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.fontColor,
-      ).toEqual('#B2B2B2');
+      await user.click(await screen.findByTestId('toolbar-font-color-swatch-B2B2B2'));
+      expect(controller.getCell(controller.getActiveRange().range)?.fontColor).toEqual('#B2B2B2');
     });
     test('saturation', async () => {
       const user = userEvent.setup();
@@ -291,9 +261,7 @@ describe('Toolbar.test.ts', () => {
       await user.clear(brightness);
       await user.type(brightness, '80');
 
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.fontColor,
-      ).toBeTruthy();
+      expect(controller.getCell(controller.getActiveRange().range)?.fontColor).toBeTruthy();
     });
 
     test('hue', async () => {
@@ -310,23 +278,15 @@ describe('Toolbar.test.ts', () => {
       await user.clear(brightness);
       await user.type(brightness, '80');
 
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.fontColor,
-      ).toBeTruthy();
+      expect(controller.getCell(controller.getActiveRange().range)?.fontColor).toBeTruthy();
     });
     test('reset', async () => {
       const user = userEvent.setup();
       await user.click(screen.getByTestId('toolbar-font-color'));
-      await user.click(
-        await screen.findByTestId('toolbar-font-color-swatch-B2B2B2'),
-      );
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.fontColor,
-      ).toEqual('#B2B2B2');
+      await user.click(await screen.findByTestId('toolbar-font-color-swatch-B2B2B2'));
+      expect(controller.getCell(controller.getActiveRange().range)?.fontColor).toEqual('#B2B2B2');
       await user.click(screen.getByTestId('toolbar-font-color-reset'));
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.fontColor,
-      ).toEqual('');
+      expect(controller.getCell(controller.getActiveRange().range)?.fontColor).toEqual('');
     });
   });
 });

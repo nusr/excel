@@ -29,10 +29,7 @@ describe('model.test.ts', () => {
       workbook: [model.getSheetInfo()!],
       worksheets: { [`${sheetId}_0_0`]: { formula: '=sum(1,1)', value: '' } },
     };
-    expect(mockTestHooks.worker.computeFormulas).toHaveBeenCalledWith(
-      result,
-      expect.any(Function),
-    );
+    expect(mockTestHooks.worker.computeFormulas).toHaveBeenCalledWith(result, expect.any(Function));
   });
   test('normal', () => {
     expect(model.getSheetList()).toHaveLength(0);
@@ -42,11 +39,7 @@ describe('model.test.ts', () => {
   test('setCellValue', () => {
     model.addSheet();
     expect(model.getCell(new SheetRange(0, 0, 1, 1, ''))).toBeUndefined();
-    model.setCell(
-      [['test']],
-      [],
-      new SheetRange(0, 0, 1, 1, model.getCurrentSheetId()),
-    );
+    model.setCell([['test']], [], new SheetRange(0, 0, 1, 1, model.getCurrentSheetId()));
     expect(model.getCell(new SheetRange(0, 0, 1, 1, ''))).toEqual({
       value: 'test',
     });

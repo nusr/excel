@@ -29,16 +29,20 @@ export const Collaboration = () => {
   );
 };
 
-export const User: React.FunctionComponent<
-  UserItem & { row: number; col: number }
-> = ({ range, clientId, row, col }) => {
+export const User: React.FunctionComponent<UserItem & { row: number; col: number }> = ({
+  range,
+  clientId,
+  row,
+  col,
+}) => {
   const { controller } = useExcel();
   const color = useMemo(() => {
     const list = getBytesFromUint32(clientId);
     const a = Math.max(...list);
-    const [r, g, b] = list.filter((v) => v !== a);
+    list.splice(list.indexOf(a), 1);
+    const [r, g, b] = list;
     return `rgba(${r},${g},${b},${a / 255})`;
-  }, []);
+  }, [clientId]);
 
   const [position, setPosition] = useState<CanvasOverlayPosition>({
     top: -9999,
@@ -54,10 +58,7 @@ export const User: React.FunctionComponent<
   }, [range, row, col, controller]);
 
   return (
-    <div
-      className={styles.user}
-      style={{ ...position, border: `2px solid ${color}` }}
-    >
+    <div className={styles.user} style={{ ...position, border: `2px solid ${color}` }}>
       <div className={styles.userContent} style={{ color }}>
         {`${i18n.t('user-name')} ${clientId}`}
       </div>

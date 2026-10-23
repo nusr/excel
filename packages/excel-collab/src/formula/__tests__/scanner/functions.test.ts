@@ -5,10 +5,7 @@ describe('functions', () => {
   const list: BlockType[] = [
     [
       'TODAY()',
-      [
-        getToken(TokenType.EXCEL_FUNCTION, 'TODAY'),
-        getToken(TokenType.RIGHT_BRACKET, ')'),
-      ],
+      [getToken(TokenType.EXCEL_FUNCTION, 'TODAY'), getToken(TokenType.RIGHT_BRACKET, ')')],
     ],
     [
       'SUM(1)',

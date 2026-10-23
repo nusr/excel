@@ -29,18 +29,29 @@ describe('util.test.ts', () => {
     doc.destroy();
   });
   test('coordinate keys round trip arbitrary sheet IDs', () => {
-    expect(convertWorksheetKey(getWorksheetKey('sheet_one_2', 10, 20)))
-      .toEqual({ sheetId: 'sheet_one_2', row: 10, col: 20 });
-    expect(widthOrHeightKeyToData(getCustomWidthOrHeightKey('sheet_one_2', 10)))
-      .toEqual({ sheetId: 'sheet_one_2', rowOrCol: 10 });
+    expect(convertWorksheetKey(getWorksheetKey('sheet_one_2', 10, 20))).toEqual({
+      sheetId: 'sheet_one_2',
+      row: 10,
+      col: 20,
+    });
+    expect(widthOrHeightKeyToData(getCustomWidthOrHeightKey('sheet_one_2', 10))).toEqual({
+      sheetId: 'sheet_one_2',
+      rowOrCol: 10,
+    });
   });
-  test.each(['sheet_1x_2', 'sheet_1_2x', 'sheet_1_2.5', 'sheet__2', 'sheet_-1_2', 'sheet_1_9007199254740992'])(
-    'rejects malformed cell coordinates: %s', (key) => {
-      expect(convertWorksheetKey(key)).toBeNull();
-    },
-  );
+  test.each([
+    'sheet_1x_2',
+    'sheet_1_2x',
+    'sheet_1_2.5',
+    'sheet__2',
+    'sheet_-1_2',
+    'sheet_1_9007199254740992',
+  ])('rejects malformed cell coordinates: %s', (key) => {
+    expect(convertWorksheetKey(key)).toBeNull();
+  });
   test.each(['sheet_1x', 'sheet_1.5', 'sheet_', 'sheet_9007199254740992'])(
-    'rejects malformed custom-size coordinates: %s', (key) => {
+    'rejects malformed custom-size coordinates: %s',
+    (key) => {
       expect(widthOrHeightKeyToData(key).rowOrCol).toBe(-1);
     },
   );

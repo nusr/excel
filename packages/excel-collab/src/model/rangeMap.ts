@@ -45,7 +45,7 @@ export class RangeMap implements IRangeMap {
     this.rangeMap = rangeMap;
   }
   toJSON() {
-    return {...this.rangeMap}
+    return { ...this.rangeMap };
   }
   getActiveRange() {
     const id = this.model.getCurrentSheetId();

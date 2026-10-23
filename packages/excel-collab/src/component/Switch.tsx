@@ -3,11 +3,11 @@ import {
   SwitchField,
   SwitchButton,
   type SwitchFieldProps,
-  type ValidationResult
+  type ValidationResult,
 } from 'react-aria-components/Switch';
 import './Switch.css';
-import {Description, FieldError} from './Form';
-import type {ReactNode} from 'react';
+import { Description, FieldError } from './Form';
+import type { ReactNode } from 'react';
 
 export interface SwitchProps extends Omit<SwitchFieldProps, 'children'> {
   children: ReactNode;
@@ -15,11 +15,11 @@ export interface SwitchProps extends Omit<SwitchFieldProps, 'children'> {
   errorMessage?: string | ((validation: ValidationResult) => string);
 }
 
-export function Switch({children, description, errorMessage, ...props}: SwitchProps) {
+export function Switch({ children, description, errorMessage, ...props }: SwitchProps) {
   return (
     <SwitchField {...props}>
       <SwitchButton>
-        {({isSelected, isDisabled}) => (
+        {({ isSelected, isDisabled }) => (
           <>
             <div className="track indicator">
               <div

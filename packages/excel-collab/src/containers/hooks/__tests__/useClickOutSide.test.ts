@@ -51,9 +51,7 @@ describe('useClickOutside', () => {
 
   it('should clean up event listeners on unmount', () => {
     const callback = vi.fn();
-    const { result, unmount } = renderHook(() =>
-      useClickOutside(true, callback),
-    );
+    const { result, unmount } = renderHook(() => useClickOutside(true, callback));
     const ref = result.current;
 
     const div = document.createElement('div');

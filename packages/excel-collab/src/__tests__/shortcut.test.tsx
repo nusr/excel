@@ -176,16 +176,17 @@ describe('shortcut.test.tsx', () => {
         fontWeight: '700',
       });
 
-      fireEvent.copy(document.body, { clipboardData: { setData: () => {} } });
+      const clipboard = new Map<string, string>();
+      fireEvent.copy(document.body, {
+        clipboardData: { setData: (format: string, value: string) => clipboard.set(format, value) },
+      });
 
       fireEvent.keyDown(document.body, { key: 'Enter' });
-      fireEvent.paste(document.body, { clipboardData: { getData: () => '' } });
-      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
-        'A2',
-      );
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.isBold,
-      ).toEqual(true);
+      fireEvent.paste(document.body, {
+        clipboardData: { getData: (format: string) => clipboard.get(format) || '' },
+      });
+      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue('A2');
+      expect(controller.getCell(controller.getActiveRange().range)?.isBold).toEqual(true);
     });
   });
   describe('cut', () => {
@@ -195,16 +196,17 @@ describe('shortcut.test.tsx', () => {
         fontWeight: '700',
       });
 
-      fireEvent.cut(document.body, { clipboardData: { setData: () => {} } });
+      const clipboard = new Map<string, string>();
+      fireEvent.cut(document.body, {
+        clipboardData: { setData: (format: string, value: string) => clipboard.set(format, value) },
+      });
 
       fireEvent.keyDown(document.body, { key: 'Enter' });
-      fireEvent.paste(document.body, { clipboardData: { getData: () => '' } });
-      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
-        'A2',
-      );
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.isBold,
-      ).toEqual(true);
+      fireEvent.paste(document.body, {
+        clipboardData: { getData: (format: string) => clipboard.get(format) || '' },
+      });
+      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue('A2');
+      expect(controller.getCell(controller.getActiveRange().range)?.isBold).toEqual(true);
 
       fireEvent.keyDown(document.body, { key: 'ArrowUp' });
       expect(screen.getByTestId('formula-bar-name-input')).toHaveValue('A1');
@@ -217,9 +219,7 @@ describe('shortcut.test.tsx', () => {
   describe('wheel', () => {
     test('scroll down', async () => {
       expect(
-        window.getComputedStyle(
-          screen.getByTestId('vertical-scroll-bar-content'),
-        ).transform,
+        window.getComputedStyle(screen.getByTestId('vertical-scroll-bar-content')).transform,
       ).toEqual('translateY(0px)');
       fireEvent.wheel(document.body, {
         deltaX: 0,
@@ -232,9 +232,7 @@ describe('shortcut.test.tsx', () => {
     });
     test(' scroll right', async () => {
       expect(
-        window.getComputedStyle(
-          screen.getByTestId('horizontal-scroll-bar-content'),
-        ).transform,
+        window.getComputedStyle(screen.getByTestId('horizontal-scroll-bar-content')).transform,
       ).toEqual('translateX(0px)');
       fireEvent.wheel(document.body, {
         deltaX: 200,

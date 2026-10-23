@@ -1,6 +1,4 @@
-export function classnames(
-  ...rest: Array<string | Record<string, unknown> | undefined>
-): string {
+export function classnames(...rest: Array<string | Record<string, unknown> | undefined>): string {
   let result = '';
   for (const temp of rest) {
     if (temp === undefined) {

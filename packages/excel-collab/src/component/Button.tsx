@@ -33,9 +33,7 @@ export function Button(props: ButtonProps) {
         {composeRenderProps(props.children, (children, { isPending }) => (
           <>
             {!isPending && children}
-            {isPending && (
-              <ProgressCircle aria-label="Saving..." isIndeterminate />
-            )}
+            {isPending && <ProgressCircle aria-label="Saving..." isIndeterminate />}
           </>
         ))}
       </RACButton>

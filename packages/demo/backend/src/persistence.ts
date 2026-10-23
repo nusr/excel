@@ -1,10 +1,16 @@
 import { applyUpdate, encodeStateAsUpdate, type Doc } from 'yjs';
 import {
-  SharedRoot, hydrateDocument, initializeEmptyDocument, upgradeDocument,
+  SharedRoot,
+  hydrateDocument,
+  initializeEmptyDocument,
+  upgradeDocument,
 } from 'excel-collab/protocol';
 import type { ModelJSON } from 'excel-collab';
 import {
-  setContentInitializor, setPersistence, docs, type WSSharedDoc,
+  setContentInitializor,
+  setPersistence,
+  docs,
+  type WSSharedDoc,
 } from '@y/websocket-server/utils';
 import { loadDocumentState, saveDocumentState } from './db';
 import { withDocumentLock } from './documentAccess';
@@ -12,10 +18,12 @@ import { hasRoomReservations } from './roomReservations';
 
 export class DocumentPersistence {
   private readonly pending = new Map<Doc, Promise<void>>();
-  constructor(private readonly storage = {
-    load: loadDocumentState,
-    save: saveDocumentState,
-  }) {}
+  constructor(
+    private readonly storage = {
+      load: loadDocumentState,
+      save: saveDocumentState,
+    },
+  ) {}
 
   initialize = (doc: WSSharedDoc): Promise<void> =>
     withDocumentLock(doc.name, () => this.initializeDocument(doc));
@@ -42,7 +50,7 @@ export class DocumentPersistence {
           connection.close(1011, 'Document persistence failed');
         }
       });
-    }
+    };
     doc.on('update', persist);
     doc.once('destroy', () => {
       doc.off('update', persist);
@@ -50,7 +58,7 @@ export class DocumentPersistence {
     });
     persist();
     await this.flush(doc);
-  };
+  }
 
   async flush(doc: Doc): Promise<void> {
     let task: Promise<void> | undefined;

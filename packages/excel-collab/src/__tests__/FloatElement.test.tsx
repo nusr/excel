@@ -1,10 +1,5 @@
-import { screen, fireEvent } from '@testing-library/react';
-import {
-  type,
-  extractDataFromTransform,
-  renderComponent,
-  chooseSelectOption,
-} from './util';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { type, extractDataFromTransform, renderComponent, chooseSelectOption } from './util';
 import './global.mock';
 import { IController } from '../types';
 import { CHART_TYPE_LIST } from '../util';
@@ -27,9 +22,7 @@ describe('FloatElement.test.ts', () => {
     test('active chart', async () => {
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
-      expect(await screen.findByTestId('float-element')).not.toHaveClass(
-        'active',
-      );
+      expect(await screen.findByTestId('float-element')).not.toHaveClass('active');
       fireEvent.pointerDown(await screen.findByTestId('float-element'), {
         buttons: 1,
       });
@@ -38,9 +31,7 @@ describe('FloatElement.test.ts', () => {
     test('toggle mask', async () => {
       type('1');
       fireEvent.click(screen.getByTestId('toolbar-chart'));
-      expect(screen.getByTestId('float-element-mask')).not.toHaveClass(
-        'active',
-      );
+      expect(screen.getByTestId('float-element-mask')).not.toHaveClass('active');
       fireEvent.pointerDown(await screen.findByTestId('float-element'), {
         buttons: 1,
         clientX: 0,
@@ -48,9 +39,7 @@ describe('FloatElement.test.ts', () => {
       });
       expect(screen.getByTestId('float-element-mask')).toHaveClass('active');
       fireEvent.pointerDown(screen.getByTestId('float-element-mask'));
-      expect(screen.getByTestId('float-element-mask')).not.toHaveClass(
-        'active',
-      );
+      expect(screen.getByTestId('float-element-mask')).not.toHaveClass('active');
     });
     test('not active float element', async () => {
       type('1');
@@ -58,9 +47,7 @@ describe('FloatElement.test.ts', () => {
       fireEvent.pointerDown(await screen.findByTestId('float-element'), {
         buttons: 0,
       });
-      expect(screen.getByTestId('float-element-mask')).not.toHaveClass(
-        'active',
-      );
+      expect(screen.getByTestId('float-element-mask')).not.toHaveClass('active');
     });
   });
   describe('context menu', () => {
@@ -89,7 +76,7 @@ describe('FloatElement.test.ts', () => {
         clientX: 20,
       });
       fireEvent.click(screen.getByTestId('float-element-context-menu-paste'));
-      expect(await screen.findAllByTestId('float-element')).toHaveLength(2);
+      await waitFor(() => expect(screen.getAllByTestId('float-element')).toHaveLength(2));
     });
     test('cut', async () => {
       type('1');
@@ -115,10 +102,8 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-duplicate'),
-      );
-      expect(await screen.findAllByTestId('float-element')).toHaveLength(2);
+      fireEvent.click(screen.getByTestId('float-element-context-menu-duplicate'));
+      await waitFor(() => expect(screen.getAllByTestId('float-element')).toHaveLength(2));
     });
     test('delete', async () => {
       type('1');
@@ -127,10 +112,8 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-duplicate'),
-      );
-      expect(screen.getAllByTestId('float-element')).toHaveLength(2);
+      fireEvent.click(screen.getByTestId('float-element-context-menu-duplicate'));
+      await waitFor(() => expect(screen.getAllByTestId('float-element')).toHaveLength(2));
 
       fireEvent.contextMenu(screen.getAllByTestId('float-element')[1], {
         clientY: 20,
@@ -148,9 +131,10 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      expect(
-        screen.getByTestId('float-element-context-menu-reset-size'),
-      ).toHaveAttribute('aria-disabled', 'true');
+      expect(screen.getByTestId('float-element-context-menu-reset-size')).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      );
     });
     test('reset size', async () => {
       type('1');
@@ -160,9 +144,7 @@ describe('FloatElement.test.ts', () => {
         clientX: 0,
         clientY: 0,
       });
-      const oldHeight = window.getComputedStyle(
-        await screen.findByTestId('float-element'),
-      ).height;
+      const oldHeight = window.getComputedStyle(await screen.findByTestId('float-element')).height;
       const dom = screen.getByTestId('float-element-resize-top');
       dom.setAttribute('data-position', 'top');
       fireEvent.pointerDown(dom, {
@@ -178,24 +160,17 @@ describe('FloatElement.test.ts', () => {
         buttons: 1,
       });
       expect(
-        parseInt(
-          window.getComputedStyle(await screen.findByTestId('float-element'))
-            .height,
-          10,
-        ),
+        parseInt(window.getComputedStyle(await screen.findByTestId('float-element')).height, 10),
       ).toEqual(parseInt(oldHeight, 10) - 20);
 
       fireEvent.contextMenu(await screen.findByTestId('float-element'), {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-reset-size'),
+      fireEvent.click(screen.getByTestId('float-element-context-menu-reset-size'));
+      expect(window.getComputedStyle(await screen.findByTestId('float-element')).height).toEqual(
+        oldHeight,
       );
-      expect(
-        window.getComputedStyle(await screen.findByTestId('float-element'))
-          .height,
-      ).toEqual(oldHeight);
     });
   });
 
@@ -207,15 +182,10 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-select-data'),
-      );
-      fireEvent.change(
-        screen.getByTestId('dialog-select-data-input').querySelector('input')!,
-        {
-          target: { value: 'C3' },
-        },
-      );
+      fireEvent.click(screen.getByTestId('float-element-context-menu-select-data'));
+      fireEvent.change(screen.getByTestId('dialog-select-data-input').querySelector('input')!, {
+        target: { value: 'C3' },
+      });
 
       fireEvent.click(screen.getByTestId('dialog-confirm-button'));
       expect(controller.getDrawingList()[0].chartRange!).toEqual({
@@ -233,20 +203,13 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-select-data'),
-      );
-      fireEvent.change(
-        screen.getByTestId('dialog-select-data-input').querySelector('input')!,
-        {
-          target: { value: '' },
-        },
-      );
+      fireEvent.click(screen.getByTestId('float-element-context-menu-select-data'));
+      fireEvent.change(screen.getByTestId('dialog-select-data-input').querySelector('input')!, {
+        target: { value: '' },
+      });
 
       fireEvent.click(screen.getByTestId('dialog-confirm-button'));
-      expect(
-        await screen.findByText(i18n.t('reference-is-empty')),
-      ).not.toHaveTextContent('');
+      expect(await screen.findByText(i18n.t('reference-is-empty'))).not.toHaveTextContent('');
     });
 
     test('invalid', async () => {
@@ -256,20 +219,13 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-select-data'),
-      );
-      fireEvent.change(
-        screen.getByTestId('dialog-select-data-input').querySelector('input')!,
-        {
-          target: { value: '_.fe3435' },
-        },
-      );
+      fireEvent.click(screen.getByTestId('float-element-context-menu-select-data'));
+      fireEvent.change(screen.getByTestId('dialog-select-data-input').querySelector('input')!, {
+        target: { value: '_.fe3435' },
+      });
 
       fireEvent.click(screen.getByTestId('dialog-confirm-button'));
-      expect(
-        await screen.findByText(i18n.t('reference-is-not-valid')),
-      ).not.toHaveTextContent('');
+      expect(await screen.findByText(i18n.t('reference-is-not-valid'))).not.toHaveTextContent('');
     });
     test('cancel dialog', async () => {
       type('1');
@@ -279,15 +235,10 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-select-data'),
-      );
-      fireEvent.change(
-        screen.getByTestId('dialog-select-data-input').querySelector('input')!,
-        {
-          target: { value: '_.fe3435' },
-        },
-      );
+      fireEvent.click(screen.getByTestId('float-element-context-menu-select-data'));
+      fireEvent.change(screen.getByTestId('dialog-select-data-input').querySelector('input')!, {
+        target: { value: '_.fe3435' },
+      });
 
       fireEvent.click(screen.getByTestId('dialog-cancel-button'));
       expect(controller.getDrawingList()[0].chartRange!).toEqual(oldChartRange);
@@ -301,13 +252,9 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-change-chart-title'),
-      );
+      fireEvent.click(screen.getByTestId('float-element-context-menu-change-chart-title'));
       fireEvent.change(
-        screen
-          .getByTestId('dialog-change-chart-title-input')
-          .querySelector('input')!,
+        screen.getByTestId('dialog-change-chart-title-input').querySelector('input')!,
         {
           target: { value: 'new_chart_title' },
         },
@@ -323,22 +270,18 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-change-chart-title'),
-      );
+      fireEvent.click(screen.getByTestId('float-element-context-menu-change-chart-title'));
       fireEvent.change(
-        screen
-          .getByTestId('dialog-change-chart-title-input')
-          .querySelector('input')!,
+        screen.getByTestId('dialog-change-chart-title-input').querySelector('input')!,
         {
           target: { value: '' },
         },
       );
 
       fireEvent.click(screen.getByTestId('dialog-confirm-button'));
-      expect(
-        await screen.findByText(i18n.t('the-value-cannot-be-empty')),
-      ).not.toHaveTextContent('');
+      expect(await screen.findByText(i18n.t('the-value-cannot-be-empty'))).not.toHaveTextContent(
+        '',
+      );
     });
     test('cancel dialog', async () => {
       type('1');
@@ -348,23 +291,14 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-change-chart-title'),
-      );
+      fireEvent.click(screen.getByTestId('float-element-context-menu-change-chart-title'));
 
       fireEvent.click(screen.getByTestId('dialog-cancel-button'));
       expect(controller.getDrawingList()[0].title).toEqual(oldData);
     });
   });
   describe('chart type', () => {
-    for (const item of [
-      'line',
-      'bar',
-      'pie',
-      'scatter',
-      'radar',
-      'polarArea',
-    ]) {
+    for (const item of ['line', 'bar', 'pie', 'scatter', 'radar', 'polarArea']) {
       test(`change chart type to: ${item}`, async () => {
         type('1');
         fireEvent.click(screen.getByTestId('toolbar-chart'));
@@ -372,9 +306,7 @@ describe('FloatElement.test.ts', () => {
           clientY: 20,
           clientX: 20,
         });
-        fireEvent.click(
-          screen.getByTestId('float-element-context-menu-change-chart-type'),
-        );
+        fireEvent.click(screen.getByTestId('float-element-context-menu-change-chart-type'));
         await chooseSelectOption(
           'dialog-change-chart-type-select',
           CHART_TYPE_LIST.find((v) => v.value === item)!.label,
@@ -392,9 +324,7 @@ describe('FloatElement.test.ts', () => {
         clientY: 20,
         clientX: 20,
       });
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-change-chart-type'),
-      );
+      fireEvent.click(screen.getByTestId('float-element-context-menu-change-chart-type'));
 
       fireEvent.click(screen.getByTestId('dialog-cancel-button'));
       expect(controller.getDrawingList()[0].chartType!).toEqual(oldData);
@@ -410,14 +340,9 @@ describe('FloatElement.test.ts', () => {
           clientX: 0,
           clientY: 0,
         });
-        const oldStyle = window.getComputedStyle(
-          await screen.findByTestId('float-element'),
-        );
+        const oldStyle = window.getComputedStyle(await screen.findByTestId('float-element'));
         const oldHeight = oldStyle.height;
-        const oldTop = extractDataFromTransform(
-          oldStyle.transform,
-          'translateY',
-        );
+        const oldTop = extractDataFromTransform(oldStyle.transform, 'translateY');
         const dom = screen.getByTestId('float-element-resize-top');
         dom.setAttribute('data-position', item);
         fireEvent.pointerDown(dom, {
@@ -433,16 +358,9 @@ describe('FloatElement.test.ts', () => {
         fireEvent.pointerUp(document, {
           buttons: 1,
         });
-        const newStyle = window.getComputedStyle(
-          await screen.findByTestId('float-element'),
-        );
-        const newTop = extractDataFromTransform(
-          newStyle.transform,
-          'translateY',
-        );
-        expect(parseInt(newStyle.height, 10)).toEqual(
-          parseInt(oldHeight, 10) - 20,
-        );
+        const newStyle = window.getComputedStyle(await screen.findByTestId('float-element'));
+        const newTop = extractDataFromTransform(newStyle.transform, 'translateY');
+        expect(parseInt(newStyle.height, 10)).toEqual(parseInt(oldHeight, 10) - 20);
         expect(newTop).toEqual(oldTop + 20);
       });
     }
@@ -474,11 +392,7 @@ describe('FloatElement.test.ts', () => {
           buttons: 1,
         });
         expect(
-          parseInt(
-            window.getComputedStyle(await screen.findByTestId('float-element'))
-              .height,
-            10,
-          ),
+          parseInt(window.getComputedStyle(await screen.findByTestId('float-element')).height, 10),
         ).toEqual(parseInt(oldHeight, 10) + 20);
       });
     }
@@ -491,14 +405,9 @@ describe('FloatElement.test.ts', () => {
           clientX: 0,
           clientY: 0,
         });
-        const oldStyle = window.getComputedStyle(
-          await screen.findByTestId('float-element'),
-        );
+        const oldStyle = window.getComputedStyle(await screen.findByTestId('float-element'));
         const oldWidth = oldStyle.width;
-        const oldLeft = extractDataFromTransform(
-          oldStyle.transform,
-          'translateX',
-        );
+        const oldLeft = extractDataFromTransform(oldStyle.transform, 'translateX');
         const dom = screen.getByTestId('float-element-resize-top');
         dom.setAttribute('data-position', item);
         fireEvent.pointerDown(dom, {
@@ -513,16 +422,9 @@ describe('FloatElement.test.ts', () => {
         fireEvent.pointerUp(document, {
           buttons: 1,
         });
-        const newStyle = window.getComputedStyle(
-          await screen.findByTestId('float-element'),
-        );
-        const newLeft = extractDataFromTransform(
-          newStyle.transform,
-          'translateX',
-        );
-        expect(parseInt(newStyle.width, 10)).toEqual(
-          parseInt(oldWidth, 10) - 20,
-        );
+        const newStyle = window.getComputedStyle(await screen.findByTestId('float-element'));
+        const newLeft = extractDataFromTransform(newStyle.transform, 'translateX');
+        expect(parseInt(newStyle.width, 10)).toEqual(parseInt(oldWidth, 10) - 20);
         expect(newLeft).toEqual(oldLeft + 20);
       });
     }
@@ -535,9 +437,7 @@ describe('FloatElement.test.ts', () => {
           clientX: 0,
           clientY: 0,
         });
-        const oldWidth = window.getComputedStyle(
-          await screen.findByTestId('float-element'),
-        ).width;
+        const oldWidth = window.getComputedStyle(await screen.findByTestId('float-element')).width;
         const dom = screen.getByTestId('float-element-resize-top');
         dom.setAttribute('data-position', item);
         fireEvent.pointerDown(dom, {
@@ -554,11 +454,7 @@ describe('FloatElement.test.ts', () => {
           buttons: 1,
         });
         expect(
-          parseInt(
-            window.getComputedStyle(await screen.findByTestId('float-element'))
-              .width,
-            10,
-          ),
+          parseInt(window.getComputedStyle(await screen.findByTestId('float-element')).width, 10),
         ).toEqual(parseInt(oldWidth, 10) + 20);
       });
     }
@@ -570,9 +466,7 @@ describe('FloatElement.test.ts', () => {
         clientX: 0,
         clientY: 0,
       });
-      const oldWidth = window.getComputedStyle(
-        await screen.findByTestId('float-element'),
-      ).width;
+      const oldWidth = window.getComputedStyle(await screen.findByTestId('float-element')).width;
       const dom = screen.getByTestId('float-element-resize-top');
       dom.setAttribute('data-position', 'top');
       fireEvent.pointerDown(dom, {
@@ -589,11 +483,7 @@ describe('FloatElement.test.ts', () => {
         buttons: 1,
       });
       expect(
-        parseInt(
-          window.getComputedStyle(await screen.findByTestId('float-element'))
-            .width,
-          10,
-        ),
+        parseInt(window.getComputedStyle(await screen.findByTestId('float-element')).width, 10),
       ).toEqual(parseInt(oldWidth, 10));
     });
     test('no data-position', async () => {
@@ -604,9 +494,7 @@ describe('FloatElement.test.ts', () => {
         clientX: 0,
         clientY: 0,
       });
-      const oldWidth = window.getComputedStyle(
-        await screen.findByTestId('float-element'),
-      ).width;
+      const oldWidth = window.getComputedStyle(await screen.findByTestId('float-element')).width;
       const dom = screen.getByTestId('float-element-resize-top');
       fireEvent.pointerDown(dom, {
         clientX: 0,
@@ -622,11 +510,7 @@ describe('FloatElement.test.ts', () => {
         buttons: 1,
       });
       expect(
-        parseInt(
-          window.getComputedStyle(await screen.findByTestId('float-element'))
-            .width,
-          10,
-        ),
+        parseInt(window.getComputedStyle(await screen.findByTestId('float-element')).width, 10),
       ).toEqual(parseInt(oldWidth, 10));
     });
   });
@@ -639,13 +523,8 @@ describe('FloatElement.test.ts', () => {
         clientX: 0,
         clientY: 0,
       });
-      const oldStyle = window.getComputedStyle(
-        await screen.findByTestId('float-element'),
-      );
-      const oldLeft = extractDataFromTransform(
-        oldStyle.transform,
-        'translateX',
-      );
+      const oldStyle = window.getComputedStyle(await screen.findByTestId('float-element'));
+      const oldLeft = extractDataFromTransform(oldStyle.transform, 'translateX');
 
       fireEvent.pointerMove(document, {
         buttons: 1,
@@ -655,13 +534,8 @@ describe('FloatElement.test.ts', () => {
       fireEvent.pointerUp(document, {
         buttons: 1,
       });
-      const newStyle = window.getComputedStyle(
-        await screen.findByTestId('float-element'),
-      );
-      const newLeft = extractDataFromTransform(
-        newStyle.transform,
-        'translateX',
-      );
+      const newStyle = window.getComputedStyle(await screen.findByTestId('float-element'));
+      const newLeft = extractDataFromTransform(newStyle.transform, 'translateX');
       expect(newLeft).toEqual(oldLeft + 20);
     });
     test('move down', async () => {
@@ -672,9 +546,7 @@ describe('FloatElement.test.ts', () => {
         clientX: 0,
         clientY: 0,
       });
-      const oldStyle = window.getComputedStyle(
-        await screen.findByTestId('float-element'),
-      );
+      const oldStyle = window.getComputedStyle(await screen.findByTestId('float-element'));
       const oldTop = extractDataFromTransform(oldStyle.transform, 'translateY');
 
       fireEvent.pointerMove(document, {
@@ -685,9 +557,7 @@ describe('FloatElement.test.ts', () => {
       fireEvent.pointerUp(document, {
         buttons: 1,
       });
-      const newStyle = window.getComputedStyle(
-        await screen.findByTestId('float-element'),
-      );
+      const newStyle = window.getComputedStyle(await screen.findByTestId('float-element'));
       const newTop = extractDataFromTransform(newStyle.transform, 'translateY');
       expect(newTop).toEqual(oldTop + 20);
     });
@@ -708,9 +578,7 @@ describe('FloatElement.test.ts', () => {
         clientX: 0,
         clientY: 0,
       });
-      const oldStyle = window.getComputedStyle(
-        await screen.findByTestId('float-element'),
-      );
+      const oldStyle = window.getComputedStyle(await screen.findByTestId('float-element'));
       const oldValue = extractDataFromTransform(oldStyle.transform, 'rotate');
       const dom = screen.getByTestId('float-element-resize-top');
       dom.setAttribute('data-position', 'rotate');
@@ -726,9 +594,7 @@ describe('FloatElement.test.ts', () => {
       fireEvent.pointerUp(document, {
         buttons: 1,
       });
-      const newStyle = window.getComputedStyle(
-        await screen.findByTestId('float-element'),
-      );
+      const newStyle = window.getComputedStyle(await screen.findByTestId('float-element'));
       const newValue = extractDataFromTransform(newStyle.transform, 'rotate');
       expect(newValue).toEqual(oldValue + 45);
     });

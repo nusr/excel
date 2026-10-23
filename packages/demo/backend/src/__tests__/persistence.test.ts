@@ -30,7 +30,9 @@ async function room(persistence: DocumentPersistence, name = 'persistence-test')
 }
 function deferred() {
   let resolve!: () => void;
-  const promise = new Promise<void>((done) => { resolve = done; });
+  const promise = new Promise<void>((done) => {
+    resolve = done;
+  });
   return { promise, resolve };
 }
 async function mockConnection() {
@@ -54,7 +56,9 @@ afterAll(async () => {
 
 test('legacy coordinate JSON is migrated and binary state takes precedence over stale JSON', async () => {
   const json = {
-    workbook: { '1': { sheetId: '1', name: 'Legacy', sort: 1, isHide: false, rowCount: 3, colCount: 3 } },
+    workbook: {
+      '1': { sheetId: '1', name: 'Legacy', sort: 1, isHide: false, rowCount: 3, colCount: 3 },
+    },
     worksheets: { '1_1_2': { value: 'saved' } },
     customWidth: { '1_2': { len: 120, isHide: false } },
   };
@@ -63,9 +67,15 @@ test('legacy coordinate JSON is migrated and binary state takes precedence over 
   const doc = await room(persistence);
   expect(new SharedRoot(doc).toJSON()).toMatchObject(json);
   const saved = await disk.load(doc.name);
-  const restored = await room(new DocumentPersistence(storage({
-    state: saved!.state, content: '{"workbook":{}}',
-  })), 'restored');
+  const restored = await room(
+    new DocumentPersistence(
+      storage({
+        state: saved!.state,
+        content: '{"workbook":{}}',
+      }),
+    ),
+    'restored',
+  );
   expect(new SharedRoot(restored).toJSON()).toEqual(new SharedRoot(doc).toJSON());
   expect(encodeStateAsUpdate(restored)).toEqual(encodeStateAsUpdate(doc));
 });
@@ -93,7 +103,10 @@ test('queued writes save matching JSON and binary snapshots in update order', as
 test('closing the last connection during initialization does not destroy an initializing room', async () => {
   const disk = storage();
   const loading = deferred();
-  disk.load.mockImplementationOnce(async () => { await loading.promise; return undefined; });
+  disk.load.mockImplementationOnce(async () => {
+    await loading.promise;
+    return undefined;
+  });
   const persistence = new DocumentPersistence(disk);
   persistence.install();
   const doc = getYDoc('initializing');
@@ -115,8 +128,15 @@ test('release waits for writes queued while flushing and retains a room that rec
   const first = deferred();
   const second = deferred();
   const save = disk.save.getMockImplementation()!;
-  disk.save.mockImplementationOnce(async (...args) => { await first.promise; await save(...args); })
-    .mockImplementationOnce(async (...args) => { await second.promise; await save(...args); });
+  disk.save
+    .mockImplementationOnce(async (...args) => {
+      await first.promise;
+      await save(...args);
+    })
+    .mockImplementationOnce(async (...args) => {
+      await second.promise;
+      await save(...args);
+    });
   const sheet = new SharedRoot(doc).get('workbook').values().next().value!;
   sheet.set('name', 'first');
   const released = persistence.release(doc);
@@ -183,7 +203,9 @@ test('failed saves reject flush, report errors, close clients and retain unsaved
 test('invalid persisted binary rejects initialization without falling back to JSON or overwriting storage', async () => {
   const binary = Buffer.from([255]);
   const content = JSON.stringify({
-    workbook: { '1': { sheetId: '1', name: 'Do not reset', sort: 1, isHide: false, rowCount: 3, colCount: 3 } },
+    workbook: {
+      '1': { sheetId: '1', name: 'Do not reset', sort: 1, isHide: false, rowCount: 3, colCount: 3 },
+    },
   });
   const disk = storage({ state: binary, content });
   const persistence = new DocumentPersistence(disk);
@@ -215,7 +237,9 @@ test('websocket sends no sync frames before initialization is durably saved', as
   await once(server, 'listening');
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('Expected a TCP address');
-  const socket = new WebSocket(`ws://127.0.0.1:${address.port}/durable-handshake?protocol=${PROTOCOL_VERSION}`);
+  const socket = new WebSocket(
+    `ws://127.0.0.1:${address.port}/durable-handshake?protocol=${PROTOCOL_VERSION}`,
+  );
   const opened = once(socket, 'open');
   const messages: Uint8Array[] = [];
   socket.on('message', (message) => messages.push(new Uint8Array(message as Buffer)));
@@ -237,7 +261,9 @@ test('websocket sends no sync frames before initialization is durably saved', as
     socket.terminate();
     await manager.closeAllConnections();
     await persistence.flushAll();
-    await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    await new Promise<void>((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
+    );
   }
 });
 
@@ -260,7 +286,8 @@ test('real websocket clients synchronize before editing and reconnect with persi
   const connect = async () => {
     const doc = new Doc();
     const provider = new WebsocketProvider(`ws://127.0.0.1:${address.port}`, 'network-test', doc, {
-      disableBc: true, params: { protocol: String(PROTOCOL_VERSION) },
+      disableBc: true,
+      params: { protocol: String(PROTOCOL_VERSION) },
     });
     clients.push({ doc, provider });
     await vi.waitFor(() => expect(provider.synced).toBe(true));
@@ -275,7 +302,9 @@ test('real websocket clients synchronize before editing and reconnect with persi
     expect(rootB.toJSON()).toEqual(rootA.toJSON());
     const sheet = rootA.getSheets()[0];
     rootA.get('workbook').get(sheet.sheetId)!.get('rows')!.insert(0, ['inserted-row']);
-    rootB.get('workbook').set('second', createSharedSheet({ ...sheet, sheetId: 'second', name: 'Other' }));
+    rootB
+      .get('workbook')
+      .set('second', createSharedSheet({ ...sheet, sheetId: 'second', name: 'Other' }));
     await vi.waitFor(() => expect(rootA.toJSON()).toEqual(rootB.toJSON()));
     const sharedDoc = docs.get('network-test')!;
     rooms.add(sharedDoc);
@@ -286,7 +315,9 @@ test('real websocket clients synchronize before editing and reconnect with persi
     const restored = await connect();
     rooms.add(docs.get('network-test')!);
     expect(new SharedRoot(restored).toJSON()).toEqual(expected);
-    expect(new SharedRoot(restored).get('workbook').get(sheet.sheetId)!.get('rows')!.get(0)).toBe('inserted-row');
+    expect(new SharedRoot(restored).get('workbook').get(sheet.sheetId)!.get('rows')!.get(0)).toBe(
+      'inserted-row',
+    );
   } finally {
     for (const { doc, provider } of clients) {
       provider.destroy();
@@ -294,6 +325,8 @@ test('real websocket clients synchronize before editing and reconnect with persi
     }
     await manager.closeAllConnections();
     await persistence.flushAll();
-    await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    await new Promise<void>((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve())),
+    );
   }
 }, 15000);

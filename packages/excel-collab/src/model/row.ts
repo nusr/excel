@@ -1,13 +1,5 @@
-import type {
-  ModelJSON,
-  IRow,
-  CustomItem,
-  IModel,
-} from '../types';
-import {
-  CELL_HEIGHT,
-  widthOrHeightKeyToData,
-} from '../util';
+import type { ModelJSON, IRow, CustomItem, IModel } from '../types';
+import { CELL_HEIGHT, widthOrHeightKeyToData } from '../util';
 
 export class RowManager implements IRow {
   private model: IModel;
@@ -64,8 +56,10 @@ export class RowManager implements IRow {
   getRow(row: number, sheetId?: string): CustomItem {
     const id = sheetId || this.model.getCurrentSheetId();
     const key = this.model.getRoot().sizeKey(id, 'rows', row);
-    const temp = key === undefined ? undefined
-      : this.customHeight.get(key) ?? this.customHeight.get(`${id}_overflow:${row}`);
+    const temp =
+      key === undefined
+        ? undefined
+        : (this.customHeight.get(key) ?? this.customHeight.get(`${id}_overflow:${row}`));
     if (!temp) {
       return {
         len: CELL_HEIGHT,

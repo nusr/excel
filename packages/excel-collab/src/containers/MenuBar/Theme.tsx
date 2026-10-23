@@ -35,11 +35,7 @@ export const Theme: React.FunctionComponent = memo(() => {
   }, []);
   return (
     <div data-testid="menubar-theme" className={styles.theme}>
-      <Button
-        onPress={handleClick}
-        data-testid="menubar-theme-toggle"
-        aria-label="Toggle theme"
-      >
+      <Button onPress={handleClick} data-testid="menubar-theme-toggle" aria-label="Toggle theme">
         {themeData === 'dark' ? <Sun /> : <Moon />}
       </Button>
     </div>

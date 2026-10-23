@@ -83,8 +83,7 @@ function qualifierAt(source: string, start: number): Qualifier | undefined {
         name += "'";
         end++;
       } else {
-        return source[end + 1] === '!'
-          ? { name, start, end: end + 1, after: end + 2 } : undefined;
+        return source[end + 1] === '!' ? { name, start, end: end + 1, after: end + 2 } : undefined;
       }
     }
     return undefined;
@@ -131,10 +130,16 @@ function atomAt<A>(
     start: atomStart,
     end,
     kind: relative ? 'r1c1' : 'a1',
-    absoluteRow: relative ? Boolean(relative[2] && !relative[2].startsWith('['))
-      : cell ? Boolean(cell[2]) : range.colCount === 0 && raw.startsWith('$'),
-    absoluteCol: relative ? Boolean(relative[4] && !relative[4].startsWith('['))
-      : cell ? Boolean(cell[1]) : range.rowCount === 0 && raw.startsWith('$'),
+    absoluteRow: relative
+      ? Boolean(relative[2] && !relative[2].startsWith('['))
+      : cell
+        ? Boolean(cell[2])
+        : range.colCount === 0 && raw.startsWith('$'),
+    absoluteCol: relative
+      ? Boolean(relative[4] && !relative[4].startsWith('['))
+      : cell
+        ? Boolean(cell[1])
+        : range.rowCount === 0 && raw.startsWith('$'),
     rowEnd: false,
     colEnd: false,
   };
@@ -144,8 +149,10 @@ function atomAt<A>(
     range: { ...range.toIRange(), sheetId: sheetId ?? '' },
     sheetId,
     named: Boolean(options.isDefinedName?.(raw, sheetId ?? options.sheetId)),
-    qualifier: qualifier && sheetId !== undefined
-      ? { start: qualifier.start, end: qualifier.end, name: qualifier.name, sheetId } : undefined,
+    qualifier:
+      qualifier && sheetId !== undefined
+        ? { start: qualifier.start, end: qualifier.end, name: qualifier.name, sheetId }
+        : undefined,
     endpoint,
   };
 }
@@ -168,7 +175,9 @@ export function bindFormulaReferences<A>(
       continue;
     }
     if (char === '#') {
-      const error = [...ERROR_SET].find((code) => formula.slice(cursor).toUpperCase().startsWith(code));
+      const error = [...ERROR_SET].find((code) =>
+        formula.slice(cursor).toUpperCase().startsWith(code),
+      );
       cursor += error?.length ?? 1;
       continue;
     }
@@ -187,28 +196,38 @@ export function bindFormulaReferences<A>(
     const qualifier = qualifierAt(formula, cursor);
     if (qualifier) {
       const sheetId = options.resolveSheet(qualifier.name);
-      if (sheetId !== undefined) qualifiers.set(qualifier.start, {
-        start: qualifier.start, end: qualifier.end, name: qualifier.name, sheetId,
-      });
+      if (sheetId !== undefined)
+        qualifiers.set(qualifier.start, {
+          start: qualifier.start,
+          end: qualifier.end,
+          name: qualifier.name,
+          sheetId,
+        });
     } else if (char === "'") {
       cursor = quotedEnd(formula, cursor, char);
       continue;
     }
     const first = atomAt(formula, cursor, options.sheetId, options);
     if (!first) {
-      cursor = qualifier?.after ?? cursor + (identifier.exec(formula.slice(cursor))?.[0].length ?? 1);
+      cursor =
+        qualifier?.after ?? cursor + (identifier.exec(formula.slice(cursor))?.[0].length ?? 1);
       continue;
     }
     const colon = /^\s*:\s*/.exec(formula.slice(first.end));
-    const second = colon ? atomAt(formula, first.end + colon[0].length, first.sheetId, options) : undefined;
-    const merged = second && !first.named && !second.named && first.sheetId === second.sheetId
-      ? mergeRange(first.range, second.range) : undefined;
+    const second = colon
+      ? atomAt(formula, first.end + colon[0].length, first.sheetId, options)
+      : undefined;
+    const merged =
+      second && !first.named && !second.named && first.sheetId === second.sheetId
+        ? mergeRange(first.range, second.range)
+        : undefined;
     const atoms = merged && second ? [first, second] : [first];
     const range = merged?.toIRange() ?? first.range;
     const end = atoms[atoms.length - 1].end;
-    const localQualifiers = atoms.flatMap((atom) => atom.qualifier ? [atom.qualifier] : []);
+    const localQualifiers = atoms.flatMap((atom) => (atom.qualifier ? [atom.qualifier] : []));
     for (const item of localQualifiers) qualifiers.set(item.start, item);
-    const bareNumber = !colon && !qualifier && /^\d+$/.test(formula.slice(first.endpoint.start, first.end));
+    const bareNumber =
+      !colon && !qualifier && /^\d+$/.test(formula.slice(first.endpoint.start, first.end));
     if (!first.named && first.sheetId !== undefined && !bareNumber) {
       const anchor = options.bindRange(range);
       if (anchor !== undefined) {
@@ -232,11 +251,16 @@ export function bindFormulaReferences<A>(
 }
 
 function validRange(range: IRange): boolean {
-  return [range.row, range.col, range.rowCount, range.colCount].every(Number.isSafeInteger) &&
-    range.row >= 0 && range.col >= 0 && range.rowCount >= 0 && range.colCount >= 0 &&
+  return (
+    [range.row, range.col, range.rowCount, range.colCount].every(Number.isSafeInteger) &&
+    range.row >= 0 &&
+    range.col >= 0 &&
+    range.rowCount >= 0 &&
+    range.colCount >= 0 &&
     (range.rowCount > 0 || range.colCount > 0) &&
     range.row + Math.max(1, range.rowCount) <= XLSX_MAX_ROW_COUNT &&
-    range.col + Math.max(1, range.colCount) <= XLSX_MAX_COL_COUNT;
+    range.col + Math.max(1, range.colCount) <= XLSX_MAX_COL_COUNT
+  );
 }
 
 function renderEndpoint<A>(
@@ -247,18 +271,30 @@ function renderEndpoint<A>(
 ) {
   const row = range.row + (endpoint.rowEnd ? range.rowCount - 1 : 0);
   const col = range.col + (endpoint.colEnd ? range.colCount - 1 : 0);
-  const original = endpoint.kind === 'r1c1' ? parseR1C1(raw, { ...options, sheetId: range.sheetId })
-    : parseReference(raw);
-  if (original && original.row === row && original.col === col &&
+  const original =
+    endpoint.kind === 'r1c1'
+      ? parseR1C1(raw, { ...options, sheetId: range.sheetId })
+      : parseReference(raw);
+  if (
+    original &&
+    original.row === row &&
+    original.col === col &&
     (original.rowCount === 0) === (range.rowCount === 0) &&
-    (original.colCount === 0) === (range.colCount === 0)) return raw;
+    (original.colCount === 0) === (range.colCount === 0)
+  )
+    return raw;
   if (endpoint.kind === 'r1c1') {
     const syntax = r1c1.exec(raw);
     const axis = (prefix: string, coordinate: number, origin: number, absolute: boolean) =>
-      absolute ? `${prefix}${coordinate + 1}`
-        : coordinate === origin ? prefix : `${prefix}[${coordinate - origin}]`;
-    return axis(syntax?.[1] ?? 'R', row, options.row, endpoint.absoluteRow) +
-      axis(syntax?.[3] ?? 'C', col, options.col, endpoint.absoluteCol);
+      absolute
+        ? `${prefix}${coordinate + 1}`
+        : coordinate === origin
+          ? prefix
+          : `${prefix}[${coordinate - origin}]`;
+    return (
+      axis(syntax?.[1] ?? 'R', row, options.row, endpoint.absoluteRow) +
+      axis(syntax?.[3] ?? 'C', col, options.col, endpoint.absoluteCol)
+    );
   }
   const column = `${endpoint.absoluteCol ? '$' : ''}${intToColumnName(col)}`;
   const label = `${endpoint.absoluteRow ? '$' : ''}${row + 1}`;
@@ -284,9 +320,11 @@ export function renderFormulaReferences<A>(
       if (value !== raw) edits.push({ start: endpoint.start, end: endpoint.end, value });
     }
   }
-  const qualifiers = binding.qualifiers ?? binding.references.flatMap((reference) => reference.qualifiers);
+  const qualifiers =
+    binding.qualifiers ?? binding.references.flatMap((reference) => reference.qualifiers);
   for (const qualifier of qualifiers) {
-    if (deleted.some((range) => qualifier.start >= range.start && qualifier.end <= range.end)) continue;
+    if (deleted.some((range) => qualifier.start >= range.start && qualifier.end <= range.end))
+      continue;
     const name = options.getSheetName?.(qualifier.sheetId);
     if (name === undefined || name === qualifier.name) continue;
     const value = /^[A-Za-z_][A-Za-z0-9_]*$/.test(name) ? name : `'${name.replace(/'/g, "''")}'`;

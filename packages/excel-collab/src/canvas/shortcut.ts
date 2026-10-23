@@ -32,11 +32,7 @@ export function handleEnterClick(controller: IController) {
   });
 }
 
-export function computeScrollRowAndCol(
-  controller: IController,
-  left: number,
-  top: number,
-) {
+export function computeScrollRowAndCol(controller: IController, left: number, top: number) {
   const oldScroll = controller.getScroll();
   const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId());
   if (!sheetInfo) {
@@ -118,9 +114,7 @@ export function scrollToView(controller: IController, range: IRange) {
       controller.setActiveRange(range);
       return true;
     }
-    const oldPosition = controller.computeCellPosition(
-      controller.getActiveRange().range,
-    );
+    const oldPosition = controller.computeCellPosition(controller.getActiveRange().range);
 
     scrollBar(controller, left - oldPosition.left, top - oldPosition.top);
     controller.setActiveRange(range);
@@ -146,11 +140,7 @@ export function computeScrollPosition(controller: IController) {
   };
 }
 
-export function scrollBar(
-  controller: IController,
-  scrollX: number,
-  scrollY: number,
-) {
+export function scrollBar(controller: IController, scrollX: number, scrollY: number) {
   const oldScroll = controller.getScroll();
 
   const size = computeScrollPosition(controller);
@@ -269,16 +259,11 @@ export function checkFocus() {
 }
 
 export function setActiveCellValue(controller: IController) {
-  const inputDom = document.activeElement as
-    | HTMLInputElement
-    | HTMLTextAreaElement;
+  const inputDom = document.activeElement as HTMLInputElement | HTMLTextAreaElement;
   const { range, isMerged } = controller.getActiveRange();
   const cellData = controller.getCell(range);
   let value = inputDom.value;
-  if (
-    typeof cellData?.value === 'string' &&
-    isMergeContent(isMerged, cellData?.value)
-  ) {
+  if (typeof cellData?.value === 'string' && isMergeContent(isMerged, cellData?.value)) {
     value = value.replaceAll(LINE_BREAK, MERGE_CELL_LINE_BREAK);
   }
   controller.setCellValue(value, range);
@@ -293,9 +278,7 @@ function checkActiveElement(controller: IController) {
   }
   setActiveCellValue(controller);
 }
-const modifierKey: KeyboardEventItem['modifierKey'] = [
-  isMac() ? 'meta' : 'ctrl',
-];
+const modifierKey: KeyboardEventItem['modifierKey'] = [isMac() ? 'meta' : 'ctrl'];
 /* jscpd:ignore-start */
 export const keyboardEventList: KeyboardEventItem[] = [
   {
@@ -426,10 +409,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
         return;
       }
       const cellData = controller.getCell(controller.getActiveRange().range);
-      controller.updateCellStyle(
-        { isBold: !cellData?.isBold },
-        controller.getActiveRange().range,
-      );
+      controller.updateCellStyle({ isBold: !cellData?.isBold }, controller.getActiveRange().range);
     },
   },
   {
@@ -476,10 +456,7 @@ export const keyboardEventList: KeyboardEventItem[] = [
       } else {
         newUnderline = EUnderLine.NONE;
       }
-      controller.updateCellStyle(
-        { underline: newUnderline },
-        controller.getActiveRange().range,
-      );
+      controller.updateCellStyle({ underline: newUnderline }, controller.getActiveRange().range);
     },
   },
   {

@@ -22,7 +22,9 @@ describe('invalid expressions', () => {
     });
   });
   it('#VALUE!', () => {
-    expect(buildTree('#VALUE!')).toEqual(new LiteralExpression(new Token(TokenType.ERROR, '#VALUE!')));
+    expect(buildTree('#VALUE!')).toEqual(
+      new LiteralExpression(new Token(TokenType.ERROR, '#VALUE!')),
+    );
   });
 
   it('SUM(', () => {

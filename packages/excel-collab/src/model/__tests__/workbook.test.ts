@@ -118,10 +118,7 @@ describe('workbook.test.ts', () => {
     test('ok', () => {
       model.addSheet();
       const oldData = model.getSheetInfo();
-      model.updateSheetInfo(
-        { colCount: 10, rowCount: 10 },
-        model.getCurrentSheetId(),
-      );
+      model.updateSheetInfo({ colCount: 10, rowCount: 10 }, model.getCurrentSheetId());
       expect(model.getSheetInfo()).not.toEqual(oldData);
     });
   });
@@ -132,9 +129,8 @@ describe('workbook.test.ts', () => {
       model.addSheet();
 
       const len = model.getSheetList().length;
-      model.deleteSheet('aaa')
-      expect(model.getSheetList()).toHaveLength(len)
-
+      model.deleteSheet('aaa');
+      expect(model.getSheetList()).toHaveLength(len);
     });
   });
   describe('hideSheet', () => {

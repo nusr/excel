@@ -30,11 +30,7 @@ describe('renderCell', () => {
       fillText,
     } as unknown as CanvasRenderingContext2D;
 
-    renderCell(
-      ctx,
-      { left: 20, top: 20, width: 10, height: 5 },
-      { value: 'too large' },
-    );
+    renderCell(ctx, { left: 20, top: 20, width: 10, height: 5 }, { value: 'too large' });
 
     expect(fillText).not.toHaveBeenCalled();
   });

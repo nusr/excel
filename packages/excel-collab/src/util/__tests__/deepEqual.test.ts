@@ -19,10 +19,7 @@ describe('deepEqual.test.ts', () => {
       expect(deepEqual([1, 2], [1, 2])).toBeTruthy();
       expect(deepEqual([[1, 2], [3]], [[1, 2], [3]])).toBeTruthy();
       expect(
-        deepEqual(
-          [{ a: { b: { c: { d: 1 } } } }],
-          [{ a: { b: { c: { d: 1 } } } }],
-        ),
+        deepEqual([{ a: { b: { c: { d: 1 } } } }], [{ a: { b: { c: { d: 1 } } } }]),
       ).toBeTruthy();
       expect(deepEqual({ test: 1 }, { test: 1 })).toBeTruthy();
       expect(

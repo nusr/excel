@@ -35,10 +35,7 @@ function i18nConfig() {
     init: () => {
       _currentLanguage = getLanguage(localStorage.getItem(languageKey) as any);
     },
-    t: (
-      key: TranslationKeys,
-      options: Record<string, string | number> = {},
-    ) => {
+    t: (key: TranslationKeys, options: Record<string, string | number> = {}) => {
       const template = locales[_currentLanguage][key];
 
       // @ts-ignore

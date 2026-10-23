@@ -1,8 +1,5 @@
 import { buildTree } from './util';
-import {
-  CellRangeExpression,
-  CellExpression,
-} from '../../expression';
+import { CellRangeExpression, CellExpression } from '../../expression';
 import { TokenType } from '../../../types';
 import { Token } from '../../token';
 
@@ -10,40 +7,30 @@ describe('cell ranges', () => {
   it('A1', () => {
     const tree = buildTree('A1');
 
-    expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.CELL, 'A1'), undefined),
-    );
+    expect(tree).toEqual(new CellExpression(new Token(TokenType.CELL, 'A1'), undefined));
   });
 
   it('A$1', () => {
     const tree = buildTree('A$1');
 
-    expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.CELL, 'A$1'), undefined),
-    );
+    expect(tree).toEqual(new CellExpression(new Token(TokenType.CELL, 'A$1'), undefined));
   });
 
   it('$A1', () => {
     const tree = buildTree('$A1');
 
-    expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.CELL, '$A1'), undefined),
-    );
+    expect(tree).toEqual(new CellExpression(new Token(TokenType.CELL, '$A1'), undefined));
   });
 
   it('$a1', () => {
     const tree = buildTree('$a1');
 
-    expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.CELL, '$a1'), undefined),
-    );
+    expect(tree).toEqual(new CellExpression(new Token(TokenType.CELL, '$a1'), undefined));
   });
 
   it('$A$1', () => {
     const tree = buildTree('$A$1');
-    expect(tree).toEqual(
-      new CellExpression(new Token(TokenType.CELL, '$A$1'), undefined),
-    );
+    expect(tree).toEqual(new CellExpression(new Token(TokenType.CELL, '$A$1'), undefined));
   });
 
   it('A1:A4', () => {

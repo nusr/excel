@@ -1,7 +1,7 @@
 'use client';
-import {composeRenderProps} from 'react-aria-components/composeRenderProps';
-import {ProgressBar} from 'react-aria-components/ProgressBar';
-import type {ProgressBarProps} from 'react-aria-components/ProgressBar';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { ProgressBar } from 'react-aria-components/ProgressBar';
+import type { ProgressBarProps } from 'react-aria-components/ProgressBar';
 
 export interface ProgressCircleProps extends ProgressBarProps {
   size?: number;
@@ -15,12 +15,13 @@ export function ProgressCircle(props: ProgressCircleProps) {
   return (
     <ProgressBar
       {...props}
-      style={composeRenderProps(props.style, style => ({
+      style={composeRenderProps(props.style, (style) => ({
         ...style,
         width: props.size || 16,
-        height: props.size || 16
-      }))}>
-      {({percentage, isIndeterminate}) => (
+        height: props.size || 16,
+      }))}
+    >
+      {({ percentage, isIndeterminate }) => (
         <>
           <svg fill="none" width="100%" height="100%" viewBox="0 0 32 32">
             <circle
@@ -44,8 +45,9 @@ export function ProgressCircle(props: ProgressCircleProps) {
               strokeLinecap="round"
               style={{
                 rotate: '-90deg',
-                transformOrigin: 'center center'
-              }}>
+                transformOrigin: 'center center',
+              }}
+            >
               {isIndeterminate && (
                 <animateTransform
                   attributeName="transform"

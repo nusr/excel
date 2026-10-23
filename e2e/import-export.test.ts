@@ -9,19 +9,26 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function excelizeRequests(page: Page) {
-  return page.evaluate(() => performance.getEntriesByType('resource')
-    .map((entry) => new URL(entry.name))
-    .filter((url) => !url.searchParams.has('url'))
-    .filter((url) => url.pathname.includes('excelize.wasm') ||
-      /\/main(?:-[^/]+)?\.js$/.test(url.pathname))
-    .map((url) => url.href));
+  return page.evaluate(() =>
+    performance
+      .getEntriesByType('resource')
+      .map((entry) => new URL(entry.name))
+      .filter((url) => !url.searchParams.has('url'))
+      .filter(
+        (url) =>
+          url.pathname.includes('excelize.wasm') || /\/main(?:-[^/]+)?\.js$/.test(url.pathname),
+      )
+      .map((url) => url.href),
+  );
 }
 
 test('CSV and JSON operations do not load Excelize', async ({ page }) => {
   expect(await excelizeRequests(page)).toEqual([]);
   await page.getByTestId('menubar-excel-trigger').click();
   await page.getByTestId('menubar-import-input').setInputFiles({
-    name: 'data.csv', mimeType: 'text/csv', buffer: Buffer.from('hello,42'),
+    name: 'data.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from('hello,42'),
   });
   await expect(page.getByTestId('formula-editor-trigger')).toHaveText('hello');
   await page.keyboard.press('Escape');
@@ -30,7 +37,9 @@ test('CSV and JSON operations do not load Excelize', async ({ page }) => {
     await page.getByTestId('menubar-excel-trigger').click();
     await page.getByRole('menuitem', { name: /export/i }).hover();
     const download = page.waitForEvent('download');
-    await page.getByTestId(ext === 'json' ? 'menubar-export-json' : 'menubar-export-more-csv').click();
+    await page
+      .getByTestId(ext === 'json' ? 'menubar-export-json' : 'menubar-export-more-csv')
+      .click();
     expect((await download).suggestedFilename()).toMatch(new RegExp(`\\.${ext}$`));
   }
   expect(await excelizeRequests(page)).toEqual([]);
@@ -49,11 +58,12 @@ for (const transport of ['http-gzip', 'raw-gzip']) {
     }
     expect(await excelizeRequests(page)).toEqual([]);
     await page.getByTestId('menubar-excel-trigger').click();
-    await page.getByTestId('menubar-import-input').setInputFiles(
-      path.resolve('scripts/origin.xlsx'),
-    );
-    await expect.poll(() => page.getByTestId('sheet-bar-list')
-      .evaluate((element) => element.children.length)).toBeGreaterThanOrEqual(5);
+    await page
+      .getByTestId('menubar-import-input')
+      .setInputFiles(path.resolve('scripts/origin.xlsx'));
+    await expect
+      .poll(() => page.getByTestId('sheet-bar-list').evaluate((element) => element.children.length))
+      .toBeGreaterThanOrEqual(5);
     const loaded = await excelizeRequests(page);
     expect(loaded.filter((url) => url.includes('excelize.wasm'))).toHaveLength(1);
     expect(loaded.filter((url) => /\/main(?:-[^/]+)?\.js/.test(url))).toHaveLength(1);
@@ -75,12 +85,17 @@ test('invalid workbook import notifies the user and allows retry', async ({ page
   await page.getByTestId('menubar-excel-trigger').click();
   const input = page.getByTestId('menubar-import-input');
   await input.setInputFiles({
-    name: 'broken.xlsx', mimeType: 'application/octet-stream', buffer: Buffer.from('not a workbook'),
+    name: 'broken.xlsx',
+    mimeType: 'application/octet-stream',
+    buffer: Buffer.from('not a workbook'),
   });
   await expect(page.getByRole('alertdialog')).toContainText('Import failed:');
   await expect(input).toHaveValue('');
   await input.setInputFiles(path.resolve('scripts/origin.xlsx'));
-  await expect.poll(() => page.getByTestId('sheet-bar-list')
-    .evaluate((element) => element.children.length)).toBeGreaterThanOrEqual(5);
-  expect((await excelizeRequests(page)).filter((url) => url.includes('excelize.wasm'))).toHaveLength(1);
+  await expect
+    .poll(() => page.getByTestId('sheet-bar-list').evaluate((element) => element.children.length))
+    .toBeGreaterThanOrEqual(5);
+  expect(
+    (await excelizeRequests(page)).filter((url) => url.includes('excelize.wasm')),
+  ).toHaveLength(1);
 });

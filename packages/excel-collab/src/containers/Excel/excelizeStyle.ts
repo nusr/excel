@@ -10,8 +10,18 @@ import { NUMBER_FORMAT_LIST } from '../../util';
 import { getFormatFromId } from 'numfmt';
 
 const BORDER_TYPES: BorderType[] = [
-  'thin', 'medium', 'dashed', 'dotted', 'thick', 'double', 'hair',
-  'mediumDashed', 'dashDot', 'mediumDashDot', 'dashDotDot', 'mediumDashDotDot',
+  'thin',
+  'medium',
+  'dashed',
+  'dotted',
+  'thick',
+  'double',
+  'hair',
+  'mediumDashed',
+  'dashDot',
+  'mediumDashDot',
+  'dashDotDot',
+  'mediumDashDotDot',
 ];
 const HORIZONTAL = ['left', 'center', 'right'];
 const VERTICAL = ['top', 'center', 'bottom'];
@@ -38,7 +48,8 @@ export function fromExcelizeStyle(source: Style): Partial<StyleType> {
     if (font.Strike) result.isStrike = true;
     if (font.Underline) {
       result.underline = font.Underline.toLowerCase().includes('double')
-        ? EUnderLine.DOUBLE : EUnderLine.SINGLE;
+        ? EUnderLine.DOUBLE
+        : EUnderLine.SINGLE;
     }
     const fontColor = color(font.Color);
     if (fontColor) result.fontColor = fontColor;
@@ -60,7 +71,8 @@ export function fromExcelizeStyle(source: Style): Partial<StyleType> {
     const type = BORDER_TYPES[(border.Style ?? 0) - 1];
     if (side && type) result[side] = { type, color: color(border.Color) ?? '' };
   }
-  const numberFormat = source.CustomNumFmt ??
+  const numberFormat =
+    source.CustomNumFmt ??
     NUMBER_FORMAT_LIST.find((item) => item.id === source.NumFmt)?.formatCode ??
     (source.NumFmt !== undefined ? getFormatFromId(source.NumFmt) : undefined);
   if (numberFormat && numberFormat !== 'General') result.numberFormat = numberFormat;
@@ -85,7 +97,8 @@ export function toExcelizeStyle(source: Partial<StyleType>): Style {
   }
   if (Object.keys(font).length) result.Font = font;
   const alignment: NonNullable<Style['Alignment']> = {};
-  if (source.horizontalAlign !== undefined) alignment.Horizontal = HORIZONTAL[source.horizontalAlign];
+  if (source.horizontalAlign !== undefined)
+    alignment.Horizontal = HORIZONTAL[source.horizontalAlign];
   if (source.verticalAlign !== undefined) alignment.Vertical = VERTICAL[source.verticalAlign];
   if (source.isWrapText !== undefined) alignment.WrapText = source.isWrapText;
   if (Object.keys(alignment).length) result.Alignment = alignment;

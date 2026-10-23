@@ -30,11 +30,7 @@ import {
   useStyleStore,
   useUserInfo,
 } from '../../containers/store';
-import {
-  MainCanvas,
-  registerGlobalEvent,
-  scrollSheetToView,
-} from '../../canvas';
+import { MainCanvas, registerGlobalEvent, scrollSheetToView } from '../../canvas';
 import { numberFormat as numberFormatUtil, isDateFormat } from '../../formula';
 import { initFontFamilyList } from './isSupportFontFamily';
 import { queue } from '../../component/Toast';
@@ -55,11 +51,7 @@ function getChartData(
     labels: [],
     datasets: [],
   };
-  for (
-    let r = row, index = 1, endRow = row + rowCount;
-    r < endRow;
-    r++, index++
-  ) {
+  for (let r = row, index = 1, endRow = row + rowCount; r < endRow; r++, index++) {
     const rowHeight = controller.getRowHeight(r, sheetId);
     if (rowHeight === HIDE_CELL) {
       continue;
@@ -87,10 +79,7 @@ function getChartData(
   return result;
 }
 
-function getActiveCellPosition(
-  controller: IController,
-  canvas: HTMLCanvasElement,
-) {
+function getActiveCellPosition(controller: IController, canvas: HTMLCanvasElement) {
   const pos = computeCanvasSize(canvas);
   const { range } = controller.getActiveRange();
   const cellSize = controller.getCellSize(range);
@@ -144,10 +133,8 @@ function updateActiveCell(controller: IController, canvas: HTMLCanvasElement) {
   } = cell || {};
 
   const numberFormat = cell?.numberFormat || DEFAULT_FORMAT_CODE;
-  const isRight =
-    numberFormat === DEFAULT_FORMAT_CODE && typeof cell?.value === 'number';
-  const horAlign =
-    horizontalAlign ?? (isRight ? EHorizontalAlign.RIGHT : EHorizontalAlign.LEFT);
+  const isRight = numberFormat === DEFAULT_FORMAT_CODE && typeof cell?.value === 'number';
+  const horAlign = horizontalAlign ?? (isRight ? EHorizontalAlign.RIGHT : EHorizontalAlign.LEFT);
   let displayValue = numberFormatUtil(cell?.value, numberFormat);
   let realValue = '';
   if (isDateFormat(numberFormat) || numberFormat === getFormatCode(10)) {
@@ -249,11 +236,7 @@ const handleStateChange = (
     const list = controller.getDefineNameList().map((v) => v.name);
     core.defineNames = list;
   }
-  if (
-    changeSet.has('drawings') ||
-    changeSet.has('worksheets') ||
-    viewportChanged
-  ) {
+  if (changeSet.has('drawings') || changeSet.has('worksheets') || viewportChanged) {
     const canvasSize = controller.getCanvasSize();
     const sheetId = controller.getCurrentSheetId();
     const list = controller.getDrawingList(sheetId);
@@ -327,19 +310,18 @@ function computeCanvasSize(canvas: HTMLCanvasElement) {
   return result;
 }
 
-const canvasRenderers = new WeakMap<HTMLCanvasElement, { controller: IController; renderer: MainCanvas }>();
+const canvasRenderers = new WeakMap<
+  HTMLCanvasElement,
+  { controller: IController; renderer: MainCanvas }
+>();
 
-export function initCanvas(
-  controller: IController,
-  canvas: HTMLCanvasElement,
-): () => void {
+export function initCanvas(controller: IController, canvas: HTMLCanvasElement): () => void {
   useCoreStore.getState().setFontFamilies(initFontFamilyList());
   useUserInfo.getState().setClientId(controller.getHooks().doc.clientID);
 
   const cached = canvasRenderers.get(canvas);
-  const mainCanvas = cached?.controller === controller
-    ? cached.renderer
-    : new MainCanvas(controller, canvas);
+  const mainCanvas =
+    cached?.controller === controller ? cached.renderer : new MainCanvas(controller, canvas);
   canvasRenderers.set(canvas, { controller, renderer: mainCanvas });
   MainCanvas.instance = mainCanvas;
   let sheetScrollTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -390,18 +372,12 @@ export function initCanvas(
     }, 50);
   }
 
-  const offToastMessage = controller.on(
-    'toastMessage',
-    ({ message, duration = 5 }) => {
-      queue.add({ title: message }, { timeout: duration * 1000 });
-    },
-  );
-  const offModelToastMessage = controller.model.on(
-    'toastMessage',
-    ({ message, duration = 5 }) => {
-      queue.add({ title: message }, { timeout: duration * 1000 });
-    },
-  );
+  const offToastMessage = controller.on('toastMessage', ({ message, duration = 5 }) => {
+    queue.add({ title: message }, { timeout: duration * 1000 });
+  });
+  const offModelToastMessage = controller.model.on('toastMessage', ({ message, duration = 5 }) => {
+    queue.add({ title: message }, { timeout: duration * 1000 });
+  });
   return () => {
     clearTimeout(initialRender);
     clearTimeout(sheetScrollTimeout);

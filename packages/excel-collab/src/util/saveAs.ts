@@ -1,16 +1,16 @@
 export function saveAs(blob: Blob | string, fileName: string): void {
-  let link: HTMLAnchorElement | undefined = document.createElement('a');
+  const link = document.createElement('a');
   link.download = fileName || 'download';
   link.rel = 'noopener';
   link.target = '_blank';
   link.setAttribute('data-testid', 'save-as-link');
-  if (typeof blob === 'string') {
-    link.href = blob;
-  } else {
-    link.href = URL.createObjectURL(blob);
+  const href = typeof blob === 'string' ? blob : URL.createObjectURL(blob);
+  link.href = href;
+  try {
+    link.dispatchEvent(new MouseEvent('click'));
+  } finally {
+    if (typeof blob !== 'string') {
+      setTimeout(() => URL.revokeObjectURL(href), 40_000);
+    }
   }
-  link.dispatchEvent(new MouseEvent('click'));
-  link = undefined;
 }
-
-

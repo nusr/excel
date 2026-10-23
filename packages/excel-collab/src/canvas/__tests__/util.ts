@@ -1,11 +1,6 @@
 import OffScreenWorker from '../offScreenWorker';
 import { createCanvas } from 'canvas';
-import {
-  IController,
-  ChangeEventType,
-  ThemeType,
-  RequestRender,
-} from '../../types';
+import { IController, ChangeEventType, ThemeType, RequestRender } from '../../types';
 import fs from 'fs';
 import { setDpr } from '../../util';
 import path from 'path';
@@ -60,16 +55,9 @@ async function compareImage(
   const newImage = PNG.PNG.sync.read(newImageBuffer);
   const { width, height } = baseImage;
   const diff = new PNG.PNG({ width, height });
-  const result = pixelMatch(
-    baseImage.data,
-    newImage.data,
-    diff.data,
-    width,
-    height,
-    {
-      threshold: 0,
-    },
-  );
+  const result = pixelMatch(baseImage.data, newImage.data, diff.data, width, height, {
+    threshold: 0,
+  });
   const threshold = Math.sqrt(result / (width * height));
   if (threshold > maxThreshold) {
     console.log(`threshold: ${threshold},maxThreshold: ${maxThreshold}`);
@@ -77,10 +65,7 @@ async function compareImage(
       basePath.replace('.png', '.diff.png'),
       PNG.PNG.sync.write(diff) as any,
     );
-    await fs.promises.writeFile(
-      basePath.replace('.png', '.actual.png'),
-      newImageBuffer,
-    );
+    await fs.promises.writeFile(basePath.replace('.png', '.actual.png'), newImageBuffer);
     return 1;
   } else {
     return 0;
@@ -131,11 +116,6 @@ export async function compareScreenShot(
     }
     throw error;
   }
-  const result = await compareImage(
-    imagePath,
-    baseBuffer,
-    newBuffer,
-    maxThreshold,
-  );
+  const result = await compareImage(imagePath, baseBuffer, newBuffer, maxThreshold);
   expect(result).toEqual(0);
 }

@@ -3,9 +3,17 @@ import * as formulajs from '@formulajs/formulajs';
 
 export const getFunction = (name: string) => {
   let fun: unknown = formulajs;
-  for (const part of name.toUpperCase().replace(/^_XLFN\./, '').replace(/^_XLWS\./, '').split('.')) {
-    if (!fun || (typeof fun !== 'object' && typeof fun !== 'function') ||
-      !Object.prototype.hasOwnProperty.call(fun, part)) throw getCustomError('#NAME?');
+  for (const part of name
+    .toUpperCase()
+    .replace(/^_XLFN\./, '')
+    .replace(/^_XLWS\./, '')
+    .split('.')) {
+    if (
+      !fun ||
+      (typeof fun !== 'object' && typeof fun !== 'function') ||
+      !Object.prototype.hasOwnProperty.call(fun, part)
+    )
+      throw getCustomError('#NAME?');
     fun = Reflect.get(fun, part);
   }
   if (typeof fun !== 'function') throw getCustomError('#NAME?');
@@ -30,6 +38,11 @@ export const getCustomError = (value: ErrorTypes) => {
 };
 
 export const anyError = (err: unknown) => {
-  const message = err instanceof Error ? err.message : typeof err === 'string' || err instanceof String ? String(err) : undefined;
+  const message =
+    err instanceof Error
+      ? err.message
+      : typeof err === 'string' || err instanceof String
+        ? String(err)
+        : undefined;
   return [...ERROR_SET].find((value) => value === message);
 };

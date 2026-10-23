@@ -6,12 +6,12 @@ import {
   Text,
   type DateValue,
   type RangeCalendarProps as AriaRangeCalendarProps,
-  type CalendarCellProps
+  type CalendarCellProps,
 } from 'react-aria-components/RangeCalendar';
-import {composeRenderProps} from 'react-aria-components/composeRenderProps';
-import {Button} from './Button';
-import {ChevronLeft, ChevronRight} from 'lucide-react';
-import {CalendarGrid} from './Calendar';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { Button } from './Button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarGrid } from './Calendar';
 import './RangeCalendar.css';
 
 export interface RangeCalendarProps<T extends DateValue> extends AriaRangeCalendarProps<T> {
@@ -26,7 +26,7 @@ export function RangeCalendar<T extends DateValue>({
   return (
     <AriaRangeCalendar {...props}>
       <div className="months">
-        {Array.from({length: months}, (_, i) => (
+        {Array.from({ length: months }, (_, i) => (
           <div key={i} className="month">
             <header>
               {i === 0 && (
@@ -34,14 +34,16 @@ export function RangeCalendar<T extends DateValue>({
                   <ChevronLeft />
                 </Button>
               )}
-              <CalendarHeading offset={{months: i}} />
+              <CalendarHeading offset={{ months: i }} />
               {i === months - 1 && (
                 <Button slot="next" variant="quiet" aria-label="Next Month">
                   <ChevronRight />
                 </Button>
               )}
             </header>
-            <CalendarGrid offset={{months: i}}>{date => <CalendarCell date={date} />}</CalendarGrid>
+            <CalendarGrid offset={{ months: i }}>
+              {(date) => <CalendarCell date={date} />}
+            </CalendarGrid>
           </div>
         ))}
       </div>
@@ -50,7 +52,7 @@ export function RangeCalendar<T extends DateValue>({
   );
 }
 
-export {CalendarGrid};
+export { CalendarGrid };
 export function CalendarCell(props: CalendarCellProps) {
   return (
     <AriaCalendarCell {...props}>
@@ -58,7 +60,7 @@ export function CalendarCell(props: CalendarCellProps) {
         props.children,
         (
           children,
-          {defaultChildren, isHovered, isPressed, isSelectionStart, isSelectionEnd, isDisabled}
+          { defaultChildren, isHovered, isPressed, isSelectionStart, isSelectionEnd, isDisabled },
         ) => (
           <span
             className="button-base"
@@ -66,10 +68,11 @@ export function CalendarCell(props: CalendarCellProps) {
             data-hovered={isHovered || undefined}
             data-pressed={isPressed || undefined}
             data-selected={isSelectionStart || isSelectionEnd || undefined}
-            data-disabled={isDisabled || undefined}>
+            data-disabled={isDisabled || undefined}
+          >
             {children || defaultChildren}
           </span>
-        )
+        ),
       )}
     </AriaCalendarCell>
   );

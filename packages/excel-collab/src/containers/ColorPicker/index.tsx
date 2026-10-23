@@ -10,18 +10,12 @@ import { ColorArea } from '../../component/ColorArea';
 import { ColorField } from '../../component/ColorField';
 import { Popover } from '../../component/Popover';
 import { Select, SelectItem } from '../../component/Select';
-import {
-  ColorSwatchPicker,
-  ColorSwatchPickerItem,
-} from '../../component/ColorSwatchPicker';
+import { ColorSwatchPicker, ColorSwatchPickerItem } from '../../component/ColorSwatchPicker';
 import { Button } from '../../component/Button';
 import { COLOR_PICKER_COLOR_LIST } from '../../util';
 import { useState } from 'react';
 
-export interface ColorPickerProps extends Omit<
-  AriaColorPickerProps,
-  'children' | 'onChange'
-> {
+export interface ColorPickerProps extends Omit<AriaColorPickerProps, 'children' | 'onChange'> {
   children: React.ReactNode;
   onReset?: () => void;
   onChange?: (color: string) => void;
@@ -46,11 +40,7 @@ export function ColorPicker({
     >
       <DialogTrigger>
         {children}
-        <Popover
-          hideArrow
-          placement="bottom start"
-          className="color-picker-dialog"
-        >
+        <Popover hideArrow placement="bottom start" className="color-picker-dialog">
           <ColorArea
             colorSpace="hsb"
             xChannel="saturation"
@@ -69,9 +59,7 @@ export function ColorPicker({
             data-testid={controlPrefix && `${controlPrefix}-list`}
             value={pickerValue}
             onChange={(color) =>
-              onChange?.(
-                typeof color === 'string' ? color : color.toString('hex'),
-              )
+              onChange?.(typeof color === 'string' ? color : color.toString('hex'))
             }
           >
             {COLOR_PICKER_COLOR_LIST.map((color) => (
@@ -79,10 +67,7 @@ export function ColorPicker({
                 key={color}
                 color={color}
                 aria-label={color}
-                data-testid={
-                  controlPrefix &&
-                  `${controlPrefix}-swatch-${color.replace('#', '')}`
-                }
+                data-testid={controlPrefix && `${controlPrefix}-swatch-${color.replace('#', '')}`}
               />
             ))}
           </ColorSwatchPicker>

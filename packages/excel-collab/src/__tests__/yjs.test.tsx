@@ -64,20 +64,25 @@ test('concurrent sheet creation preserves both sheets with unique IDs', () => {
   for (const sheet of a.getSheetList()) expect(a.getSheetInfo(sheet.sheetId)).toEqual(sheet);
 });
 
-test.each(['rows', 'cols'] as const)('concurrent %s insertion preserves a remote edit on the moved cell', (axis) => {
-  const { a, b, sheetId } = pair();
-  const before = cell(sheetId, axis === 'rows' ? 1 : 0, axis === 'cols' ? 1 : 0);
-  const after = cell(sheetId, axis === 'rows' ? 2 : 0, axis === 'cols' ? 2 : 0);
-  a.setCellValue('before', before);
-  exchange(a, b);
-  if (axis === 'rows') a.addRow(0, 1, true);
-  else a.addCol(0, 1);
-  b.setCellValue('remote edit', before);
-  exchange(a, b);
-  expect(a.getCell(after)?.value).toBe('remote edit');
-  expect(b.getCell(after)?.value).toBe('remote edit');
-  expect(a.toJSON().worksheets[getWorksheetKey(sheetId, after.row, after.col)].value).toBe('remote edit');
-});
+test.each(['rows', 'cols'] as const)(
+  'concurrent %s insertion preserves a remote edit on the moved cell',
+  (axis) => {
+    const { a, b, sheetId } = pair();
+    const before = cell(sheetId, axis === 'rows' ? 1 : 0, axis === 'cols' ? 1 : 0);
+    const after = cell(sheetId, axis === 'rows' ? 2 : 0, axis === 'cols' ? 2 : 0);
+    a.setCellValue('before', before);
+    exchange(a, b);
+    if (axis === 'rows') a.addRow(0, 1, true);
+    else a.addCol(0, 1);
+    b.setCellValue('remote edit', before);
+    exchange(a, b);
+    expect(a.getCell(after)?.value).toBe('remote edit');
+    expect(b.getCell(after)?.value).toBe('remote edit');
+    expect(a.toJSON().worksheets[getWorksheetKey(sheetId, after.row, after.col)].value).toBe(
+      'remote edit',
+    );
+  },
+);
 
 test('concurrent row inserts add both rows and keep each newly inserted cell', () => {
   const { a, b, sheetId } = pair();
@@ -88,8 +93,9 @@ test('concurrent row inserts add both rows and keep each newly inserted cell', (
   b.setCellValue('right', cell(sheetId));
   exchange(a, b);
   expect(a.getSheetInfo()!.rowCount).toBe(count + 2);
-  expect(new Set([a.getCell(cell(sheetId))?.value, a.getCell(cell(sheetId, 1))?.value]))
-    .toEqual(new Set(['left', 'right']));
+  expect(new Set([a.getCell(cell(sheetId))?.value, a.getCell(cell(sheetId, 1))?.value])).toEqual(
+    new Set(['left', 'right']),
+  );
   expect(a.toJSON()).toEqual(b.toJSON());
 });
 
@@ -172,19 +178,28 @@ test('joining a collaborative Doc waits for sync and never reapplies an HTTP sna
   a.setCellValue('live', cell(sheetId));
   exchange(a, b);
   let synced!: () => void;
-  const whenSynced = new Promise<void>((resolve) => { synced = resolve; });
+  const whenSynced = new Promise<void>((resolve) => {
+    synced = resolve;
+  });
   const getDocument = vi.fn(async () => ({
-    id: b.getHooks().doc.guid, name: 'test', content: JSON.stringify(snapshot), create_time: '',
+    id: b.getHooks().doc.guid,
+    name: 'test',
+    content: JSON.stringify(snapshot),
+    create_time: '',
   }));
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <StateContext.Provider value={{ controller: b, collaborative: true, whenSynced, provider: { getDocument } }}>
+    <StateContext.Provider
+      value={{ controller: b, collaborative: true, whenSynced, provider: { getDocument } }}
+    >
       {children}
     </StateContext.Provider>
   );
   const hook = renderHook(() => useCollaboration(), { wrapper });
   expect(hook.result.current.isLoading).toBe(true);
   expect(getDocument).not.toHaveBeenCalled();
-  await act(async () => { synced(); });
+  await act(async () => {
+    synced();
+  });
   await waitFor(() => expect(hook.result.current.isLoading).toBe(false));
   exchange(a, b);
   expect(a.getCell(cell(sheetId))?.value).toBe('live');
@@ -232,7 +247,9 @@ test('a stale formula result cannot overwrite a newer remote plain value', () =>
   exchange(a, b);
   b.setCellValue(123, cell(sheetId));
   exchange(a, b);
-  expect(stale({ list: [{ key: getWorksheetKey(sheetId, 0, 0), sheetId, newValue: 2 }] })).toBe(false);
+  expect(stale({ list: [{ key: getWorksheetKey(sheetId, 0, 0), sheetId, newValue: 2 }] })).toBe(
+    false,
+  );
   expect(a.getCell(cell(sheetId))?.value).toBe(123);
 });
 
@@ -249,8 +266,12 @@ test('current formula callbacks apply multiple batches without adding undo histo
   a.setCellValue('=2', cell(sheetId, 0, 1));
   a.clearHistory();
   const callback = callbacks.at(-1)!;
-  expect(callback({ list: [{ key: getWorksheetKey(sheetId, 0, 0), sheetId, newValue: 1 }] })).toBe(true);
-  expect(callback({ list: [{ key: getWorksheetKey(sheetId, 0, 1), sheetId, newValue: 2 }] })).toBe(true);
+  expect(callback({ list: [{ key: getWorksheetKey(sheetId, 0, 0), sheetId, newValue: 1 }] })).toBe(
+    true,
+  );
+  expect(callback({ list: [{ key: getWorksheetKey(sheetId, 0, 1), sheetId, newValue: 2 }] })).toBe(
+    true,
+  );
   expect(a.getCell(cell(sheetId))?.value).toBe(1);
   expect(a.getCell(cell(sheetId, 0, 1))?.value).toBe(2);
   expect(a.canUndo()).toBe(false);
@@ -285,8 +306,11 @@ test('formula worker failures are logged and reported to the editor', async () =
   const toast = vi.fn();
   a.on('toastMessage', toast);
   a.setCellValue('=1', cell(a.getCurrentSheetId()));
-  await waitFor(() => expect(toast).toHaveBeenCalledWith({
-    type: 'error', message: expect.stringContaining('worker unavailable'),
-  }));
+  await waitFor(() =>
+    expect(toast).toHaveBeenCalledWith({
+      type: 'error',
+      message: expect.stringContaining('worker unavailable'),
+    }),
+  );
   expect(log).toHaveBeenCalledWith('Formula computation failed', cause);
 });

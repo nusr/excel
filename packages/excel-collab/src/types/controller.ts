@@ -22,9 +22,7 @@ export type ControllerEventEmitterType = {
 /**
  * Interface representing a controller with various methods for managing and interacting with a spreadsheet.
  */
-export interface IController
-  extends IBaseModel,
-    IEventEmitter<ControllerEventEmitterType> {
+export interface IController extends IBaseModel, IEventEmitter<ControllerEventEmitterType> {
   destroy(): void;
   readonly model: IModel;
   /**
@@ -196,10 +194,7 @@ export interface ICollaborationProvider {
   /**
    * Updates an existing document in the collaboration provider.
    */
-  updateDocument(
-    id: string,
-    data: Pick<DocumentItem, 'name' | 'content'>,
-  ): Promise<void>;
+  updateDocument(id: string, data: Pick<DocumentItem, 'name' | 'content'>): Promise<void>;
 
   /**
    * Retrieves a document from the collaboration provider.

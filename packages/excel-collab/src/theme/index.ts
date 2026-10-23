@@ -15,9 +15,7 @@ export function getTheme(): ThemeType {
     }
   }
   if (typeof matchMedia === 'function') {
-    const result = matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
+    const result = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     return result;
   }
   return 'light';

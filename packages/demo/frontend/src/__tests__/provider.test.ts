@@ -169,9 +169,12 @@ describe('RemoteProvider', () => {
 
     await provider.updateDocument('docId', { name: '', content: '' });
 
-    expect(global.fetch).toHaveBeenCalledWith(`${BASE_URL}/document/docId`, expect.objectContaining({
-      body: JSON.stringify({ name: '', content: '' }),
-    }));
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${BASE_URL}/document/docId`,
+      expect.objectContaining({
+        body: JSON.stringify({ name: '', content: '' }),
+      }),
+    );
   });
 
   it('should not navigate when document creation fails', async () => {
@@ -226,11 +229,7 @@ describe('LocalProvider', () => {
 
   test('uploadFile should return base64 string', async () => {
     const base64 = 'base64string';
-    const result = await localProvider.uploadFile(
-      'docId',
-      new File([], 'file'),
-      base64,
-    );
+    const result = await localProvider.uploadFile('docId', new File([], 'file'), base64);
 
     expect(result).toBe(base64);
   });
@@ -246,9 +245,7 @@ describe('LocalProvider', () => {
     const id = '3';
     await localProvider.addDocument(id);
 
-    const documents = JSON.parse(
-      sessionStorage.getItem(LOCAL_STORAGE_KEY + '_' + id) ?? '{}',
-    );
+    const documents = JSON.parse(sessionStorage.getItem(LOCAL_STORAGE_KEY + '_' + id) ?? '{}');
     expect(documents.id).toBe('3');
     expect(documents.name).toBe('');
     expect(mockCallback).toHaveBeenCalled();
@@ -268,17 +265,20 @@ describe('LocalProvider', () => {
       content: 'New content',
     });
 
-    const updatedDocuments = JSON.parse(
-      sessionStorage.getItem(LOCAL_STORAGE_KEY + '_1') || '{}',
-    );
+    const updatedDocuments = JSON.parse(sessionStorage.getItem(LOCAL_STORAGE_KEY + '_1') || '{}');
     expect(updatedDocuments.name).toBe('Updated Doc 1');
     expect(updatedDocuments.content).toBe('New content');
   });
 
   test('updateDocument should allow clearing existing fields', async () => {
-    sessionStorage.setItem(LOCAL_STORAGE_KEY + '_1', JSON.stringify({
-      id: '1', name: 'Old name', content: 'Old content',
-    }));
+    sessionStorage.setItem(
+      LOCAL_STORAGE_KEY + '_1',
+      JSON.stringify({
+        id: '1',
+        name: 'Old name',
+        content: 'Old content',
+      }),
+    );
 
     await localProvider.updateDocument('1', { name: '', content: '' });
 
@@ -286,9 +286,7 @@ describe('LocalProvider', () => {
   });
 
   test('getDocument should return the document by id', async () => {
-    const documents = [
-      { id: '1', name: 'Doc 1', create_time: '2023-01-01T00:00:00Z' },
-    ];
+    const documents = [{ id: '1', name: 'Doc 1', create_time: '2023-01-01T00:00:00Z' }];
     sessionStorage.setItem(LOCAL_STORAGE_KEY + '_1', JSON.stringify(documents));
 
     const result = await localProvider.getDocument('1');

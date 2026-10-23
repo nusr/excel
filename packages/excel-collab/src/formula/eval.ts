@@ -39,7 +39,8 @@ export function renameFormulaSheetReferences(
     throw error;
   }
   const replacement = /^[A-Za-z_][A-Za-z0-9_]*$/.test(newName)
-    ? newName : `'${newName.replace(/'/g, "''")}'`;
+    ? newName
+    : `'${newName.replace(/'/g, "''")}'`;
   let result = formula;
   for (const reference of [...scanner.sheetReferences].reverse()) {
     if (reference.name.toLowerCase() === oldName.toLowerCase()) {
@@ -182,7 +183,9 @@ export function computeFormulas(
   const { currentSheetId, worksheets, workbook, definedNames } = eventData;
   const formulaCache = new Map<string, InterpreterResult>();
   const formulaErrorCache = new Map<string, Error>();
-  const names = new Map(Object.entries(definedNames).map(([name, range]) => [name.toLowerCase(), range]));
+  const names = new Map(
+    Object.entries(definedNames).map(([name, range]) => [name.toLowerCase(), range]),
+  );
   const result: ResponseFormulas = {
     list: [],
   };

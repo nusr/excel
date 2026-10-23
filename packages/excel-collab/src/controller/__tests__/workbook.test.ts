@@ -75,17 +75,10 @@ describe('workbook.test.ts', () => {
       expect(controller.getSheetList()).toHaveLength(2);
     });
     test('update', () => {
-      const sheetInfo = controller.getSheetInfo(
-        controller.getCurrentSheetId(),
-      )!;
+      const sheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
 
-      controller.updateSheetInfo(
-        { colCount: 10, isHide: true },
-        controller.getCurrentSheetId(),
-      );
-      const newSheetInfo = controller.getSheetInfo(
-        controller.getCurrentSheetId(),
-      )!;
+      controller.updateSheetInfo({ colCount: 10, isHide: true }, controller.getCurrentSheetId());
+      const newSheetInfo = controller.getSheetInfo(controller.getCurrentSheetId())!;
       expect(newSheetInfo.colCount).not.toEqual(sheetInfo.colCount);
       expect(newSheetInfo.isHide).not.toEqual(sheetInfo.isHide);
     });

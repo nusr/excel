@@ -18,12 +18,9 @@ describe('get.test.ts', () => {
     });
 
     it("should get '1'", () => {
-      expect(
-        get(
-          { worksheets: { 1: { 2: { value: '1' } } } },
-          'worksheets.1.2.value',
-        ),
-      ).toEqual('1');
+      expect(get({ worksheets: { 1: { 2: { value: '1' } } } }, 'worksheets.1.2.value')).toEqual(
+        '1',
+      );
     });
   });
 });

@@ -1,9 +1,4 @@
-import {
-  SHEET_NAME_PREFIX,
-  SPLITTER,
-  FORMULA_PREFIX,
-  MERGE_CELL_LINE_BREAK,
-} from './constant';
+import { SHEET_NAME_PREFIX, SPLITTER, FORMULA_PREFIX, MERGE_CELL_LINE_BREAK } from './constant';
 import type {
   WorksheetType,
   Coordinate,
@@ -47,8 +42,7 @@ export function getListMaxNum(list: string[] = []): number {
 export function getDefaultSheetInfo(
   list: WorksheetType[] = [],
 ): Pick<WorksheetType, 'name' | 'sheetId' | 'sort'> {
-  const sheetId =
-    Math.ceil(getListMaxNum(list.map((item) => item.sheetId))) + 1;
+  const sheetId = Math.ceil(getListMaxNum(list.map((item) => item.sheetId))) + 1;
   return {
     name: `${SHEET_NAME_PREFIX}${sheetId}`,
     sheetId: String(sheetId),
@@ -90,9 +84,7 @@ export function getWorksheetKey(sheetId: string, row: number, col: number) {
   return `${sheetId}${SPLITTER}${row}${SPLITTER}${col}`;
 }
 
-export function convertWorksheetKey(
-  key: string,
-): Pick<IRange, 'sheetId' | 'row' | 'col'> | null {
+export function convertWorksheetKey(key: string): Pick<IRange, 'sheetId' | 'row' | 'col'> | null {
   const parts = key.split(SPLITTER);
   const col = parts.pop() ?? '';
   const row = parts.pop() ?? '';
@@ -104,7 +96,13 @@ export function convertWorksheetKey(
     col: isNaN(c) ? -1 : c,
     sheetId,
   };
-  if (result.row < 0 || result.col < 0 || !Number.isSafeInteger(r) || !Number.isSafeInteger(c) || !sheetId) {
+  if (
+    result.row < 0 ||
+    result.col < 0 ||
+    !Number.isSafeInteger(r) ||
+    !Number.isSafeInteger(c) ||
+    !sheetId
+  ) {
     return null;
   }
   return result;
@@ -169,12 +167,7 @@ export function isMac() {
 }
 
 export function isFormula(value: ResultType) {
-  if (
-    typeof value === 'string' &&
-    value &&
-    value.startsWith(FORMULA_PREFIX) &&
-    value.length > 1
-  ) {
+  if (typeof value === 'string' && value && value.startsWith(FORMULA_PREFIX) && value.length > 1) {
     return true;
   }
   return false;
@@ -204,9 +197,7 @@ export function stringToUint8Array(str: string) {
 }
 
 export function uint8ArrayToString(bytes: Uint8Array) {
-  const binString = Array.from(bytes, (byte) =>
-    String.fromCodePoint(byte),
-  ).join('');
+  const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join('');
   return btoa(binString);
 }
 
@@ -218,7 +209,13 @@ export function modelToChangeSet(list: Transaction) {
       result.add('worksheets');
       result.add('cellStyle');
     } else if (name === 'excel:anchors') {
-      for (const key of ['mergeCells', 'definedNames', 'autoFilter', 'drawings', 'worksheets'] as const) {
+      for (const key of [
+        'mergeCells',
+        'definedNames',
+        'autoFilter',
+        'drawings',
+        'worksheets',
+      ] as const) {
         result.add(key);
       }
     } else if (name === 'excel:formulaBindings') {
@@ -230,7 +227,12 @@ export function modelToChangeSet(list: Transaction) {
     if (type && (list.changed.has(type) || list.changedParentTypes.has(type))) {
       result.add(key);
       if (key === 'workbook') {
-        for (const item of ['worksheets', 'customHeight', 'customWidth', 'currentSheetId'] as const) {
+        for (const item of [
+          'worksheets',
+          'customHeight',
+          'customWidth',
+          'currentSheetId',
+        ] as const) {
           result.add(item);
         }
       }

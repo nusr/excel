@@ -4,11 +4,11 @@ import {
   Input,
   NumberField as AriaNumberField,
   type NumberFieldProps as AriaNumberFieldProps,
-  type ValidationResult
+  type ValidationResult,
 } from 'react-aria-components/NumberField';
-import {Button} from './Button';
-import {Plus, Minus} from 'lucide-react';
-import {Label, FieldError, Description} from './Form';
+import { Button } from './Button';
+import { Plus, Minus } from 'lucide-react';
+import { Label, FieldError, Description } from './Form';
 import './NumberField.css';
 
 export interface NumberFieldProps extends AriaNumberFieldProps {
@@ -18,7 +18,7 @@ export interface NumberFieldProps extends AriaNumberFieldProps {
   placeholder?: string;
 }
 
-export function NumberField({label, description, errorMessage, ...props}: NumberFieldProps) {
+export function NumberField({ label, description, errorMessage, ...props }: NumberFieldProps) {
   return (
     <AriaNumberField {...props}>
       <Label>{label}</Label>

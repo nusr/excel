@@ -1,11 +1,6 @@
 import type { ResultType } from './parser';
 import type { IRange } from './range';
-import type {
-  WorksheetType,
-  ChangeEventType,
-  AutoFilterItem,
-  ScrollValue,
-} from './model';
+import type { WorksheetType, ChangeEventType, AutoFilterItem, ScrollValue } from './model';
 import type { ThemeType, CanvasOverlayPosition } from './components';
 import { type IController } from './controller';
 import { ModelJSON } from './yjs';
@@ -92,10 +87,7 @@ export type WorkerMethod = {
    * @param cb - The callback to execute with the render response data.
    * @returns A promise that resolves when the render is complete.
    */
-  render(
-    data: RequestRender,
-    cb: (data: ResponseRender) => void,
-  ): Promise<void>;
+  render(data: RequestRender, cb: (data: ResponseRender) => void): Promise<void>;
 
   /**
    * Computes formulas and executes a callback with the results.
@@ -103,10 +95,7 @@ export type WorkerMethod = {
    * @param cb - The callback to execute with the formulas response data.
    * @returns A promise that resolves to a boolean indicating success.
    */
-  computeFormulas(
-    data: RequestFormulas,
-    cb: (data: ResponseFormulas) => boolean,
-  ): Promise<boolean>;
+  computeFormulas(data: RequestFormulas, cb: (data: ResponseFormulas) => boolean): Promise<boolean>;
 };
 
 export type WorkerType = Pick<WorkerMethod, 'computeFormulas'>;
@@ -145,10 +134,7 @@ export interface EventHandler {
    * @param event - The pointer event on an HTML canvas element.
    * @returns A boolean indicating whether the event was handled, or a ModalValue.
    */
-  pointerMove(
-    data: EventData,
-    event: React.PointerEvent<HTMLCanvasElement>,
-  ): boolean | ModalValue;
+  pointerMove(data: EventData, event: React.PointerEvent<HTMLCanvasElement>): boolean | ModalValue;
 
   /**
    * Handles the pointer down event.
@@ -157,8 +143,5 @@ export interface EventHandler {
    * @param event - The pointer event on an HTML canvas element.
    * @returns A boolean indicating whether the event was handled, or a ModalValue.
    */
-  pointerDown(
-    data: EventData,
-    event: React.PointerEvent<HTMLCanvasElement>,
-  ): boolean | ModalValue;
+  pointerDown(data: EventData, event: React.PointerEvent<HTMLCanvasElement>): boolean | ModalValue;
 }

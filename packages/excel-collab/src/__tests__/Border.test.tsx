@@ -17,9 +17,7 @@ describe('Border.test.tsx', () => {
       await user.click(screen.getByTestId('toolbar-border-trigger'));
       await user.hover(screen.getByTestId('toolbar-border-color-trigger'));
       await user.click(await screen.findByRole('menuitem', { name: '#B2B2B2' }));
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.borderLeft,
-      ).toEqual({
+      expect(controller.getCell(controller.getActiveRange().range)?.borderLeft).toEqual({
         color: '#B2B2B2',
         type: 'thin',
       });
@@ -33,10 +31,7 @@ describe('Border.test.tsx', () => {
         await user.click(screen.getByTestId('toolbar-border-trigger'));
         await user.hover(screen.getByTestId('toolbar-border-style'));
         await user.click(await screen.findByTestId(selector));
-        expect(
-          controller.getCell(controller.getActiveRange().range)?.borderTop
-            ?.type,
-        ).toBe(item);
+        expect(controller.getCell(controller.getActiveRange().range)?.borderTop?.type).toBe(item);
       });
     }
   });
@@ -48,9 +43,7 @@ describe('Border.test.tsx', () => {
         color: '',
         type: 'thin',
       };
-      expect(
-        controller.getCell(controller.getActiveRange().range),
-      ).toMatchObject({
+      expect(controller.getCell(controller.getActiveRange().range)).toMatchObject({
         borderLeft: item,
         borderRight: item,
         borderTop: item,
@@ -66,9 +59,7 @@ describe('Border.test.tsx', () => {
         color: '',
         type: 'thin',
       };
-      expect(
-        controller.getCell(controller.getActiveRange().range),
-      ).toMatchObject({
+      expect(controller.getCell(controller.getActiveRange().range)).toMatchObject({
         borderLeft: item,
         borderRight: item,
         borderTop: item,
@@ -78,9 +69,7 @@ describe('Border.test.tsx', () => {
       fireEvent.click(screen.getByTestId('toolbar-border-trigger'));
       fireEvent.click(screen.getByTestId('toolbar-no-border'));
 
-      expect(
-        controller.getCell(controller.getActiveRange().range),
-      ).toMatchObject({
+      expect(controller.getCell(controller.getActiveRange().range)).toMatchObject({
         borderLeft: undefined,
         borderRight: undefined,
         borderTop: undefined,
@@ -96,9 +85,7 @@ describe('Border.test.tsx', () => {
         color: '',
         type: 'thin',
       };
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.borderTop,
-      ).toEqual(item);
+      expect(controller.getCell(controller.getActiveRange().range)?.borderTop).toEqual(item);
     });
   });
   describe('Bottom Border', () => {
@@ -109,9 +96,7 @@ describe('Border.test.tsx', () => {
         color: '',
         type: 'thin',
       };
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.borderBottom,
-      ).toEqual(item);
+      expect(controller.getCell(controller.getActiveRange().range)?.borderBottom).toEqual(item);
     });
   });
   describe('Left Border', () => {
@@ -122,9 +107,7 @@ describe('Border.test.tsx', () => {
         color: '',
         type: 'thin',
       };
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.borderLeft,
-      ).toEqual(item);
+      expect(controller.getCell(controller.getActiveRange().range)?.borderLeft).toEqual(item);
     });
   });
   describe('Right Border', () => {
@@ -135,9 +118,7 @@ describe('Border.test.tsx', () => {
         color: '',
         type: 'thin',
       };
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.borderRight,
-      ).toEqual(item);
+      expect(controller.getCell(controller.getActiveRange().range)?.borderRight).toEqual(item);
     });
   });
   describe('Thick Box Border', () => {
@@ -148,9 +129,7 @@ describe('Border.test.tsx', () => {
         color: '',
         type: 'medium',
       };
-      expect(
-        controller.getCell(controller.getActiveRange().range),
-      ).toMatchObject({
+      expect(controller.getCell(controller.getActiveRange().range)).toMatchObject({
         borderLeft: item,
         borderRight: item,
         borderTop: item,
@@ -166,9 +145,7 @@ describe('Border.test.tsx', () => {
         color: '',
         type: 'thin',
       };
-      expect(
-        controller.getCell(controller.getActiveRange().range),
-      ).toMatchObject({
+      expect(controller.getCell(controller.getActiveRange().range)).toMatchObject({
         borderLeft: item,
         borderRight: item,
         borderTop: item,
@@ -187,9 +164,7 @@ describe('Border.test.tsx', () => {
         color: '',
         type: 'thin',
       };
-      expect(
-        controller.getCell(controller.getActiveRange().range)?.borderTop,
-      ).toEqual(item);
+      expect(controller.getCell(controller.getActiveRange().range)?.borderTop).toEqual(item);
     });
   });
 });

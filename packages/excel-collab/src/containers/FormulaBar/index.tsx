@@ -1,17 +1,9 @@
 import { useMemo, memo, useCallback } from 'react';
-import {
-  MultipleLineEditor,
-  getEditorStyle,
-  getDisplayStyle,
-} from './FormulaEditor';
+import { MultipleLineEditor, getEditorStyle, getDisplayStyle } from './FormulaEditor';
 import { LINE_BREAK, classnames, convertToReference } from '../../util';
 import styles from './index.module.css';
 import { EditorStatus } from '../../types';
-import {
-  useActiveCell,
-  useCoreStore,
-  useStyleStore,
-} from '../../containers/store';
+import { useActiveCell, useCoreStore, useStyleStore } from '../../containers/store';
 import { DefineName } from './DefineName';
 
 export const FormulaBarContainer = memo(() => {
@@ -42,10 +34,7 @@ export const FormulaBarContainer = memo(() => {
 
   return (
     <div className={styles['formula-bar-wrapper']} data-testid="formula-bar">
-      <DefineName
-        displayName={displayName}
-        defineName={activeCell.defineName}
-      />
+      <DefineName displayName={displayName} defineName={activeCell.defineName} />
       <div className={styles['formula-bar-editor-wrapper']}>
         {editorStatus !== EditorStatus.NONE && (
           <MultipleLineEditor
@@ -53,17 +42,13 @@ export const FormulaBarContainer = memo(() => {
             style={getEditorStyle(activeCell, editorStatus, cellStyle)}
             testId="formula-editor"
             isMergeCell={cellStyle.isMergeCell}
-            className={
-              editorStatus === EditorStatus.EDIT_CELL ? styles['edit-cell'] : ''
-            }
+            className={editorStatus === EditorStatus.EDIT_CELL ? styles['edit-cell'] : ''}
           />
         )}
         <div
           className={classnames(styles['formula-bar-value'], {
             [styles['show']]: editorStatus !== EditorStatus.EDIT_FORMULA_BAR,
-            [styles['wrap']]:
-              cellStyle.isMergeCell &&
-              activeCell.displayValue.includes(LINE_BREAK),
+            [styles['wrap']]: cellStyle.isMergeCell && activeCell.displayValue.includes(LINE_BREAK),
           })}
           style={style}
           onClick={handleClick}

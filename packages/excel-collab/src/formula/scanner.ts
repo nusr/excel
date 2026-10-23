@@ -228,10 +228,7 @@ export class Scanner {
             this.addIdentifier();
             break;
           }
-          const text = this.list
-            .slice(this.start, this.current)
-            .join('')
-            .toUpperCase();
+          const text = this.list.slice(this.start, this.current).join('').toUpperCase();
           this.tokens.push(new Token(TokenType.R1C1, text));
         } else {
           this.addIdentifier();
@@ -243,7 +240,9 @@ export class Scanner {
         const error = [...ERROR_SET].find((value) => remaining.startsWith(value));
         if (!error) throw getCustomError('#NAME?');
         this.current = this.start + error.length;
-        this.tokens.push(new Token(error === '#REF!' ? TokenType.ERROR_REF : TokenType.ERROR, error));
+        this.tokens.push(
+          new Token(error === '#REF!' ? TokenType.ERROR_REF : TokenType.ERROR, error),
+        );
         break;
       }
       case '(':

@@ -1,9 +1,4 @@
-import {
-  ExcelEditor,
-  EditorProps,
-  StateContext,
-  StateContextValue,
-} from './containers';
+import { ExcelEditor, EditorProps, StateContext, StateContextValue } from './containers';
 import { memo, useEffect, useRef, useState } from 'react';
 import { initController } from './controller';
 import Worker from './worker?worker&inline';
@@ -21,7 +16,9 @@ export type ExcelProps = EditorProps & {
 export const Excel: React.FunctionComponent<ExcelProps> = memo((props) => {
   const { doc, provider, awareness, docConfig, whenSynced } = props;
 
-  const [value, setValue] = useState<(StateContextValue & { editorKey: number }) | undefined>(undefined);
+  const [value, setValue] = useState<(StateContextValue & { editorKey: number }) | undefined>(
+    undefined,
+  );
   const generation = useRef(0);
 
   useEffect(() => {
@@ -44,7 +41,14 @@ export const Excel: React.FunctionComponent<ExcelProps> = memo((props) => {
         worker,
         doc: realDoc,
       });
-      setValue({ controller, provider, awareness, whenSynced, collaborative: Boolean(doc), editorKey: ++generation.current });
+      setValue({
+        controller,
+        provider,
+        awareness,
+        whenSynced,
+        collaborative: Boolean(doc),
+        editorKey: ++generation.current,
+      });
       return () => {
         controller.destroy();
         worker.terminate();

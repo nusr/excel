@@ -1,20 +1,20 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
       interval: 'weekly'
       day: 'sunday'
     labels:
       - 'dependencies'
     commit-message:
-      prefix: "chore(deps)"
-      prefix-development: "chore(deps)"
+      prefix: 'chore(deps)'
+      prefix-development: 'chore(deps)'
     open-pull-requests-limit: 5
     groups:
       react:
         patterns:
-          - "react"
-          - "react-dom"
-          - "@types/react"
-          - "@types/react-dom"
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'

@@ -78,12 +78,18 @@ describe('filter.test.ts', () => {
 
   test('opens the filter only at its actual header row', () => {
     controller.addFilter({
-      row: 3, col: 0, rowCount: 5, colCount: 2,
+      row: 3,
+      col: 0,
+      rowCount: 5,
+      colCount: 2,
       sheetId: controller.getCurrentSheetId(),
     });
     const event: any = { stopPropagation: vi.fn(), clientX: 100, clientY: 100 };
     const data: EventData = {
-      controller, position: { row: 3, col: 0, marginX: 95, marginY: 95 }, x: 0, y: 0,
+      controller,
+      position: { row: 3, col: 0, marginX: 95, marginY: 95 },
+      x: 0,
+      y: 0,
     };
     expect(filterHandler.pointerDown(data, event)).toMatchObject({ type: 'filter', row: 3 });
     data.position!.row = 0;

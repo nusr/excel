@@ -16,8 +16,6 @@ export type ContentParams = {
 };
 
 export interface MainView {
-  render(data: EventType) : Promise<void>;
+  render(data: EventType): Promise<void>;
   resize(): void;
 }
-
-

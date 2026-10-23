@@ -58,9 +58,7 @@ describe('Canvas Modal', () => {
   });
   it('renders FilterModal', () => {
     renderComponent({}, true);
-    expect(screen.getAllByTestId('filter-model-item').length).toBeGreaterThan(
-      1,
-    );
+    expect(screen.getAllByTestId('filter-model-item').length).toBeGreaterThan(1);
   });
 
   it('applies selected filter values', async () => {

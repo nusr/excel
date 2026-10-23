@@ -6,9 +6,9 @@ import {
   type TokenFieldProps as AriaTokenFieldProps,
   type TokenInputProps,
   type TokenProps,
-  type TokenFieldValue
+  type TokenFieldValue,
 } from 'react-aria-components/TokenField';
-import {Label, Description} from './Form';
+import { Label, Description } from './Form';
 import './TokenField.css';
 import type React from 'react';
 
@@ -39,7 +39,8 @@ export function TokenField<T extends TokenFieldValue = TokenFieldValue>({
         ref={inputRef}
         style={style}
         data-placeholder={placeholder}
-        className="react-aria-TokenInput inset">
+        className="react-aria-TokenInput inset"
+      >
         {children}
       </AriaTokenInput>
       {description && <Description>{description}</Description>}

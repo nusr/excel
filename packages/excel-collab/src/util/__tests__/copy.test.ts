@@ -9,9 +9,20 @@ import {
   CUSTOM_FORMAT,
   copyOrCut,
   IMAGE_FORMAT,
+  parseCustomData,
 } from '../copy';
 
 describe('generateHTML', () => {
+  it('preserves line breaks inside copied cells and prevents styles from closing the style element', () => {
+    const html = generateHTML(
+      'td { font-family: "</style><img src=x>"; }',
+      '<tr><td>first\nsecond</td></tr>',
+    );
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    expect(template.content.querySelector('td')?.textContent).toBe('first\nsecond');
+    expect(template.content.querySelector('img')).toBeNull();
+  });
   it('should generate HTML with given style and content', () => {
     const style = 'body { background-color: red; }';
     const content = '<tr><td>Test</td></tr>';
@@ -59,6 +70,25 @@ describe('generateHTML', () => {
 });
 
 describe('extractCustomData', () => {
+  it('round-trips metadata containing HTML characters without injecting markup', () => {
+    const custom = {
+      range: { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '<img src=x>&' },
+      type: 'copy',
+      floatElementUuid: '',
+    };
+    const html = formatCustomData(JSON.stringify(custom));
+    expect(html).not.toContain('<img');
+    expect(extractCustomData(html)).toEqual(custom);
+  });
+  it.each([
+    'null',
+    '[]',
+    '{}',
+    '{"type":"copy","range":null}',
+    '{"type":"cut","range":{"row":-1,"col":0,"rowCount":1,"colCount":1,"sheetId":"test"}}',
+  ])('rejects invalid metadata: %s', (text) => {
+    expect(parseCustomData(text)).toBeNull();
+  });
   it('should extract custom data from HTML', () => {
     const html =
       '<html><caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption></html>';
@@ -103,6 +133,7 @@ describe('extractCustomData', () => {
 });
 
 describe('paste', () => {
+  afterEach(() => vi.restoreAllMocks());
   beforeEach(() => {
     // @ts-ignore
     vi.spyOn(global, 'Blob').mockImplementation(function (data: string[]) {
@@ -118,12 +149,15 @@ describe('paste', () => {
     try {
       Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined });
       Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
-      await copyOrCut({
-        [PLAIN_FORMAT]: 'fallback content',
-        [HTML_FORMAT]: '',
-        [CUSTOM_FORMAT]: null,
-        [IMAGE_FORMAT]: null,
-      }, 'copy');
+      await copyOrCut(
+        {
+          [PLAIN_FORMAT]: 'fallback content',
+          [HTML_FORMAT]: '',
+          [CUSTOM_FORMAT]: null,
+          [IMAGE_FORMAT]: null,
+        },
+        'copy',
+      );
       expect(execCommand).toHaveBeenCalledWith('copy');
       expect(document.querySelector('textarea')).toBeNull();
     } finally {
@@ -132,6 +166,46 @@ describe('paste', () => {
       else Reflect.deleteProperty(document, 'execCommand');
       log.mockRestore();
     }
+  });
+  test('restores focus and removes the fallback textarea even when execCommand throws', async () => {
+    const clipboard = navigator.clipboard;
+    const descriptor = Object.getOwnPropertyDescriptor(document, 'execCommand');
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.focus();
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined });
+      Object.defineProperty(document, 'execCommand', {
+        configurable: true,
+        value: () => {
+          throw new Error('denied');
+        },
+      });
+      await copyOrCut(
+        {
+          [PLAIN_FORMAT]: 'content',
+          [HTML_FORMAT]: '',
+          [CUSTOM_FORMAT]: null,
+          [IMAGE_FORMAT]: null,
+        },
+        'copy',
+      );
+      expect(document.activeElement).toBe(input);
+      expect(document.querySelector('textarea')).toBeNull();
+    } finally {
+      input.remove();
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: clipboard });
+      if (descriptor) Object.defineProperty(document, 'execCommand', descriptor);
+      else Reflect.deleteProperty(document, 'execCommand');
+      log.mockRestore();
+    }
+  });
+  test('falls back to readText when rich clipboard reading is denied', async () => {
+    vi.spyOn(navigator.clipboard, 'read').mockRejectedValue(new Error('denied'));
+    vi.spyOn(navigator.clipboard, 'readText').mockResolvedValue('plain fallback');
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    expect((await paste())[PLAIN_FORMAT]).toBe('plain fallback');
   });
   test('empty', async () => {
     const result = await paste();

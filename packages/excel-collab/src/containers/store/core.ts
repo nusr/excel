@@ -1,14 +1,7 @@
-import {
-  EditorStatus,
-  OptionItem,
-  WorksheetType,
-  DrawingElement,
-} from '../../types';
+import { EditorStatus, OptionItem, WorksheetType, DrawingElement } from '../../types';
 import { create } from 'zustand';
 
-export type SheetItem = Required<
-  Pick<WorksheetType, 'sheetId' | 'isHide' | 'name' | 'tabColor'>
->;
+export type SheetItem = Required<Pick<WorksheetType, 'sheetId' | 'isHide' | 'name' | 'tabColor'>>;
 
 export type FloatElementItem = DrawingElement & {
   labels: string[];

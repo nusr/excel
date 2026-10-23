@@ -15,12 +15,7 @@ import { useExcel } from '../store';
 import { User } from './User';
 import { File } from './File';
 import { v4 } from 'uuid';
-import {
-  MenuTrigger,
-  SubmenuTrigger,
-  Menu,
-  MenuItem,
-} from '../../component/Menu';
+import { MenuTrigger, SubmenuTrigger, Menu, MenuItem } from '../../component/Menu';
 import { Button } from '../../component/Button';
 import { queue } from '../../component/Toast';
 
@@ -34,16 +29,26 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
     const { controller, provider } = useExcel();
     const [visible, setVisible] = useState(false);
     const importVersion = useRef(0);
-    useEffect(() => () => { importVersion.current++; }, [controller]);
-    const handleExportExcel = useCallback(async (format: ExportExtension) => {
-      try {
-        await exportExcel(`excel_${Date.now()}`, controller, format);
-      } catch (error) {
-        queue.add({ title: i18n.t('export-failed', {
-          message: error instanceof Error ? error.message : String(error),
-        }) });
-      }
-    }, [controller]);
+    useEffect(
+      () => () => {
+        importVersion.current++;
+      },
+      [controller],
+    );
+    const handleExportExcel = useCallback(
+      async (format: ExportExtension) => {
+        try {
+          await exportExcel(`excel_${Date.now()}`, controller, format);
+        } catch (error) {
+          queue.add({
+            title: i18n.t('export-failed', {
+              message: error instanceof Error ? error.message : String(error),
+            }),
+          });
+        }
+      },
+      [controller],
+    );
     const handleImportExcel = useCallback(
       async (event: React.ChangeEvent<HTMLInputElement>) => {
         const input = event.currentTarget;
@@ -56,9 +61,12 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
           const model = await importExcel(file);
           if (version === importVersion.current) controller.fromJSON(model);
         } catch (error) {
-          if (version === importVersion.current) queue.add({ title: i18n.t('import-failed', {
-            message: error instanceof Error ? error.message : String(error),
-          }) });
+          if (version === importVersion.current)
+            queue.add({
+              title: i18n.t('import-failed', {
+                message: error instanceof Error ? error.message : String(error),
+              }),
+            });
         } finally {
           input.value = '';
           input.blur();
@@ -81,10 +89,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
         <div className={styles['menubar-menu']}>
           <File visible={visible} setVisible={setVisible} />
           <MenuTrigger data-testid="menubar-excel">
-            <Button
-              data-testid="menubar-excel-trigger"
-              aria-label="Excel Menu Trigger"
-            >
+            <Button data-testid="menubar-excel-trigger" aria-label="Excel Menu Trigger">
               {i18n.t('file')}
             </Button>
             <Menu aria-label="Excel Menu">
@@ -115,9 +120,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
                   data-testid="menubar-import-input"
                   id="menubar-import-input"
                 />
-                <label htmlFor="menubar-import-input">
-                  {i18n.t('import', { format: 'File' })}
-                </label>
+                <label htmlFor="menubar-import-input">{i18n.t('import', { format: 'File' })}</label>
               </MenuItem>
               <SubmenuTrigger data-testid="menubar-export-more">
                 <MenuItem textValue={i18n.t('export', { format: '...' })}>

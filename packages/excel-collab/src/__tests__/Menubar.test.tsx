@@ -1,11 +1,5 @@
 import { ExcelEditor, StateContext } from '../containers';
-import {
-  screen,
-  render,
-  fireEvent,
-  act,
-  within,
-} from '@testing-library/react';
+import { screen, render, fireEvent, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import './global.mock';
 import { renderComponent } from './util';
@@ -86,10 +80,7 @@ test('change i18n', async () => {
 describe('change theme', () => {
   test('mock matchMedia light to dark', async () => {
     let func: MatchMediaFun;
-    function addEventListener(
-      _type: string,
-      fn: (data: { matches: boolean }) => void,
-    ) {
+    function addEventListener(_type: string, fn: (data: { matches: boolean }) => void) {
       func = fn;
     }
     Object.defineProperty(global, 'matchMedia', {
@@ -112,10 +103,7 @@ describe('change theme', () => {
   });
   test('mock matchMedia dark to light', async () => {
     let func: MatchMediaFun;
-    function addEventListener(
-      _type: string,
-      fn: (data: { matches: boolean }) => void,
-    ) {
+    function addEventListener(_type: string, fn: (data: { matches: boolean }) => void) {
       func = fn;
     }
     Object.defineProperty(global, 'matchMedia', {
@@ -132,7 +120,7 @@ describe('change theme', () => {
     const before = document.documentElement.getAttribute('data-theme');
     expect(before).toEqual('dark');
     act(() => {
-       func?.({ matches: false });
+      func?.({ matches: false });
     });
     const after = document.documentElement.getAttribute('data-theme');
     expect(after).toEqual('light');

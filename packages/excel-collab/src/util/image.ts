@@ -33,10 +33,7 @@ export function extractImageType(src: string): {
   return { ext: '', base64: '', type: '' };
 }
 
-export function convertFileToTextOrBase64(
-  file: File,
-  isBase64 = false,
-): Promise<string> {
+export function convertFileToTextOrBase64(file: File, isBase64 = false): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = function (event) {
@@ -80,13 +77,13 @@ export function convertBase64toBlob(base64: string, contentType = 'image/png') {
   const byteCharacters = atob(base64);
   const bytesLength = byteCharacters.length;
   const slicesCount = Math.ceil(bytesLength / sliceSize);
-  const byteArrays = Array.from<BlobPart>({ length: slicesCount })
+  const byteArrays = Array.from<BlobPart>({ length: slicesCount });
 
   for (let sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
     let begin = sliceIndex * sliceSize;
     let end = Math.min(begin + sliceSize, bytesLength);
 
-    let bytes = Array.from<number>({ length: end - begin })
+    let bytes = Array.from<number>({ length: end - begin });
     for (let offset = begin, i = 0; offset < end; ++i, ++offset) {
       bytes[i] = byteCharacters[offset].charCodeAt(0);
     }

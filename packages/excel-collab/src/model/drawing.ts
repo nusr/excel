@@ -1,11 +1,4 @@
-import type {
-  ModelJSON,
-  IDrawings,
-  DrawingElement,
-  IModel,
-  IRange,
-  TypedMap,
-} from '../types';
+import type { ModelJSON, IDrawings, DrawingElement, IModel, IRange, TypedMap } from '../types';
 import { CHART_TYPE_LIST, iterateRange, toIRange } from '../util';
 import i18n from '../i18n';
 import { Map } from 'yjs';
@@ -87,26 +80,21 @@ export class Drawing implements IDrawings {
           message: i18n.t('sheet-is-not-exist'),
         });
       }
-      iterateRange(
-        range,
-        info?.rowCount,
-        info?.colCount,
-        (row: number, col: number) => {
-          const data = this.model.getCell({
-            row,
-            col,
-            rowCount: 1,
-            colCount: 1,
-            sheetId: range.sheetId,
-          });
-          if (data && data.value !== '' && data.value !== undefined && data.value !== null) {
-            check = true;
-            return true;
-          } else {
-            return false;
-          }
-        },
-      );
+      iterateRange(range, info?.rowCount, info?.colCount, (row: number, col: number) => {
+        const data = this.model.getCell({
+          row,
+          col,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: range.sheetId,
+        });
+        if (data && data.value !== '' && data.value !== undefined && data.value !== null) {
+          check = true;
+          return true;
+        } else {
+          return false;
+        }
+      });
       if (!check) {
         return this.model.emit('toastMessage', {
           type: 'error',
@@ -119,10 +107,7 @@ export class Drawing implements IDrawings {
         data.imageAngle = 0;
       }
     }
-    this.drawings!.set(
-      data.uuid,
-      new Map(Object.entries(data)) as TypedMap<DrawingElement>,
-    );
+    this.drawings!.set(data.uuid, new Map(Object.entries(data)) as TypedMap<DrawingElement>);
     this.model.getRoot().bindDrawing(data.uuid, data);
   }
   updateDrawing(uuid: string, value: Partial<DrawingElement>) {
@@ -134,9 +119,7 @@ export class Drawing implements IDrawings {
     for (const key of keyList) {
       if (item.get(key) !== value[key]) {
         if (key === 'chartType') {
-          const index = CHART_TYPE_LIST.findIndex(
-            (v) => v.value === value.chartType!,
-          );
+          const index = CHART_TYPE_LIST.findIndex((v) => v.value === value.chartType!);
           if (index < 0) {
             return this.model.emit('toastMessage', {
               type: 'error',
@@ -149,18 +132,17 @@ export class Drawing implements IDrawings {
     for (const key of keyList) {
       const newValue = value[key];
       if (item.get(key) !== newValue) {
-        item.set(
-          key,
-          key === 'chartRange' ? toIRange(newValue as IRange) : newValue,
-        );
+        item.set(key, key === 'chartRange' ? toIRange(newValue as IRange) : newValue);
       }
     }
     const projected = this.model.getRoot().drawing(uuid)!;
     if ('fromRow' in value || 'fromCol' in value || 'sheetId' in value) {
       this.model.getRoot().bindRange(`drawing:${uuid}`, {
         sheetId: value.sheetId ?? projected.sheetId,
-        row: value.fromRow ?? projected.fromRow, col: value.fromCol ?? projected.fromCol,
-        rowCount: 1, colCount: 1,
+        row: value.fromRow ?? projected.fromRow,
+        col: value.fromCol ?? projected.fromCol,
+        rowCount: 1,
+        colCount: 1,
       });
     }
     if (value.chartRange) this.model.getRoot().bindRange(`chart:${uuid}`, value.chartRange);
@@ -197,14 +179,13 @@ export class Drawing implements IDrawings {
           chartRange.col += count;
         } else {
           chartRange.col = colCount - 1;
-          chartRange.colCount = Math.max(
-            colCount - 1 - count - col + chartRange.colCount,
-            1,
-          );
+          chartRange.colCount = Math.max(colCount - 1 - count - col + chartRange.colCount, 1);
         }
         result.chartRange = chartRange;
-      } else if (item.type === 'chart' &&
-        item.chartRange!.col + item.chartRange!.colCount > startIndex) {
+      } else if (
+        item.type === 'chart' &&
+        item.chartRange!.col + item.chartRange!.colCount > startIndex
+      ) {
         result.chartRange = { ...item.chartRange!, colCount: item.chartRange!.colCount + count };
       }
 
@@ -243,14 +224,13 @@ export class Drawing implements IDrawings {
           chartRange.row += count;
         } else {
           chartRange.row = rowCount - 1;
-          chartRange.rowCount = Math.max(
-            rowCount - 1 - count - row + chartRange.rowCount,
-            1,
-          );
+          chartRange.rowCount = Math.max(rowCount - 1 - count - row + chartRange.rowCount, 1);
         }
         result.chartRange = chartRange;
-      } else if (item.type === 'chart' &&
-        item.chartRange!.row + item.chartRange!.rowCount > startIndex) {
+      } else if (
+        item.type === 'chart' &&
+        item.chartRange!.row + item.chartRange!.rowCount > startIndex
+      ) {
         result.chartRange = { ...item.chartRange!, rowCount: item.chartRange!.rowCount + count };
       }
       this.updateDrawing(uuid, result);
@@ -275,8 +255,14 @@ export class Drawing implements IDrawings {
           ...item.chartRange!,
         };
         const col = chartRange.col;
-        const overlap = Math.max(0, Math.min(col + chartRange.colCount, colIndex + count) - Math.max(col, colIndex));
-        chartRange.col = Math.min(colCount - 1, col < colIndex ? col : Math.max(colIndex, col - count));
+        const overlap = Math.max(
+          0,
+          Math.min(col + chartRange.colCount, colIndex + count) - Math.max(col, colIndex),
+        );
+        chartRange.col = Math.min(
+          colCount - 1,
+          col < colIndex ? col : Math.max(colIndex, col - count),
+        );
         chartRange.colCount = Math.max(1, chartRange.colCount - overlap);
         chartRange.colCount = Math.min(chartRange.colCount, colCount - chartRange.col);
         result.chartRange = chartRange;
@@ -304,8 +290,14 @@ export class Drawing implements IDrawings {
           ...item.chartRange!,
         };
         const row = chartRange.row;
-        const overlap = Math.max(0, Math.min(row + chartRange.rowCount, rowIndex + count) - Math.max(row, rowIndex));
-        chartRange.row = Math.min(rowCount - 1, row < rowIndex ? row : Math.max(rowIndex, row - count));
+        const overlap = Math.max(
+          0,
+          Math.min(row + chartRange.rowCount, rowIndex + count) - Math.max(row, rowIndex),
+        );
+        chartRange.row = Math.min(
+          rowCount - 1,
+          row < rowIndex ? row : Math.max(rowIndex, row - count),
+        );
         chartRange.rowCount = Math.max(1, chartRange.rowCount - overlap);
         chartRange.rowCount = Math.min(chartRange.rowCount, rowCount - chartRange.row);
         result.chartRange = chartRange;

@@ -27,10 +27,7 @@ const workerMethod: WorkerMethod = {
       await cb(result);
     }
   },
-  async computeFormulas(
-    data: RequestFormulas,
-    cb: (data: ResponseFormulas) => boolean,
-  ) {
+  async computeFormulas(data: RequestFormulas, cb: (data: ResponseFormulas) => boolean) {
     const result = await computeFormulas(data, cb);
     return result;
   },

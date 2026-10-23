@@ -1,11 +1,4 @@
-import React, {
-  useRef,
-  useEffect,
-  Fragment,
-  useState,
-  memo,
-  useCallback,
-} from 'react';
+import React, { useRef, useEffect, Fragment, useState, memo, useCallback } from 'react';
 import type { IController, EventData, ModalValue } from '../../types';
 import { getHitInfo, DEFAULT_POSITION } from '../../util';
 import styles from './index.module.css';
@@ -61,16 +54,13 @@ export const CanvasContainer = memo(() => {
     }
     return initCanvas(controller, ref.current);
   }, [controller]);
-  const handleContextMenu = useCallback(
-    (event: React.MouseEvent<HTMLCanvasElement>) => {
-      event.preventDefault();
-      setMenuPosition({
-        top: event.clientY,
-        left: event.clientX,
-      });
-    },
-    [],
-  );
+  const handleContextMenu = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
+    setMenuPosition({
+      top: event.clientY,
+      left: event.clientX,
+    });
+  }, []);
   const hideContextMenu = () => {
     setMenuPosition({
       top: DEFAULT_POSITION,
@@ -119,10 +109,7 @@ export const CanvasContainer = memo(() => {
   return (
     <Fragment>
       <MyToastRegion />
-      <div
-        className={styles['canvas-container']}
-        data-testid="canvas-container"
-      >
+      <div className={styles['canvas-container']} data-testid="canvas-container">
         <canvas
           key={canvasIdentity.current.key}
           className={styles['canvas-content']}
@@ -135,10 +122,7 @@ export const CanvasContainer = memo(() => {
         <ScrollBar />
         <BottomBar />
         {floatElementList.length > 0 && (
-          <FloatElementContainer
-            floatElementList={floatElementList}
-            activeUuid={activeUuid}
-          />
+          <FloatElementContainer floatElementList={floatElementList} activeUuid={activeUuid} />
         )}
         <Collaboration />
       </div>

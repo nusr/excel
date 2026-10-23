@@ -1,9 +1,4 @@
-import type {
-  ModelJSON,
-  IRange,
-  IMergeCell,
-  IModel,
-} from '../types';
+import type { ModelJSON, IRange, IMergeCell, IModel } from '../types';
 import { toIRange } from '../util';
 import { mergeCellKey } from '../protocol';
 import i18n from '../i18n';
@@ -38,13 +33,17 @@ export class MergeCell implements IMergeCell {
       return [];
     }
     const id = sheetId || this.model.getCurrentSheetId();
-    return Array.from(this.mergeCells).map(([key, range]) =>
-      this.model.getRoot().range(`merge:${key}`, range))
+    return Array.from(this.mergeCells)
+      .map(([key, range]) => this.model.getRoot().range(`merge:${key}`, range))
       .filter((range): range is IRange => !!range && range.sheetId === id);
   }
   addMergeCell(range: IRange) {
     const ref = this.key(range);
-    if (this.getMergeCellList(range.sheetId).some((value) => mergeCellKey(value) === mergeCellKey(range))) {
+    if (
+      this.getMergeCellList(range.sheetId).some(
+        (value) => mergeCellKey(value) === mergeCellKey(range),
+      )
+    ) {
       this.model.emit('toastMessage', {
         type: 'error',
         message: i18n.t('merging-cell-is-duplicate'),
@@ -57,10 +56,17 @@ export class MergeCell implements IMergeCell {
   }
   private key(range: IRange) {
     const anchor = this.model.getRoot().anchorRange(range);
-    return anchor ? JSON.stringify([
-      range.sheetId, anchor.rows.first, anchor.rows.last, anchor.rows.full,
-      anchor.cols.first, anchor.cols.last, anchor.cols.full,
-    ]) : mergeCellKey(range);
+    return anchor
+      ? JSON.stringify([
+          range.sheetId,
+          anchor.rows.first,
+          anchor.rows.last,
+          anchor.rows.full,
+          anchor.cols.first,
+          anchor.cols.last,
+          anchor.cols.full,
+        ])
+      : mergeCellKey(range);
   }
   deleteMergeCell(range: IRange): void {
     range.sheetId = range.sheetId || this.model.getCurrentSheetId();

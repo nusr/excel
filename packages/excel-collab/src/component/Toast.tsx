@@ -39,10 +39,7 @@ export function MyToastRegion() {
     // The ToastRegion should be rendered at the root of your app.
     <ToastRegion queue={queue}>
       {({ toast }) => (
-        <MyToast
-          toast={toast}
-          style={{ viewTransitionName: toast.key } as CSSProperties}
-        >
+        <MyToast toast={toast} style={{ viewTransitionName: toast.key } as CSSProperties}>
           <ToastContent>
             <Text slot="title">{toast.content.title}</Text>
             {toast.content.description && (

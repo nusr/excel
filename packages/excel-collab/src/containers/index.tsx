@@ -33,7 +33,10 @@ function useCollaboration() {
         setFileInfo(file?.id ?? doc.guid, file?.name ?? '');
       }
       if (controller.getSheetList().length === 0) {
-        if (collaborative) throw new Error('The collaboration server must initialize the workbook before the first sync');
+        if (collaborative)
+          throw new Error(
+            'The collaboration server must initialize the workbook before the first sync',
+          );
         controller.addFirstSheet();
       }
       setIsLoading(false);
@@ -44,7 +47,9 @@ function useCollaboration() {
         setIsLoading(false);
       }
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [controller, provider, whenSynced, collaborative, setFileInfo]);
 
   useEffect(() => {
@@ -77,7 +82,8 @@ function useCollaboration() {
   }, [controller, awareness]);
 
   return {
-    isLoading, error,
+    isLoading,
+    error,
   };
 }
 
@@ -89,38 +95,18 @@ export type EditorProps = {
   sheetBarChildren?: React.ReactNode;
 };
 const ExcelEditor: React.FunctionComponent<EditorProps> = memo(
-  ({
-    style,
-    menubarLeftChildren,
-    menubarRightChildren,
-    toolbarChildren,
-    sheetBarChildren,
-  }) => {
+  ({ style, menubarLeftChildren, menubarRightChildren, toolbarChildren, sheetBarChildren }) => {
     const { isLoading, error } = useCollaboration();
 
     if (error) return <div role="alert">{i18n.t('initialization-failed', { message: error })}</div>;
 
     if (isLoading) {
-      return (
-        <ProgressCircle
-          value={60}
-          size={64}
-          isIndeterminate
-          aria-label="Loading editor"
-        />
-      );
+      return <ProgressCircle value={60} size={64} isIndeterminate aria-label="Loading editor" />;
     }
 
     return (
-      <div
-        className={styles['app-container']}
-        data-testid="app-container"
-        style={style}
-      >
-        <MenuBarContainer
-          leftChildren={menubarLeftChildren}
-          rightChildren={menubarRightChildren}
-        />
+      <div className={styles['app-container']} data-testid="app-container" style={style}>
+        <MenuBarContainer leftChildren={menubarLeftChildren} rightChildren={menubarRightChildren} />
         <ToolbarContainer>{toolbarChildren}</ToolbarContainer>
         <FormulaBarContainer />
         <CanvasContainer />

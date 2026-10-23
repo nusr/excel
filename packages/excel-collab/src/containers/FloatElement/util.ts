@@ -41,11 +41,7 @@ export const INITIAL_STATE: State = {
   },
 };
 
-export function roundPosition(
-  top: number,
-  left: number,
-  controller: IController,
-) {
+export function roundPosition(top: number, left: number, controller: IController) {
   const canvasSize = controller.getCanvasSize();
   const headerSize = controller.getHeaderSize();
   const minTop = headerSize.height;

@@ -16,12 +16,17 @@ function setup() {
   render(
     <canvas
       data-testid="pointer-target"
-      onPointerDown={(event) => handler.pointerDown({
-        controller,
-        x: header.width + 5,
-        y: header.height + 5,
-        position: { row: 0, col: 0, marginX: 5, marginY: 5 },
-      }, event)}
+      onPointerDown={(event) =>
+        handler.pointerDown(
+          {
+            controller,
+            x: header.width + 5,
+            y: header.height + 5,
+            position: { row: 0, col: 0, marginX: 5, marginY: 5 },
+          },
+          event,
+        )
+      }
     />,
   );
   return (button: number, timeStamp: number) => {
@@ -40,11 +45,14 @@ afterEach(() => {
   }
 });
 
-test.each([0, 2])('an early first pointer click with button %s does not enter cell editing', (button) => {
-  const pointerDown = setup();
-  pointerDown(button, 100);
-  expect(useCoreStore.getState().editorStatus).toBe(EditorStatus.NONE);
-});
+test.each([0, 2])(
+  'an early first pointer click with button %s does not enter cell editing',
+  (button) => {
+    const pointerDown = setup();
+    pointerDown(button, 100);
+    expect(useCoreStore.getState().editorStatus).toBe(EditorStatus.NONE);
+  },
+);
 
 test('a right-click after a primary click never enters editing or starts another double-click', () => {
   const pointerDown = setup();

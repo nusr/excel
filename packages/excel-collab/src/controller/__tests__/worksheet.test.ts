@@ -77,17 +77,13 @@ describe('worksheet.test.ts', () => {
       ).toBeUndefined();
     });
     test('set text formula', () => {
-      controller.setCell(
-        [['=SUM(1,2)']],
-        [[{ numberFormat: DEFAULT_TEXT_FORMAT_CODE }]],
-        {
-          row: 0,
-          col: 0,
-          colCount: 1,
-          rowCount: 1,
-          sheetId: controller.getCurrentSheetId(),
-        },
-      );
+      controller.setCell([['=SUM(1,2)']], [[{ numberFormat: DEFAULT_TEXT_FORMAT_CODE }]], {
+        row: 0,
+        col: 0,
+        colCount: 1,
+        rowCount: 1,
+        sheetId: controller.getCurrentSheetId(),
+      });
       expect(
         controller.getCell({
           row: 0,
@@ -443,9 +439,7 @@ describe('worksheet.test.ts', () => {
         })?.value,
       ).toEqual(1);
 
-      controller.setWorksheet([
-        { value: 'test', isBold: true, row: 0, col: 0, sheetId: '' },
-      ]);
+      controller.setWorksheet([{ value: 'test', isBold: true, row: 0, col: 0, sheetId: '' }]);
       const result: WorksheetData = [
         {
           value: 'test',

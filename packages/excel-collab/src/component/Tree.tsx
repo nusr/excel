@@ -11,11 +11,11 @@ import {
   TreeLoadMoreItem as AriaTreeLoadMoreItem,
   type TreeLoadMoreItemProps,
   TreeSection as AriaTreeSection,
-  TreeHeader as AriaTreeHeader
+  TreeHeader as AriaTreeHeader,
 } from 'react-aria-components/Tree';
-import {ChevronRight, GripVertical} from 'lucide-react';
-import {Checkbox} from './Checkbox';
-import {ProgressCircle} from './ProgressCircle';
+import { ChevronRight, GripVertical } from 'lucide-react';
+import { Checkbox } from './Checkbox';
+import { ProgressCircle } from './ProgressCircle';
 import './Tree.css';
 
 export function Tree<T>(props: TreeProps<T>) {
@@ -23,11 +23,11 @@ export function Tree<T>(props: TreeProps<T>) {
 }
 
 export function TreeItemContent(
-  props: Omit<TreeItemContentProps, 'children'> & {children?: React.ReactNode}
+  props: Omit<TreeItemContentProps, 'children'> & { children?: React.ReactNode },
 ) {
   return (
     <AriaTreeItemContent>
-      {({selectionBehavior, selectionMode, allowsDragging}: TreeItemContentRenderProps) => (
+      {({ selectionBehavior, selectionMode, allowsDragging }: TreeItemContentRenderProps) => (
         <>
           {allowsDragging && (
             <Button slot="drag">

@@ -10,7 +10,7 @@ function safeParse<T>(data: any, defaultValue: T | undefined): T | undefined {
   try {
     return JSON.parse(data) as T;
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return defaultValue;
   }
 }
@@ -40,7 +40,7 @@ export async function fetchData<T>(
     if (!result.ok) {
       return;
     }
-    return await result.json() as T;
+    return (await result.json()) as T;
   } catch (error) {
     if (process.env.NODE_ENV !== 'test') {
       console.log(error);
@@ -51,33 +51,19 @@ export async function fetchData<T>(
 
 export class RemoteProvider implements IProvider {
   private readonly baseUrl: string;
-  private readonly callback: (
-    p: ICollaborationProvider,
-    id: string,
-  ) => Promise<void>;
+  private readonly callback: (p: ICollaborationProvider, id: string) => Promise<void>;
   constructor(
     baseUrl: string,
-    callback: (
-      p: ICollaborationProvider,
-      id: string,
-    ) => Promise<void> = async () => {},
+    callback: (p: ICollaborationProvider, id: string) => Promise<void> = async () => {},
   ) {
     this.baseUrl = baseUrl;
     this.callback = callback;
   }
-  async uploadFile(
-    docId: string,
-    file: File,
-    _base64: string,
-  ): Promise<string> {
+  async uploadFile(docId: string, file: File, _base64: string): Promise<string> {
     const form = new FormData();
     form.append('file', file);
     form.append('docId', docId);
-    const res = await fetchData<{ filePath: string }>(
-      this.baseUrl + '/upload',
-      'POST',
-      form,
-    );
+    const res = await fetchData<{ filePath: string }>(this.baseUrl + '/upload', 'POST', form);
     if (res?.filePath) {
       return res?.filePath;
     }
@@ -99,10 +85,7 @@ export class RemoteProvider implements IProvider {
       await this.callback(this, id);
     }
   }
-  async updateDocument(
-    id: string,
-    data: Pick<DocumentItem, 'name' | 'content'>,
-  ): Promise<void> {
+  async updateDocument(id: string, data: Pick<DocumentItem, 'name' | 'content'>): Promise<void> {
     const temp: Pick<DocumentItem, 'name' | 'content'> = {};
     if (data.name !== undefined) {
       temp.name = data.name;
@@ -111,11 +94,7 @@ export class RemoteProvider implements IProvider {
       temp.content = data.content;
     }
 
-    await fetchData<DocumentItem>(
-      this.baseUrl + '/document/' + id,
-      'PUT',
-      JSON.stringify(temp),
-    );
+    await fetchData<DocumentItem>(this.baseUrl + '/document/' + id, 'PUT', JSON.stringify(temp));
   }
   async getDocument(id: string): Promise<DocumentItem | undefined> {
     const res = await fetchData<DocumentItem>(this.baseUrl + '/document/' + id);
@@ -128,16 +107,8 @@ export class RemoteProvider implements IProvider {
 }
 
 export class LocalProvider implements IProvider {
-  private readonly callback: (
-    p: ICollaborationProvider,
-    id: string,
-  ) => Promise<void>;
-  constructor(
-    callback: (
-      p: ICollaborationProvider,
-      id: string,
-    ) => Promise<void> = async () => {},
-  ) {
+  private readonly callback: (p: ICollaborationProvider, id: string) => Promise<void>;
+  constructor(callback: (p: ICollaborationProvider, id: string) => Promise<void> = async () => {}) {
     this.callback = callback;
   }
   private getKey(id: string) {
@@ -157,11 +128,7 @@ export class LocalProvider implements IProvider {
     }
     return list;
   }
-  async uploadFile(
-    _docId: string,
-    _file: File,
-    base64: string,
-  ): Promise<string> {
+  async uploadFile(_docId: string, _file: File, base64: string): Promise<string> {
     return base64;
   }
   downloadFile(_docId: string, filePath: string): Promise<string> {
@@ -179,10 +146,7 @@ export class LocalProvider implements IProvider {
       await this.callback(this, id);
     }
   }
-  async updateDocument(
-    id: string,
-    data: Pick<DocumentItem, 'name' | 'content'>,
-  ): Promise<void> {
+  async updateDocument(id: string, data: Pick<DocumentItem, 'name' | 'content'>): Promise<void> {
     const doc = sessionStorage.getItem(this.getKey(id));
     if (!doc) {
       const docData: DocumentItem = {

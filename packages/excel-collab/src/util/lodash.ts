@@ -41,9 +41,7 @@ export function get<T>(
 
 export function isEmpty(value: unknown): boolean {
   const temp: any = value || {};
-  return (
-    [Object, Array].includes(temp.constructor) && !Object.entries(temp).length
-  );
+  return [Object, Array].includes(temp.constructor) && !Object.entries(temp).length;
 }
 
 export function deepEqual(x: any, y: any) {
@@ -51,8 +49,7 @@ export function deepEqual(x: any, y: any) {
     return true;
   }
   if (x && typeof x === 'object' && y && typeof y === 'object') {
-    if (Array.isArray(x) !== Array.isArray(y) ||
-      (Array.isArray(x) && x.length !== y.length)) {
+    if (Array.isArray(x) !== Array.isArray(y) || (Array.isArray(x) && x.length !== y.length)) {
       return false;
     }
     if (Object.keys(x).length !== Object.keys(y).length) {
@@ -73,9 +70,7 @@ export function deepEqual(x: any, y: any) {
 export function noop() {}
 
 export function camelCase(str: string) {
-  const a = str
-    .toLowerCase()
-    .replace(/[-_\s.]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''));
+  const a = str.toLowerCase().replace(/[-_\s.]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''));
   return a.substring(0, 1).toLowerCase() + a.substring(1);
 }
 

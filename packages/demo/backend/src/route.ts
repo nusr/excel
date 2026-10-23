@@ -15,10 +15,7 @@ const UPLOAD_PREFIX = '/upload/';
 app.use(cors());
 
 // Error handling middleware
-export async function errorHandler(
-  ctx: Koa.Context,
-  next: () => Promise<void>,
-) {
+export async function errorHandler(ctx: Koa.Context, next: () => Promise<void>) {
   try {
     console.log(`${ctx.method} ${ctx.url}`);
     await next();
@@ -47,11 +44,7 @@ export async function errorHandler(
 app.use(errorHandler);
 app.use(koaBody({ multipart: true, json: true }));
 
-export function assertParam(
-  ctx: Koa.Context,
-  param: any,
-  message: string,
-): asserts param {
+export function assertParam(ctx: Koa.Context, param: any, message: string): asserts param {
   if (!param) {
     ctx.throw(400, message);
   }
@@ -83,14 +76,14 @@ export async function sendFile(ctx: Koa.Context) {
   // Validate fileId is a valid number before proceeding
   if (!Number.isSafeInteger(fileId) || fileId <= 0) {
     ctx.throw(400, 'fileId should be a valid number');
-    return
+    return;
   }
   assertNumber(ctx, fileId, 'fileId should be a valid number');
 
   const result = await db.findFile(fileId);
   if (!result) {
     ctx.throw(404, `File with ID ${fileId} not found`);
-    return
+    return;
   }
 
   ctx.response.lastModified = new Date(result.last_modified ?? new Date());
@@ -115,37 +108,50 @@ export async function sendFile(ctx: Koa.Context) {
 }
 
 router.get('/', async (ctx: Koa.Context) => {
-  const html = await fs.promises.readFile(
-    path.join(__dirname, '../index.html'),
-    'utf-8',
-  );
+  const html = await fs.promises.readFile(path.join(__dirname, '../index.html'), 'utf-8');
   ctx.type = 'html';
   ctx.body = html;
 });
 
-router.post('/upload', async (ctx: Koa.Context) => {
-  const list = (ctx.request as any).files?.file;
-  assertParam(ctx, list, 'No file uploaded');
+export async function upload(ctx: Koa.Context) {
+  const uploaded = Object.values((ctx.request as any).files ?? {}).flat() as Array<{
+    filepath: string;
+  }>;
+  try {
+    const list = (ctx.request as any).files?.file;
+    assertParam(ctx, list, 'No file uploaded');
 
-  const file = Array.isArray(list) ? list[0] : list;
+    const file = Array.isArray(list) ? list[0] : list;
+    assertParam(ctx, file, 'No file uploaded');
 
-  assertString(ctx, file.originalFilename, 'File name is required');
-  assertNumber(ctx, file.size, 'File size must be a number');
+    assertString(ctx, file.originalFilename, 'File name is required');
+    assertNumber(ctx, file.size, 'File size must be a number');
 
-  const reader = await fs.promises.readFile(file.filepath);
-  const result = await db.createFile({
-    name: file.originalFilename ?? '',
-    content: reader,
-    size: file.size,
-    last_modified: file.mtime,
-  });
+    const reader = await fs.promises.readFile(file.filepath);
+    const result = await db.createFile({
+      name: file.originalFilename ?? '',
+      content: reader,
+      size: file.size,
+      last_modified: file.mtime,
+    });
 
-  const { content: _content, ...rest } = result;
-  ctx.body = {
-    ...rest,
-    filePath: UPLOAD_PREFIX + rest.id,
-  };
-});
+    const { content: _content, ...rest } = result;
+    ctx.body = {
+      ...rest,
+      filePath: UPLOAD_PREFIX + rest.id,
+    };
+  } finally {
+    await Promise.all(
+      uploaded.map((file) =>
+        fs.promises
+          .rm(file.filepath, { force: true })
+          .catch((error: unknown) => console.error('Failed to clean up uploaded file', error)),
+      ),
+    );
+  }
+}
+
+router.post('/upload', upload);
 
 router.get(`${UPLOAD_PREFIX}:fileId`, async (ctx: Koa.Context) => {
   await sendFile(ctx);
@@ -180,7 +186,11 @@ export const updateDocument = async (ctx: Koa.Context) => {
   const id = ctx.params.id;
 
   assertString(ctx, id, 'Document ID must be a string');
-  assertParam(ctx, name !== undefined || content !== undefined, 'Either name or content must be provided');
+  assertParam(
+    ctx,
+    name !== undefined || content !== undefined,
+    'Either name or content must be provided',
+  );
   if (name !== undefined) {
     assertString(ctx, name, 'Document name must be a string');
   }
@@ -230,10 +240,12 @@ export const sync = async (ctx: Koa.Context) => {
   }
   assertString(ctx, id, 'Room ID must be a string');
   const realContent = JSON.stringify(content);
-  const result = await writeJsonContent(id, () => db.upsertDocument(id, {
-    content: realContent,
-    id,
-  }));
+  const result = await writeJsonContent(id, () =>
+    db.upsertDocument(id, {
+      content: realContent,
+      id,
+    }),
+  );
 
   ctx.body = result;
 };

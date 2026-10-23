@@ -2,19 +2,9 @@ import { vi } from 'vitest';
 import http from 'node:http';
 import { once } from 'node:events';
 import WebSocket from 'ws';
-import {
-  Array as YArray,
-  Map as YMap,
-  Doc,
-  applyUpdate,
-  encodeStateAsUpdate,
-} from 'yjs';
+import { Array as YArray, Map as YMap, Doc, applyUpdate, encodeStateAsUpdate } from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
-import {
-  docs,
-  getYDoc,
-  setContentInitializor,
-} from '@y/websocket-server/utils';
+import { docs, getYDoc, setContentInitializor } from '@y/websocket-server/utils';
 import { PROTOCOL_VERSION, SharedRoot } from 'excel-collab/protocol';
 import {
   initDatabase,
@@ -102,14 +92,11 @@ async function seed(id: string, state = v2State()) {
 async function network(persistence: DocumentPersistence) {
   persistence.install();
   const server = http.createServer();
-  const manager = new WebSocketManager(server, (doc) =>
-    persistence.release(doc),
-  );
+  const manager = new WebSocketManager(server, (doc) => persistence.release(doc));
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   const address = server.address();
-  if (!address || typeof address === 'string')
-    throw new Error('Expected a TCP address');
+  if (!address || typeof address === 'string') throw new Error('Expected a TCP address');
   return {
     url: `ws://127.0.0.1:${address.port}`,
     async close() {
@@ -158,11 +145,7 @@ test('persisted v2 binary migrates atomically and restarts with unchanged v3 ide
   });
   binary.destroy();
   const expected = encodeStateAsUpdate(doc);
-  const rowIds = new SharedRoot(doc)
-    .get('workbook')
-    .get('legacy')!
-    .get('rows')!
-    .toArray();
+  const rowIds = new SharedRoot(doc).get('workbook').get('legacy')!.get('rows')!.toArray();
   await persistence.release(doc);
 
   const restarted = new DocumentPersistence();
@@ -171,19 +154,13 @@ test('persisted v2 binary migrates atomically and restarts with unchanged v3 ide
   await restored.whenInitialized;
 
   expect(encodeStateAsUpdate(restored)).toEqual(expected);
-  expect(
-    new SharedRoot(restored)
-      .get('workbook')
-      .get('legacy')!
-      .get('rows')!
-      .toArray(),
-  ).toEqual(rowIds);
-  expect(new SharedRoot(restored).toJSON().worksheets.legacy_0_0).toMatchObject(
-    {
-      value: 42,
-      isBold: true,
-    },
+  expect(new SharedRoot(restored).get('workbook').get('legacy')!.get('rows')!.toArray()).toEqual(
+    rowIds,
   );
+  expect(new SharedRoot(restored).toJSON().worksheets.legacy_0_0).toMatchObject({
+    value: 42,
+    isBold: true,
+  });
 });
 
 test('v2 migration is saved before real clients sync, and reconnect retains migrated edits', async () => {
@@ -223,9 +200,7 @@ test('v2 migration is saved before real clients sync, and reconnect retains migr
     loading.resolve();
     await vi.waitFor(() => expect(first.provider.synced).toBe(true));
 
-    expect(first.doc.getMap('excel:meta').get('version')).toBe(
-      PROTOCOL_VERSION,
-    );
+    expect(first.doc.getMap('excel:meta').get('version')).toBe(PROTOCOL_VERSION);
     const root = new SharedRoot(first.doc);
     expect(root.toJSON().worksheets.legacy_0_0).toMatchObject({
       value: 42,
@@ -233,27 +208,19 @@ test('v2 migration is saved before real clients sync, and reconnect retains migr
     });
     root.get('workbook').get('legacy')!.set('name', 'After migration');
     await vi.waitFor(() =>
-      expect(new SharedRoot(docs.get(id)!).getSheets()[0].name).toBe(
-        'After migration',
-      ),
+      expect(new SharedRoot(docs.get(id)!).getSheets()[0].name).toBe('After migration'),
     );
     await persistence.flush(docs.get(id)!);
     const persisted = await loadDocumentState(id);
     expect(persisted!.state).toBeInstanceOf(Buffer);
-    expect(JSON.parse(persisted!.content!).workbook.legacy.name).toBe(
-      'After migration',
-    );
+    expect(JSON.parse(persisted!.content!).workbook.legacy.name).toBe('After migration');
     first.provider.destroy();
     await vi.waitFor(() => expect(docs.has(id)).toBe(false));
 
     const second = connect();
     await vi.waitFor(() => expect(second.provider.synced).toBe(true));
-    expect(new SharedRoot(second.doc).getSheets()[0].name).toBe(
-      'After migration',
-    );
-    expect(
-      new SharedRoot(second.doc).toJSON().worksheets.legacy_0_0,
-    ).toMatchObject({
+    expect(new SharedRoot(second.doc).getSheets()[0].name).toBe('After migration');
+    expect(new SharedRoot(second.doc).toJSON().worksheets.legacy_0_0).toMatchObject({
       value: 42,
       isBold: true,
     });
@@ -267,21 +234,14 @@ test('v2 migration is saved before real clients sync, and reconnect retains migr
   }
 });
 
-test.each([
-  'unknown-version',
-  'malformed-v2',
-  'failed-migration-save',
-] as const)(
+test.each(['unknown-version', 'malformed-v2', 'failed-migration-save'] as const)(
   '%s closes the socket without syncing or resetting saved content',
   async (failure) => {
     const id = `v2-failure-${failure}`;
     let binary = v2State(failure === 'unknown-version' ? 99 : 2);
     if (failure === 'malformed-v2') {
       const invalid = inspect(binary);
-      invalid
-        .getMap<YMap<unknown>>('excel:workbook')
-        .get('legacy')!
-        .delete('rows');
+      invalid.getMap<YMap<unknown>>('excel:workbook').get('legacy')!.delete('rows');
       binary = encodeStateAsUpdate(invalid);
       invalid.destroy();
     }
@@ -296,9 +256,7 @@ test.each([
     });
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     const server = await network(persistence);
-    const socket = new WebSocket(
-      `${server.url}/${id}?protocol=${PROTOCOL_VERSION}`,
-    );
+    const socket = new WebSocket(`${server.url}/${id}?protocol=${PROTOCOL_VERSION}`);
     const closed = once(socket, 'close');
     const messages: unknown[] = [];
     socket.on('message', (message) => messages.push(message));
@@ -310,8 +268,7 @@ test.each([
       expect(await loadDocumentState(id)).toEqual(original);
       expect(docs.has(id)).toBe(false);
       expect(log).toHaveBeenCalled();
-      if (failure !== 'failed-migration-save')
-        expect(save).not.toHaveBeenCalled();
+      if (failure !== 'failed-migration-save') expect(save).not.toHaveBeenCalled();
     } finally {
       socket.terminate();
       await server.close();
@@ -340,9 +297,7 @@ test.each(['', '?protocol=2', '?protocol=99'])(
       const [code, reason] = await closed;
 
       expect(code).toBe(1008);
-      expect(reason.toString()).toBe(
-        `Collaboration protocol version ${PROTOCOL_VERSION} required`,
-      );
+      expect(reason.toString()).toBe(`Collaboration protocol version ${PROTOCOL_VERSION} required`);
       expect(messages).toHaveLength(0);
       expect(load).not.toHaveBeenCalled();
       expect(docs.has(id)).toBe(false);
@@ -395,9 +350,9 @@ test('real clients merge concurrent first-cell field writes after migration and 
       });
     });
     await persistence.flush(docs.get(id)!);
-    expect(
-      JSON.parse((await loadDocumentState(id))!.content!).worksheets.legacy_1_1,
-    ).toMatchObject({ value: 'Concurrent value', isBold: true });
+    expect(JSON.parse((await loadDocumentState(id))!.content!).worksheets.legacy_1_1).toMatchObject(
+      { value: 'Concurrent value', isBold: true },
+    );
     first.provider.destroy();
     second.provider.destroy();
     await vi.waitFor(() => expect(docs.has(id)).toBe(false));

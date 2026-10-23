@@ -1,17 +1,13 @@
 import { useRef, useEffect } from 'react';
 
-export function useClickOutside(
-  shouldExecute = false,
-  handler: () => void,
-) {
+export function useClickOutside(shouldExecute = false, handler: () => void) {
   const ref = useRef<HTMLDivElement>(null);
 
   function handleEvent(event: Event) {
     const node = event.target as any;
     if (
       ref?.current &&
-      (ref.current === node ||
-        (node instanceof Node && ref.current.contains(node)))
+      (ref.current === node || (node instanceof Node && ref.current.contains(node)))
     ) {
       return;
     }

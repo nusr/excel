@@ -27,12 +27,10 @@ async function initialize(module: typeof import('excelize-wasm')): Promise<Excel
 }
 
 export function loadExcelize(): Promise<Excelize> {
-  pending ??= import(/* @vite-ignore */ moduleUrl)
-    .then(initialize)
-    .catch((error: unknown) => {
-      pending = undefined;
-      throw error;
-    });
+  pending ??= import(/* @vite-ignore */ moduleUrl).then(initialize).catch((error: unknown) => {
+    pending = undefined;
+    throw error;
+  });
   return pending;
 }
 

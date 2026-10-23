@@ -139,17 +139,12 @@ export function getDoubleLine(
   return result;
 }
 
-function splitWords(
-  text: string,
-  isWrapText?: boolean,
-  isMergeContent?: boolean,
-): string[] {
+function splitWords(text: string, isWrapText?: boolean, isMergeContent?: boolean): string[] {
   if (isMergeContent) {
     if (isWrapText) {
-      return text.split(MERGE_CELL_LINE_BREAK).flatMap((line, index) => [
-        ...(index > 0 ? ['\n'] : []),
-        ...splitByLineBreak(line),
-      ]);
+      return text
+        .split(MERGE_CELL_LINE_BREAK)
+        .flatMap((line, index) => [...(index > 0 ? ['\n'] : []), ...splitByLineBreak(line)]);
     }
     text = text.replaceAll(MERGE_CELL_LINE_BREAK, '');
   }
@@ -157,9 +152,9 @@ function splitWords(
 }
 
 function splitByLineBreak(text: string): string[] {
-  return text.split(/(\r\n|\r|\n)/).flatMap((part) =>
-    /^(\r\n|\r|\n)$/.test(part) ? ['\n'] : splitToWords(part),
-  );
+  return text
+    .split(/(\r\n|\r|\n)/)
+    .flatMap((part) => (/^(\r\n|\r|\n)$/.test(part) ? ['\n'] : splitToWords(part)));
 }
 
 export function drawAntLine(
@@ -171,13 +166,7 @@ export function drawAntLine(
 ) {
   ctx.setLineDash([npx(8), npx(6)]);
   const offset = DEFAULT_LINE_WIDTH;
-  strokeRect(
-    ctx,
-    x + offset,
-    y + offset,
-    width - offset * 2,
-    height - offset * 2,
-  );
+  strokeRect(ctx, x + offset, y + offset, width - offset * 2, height - offset * 2);
   ctx.setLineDash([]);
 }
 
@@ -268,10 +257,12 @@ function splitLongWords(
 ): TextItem[] {
   return textList.flatMap((item) => {
     if (item.str === '\n' || item.width <= maxWidth) return [item];
-    const graphemes = typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'function'
-      ? [...new Intl.Segmenter([], { granularity: 'grapheme' }).segment(item.str)]
-        .map(({ segment }) => segment)
-      : [...item.str];
+    const graphemes =
+      typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'function'
+        ? [...new Intl.Segmenter([], { granularity: 'grapheme' }).segment(item.str)].map(
+            ({ segment }) => segment,
+          )
+        : [...item.str];
     return graphemes.map((grapheme) => {
       const size = measureText(ctx, grapheme);
       return {
@@ -329,9 +320,7 @@ export function renderCell(
 
   // show all date text
   const isDate = !realStyle?.isWrapText && isDateFormat(format);
-  const texts = isDate
-    ? [text]
-    : splitWords(text, cellInfo?.isWrapText, isMergeCell);
+  const texts = isDate ? [text] : splitWords(text, cellInfo?.isWrapText, isMergeCell);
   const measuredTexts: TextItem[] = texts.map((item) => {
     const size = measureText(ctx, item);
     return {
@@ -350,11 +339,7 @@ export function renderCell(
     : measuredTexts;
 
   // fill text
-  const { width, height, resultList } = computeCell(
-    textList,
-    position,
-    realStyle,
-  );
+  const { width, height, resultList } = computeCell(textList, position, realStyle);
   if (width > 0 && height > 0) {
     const lineGap = Math.ceil((fontSize * (1.5 - 1)) / 2);
     let list: Point[] = [];
@@ -458,8 +443,11 @@ function computeCell(
   }
 
   const textWidth = Math.max(0, ...lines.map((line) => line.width)) + lineGap;
-  const contentHeight = lines.reduce((total, line, index) =>
-    total + line.height + (style?.isWrapText || index > 0 ? lineGap * 2 : 0), 0);
+  const contentHeight = lines.reduce(
+    (total, line, index) =>
+      total + line.height + (style?.isWrapText || index > 0 ? lineGap * 2 : 0),
+    0,
+  );
   const textHeight = Math.max(contentHeight, fontSize * 1.5) + lineGap;
   if (textWidth > width || textHeight > height) {
     return { width: textWidth, height: textHeight, resultList: [] };
@@ -484,11 +472,13 @@ function computeCell(
     if (line.text) {
       resultList.push({
         text: line.text,
-        x: x + (style?.horizontalAlign === EHorizontalAlign.CENTER
-          ? (textWidth - lineGap - line.width) / 2
-          : style?.horizontalAlign === EHorizontalAlign.RIGHT
-            ? textWidth - lineGap - line.width
-            : 0),
+        x:
+          x +
+          (style?.horizontalAlign === EHorizontalAlign.CENTER
+            ? (textWidth - lineGap - line.width) / 2
+            : style?.horizontalAlign === EHorizontalAlign.RIGHT
+              ? textWidth - lineGap - line.width
+              : 0),
         y: lineTop,
         width: line.width,
         height: line.height,

@@ -21,8 +21,7 @@ export async function getProvider(
   const docId = getDocId();
   const doc = await provider.getDocument(docId);
   const isE2e =
-    new URLSearchParams(location.search).get('mode') === 'e2e' ||
-    import.meta.env.MODE === 'e2e';
+    new URLSearchParams(location.search).get('mode') === 'e2e' || import.meta.env.MODE === 'e2e';
 
   if (!doc && !isE2e) {
     await provider.addDocument(docId, false);

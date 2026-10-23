@@ -1,13 +1,5 @@
-import type {
-  ModelJSON,
-  ICol,
-  IModel,
-  CustomItem,
-} from '../types';
-import {
-  CELL_WIDTH,
-  widthOrHeightKeyToData,
-} from '../util';
+import type { ModelJSON, ICol, IModel, CustomItem } from '../types';
+import { CELL_WIDTH, widthOrHeightKeyToData } from '../util';
 
 export class ColManager implements ICol {
   private model: IModel;
@@ -62,8 +54,10 @@ export class ColManager implements ICol {
   getCol(col: number, sheetId?: string): CustomItem {
     const id = sheetId || this.model.getCurrentSheetId();
     const key = this.model.getRoot().sizeKey(id, 'cols', col);
-    const temp = key === undefined ? undefined
-      : this.customWidth.get(key) ?? this.customWidth.get(`${id}_overflow:${col}`);
+    const temp =
+      key === undefined
+        ? undefined
+        : (this.customWidth.get(key) ?? this.customWidth.get(`${id}_overflow:${col}`));
     if (!temp) {
       return {
         len: CELL_WIDTH,

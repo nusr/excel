@@ -1,11 +1,5 @@
 import { Buffer } from 'node:buffer';
-import {
-  applyUpdate,
-  Doc,
-  encodeStateAsUpdate,
-  Map as YMap,
-  Array as YArray,
-} from 'yjs';
+import { applyUpdate, Doc, encodeStateAsUpdate, Map as YMap, Array as YArray } from 'yjs';
 import { Model } from '../Model';
 import { getMockHooks } from './util';
 import { initController } from '../../controller';
@@ -84,9 +78,7 @@ describe('collaboration protocol v3', () => {
       const left = setup();
       const right = peer(left.doc);
       left.model.transaction(() => left.model.setCellValue(42, left.range));
-      right.model.transaction(() =>
-        right.model.updateCellStyle({ isBold: true }, left.range),
-      );
+      right.model.transaction(() => right.model.updateCellStyle({ isBold: true }, left.range));
       exchange(left.doc, right.doc, reverse);
       expect(left.model.getCell(left.range)).toEqual({
         value: 42,
@@ -96,9 +88,7 @@ describe('collaboration protocol v3', () => {
         value: 42,
         isBold: true,
       });
-      right.model.transaction(() =>
-        right.model.updateCellStyle({ fontSize: 24 }, left.range),
-      );
+      right.model.transaction(() => right.model.updateCellStyle({ fontSize: 24 }, left.range));
       exchange(left.doc, right.doc, !reverse);
       expect(left.model.getCell(left.range)).toEqual({
         value: 42,
@@ -139,10 +129,7 @@ describe('collaboration protocol v3', () => {
       expect(right.getCell(range)).toEqual({ value: 42, isBold: true });
       changes.length = 0;
       left.setCellValue(43, range);
-      applyUpdate(
-        right.getHooks().doc,
-        encodeStateAsUpdate(left.getHooks().doc),
-      );
+      applyUpdate(right.getHooks().doc, encodeStateAsUpdate(left.getHooks().doc));
       await Promise.resolve();
       expect(right.getCell(range)).toEqual({ value: 43, isBold: true });
       expect(changes.some((set) => set.has('worksheets'))).toBe(true);
@@ -161,9 +148,7 @@ describe('collaboration protocol v3', () => {
           await left.model.computeFormulas();
         }
         const right = peer(left.doc);
-        left.model.transaction(() =>
-          left.model.setCellValue('=2+2', left.range),
-        );
+        left.model.transaction(() => left.model.setCellValue('=2+2', left.range));
         await left.model.computeFormulas();
         right.model.transaction(() => {
           right.model.setCellValue(42, left.range);
@@ -175,8 +160,7 @@ describe('collaboration protocol v3', () => {
         const cell = left.model.getCell(left.range)!;
         expect(cell).toEqual(right.model.getCell(left.range));
         expect(cell.isBold).toBe(true);
-        if (cell.formula)
-          expect(cell).toMatchObject({ formula: '=2+2', value: 4 });
+        if (cell.formula) expect(cell).toMatchObject({ formula: '=2+2', value: 4 });
         else expect(cell.value).toBe(42);
         const restored = peer(left.doc);
         expect(restored.model.getCell(left.range)).toEqual(cell);
@@ -266,9 +250,7 @@ describe('collaboration protocol v3', () => {
         expect(model.getFilter()?.range).toEqual(expected);
         const moved = { ...aggregate, [axis]: aggregate[axis] - 2 };
         const movedDirect = { ...direct, [axis]: direct[axis] - 2 };
-        expect(model.getCell(moved)?.formula).toBe(
-          axis === 'row' ? '=SUM(C3:F4)' : '=SUM(C3:D6)',
-        );
+        expect(model.getCell(moved)?.formula).toBe(axis === 'row' ? '=SUM(C3:F4)' : '=SUM(C3:D6)');
         expect(model.getCell(movedDirect)?.formula).toBe('=#REF!');
         await model.computeFormulas();
         expect(model.getCell(moved)?.value).toBe(7);
@@ -338,18 +320,13 @@ describe('collaboration protocol v3', () => {
     const left = setup();
     const formula = { ...left.range, row: 10, col: 10 };
     left.model.setCellValue('=SUM(C:C)+SUM(3:3)+R[-8]C[-8]+$C3+C$3', formula);
-    left.model.setDefineName(
-      { ...left.range, row: 0, rowCount: 0, colCount: 1 },
-      'wholeColumn',
-    );
+    left.model.setDefineName({ ...left.range, row: 0, rowCount: 0, colCount: 1 }, 'wholeColumn');
     left.model.transaction(() => {
       left.model.addRow(0, 1, true);
       left.model.addCol(0, 1);
     });
     const moved = { ...formula, row: 11, col: 11 };
-    expect(left.model.getCell(moved)?.formula).toBe(
-      '=SUM(D:D)+SUM(4:4)+R[-8]C[-8]+$D4+D$4',
-    );
+    expect(left.model.getCell(moved)?.formula).toBe('=SUM(D:D)+SUM(4:4)+R[-8]C[-8]+$D4+D$4');
     expect(left.model.checkDefineName('wholeColumn')).toMatchObject({
       row: 0,
       rowCount: 0,
@@ -368,10 +345,7 @@ describe('collaboration protocol v3', () => {
     left.model.addMergeCell(range);
     left.model.addRow(2, 2, true);
     left.model.addMergeCell(range);
-    expect(left.model.getMergeCellList()).toEqual([
-      { ...range, row: 4 },
-      range,
-    ]);
+    expect(left.model.getMergeCellList()).toEqual([{ ...range, row: 4 }, range]);
   });
 
   test('re-entering original source after structural projection rebinds the newly requested coordinate', async () => {
@@ -412,9 +386,7 @@ describe('collaboration protocol v3', () => {
     const remote = peer(hooks.doc);
     remote.model.setCellValue(42, range);
     applyUpdate(hooks.doc, encodeStateAsUpdate(remote.doc));
-    expect(
-      callback!({ list: [{ key: `${range.sheetId}_0_0`, newValue: 2 }] }),
-    ).toBe(false);
+    expect(callback!({ list: [{ key: `${range.sheetId}_0_0`, newValue: 2 }] })).toBe(false);
     expect(model.getCell(range)).toMatchObject({ value: 42, formula: '' });
   });
 
@@ -481,27 +453,19 @@ describe('collaboration protocol v3', () => {
       expect(left.model.getCell(moved)?.formula).toBe(data.after);
       await left.model.computeFormulas();
       expect(left.model.getCell(moved)?.value).toBe(28);
-      expect(peer(left.doc).model.getCell(moved)).toEqual(
-        left.model.getCell(moved),
-      );
+      expect(peer(left.doc).model.getCell(moved)).toEqual(left.model.getCell(moved));
     },
   );
 
   test('invalid/mixed versions and malformed v2 documents fail without destructive migration', () => {
     const doc = new Doc();
     doc.getMap('excel:meta').set('version', 4);
-    expect(() => new SharedRoot(doc)).toThrow(
-      'Unsupported collaboration protocol: 4',
-    );
+    expect(() => new SharedRoot(doc)).toThrow('Unsupported collaboration protocol: 4');
     doc.getMap('excel:meta').set('version', 2);
-    doc
-      .getMap('excel:workbook')
-      .set('broken', new YMap([['rows', new YArray()]]));
+    doc.getMap('excel:workbook').set('broken', new YMap([['rows', new YArray()]]));
     const before = encodeStateAsUpdate(doc);
     expect(() => upgradeDocument(doc)).toThrow('Invalid worksheet');
-    expect(
-      Buffer.from(encodeStateAsUpdate(doc)).equals(Buffer.from(before)),
-    ).toBe(true);
+    expect(Buffer.from(encodeStateAsUpdate(doc)).equals(Buffer.from(before))).toBe(true);
     const legacy = setup().model.toJSON();
     const clean = new Doc();
     hydrateDocument(clean, legacy);

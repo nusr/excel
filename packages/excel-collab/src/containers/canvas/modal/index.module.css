@@ -5,8 +5,11 @@
   border-radius: 4px;
   position: fixed;
   z-index: 4;
-  max-width: 320px;
-  overflow: hidden;
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 .modalContainer label {
   white-space: nowrap;
@@ -27,4 +30,94 @@
 }
 .dialog-button button {
   margin-left: 8px;
+}
+.filterPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  letter-spacing: 0;
+}
+.filterHeader,
+.filterSelection,
+.filterValue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+.filterHeader strong {
+  font-size: 14px;
+}
+.filterSelection > span,
+.filterValue > span {
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.filterValues {
+  max-height: 220px;
+  min-height: 80px;
+  overflow: auto;
+  border-block: 1px solid var(--border-color);
+  padding-block: 4px;
+}
+.filterValue {
+  min-height: 30px;
+}
+.filterPanel label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.filterValue label {
+  min-width: 0;
+  flex: 1;
+}
+.filterConditions,
+.filterCondition {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.filterPanel :global(.react-aria-Select),
+.filterPanel :global(.react-aria-TextField) {
+  min-width: 0;
+  width: 100%;
+}
+.filterPanel :global(.react-aria-Select button),
+.filterPanel input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.filterEmpty,
+.filterError {
+  padding: 8px 0;
+  font-size: 12px;
+}
+.filterColors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.filterSwatch {
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.filterSwatch[aria-pressed='true'] {
+  outline: 2px solid var(--content-color, currentColor);
+  outline-offset: 2px;
+}
+.filterSwatchMark {
+  display: block;
+  width: 8px;
+  height: 8px;
+  margin: auto;
+  background: white;
+  border: 1px solid black;
+  border-radius: 50%;
 }

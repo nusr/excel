@@ -18,10 +18,7 @@ export function initController(
     doc: Doc;
   } = getMockHooks(),
 ): IController {
-  const worker =
-    options.worker instanceof Worker
-      ? wrap(options.worker)
-      : (options.worker as any);
+  const worker = options.worker instanceof Worker ? wrap(options.worker) : (options.worker as any);
 
   const hooks = {
     worker,

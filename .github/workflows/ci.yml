@@ -46,6 +46,9 @@ jobs:
       - name: Lint
         run: yarn lint
 
+      - name: Format
+        run: yarn format
+
       - name: Unit test
         run: yarn coverage
 

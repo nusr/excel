@@ -86,12 +86,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
   };
   return (
     <Fragment>
-      <div
-        className={styles['context-menu']}
-        data-testid="context-menu"
-        style={style}
-        ref={ref}
-      >
+      <div className={styles['context-menu']} data-testid="context-menu" style={style} ref={ref}>
         <Menu aria-label="Canvas Context Menu">
           <MenuItem
             onPress={() => {
@@ -125,8 +120,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
           >
             {i18n.t('paste')}
           </MenuItem>
-          {(position === ClickPosition.ROW_HEADER ||
-            position === ClickPosition.CONTENT) && (
+          {(position === ClickPosition.ROW_HEADER || position === ClickPosition.CONTENT) && (
             <Fragment>
               <MenuItem
                 data-testid="context-menu-insert-row-above"
@@ -150,8 +144,7 @@ export const ContextMenu: React.FunctionComponent<Props> = memo((props) => {
               </MenuItem>
             </Fragment>
           )}
-          {(position === ClickPosition.COLUMN_HEADER ||
-            position === ClickPosition.CONTENT) && (
+          {(position === ClickPosition.COLUMN_HEADER || position === ClickPosition.CONTENT) && (
             <Fragment>
               <MenuItem
                 data-testid="context-menu-insert-column-left"

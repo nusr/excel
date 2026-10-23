@@ -19,11 +19,14 @@ async function start() {
   const filePath = path.join(__dirname, '../../frontend/.env.development');
   const createdEnvFile = !fs.existsSync(filePath);
   if (createdEnvFile) {
-    fs.writeFileSync(filePath, [
-      `VITE_BACKEND_URL=http://localhost:${port}`,
-      'VITE_DEFAULT_EXCEL_ID=',
-      `VITE_WEBSOCKET_URL=ws://localhost:${port}`,
-    ].join('\n'));
+    fs.writeFileSync(
+      filePath,
+      [
+        `VITE_BACKEND_URL=http://localhost:${port}`,
+        'VITE_DEFAULT_EXCEL_ID=',
+        `VITE_WEBSOCKET_URL=ws://localhost:${port}`,
+      ].join('\n'),
+    );
   }
   const cleanup = () => {
     if (createdEnvFile && fs.existsSync(filePath)) fs.unlinkSync(filePath);
@@ -37,7 +40,7 @@ async function start() {
       await wsManager.closeAllConnections();
       await persistence.flushAll();
       await new Promise<void>((resolve, reject) => {
-        server.close((error) => error ? reject(error) : resolve());
+        server.close((error) => (error ? reject(error) : resolve()));
       });
       await closeDatabase();
       cleanup();

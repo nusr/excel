@@ -10,9 +10,7 @@ describe('NumberFormat.test.tsx', () => {
   });
   describe('General', () => {
     test('ok', () => {
-      expect(
-        screen.getByTestId('toolbar-number-format-value'),
-      ).toHaveTextContent('General');
+      expect(screen.getByTestId('toolbar-number-format-value')).toHaveTextContent('General');
     });
   });
   describe('active status', () => {
@@ -26,14 +24,13 @@ describe('NumberFormat.test.tsx', () => {
         type('1');
         const trigger = screen.getByTestId('toolbar-number-format-trigger');
         await user.click(trigger);
-        await user.click(
-          screen.getByRole('menuitemradio', { name: item.label }),
-        );
+        await user.click(screen.getByRole('menuitemradio', { name: item.label }));
         await user.click(trigger);
 
-        expect(
-          screen.getByRole('menuitemradio', { name: item.label }),
-        ).toHaveAttribute('aria-checked', 'true');
+        expect(screen.getByRole('menuitemradio', { name: item.label })).toHaveAttribute(
+          'aria-checked',
+          'true',
+        );
       });
     }
   });
@@ -42,13 +39,9 @@ describe('NumberFormat.test.tsx', () => {
       const user = userEvent.setup();
       type('1.2345');
       await user.click(screen.getByTestId('toolbar-number-format-trigger'));
-      await user.click(
-        screen.getByRole('menuitemradio', { name: 'Percentage' }),
-      );
+      await user.click(screen.getByRole('menuitemradio', { name: 'Percentage' }));
 
-      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
-        '123.45%',
-      );
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent('123.45%');
     });
   });
 });

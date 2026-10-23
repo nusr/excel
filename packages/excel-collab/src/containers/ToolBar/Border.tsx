@@ -4,12 +4,7 @@ import { BorderItem, IRange, BorderType } from '../../types';
 import { BORDER_TYPE_MAP, isRow, isCol } from '../../util';
 import i18n from '../../i18n';
 import { useExcel } from '../store';
-import {
-  MenuTrigger,
-  SubmenuTrigger,
-  Menu,
-  MenuItem,
-} from '../../component/Menu';
+import { MenuTrigger, SubmenuTrigger, Menu, MenuItem } from '../../component/Menu';
 import { Button } from '../../component/Button';
 import { ChevronDown } from 'lucide-react';
 import { COLOR_PICKER_COLOR_LIST } from '../../util';
@@ -184,10 +179,7 @@ export const BorderToolBar = memo(() => {
         {i18n.t(type)}
       </Button>
       <MenuTrigger>
-        <Button
-          data-testid="toolbar-border-trigger"
-          aria-label="Border Trigger"
-        >
+        <Button data-testid="toolbar-border-trigger" aria-label="Border Trigger">
           <ChevronDown />
         </Button>
         <Menu data-testid="toolbar-border" aria-label="Toolbar Border Menu">

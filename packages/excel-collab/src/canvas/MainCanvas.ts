@@ -69,6 +69,15 @@ export class MainCanvas implements MainView {
     }
     const copyRange = controller.getCopyRange();
     const jsonData = controller.toJSON();
+    const filter = controller.getFilter(currentId);
+    if (filter) {
+      const end =
+        filter.range.rowCount === 0 ? sheetInfo.rowCount : filter.range.row + filter.range.rowCount;
+      for (let row = filter.range.row + 1; row < end; row++) {
+        const size = controller.getRow(row, currentId);
+        if (size.isHide) jsonData.customHeight[`${currentId}_${row}`] = size;
+      }
+    }
     const eventData: RequestRender = {
       changeSet: data.changeSet,
       theme: getTheme(),
@@ -85,12 +94,10 @@ export class MainCanvas implements MainView {
       autoFilter: jsonData.autoFilter[currentId],
     };
 
-    return this.controller
-      .getHooks()
-      .worker.render(
-        eventData,
-        proxy((result: ResponseRender) => this.renderCallback(result, currentId)),
-      );
+    return this.controller.getHooks().worker.render(
+      eventData,
+      proxy((result: ResponseRender) => this.renderCallback(result, currentId)),
+    );
   }
   resize() {
     const { canvas } = this;

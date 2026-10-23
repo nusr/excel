@@ -12,9 +12,9 @@ import {
   type NavigationTreeItemProps as AriaNavigationTreeItemProps,
   type NavigationTreeProps,
   NavigationTreeSection as AriaNavigationTreeSection,
-  type NavigationTreeSectionProps
+  type NavigationTreeSectionProps,
 } from 'react-aria-components/NavigationTree';
-import {ChevronRight} from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import React from 'react';
 import './NavigationTree.css';
 
@@ -23,7 +23,7 @@ const RenderLinkContext = React.createContext<LinkProps['render'] | undefined>(u
 export function NavigationTree<T>({
   renderLink,
   ...props
-}: NavigationTreeProps<T> & {renderLink?: LinkProps['render']}) {
+}: NavigationTreeProps<T> & { renderLink?: LinkProps['render'] }) {
   return (
     <RenderLinkContext.Provider value={renderLink}>
       <AriaNavigationTree {...props} />
@@ -31,16 +31,17 @@ export function NavigationTree<T>({
   );
 }
 
-export function NavigationTreeItemContent(props: {children?: React.ReactNode}) {
+export function NavigationTreeItemContent(props: { children?: React.ReactNode }) {
   return (
     <AriaNavigationTreeItemContent>
-      {({hasChildItems}: NavigationTreeItemContentRenderProps) => (
+      {({ hasChildItems }: NavigationTreeItemContentRenderProps) => (
         <>
           {props.children}
           <Button
             slot="chevron"
             isDisabled={!hasChildItems}
-            style={{visibility: hasChildItems ? undefined : 'hidden'}}>
+            style={{ visibility: hasChildItems ? undefined : 'hidden' }}
+          >
             <ChevronRight aria-hidden />
           </Button>
         </>
@@ -61,7 +62,7 @@ export function NavigationTreeHeader(props: NavigationTreeHeaderProps) {
   return <AriaNavigationTreeHeader {...props} />;
 }
 
-export function NavigationTreeItemLink({render: renderProp, ...props}: LinkProps) {
+export function NavigationTreeItemLink({ render: renderProp, ...props }: LinkProps) {
   const contextRender = React.useContext(RenderLinkContext);
   return <Link render={renderProp ?? contextRender} {...props} />;
 }

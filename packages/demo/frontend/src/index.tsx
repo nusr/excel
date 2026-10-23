@@ -43,8 +43,20 @@ function App(props: Omit<ExcelProps, 'provider'> & { provider: IProvider }) {
   );
 }
 
+let disposed = false;
+let cleanup: (() => void) | undefined;
+const dispose = () => {
+  if (disposed) return;
+  disposed = true;
+  window.removeEventListener('beforeunload', dispose);
+  cleanup?.();
+};
+window.addEventListener('beforeunload', dispose, { once: true });
+import.meta.hot?.dispose(dispose);
+
 async function init() {
   const provider = await getProvider(callback);
+  if (disposed) return;
 
   const docId = getDocId();
 
@@ -59,17 +71,22 @@ async function init() {
   }
 
   webSocket?.connect();
-  const whenSynced = webSocket ? new Promise<void>((resolve) => {
-    const connection = webSocket;
-    if (connection.synced) { resolve(); return; }
-    const handleSync = (synced: boolean) => {
-      if (synced) {
-        connection.off('sync', handleSync);
-        resolve();
-      }
-    };
-    connection.on('sync', handleSync);
-  }) : undefined;
+  const whenSynced = webSocket
+    ? new Promise<void>((resolve) => {
+        const connection = webSocket;
+        if (connection.synced) {
+          resolve();
+          return;
+        }
+        const handleSync = (synced: boolean) => {
+          if (synced) {
+            connection.off('sync', handleSync);
+            resolve();
+          }
+        };
+        connection.on('sync', handleSync);
+      })
+    : undefined;
 
   (window as any).provider = provider;
   (window as any).webSocket = webSocket;
@@ -87,6 +104,12 @@ async function init() {
     onRecoverableError: Sentry.reactErrorHandler(),
   });
 
+  cleanup = () => {
+    root.unmount();
+    webSocket?.destroy();
+    doc?.destroy();
+  };
+
   root.render(
     <StrictMode>
       <App
@@ -99,10 +122,5 @@ async function init() {
       />
     </StrictMode>,
   );
-  window.addEventListener('beforeunload', () => {
-    root.unmount();
-    webSocket?.destroy();
-    doc?.destroy();
-  }, { once: true });
 }
 init();

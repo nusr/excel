@@ -7,7 +7,7 @@ export default defineConfig({
     lib: {
       entry: './src/protocol.ts',
       formats: ['es', 'cjs'],
-      fileName: (format) => format === 'es' ? 'protocol.mjs' : 'protocol.cjs',
+      fileName: (format) => (format === 'es' ? 'protocol.mjs' : 'protocol.cjs'),
     },
     rollupOptions: { external: ['yjs'] },
   },

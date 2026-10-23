@@ -10,10 +10,10 @@ on:
       - published
   push:
     tags:
-      - "*"
+      - '*'
 
 concurrency:
-  group: "publish"
+  group: 'publish'
   cancel-in-progress: false
 
 env:
@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: lts/*
-          registry-url: "https://registry.npmjs.org"
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Setup Yarn
         run: npm install -g yarn

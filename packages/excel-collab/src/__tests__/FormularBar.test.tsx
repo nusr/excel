@@ -74,19 +74,13 @@ describe('FormulaBar.test.tsx', () => {
       fireEvent.keyDown(screen.getByTestId('formula-bar-name-input'), {
         key: 'Enter',
       });
-      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
-        'foo',
-      );
+      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue('foo');
 
       fireEvent.keyDown(document.body, { key: 'Enter' });
 
       await user.click(await screen.findByTestId('formula-bar-name-trigger'));
-      await user.click(
-        await screen.findByRole('menuitemradio', { name: 'foo' }),
-      );
-      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue(
-        'foo',
-      );
+      await user.click(await screen.findByRole('menuitemradio', { name: 'foo' }));
+      expect(await screen.findByTestId('formula-bar-name-input')).toHaveValue('foo');
     });
 
     test('duplicate', async () => {
@@ -112,15 +106,11 @@ describe('FormulaBar.test.tsx', () => {
   describe('formula editor', () => {
     test('enter', async () => {
       type('3');
-      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
-        '3',
-      );
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent('3');
     });
     test('tab', async () => {
       type('3', false);
-      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
-        '3',
-      );
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent('3');
     });
   });
 });

@@ -33,7 +33,10 @@ describe('style.test.ts', () => {
         [''],
         ['C', 'D'],
       ]);
-      expect(parseText('A\tB\rC\tD')).toEqual([['A', 'B'], ['C', 'D']]);
+      expect(parseText('A\tB\rC\tD')).toEqual([
+        ['A', 'B'],
+        ['C', 'D'],
+      ]);
     });
     test('ok \n', () => {
       expect(parseText('=SUM(1,2)\t2\ntest\ttrue')).toEqual([
@@ -108,13 +111,31 @@ describe('style.test.ts', () => {
     });
   });
   describe('parseHTML', () => {
+    test.each(['<!<!----', '<!<!<!------', '--<!-->', '--<!--!>', '---->>', '----!>>'])(
+      'fully removes nested HTML comment markers: %s',
+      (commentMarker) => {
+        const result = parseHTML(`<style>${commentMarker} td { color: red; }</style>
+        <table><tr><td>Text</td></tr></table>`);
+        expect(result.styleList[0][0]).toEqual({ fontColor: 'red' });
+      },
+    );
+    test.each(['-->', '--!>'])('parses CSS inside HTML comments ending with %s', (commentEnd) => {
+      const result = parseHTML(`<style><!-- td { color: red; }${commentEnd}</style>
+          <table><tr><td>Text</td></tr></table>`);
+      expect(result.styleList[0][0]).toEqual({ fontColor: 'red' });
+    });
     test('keeps dimension indices even when earlier rows or cells have no dimensions', () => {
       const result = parseHTML(`<table>
         <tr><td>A</td><td style="width:80px">B</td></tr>
         <tr style="height:30px"><td>C</td><td style="width:90px">D</td><td style="width:100px">E</td></tr>
       </table>`);
       expect(result.rowMap).toEqual(new Map([[1, 30]]));
-      expect(result.colMap).toEqual(new Map([[1, 80], [2, 100]]));
+      expect(result.colMap).toEqual(
+        new Map([
+          [1, 80],
+          [2, 100],
+        ]),
+      );
     });
     test('preserves all cell text, header cells and inline numeric bold weights', () => {
       const result = parseHTML(`<style>.header { font-family: Times New Roman; }</style><table>
@@ -165,13 +186,7 @@ describe('style.test.ts', () => {
         colMap: new Map(),
         rowMap: new Map(),
         textList: [
-          [
-            '1',
-            'large text',
-            'This is a very long text that needs to be wrapped',
-            '2',
-            '',
-          ],
+          ['1', 'large text', 'This is a very long text that needs to be wrapped', '2', ''],
         ],
         styleList: [
           [

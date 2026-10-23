@@ -28,19 +28,14 @@ describe('function calls', () => {
     const tree = buildTree('-SUM()');
 
     expect(tree).toEqual(
-      new UnaryExpression(
-        new Token(TokenType.MINUS, '-'),
-        new CallExpression(getFunc('SUM'), []),
-      ),
+      new UnaryExpression(new Token(TokenType.MINUS, '-'), new CallExpression(getFunc('SUM'), [])),
     );
   });
 
   it('SUM(1)', () => {
     const tree = buildTree('SUM(1)');
     expect(tree).toEqual(
-      new CallExpression(getFunc('SUM'), [
-        new LiteralExpression(new Token(TokenType.NUMBER, '1')),
-      ]),
+      new CallExpression(getFunc('SUM'), [new LiteralExpression(new Token(TokenType.NUMBER, '1'))]),
     );
   });
 
@@ -155,10 +150,7 @@ describe('function calls', () => {
           new Token(TokenType.CELL, 'A1'),
           new Token(TokenType.SHEET_NAME, 'Sheet1'),
         ),
-        new CellExpression(
-          new Token(TokenType.CELL, '$B$1'),
-          undefined,
-        ),
+        new CellExpression(new Token(TokenType.CELL, '$B$1'), undefined),
       ]),
     );
   });

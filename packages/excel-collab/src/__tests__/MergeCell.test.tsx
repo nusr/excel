@@ -25,13 +25,8 @@ describe('MergeCell.test.tsx', () => {
 
       fireEvent.click(screen.getByTestId('toolbar-merge-cell'));
 
-      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
-        'test',
-      );
-      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute(
-        'aria-pressed',
-        'true',
-      );
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent('test');
+      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute('aria-pressed', 'true');
     });
     test('toggle merge cell', async () => {
       type('test');
@@ -50,17 +45,11 @@ describe('MergeCell.test.tsx', () => {
 
       fireEvent.click(screen.getByTestId('toolbar-merge-cell'));
 
-      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute(
-        'aria-pressed',
-        'true',
-      );
+      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute('aria-pressed', 'true');
 
       fireEvent.click(screen.getByTestId('toolbar-merge-cell'));
 
-      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute(
-        'aria-pressed',
-        'false',
-      );
+      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute('aria-pressed', 'false');
     });
     test('merge content', async () => {
       const user = userEvent.setup();
@@ -82,17 +71,10 @@ describe('MergeCell.test.tsx', () => {
         buttons: 1,
       });
       await user.click(screen.getByTestId('toolbar-merge-cell-select-trigger'));
-      await user.click(
-        screen.getByRole('menuitemradio', { name: 'Merge Content' }),
-      );
+      await user.click(screen.getByRole('menuitemradio', { name: 'Merge Content' }));
 
-      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute(
-        'aria-pressed',
-        'true',
-      );
-      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
-        'test aa',
-      );
+      expect(screen.getByTestId('toolbar-merge-cell')).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent('test aa');
     });
   });
 });

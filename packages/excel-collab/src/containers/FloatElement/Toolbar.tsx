@@ -11,7 +11,12 @@ export const InsertFloatingPicture = memo(() => {
   const { controller, provider } = useExcel();
   const ref = useRef<HTMLInputElement>(null);
   const generation = useRef(0);
-  useEffect(() => () => { generation.current++; }, [controller]);
+  useEffect(
+    () => () => {
+      generation.current++;
+    },
+    [controller],
+  );
 
   const handleImport = useCallback(
     async (files: FileList | null) => {
@@ -40,11 +45,7 @@ export const InsertFloatingPicture = memo(() => {
         const size = await getImageSize(base64);
         let imageSrc = base64;
         if (provider?.uploadFile) {
-          imageSrc = await provider.uploadFile(
-            controller.getHooks().doc.guid,
-            file,
-            base64,
-          );
+          imageSrc = await provider.uploadFile(controller.getHooks().doc.guid, file, base64);
         }
         if (version !== generation.current) return;
         if (!imageSrc) {
@@ -68,9 +69,12 @@ export const InsertFloatingPicture = memo(() => {
           marginY: 0,
         });
       } catch (error) {
-        if (version === generation.current) queue.add({ title: i18n.t('import-failed', {
-          message: error instanceof Error ? error.message : String(error),
-        }) });
+        if (version === generation.current)
+          queue.add({
+            title: i18n.t('import-failed', {
+              message: error instanceof Error ? error.message : String(error),
+            }),
+          });
       } finally {
         clearUpdate();
       }

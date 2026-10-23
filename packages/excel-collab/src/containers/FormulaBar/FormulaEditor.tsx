@@ -9,12 +9,7 @@ import React, {
 } from 'react';
 import { EditorStatus } from '../../types';
 import styles from './index.module.css';
-import {
-  CellStoreType,
-  useCoreStore,
-  StyleStoreType,
-  useExcel,
-} from '../store';
+import { CellStoreType, useCoreStore, StyleStoreType, useExcel } from '../store';
 import {
   MAX_NAME_LENGTH,
   FORMULA_EDITOR_ROLE,
@@ -32,10 +27,7 @@ interface MultipleLineEditorProps {
   testId?: string;
   className?: string;
 }
-export function getDisplayStyle(
-  style: StyleStoreType,
-  isFormulaBar = true,
-): CSSProperties {
+export function getDisplayStyle(style: StyleStoreType, isFormulaBar = true): CSSProperties {
   const result: CSSProperties = {};
   if (style?.isItalic) {
     result.fontStyle = 'italic';
@@ -85,7 +77,7 @@ export function getEditorStyle(
     width: style.width,
     height: style.height,
     borderRadius: 0,
-    border: '2px solid var(--tint-900)'
+    border: '2px solid var(--tint-900)',
   };
   return result;
 }
@@ -96,8 +88,8 @@ function countRows(count: number) {
   return Math.max(Math.min(TEXTAREA_MAX_ROWS, count), minRows);
 }
 
-export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps> =
-  memo(({ initValue, style, testId, isMergeCell, className }) => {
+export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps> = memo(
+  ({ initValue, style, testId, isMergeCell, className }) => {
     const { controller } = useExcel();
     const setEditorStatus = useCoreStore((state) => state.setEditorStatus);
     const ref = useRef<HTMLTextAreaElement>(null);
@@ -117,39 +109,33 @@ export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps
         setRowCount(countRows(rows));
       }
     }, [isMergeCell, initValue]);
-    const onKeyDown = useCallback(
-      (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        event.stopPropagation();
-        if (event.nativeEvent.isComposing) return;
-        if (event.key === 'Enter' || event.key === 'Tab') {
-          event.preventDefault();
-          let value = event.currentTarget.value;
-          const { range, isMerged } = controller.getActiveRange();
-          const cellData = controller.getCell(range);
-          if (
-            typeof cellData?.value === 'string' &&
-            isMergeContent(isMerged, cellData?.value)
-          ) {
-            value = value.replaceAll(LINE_BREAK, MERGE_CELL_LINE_BREAK);
-          }
-          controller.transaction(() => {
-            controller.setCellValue(value, range);
-            if (event.key === 'Enter') {
-              controller.setNextActiveCell('down');
-            } else {
-              controller.setNextActiveCell('right');
-            }
-          });
-          setEditorStatus(EditorStatus.NONE);
-          event.currentTarget.value = '';
-          event.currentTarget.blur();
-        } else {
-          const rows = Math.ceil(event.currentTarget.scrollHeight / 20);
-          setRowCount(countRows(rows));
+    const onKeyDown = useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      event.stopPropagation();
+      if (event.nativeEvent.isComposing) return;
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault();
+        let value = event.currentTarget.value;
+        const { range, isMerged } = controller.getActiveRange();
+        const cellData = controller.getCell(range);
+        if (typeof cellData?.value === 'string' && isMergeContent(isMerged, cellData?.value)) {
+          value = value.replaceAll(LINE_BREAK, MERGE_CELL_LINE_BREAK);
         }
-      },
-      [],
-    );
+        controller.transaction(() => {
+          controller.setCellValue(value, range);
+          if (event.key === 'Enter') {
+            controller.setNextActiveCell('down');
+          } else {
+            controller.setNextActiveCell('right');
+          }
+        });
+        setEditorStatus(EditorStatus.NONE);
+        event.currentTarget.value = '';
+        event.currentTarget.blur();
+      } else {
+        const rows = Math.ceil(event.currentTarget.scrollHeight / 20);
+        setRowCount(countRows(rows));
+      }
+    }, []);
     return (
       <textarea
         spellCheck
@@ -165,6 +151,7 @@ export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps
         rows={rowCount}
       />
     );
-  });
+  },
+);
 
 MultipleLineEditor.displayName = 'MultipleLineEditor';

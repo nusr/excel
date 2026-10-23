@@ -129,11 +129,7 @@ function hexToRgba(hex: string) {
 
 export const convertColorToDark = (color: string) => {
   if (color.startsWith('rgb')) {
-    const t = color
-      .replace('rgb', '')
-      .replace('a', '')
-      .replace('(', '')
-      .replace(')', '');
+    const t = color.replace('rgb', '').replace('a', '').replace('(', '').replace(')', '');
     const list = t.split(',').map(Number);
     if (list.length <= 3) {
       list.push(1);

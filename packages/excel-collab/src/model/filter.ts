@@ -5,8 +5,9 @@ import type {
   IFilter,
   IRange,
   TypedMap,
+  FilterValue,
 } from '../types';
-import { MERGE_CELL_LINE_BREAK, toIRange } from '../util';
+import { getFilterCriteria, matchesFilter, toIRange } from '../util';
 import { Map } from 'yjs';
 
 export class FilterManger implements IFilter {
@@ -28,12 +29,19 @@ export class FilterManger implements IFilter {
         continue;
       }
       const temp = new Map(Object.entries(value)) as TypedMap<AutoFilterItem>;
+      temp.set(
+        'filters',
+        this.createCriteria(key, getFilterCriteria(value)) as unknown as Record<
+          string,
+          FilterValue
+        >,
+      );
 
       autoFilter.set(key, temp);
       this.model.getRoot().bindRange(`filter:${key}`, value.range);
       if (value.col !== undefined) this.model.getRoot().bindFilterColumn(key, value.col);
+      this.model.getRoot().bindFilterColumns(key, getFilterCriteria(value));
     }
-
   }
 
   deleteAll(sheetId?: string): void {
@@ -41,7 +49,12 @@ export class FilterManger implements IFilter {
     this.autoFilter?.delete(id);
   }
   addFilter(range: IRange): void {
-    range.sheetId = range.sheetId || this.model.getCurrentSheetId();
+    range = {
+      ...range,
+      sheetId: range.sheetId || this.model.getCurrentSheetId(),
+      row: range.rowCount === 0 ? 0 : range.row,
+      col: range.colCount === 0 ? 0 : range.col,
+    };
     if (!this.model.validateRange(range)) {
       return;
     }
@@ -52,6 +65,7 @@ export class FilterManger implements IFilter {
       range: toIRange(range),
     };
     const temp = new Map(Object.entries(newValue)) as TypedMap<AutoFilterItem>;
+    temp.set('filters', new Map<FilterValue>() as unknown as Record<string, FilterValue>);
     this.autoFilter!.set(range.sheetId, temp);
     this.model.getRoot().bindRange(`filter:${range.sheetId}`, range);
   }
@@ -66,70 +80,68 @@ export class FilterManger implements IFilter {
     if (!item) {
       return;
     }
+    const current = this.getFilter(id);
+    const range = value.range ? { ...value.range, sheetId: id } : current?.range;
+    if (!range || !this.model.validateRange(range)) return;
+    const filters =
+      item.get('filters') instanceof Map
+        ? (item.get('filters') as unknown as Map<FilterValue>)
+        : this.createCriteria(id, getFilterCriteria(current));
+    const columns = this.model.getRoot().get('workbook').get(id)?.get('cols');
+    if ('col' in value && value.col !== undefined) {
+      const info = this.model.getSheetInfo(id);
+      if (
+        !Number.isInteger(value.col) ||
+        value.col < range.col ||
+        value.col >= (range.colCount ? range.col + range.colCount : info?.colCount || 0)
+      )
+        return;
+      const columnId = columns?.get(value.col);
+      if (columnId === undefined) return;
+      if (value.value) filters.set(columnId, value.value);
+      else filters.delete(columnId);
+    } else if ('value' in value && value.value === undefined && 'col' in value) {
+      filters.clear();
+    }
+    if (value.filters) {
+      filters.clear();
+      for (const [column, criterion] of Object.entries(value.filters)) {
+        const columnId = columns?.get(Number(column));
+        if (columnId !== undefined) filters.set(columnId, criterion);
+      }
+    }
+    if (!(item.get('filters') instanceof Map)) {
+      item.set('filters', filters as unknown as Record<string, FilterValue>);
+    }
     if (value.range) this.model.getRoot().bindRange(`filter:${id}`, value.range);
     if (value.col !== undefined) this.model.getRoot().bindFilterColumn(id, value.col);
     for (const key of keyList) {
+      if (key === 'filters') continue;
       if (item.get(key) !== value[key]) {
         item.set(key, value[key]);
       }
     }
-    const range = this.model.getRoot().filter(id)?.range;
     /* jscpd:ignore-end */
-    if (range && typeof value.col === 'number' && value.value) {
-      this.applyFilter(range, value as Required<AutoFilterItem>);
-      return;
-    }
-    if (range && typeof value.col === 'undefined' && !value.value) {
-      this.clearFilter(range);
-    }
   }
-  private clearFilter(range: IRange) {
-    const sheetInfo = this.model.getSheetInfo(range.sheetId);
-    if (!sheetInfo) {
-      return;
+  private createCriteria(sheetId: string, filters: Record<string, FilterValue>): Map<FilterValue> {
+    const result = new Map<FilterValue>();
+    const columns = this.model.getRoot().get('workbook').get(sheetId)?.get('cols');
+    for (const [column, criterion] of Object.entries(filters)) {
+      const columnId = columns?.get(Number(column));
+      if (columnId !== undefined) result.set(columnId, criterion);
     }
-    let r = range.row + 1;
-    let end =
-      range.rowCount === 0 ? sheetInfo.rowCount : range.row + range.rowCount;
-    for (; r < end; r++) {
-      this.setRowHidden(range.sheetId, r, false);
-    }
+    return result;
   }
-  private applyFilter(range: IRange, autoFilter: Required<AutoFilterItem>) {
-    const sheetInfo = this.model.getSheetInfo(range.sheetId);
-    if (!sheetInfo) {
-      return;
-    }
-    const { col, value } = autoFilter;
-    if (value?.type === 'normal') {
-      const set = new Set(value.value);
-      let r = range.row + 1;
-      let end =
-        range.rowCount === 0 ? sheetInfo.rowCount : range.row + range.rowCount;
-      for (; r < end; r++) {
-        const cell = this.model.getCell({
-          row: r,
-          col,
-          rowCount: 1,
-          colCount: 1,
-          sheetId: range.sheetId,
-        });
-        const v = cell ? cell.value : MERGE_CELL_LINE_BREAK;
-        if (!set.has(v)) {
-          this.setRowHidden(range.sheetId, r, true);
-        } else {
-          this.setRowHidden(range.sheetId, r, false);
-        }
-      }
-    }
-  }
-  private setRowHidden(sheetId: string, row: number, isHide: boolean) {
-    const key = this.model.getRoot().sizeKey(sheetId, 'rows', row);
-    if (key === undefined) return;
-    const old = this.model.getRow(row, sheetId);
-    if (old.isHide !== isHide) {
-      this.model.getRoot().get('customHeight').set(key, { ...old, isHide });
-    }
+  isRowFiltered(row: number, sheetId: string): boolean {
+    const filter = this.getFilter(sheetId);
+    if (!filter) return false;
+    const { range } = filter;
+    if (row <= range.row || (range.rowCount > 0 && row >= range.row + range.rowCount)) return false;
+    return Object.entries(getFilterCriteria(filter)).some(([column, value]) => {
+      const col = Number(column);
+      const cell = this.model.getCell({ row, col, rowCount: 1, colCount: 1, sheetId });
+      return !matchesFilter(cell, value);
+    });
   }
   getFilter(sheetId?: string) {
     const id = sheetId || this.model.getCurrentSheetId();

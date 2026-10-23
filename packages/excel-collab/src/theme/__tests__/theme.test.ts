@@ -1,5 +1,5 @@
 import { setTheme, getTheme, getThemeColor, lightColor, darkColor } from '../';
-import { convertColorToDark } from '../convert'
+import { convertColorToDark } from '../convert';
 
 describe('theme.test.ts', () => {
   afterEach(() => {
@@ -9,16 +9,12 @@ describe('theme.test.ts', () => {
     test('dark', () => {
       setTheme('dark');
       expect(getTheme()).toEqual('dark');
-      expect(document.documentElement.getAttribute('data-theme')).toEqual(
-        'dark',
-      );
+      expect(document.documentElement.getAttribute('data-theme')).toEqual('dark');
     });
     test('light', () => {
       setTheme('light');
       expect(getTheme()).toEqual('light');
-      expect(document.documentElement.getAttribute('data-theme')).toEqual(
-        'light',
-      );
+      expect(document.documentElement.getAttribute('data-theme')).toEqual('light');
     });
   });
   describe('getTheme', () => {
@@ -55,19 +51,13 @@ describe('theme.test.ts', () => {
   });
   describe('convertColorToDark', () => {
     test('rgb', () => {
-      expect(convertColorToDark('rgba(198,198,198,0.3)')).toEqual(
-        'rgba(57,57,57,0.3)',
-      );
+      expect(convertColorToDark('rgba(198,198,198,0.3)')).toEqual('rgba(57,57,57,0.3)');
     });
     test('translucent black becomes translucent white', () => {
-      expect(convertColorToDark('rgba(0,0,0,0.1)')).toBe(
-        'rgba(255,255,255,0.1)',
-      );
+      expect(convertColorToDark('rgba(0,0,0,0.1)')).toBe('rgba(255,255,255,0.1)');
     });
     test('translucent colors use the same RGB channels as opaque colors', () => {
-      expect(convertColorToDark('rgba(200,150,100,0.5)')).toBe(
-        'rgba(150,105,60,0.5)',
-      );
+      expect(convertColorToDark('rgba(200,150,100,0.5)')).toBe('rgba(150,105,60,0.5)');
     });
     test('rgba', () => {
       expect(convertColorToDark('rgba(198,198,198)')).toEqual('#393939');

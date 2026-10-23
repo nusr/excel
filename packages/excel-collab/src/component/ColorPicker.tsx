@@ -12,21 +12,13 @@ import { ColorField } from './ColorField';
 import { Popover } from './Popover';
 import './ColorPicker.css';
 
-export interface ColorPickerProps extends Omit<
-  AriaColorPickerProps,
-  'children'
-> {
+export interface ColorPickerProps extends Omit<AriaColorPickerProps, 'children'> {
   label?: string;
   children?: React.ReactNode;
   trigger?: React.ReactNode;
 }
 
-export function ColorPicker({
-  label,
-  children,
-  trigger,
-  ...props
-}: ColorPickerProps) {
+export function ColorPicker({ label, children, trigger, ...props }: ColorPickerProps) {
   return (
     <AriaColorPicker {...props}>
       <DialogTrigger>
@@ -39,18 +31,10 @@ export function ColorPicker({
           </Button>
         )}
 
-        <Popover
-          hideArrow
-          placement="bottom start"
-          className="color-picker-dialog"
-        >
+        <Popover hideArrow placement="bottom start" className="color-picker-dialog">
           {children || (
             <>
-              <ColorArea
-                colorSpace="hsb"
-                xChannel="saturation"
-                yChannel="brightness"
-              />
+              <ColorArea colorSpace="hsb" xChannel="saturation" yChannel="brightness" />
               <ColorSlider colorSpace="hsb" channel="hue" />
               <ColorField label="Hex" />
             </>

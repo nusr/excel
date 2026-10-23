@@ -7,8 +7,7 @@ import './global.mock';
 const { mockSaveAs } = vi.hoisted(() => ({ mockSaveAs: vi.fn() }));
 
 vi.mock('../util', async (importOriginal) => {
-  const originalModule =
-    await importOriginal<typeof import('../util')>();
+  const originalModule = await importOriginal<typeof import('../util')>();
   return {
     ...originalModule,
     saveAs: (...list: unknown[]) => mockSaveAs(...list),
@@ -38,9 +37,7 @@ describe('Export.test.ts', () => {
         clientX: 20,
       });
 
-      fireEvent.click(
-        await screen.findByTestId('float-element-context-menu-save-as-picture'),
-      );
+      fireEvent.click(await screen.findByTestId('float-element-context-menu-save-as-picture'));
       expect(mockSaveAs).toHaveBeenCalledWith('data:,', 'Chart Title.png');
     });
   });
@@ -60,9 +57,7 @@ describe('Export.test.ts', () => {
         clientX: 20,
       });
 
-      fireEvent.click(
-        screen.getByTestId('float-element-context-menu-save-as-picture'),
-      );
+      fireEvent.click(screen.getByTestId('float-element-context-menu-save-as-picture'));
       expect(mockSaveAs).toHaveBeenCalled();
     });
   });
@@ -73,9 +68,12 @@ describe('Export.test.ts', () => {
       await user.click(screen.getByTestId('menubar-excel-trigger'));
       await user.hover(screen.getByRole('menuitem', { name: /export/i }));
       await user.click(await screen.findByTestId('menubar-export-more-xlsx'));
-      await waitFor(() => {
-        expect(mockSaveAs).toHaveBeenCalled();
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(mockSaveAs).toHaveBeenCalled();
+        },
+        { timeout: 5000 },
+      );
     }, 10000);
   });
   describe('download csv', () => {

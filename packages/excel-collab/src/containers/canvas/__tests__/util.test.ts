@@ -19,7 +19,7 @@ import {
 import { initCanvas } from '../util';
 
 vi.mock('../../../canvas', async (importOriginal) => ({
-  ...await importOriginal<typeof import('../../../canvas')>(),
+  ...(await importOriginal<typeof import('../../../canvas')>()),
   scrollSheetToView: vi.fn(),
 }));
 
@@ -83,9 +83,7 @@ describe('canvas state synchronization', () => {
       clientWidth: { get: () => width },
       clientHeight: { get: () => height },
     });
-    vi.spyOn(parent, 'getBoundingClientRect').mockReturnValue(
-      new DOMRect(10, 20, width, height),
-    );
+    vi.spyOn(parent, 'getBoundingClientRect').mockReturnValue(new DOMRect(10, 20, width, height));
     cleanup = () => {};
   });
 
@@ -138,17 +136,25 @@ describe('canvas state synchronization', () => {
   });
 
   test('resets formatting when selecting an unstyled cell', () => {
-    controller.setCell([[42]], [[{
-      isBold: true,
-      isItalic: true,
-      isStrike: true,
-      underline: EUnderLine.DOUBLE,
-      fillColor: '#ff0000',
-      fontSize: 24,
-      fontFamily: 'Custom font',
-      horizontalAlign: EHorizontalAlign.CENTER,
-      verticalAlign: EVerticalAlign.BOTTOM,
-    }]], range());
+    controller.setCell(
+      [[42]],
+      [
+        [
+          {
+            isBold: true,
+            isItalic: true,
+            isStrike: true,
+            underline: EUnderLine.DOUBLE,
+            fillColor: '#ff0000',
+            fontSize: 24,
+            fontFamily: 'Custom font',
+            horizontalAlign: EHorizontalAlign.CENTER,
+            verticalAlign: EVerticalAlign.BOTTOM,
+          },
+        ],
+      ],
+      range(),
+    );
     cleanup = initCanvas(controller, canvas);
     expect(useStyleStore.getState().isBold).toBe(true);
 
@@ -211,7 +217,12 @@ describe('canvas state synchronization', () => {
     });
 
     const scroll = {
-      row: 1, col: 1, top: 60, left: 120, scrollTop: 5, scrollLeft: 8,
+      row: 1,
+      col: 1,
+      top: 60,
+      left: 120,
+      scrollTop: 5,
+      scrollLeft: 8,
     };
     controller.setScroll(scroll);
     const scrolled = controller.computeCellPosition(range(2, 2));
@@ -227,7 +238,12 @@ describe('canvas state synchronization', () => {
   test('projects scroll state even when only the current sheet changes', () => {
     cleanup = initCanvas(controller, canvas);
     const scroll = {
-      row: 3, col: 4, top: 90, left: 200, scrollTop: 12, scrollLeft: 15,
+      row: 3,
+      col: 4,
+      top: 90,
+      left: 200,
+      scrollTop: 12,
+      scrollLeft: 15,
     };
     vi.spyOn(controller, 'getScroll').mockReturnValue(scroll);
     useCoreStore.setState({ activeUuid: 'old-sheet-picture' });
@@ -248,19 +264,23 @@ describe('canvas state synchronization', () => {
   ])('checks drawing rectangle overlap: $top/$left/$width/$height', (item) => {
     vi.spyOn(controller, 'getDrawingList').mockReturnValue([drawing(item)]);
     vi.spyOn(controller, 'computeCellPosition').mockReturnValue({
-      top: item.top, left: item.left,
+      top: item.top,
+      left: item.left,
     });
     vi.spyOn(controller, 'getScroll').mockReturnValue({
-      row: 10, col: 10, top: 1000, left: 1000, scrollTop: 0, scrollLeft: 0,
+      row: 10,
+      col: 10,
+      top: 1000,
+      left: 1000,
+      scrollTop: 0,
+      scrollLeft: 0,
     });
     cleanup = initCanvas(controller, canvas);
     expect(useCoreStore.getState().drawings).toHaveLength(item.visible ? 1 : 0);
   });
 
   test('resizing refreshes scroll dimensions and drawing visibility', () => {
-    vi.spyOn(controller, 'getDrawingList').mockReturnValue([
-      drawing({ marginX: 400 }),
-    ]);
+    vi.spyOn(controller, 'getDrawingList').mockReturnValue([drawing({ marginX: 400 })]);
     cleanup = initCanvas(controller, canvas);
     expect(useCoreStore.getState().drawings).toHaveLength(0);
     useActiveCell.setState({ value: 'draft', displayValue: 'draft' });
@@ -287,13 +307,19 @@ describe('canvas state synchronization', () => {
     const targetSheetId = controller.addSheet()!.sheetId;
     controller.hideRow(0, 1);
     expect(controller.getCurrentSheetId()).toBe(targetSheetId);
-    vi.spyOn(controller, 'getDrawingList').mockReturnValue([drawing({
-      type: 'chart',
-      chartType: 'bar',
-      chartRange: {
-        row: 0, col: 0, rowCount: 3, colCount: 3, sheetId: sourceSheetId,
-      },
-    })]);
+    vi.spyOn(controller, 'getDrawingList').mockReturnValue([
+      drawing({
+        type: 'chart',
+        chartType: 'bar',
+        chartRange: {
+          row: 0,
+          col: 0,
+          rowCount: 3,
+          colCount: 3,
+          sheetId: sourceSheetId,
+        },
+      }),
+    ]);
     cleanup = initCanvas(controller, canvas);
     expect(useCoreStore.getState().drawings[0]).toMatchObject({
       labels: ['1', '2', '3'],
@@ -303,7 +329,8 @@ describe('canvas state synchronization', () => {
       ],
     });
     controller.setCell([[9]], [], {
-      ...range(0, 2), sheetId: sourceSheetId,
+      ...range(0, 2),
+      sheetId: sourceSheetId,
     });
     expect(useCoreStore.getState().drawings[0].datasets[0].data).toEqual([1, 0, 9]);
   });

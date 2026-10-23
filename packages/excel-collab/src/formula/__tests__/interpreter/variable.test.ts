@@ -11,9 +11,7 @@ describe('parseFormula variable', () => {
   });
   it('should evaluate custom variables', () => {
     const cellDataMap = new CellDataMapImpl();
-    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [
-      ['222'],
-    ]);
+    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [['222']]);
     cellDataMap.setDefinedName('foo', {
       row: 0,
       col: 0,

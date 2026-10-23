@@ -1,11 +1,4 @@
-import React, {
-  useRef,
-  Fragment,
-  memo,
-  useEffect,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { useRef, Fragment, memo, useEffect, useCallback, useMemo } from 'react';
 import { type IController, ScrollStatus } from '../../types';
 import { computeScrollRowAndCol, computeScrollPosition } from '../../canvas';
 import styles from './index.module.css';
@@ -71,14 +64,12 @@ export const ScrollBar = memo(() => {
       }
     }
     function toggleEvents(state?: boolean) {
-      const toggleEvent = state
-        ? document.addEventListener
-        : document.removeEventListener;
+      const toggleEvent = state ? document.addEventListener : document.removeEventListener;
       toggleEvent('pointermove', handlePointerMove);
       toggleEvent('pointerup', handlePointerUp);
     }
     return [toggleEvents];
-  }, []);
+  }, [controller]);
   useEffect(() => toggleEvents, [toggleEvents]);
 
   const addEvents = useCallback(
@@ -104,7 +95,7 @@ export const ScrollBar = memo(() => {
     (event: React.PointerEvent<HTMLDivElement>) => {
       addEvents(event, ScrollStatus.HORIZONTAL);
     },
-    [toggleEvents],
+    [addEvents],
   );
   return (
     <Fragment>

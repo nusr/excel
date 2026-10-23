@@ -1,11 +1,4 @@
-import {
-  SheetRange,
-  isCol,
-  isRow,
-  isSheet,
-  containRange,
-  iterateRange,
-} from '../range';
+import { SheetRange, isCol, isRow, isSheet, containRange, iterateRange } from '../range';
 
 describe('range.test.ts', () => {
   const mockSheetName = 'test';
@@ -46,7 +39,9 @@ describe('range.test.ts', () => {
       expect(containRange(point, new SheetRange(4, 0, 1, 0, 'one'))).toBe(false);
       expect(containRange(point, new SheetRange(0, 5, 0, 1, 'one'))).toBe(false);
       expect(containRange(point, new SheetRange(0, 0, 10, 10, 'two'))).toBe(false);
-      expect(containRange(new SheetRange(3, 4, 1, 1, ''), new SheetRange(0, 0, 10, 10, 'one'))).toBe(true);
+      expect(
+        containRange(new SheetRange(3, 4, 1, 1, ''), new SheetRange(0, 0, 10, 10, 'one')),
+      ).toBe(true);
     });
     it('should be true', () => {
       expect(
@@ -145,67 +140,42 @@ describe('range.test.ts', () => {
   describe('iterateRange', () => {
     test('all', () => {
       let count = 0;
-      iterateRange(
-        { row: 0, col: 0, rowCount: 0, colCount: 0, sheetId: '' },
-        10,
-        10,
-        () => {
-          count++;
-          return false;
-        },
-      );
+      iterateRange({ row: 0, col: 0, rowCount: 0, colCount: 0, sheetId: '' }, 10, 10, () => {
+        count++;
+        return false;
+      });
       expect(count).toEqual(100);
     });
     test('row', () => {
       let count = 0;
-      iterateRange(
-        { row: 0, col: 0, rowCount: 1, colCount: 0, sheetId: '' },
-        10,
-        10,
-        () => {
-          count++;
-          return false;
-        },
-      );
+      iterateRange({ row: 0, col: 0, rowCount: 1, colCount: 0, sheetId: '' }, 10, 10, () => {
+        count++;
+        return false;
+      });
       expect(count).toEqual(10);
     });
     test('col', () => {
       let count = 0;
-      iterateRange(
-        { row: 0, col: 0, rowCount: 0, colCount: 1, sheetId: '' },
-        10,
-        10,
-        () => {
-          count++;
-          return false;
-        },
-      );
+      iterateRange({ row: 0, col: 0, rowCount: 0, colCount: 1, sheetId: '' }, 10, 10, () => {
+        count++;
+        return false;
+      });
       expect(count).toEqual(10);
     });
     test('cell', () => {
       let count = 0;
-      iterateRange(
-        { row: 0, col: 0, rowCount: 2, colCount: 2, sheetId: '' },
-        10,
-        10,
-        () => {
-          count++;
-          return false;
-        },
-      );
+      iterateRange({ row: 0, col: 0, rowCount: 2, colCount: 2, sheetId: '' }, 10, 10, () => {
+        count++;
+        return false;
+      });
       expect(count).toEqual(4);
     });
     test('empty sheetInfo', () => {
       let count = 0;
-      iterateRange(
-        { row: 0, col: 0, rowCount: 0, colCount: 0, sheetId: '' },
-        0,
-        0,
-        () => {
-          count++;
-          return false;
-        },
-      );
+      iterateRange({ row: 0, col: 0, rowCount: 0, colCount: 0, sheetId: '' }, 0, 0, () => {
+        count++;
+        return false;
+      });
       expect(count).toEqual(0);
     });
   });

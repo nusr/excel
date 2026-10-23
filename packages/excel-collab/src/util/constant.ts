@@ -665,9 +665,7 @@ export const BUILT_IN_FUNCTION_SET = new Set([
   'ZTEST',
 ] as const);
 
-export type BuiltInFormulas = typeof BUILT_IN_FUNCTION_SET extends Set<infer T>
-  ? T
-  : never;
+export type BuiltInFormulas = typeof BUILT_IN_FUNCTION_SET extends Set<infer T> ? T : never;
 
 export const CHART_TYPE_LIST: Array<{
   value: ChartType;

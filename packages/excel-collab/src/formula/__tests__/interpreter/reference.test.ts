@@ -4,27 +4,19 @@ import { expectFormula } from './util';
 describe('parseFormula reference', () => {
   it('just cell reference', () => {
     const cellDataMap = new CellDataMapImpl();
-    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [
-      [0],
-    ]);
+    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [[0]]);
     expectFormula('A1', [0], undefined, cellDataMap);
     expectFormula('sum(A1)', [0], undefined, cellDataMap);
 
-    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [
-      ['22'],
-    ]);
+    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [['22']]);
 
     expectFormula('A1', ['22'], undefined, cellDataMap);
 
-    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [
-      ['test'],
-    ]);
+    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [['test']]);
 
     expectFormula('A1', ['test'], undefined, cellDataMap);
 
-    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [
-      [3],
-    ]);
+    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [[3]]);
     expectFormula('A1', [3], undefined, cellDataMap);
     expectFormula('-A1', [-3], undefined, cellDataMap);
     expectFormula('A1%', [0.03], undefined, cellDataMap);
@@ -32,9 +24,7 @@ describe('parseFormula reference', () => {
   });
   it('cell math', () => {
     const cellDataMap = new CellDataMapImpl();
-    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [
-      [2, 3],
-    ]);
+    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [[2, 3]]);
 
     expectFormula('A1 *  B1', [6], undefined, cellDataMap);
     expectFormula('A1 +  B1', [5], undefined, cellDataMap);
@@ -45,27 +35,20 @@ describe('parseFormula reference', () => {
   });
   it('cell range', () => {
     const cellDataMap = new CellDataMapImpl();
-    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [
-      [1, 2, 3],
-    ]);
+    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [[1, 2, 3]]);
 
     expectFormula('sum(A1:C1)', [6], undefined, cellDataMap);
   });
   it('cell range union', () => {
     const cellDataMap = new CellDataMapImpl();
-    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [
-      [1, 2, 3, 4, 5],
-    ]);
+    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [[1, 2, 3, 4, 5]]);
 
     expectFormula('sum(A1:C1, D1:E1)', [15], undefined, cellDataMap);
   });
 
   it('sheet name not found', () => {
     const cellDataMap = new CellDataMapImpl();
-    cellDataMap.set(
-      { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' },
-      [[1, 2, 3, 4, 5]],
-    );
+    cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' }, [[1, 2, 3, 4, 5]]);
     cellDataMap.setSheetList([
       {
         sheetId: '1',
@@ -82,38 +65,28 @@ describe('parseFormula reference', () => {
   describe('reference', () => {
     test('relative', () => {
       const cellDataMap = new CellDataMapImpl();
-      cellDataMap.set(
-        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
-        [[0]],
-      );
+      cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [[0]]);
 
       expectFormula('A1', [0], undefined, cellDataMap);
     });
     test('absolute', () => {
       const cellDataMap = new CellDataMapImpl();
-      cellDataMap.set(
-        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
-        [[0]],
-      );
+      cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [[0]]);
 
       expectFormula('$A$1', [0], undefined, cellDataMap);
     });
     test('mixed', () => {
       const cellDataMap = new CellDataMapImpl();
-      cellDataMap.set(
-        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
-        [[0]],
-      );
+      cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' }, [[0]]);
       expectFormula('A$1', [0], undefined, cellDataMap);
     });
   });
   describe('sheetId reference', () => {
     it('relative', () => {
       const cellDataMap = new CellDataMapImpl();
-      cellDataMap.set(
-        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' },
-        [[1, 2, 3, 4, 5]],
-      );
+      cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' }, [
+        [1, 2, 3, 4, 5],
+      ]);
 
       cellDataMap.setSheetList([
         {
@@ -130,10 +103,9 @@ describe('parseFormula reference', () => {
     });
     test('absolute', () => {
       const cellDataMap = new CellDataMapImpl();
-      cellDataMap.set(
-        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' },
-        [[1, 2, 3, 4, 5]],
-      );
+      cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' }, [
+        [1, 2, 3, 4, 5],
+      ]);
 
       cellDataMap.setSheetList([
         {
@@ -150,10 +122,9 @@ describe('parseFormula reference', () => {
     });
     test('mixed', () => {
       const cellDataMap = new CellDataMapImpl();
-      cellDataMap.set(
-        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' },
-        [[1, 2, 3, 4, 5]],
-      );
+      cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '1' }, [
+        [1, 2, 3, 4, 5],
+      ]);
 
       cellDataMap.setSheetList([
         {
@@ -170,10 +141,9 @@ describe('parseFormula reference', () => {
     });
     test('space', () => {
       const cellDataMap = new CellDataMapImpl();
-      cellDataMap.set(
-        { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '7' },
-        [[1, 2, 3, 4, 5]],
-      );
+      cellDataMap.set({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '7' }, [
+        [1, 2, 3, 4, 5],
+      ]);
 
       cellDataMap.setSheetList([
         {

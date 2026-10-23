@@ -112,13 +112,14 @@ export class Parser {
     return expr;
   }
   private convertToCellExpression(expr: Expression): Expression {
-    if (expr instanceof CellExpression || expr instanceof CallExpression || expr instanceof GroupExpression) {
+    if (
+      expr instanceof CellExpression ||
+      expr instanceof CallExpression ||
+      expr instanceof GroupExpression
+    ) {
       return expr;
     }
-    if (
-      expr instanceof LiteralExpression &&
-      expr.value.type === TokenType.NUMBER
-    ) {
+    if (expr instanceof LiteralExpression && expr.value.type === TokenType.NUMBER) {
       return new CellExpression(expr.value, undefined);
     }
     throw getCustomError('#NAME?');
@@ -127,8 +128,11 @@ export class Parser {
     if (this.match(TokenType.SHEET_NAME)) {
       const name = this.previous();
       let expr = this.call();
-      if (expr instanceof LiteralExpression && expr.value.type === TokenType.NUMBER &&
-        this.check(TokenType.COLON)) {
+      if (
+        expr instanceof LiteralExpression &&
+        expr.value.type === TokenType.NUMBER &&
+        this.check(TokenType.COLON)
+      ) {
         expr = this.convertToCellExpression(expr);
       }
       if (expr instanceof CellExpression) {
@@ -140,18 +144,17 @@ export class Parser {
   }
   private call(): Expression {
     while (
-      this.match(
-        TokenType.EXCEL_FUNCTION,
-        TokenType.REF_FUNCTION,
-        TokenType.REF_FUNCTION_COND,
-      )
+      this.match(TokenType.EXCEL_FUNCTION, TokenType.REF_FUNCTION, TokenType.REF_FUNCTION_COND)
     ) {
       const name = this.previous();
       const params: Expression[] = [];
       if (!this.check(TokenType.RIGHT_BRACKET)) {
         do {
-          params.push(this.check(TokenType.COMMA) || this.check(TokenType.RIGHT_BRACKET)
-            ? new MissingExpression() : this.expression());
+          params.push(
+            this.check(TokenType.COMMA) || this.check(TokenType.RIGHT_BRACKET)
+              ? new MissingExpression()
+              : this.expression(),
+          );
         } while (this.match(TokenType.COMMA));
       }
       this.expect(TokenType.RIGHT_BRACKET);
@@ -179,7 +182,15 @@ export class Parser {
       this.expect(TokenType.RIGHT_BRACKET);
       return new GroupExpression(value);
     }
-    if (this.match(TokenType.NUMBER, TokenType.STRING, TokenType.BOOL, TokenType.ERROR, TokenType.ERROR_REF)) {
+    if (
+      this.match(
+        TokenType.NUMBER,
+        TokenType.STRING,
+        TokenType.BOOL,
+        TokenType.ERROR,
+        TokenType.ERROR_REF,
+      )
+    ) {
       return new LiteralExpression(this.previous());
     }
     if (

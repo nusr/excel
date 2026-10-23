@@ -5,10 +5,10 @@ import {
   RadioButton,
   type RadioGroupProps as AriaRadioGroupProps,
   type ValidationResult,
-  type RadioFieldProps
+  type RadioFieldProps,
 } from 'react-aria-components/RadioGroup';
-import {composeRenderProps} from 'react-aria-components/composeRenderProps';
-import {Label, FieldError, Description} from './Form';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { Label, FieldError, Description } from './Form';
 import './RadioGroup.css';
 import './utilities.css';
 
@@ -44,7 +44,7 @@ export function Radio(props: RadioProps) {
   return (
     <RadioField {...props}>
       <RadioButton>
-        {composeRenderProps(props.children, children => (
+        {composeRenderProps(props.children, (children) => (
           <>
             <div className="indicator" />
             {children}

@@ -6,7 +6,11 @@ import {
 } from '../bindings';
 import type { IRange } from '../../types';
 
-const sheets = new Map([['sheet1', 'one'], ["bob's ! sheet", 'two'], ['表😊', 'three']]);
+const sheets = new Map([
+  ['sheet1', 'one'],
+  ["bob's ! sheet", 'two'],
+  ['表😊', 'three'],
+]);
 const origin = { row: 5, col: 4 };
 
 function bind(source: string, overrides: Partial<BindFormulaOptions<IRange>> = {}) {
@@ -23,7 +27,11 @@ function bind(source: string, overrides: Partial<BindFormulaOptions<IRange>> = {
 function render(
   binding: BoundFormula<IRange>,
   resolveRange: (range: IRange) => IRange | undefined = (range) => range,
-  options: { row?: number; col?: number; getSheetName?: (sheetId: string) => string | undefined } = {},
+  options: {
+    row?: number;
+    col?: number;
+    getSheetName?: (sheetId: string) => string | undefined;
+  } = {},
 ) {
   return renderFormulaReferences(binding, { ...origin, resolveRange, ...options });
 }
@@ -56,9 +64,9 @@ describe('stable formula-reference bindings', () => {
 
   test('shrinks ranges and replaces deleted direct references as complete spans', () => {
     const binding = bind("=SUM('Bob''s ! Sheet'!$A$1:$B$5)+Sheet1!C1");
-    expect(render(binding, (range) => range.col === 2 ? undefined : { ...range, rowCount: 3 })).toBe(
-      "=SUM('Bob''s ! Sheet'!$A$1:$B$3)+#REF!",
-    );
+    expect(
+      render(binding, (range) => (range.col === 2 ? undefined : { ...range, rowCount: 3 })),
+    ).toBe("=SUM('Bob''s ! Sheet'!$A$1:$B$3)+#REF!");
     expect(render(binding, () => undefined)).toBe('=SUM(#REF!)+#REF!');
   });
 
@@ -68,34 +76,47 @@ describe('stable formula-reference bindings', () => {
       { sheetId: 'one', row: 0, col: 0, rowCount: 0, colCount: 3 },
       { sheetId: 'one', row: 1, col: 0, rowCount: 3, colCount: 0 },
     ]);
-    expect(render(binding, (range) => range.rowCount === 0
-      ? { ...range, colCount: 2 } : { ...range, row: 2, rowCount: 2 })).toBe('=SUM($A:$B, $3:4)');
+    expect(
+      render(binding, (range) =>
+        range.rowCount === 0 ? { ...range, colCount: 2 } : { ...range, row: 2, rowCount: 2 },
+      ),
+    ).toBe('=SUM($A:$B, $3:4)');
   });
 
   test('resolves case-insensitive escaped sheet names and inherited range sheets', () => {
     const binding = bind("='bOb''s ! sHeEt'!A1:B2+Sheet1!C1");
     expect(binding.references.map(({ range }) => range.sheetId)).toEqual(['two', 'one']);
-    expect(render(binding, (range) => range, {
-      getSheetName: (sheetId) => sheetId === 'two' ? "New's Sheet" : 'Sheet1',
-    })).toBe("='New''s Sheet'!A1:B2+Sheet1!C1");
+    expect(
+      render(binding, (range) => range, {
+        getSheetName: (sheetId) => (sheetId === 'two' ? "New's Sheet" : 'Sheet1'),
+      }),
+    ).toBe("='New''s Sheet'!A1:B2+Sheet1!C1");
   });
 
   test('preserves both explicit qualifiers of a same-sheet range', () => {
     const binding = bind('=SUM(Sheet1!A1 : sheet1!B3)');
     expect(binding.references).toHaveLength(1);
-    expect(render(binding, (range) => ({ ...range, rowCount: 2 }), {
-      getSheetName: () => 'Renamed',
-    })).toBe('=SUM(Renamed!A1 : Renamed!B2)');
+    expect(
+      render(binding, (range) => ({ ...range, rowCount: 2 }), {
+        getSheetName: () => 'Renamed',
+      }),
+    ).toBe('=SUM(Renamed!A1 : Renamed!B2)');
   });
 
   test('binds R1C1 relative/absolute components against the formula origin', () => {
     const binding = bind('=R[-2]C[1]+R2C3+RC+R2C[-1]');
     expect(binding.references.map(({ range }) => [range.row, range.col])).toEqual([
-      [3, 5], [1, 2], [5, 4], [1, 3],
+      [3, 5],
+      [1, 2],
+      [5, 4],
+      [1, 3],
     ]);
-    expect(render(binding, (range) => ({ ...range, row: range.row + 1, col: range.col + 2 }), {
-      row: origin.row + 1, col: origin.col + 2,
-    })).toBe('=R[-2]C[1]+R3C5+RC+R3C[-1]');
+    expect(
+      render(binding, (range) => ({ ...range, row: range.row + 1, col: range.col + 2 }), {
+        row: origin.row + 1,
+        col: origin.col + 2,
+      }),
+    ).toBe('=R[-2]C[1]+R3C5+RC+R3C[-1]');
   });
 
   test('recomputes R1C1 offsets if only the formula origin moves', () => {
@@ -113,9 +134,11 @@ describe('stable formula-reference bindings', () => {
   test('leaves named references textual, including ambiguous column-like names', () => {
     const binding = bind('=SUM(FOO, MyRange, Sheet1!foo, A1Name)+A1');
     expect(binding.references).toHaveLength(1);
-    expect(render(binding, (range) => ({ ...range, row: 1 }), {
-      getSheetName: () => 'Renamed',
-    })).toBe('=SUM(FOO, MyRange, Renamed!foo, A1Name)+A2');
+    expect(
+      render(binding, (range) => ({ ...range, row: 1 }), {
+        getSheetName: () => 'Renamed',
+      }),
+    ).toBe('=SUM(FOO, MyRange, Renamed!foo, A1Name)+A2');
   });
 
   test('does not rewrite strings, INDIRECT text, errors, or structured-reference text', () => {
@@ -129,18 +152,22 @@ describe('stable formula-reference bindings', () => {
 
   test('captures supported spans around unsupported syntax, without reading external books', () => {
     const binding = bind('=@A1+[Book]Sheet1!B2+Unknown!C3+SUM(A2:A4)');
-    expect(binding.references.map(({ range }) => [range.row, range.col, range.rowCount]))
-      .toEqual([[0, 0, 1], [1, 0, 3]]);
+    expect(binding.references.map(({ range }) => [range.row, range.col, range.rowCount])).toEqual([
+      [0, 0, 1],
+      [1, 0, 3],
+    ]);
     expect(render(binding, (range) => ({ ...range, row: range.row + 1 }))).toBe(
       '=@A2+[Book]Sheet1!B2+Unknown!C3+SUM(A3:A5)',
     );
   });
 
   test('UTF-16 spans preserve emoji before and inside quoted qualifiers', () => {
-    const binding = bind('="😊"&\'表😊\'!A1+\'表😊\'!B2');
-    expect(render(binding, (range) => ({ ...range, row: range.row + 1 }), {
-      getSheetName: () => 'New',
-    })).toBe('="😊"&New!A2+New!B3');
+    const binding = bind("=\"😊\"&'表😊'!A1+'表😊'!B2");
+    expect(
+      render(binding, (range) => ({ ...range, row: range.row + 1 }), {
+        getSheetName: () => 'New',
+      }),
+    ).toBe('="😊"&New!A2+New!B3');
   });
 
   test('bindings survive JSON round trips and invalid projected targets become errors', () => {

@@ -42,11 +42,7 @@ export function CommandPalette<T>(props: CommandPaletteProps<T>) {
     <Modal isDismissable isOpen={isOpen} onOpenChange={onOpenChange}>
       <Dialog className="command-palette-dialog" aria-label={props['aria-label'] || 'Commands'}>
         <AriaAutocomplete filter={contains} {...props}>
-          <SearchField
-            autoFocus
-            aria-label="Search commands"
-            placeholder="Search commands"
-          />
+          <SearchField autoFocus aria-label="Search commands" placeholder="Search commands" />
           <Menu {...props} renderEmptyState={() => 'No results found.'} />
         </AriaAutocomplete>
       </Dialog>

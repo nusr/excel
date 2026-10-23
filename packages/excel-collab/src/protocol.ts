@@ -1,6 +1,11 @@
 import {
-  Array as YArray, Doc, Map as YMap, createRelativePositionFromTypeIndex,
-  createAbsolutePositionFromRelativePosition, encodeRelativePosition, decodeRelativePosition,
+  Array as YArray,
+  Doc,
+  Map as YMap,
+  createRelativePositionFromTypeIndex,
+  createAbsolutePositionFromRelativePosition,
+  encodeRelativePosition,
+  decodeRelativePosition,
   type AbstractType,
 } from 'yjs';
 import { v4 } from 'uuid';
@@ -9,15 +14,23 @@ import type { WorksheetType, ModelCellType, DrawingElement, AutoFilterItem } fro
 import type { ResultType } from './types/parser';
 import type { IRange } from './types/range';
 import {
-  bindFormulaReferences, renderFormulaReferences, type BoundFormula,
+  bindFormulaReferences,
+  renderFormulaReferences,
+  type BoundFormula,
 } from './formula/bindings';
 
 export const PROTOCOL_VERSION = 3;
 export const SHARED_KEYS = [
-  'workbook', 'worksheets', 'mergeCells', 'customHeight', 'customWidth',
-  'definedNames', 'drawings', 'autoFilter',
+  'workbook',
+  'worksheets',
+  'mergeCells',
+  'customHeight',
+  'customWidth',
+  'definedNames',
+  'drawings',
+  'autoFilter',
 ] as const;
-export type SharedKey = typeof SHARED_KEYS[number];
+export type SharedKey = (typeof SHARED_KEYS)[number];
 const CELL_PREFIX = 'excel:cell:';
 const ANCHOR_KEY = 'excel:anchors';
 const FORMULA_KEY = 'excel:formulaBindings';
@@ -50,7 +63,9 @@ function isContent(value: StoredCellValue): value is CellContent {
   return !!value && typeof value === 'object' && 'revision' in value && 'value' in value;
 }
 function literalValue(value: unknown): ResultType {
-  return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' ? value : '';
+  return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+    ? value
+    : '';
 }
 
 function splitCellKey(key: string) {
@@ -72,8 +87,14 @@ export function createSharedSheet(sheet: WorksheetType): TypedMap<SharedSheet> {
   const result = new YMap(Object.entries(sheet)) as TypedMap<SharedSheet>;
   const rows = new YArray<string>();
   const cols = new YArray<string>();
-  rows.insert(0, Array.from({ length: sheet.rowCount }, (_, i) => String(i)));
-  cols.insert(0, Array.from({ length: sheet.colCount }, (_, i) => String(i)));
+  rows.insert(
+    0,
+    Array.from({ length: sheet.rowCount }, (_, i) => String(i)),
+  );
+  cols.insert(
+    0,
+    Array.from({ length: sheet.colCount }, (_, i) => String(i)),
+  );
   result.set('rows', rows);
   result.set('cols', cols);
   return result;
@@ -186,8 +207,11 @@ export class SharedRoot {
     const content = isContent(rawContent) ? rawContent : undefined;
     const computed = isContent(rawComputed) ? rawComputed : undefined;
     const result = {
-      ...styles, value: computed && content && computed.revision === content.revision ?
-        computed.value : content?.value ?? '',
+      ...styles,
+      value:
+        computed && content && computed.revision === content.revision
+          ? computed.value
+          : (content?.value ?? ''),
       ...(content?.formula === undefined ? {} : { formula: content.formula }),
     };
     const binding = content?.binding;
@@ -203,7 +227,8 @@ export class SharedRoot {
   }
   private makeContent(key: string, data: Pick<ModelCellType, 'value' | 'formula'>): CellContent {
     const result: CellContent = {
-      revision: v4(), value: data.value ?? '',
+      revision: v4(),
+      value: data.value ?? '',
       ...(data.formula === undefined ? {} : { formula: data.formula }),
     };
     if (!data.formula) return result;
@@ -211,10 +236,12 @@ export class SharedRoot {
     if (!coordinate) return result;
     result.binding = bindFormulaReferences(data.formula, {
       ...coordinate,
-      resolveSheet: (name) => this.getSheets().find((sheet) =>
-        sheet.name.toLowerCase() === name.toLowerCase())?.sheetId,
-      isDefinedName: (name) => Array.from(this.get('definedNames').keys()).some((key) =>
-        key.toLowerCase() === name.toLowerCase()),
+      resolveSheet: (name) =>
+        this.getSheets().find((sheet) => sheet.name.toLowerCase() === name.toLowerCase())?.sheetId,
+      isDefinedName: (name) =>
+        Array.from(this.get('definedNames').keys()).some(
+          (key) => key.toLowerCase() === name.toLowerCase(),
+        ),
       bindRange: (range) => this.anchorRange(range),
     });
     return result;
@@ -225,7 +252,8 @@ export class SharedRoot {
     const raw = this.doc.getMap<StoredCellValue>(`${CELL_PREFIX}${key}`);
     const value = raw.get('content');
     const content = isContent(value) ? value : undefined;
-    if (!force && content?.formula === formula && (!formula || content.binding?.source === formula)) return;
+    if (!force && content?.formula === formula && (!formula || content.binding?.source === formula))
+      return;
     const next = this.makeContent(key, { value: cell.get('value') ?? '', formula });
     if (content) next.revision = content.revision;
     raw.set('content', next);
@@ -236,7 +264,10 @@ export class SharedRoot {
     raw.clear();
     const { value, formula, ...styles } = data;
     for (const [field, fieldValue] of Object.entries(styles)) raw.set(field, fieldValue);
-    raw.set('content', this.makeContent(key, { value: value ?? '', ...(formula === undefined ? {} : { formula }) }));
+    raw.set(
+      'content',
+      this.makeContent(key, { value: value ?? '', ...(formula === undefined ? {} : { formula }) }),
+    );
   }
   setComputedValue(key: string, value: ResultType) {
     const raw = this.doc.getMap<StoredCellValue>(`${CELL_PREFIX}${key}`);
@@ -247,17 +278,30 @@ export class SharedRoot {
   anchorRange(range: IRange): AnchoredRange | undefined {
     const sheet = this.get('workbook').get(range.sheetId);
     if (!sheet) return undefined;
-    const anchor = (axis: 'rows' | 'cols', start: number, count: number): AxisAnchor | undefined => {
+    const anchor = (
+      axis: 'rows' | 'cols',
+      start: number,
+      count: number,
+    ): AxisAnchor | undefined => {
       const order = sheet.get(axis)!;
       const full = count === 0;
       if (full) start = 0;
       const end = full ? order.length : start + count;
-      if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end <= start ||
-        end > order.length) return undefined;
+      if (
+        !Number.isInteger(start) ||
+        !Number.isInteger(end) ||
+        start < 0 ||
+        end <= start ||
+        end > order.length
+      )
+        return undefined;
       return {
         start: encodeRelativePosition(createRelativePositionFromTypeIndex(order, start, 0)),
         end: encodeRelativePosition(createRelativePositionFromTypeIndex(order, end, -1)),
-        first: order.get(start), last: order.get(end - 1), single: !full && count === 1, full,
+        first: order.get(start),
+        last: order.get(end - 1),
+        single: !full && count === 1,
+        full,
       };
     };
     const rows = anchor('rows', range.row, range.rowCount);
@@ -277,19 +321,31 @@ export class SharedRoot {
       }
       const first = list.indexOf(data.first);
       const last = list.indexOf(data.last);
-      const start = first >= 0 ? first :
-        createAbsolutePositionFromRelativePosition(decodeRelativePosition(data.start), this.doc)?.index;
-      const end = last >= 0 ? last + 1 :
-        createAbsolutePositionFromRelativePosition(decodeRelativePosition(data.end), this.doc)?.index;
-      return start === undefined || end === undefined || end <= start ? undefined :
-        { start: Math.min(start, order.length), count: Math.min(end, order.length) - start };
+      const start =
+        first >= 0
+          ? first
+          : createAbsolutePositionFromRelativePosition(decodeRelativePosition(data.start), this.doc)
+              ?.index;
+      const end =
+        last >= 0
+          ? last + 1
+          : createAbsolutePositionFromRelativePosition(decodeRelativePosition(data.end), this.doc)
+              ?.index;
+      return start === undefined || end === undefined || end <= start
+        ? undefined
+        : { start: Math.min(start, order.length), count: Math.min(end, order.length) - start };
     };
     const rows = resolve('rows', anchor.rows);
     const cols = resolve('cols', anchor.cols);
-    return rows && cols ? {
-      sheetId: anchor.sheetId, row: rows.start, col: cols.start,
-      rowCount: rows.count, colCount: cols.count,
-    } : undefined;
+    return rows && cols
+      ? {
+          sheetId: anchor.sheetId,
+          row: rows.start,
+          col: cols.start,
+          rowCount: rows.count,
+          colCount: cols.count,
+        }
+      : undefined;
   }
   bindRange(key: string, range: IRange) {
     const anchor = this.anchorRange(range);
@@ -308,6 +364,15 @@ export class SharedRoot {
       if (range) this.bindRange(`filter:${key}`, range);
       const col = item.get('col');
       if (col !== undefined) this.bindFilterColumn(key, col);
+      const filters = item.get('filters');
+      if (filters && !(filters instanceof YMap)) {
+        const shared = new YMap<NonNullable<AutoFilterItem['value']>>();
+        for (const [column, criterion] of Object.entries(filters)) {
+          const columnId = this.get('workbook').get(key)?.get('cols')?.get(Number(column));
+          if (columnId !== undefined) shared.set(columnId, criterion);
+        }
+        item.set('filters', shared as unknown as NonNullable<AutoFilterItem['filters']>);
+      }
     }
     for (const [key, item] of this.get('drawings')) this.bindDrawing(key, item.toJSON());
     for (const [key, cell] of this.cells()) {
@@ -319,23 +384,56 @@ export class SharedRoot {
     const id = this.get('workbook').get(sheetId)?.get('cols')?.get(col);
     if (id !== undefined) this.anchors.set(`filterColumn:${sheetId}`, id);
   }
+  bindFilterColumns(sheetId: string, filters: NonNullable<AutoFilterItem['filters']>) {
+    for (const col of Object.keys(filters)) {
+      const id = this.get('workbook').get(sheetId)?.get('cols')?.get(Number(col));
+      if (id !== undefined) this.anchors.set(`filterColumn:${sheetId}:${col}`, id);
+    }
+  }
   filter(sheetId: string): AutoFilterItem | undefined {
-    const item = this.get('autoFilter').get(sheetId)?.toJSON();
+    const stored = this.get('autoFilter').get(sheetId);
+    const item = stored?.toJSON();
     if (!item) return undefined;
     const range = this.range(`filter:${sheetId}`, item.range);
     if (!range) return undefined;
     const colId = this.anchors.get(`filterColumn:${sheetId}`);
-    const col = typeof colId === 'string' ?
-      this.get('workbook').get(sheetId)?.get('cols')?.toArray().indexOf(colId) : item.col;
+    const col =
+      typeof colId === 'string'
+        ? this.get('workbook').get(sheetId)?.get('cols')?.toArray().indexOf(colId)
+        : item.col;
     return {
-      ...item, range,
-      ...(typeof col === 'number' && col < 0 ? { col: undefined, value: undefined } :
-        col === undefined ? {} : { col }),
+      ...item,
+      range,
+      ...(item.filters
+        ? {
+            filters: Object.fromEntries(
+              Object.entries(item.filters).flatMap(([column, criterion]) => {
+                const columnId = this.anchors.get(`filterColumn:${sheetId}:${column}`);
+                const index =
+                  stored?.get('filters') instanceof YMap
+                    ? this.get('workbook').get(sheetId)?.get('cols')?.toArray().indexOf(column)
+                    : typeof columnId === 'string'
+                      ? this.get('workbook').get(sheetId)?.get('cols')?.toArray().indexOf(columnId)
+                      : Number(column);
+                return index === undefined || index < 0 ? [] : [[String(index), criterion]];
+              }),
+            ),
+          }
+        : {}),
+      ...(typeof col === 'number' && col < 0
+        ? { col: undefined, value: undefined }
+        : col === undefined
+          ? {}
+          : { col }),
     };
   }
   bindDrawing(key: string, item: DrawingElement) {
     this.bindRange(`drawing:${key}`, {
-      sheetId: item.sheetId, row: item.fromRow, col: item.fromCol, rowCount: 1, colCount: 1,
+      sheetId: item.sheetId,
+      row: item.fromRow,
+      col: item.fromCol,
+      rowCount: 1,
+      colCount: 1,
     });
     if (item.chartRange) this.bindRange(`chart:${key}`, item.chartRange);
   }
@@ -343,13 +441,24 @@ export class SharedRoot {
     const item = this.get('drawings').get(key)?.toJSON();
     if (!item || !this.get('workbook').has(item.sheetId)) return undefined;
     const range = this.range(`drawing:${key}`, {
-      sheetId: item.sheetId, row: item.fromRow, col: item.fromCol, rowCount: 1, colCount: 1,
+      sheetId: item.sheetId,
+      row: item.fromRow,
+      col: item.fromCol,
+      rowCount: 1,
+      colCount: 1,
     });
     const chartRange = item.chartRange && this.range(`chart:${key}`, item.chartRange);
     return {
-      ...item, fromRow: range?.row ?? Math.min(item.fromRow, this.get('workbook').get(item.sheetId)!.get('rows')!.length - 1),
-      fromCol: range?.col ?? Math.min(item.fromCol, this.get('workbook').get(item.sheetId)!.get('cols')!.length - 1),
-      ...(item.chartRange ? { chartRange: chartRange ?? { ...item.chartRange, row: -1, col: -1 } } : {}),
+      ...item,
+      fromRow:
+        range?.row ??
+        Math.min(item.fromRow, this.get('workbook').get(item.sheetId)!.get('rows')!.length - 1),
+      fromCol:
+        range?.col ??
+        Math.min(item.fromCol, this.get('workbook').get(item.sheetId)!.get('cols')!.length - 1),
+      ...(item.chartRange
+        ? { chartRange: chartRange ?? { ...item.chartRange, row: -1, col: -1 } }
+        : {}),
     };
   }
   getSheets(): WorksheetType[] {
@@ -388,8 +497,18 @@ export class SharedRoot {
       const sheet = this.get('workbook').get(id)!;
       workbook[id] = info;
       indices.set(id, {
-        rows: new Map(sheet.get('rows')!.toArray().map((value, index) => [value, index])),
-        cols: new Map(sheet.get('cols')!.toArray().map((value, index) => [value, index])),
+        rows: new Map(
+          sheet
+            .get('rows')!
+            .toArray()
+            .map((value, index) => [value, index]),
+        ),
+        cols: new Map(
+          sheet
+            .get('cols')!
+            .toArray()
+            .map((value, index) => [value, index]),
+        ),
       });
     }
     const worksheets: ModelJSON['worksheets'] = {};
@@ -414,7 +533,8 @@ export class SharedRoot {
         const id = keyId.slice(separator + 1);
         if (!indices.has(sheetId)) continue;
         const index = id.startsWith('overflow:')
-          ? Number(id.slice('overflow:'.length)) : indices.get(sheetId)?.[axis].get(id);
+          ? Number(id.slice('overflow:'.length))
+          : indices.get(sheetId)?.[axis].get(id);
         if (index !== undefined) {
           const target = `${sheetId}_${index}`;
           if (!id.startsWith('overflow:') || result[target] === undefined) result[target] = value;
@@ -423,27 +543,55 @@ export class SharedRoot {
       return result;
     };
     return {
-      workbook, worksheets, currentSheetId: '', rangeMap: {}, scroll: {},
-      mergeCells: Object.fromEntries(Array.from(this.get('mergeCells').entries())
-        .map(([key, range]) => this.range(`merge:${key}`, range))
-        .filter((range): range is IRange => !!range && indices.has(range.sheetId))
-        .map((range) => [mergeCellKey(range), range])),
+      workbook,
+      worksheets,
+      currentSheetId: '',
+      rangeMap: {},
+      scroll: {},
+      mergeCells: Object.fromEntries(
+        Array.from(this.get('mergeCells').entries())
+          .map(([key, range]) => this.range(`merge:${key}`, range))
+          .filter((range): range is IRange => !!range && indices.has(range.sheetId))
+          .map((range) => [mergeCellKey(range), range]),
+      ),
       customHeight: sizes('customHeight', 'rows'),
       customWidth: sizes('customWidth', 'cols'),
-      definedNames: Object.fromEntries(Array.from(this.get('definedNames')).map(([key, value]) =>
-        [key, this.range(`name:${key}`, value) ?? { ...value, row: -1, col: -1, rowCount: 1, colCount: 1 }])),
-      drawings: Object.fromEntries(Array.from(this.get('drawings').keys())
-        .map((key) => [key, this.drawing(key)]).filter(([, value]) => value)),
-      autoFilter: Object.fromEntries(Array.from(this.get('autoFilter').keys())
-        .map((key) => [key, this.filter(key)]).filter(([, value]) => value)),
+      definedNames: Object.fromEntries(
+        Array.from(this.get('definedNames')).map(([key, value]) => [
+          key,
+          this.range(`name:${key}`, value) ?? {
+            ...value,
+            row: -1,
+            col: -1,
+            rowCount: 1,
+            colCount: 1,
+          },
+        ]),
+      ),
+      drawings: Object.fromEntries(
+        Array.from(this.get('drawings').keys())
+          .map((key) => [key, this.drawing(key)])
+          .filter(([, value]) => value),
+      ),
+      autoFilter: Object.fromEntries(
+        Array.from(this.get('autoFilter').keys())
+          .map((key) => [key, this.filter(key)])
+          .filter(([, value]) => value),
+      ),
     };
   }
 }
 
 export function hydrateDocument(doc: Doc, json: ModelJSON) {
   for (const sheet of Object.values(json.workbook ?? {})) {
-    if (!Number.isInteger(sheet.rowCount) || !Number.isInteger(sheet.colCount) ||
-      sheet.rowCount <= 0 || sheet.rowCount > 1048576 || sheet.colCount <= 0 || sheet.colCount > 16384) {
+    if (
+      !Number.isInteger(sheet.rowCount) ||
+      !Number.isInteger(sheet.colCount) ||
+      sheet.rowCount <= 0 ||
+      sheet.rowCount > 1048576 ||
+      sheet.colCount <= 0 ||
+      sheet.colCount > 16384
+    ) {
       throw new Error('Invalid worksheet dimensions in stored document');
     }
   }
@@ -453,8 +601,12 @@ export function hydrateDocument(doc: Doc, json: ModelJSON) {
       const separator = id.lastIndexOf('_');
       const sheetId = id.slice(0, separator);
       const coordinate = id.slice(separator + 1);
-      if (!sheets.has(sheetId) || !/^\d+$/.test(coordinate) ||
-        !Number.isInteger(Number(coordinate)) || Number(coordinate) < 0) {
+      if (
+        !sheets.has(sheetId) ||
+        !/^\d+$/.test(coordinate) ||
+        !Number.isInteger(Number(coordinate)) ||
+        Number(coordinate) < 0
+      ) {
         throw new Error('Invalid custom size coordinate in stored document');
       }
     }
@@ -482,8 +634,13 @@ export function hydrateDocument(doc: Doc, json: ModelJSON) {
         const separator = id.lastIndexOf('_');
         const sheetId = id.slice(0, separator);
         const coordinate = id.slice(separator + 1);
-        const target = root.sizeKey(sheetId, key === 'customHeight' ? 'rows' : 'cols', Number(coordinate));
-        if (target === undefined) throw new Error('Invalid custom size coordinate in stored document');
+        const target = root.sizeKey(
+          sheetId,
+          key === 'customHeight' ? 'rows' : 'cols',
+          Number(coordinate),
+        );
+        if (target === undefined)
+          throw new Error('Invalid custom size coordinate in stored document');
         root.get(key).set(target, value);
       }
     }
@@ -505,11 +662,17 @@ export function upgradeDocument(doc: Doc): { fromVersion: 2 | 3; version: 3 } {
   if (doc.getMap('excel').size) throw new Error('Unsupported legacy collaboration root');
   const workbook = doc.getMap<TypedMap<SharedSheet>>('excel:workbook');
   for (const [id, sheet] of workbook) {
-    if (!(sheet instanceof YMap) || !(sheet.get('rows') instanceof YArray) ||
-      !(sheet.get('cols') instanceof YArray) || sheet.get('sheetId') !== id ||
-      !sheet.get('rows')!.length || !sheet.get('cols')!.length ||
+    if (
+      !(sheet instanceof YMap) ||
+      !(sheet.get('rows') instanceof YArray) ||
+      !(sheet.get('cols') instanceof YArray) ||
+      sheet.get('sheetId') !== id ||
+      !sheet.get('rows')!.length ||
+      !sheet.get('cols')!.length ||
       typeof sheet.get('name') !== 'string' ||
-      sheet.get('rows')!.length > 1048576 || sheet.get('cols')!.length > 16384) {
+      sheet.get('rows')!.length > 1048576 ||
+      sheet.get('cols')!.length > 16384
+    ) {
       throw new Error('Invalid worksheet in collaboration protocol v2 document');
     }
     for (const axis of ['rows', 'cols'] as const) {
@@ -526,15 +689,23 @@ export function upgradeDocument(doc: Doc): { fromVersion: 2 | 3; version: 3 } {
     }
   }
   const validRange = (value: unknown): value is IRange =>
-    !!value && typeof value === 'object' &&
-    'sheetId' in value && typeof value.sheetId === 'string' && workbook.has(value.sheetId) &&
-    'row' in value && Number.isInteger(value.row) &&
-    'col' in value && Number.isInteger(value.col) &&
-    'rowCount' in value && Number.isInteger(value.rowCount) &&
-    'colCount' in value && Number.isInteger(value.colCount);
+    !!value &&
+    typeof value === 'object' &&
+    'sheetId' in value &&
+    typeof value.sheetId === 'string' &&
+    workbook.has(value.sheetId) &&
+    'row' in value &&
+    Number.isInteger(value.row) &&
+    'col' in value &&
+    Number.isInteger(value.col) &&
+    'rowCount' in value &&
+    Number.isInteger(value.rowCount) &&
+    'colCount' in value &&
+    Number.isInteger(value.colCount);
   for (const key of ['mergeCells', 'definedNames'] as const) {
     for (const range of doc.getMap(sharedTypeName(key)).values()) {
-      if (!validRange(range)) throw new Error(`Invalid ${key} in collaboration protocol v2 document`);
+      if (!validRange(range))
+        throw new Error(`Invalid ${key} in collaboration protocol v2 document`);
     }
   }
   for (const item of doc.getMap('excel:autoFilter').values()) {
@@ -543,9 +714,12 @@ export function upgradeDocument(doc: Doc): { fromVersion: 2 | 3; version: 3 } {
     }
   }
   for (const item of doc.getMap('excel:drawings').values()) {
-    if (!(item instanceof YMap) || typeof item.get('sheetId') !== 'string' ||
+    if (
+      !(item instanceof YMap) ||
+      typeof item.get('sheetId') !== 'string' ||
       !workbook.has(item.get('sheetId')) ||
-      (item.get('chartRange') !== undefined && !validRange(item.get('chartRange')))) {
+      (item.get('chartRange') !== undefined && !validRange(item.get('chartRange')))
+    ) {
       throw new Error('Invalid drawing in collaboration protocol v2 document');
     }
   }
@@ -555,7 +729,8 @@ export function upgradeDocument(doc: Doc): { fromVersion: 2 | 3; version: 3 } {
     for (const [key, cell] of Array.from(legacyCells.entries())) {
       const { value, formula, ...styles } = cell.toJSON();
       const data: ModelCellType = {
-        ...styles, value: literalValue(value),
+        ...styles,
+        value: literalValue(value),
         ...(typeof formula === 'string' ? { formula } : {}),
       };
       doc.getMap<boolean>('excel:worksheets').set(key, true);
@@ -570,7 +745,12 @@ export function initializeEmptyDocument(doc: Doc) {
   const root = new SharedRoot(doc);
   if (root.get('workbook').size) return;
   const sheet: WorksheetType = {
-    sheetId: v4(), name: 'Sheet1', sort: 1, isHide: false, rowCount: 200, colCount: 30,
+    sheetId: v4(),
+    name: 'Sheet1',
+    sort: 1,
+    isHide: false,
+    rowCount: 200,
+    colCount: 30,
   };
   root.get('workbook').set(sheet.sheetId, createSharedSheet(sheet));
 }

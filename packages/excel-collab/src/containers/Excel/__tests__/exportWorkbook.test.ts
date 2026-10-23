@@ -1,8 +1,4 @@
-import {
-  convertToWorkbook,
-  convertToXLSXData,
-  exportToCsv,
-} from '../exportExcel';
+import { convertToWorkbook, convertToXLSXData, exportToCsv } from '../exportExcel';
 import { importExcel } from '../importExcel';
 import { initController } from '../../../controller';
 import { getCustomWidthOrHeightKey } from '../../../util';
@@ -50,10 +46,16 @@ describe('exportWorkbook.test.ts', () => {
     const controller = initController();
     try {
       controller.addSheet();
-      controller.setDefineName({
-        row: 1, col: 0, rowCount: 1, colCount: 1,
-        sheetId: controller.getCurrentSheetId(),
-      }, 'deletedname');
+      controller.setDefineName(
+        {
+          row: 1,
+          col: 0,
+          rowCount: 1,
+          colCount: 1,
+          sheetId: controller.getCurrentSheetId(),
+        },
+        'deletedname',
+      );
       controller.deleteRow(1, 1);
       expect(controller.toJSON().definedNames.deletedname).toMatchObject({ row: -1, col: -1 });
       const workbook = await convertToWorkbook(controller);

@@ -10,9 +10,7 @@ export type StateContextValue = {
   collaborative?: boolean;
 };
 
-export const StateContext = createContext<StateContextValue | undefined>(
-  undefined,
-);
+export const StateContext = createContext<StateContextValue | undefined>(undefined);
 
 export function useExcel() {
   const state = useContext(StateContext);

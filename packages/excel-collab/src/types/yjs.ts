@@ -38,9 +38,7 @@ export interface TypedMap<Data extends Record<string, any>> extends Map<any> {
 
   has<Key extends StringKeyOf<Data>>(key: Key): boolean;
 
-  [Symbol.iterator]<Key extends StringKeyOf<Data>>(): IterableIterator<
-    [Key, Data[Key]]
-  >;
+  [Symbol.iterator]<Key extends StringKeyOf<Data>>(): IterableIterator<[Key, Data[Key]]>;
   toJSON(): Convert<Data>;
 }
 

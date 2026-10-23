@@ -39,11 +39,9 @@ export function makeFont(
   fontFamily = '',
 ): string {
   const temp = `${fontStyle} ${fontWeight} ${fontSize}px `;
-  const fontFamilyList: string[] = [
-    'Source Code Pro',
-    fontFamily,
-    MUST_FONT_FAMILY,
-  ].filter((v) => v.trim());
+  const fontFamilyList: string[] = ['Source Code Pro', fontFamily, MUST_FONT_FAMILY].filter((v) =>
+    v.trim(),
+  );
 
   return temp + fontFamilyList.join(',');
 }
@@ -121,14 +119,7 @@ function pickCSSStyle(style: Partial<CSSStyleDeclaration>): Partial<StyleType> {
   }
   if (
     whiteSpace &&
-    [
-      'normal',
-      'pre-wrap',
-      'pre-line',
-      'break-spaces',
-      'revert',
-      'unset',
-    ].includes(whiteSpace)
+    ['normal', 'pre-wrap', 'pre-line', 'break-spaces', 'revert', 'unset'].includes(whiteSpace)
   ) {
     result.isWrapText = true;
   }
@@ -175,7 +166,10 @@ function parseStyle(
 }
 
 function convertToCssStyleDeclaration(cssStr: string) {
-  const str = cssStr.replace(/<!--|-->/g, '');
+  let str = cssStr;
+  while (/<!--|--!?>/.test(str)) {
+    str = str.replace(/<!--|--!?>/g, '');
+  }
   const regex = /([^{}]+)\s*\{([^}]*)\}/g;
   const matches: Record<string, Record<string, string | number>> = {};
   let match;
@@ -223,8 +217,7 @@ export function parseText(text: string, splitter = '\t') {
 }
 
 export function parseHTML(html: string) {
-  let template: HTMLTemplateElement | undefined =
-    document.createElement('template');
+  let template: HTMLTemplateElement | undefined = document.createElement('template');
   template.innerHTML = html;
   const doc = template.content;
   const styleMap: Record<string, CSSStyleDeclaration> = {};

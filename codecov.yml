@@ -1,7 +1,7 @@
 coverage:
   ignore:
-    - "**/*.test.tsx"
-    - "**/*.test.ts"
+    - '**/*.test.tsx'
+    - '**/*.test.ts'
   status:
     project:
       default: true

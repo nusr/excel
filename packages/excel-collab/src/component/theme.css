@@ -29,27 +29,13 @@
   --tint-700: oklch(from var(--tint) var(--lightness-700) var(--chroma-700) h);
   --tint-800: oklch(from var(--tint) var(--lightness-800) var(--chroma-800) h);
   --tint-900: oklch(from var(--tint) var(--lightness-900) var(--chroma-900) h);
-  --tint-1000: oklch(
-    from var(--tint) var(--lightness-1000) var(--chroma-1000) h
-  );
-  --tint-1100: oklch(
-    from var(--tint) var(--lightness-1100) var(--chroma-1100) h
-  );
-  --tint-1200: oklch(
-    from var(--tint) var(--lightness-1200) var(--chroma-1200) h
-  );
-  --tint-1300: oklch(
-    from var(--tint) var(--lightness-1300) var(--chroma-1300) h
-  );
-  --tint-1400: oklch(
-    from var(--tint) var(--lightness-1400) var(--chroma-1400) h
-  );
-  --tint-1500: oklch(
-    from var(--tint) var(--lightness-1500) var(--chroma-1500) h
-  );
-  --tint-1600: oklch(
-    from var(--tint) var(--lightness-1600) var(--chroma-1600) h
-  );
+  --tint-1000: oklch(from var(--tint) var(--lightness-1000) var(--chroma-1000) h);
+  --tint-1100: oklch(from var(--tint) var(--lightness-1100) var(--chroma-1100) h);
+  --tint-1200: oklch(from var(--tint) var(--lightness-1200) var(--chroma-1200) h);
+  --tint-1300: oklch(from var(--tint) var(--lightness-1300) var(--chroma-1300) h);
+  --tint-1400: oklch(from var(--tint) var(--lightness-1400) var(--chroma-1400) h);
+  --tint-1500: oklch(from var(--tint) var(--lightness-1500) var(--chroma-1500) h);
+  --tint-1600: oklch(from var(--tint) var(--lightness-1600) var(--chroma-1600) h);
 
   /* gray scale */
   --gray-100: oklch(from var(--gray) var(--lightness-100) c h);
@@ -165,9 +151,7 @@ html[data-theme='dark'] {
    * to ensure contrast with the foreground color */
   --highlight-background: oklch(from var(--tint) 55% c h);
   --highlight-background-pressed: oklch(from var(--tint) 50% c h);
-  --highlight-background-invalid: oklch(
-    from var(--red) var(--lightness-900) c h
-  );
+  --highlight-background-invalid: oklch(from var(--red) var(--lightness-900) c h);
   --highlight-foreground: white;
   --highlight-overlay: oklch(from var(--tint-1000) l c h / 15%);
   --invalid-color: oklch(from var(--red) var(--lightness-1000) c h);

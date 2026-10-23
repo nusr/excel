@@ -307,36 +307,44 @@ import { useExcel } from 'excel-collab';
 
 // 获取控制器实例
 const { controller } = useExcel();
+const sheetId = controller.getCurrentSheetId();
+const range = { sheetId, row: 0, col: 0, rowCount: 1, colCount: 1 };
 
 // 单元格操作
-controller.setCellValue(range, value);
-controller.getCellValue(range);
+controller.setCellValue('Hello', range);
+const value = controller.getCell(range)?.value;
 
 // 范围操作
-controller.selectRange(range);
-controller.copyRange(range);
-controller.pasteRange(range);
+controller.setActiveRange(range);
+await controller.copy();
+controller.setActiveRange({ ...range, row: 1 });
+await controller.paste();
 
 // 工作表操作
-controller.addSheet(name);
-controller.deleteSheet(sheetId);
-controller.renameSheet(sheetId, name);
+const addedSheet = controller.addSheet();
+if (addedSheet) {
+  controller.renameSheet('Data', addedSheet.sheetId);
+  controller.deleteSheet(addedSheet.sheetId);
+}
 
-// 公式操作
-controller.setCellFormula(range, formula);
-controller.computeFormulas();
+// 公式会在值更新后自动重新计算
+controller.setCellValue('=SUM(1,2)', range);
 ```
 
 ### 事件处理
 
 ```tsx
-controller.on('change', (changeSet) => {
+const unsubscribeRender = controller.on('renderChange', ({ changeSet }) => {
   // 处理变化
 });
 
-controller.on('save', (json) => {
-  // 处理保存
+const unsubscribeRange = controller.on('rangeChange', (range) => {
+  // 处理选区变化
 });
+
+// 不再需要时移除监听
+unsubscribeRender();
+unsubscribeRange();
 ```
 
 ## 致谢

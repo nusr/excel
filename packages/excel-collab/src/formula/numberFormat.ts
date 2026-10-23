@@ -4,16 +4,8 @@ import { DEFAULT_FORMAT_CODE } from '../util';
 
 type Options = Parameters<typeof numberFormatUtil.format>[2];
 
-export function numberFormat(
-  value: NumberFormatValue,
-  pattern?: string,
-  options: Options = {},
-) {
-  return numberFormatUtil.format(
-    pattern ?? DEFAULT_FORMAT_CODE,
-    value,
-    options,
-  );
+export function numberFormat(value: NumberFormatValue, pattern?: string, options: Options = {}) {
+  return numberFormatUtil.format(pattern ?? DEFAULT_FORMAT_CODE, value, options);
 }
 
 export function isDateFormat(format?: string) {

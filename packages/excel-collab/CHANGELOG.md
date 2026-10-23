@@ -5,192 +5,130 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ## 0.1.13 (2026-01-15)
 
-
 ### Bug Fixes
 
-* CI ([5c7eaf6](https://github.com/nusr/excel/commit/5c7eaf60a88cefc96b5410ee9607af86a86a5868))
-
-
-
-
+- CI ([5c7eaf6](https://github.com/nusr/excel/commit/5c7eaf60a88cefc96b5410ee9607af86a86a5868))
 
 ## 0.1.12 (2026-01-06)
 
-
 ### Bug Fixes
 
-* publish to NPM ([8863293](https://github.com/nusr/excel/commit/8863293a8108721f75154a1c35251fd4d0b8257e))
-
-
-
-
+- publish to NPM ([8863293](https://github.com/nusr/excel/commit/8863293a8108721f75154a1c35251fd4d0b8257e))
 
 ## 0.1.11 (2026-01-06)
 
-
 ### Bug Fixes
 
-* publish to NPM ([b10c402](https://github.com/nusr/excel/commit/b10c4028a56dbb22002cb6e7d53920494246c4dc))
-
-
-
-
+- publish to NPM ([b10c402](https://github.com/nusr/excel/commit/b10c4028a56dbb22002cb6e7d53920494246c4dc))
 
 ## 0.1.10 (2026-01-06)
 
-
 ### Bug Fixes
 
-* CI ([2cffb94](https://github.com/nusr/excel/commit/2cffb94719b169d70e50b7861b13021f1e9dcf29))
-
-
-
-
+- CI ([2cffb94](https://github.com/nusr/excel/commit/2cffb94719b169d70e50b7861b13021f1e9dcf29))
 
 ## 0.1.9 (2025-12-29)
 
-
 ### Bug Fixes
 
-* deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
-* i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
-* start ([dc54379](https://github.com/nusr/excel/commit/dc543790d47b52da212123af164e72fe31f08493))
-* ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
-* update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
-
+- deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
+- i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
+- start ([dc54379](https://github.com/nusr/excel/commit/dc543790d47b52da212123af164e72fe31f08493))
+- ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
+- update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
 
 ### Features
 
-* add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
-* mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
-* support all formulas ([df6749b](https://github.com/nusr/excel/commit/df6749bda409075f3fab54e9ec019b1149e1e7bb))
-* support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
-
-
-
-
+- add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
+- mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
+- support all formulas ([df6749b](https://github.com/nusr/excel/commit/df6749bda409075f3fab54e9ec019b1149e1e7bb))
+- support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
 
 ## 0.1.8 (2025-12-29)
 
-
 ### Bug Fixes
 
-* deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
-* i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
-* start ([dc54379](https://github.com/nusr/excel/commit/dc543790d47b52da212123af164e72fe31f08493))
-* ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
-* update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
-
+- deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
+- i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
+- start ([dc54379](https://github.com/nusr/excel/commit/dc543790d47b52da212123af164e72fe31f08493))
+- ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
+- update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
 
 ### Features
 
-* add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
-* mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
-* support all formulas ([df6749b](https://github.com/nusr/excel/commit/df6749bda409075f3fab54e9ec019b1149e1e7bb))
-* support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
-
-
-
-
+- add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
+- mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
+- support all formulas ([df6749b](https://github.com/nusr/excel/commit/df6749bda409075f3fab54e9ec019b1149e1e7bb))
+- support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
 
 ## 0.1.7 (2025-12-29)
 
-
 ### Bug Fixes
 
-* deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
-* i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
-* start ([dc54379](https://github.com/nusr/excel/commit/dc543790d47b52da212123af164e72fe31f08493))
-* ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
-* update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
-
+- deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
+- i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
+- start ([dc54379](https://github.com/nusr/excel/commit/dc543790d47b52da212123af164e72fe31f08493))
+- ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
+- update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
 
 ### Features
 
-* add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
-* mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
-* support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
-
-
-
-
+- add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
+- mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
+- support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
 
 ## 0.1.6 (2025-08-08)
 
-
 ### Bug Fixes
 
-* deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
-* i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
-* ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
-* update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
-
+- deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
+- i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
+- ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
+- update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
 
 ### Features
 
-* add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
-* mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
-* support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
-
-
-
-
+- add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
+- mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
+- support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
 
 ## 0.1.5 (2025-08-08)
 
-
 ### Bug Fixes
 
-* deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
-* i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
-* ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
-* update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
-
+- deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
+- i18n ([c532266](https://github.com/nusr/excel/commit/c532266049dc6913c711594b9df7f5aa30e4dd18))
+- ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
+- update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
 
 ### Features
 
-* add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
-* mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
-* support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
-
-
-
-
+- add home page ([bc3be63](https://github.com/nusr/excel/commit/bc3be639ba83a01e9b0976eee738dfdb40e240c5))
+- mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
+- support more languages ([c486aa8](https://github.com/nusr/excel/commit/c486aa85090ce71e22866cb4a19f7fc899d8a081))
 
 ## 0.1.4 (2025-07-25)
 
-
 ### Bug Fixes
 
-* deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
-* ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
-* update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
-
+- deploy ([9721511](https://github.com/nusr/excel/commit/9721511d02ae31deedaa2ddd41943ab44cae9b0f))
+- ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
+- update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
 
 ### Features
 
-* mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
-
-
-
-
+- mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
 
 ## 0.1.2 (2025-07-21)
 
-
 ### Bug Fixes
 
-* ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
-* update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
-
+- ts reference ([670d6ff](https://github.com/nusr/excel/commit/670d6ffdbf6ffe90223506c3eb4f00d9df501f9c))
+- update CI ([792f099](https://github.com/nusr/excel/commit/792f09906bd9f723f819a24f191062198e61ee3b))
 
 ### Features
 
-* mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
-
-
-
-
+- mono repo ([#108](https://github.com/nusr/excel/issues/108)) ([6471621](https://github.com/nusr/excel/commit/647162181aa2ca07be718a416acb5905f225e6a2))
 
 # Changelog
 
@@ -198,35 +136,35 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Features
 
-* init model ([6b0d06d](https://github.com/nusr/excel/commit/6b0d06d4e45f113c4e266b561837829ad89f290b))
+- init model ([6b0d06d](https://github.com/nusr/excel/commit/6b0d06d4e45f113c4e266b561837829ad89f290b))
 
 ### Bug Fixes
 
-* simplify the import of worker ([77982de](https://github.com/nusr/excel/commit/77982de7b286ab3ffca0711120aed95e3d3b9421))
-* update dep ([dc9aa8f](https://github.com/nusr/excel/commit/dc9aa8ff30567f377d4e3ed1e514ac4adf026bbe))
+- simplify the import of worker ([77982de](https://github.com/nusr/excel/commit/77982de7b286ab3ffca0711120aed95e3d3b9421))
+- update dep ([dc9aa8f](https://github.com/nusr/excel/commit/dc9aa8ff30567f377d4e3ed1e514ac4adf026bbe))
 
 ## [0.0.8](https://github.com/nusr/excel/compare/v0.0.7...v0.0.8) (2025-01-14)
 
 ### Features
 
-* doc list page ([826d855](https://github.com/nusr/excel/commit/826d855daf3bbcdeab770ff0e76f20d6ba458e4d))
-* local server ([19cc16d](https://github.com/nusr/excel/commit/19cc16dcea03ca34e6f9c0045c98a4133662fe0f))
+- doc list page ([826d855](https://github.com/nusr/excel/commit/826d855daf3bbcdeab770ff0e76f20d6ba458e4d))
+- local server ([19cc16d](https://github.com/nusr/excel/commit/19cc16dcea03ca34e6f9c0045c98a4133662fe0f))
 
 ### Bug Fixes
 
-* CI ([22c107c](https://github.com/nusr/excel/commit/22c107c89046cc474caea7f389fa19d9fd2e9366))
-* collab ([749335a](https://github.com/nusr/excel/commit/749335acf68a27b05be7144d108c4df68ae6f04b))
-* remove console.log ([eab76e5](https://github.com/nusr/excel/commit/eab76e53a0dc79422e732bf5b57fad0e80c91591))
-* style ([f283074](https://github.com/nusr/excel/commit/f2830745425ef3c3c87b0cb192cce9fe6717083f))
-* undefined ([5915996](https://github.com/nusr/excel/commit/5915996e0abbf452904adbf7995dbeca20f6b2b6))
-* websocket url ([cdbf605](https://github.com/nusr/excel/commit/cdbf605f56c070d0e5cd7da8acca2bbb53960c9a))
+- CI ([22c107c](https://github.com/nusr/excel/commit/22c107c89046cc474caea7f389fa19d9fd2e9366))
+- collab ([749335a](https://github.com/nusr/excel/commit/749335acf68a27b05be7144d108c4df68ae6f04b))
+- remove console.log ([eab76e5](https://github.com/nusr/excel/commit/eab76e53a0dc79422e732bf5b57fad0e80c91591))
+- style ([f283074](https://github.com/nusr/excel/commit/f2830745425ef3c3c87b0cb192cce9fe6717083f))
+- undefined ([5915996](https://github.com/nusr/excel/commit/5915996e0abbf452904adbf7995dbeca20f6b2b6))
+- websocket url ([cdbf605](https://github.com/nusr/excel/commit/cdbf605f56c070d0e5cd7da8acca2bbb53960c9a))
 
 ## [0.0.7](https://github.com/nusr/excel/compare/v0.0.6...v0.0.7) (2025-01-04)
 
 ### Features
 
-* support websocket and webrtc ([f16c9cb](https://github.com/nusr/excel/commit/f16c9cbcb53c9ea8a2d683069beae376e1eed929))
-* y-websocket ([b23be4c](https://github.com/nusr/excel/commit/b23be4c6bb6265aff670a63cf725302039209631))
+- support websocket and webrtc ([f16c9cb](https://github.com/nusr/excel/commit/f16c9cbcb53c9ea8a2d683069beae376e1eed929))
+- y-websocket ([b23be4c](https://github.com/nusr/excel/commit/b23be4c6bb6265aff670a63cf725302039209631))
 
 ## [0.0.6](https://github.com/nusr/excel/compare/v0.0.5...v0.0.6) (2024-12-29)
 

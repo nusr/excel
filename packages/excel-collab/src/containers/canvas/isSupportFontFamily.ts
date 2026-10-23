@@ -37,10 +37,7 @@ function SupportFontFamilyFactory() {
   function detect(font: string): boolean {
     for (const item of baseFonts) {
       const { offsetWidth, offsetHeight } = createElement(font + ',' + item);
-      if (
-        offsetWidth !== defaultWidth[item] ||
-        offsetHeight !== defaultHeight[item]
-      ) {
+      if (offsetWidth !== defaultWidth[item] || offsetHeight !== defaultHeight[item]) {
         return true;
       }
     }

@@ -98,7 +98,10 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
               {i18n.t('unhide')}
             </MenuItem>
             <SubmenuTrigger>
-              <MenuItem data-testid="sheet-bar-context-menu-tab-color" textValue={i18n.t('tab-color')}>
+              <MenuItem
+                data-testid="sheet-bar-context-menu-tab-color"
+                textValue={i18n.t('tab-color')}
+              >
                 {i18n.t('tab-color')}
               </MenuItem>
               <Menu aria-label="Tab Color Menu">
@@ -149,11 +152,7 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
             aria-label="Select sheet to unhide"
           >
             {hideSheetList.map((item) => (
-              <SelectItem
-                key={item.value}
-                id={item.value}
-                aria-label={item.label}
-              >
+              <SelectItem key={item.value} id={item.value} aria-label={item.label}>
                 {item.label}
               </SelectItem>
             ))}

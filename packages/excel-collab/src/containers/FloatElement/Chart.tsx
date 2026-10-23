@@ -128,15 +128,10 @@ function ChartComponent<
   );
 }
 
-function createTypedChart<T extends ChartType>(
-  type: T,
-  controller: ChartComponentLike,
-) {
+function createTypedChart<T extends ChartType>(type: T, controller: ChartComponentLike) {
   ChartJS.register(controller);
 
-  return memo((props: Omit<ChartProps<T>, 'type'>) => (
-    <ChartComponent {...props} type={type} />
-  ));
+  return memo((props: Omit<ChartProps<T>, 'type'>) => <ChartComponent {...props} type={type} />);
 }
 
 const Line = createTypedChart('line', LineController);
@@ -221,14 +216,7 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
         };
       }),
     };
-    node = (
-      <Radar
-        {...extra}
-        options={radarOptions}
-        plugins={radarPlugins}
-        data={data}
-      />
-    );
+    node = <Radar {...extra} options={radarOptions} plugins={radarPlugins} data={data} />;
   } else if (chartType === 'scatter') {
     const data = {
       datasets: datasets.map((v, i) => {

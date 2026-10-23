@@ -12,16 +12,12 @@ describe('basic expressions', () => {
   it('1', () => {
     const tree = buildTree('1');
 
-    expect(tree).toEqual(
-      new LiteralExpression(new Token(TokenType.NUMBER, '1')),
-    );
+    expect(tree).toEqual(new LiteralExpression(new Token(TokenType.NUMBER, '1')));
   });
 
   it('1E-2', () => {
     const tree = buildTree('1E-2');
-    expect(tree).toEqual(
-      new LiteralExpression(new Token(TokenType.NUMBER, '1E-2')),
-    );
+    expect(tree).toEqual(new LiteralExpression(new Token(TokenType.NUMBER, '1E-2')));
   });
 
   it('10%', () => {
@@ -64,23 +60,17 @@ describe('basic expressions', () => {
   it('"abc"', () => {
     const tree = buildTree('"abc"');
 
-    expect(tree).toEqual(
-      new LiteralExpression(new Token(TokenType.STRING, 'abc')),
-    );
+    expect(tree).toEqual(new LiteralExpression(new Token(TokenType.STRING, 'abc')));
   });
 
   it('TRUE', () => {
     const tree = buildTree('TRUE');
 
-    expect(tree).toEqual(
-      new LiteralExpression(new Token(TokenType.BOOL, 'TRUE')),
-    );
+    expect(tree).toEqual(new LiteralExpression(new Token(TokenType.BOOL, 'TRUE')));
   });
   it('FALSE', () => {
     const tree = buildTree('FALSE');
-    expect(tree).toEqual(
-      new LiteralExpression(new Token(TokenType.BOOL, 'FALSE')),
-    );
+    expect(tree).toEqual(new LiteralExpression(new Token(TokenType.BOOL, 'FALSE')));
   });
 
   it('1 + 2', () => {

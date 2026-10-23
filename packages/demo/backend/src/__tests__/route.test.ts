@@ -1,19 +1,20 @@
 import { vi } from 'vitest';
 // Mock dependencies before importing the app
-const { mockDb, mockReadFile, mockJoin, mockExtname } = vi.hoisted(() => ({
+const { mockDb, mockReadFile, mockRemoveFile, mockJoin, mockExtname } = vi.hoisted(() => ({
   mockDb: {
-  findFile: vi.fn(),
-  createFile: vi.fn(),
-  createDocument: vi.fn(),
-  deleteDocument: vi.fn(),
-  updateDocument: vi.fn(),
-  findDocument: vi.fn(),
-  findAllDocuments: vi.fn(),
-  upsertDocument: vi.fn(),
-  loadDocumentState: vi.fn().mockResolvedValue(undefined),
-  initDatabase: vi.fn().mockResolvedValue(undefined),
+    findFile: vi.fn(),
+    createFile: vi.fn(),
+    createDocument: vi.fn(),
+    deleteDocument: vi.fn(),
+    updateDocument: vi.fn(),
+    findDocument: vi.fn(),
+    findAllDocuments: vi.fn(),
+    upsertDocument: vi.fn(),
+    loadDocumentState: vi.fn().mockResolvedValue(undefined),
+    initDatabase: vi.fn().mockResolvedValue(undefined),
   },
   mockReadFile: vi.fn(),
+  mockRemoveFile: vi.fn().mockResolvedValue(undefined),
   mockJoin: vi.fn(),
   mockExtname: vi.fn(),
 }));
@@ -27,9 +28,9 @@ vi.mock('node:fs', async (importOriginal) => {
     ...actual,
     default: {
       ...actual,
-      promises: { ...actual.promises, readFile: mockReadFile },
+      promises: { ...actual.promises, readFile: mockReadFile, rm: mockRemoveFile },
     },
-    promises: { ...actual.promises, readFile: mockReadFile },
+    promises: { ...actual.promises, readFile: mockReadFile, rm: mockRemoveFile },
   };
 });
 
@@ -63,12 +64,65 @@ import app, {
   updateDocument,
   findDocument,
   listDocuments,
-  sync
+  sync,
+  upload,
 } from '../route';
 
 describe('Route Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe('Upload cleanup', () => {
+    it.each([false, true])(
+      'removes all temporary files even when storage fails (%s)',
+      async (fails) => {
+        const file = { filepath: '/tmp/upload-first', originalFilename: 'photo.png', size: 5 };
+        const ctx = {
+          request: {
+            files: {
+              file: [file, { ...file, filepath: '/tmp/upload-second' }],
+              extra: { ...file, filepath: '/tmp/upload-extra' },
+            },
+          },
+          body: undefined,
+          throw(status: number, message: string): never {
+            throw Object.assign(new Error(message), { status });
+          },
+        };
+        mockReadFile.mockResolvedValue(Buffer.from('image'));
+        if (fails) mockDb.createFile.mockRejectedValueOnce(new Error('storage unavailable'));
+        else
+          mockDb.createFile.mockResolvedValueOnce({
+            id: 7,
+            name: 'photo.png',
+            size: 5,
+            content: Buffer.from('image'),
+          });
+        const result = upload(ctx as unknown as Context);
+        if (fails) await expect(result).rejects.toThrow('storage unavailable');
+        else {
+          await result;
+          expect(ctx.body).toEqual({ id: 7, name: 'photo.png', size: 5, filePath: '/upload/7' });
+        }
+        for (const filepath of ['/tmp/upload-first', '/tmp/upload-second', '/tmp/upload-extra']) {
+          expect(mockRemoveFile).toHaveBeenCalledWith(filepath, { force: true });
+        }
+      },
+    );
+    it('cleans up an unexpected file field when rejecting a request without the required field', async () => {
+      const ctx = {
+        request: {
+          files: { extra: { filepath: '/tmp/unexpected', originalFilename: 'photo.png', size: 5 } },
+        },
+        throw(status: number, message: string): never {
+          throw Object.assign(new Error(message), { status });
+        },
+      };
+      await expect(upload(ctx as unknown as Context)).rejects.toMatchObject({ status: 400 });
+      expect(mockDb.createFile).not.toHaveBeenCalled();
+      expect(mockRemoveFile).toHaveBeenCalledWith('/tmp/unexpected', { force: true });
+    });
   });
 
   describe('Error Handling Middleware', () => {
@@ -81,7 +135,8 @@ describe('Route Tests', () => {
 
       expect(ctx.status).toBe(500);
       expect(ctx.body).toEqual({
-        error: 'Internal Server Error', message: 'An unexpected error occurred',
+        error: 'Internal Server Error',
+        message: 'An unexpected error occurred',
       });
     });
 
@@ -103,7 +158,7 @@ describe('Route Tests', () => {
         expect(mockDb.createDocument).not.toHaveBeenCalled();
       } finally {
         await new Promise<void>((resolve, reject) => {
-          server.close((error) => error ? reject(error) : resolve());
+          server.close((error) => (error ? reject(error) : resolve()));
           server.closeAllConnections();
         });
       }
@@ -125,7 +180,10 @@ describe('Route Tests', () => {
       await errorHandler(ctx as unknown as Context, next as NextFunction);
 
       expect(ctx.status).toBe(500);
-      expect(ctx.body).toEqual({ error: 'Internal Server Error', message: 'An unexpected error occurred' });
+      expect(ctx.body).toEqual({
+        error: 'Internal Server Error',
+        message: 'An unexpected error occurred',
+      });
     });
 
     it('should handle custom errors with specific status codes', async () => {
@@ -170,11 +228,7 @@ describe('Route Tests', () => {
 
         // Test with valid parameter
         expect(() =>
-          assertParam(
-            ctx as unknown as Context,
-            'test-value',
-            'Param validation',
-          ),
+          assertParam(ctx as unknown as Context, 'test-value', 'Param validation'),
         ).not.toThrow();
       });
 
@@ -199,11 +253,7 @@ describe('Route Tests', () => {
 
         // Test with valid string
         expect(() =>
-          assertString(
-            ctx as unknown as Context,
-            'test-string',
-            'String validation',
-          ),
+          assertString(ctx as unknown as Context, 'test-string', 'String validation'),
         ).not.toThrow();
       });
 
@@ -255,25 +305,31 @@ describe('Route Tests', () => {
   });
 
   describe('sendFile Function', () => {
-    it.each(['GET', 'HEAD'])('should honor conditional %s requests with a real Koa context', async (method) => {
-      const modified = new Date('2023-01-01T00:00:00Z');
-      mockDb.findFile.mockResolvedValue({
-        id: 1, name: 'test.txt', size: 4, content: Buffer.from('test'),
-        last_modified: modified.toISOString(),
-      });
-      mockExtname.mockReturnValue('.txt');
-      const request = new http.IncomingMessage(new Socket());
-      request.method = method;
-      request.headers['if-modified-since'] = modified.toUTCString();
-      const ctx = app.createContext(request, new http.ServerResponse(request));
-      ctx.params = { fileId: '1' };
-      ctx.res.statusCode = 404;
+    it.each(['GET', 'HEAD'])(
+      'should honor conditional %s requests with a real Koa context',
+      async (method) => {
+        const modified = new Date('2023-01-01T00:00:00Z');
+        mockDb.findFile.mockResolvedValue({
+          id: 1,
+          name: 'test.txt',
+          size: 4,
+          content: Buffer.from('test'),
+          last_modified: modified.toISOString(),
+        });
+        mockExtname.mockReturnValue('.txt');
+        const request = new http.IncomingMessage(new Socket());
+        request.method = method;
+        request.headers['if-modified-since'] = modified.toUTCString();
+        const ctx = app.createContext(request, new http.ServerResponse(request));
+        ctx.params = { fileId: '1' };
+        ctx.res.statusCode = 404;
 
-      await sendFile(ctx);
+        await sendFile(ctx);
 
-      expect(ctx.status).toBe(304);
-      expect(ctx.body).toBeUndefined();
-    });
+        expect(ctx.status).toBe(304);
+        expect(ctx.body).toBeUndefined();
+      },
+    );
 
     it('should set correct headers and body for file download (GET)', async () => {
       const mockFile = {
@@ -370,10 +426,7 @@ describe('Route Tests', () => {
 
       await sendFile(ctx as unknown as Context);
 
-      expect(ctx.throw).toHaveBeenCalledWith(
-        400,
-        'fileId should be a valid number',
-      );
+      expect(ctx.throw).toHaveBeenCalledWith(400, 'fileId should be a valid number');
     });
 
     it.each(['1abc', '1.5', '0', '-1', 'Infinity', '9007199254740992'])(
@@ -544,7 +597,11 @@ describe('Route Tests', () => {
     });
 
     it('should handle document updating with valid data', async () => {
-      const mockDocument = { id: 'update-doc', name: 'Updated Document', content: '{"updated":true}' };
+      const mockDocument = {
+        id: 'update-doc',
+        name: 'Updated Document',
+        content: '{"updated":true}',
+      };
       mockDb.updateDocument.mockResolvedValue(mockDocument);
 
       const ctx = {
@@ -608,7 +665,10 @@ describe('Route Tests', () => {
     });
 
     it('should handle document list with default ordering', async () => {
-      const mockDocuments = [{ id: 'doc1', name: 'Doc 1' }, { id: 'doc2', name: 'Doc 2' }];
+      const mockDocuments = [
+        { id: 'doc1', name: 'Doc 1' },
+        { id: 'doc2', name: 'Doc 2' },
+      ];
       mockDb.findAllDocuments.mockResolvedValue(mockDocuments);
 
       const ctx = {
@@ -624,7 +684,10 @@ describe('Route Tests', () => {
     });
 
     it('should handle document list with custom ordering', async () => {
-      const mockDocuments = [{ id: 'doc1', name: 'Doc 1' }, { id: 'doc2', name: 'Doc 2' }];
+      const mockDocuments = [
+        { id: 'doc1', name: 'Doc 1' },
+        { id: 'doc2', name: 'Doc 2' },
+      ];
       mockDb.findAllDocuments.mockResolvedValue(mockDocuments);
 
       const ctx = {

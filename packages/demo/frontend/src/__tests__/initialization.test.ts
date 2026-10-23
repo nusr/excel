@@ -22,9 +22,11 @@ test('initializes a missing template before allowing navigation on user-created 
   expect(callback).not.toHaveBeenCalled();
   expect(document?.name).toBe('Template');
   const content = JSON.parse(document!.content!);
-  expect(Object.values(content.drawings)).not.toContainEqual(expect.objectContaining({
-    type: 'floating-picture',
-  }));
+  expect(Object.values(content.drawings)).not.toContainEqual(
+    expect.objectContaining({
+      type: 'floating-picture',
+    }),
+  );
   expect(JSON.stringify(template.drawings)).toBe(drawings);
 
   await provider.addDocument('user-created');

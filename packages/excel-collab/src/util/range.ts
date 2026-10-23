@@ -20,10 +20,7 @@ export function isSameRange(oldRange: IRange, newRange: IRange): boolean {
   );
 }
 
-export function containRange(
-  sourceRange: IRange,
-  targetRange: IRange,
-): boolean {
+export function containRange(sourceRange: IRange, targetRange: IRange): boolean {
   if (sourceRange.sheetId && targetRange.sheetId && sourceRange.sheetId !== targetRange.sheetId) {
     return false;
   }
@@ -34,11 +31,16 @@ export function containRange(
     return false;
   }
   if (targetRange.colCount === 0) {
-    return targetRange.rowCount === 0 ||
-      (sourceRange.row >= targetRange.row && sourceRange.row < targetRange.row + targetRange.rowCount);
+    return (
+      targetRange.rowCount === 0 ||
+      (sourceRange.row >= targetRange.row &&
+        sourceRange.row < targetRange.row + targetRange.rowCount)
+    );
   }
   if (targetRange.rowCount === 0) {
-    return sourceRange.col >= targetRange.col && sourceRange.col < targetRange.col + targetRange.colCount;
+    return (
+      sourceRange.col >= targetRange.col && sourceRange.col < targetRange.col + targetRange.colCount
+    );
   }
   const { row, col } = sourceRange;
   const check =
@@ -63,13 +65,7 @@ export class SheetRange implements IRange {
   colCount = 0;
   rowCount = 0;
   sheetId = '';
-  constructor(
-    row: number,
-    col: number,
-    rowCount: number,
-    colCount: number,
-    sheetId: string,
-  ) {
+  constructor(row: number, col: number, rowCount: number, colCount: number, sheetId: string) {
     this.row = row;
     this.col = col;
     this.colCount = colCount;
@@ -78,13 +74,7 @@ export class SheetRange implements IRange {
   }
 
   static makeRange(range: IRange): SheetRange {
-    return new SheetRange(
-      range.row,
-      range.col,
-      range.rowCount,
-      range.colCount,
-      range.sheetId,
-    );
+    return new SheetRange(range.row, range.col, range.rowCount, range.colCount, range.sheetId);
   }
   toIRange(): IRange {
     return {

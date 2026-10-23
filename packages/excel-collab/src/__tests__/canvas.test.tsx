@@ -14,9 +14,7 @@ describe('Canvas.test.ts', () => {
   describe('canvas', () => {
     test('normal', () => {
       expect(screen.getByTestId('canvas-container').childNodes).toHaveLength(4);
-      expect(
-        screen.getByTestId('canvas-container').firstChild!.nodeName,
-      ).toEqual('CANVAS');
+      expect(screen.getByTestId('canvas-container').firstChild!.nodeName).toEqual('CANVAS');
     });
     test('context menu', () => {
       fireEvent.contextMenu(screen.getByTestId('canvas-main'), {
@@ -30,9 +28,7 @@ describe('Canvas.test.ts', () => {
     test('normal', () => {
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
       fireEvent.keyDown(document.body, { key: 'ArrowDown', [key]: true });
-      expect(screen.getByTestId('canvas-bottom-bar').childNodes.length).toEqual(
-        4,
-      );
+      expect(screen.getByTestId('canvas-bottom-bar').childNodes.length).toEqual(4);
     });
     test('add rows', () => {
       const key = `${isMac() ? 'meta' : 'ctrl'}Key`;
@@ -62,9 +58,7 @@ describe('Canvas.test.ts', () => {
   describe('ScrollBar', () => {
     test('scroll down', async () => {
       const oldTop = extractDataFromTransform(
-        window.getComputedStyle(
-          await screen.findByTestId('vertical-scroll-bar-content'),
-        ).transform,
+        window.getComputedStyle(await screen.findByTestId('vertical-scroll-bar-content')).transform,
         'translateY',
       );
       fireEvent.pointerDown(await screen.findByTestId('vertical-scroll-bar'), {
@@ -79,9 +73,7 @@ describe('Canvas.test.ts', () => {
       });
       fireEvent.pointerUp(document.body);
       const newTop = extractDataFromTransform(
-        window.getComputedStyle(
-          await screen.findByTestId('vertical-scroll-bar-content'),
-        ).transform,
+        window.getComputedStyle(await screen.findByTestId('vertical-scroll-bar-content')).transform,
         'translateY',
       );
 
@@ -89,9 +81,7 @@ describe('Canvas.test.ts', () => {
     });
     test('scroll right', async () => {
       const old = extractDataFromTransform(
-        window.getComputedStyle(
-          screen.getByTestId('horizontal-scroll-bar-content'),
-        ).transform,
+        window.getComputedStyle(screen.getByTestId('horizontal-scroll-bar-content')).transform,
         'translateX',
       );
       fireEvent.pointerDown(screen.getByTestId('horizontal-scroll-bar'), {
@@ -102,9 +92,7 @@ describe('Canvas.test.ts', () => {
       fireEvent.pointerMove(document, { buttons: 1, clientY: 0, clientX: 20 });
       fireEvent.pointerUp(document);
       const newData = extractDataFromTransform(
-        window.getComputedStyle(
-          screen.getByTestId('horizontal-scroll-bar-content'),
-        ).transform,
+        window.getComputedStyle(screen.getByTestId('horizontal-scroll-bar-content')).transform,
         'translateX',
       );
       expect(newData).toEqual(old + 20);
@@ -210,9 +198,7 @@ describe('Canvas.test.ts', () => {
       });
       await user.click(screen.getByTestId('context-menu-paste'));
       await waitFor(() => {
-        expect(
-          controller.getCell(controller.getActiveRange().range)?.value,
-        ).toEqual('test');
+        expect(controller.getCell(controller.getActiveRange().range)?.value).toEqual('test');
       });
     });
     test('cut', async () => {
@@ -232,16 +218,12 @@ describe('Canvas.test.ts', () => {
       await user.click(screen.getByTestId('context-menu-paste'));
 
       await waitFor(() => {
-        expect(
-          controller.getCell(controller.getActiveRange().range)?.value,
-        ).toEqual('test');
+        expect(controller.getCell(controller.getActiveRange().range)?.value).toEqual('test');
       });
 
       fireEvent.keyDown(document.body, { key: 'ArrowUp' });
       await waitFor(() => {
-        expect(
-          controller.getCell(controller.getActiveRange().range),
-        ).toBeUndefined();
+        expect(controller.getCell(controller.getActiveRange().range)).toBeUndefined();
       });
     });
 
@@ -266,9 +248,7 @@ describe('Canvas.test.ts', () => {
       await user.type(input, '200');
 
       await user.click(screen.getByTestId('dialog-confirm-button'));
-      expect(
-        controller.getCol(controller.getActiveRange().range.col).len,
-      ).toEqual(200);
+      expect(controller.getCol(controller.getActiveRange().range.col).len).toEqual(200);
     });
     test('hide col', () => {
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
@@ -284,9 +264,7 @@ describe('Canvas.test.ts', () => {
 
       fireEvent.click(screen.getByTestId('context-menu-hide-column'));
 
-      expect(
-        controller.getCol(controller.getActiveRange().range.col).isHide,
-      ).toEqual(true);
+      expect(controller.getCol(controller.getActiveRange().range.col).isHide).toEqual(true);
     });
     test('delete col', () => {
       const oldColCount = controller.getSheetInfo()!.colCount;
@@ -362,9 +340,7 @@ describe('Canvas.test.ts', () => {
       await user.type(input, '200');
 
       await user.click(screen.getByTestId('dialog-confirm-button'));
-      expect(
-        controller.getRow(controller.getActiveRange().range.row).len,
-      ).toEqual(200);
+      expect(controller.getRow(controller.getActiveRange().range.row).len).toEqual(200);
     });
 
     test('hide row', () => {
@@ -381,9 +357,7 @@ describe('Canvas.test.ts', () => {
 
       fireEvent.click(screen.getByTestId('context-menu-hide-row'));
 
-      expect(
-        controller.getRow(controller.getActiveRange().range.row).isHide,
-      ).toEqual(true);
+      expect(controller.getRow(controller.getActiveRange().range.row).isHide).toEqual(true);
     });
 
     test('delete row', () => {
@@ -443,9 +417,7 @@ describe('Canvas.test.ts', () => {
       expect(screen.getByTestId('formula-editor-trigger')).toHaveStyle({
         fontWeight: '700',
       });
-      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
-        'test',
-      );
+      expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent('test');
 
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
@@ -460,21 +432,15 @@ describe('Canvas.test.ts', () => {
 
       fireEvent.click(screen.getByTestId('context-menu-delete'));
 
-      expect(
-        await screen.findByTestId('formula-editor-trigger'),
-      ).not.toHaveStyle({
+      expect(await screen.findByTestId('formula-editor-trigger')).not.toHaveStyle({
         fontWeight: '700',
       });
-      expect(
-        await screen.findByTestId('formula-editor-trigger'),
-      ).toHaveTextContent('');
+      expect(await screen.findByTestId('formula-editor-trigger')).toHaveTextContent('');
     });
 
     test('change row height cancel', async () => {
       const user = userEvent.setup();
-      const oldHeight = controller.getRow(
-        controller.getActiveRange().range.row,
-      ).len;
+      const oldHeight = controller.getRow(controller.getActiveRange().range.row).len;
       fireEvent.pointerDown(screen.getByTestId('canvas-main'), {
         timeStamp: 100,
         clientX: 17,
@@ -489,9 +455,7 @@ describe('Canvas.test.ts', () => {
       fireEvent.click(screen.getByTestId('context-menu-row-height'));
 
       await user.click(screen.getByRole('button', { name: /cancel/i }));
-      expect(
-        controller.getRow(controller.getActiveRange().range.row).len,
-      ).toEqual(oldHeight);
+      expect(controller.getRow(controller.getActiveRange().range.row).len).toEqual(oldHeight);
     });
   });
 });

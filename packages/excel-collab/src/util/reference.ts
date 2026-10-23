@@ -22,11 +22,7 @@ function parseCell(
   const separator = realRef.lastIndexOf('!');
   let sheetName = separator === -1 ? '' : realRef.slice(0, separator);
   const other = realRef.slice(separator + 1);
-  if (
-    sheetName &&
-    sheetName[0] === "'" &&
-    sheetName[sheetName.length - 1] === "'"
-  ) {
+  if (sheetName && sheetName[0] === "'" && sheetName[sheetName.length - 1] === "'") {
     sheetName = sheetName.slice(1, -1).replace(/''/g, "'");
   }
   let i = 0;
@@ -67,23 +63,12 @@ function parseCell(
   } else {
     col = columnNameToInt(colText);
   }
-  if (
-    row < 0 ||
-    col < 0 ||
-    col >= XLSX_MAX_COL_COUNT ||
-    row >= XLSX_MAX_ROW_COUNT
-  ) {
+  if (row < 0 || col < 0 || col >= XLSX_MAX_COL_COUNT || row >= XLSX_MAX_ROW_COUNT) {
     return undefined;
   }
   const sheetId = convertSheetName(sheetName);
   if (sheetName && !sheetId) return undefined;
-  const range = new SheetRange(
-    row,
-    col,
-    rowCount,
-    colCount,
-    sheetId,
-  );
+  const range = new SheetRange(row, col, rowCount, colCount, sheetId);
   return range;
 }
 
@@ -132,10 +117,10 @@ export function mergeRange(start: IRange, end: IRange): SheetRange | undefined {
 
   const row = start.row < end.row ? start.row : end.row;
   const col = start.col < end.col ? start.col : end.col;
-  const rowCount = start.rowCount === 0 ? 0
-    : Math.max(start.row + start.rowCount, end.row + end.rowCount) - row;
-  const colCount = start.colCount === 0 ? 0
-    : Math.max(start.col + start.colCount, end.col + end.colCount) - col;
+  const rowCount =
+    start.rowCount === 0 ? 0 : Math.max(start.row + start.rowCount, end.row + end.rowCount) - row;
+  const colCount =
+    start.colCount === 0 ? 0 : Math.max(start.col + start.colCount, end.col + end.colCount) - col;
 
   return new SheetRange(row, col, rowCount, colCount, start.sheetId);
 }
@@ -143,9 +128,7 @@ export function mergeRange(start: IRange, end: IRange): SheetRange | undefined {
 function convertCell(row: number, col: number, referenceType: ReferenceType) {
   const first = referenceType === 'absolute' || referenceType === 'mixed';
   const second = referenceType === 'absolute';
-  return `${first ? '$' : ''}${intToColumnName(col)}${second ? '$' : ''}${
-    row + 1
-  }`;
+  return `${first ? '$' : ''}${intToColumnName(col)}${second ? '$' : ''}${row + 1}`;
 }
 
 export function convertToReference(
@@ -226,12 +209,7 @@ export function parseR1C1(
   } else {
     col = parseNumber(colText, activeCell.col);
   }
-  if (
-    col >= XLSX_MAX_COL_COUNT ||
-    row >= XLSX_MAX_ROW_COUNT ||
-    row < 0 ||
-    col < 0
-  ) {
+  if (col >= XLSX_MAX_COL_COUNT || row >= XLSX_MAX_ROW_COUNT || row < 0 || col < 0) {
     return undefined;
   }
   const range = new SheetRange(row, col, 1, 1, activeCell.sheetId);

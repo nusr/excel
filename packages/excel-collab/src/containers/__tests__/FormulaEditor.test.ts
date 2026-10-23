@@ -1,11 +1,6 @@
 import { getEditorStyle } from '../FormulaBar/FormulaEditor';
 import type { CSSProperties } from 'react';
-import {
-  EditorStatus,
-  EUnderLine,
-  EHorizontalAlign,
-  EVerticalAlign,
-} from '../../types';
+import { EditorStatus, EUnderLine, EHorizontalAlign, EVerticalAlign } from '../../types';
 describe('getEditorStyle', () => {
   test('EditorStatus NONE', () => {
     expect(

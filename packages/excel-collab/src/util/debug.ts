@@ -1,19 +1,11 @@
 import { getRandomColor } from './util';
 
-type NameSpaceType =
-  | 'react'
-  | 'model'
-  | 'test'
-  | 'collaboration'
-  | 'controller';
+type NameSpaceType = 'react' | 'model' | 'test' | 'collaboration' | 'controller';
 
 export class Debug {
   namespace: NameSpaceType;
 
-  static readonly colorMap: Map<NameSpaceType, string> = new Map<
-    NameSpaceType,
-    string
-  >();
+  static readonly colorMap: Map<NameSpaceType, string> = new Map<NameSpaceType, string>();
   constructor(namespace: NameSpaceType) {
     this.namespace = namespace;
   }

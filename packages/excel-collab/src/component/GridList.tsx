@@ -9,14 +9,14 @@ import {
   GridListHeader,
   type GridListItemProps,
   type GridListProps,
-  type GridListLoadMoreItemProps
+  type GridListLoadMoreItemProps,
 } from 'react-aria-components/GridList';
-import {Checkbox} from './Checkbox';
-import {GripVertical} from 'lucide-react';
-import {ProgressCircle} from './ProgressCircle';
+import { Checkbox } from './Checkbox';
+import { GripVertical } from 'lucide-react';
+import { ProgressCircle } from './ProgressCircle';
 import './GridList.css';
 
-export function GridList<T>({children, layout = 'grid', ...props}: GridListProps<T>) {
+export function GridList<T>({ children, layout = 'grid', ...props }: GridListProps<T>) {
   return (
     <AriaGridList {...props} layout={layout}>
       {children}
@@ -33,7 +33,7 @@ export function GridListItem({
   let textValue = typeof children === 'string' ? children : undefined;
   return (
     <AriaGridListItem textValue={textValue} {...props}>
-      {({selectionMode, selectionBehavior, allowsDragging}) => (
+      {({ selectionMode, selectionBehavior, allowsDragging }) => (
         <>
           {/* Add elements for drag and drop and selection. */}
           {allowsDragging && (
@@ -59,4 +59,4 @@ export function GridListLoadMoreItem(props: GridListLoadMoreItemProps) {
   );
 }
 
-export {GridListSection, GridListHeader, Text};
+export { GridListSection, GridListHeader, Text };

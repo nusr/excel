@@ -2,8 +2,7 @@ import { IEventEmitter } from '../types';
 
 export class EventEmitter<
   EventType extends Record<string, unknown> = Record<string, unknown>,
-> implements IEventEmitter<EventType>
-{
+> implements IEventEmitter<EventType> {
   private event: Record<string, Array<(...args: unknown[]) => void>>;
   constructor() {
     this.event = Object.create(null);
@@ -34,10 +33,7 @@ export class EventEmitter<
       item(data);
     }
   };
-  off = <T extends keyof EventType>(
-    name: T,
-    callback?: (data: EventType[T]) => void,
-  ): void => {
+  off = <T extends keyof EventType>(name: T, callback?: (data: EventType[T]) => void): void => {
     const result = [];
     // @ts-ignore
     const events = this.event[name];

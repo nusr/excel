@@ -43,7 +43,9 @@ describe('importExcel', () => {
   });
 
   test('preserves quoted delimiters, escaped quotes, newlines and empty fields', async () => {
-    const model = await importExcel(new File(['\uFEFF"a,b","a""b","line\nbreak",,TRUE\r\n,,1.5'], 'data.csv'));
+    const model = await importExcel(
+      new File(['\uFEFF"a,b","a""b","line\nbreak",,TRUE\r\n,,1.5'], 'data.csv'),
+    );
     expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe('a,b');
     expect(model.worksheets[getWorksheetKey('1', 0, 1)].value).toBe('a"b');
     expect(model.worksheets[getWorksheetKey('1', 0, 2)].value).toBe('line\nbreak');

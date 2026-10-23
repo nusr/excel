@@ -1,5 +1,6 @@
 import { IController } from '../../types';
 import { initController } from '..';
+import { IMAGE_FORMAT } from '../../util';
 
 describe('drawing.test.ts', () => {
   let controller: IController;
@@ -292,6 +293,98 @@ describe('drawing.test.ts', () => {
     });
   });
   describe('float element', () => {
+    test('copies picture data even when its canvas is not mounted', async () => {
+      const imageSrc = 'data:image/png;base64,aGVsbG8=';
+      controller.addDrawing({
+        title: 'picture',
+        type: 'floating-picture',
+        imageSrc,
+        sheetId: controller.getCurrentSheetId(),
+        uuid: 'unmounted-picture',
+        width: 100,
+        height: 100,
+        originWidth: 100,
+        originHeight: 100,
+        fromRow: 0,
+        fromCol: 0,
+        marginX: 0,
+        marginY: 0,
+      });
+      controller.setFloatElementUuid('unmounted-picture');
+      const data = new Map<string, string>();
+      await controller.copy({
+        clipboardData: { setData: (format: string, value: string) => data.set(format, value) },
+      } as unknown as ClipboardEvent);
+      expect(data.get(IMAGE_FORMAT)).toBe(imageSrc);
+    });
+    test.each(['copy', 'cut'] as const)(
+      '%s uses the copied drawing even after changing selection and sheets',
+      async (operation) => {
+        const sourceSheetId = controller.getCurrentSheetId();
+        const range = { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: sourceSheetId };
+        controller.setCellValue(1, range);
+        controller.addDrawing({
+          title: 'copied chart',
+          type: 'chart',
+          chartType: 'bar',
+          chartRange: range,
+          sheetId: sourceSheetId,
+          uuid: 'copied-chart',
+          width: 100,
+          height: 100,
+          originWidth: 100,
+          originHeight: 100,
+          fromRow: 0,
+          fromCol: 0,
+          marginX: 0,
+          marginY: 0,
+        });
+        controller.setFloatElementUuid('copied-chart');
+        await controller[operation]();
+        controller.setFloatElementUuid('unrelated-selection');
+        const destination = controller.addSheet()!;
+        await controller.paste();
+        expect(controller.getDrawingList(destination.sheetId)).toHaveLength(1);
+        expect(controller.getDrawingList(destination.sheetId)[0].title).toBe('copied chart');
+        expect(controller.getDrawingList(sourceSheetId)).toHaveLength(operation === 'cut' ? 0 : 1);
+        if (operation === 'cut') expect(controller.getCopyRange()).toBeUndefined();
+      },
+    );
+    test('a deleted cut drawing falls back to clipboard text without cutting source cells', async () => {
+      const range = controller.getActiveRange().range;
+      controller.setCellValue('keep source', range);
+      controller.addDrawing({
+        title: 'removed',
+        type: 'chart',
+        chartType: 'bar',
+        chartRange: range,
+        sheetId: range.sheetId,
+        uuid: 'removed-chart',
+        width: 100,
+        height: 100,
+        originWidth: 100,
+        originHeight: 100,
+        fromRow: 0,
+        fromCol: 0,
+        marginX: 0,
+        marginY: 0,
+      });
+      controller.setFloatElementUuid('removed-chart');
+      const data = new Map<string, string>();
+      const event = {
+        clipboardData: {
+          setData: (format: string, value: string) => data.set(format, value),
+          getData: (format: string) => data.get(format) || '',
+        },
+      } as unknown as ClipboardEvent;
+      await controller.cut(event);
+      controller.deleteDrawing('removed-chart');
+      controller.setActiveRange({ ...range, row: 1 });
+      await controller.paste(event);
+      expect(controller.getCell(range)?.value).toBe('keep source');
+      expect(controller.getCell({ ...range, row: 1 })?.value).toBe('keep source');
+      expect(controller.getCopyRange()).toBeUndefined();
+    });
     test('copy', async () => {
       controller.setCell(
         [
@@ -317,15 +410,11 @@ describe('drawing.test.ts', () => {
         fromCol: 4,
         fromRow: 4,
       });
-      expect(
-        controller.getDrawingList(controller.getCurrentSheetId()),
-      ).toHaveLength(1);
+      expect(controller.getDrawingList(controller.getCurrentSheetId())).toHaveLength(1);
       controller.setFloatElementUuid('1');
       await controller.copy();
       await controller.paste();
-      expect(
-        controller.getDrawingList(controller.getCurrentSheetId()),
-      ).toHaveLength(2);
+      expect(controller.getDrawingList(controller.getCurrentSheetId())).toHaveLength(2);
       controller.setFloatElementUuid('');
     });
     test('cut', async () => {
@@ -353,9 +442,7 @@ describe('drawing.test.ts', () => {
         fromCol: 4,
         fromRow: 4,
       });
-      expect(
-        controller.getDrawingList(controller.getCurrentSheetId()),
-      ).toHaveLength(1);
+      expect(controller.getDrawingList(controller.getCurrentSheetId())).toHaveLength(1);
       controller.setFloatElementUuid('1');
       await controller.cut();
       await controller.paste();
@@ -401,26 +488,14 @@ describe('drawing.test.ts', () => {
         height: 100,
         chartType: 'bar',
       });
-      expect(
-        controller.getDrawingList('').find((v) => v.uuid === '1')!.width,
-      ).toEqual(100);
-      expect(
-        controller.getDrawingList('').find((v) => v.uuid === '1')!.height,
-      ).toEqual(100);
-      expect(
-        controller.getDrawingList('').find((v) => v.uuid === '1')!.chartType,
-      ).toEqual('bar');
+      expect(controller.getDrawingList('').find((v) => v.uuid === '1')!.width).toEqual(100);
+      expect(controller.getDrawingList('').find((v) => v.uuid === '1')!.height).toEqual(100);
+      expect(controller.getDrawingList('').find((v) => v.uuid === '1')!.chartType).toEqual('bar');
 
       controller.undo();
-      expect(
-        controller.getDrawingList('').find((v) => v.uuid === '1')!.width,
-      ).toEqual(300);
-      expect(
-        controller.getDrawingList('').find((v) => v.uuid === '1')!.height,
-      ).toEqual(300);
-      expect(
-        controller.getDrawingList('').find((v) => v.uuid === '1')!.chartType,
-      ).toEqual('line');
+      expect(controller.getDrawingList('').find((v) => v.uuid === '1')!.width).toEqual(300);
+      expect(controller.getDrawingList('').find((v) => v.uuid === '1')!.height).toEqual(300);
+      expect(controller.getDrawingList('').find((v) => v.uuid === '1')!.chartType).toEqual('line');
     });
   });
 });

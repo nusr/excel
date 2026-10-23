@@ -6,12 +6,12 @@ import {
   Input,
   type ListBoxItemProps,
   type ListBoxProps,
-  type ValidationResult
+  type ValidationResult,
 } from 'react-aria-components/ComboBox';
-import {Label, FieldError, FieldButton, Description} from './Form';
-import {DropdownItem, DropdownListBox} from './ListBox';
-import {Popover} from './Popover';
-import {ChevronDown} from 'lucide-react';
+import { Label, FieldError, FieldButton, Description } from './Form';
+import { DropdownItem, DropdownListBox } from './ListBox';
+import { Popover } from './Popover';
+import { ChevronDown } from 'lucide-react';
 import './ComboBox.css';
 
 export interface ComboBoxProps<T, M extends 'single' | 'multiple'> extends Omit<

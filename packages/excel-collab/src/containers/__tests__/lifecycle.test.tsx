@@ -12,12 +12,17 @@ import { EditorStatus } from '../../types';
 import { initController } from '../../controller';
 import * as utils from '../../util';
 import { queue } from '../../component/Toast';
+import { ScrollBar } from '../canvas/ScrollBar';
+import { User as CollaborationUser } from '../canvas/Collaboration';
 import '../../__tests__/global.mock';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (reason: Error) => void;
-  const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
+  const promise = new Promise<T>((yes, no) => {
+    resolve = yes;
+    reject = no;
+  });
   return { promise, resolve, reject };
 }
 
@@ -38,10 +43,56 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+test('scrollbar dragging uses the new controller after its context changes', () => {
+  const first = controller();
+  const second = controller();
+  for (const value of [first, second])
+    value.setCanvasSize({ top: 0, left: 0, width: 300, height: 200 });
+  const firstScroll = vi.spyOn(first, 'setScroll');
+  const secondScroll = vi.spyOn(second, 'setScroll');
+  const view = render(
+    <StateContext.Provider value={{ controller: first }}>
+      <ScrollBar />
+    </StateContext.Provider>,
+  );
+  view.rerender(
+    <StateContext.Provider value={{ controller: second }}>
+      <ScrollBar />
+    </StateContext.Provider>,
+  );
+  fireEvent.pointerDown(screen.getByTestId('horizontal-scroll-bar'), {
+    buttons: 1,
+    clientX: 0,
+    clientY: 0,
+  });
+  fireEvent.pointerMove(document, { buttons: 1, clientX: 20, clientY: 0 });
+  fireEvent.pointerUp(document);
+  expect(secondScroll).toHaveBeenCalledOnce();
+  expect(firstScroll).not.toHaveBeenCalled();
+});
+
+test('collaborator colors stay valid for repeated bytes and update with client identity', () => {
+  const value = controller();
+  const range = value.getActiveRange().range;
+  const view = render(
+    <StateContext.Provider value={{ controller: value }}>
+      <CollaborationUser range={range} clientId={255} row={0} col={0} />
+    </StateContext.Provider>,
+  );
+  expect(screen.getByText('User 255')).toHaveStyle({ color: 'rgb(0, 0, 0)' });
+  view.rerender(
+    <StateContext.Provider value={{ controller: value }}>
+      <CollaborationUser range={range} clientId={4294967295} row={0} col={0} />
+    </StateContext.Provider>,
+  );
+  expect(screen.getByText('User 4294967295')).toHaveStyle({ color: 'rgb(255, 255, 255)' });
+});
+
 test('obsolete image downloads cannot replace a newer source', async () => {
   const first = deferred<string>();
   const second = deferred<string>();
-  const downloadFile = vi.fn()
+  const downloadFile = vi
+    .fn()
     .mockReturnValueOnce(first.promise)
     .mockReturnValueOnce(second.promise);
   const value = { controller: controller(), provider: { downloadFile } };
@@ -57,9 +108,13 @@ test('obsolete image downloads cannot replace a newer source', async () => {
     </StateContext.Provider>,
   );
   await waitFor(() => expect(downloadFile).toHaveBeenCalledTimes(2));
-  await act(async () => { second.resolve('data:image/png;base64,new'); });
+  await act(async () => {
+    second.resolve('data:image/png;base64,new');
+  });
   expect(screen.getByRole('img').getAttribute('src')).toBe('data:image/png;base64,new');
-  await act(async () => { first.resolve('data:image/png;base64,old'); });
+  await act(async () => {
+    first.resolve('data:image/png;base64,old');
+  });
   expect(screen.getByRole('img').getAttribute('src')).toBe('data:image/png;base64,new');
 });
 
@@ -88,9 +143,11 @@ test('image upload failures are handled without inserting a drawing', async () =
   fireEvent.change(screen.getByTestId('toolbar-floating-picture-input'), {
     target: { files: [new File(['image'], 'photo.jpeg', { type: 'image/jpeg' })] },
   });
-  await waitFor(() => expect(notify).toHaveBeenCalledWith({
-    title: expect.stringContaining('upload unavailable'),
-  }));
+  await waitFor(() =>
+    expect(notify).toHaveBeenCalledWith({
+      title: expect.stringContaining('upload unavailable'),
+    }),
+  );
   expect(value.getDrawingList()).toHaveLength(0);
 });
 
@@ -110,8 +167,12 @@ test('a slow image upload retains its original sheet and full file title', async
     target: { files: [new File(['image'], 'photo.jpeg', { type: 'image/jpeg' })] },
   });
   await waitFor(() => expect(uploadFile).toHaveBeenCalledOnce());
-  act(() => { value.addSheet(); });
-  await act(async () => { pending.resolve('stored-image'); });
+  act(() => {
+    value.addSheet();
+  });
+  await act(async () => {
+    pending.resolve('stored-image');
+  });
   expect(value.getDrawingList(first)[0]).toMatchObject({ title: 'photo', sheetId: first });
   expect(value.getDrawingList()).toHaveLength(0);
 });
@@ -119,47 +180,83 @@ test('a slow image upload retains its original sheet and full file title', async
 test('an open drawing menu updates reset-size availability after resizing', () => {
   const value = controller();
   const props = {
-    uuid: 'image', type: 'floating-picture' as const, title: 'picture',
-    width: 100, height: 100, originWidth: 100, originHeight: 100,
-    top: 0, left: 0, fromRow: 0, fromCol: 0, marginX: 0, marginY: 0,
-    sheetId: value.getCurrentSheetId(), labels: [], datasets: [],
-    menuLeft: 0, menuTop: 0, hideContextMenu: vi.fn(), resetResize: vi.fn(),
+    uuid: 'image',
+    type: 'floating-picture' as const,
+    title: 'picture',
+    width: 100,
+    height: 100,
+    originWidth: 100,
+    originHeight: 100,
+    top: 0,
+    left: 0,
+    fromRow: 0,
+    fromCol: 0,
+    marginX: 0,
+    marginY: 0,
+    sheetId: value.getCurrentSheetId(),
+    labels: [],
+    datasets: [],
+    menuLeft: 0,
+    menuTop: 0,
+    hideContextMenu: vi.fn(),
+    resetResize: vi.fn(),
   };
   const view = render(
     <StateContext.Provider value={{ controller: value }}>
       <FloatElementContextMenu {...props} />
     </StateContext.Provider>,
   );
-  expect(screen.getByTestId('float-element-context-menu-reset-size')).toHaveAttribute('aria-disabled', 'true');
+  expect(screen.getByTestId('float-element-context-menu-reset-size')).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
   view.rerender(
     <StateContext.Provider value={{ controller: value }}>
       <FloatElementContextMenu {...props} width={120} />
     </StateContext.Provider>,
   );
-  expect(screen.getByTestId('float-element-context-menu-reset-size')).not.toHaveAttribute('aria-disabled', 'true');
+  expect(screen.getByTestId('float-element-context-menu-reset-size')).not.toHaveAttribute(
+    'aria-disabled',
+    'true',
+  );
 });
 
 test('theme removes its system preference listener on unmount', () => {
   const media = { addEventListener: vi.fn(), removeEventListener: vi.fn() };
-  vi.stubGlobal('matchMedia', vi.fn(() => media));
+  vi.stubGlobal(
+    'matchMedia',
+    vi.fn(() => media),
+  );
   const view = render(
-    <StateContext.Provider value={{ controller: controller() }}><Theme /></StateContext.Provider>,
+    <StateContext.Provider value={{ controller: controller() }}>
+      <Theme />
+    </StateContext.Provider>,
   );
   const handler = media.addEventListener.mock.calls[0][1];
   view.unmount();
   expect(media.removeEventListener).toHaveBeenCalledWith('change', handler);
 });
 
-test.each(['Enter', 'Tab'])('formula editor prevents the native %s action after committing', (key) => {
-  const value = controller();
-  render(
-    <StateContext.Provider value={{ controller: value }}>
-      <MultipleLineEditor initValue="hello" isMergeCell={false} style={undefined} testId="editor" />
-    </StateContext.Provider>,
-  );
-  expect(fireEvent.keyDown(screen.getByTestId('editor'), { key })).toBe(false);
-  expect(value.getCell({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' })?.value).toBe('hello');
-});
+test.each(['Enter', 'Tab'])(
+  'formula editor prevents the native %s action after committing',
+  (key) => {
+    const value = controller();
+    render(
+      <StateContext.Provider value={{ controller: value }}>
+        <MultipleLineEditor
+          initValue="hello"
+          isMergeCell={false}
+          style={undefined}
+          testId="editor"
+        />
+      </StateContext.Provider>,
+    );
+    expect(fireEvent.keyDown(screen.getByTestId('editor'), { key })).toBe(false);
+    expect(value.getCell({ row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' })?.value).toBe(
+      'hello',
+    );
+  },
+);
 
 test('keyboard activation focuses the editor with its first character before later input', () => {
   const value = controller();
@@ -179,9 +276,15 @@ test('keyboard activation focuses the editor with its first character before lat
     expect(editor).toHaveProperty('selectionEnd', 1);
     fireEvent.input(editor, { target: { value: 'Hello' } });
     fireEvent.keyDown(editor, { key: 'Enter' });
-    expect(value.getCell({
-      row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '',
-    })?.value).toBe('Hello');
+    expect(
+      value.getCell({
+        row: 0,
+        col: 0,
+        rowCount: 1,
+        colCount: 1,
+        sheetId: '',
+      })?.value,
+    ).toBe('Hello');
     expect(useCoreStore.getState().editorInitialValue).toBeUndefined();
   } finally {
     cleanup();
@@ -193,7 +296,12 @@ test('IME composition Enter does not commit a partially composed value', () => {
   const value = controller();
   render(
     <StateContext.Provider value={{ controller: value }}>
-      <MultipleLineEditor initValue="composing" isMergeCell={false} style={undefined} testId="editor" />
+      <MultipleLineEditor
+        initValue="composing"
+        isMergeCell={false}
+        style={undefined}
+        testId="editor"
+      />
     </StateContext.Provider>,
   );
   fireEvent.keyDown(screen.getByTestId('editor'), { key: 'Enter', isComposing: true });

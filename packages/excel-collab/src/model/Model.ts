@@ -16,12 +16,7 @@ import {
   SYNC_FLAG,
   ModelEventEmitterType,
 } from '../types';
-import {
-  XLSX_MAX_ROW_COUNT,
-  XLSX_MAX_COL_COUNT,
-  EventEmitter,
-  containRange,
-} from '../util';
+import { XLSX_MAX_ROW_COUNT, XLSX_MAX_COL_COUNT, EventEmitter, containRange } from '../util';
 import { Workbook } from './workbook';
 import { RangeMap } from './rangeMap';
 import { Drawing } from './drawing';
@@ -35,10 +30,7 @@ import { ScrollManager } from './scroll';
 import { Doc, UndoManager, type Map as YMap } from 'yjs';
 import { SharedRoot, type SharedType } from '../protocol';
 
-export class Model
-  extends EventEmitter<ModelEventEmitterType>
-  implements IModel
-{
+export class Model extends EventEmitter<ModelEventEmitterType> implements IModel {
   private readonly workbookManager: Workbook;
   private readonly rangeMapManager: RangeMap;
   private readonly drawingsManager: Drawing;
@@ -71,10 +63,13 @@ export class Model
     this.doc = doc;
     this.root = new SharedRoot(doc);
     const root = this.getRoot();
-    this.undoManager = new UndoManager(root.types.filter((type) => type !== root.get('worksheets')), {
-      trackedOrigins: new Set([SYNC_FLAG.MODEL, SYNC_FLAG.SKIP_UPDATE]),
-      captureTimeout: 100,
-    });
+    this.undoManager = new UndoManager(
+      root.types.filter((type) => type !== root.get('worksheets')),
+      {
+        trackedOrigins: new Set([SYNC_FLAG.MODEL, SYNC_FLAG.SKIP_UPDATE]),
+        captureTimeout: 100,
+      },
+    );
     this.observeTypes();
     root.onType(this.observeType);
     doc.on('afterTransaction', this.observeTypes);
@@ -191,18 +186,19 @@ export class Model
   getCurrentSheetId(): string {
     return this.workbookManager.getCurrentSheetId();
   }
-  fromJSON = (json: ModelJSON): void => this.doc.transact(() => {
-    this.workbookManager.fromJSON(json);
-    this.rangeMapManager.fromJSON(json);
-    this.drawingsManager.fromJSON(json);
-    this.definedNameManager.fromJSON(json);
-    this.worksheetManager.fromJSON(json);
-    this.mergeCellManager.fromJSON(json);
-    this.rowManager.fromJSON(json);
-    this.colManager.fromJSON(json);
-    this.filterManager.fromJSON(json);
-    this.scrollManager.fromJSON(json);
-  }, SYNC_FLAG.SKIP_UNDO_REDO);
+  fromJSON = (json: ModelJSON): void =>
+    this.doc.transact(() => {
+      this.workbookManager.fromJSON(json);
+      this.rangeMapManager.fromJSON(json);
+      this.drawingsManager.fromJSON(json);
+      this.definedNameManager.fromJSON(json);
+      this.worksheetManager.fromJSON(json);
+      this.mergeCellManager.fromJSON(json);
+      this.rowManager.fromJSON(json);
+      this.colManager.fromJSON(json);
+      this.filterManager.fromJSON(json);
+      this.scrollManager.fromJSON(json);
+    }, SYNC_FLAG.SKIP_UNDO_REDO);
   toJSON = (): ModelJSON => {
     return {
       ...this.getRoot().toJSON(),
@@ -211,15 +207,11 @@ export class Model
     };
   };
 
-  deleteCell(range: IRange){
-    this.worksheetManager.deleteCell(range)
+  deleteCell(range: IRange) {
+    this.worksheetManager.deleteCell(range);
   }
 
-  setCell(
-    value: ResultType[][],
-    style: Array<Array<Partial<StyleType>>>,
-    range: IRange,
-  ) {
+  setCell(value: ResultType[][], style: Array<Array<Partial<StyleType>>>, range: IRange) {
     return this.worksheetManager.setCell(value, style, range);
   }
   setCellValue(value: ResultType, range: IRange) {
@@ -249,7 +241,12 @@ export class Model
     if (sheetInfo.colCount >= XLSX_MAX_COL_COUNT) {
       return;
     }
-    if (!Number.isInteger(count) || !Number.isInteger(colIndex) || colIndex < 0 || colIndex >= sheetInfo.colCount) {
+    if (
+      !Number.isInteger(count) ||
+      !Number.isInteger(colIndex) ||
+      colIndex < 0 ||
+      colIndex >= sheetInfo.colCount
+    ) {
       throw new RangeError('Invalid column insertion');
     }
     count = Math.min(count, XLSX_MAX_COL_COUNT - sheetInfo.colCount);
@@ -263,7 +260,12 @@ export class Model
     if (!sheetInfo) {
       return;
     }
-    if (!Number.isInteger(count) || !Number.isInteger(colIndex) || colIndex < 0 || colIndex >= sheetInfo.colCount) {
+    if (
+      !Number.isInteger(count) ||
+      !Number.isInteger(colIndex) ||
+      colIndex < 0 ||
+      colIndex >= sheetInfo.colCount
+    ) {
       throw new RangeError('Invalid column deletion');
     }
     count = Math.min(count, sheetInfo.colCount - colIndex, sheetInfo.colCount - 1);
@@ -291,7 +293,12 @@ export class Model
     if (sheetInfo.rowCount >= XLSX_MAX_ROW_COUNT) {
       return;
     }
-    if (!Number.isInteger(count) || !Number.isInteger(rowIndex) || rowIndex < 0 || rowIndex >= sheetInfo.rowCount) {
+    if (
+      !Number.isInteger(count) ||
+      !Number.isInteger(rowIndex) ||
+      rowIndex < 0 ||
+      rowIndex >= sheetInfo.rowCount
+    ) {
       throw new RangeError('Invalid row insertion');
     }
     count = Math.min(count, XLSX_MAX_ROW_COUNT - sheetInfo.rowCount);
@@ -305,7 +312,12 @@ export class Model
     if (!sheetInfo) {
       return;
     }
-    if (!Number.isInteger(count) || !Number.isInteger(rowIndex) || rowIndex < 0 || rowIndex >= sheetInfo.rowCount) {
+    if (
+      !Number.isInteger(count) ||
+      !Number.isInteger(rowIndex) ||
+      rowIndex < 0 ||
+      rowIndex >= sheetInfo.rowCount
+    ) {
       throw new RangeError('Invalid row deletion');
     }
     count = Math.min(count, sheetInfo.rowCount - rowIndex, sheetInfo.rowCount - 1);
@@ -322,7 +334,12 @@ export class Model
     this.colManager.unhideCol(colIndex, count);
   }
   getRow(row: number, sheetId?: string): CustomItem {
-    return this.rowManager.getRow(row, sheetId);
+    const result = this.rowManager.getRow(row, sheetId);
+    return {
+      ...result,
+      isHide:
+        result.isHide || this.filterManager.isRowFiltered(row, sheetId || this.getCurrentSheetId()),
+    };
   }
   setRowHeight(row: number, height: number, sheetId?: string): void {
     this.rowManager.setRowHeight(row, height, sheetId);
@@ -433,9 +450,7 @@ export class Model
       return '';
     }
     const isLast = index === list.length - 1;
-    let lastIndex = isLast
-      ? (index - 1 + list.length) % list.length
-      : (index + 1) % list.length;
+    let lastIndex = isLast ? (index - 1 + list.length) % list.length : (index + 1) % list.length;
     while (lastIndex !== index) {
       if (list[lastIndex].isHide) {
         lastIndex = isLast

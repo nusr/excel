@@ -7,7 +7,7 @@ on:
     types:
       - closed
     branches:
-      - "main"
+      - 'main'
 
 concurrency:
   group: create-release-pr
@@ -53,46 +53,46 @@ jobs:
         run: |
           echo "🔍 Checking staged files..."
           modified_files=$(git ls-files -m -o --exclude-standard)
-          
+
           if [ -z "$modified_files" ]; then
             echo "❌ No modified files found"
             exit 1
           fi
-          
+
           # Extract package.json and CHANGELOG.md paths
           package_json_path=$(echo "$modified_files" | grep "package.json" | head -n 1)
           changelog_path=$(echo "$modified_files" | grep "CHANGELOG.md" | head -n 1)
-          
+
           if [ -z "$package_json_path" ]; then
             echo "❌ package.json not found among modified files"
             exit 1
           fi
-          
+
           if [ -z "$changelog_path" ]; then
             echo "❌ CHANGELOG.md not found among modified files"
             exit 1
           fi
-          
+
           # Extract changelog content
           latest_changelog=$(git diff --no-color "$changelog_path" | grep -E '^(\+[^+]|-)' | grep -Ev '^--- a/' | sed 's/^+//;s/^-//')
-          
+
           if [ -z "$latest_changelog" ]; then
             echo "❌ CHANGELOG.md has no changes"
             exit 1
           fi
-          
+
           # Save to temp file
           changelog_temp_file=$(mktemp)
           echo "$latest_changelog" > "$changelog_temp_file"
-          
+
           # Extract package info
           package_name=$(jq -r '.name' "$package_json_path")
           package_name="${package_name//@/}"
           package_version=$(jq -r '.version' "$package_json_path")
-          
+
           echo "📦 Package: $package_name"
           echo "🏷️ Version: $package_version"
-          
+
           # Set outputs
           {
             echo "package_name=$package_name"
@@ -104,14 +104,14 @@ jobs:
       - name: Check branch and create commit
         run: |
           branchName="${{ steps.validate-files.outputs.branchName }}"
-          
+
           echo "🌿 Branch: $branchName"
-          
+
           if git ls-remote --exit-code --heads origin "$branchName"; then
             echo "❌ Branch already exists"
             exit 1
           fi
-          
+
           git checkout -B "$branchName"
           git add -A
           git commit -m "chore(RELEASE): ${{ steps.validate-files.outputs.package_version }}"
@@ -124,16 +124,16 @@ jobs:
         run: |
           changelog_content=$(cat "${{ steps.validate-files.outputs.changelog_temp_file }}")
           default_branch=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
-          
+
           echo "🔗 Creating PR..."
           pr_url=$(gh pr create \
             --title "chore(RELEASE): ${{ steps.validate-files.outputs.package_version }}" \
             --body "$changelog_content" \
             --base "$default_branch" \
             --head "${{ steps.validate-files.outputs.branchName }}")
-          
+
           echo "✅ PR created: $pr_url"
-          
+
           # Cleanup
           rm -f "${{ steps.validate-files.outputs.changelog_temp_file }}"
 
@@ -149,7 +149,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          ref: "main"
+          ref: 'main'
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -168,46 +168,46 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🔍 Fetching PR metadata..."
-          
+
           PR_NUMBER=${{ github.event.pull_request.number }}
           PR_META=$(gh pr view "$PR_NUMBER" --json number,title,body,mergeCommit)
-          
+
           PR_TITLE=$(echo "$PR_META" | jq -r '.title')
           PR_BODY=$(echo "$PR_META" | jq -r '.body')
           TAG_NAME=$(echo "$PR_TITLE" | sed -e 's/^chore(RELEASE): *//' -e 's/ *$//')
           COMMIT_ID=$(echo "$PR_META" | jq -r '.mergeCommit.oid')
-          
+
           if [ -z "$COMMIT_ID" ]; then
             echo "❌ No merge commit found"
             exit 1
           fi
-          
+
           # Validate version format
           if [[ ! "$TAG_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-hotfix-[0-9]+)?$ ]]; then
             echo "❌ Invalid version format: $TAG_NAME"
             exit 1
           fi
-          
+
           echo "🚀 Creating release: $TAG_NAME"
-          
+
           # Create release using gh CLI
           gh release create "$TAG_NAME" \
             --repo "$GITHUB_REPOSITORY" \
             --title "$TAG_NAME" \
             --target "$COMMIT_ID" \
             --notes "$PR_BODY"
-          
+
           echo "✅ Release created successfully: $TAG_NAME"
-          
+
       - name: Trigger publish workflow
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🚀 Triggering publish workflow..."
-          
+
           # Trigger publish workflow using workflow_dispatch event
           gh workflow run publish.yml \
             --repo "$GITHUB_REPOSITORY" \
             --ref "main"
-          
+
           echo "✅ Publish workflow triggered"

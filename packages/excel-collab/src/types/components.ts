@@ -64,6 +64,7 @@ export type CustomClipboardData = {
   type: 'cut' | 'copy';
   range: IRange;
   floatElementUuid: string;
+  clipboardId?: string;
 };
 
 export type DocumentItem = {

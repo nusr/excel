@@ -27,9 +27,7 @@ test('apply number format to cell with number', async ({ page }) => {
   await sleep(100);
 
   // Verify cell has the number
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    '1234.56',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('1234.56');
 });
 
 test('number format with percentage', async ({ page }) => {
@@ -72,9 +70,7 @@ test('number format with large number', async ({ page }) => {
   await page.keyboard.press('ArrowUp');
 
   // Verify the number
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    '1000000',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('1000000');
 
   // Number format should be accessible
   const numberFormat = page.getByTestId('toolbar-number-format');

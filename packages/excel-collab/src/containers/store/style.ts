@@ -1,9 +1,4 @@
-import {
-  StyleType,
-  EUnderLine,
-  EHorizontalAlign,
-  EVerticalAlign,
-} from '../../types';
+import { StyleType, EUnderLine, EHorizontalAlign, EVerticalAlign } from '../../types';
 import { DEFAULT_FONT_SIZE, DEFAULT_FORMAT_CODE } from '../../util';
 import { getThemeColor } from '../../theme';
 import { create } from 'zustand';

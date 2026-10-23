@@ -55,19 +55,12 @@ describe('Yjs protocol compatibility', () => {
       typeof import('@y/websocket-server/utils')
     >('@y/websocket-server/utils');
     const Y = await vi.importActual<typeof import('yjs')>('yjs');
-    const sync =
-      await vi.importActual<typeof import('y-protocols/sync')>(
-        'y-protocols/sync',
-      );
-    const encoding =
-      await vi.importActual<typeof import('lib0/encoding')>('lib0/encoding');
-    const decoding =
-      await vi.importActual<typeof import('lib0/decoding')>('lib0/decoding');
+    const sync = await vi.importActual<typeof import('y-protocols/sync')>('y-protocols/sync');
+    const encoding = await vi.importActual<typeof import('lib0/encoding')>('lib0/encoding');
+    const decoding = await vi.importActual<typeof import('lib0/decoding')>('lib0/decoding');
     const messages: Uint8Array[] = [];
-    const connection: EventEmitter &
-      Pick<WebSocket, 'readyState' | 'send' | 'close' | 'ping'> = Object.assign(
-      new EventEmitter(),
-      {
+    const connection: EventEmitter & Pick<WebSocket, 'readyState' | 'send' | 'close' | 'ping'> =
+      Object.assign(new EventEmitter(), {
         readyState: 1 as const,
         send(message: Parameters<WebSocket['send']>[0]) {
           if (!(message instanceof Uint8Array)) {
@@ -77,21 +70,16 @@ describe('Yjs protocol compatibility', () => {
         },
         close: vi.fn(),
         ping: vi.fn(),
-      },
-    );
+      });
     const docName = 'protocol-compatibility-test';
     const client = new Y.Doc();
     const protocolErrors: Error[] = [];
 
     try {
-      setupWSConnection(
-        connection as WebSocket,
-        { url: `/${docName}` } as http.IncomingMessage,
-        { docName },
-      );
-      docs
-        .get(docName)!
-        .on('error', (error: Error) => protocolErrors.push(error));
+      setupWSConnection(connection as WebSocket, { url: `/${docName}` } as http.IncomingMessage, {
+        docName,
+      });
+      docs.get(docName)!.on('error', (error: Error) => protocolErrors.push(error));
       expect(messages).toHaveLength(1);
 
       const handshake = decoding.createDecoder(messages.shift()!);
@@ -184,10 +172,7 @@ describe('WebSocketManager Tests', () => {
 
     it('should call setupEventListeners to configure event handlers', () => {
       // Verify that connection event handler was registered
-      expect(mockWss.on).toHaveBeenCalledWith(
-        'connection',
-        expect.any(Function),
-      );
+      expect(mockWss.on).toHaveBeenCalledWith('connection', expect.any(Function));
     });
   });
 
@@ -298,9 +283,7 @@ describe('WebSocketManager Tests', () => {
       expect(wsManager.getConnectionCount()).toBe(1);
 
       // Get the close event handler
-      const closeHandler = mockWs.on.mock.calls.find(
-        (call: any[]) => call[0] === 'close',
-      )[1];
+      const closeHandler = mockWs.on.mock.calls.find((call: any[]) => call[0] === 'close')[1];
 
       // Simulate closing the connection
       closeHandler(1000, 'Normal closure');
@@ -326,9 +309,7 @@ describe('WebSocketManager Tests', () => {
       }
 
       // Get the error event handler
-      const errorHandler = mockWs.on.mock.calls.find(
-        (call: any[]) => call[0] === 'error',
-      )[1];
+      const errorHandler = mockWs.on.mock.calls.find((call: any[]) => call[0] === 'error')[1];
 
       // Simulate an error
       const mockError = new Error('WebSocket error');
@@ -347,9 +328,7 @@ describe('WebSocketManager Tests', () => {
       const mockError = new Error('Server error');
 
       // Get the error event handler from the WebSocketServer
-      const errorHandler = mockWss.on.mock.calls.find(
-        (call: any[]) => call[0] === 'error',
-      )?.[1];
+      const errorHandler = mockWss.on.mock.calls.find((call: any[]) => call[0] === 'error')?.[1];
 
       // Call the error handler if it exists
       if (errorHandler) {
@@ -357,9 +336,7 @@ describe('WebSocketManager Tests', () => {
       }
 
       // Verify error was logged
-      expect(console.error).toHaveBeenCalledWith(
-        'WebSocket server error: Error: Server error',
-      );
+      expect(console.error).toHaveBeenCalledWith('WebSocket server error: Error: Server error');
     });
   });
 
@@ -407,9 +384,7 @@ describe('WebSocketManager Tests', () => {
       expect(mockWss.close).toHaveBeenCalled();
 
       // The console.log should have been called by the callback
-      expect(console.log).toHaveBeenCalledWith(
-        'All WebSocket connections have been closed',
-      );
+      expect(console.log).toHaveBeenCalledWith('All WebSocket connections have been closed');
     });
   });
 
@@ -456,11 +431,10 @@ describe('WebSocketManager Tests', () => {
       }
 
       // Verify connection was set up with empty docName
-      expect(mockSetupWSConnection).toHaveBeenCalledWith(
-        mockWs,
-        requestWithEmptyUrl,
-        { gc: true, docName: '' },
-      );
+      expect(mockSetupWSConnection).toHaveBeenCalledWith(mockWs, requestWithEmptyUrl, {
+        gc: true,
+        docName: '',
+      });
     });
   });
 

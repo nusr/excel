@@ -1,4 +1,4 @@
-import { sleep, test, expect } from './util';
+import { test, expect } from './util';
 
 test('scrollbars are visible', async ({ page }) => {
   await page.keyboard.press('Escape');
@@ -18,17 +18,22 @@ test('navigate far down and scrollbar updates', async ({ page }) => {
   // Enter data at A1
   await page.keyboard.type('Start');
   await page.keyboard.press('Enter');
+  const cellName = page.getByTestId('formula-bar-name-input');
+  await expect(cellName).toHaveValue('A2');
 
-  // Navigate down multiple times
-  for (let i = 0; i < 20; i++) {
+  for (let row = 3; row <= 62; row++) {
     await page.keyboard.press('ArrowDown');
-    await sleep(10);
+    await expect(cellName).toHaveValue(`A${row}`);
   }
 
-  // Should be at row 22
-  const cellName = page.getByTestId('formula-bar-name-input');
-  const value = await cellName.inputValue();
-  expect(value).toContain('A2');
+  const scrollThumb = page.getByTestId('vertical-scroll-bar-content');
+  await expect
+    .poll(() =>
+      scrollThumb.evaluate(
+        (element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).m42,
+      ),
+    )
+    .toBeGreaterThan(0);
 });
 
 test('navigate far right and scrollbar updates', async ({ page }) => {
@@ -38,15 +43,20 @@ test('navigate far right and scrollbar updates', async ({ page }) => {
   await page.keyboard.type('Start');
   await page.keyboard.press('Enter');
   await page.keyboard.press('ArrowUp');
+  const cellName = page.getByTestId('formula-bar-name-input');
+  await expect(cellName).toHaveValue('A1');
 
-  // Navigate right multiple times
-  for (let i = 0; i < 10; i++) {
+  for (const column of 'BCDEFGHIJKLMNOPQRSTU') {
     await page.keyboard.press('ArrowRight');
-    await sleep(10);
+    await expect(cellName).toHaveValue(`${column}1`);
   }
 
-  // Should have moved to the right
-  const cellName = page.getByTestId('formula-bar-name-input');
-  const value = await cellName.inputValue();
-  expect(value).not.toBe('A1');
+  const scrollThumb = page.getByTestId('horizontal-scroll-bar-content');
+  await expect
+    .poll(() =>
+      scrollThumb.evaluate(
+        (element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).m41,
+      ),
+    )
+    .toBeGreaterThan(0);
 });

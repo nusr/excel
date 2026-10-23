@@ -1,10 +1,5 @@
 import { initController } from '../../controller';
-import {
-  EUnderLine,
-  IController,
-  EVerticalAlign,
-  EHorizontalAlign,
-} from '../../types';
+import { EUnderLine, IController, EVerticalAlign, EHorizontalAlign } from '../../types';
 import { compareScreenShot } from './util';
 
 describe('cell-style.test.ts', () => {
@@ -82,16 +77,8 @@ describe('cell-style.test.ts', () => {
     });
   });
   describe('align', () => {
-    for (const v of [
-      EVerticalAlign.TOP,
-      EVerticalAlign.MIDDLE,
-      EVerticalAlign.BOTTOM,
-    ]) {
-      for (const h of [
-        EHorizontalAlign.LEFT,
-        EHorizontalAlign.CENTER,
-        EHorizontalAlign.RIGHT,
-      ]) {
+    for (const v of [EVerticalAlign.TOP, EVerticalAlign.MIDDLE, EVerticalAlign.BOTTOM]) {
+      for (const h of [EHorizontalAlign.LEFT, EHorizontalAlign.CENTER, EHorizontalAlign.RIGHT]) {
         test(`${EVerticalAlign[v]} ${EHorizontalAlign[h]}`, () => {
           controller.setRowHeight(0, controller.getRow(0).len * 2);
           controller.setColWidth(0, controller.getCol(0).len * 2);

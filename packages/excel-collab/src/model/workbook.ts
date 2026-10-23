@@ -1,9 +1,4 @@
-import type {
-  ModelJSON,
-  WorksheetType,
-  IWorkbook,
-  IModel,
-} from '../types';
+import type { ModelJSON, WorksheetType, IWorkbook, IModel } from '../types';
 import {
   DEFAULT_ROW_COUNT,
   DEFAULT_COL_COUNT,
@@ -78,18 +73,27 @@ export class Workbook implements IWorkbook {
     }
     const keyList = Object.keys(data) as Array<keyof Partial<WorksheetType>>;
     for (const key of keyList) {
-      if (key === 'sheetId' || (key !== 'rowCount' && key !== 'colCount' && sheetInfo.get(key) === data[key])) {
+      if (
+        key === 'sheetId' ||
+        (key !== 'rowCount' && key !== 'colCount' && sheetInfo.get(key) === data[key])
+      ) {
         continue;
       }
       if (key === 'rowCount' || key === 'colCount') {
         const order = sheetInfo.get(key === 'rowCount' ? 'rows' : 'cols')!;
         const length = data[key]!;
-        if (!Number.isInteger(length) || length <= 0 ||
-          length > (key === 'rowCount' ? XLSX_MAX_ROW_COUNT : XLSX_MAX_COL_COUNT)) {
+        if (
+          !Number.isInteger(length) ||
+          length <= 0 ||
+          length > (key === 'rowCount' ? XLSX_MAX_ROW_COUNT : XLSX_MAX_COL_COUNT)
+        ) {
           throw new RangeError('Invalid worksheet dimensions');
         }
         if (length > order.length) {
-          order.insert(order.length, Array.from({ length: length - order.length }, () => v4()));
+          order.insert(
+            order.length,
+            Array.from({ length: length - order.length }, () => v4()),
+          );
         } else if (length < order.length) {
           order.delete(length, order.length - length);
         }
@@ -114,10 +118,7 @@ export class Workbook implements IWorkbook {
       colCount: DEFAULT_COL_COUNT,
       rowCount: DEFAULT_ROW_COUNT,
     };
-    this.workbook!.set(
-      sheet.sheetId,
-      createSharedSheet(sheet),
-    );
+    this.workbook!.set(sheet.sheetId, createSharedSheet(sheet));
     return this.getSheetInfo(sheet.sheetId)!;
   }
 
@@ -145,7 +146,9 @@ export class Workbook implements IWorkbook {
     }
     const id = sheetId || this.getCurrentSheetId();
     const sheetList = this.getSheetList();
-    const item = sheetList.find((v) => v.name.toLowerCase() === sheetName.toLowerCase() && v.sheetId !== id);
+    const item = sheetList.find(
+      (v) => v.name.toLowerCase() === sheetName.toLowerCase() && v.sheetId !== id,
+    );
     if (item) {
       this.model.emit('toastMessage', {
         type: 'error',

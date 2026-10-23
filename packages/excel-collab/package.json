@@ -2,16 +2,34 @@
   "name": "excel-collab",
   "version": "0.1.13",
   "description": "Online Collaboration Excel",
-  "author": "Steve Xu <stevexugc@gmail.com>",
-  "bugs": "https://github.com/nusr/excel/issues",
+  "keywords": [
+    "collaboration",
+    "excel",
+    "react",
+    "spreadsheet",
+    "xlsx",
+    "yjs"
+  ],
   "homepage": "https://github.com/nusr/excel",
-  "repository": "git+https://github.com/nusr/excel.git",
+  "bugs": "https://github.com/nusr/excel/issues",
   "license": "MIT",
-  "module": "./lib/index.es.js",
+  "author": "Steve Xu <stevexugc@gmail.com>",
+  "repository": "git+https://github.com/nusr/excel.git",
+  "files": [
+    "lib",
+    "CHANGELOG.md",
+    "README.md",
+    "package.json"
+  ],
   "main": "./lib/index.umd.js",
+  "module": "./lib/index.es.js",
   "types": "./lib/index.d.ts",
   "typesVersions": {
-    "*": { "protocol": ["lib/protocol.d.ts"] }
+    "*": {
+      "protocol": [
+        "lib/protocol.d.ts"
+      ]
+    }
   },
   "exports": {
     ".": {
@@ -27,6 +45,9 @@
     },
     "./style.css": "./lib/style.css",
     "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "type-check": "tsc",
@@ -46,30 +67,13 @@
     "uuid": "^14.0.3",
     "zustand": "^5.0.15"
   },
+  "devDependencies": {
+    "y-protocols": "^1.0.7",
+    "yjs": "^13.6.33"
+  },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
     "yjs": "^13.6.32"
-  },
-  "keywords": [
-    "react",
-    "yjs",
-    "collaboration",
-    "excel",
-    "xlsx",
-    "spreadsheet"
-  ],
-  "files": [
-    "lib",
-    "CHANGELOG.md",
-    "README.md",
-    "package.json"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "devDependencies": {
-    "y-protocols": "^1.0.7",
-    "yjs": "^13.6.33"
   }
 }

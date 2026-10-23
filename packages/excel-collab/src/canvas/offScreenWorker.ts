@@ -37,6 +37,7 @@ import {
   containRange,
   getCustomWidthOrHeightKey,
   getWorksheetKey,
+  getFilterCriteria,
 } from '../util';
 import { getHeaderStyle } from './constant';
 
@@ -178,12 +179,7 @@ export default class OffScreenWorker implements WorkerMainView {
           ? getThemeColor('primaryColor', this.eventData.theme)
           : getThemeColor('black', this.eventData.theme);
 
-        fillText(
-          this.ctx,
-          String(i + 1),
-          headerSize.width / 2,
-          temp + rowHeight / 2,
-        );
+        fillText(this.ctx, String(i + 1), headerSize.width / 2, temp + rowHeight / 2);
       }
       y += rowHeight;
     }
@@ -228,12 +224,7 @@ export default class OffScreenWorker implements WorkerMainView {
         this.ctx.fillStyle = check
           ? getThemeColor('primaryColor', this.eventData.theme)
           : getThemeColor('black', this.eventData.theme);
-        fillText(
-          this.ctx,
-          intToColumnName(i),
-          temp + colWidth / 2,
-          headerSize.height / 2,
-        );
+        fillText(this.ctx, intToColumnName(i), temp + colWidth / 2, headerSize.height / 2);
       }
       if (
         autoFilter &&
@@ -241,13 +232,10 @@ export default class OffScreenWorker implements WorkerMainView {
         filterBottom > headerSize.height &&
         filterBottom <= this.eventData.canvasSize.height &&
         i >= autoFilter.range.col &&
-        i < autoFilter.range.col + autoFilter.range.colCount
+        i <
+          (autoFilter.range.colCount ? autoFilter.range.col + autoFilter.range.colCount : colCount)
       ) {
-        this.renderFilter(
-          x + colWidth,
-          filterBottom,
-          autoFilter.col === i,
-        );
+        this.renderFilter(x + colWidth, filterBottom, !!getFilterCriteria(autoFilter)[i]);
       }
       x += colWidth;
     }
@@ -333,10 +321,7 @@ export default class OffScreenWorker implements WorkerMainView {
     this.ctx.save();
 
     fillRect(this.ctx, 0, 0, headerSize.width, headerSize.height);
-    this.ctx.fillStyle = getThemeColor(
-      'triangleFillColor',
-      this.eventData.theme,
-    );
+    this.ctx.fillStyle = getThemeColor('triangleFillColor', this.eventData.theme);
 
     const offset = 2;
     const minY = Math.floor(offset);
@@ -349,10 +334,7 @@ export default class OffScreenWorker implements WorkerMainView {
     this.ctx.restore();
   }
   private getRowHeight(row: number) {
-    const key = getCustomWidthOrHeightKey(
-      this.eventData.currentSheetInfo.sheetId,
-      row,
-    );
+    const key = getCustomWidthOrHeightKey(this.eventData.currentSheetInfo.sheetId, row);
     const data = this.eventData.customHeight[key];
     if (!data) {
       return CELL_HEIGHT;
@@ -360,10 +342,7 @@ export default class OffScreenWorker implements WorkerMainView {
     return data.isHide ? HIDE_CELL : data.len;
   }
   private getColWidth(col: number) {
-    const key = getCustomWidthOrHeightKey(
-      this.eventData.currentSheetInfo.sheetId,
-      col,
-    );
+    const key = getCustomWidthOrHeightKey(this.eventData.currentSheetInfo.sheetId, col);
     const data = this.eventData.customWidth[key];
     if (!data) {
       return CELL_WIDTH;
@@ -424,13 +403,7 @@ export default class OffScreenWorker implements WorkerMainView {
     }
     this.ctx.lineWidth = lineWidth;
     this.ctx.strokeStyle = getThemeColor('primaryColor', this.eventData.theme);
-    drawAntLine(
-      this.ctx,
-      left,
-      top,
-      width,
-      height,
-    );
+    drawAntLine(this.ctx, left, top, width, height);
   }
   private renderMergeCell() {
     const mergeCells = this.eventData.currentMergeCells;
@@ -566,9 +539,7 @@ export default class OffScreenWorker implements WorkerMainView {
     const mergeCells = this.eventData.currentMergeCells;
     for (let rowIndex = row; rowIndex < endRow; rowIndex++) {
       for (let colIndex = col; colIndex < endCol; colIndex++) {
-        const mergeCell = mergeCells.find(
-          (v) => v.row === rowIndex && v.col === colIndex,
-        );
+        const mergeCell = mergeCells.find((v) => v.row === rowIndex && v.col === colIndex);
 
         this.renderCell(rowIndex, colIndex, mergeCell, maxWidth, maxHeight);
       }
@@ -590,11 +561,7 @@ export default class OffScreenWorker implements WorkerMainView {
       colCount: 1,
       sheetId: '',
     };
-    const key = getWorksheetKey(
-      this.eventData.currentSheetInfo.sheetId,
-      row,
-      col,
-    );
+    const key = getWorksheetKey(this.eventData.currentSheetInfo.sheetId, row, col);
     const cellInfo = this.eventData.sheetData[key];
     if (!cellInfo) {
       return;
@@ -695,10 +662,7 @@ export default class OffScreenWorker implements WorkerMainView {
       [activeCell.left, headerSize.height],
       [activeCell.left + width, headerSize.height],
     ];
-    list.push(
-      [headerSize.width, activeCell.top],
-      [headerSize.width, activeCell.top + height],
-    );
+    list.push([headerSize.width, activeCell.top], [headerSize.width, activeCell.top + height]);
     drawLines(this.ctx, list);
     if (check) {
       this.renderActiveCell();
@@ -731,11 +695,7 @@ export default class OffScreenWorker implements WorkerMainView {
     const activeCell = this.computeCellPosition(range);
 
     let strokeWidth = 0;
-    for (
-      let i = range.col, endCol = range.col + range.colCount;
-      i < endCol;
-      i++
-    ) {
+    for (let i = range.col, endCol = range.col + range.colCount; i < endCol; i++) {
       strokeWidth += this.getColWidth(i);
     }
     const realHeight = contentHeight - headerSize.height;
@@ -765,11 +725,7 @@ export default class OffScreenWorker implements WorkerMainView {
     const range = this.eventData.range;
     const activeCell = this.computeCellPosition(range);
     let strokeHeight = 0;
-    for (
-      let i = range.row, endRow = range.row + range.rowCount;
-      i < endRow;
-      i++
-    ) {
+    for (let i = range.row, endRow = range.row + range.rowCount; i < endRow; i++) {
       strokeHeight += this.getRowHeight(i);
     }
     const realWidth = contentWidth - headerSize.width - DEFAULT_LINE_WIDTH;

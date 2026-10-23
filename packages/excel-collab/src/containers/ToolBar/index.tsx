@@ -1,27 +1,14 @@
 import React, { useMemo, memo, useCallback, Key } from 'react';
 import { SelectList } from '../../components';
-import {
-  FONT_SIZE_LIST,
-  QUERY_ALL_LOCAL_FONT,
-  LOCAL_FONT_KEY,
-} from '../../util';
-import {
-  EUnderLine,
-  OptionItem,
-  EHorizontalAlign,
-  EVerticalAlign,
-} from '../../types';
+import { FONT_SIZE_LIST, QUERY_ALL_LOCAL_FONT, LOCAL_FONT_KEY } from '../../util';
+import { EUnderLine, OptionItem, EHorizontalAlign, EVerticalAlign } from '../../types';
 import styles from './index.module.css';
 import { useStyleStore, useCoreStore, useExcel } from '../../containers/store';
 import { InsertFloatingPicture, InsertChart } from '../FloatElement/Toolbar';
 import i18n from '../../i18n';
 import { BorderToolBar } from './Border';
 import { isSupportFontFamily } from '../canvas/isSupportFontFamily';
-import {
-  numberFormatOptionList,
-  underlineOptionList,
-  mergeOptionList,
-} from './constant';
+import { numberFormatOptionList, underlineOptionList, mergeOptionList } from './constant';
 import { Select, SelectItem } from '../../component/Select';
 import { ColorPicker } from '../ColorPicker';
 import { ToggleButton } from '../../component/ToggleButton';
@@ -41,8 +28,8 @@ import {
 
 type ToolbarClickHandler = NonNullable<React.ComponentProps<typeof ToggleButton>['onClick']>;
 
-export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> =
-  memo(({ children }) => {
+export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> = memo(
+  ({ children }) => {
     const { controller } = useExcel();
     const canRedo = useCoreStore((s) => s.canRedo);
     const canUndo = useCoreStore((s) => s.canUndo);
@@ -62,9 +49,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
     const [numberFormatLabel, numberFormatValue] = useMemo(() => {
       let item: OptionItem = numberFormatOptionList[0];
       if (cellStyle.numberFormat) {
-        const t = numberFormatOptionList.find(
-          (v) => v.value === cellStyle.numberFormat,
-        );
+        const t = numberFormatOptionList.find((v) => v.value === cellStyle.numberFormat);
         if (t) {
           item = t;
         } else {
@@ -78,15 +63,10 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
       if (!value) {
         return;
       }
-      if (
-        String(value) === QUERY_ALL_LOCAL_FONT &&
-        typeof window.queryLocalFonts === 'function'
-      ) {
+      if (String(value) === QUERY_ALL_LOCAL_FONT && typeof window.queryLocalFonts === 'function') {
         window.queryLocalFonts().then((list) => {
           let fontList = list.map((v) => v.fullName);
-          fontList = Array.from(new Set(fontList)).filter((v) =>
-            isSupportFontFamily(v),
-          );
+          fontList = Array.from(new Set(fontList)).filter((v) => isSupportFontFamily(v));
           fontList.sort((a, b) => a.localeCompare(b));
           const l = fontList.map((v) => ({
             label: v,
@@ -97,9 +77,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
             setFontFamilies(l);
             localStorage.setItem(LOCAL_FONT_KEY, JSON.stringify(fontList));
           } else {
-            setFontFamilies(
-              fontFamilies.filter((v) => v.value !== QUERY_ALL_LOCAL_FONT),
-            );
+            setFontFamilies(fontFamilies.filter((v) => v.value !== QUERY_ALL_LOCAL_FONT));
           }
         });
       } else {
@@ -115,29 +93,32 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
     const redo = useCallback(() => {
       controller.redo();
     }, []);
-    const copy = useCallback<ToolbarClickHandler>((event) => {
-      controller.copy();
-      if (event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
-    }, [controller]);
-    const cut = useCallback<ToolbarClickHandler>((event) => {
-      controller.cut();
-      if (event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
-    }, [controller]);
-    const paste = useCallback<ToolbarClickHandler>((event) => {
-      controller.paste();
-      if (event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
-    }, [controller]);
+    const copy = useCallback<ToolbarClickHandler>(
+      (event) => {
+        controller.copy();
+        if (event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
+      },
+      [controller],
+    );
+    const cut = useCallback<ToolbarClickHandler>(
+      (event) => {
+        controller.cut();
+        if (event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
+      },
+      [controller],
+    );
+    const paste = useCallback<ToolbarClickHandler>(
+      (event) => {
+        controller.paste();
+        if (event.currentTarget instanceof HTMLElement) event.currentTarget.blur();
+      },
+      [controller],
+    );
     const setFontSize = useCallback((value: Key | null) => {
-      controller.updateCellStyle(
-        { fontSize: Number(value) },
-        controller.getActiveRange().range,
-      );
+      controller.updateCellStyle({ fontSize: Number(value) }, controller.getActiveRange().range);
     }, []);
     const toggleBold = useCallback(() => {
-      controller.updateCellStyle(
-        { isBold: !cellStyle.isBold },
-        controller.getActiveRange().range,
-      );
+      controller.updateCellStyle({ isBold: !cellStyle.isBold }, controller.getActiveRange().range);
     }, [cellStyle.isBold]);
     const toggleItalic = useCallback(() => {
       controller.updateCellStyle(
@@ -159,22 +140,13 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
       } else if (t === EUnderLine.DOUBLE) {
         underline = EUnderLine.DOUBLE;
       }
-      controller.updateCellStyle(
-        { underline },
-        controller.getActiveRange().range,
-      );
+      controller.updateCellStyle({ underline }, controller.getActiveRange().range);
     }, []);
     const setFillColor = useCallback((value: unknown) => {
-      controller.updateCellStyle(
-        { fillColor: String(value) },
-        controller.getActiveRange().range,
-      );
+      controller.updateCellStyle({ fillColor: String(value) }, controller.getActiveRange().range);
     }, []);
     const setFontColor = useCallback((value: unknown) => {
-      controller.updateCellStyle(
-        { fontColor: String(value) },
-        controller.getActiveRange().range,
-      );
+      controller.updateCellStyle({ fontColor: String(value) }, controller.getActiveRange().range);
     }, []);
     const toggleWrapText = useCallback(() => {
       controller.updateCellStyle(
@@ -205,10 +177,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
       if (!value) {
         return;
       }
-      controller.updateCellStyle(
-        { numberFormat: value },
-        controller.getActiveRange().range,
-      );
+      controller.updateCellStyle({ numberFormat: value }, controller.getActiveRange().range);
     }, []);
     const horizontalLeft = useCallback(() => {
       controller.updateCellStyle(
@@ -273,21 +242,13 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
         >
           <Redo />
         </ToggleButton>
-        <ToggleButton
-          onClick={copy}
-          data-testid="toolbar-copy"
-          aria-label="Copy"
-        >
+        <ToggleButton onClick={copy} data-testid="toolbar-copy" aria-label="Copy">
           {i18n.t('copy')}
         </ToggleButton>
         <ToggleButton onClick={cut} data-testid="toolbar-cut" aria-label="Cut">
           {i18n.t('cut')}
         </ToggleButton>
-        <ToggleButton
-          onClick={paste}
-          data-testid="toolbar-paste"
-          aria-label="Paste"
-        >
+        <ToggleButton onClick={paste} data-testid="toolbar-paste" aria-label="Paste">
           {i18n.t('paste')}
         </ToggleButton>
 
@@ -355,11 +316,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
           onChange={setUnderline}
         >
           {underlineOptionList.map((item) => (
-            <SelectItem
-              key={item.value}
-              id={item.value}
-              aria-label={item.label}
-            >
+            <SelectItem key={item.value} id={item.value} aria-label={item.label}>
               {item.label}
             </SelectItem>
           ))}
@@ -372,11 +329,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
           onChange={setFillColor}
           data-testid="toolbar-fill-color-picker"
         >
-          <Button
-            style={fillStyle}
-            data-testid="toolbar-fill-color"
-            aria-label="Fill Color"
-          >
+          <Button style={fillStyle} data-testid="toolbar-fill-color" aria-label="Fill Color">
             <PaintBucket />
           </Button>
         </ColorPicker>
@@ -386,18 +339,11 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
           value={cellStyle.fontColor}
           onChange={setFontColor}
           onReset={() =>
-            controller.updateCellStyle(
-              { fontColor: '' },
-              controller.getActiveRange().range,
-            )
+            controller.updateCellStyle({ fontColor: '' }, controller.getActiveRange().range)
           }
           data-testid="toolbar-font-color-picker"
         >
-          <Button
-            style={fontStyle}
-            data-testid="toolbar-font-color"
-            aria-label="Font Color"
-          >
+          <Button style={fontStyle} data-testid="toolbar-font-color" aria-label="Font Color">
             <Baseline />
           </Button>
         </ColorPicker>
@@ -480,10 +426,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
           onChange={handleNumberFormat}
           testId="toolbar-number-format"
         >
-          <Button
-            aria-label="Number Format"
-            data-testid="toolbar-number-format-value"
-          >
+          <Button aria-label="Number Format" data-testid="toolbar-number-format-value">
             {numberFormatLabel}
           </Button>
         </SelectList>
@@ -501,7 +444,8 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
         {children}
       </div>
     );
-  });
+  },
+);
 
 ToolbarContainer.displayName = 'ToolbarContainer';
 

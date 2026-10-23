@@ -1,5 +1,10 @@
 import { vi } from 'vitest';
-import { CellDataMapImpl, computeFormulas, parseFormula, renameFormulaSheetReferences } from '../eval';
+import {
+  CellDataMapImpl,
+  computeFormulas,
+  parseFormula,
+  renameFormulaSheetReferences,
+} from '../eval';
 import { Scanner } from '../scanner';
 import { Parser } from '../parser';
 import { getFunction, parseReference, iterateRange, convertToReference } from '../../util';
@@ -12,8 +17,14 @@ const sheets = [
 function data() {
   const map = new CellDataMapImpl();
   map.setSheetList(sheets);
-  map.set({ sheetId: 'one', row: 0, col: 0, rowCount: 2, colCount: 2 }, [[1, 2], [3, 4]]);
-  map.set({ sheetId: 'two', row: 0, col: 0, rowCount: 2, colCount: 2 }, [[10, 20], [30, 40]]);
+  map.set({ sheetId: 'one', row: 0, col: 0, rowCount: 2, colCount: 2 }, [
+    [1, 2],
+    [3, 4],
+  ]);
+  map.set({ sheetId: 'two', row: 0, col: 0, rowCount: 2, colCount: 2 }, [
+    [10, 20],
+    [30, 40],
+  ]);
   return map;
 }
 function evaluate(source: string, map = data(), sheetId = 'one') {
@@ -24,7 +35,7 @@ describe('sheet-reference renaming', () => {
   test('preserves formatting, absolute references, ranges and string literals', () => {
     const formula = '=SUM( Sheet1!$A$1:B2, sheet1!C$3, "Sheet1!A1", \'Other\'!A1 )';
     expect(renameFormulaSheetReferences(formula, 'SHEET1', "Bob's ! Sheet")).toBe(
-      '=SUM( \'Bob\'\'s ! Sheet\'!$A$1:B2, \'Bob\'\'s ! Sheet\'!C$3, "Sheet1!A1", \'Other\'!A1 )',
+      "=SUM( 'Bob''s ! Sheet'!$A$1:B2, 'Bob''s ! Sheet'!C$3, \"Sheet1!A1\", 'Other'!A1 )",
     );
   });
   test('decodes quoted names and preserves escaped quotes inside string literals', () => {
@@ -34,14 +45,16 @@ describe('sheet-reference renaming', () => {
     );
   });
   test('uses UTF-16 offsets correctly after emoji and inside Unicode sheet names', () => {
-    const formula = '="😊"&\'表😊\'!$A1&\'表😊\'!B$2';
+    const formula = "=\"😊\"&'表😊'!$A1&'表😊'!B$2";
     expect(renameFormulaSheetReferences(formula, '表😊', 'Sheet2')).toBe(
       '="😊"&Sheet2!$A1&Sheet2!B$2',
     );
     const scanner = new Scanner(formula);
     scanner.scan();
-    expect(scanner.sheetReferences.map(({ start, end }) => formula.slice(start, end)))
-      .toEqual(["'表😊'", "'表😊'"]);
+    expect(scanner.sheetReferences.map(({ start, end }) => formula.slice(start, end))).toEqual([
+      "'表😊'",
+      "'表😊'",
+    ]);
   });
   test('does not rename partial names or text that INDIRECT may interpret later', () => {
     const formula = '=Sheet10!A1+INDIRECT("Sheet1!A1")+\'Sheet1\'!A1';
@@ -173,13 +186,21 @@ describe('Excel formula regressions', () => {
   test('cache keys include coordinates and data source, not just formula text', () => {
     const map = data();
     const cache = new Map<string, InterpreterResult>();
-    expect(parseFormula('=RC[-1]', { sheetId: 'one', row: 0, col: 1 }, map, cache).result).toEqual([1]);
-    expect(parseFormula('=RC[-1]', { sheetId: 'one', row: 1, col: 1 }, map, cache).result).toEqual([3]);
-    expect(parseFormula('=A1', { sheetId: 'two', row: 5, col: 4 }, map, cache).result).toEqual([10]);
+    expect(parseFormula('=RC[-1]', { sheetId: 'one', row: 0, col: 1 }, map, cache).result).toEqual([
+      1,
+    ]);
+    expect(parseFormula('=RC[-1]', { sheetId: 'one', row: 1, col: 1 }, map, cache).result).toEqual([
+      3,
+    ]);
+    expect(parseFormula('=A1', { sheetId: 'two', row: 5, col: 4 }, map, cache).result).toEqual([
+      10,
+    ]);
     expect(parseFormula('=A1', { sheetId: 'one', row: 5, col: 4 }, map, cache).result).toEqual([1]);
     const other = data();
     other.set({ sheetId: 'one', row: 0, col: 0, rowCount: 1, colCount: 1 }, [[99]]);
-    expect(parseFormula('=A1', { sheetId: 'one', row: 5, col: 4 }, other, cache).result).toEqual([99]);
+    expect(parseFormula('=A1', { sheetId: 'one', row: 5, col: 4 }, other, cache).result).toEqual([
+      99,
+    ]);
   });
 
   test('nested formulas resolve unqualified references in their own sheet', () => {
@@ -220,7 +241,11 @@ describe('Excel formula regressions', () => {
   test('retained defined names with deleted anchors evaluate as reference errors', () => {
     const map = data();
     map.setDefinedName('DeletedName', {
-      sheetId: 'one', row: -1, col: -1, rowCount: 1, colCount: 1,
+      sheetId: 'one',
+      row: -1,
+      col: -1,
+      rowCount: 1,
+      colCount: 1,
     });
     expect(evaluate('=DeletedName', map)).toEqual(['#REF!']);
     expect(evaluate('=SUM(DeletedName)', map)).toEqual(['#REF!']);
@@ -228,7 +253,8 @@ describe('Excel formula regressions', () => {
   });
 
   test.each(['="a""b"', '=CONCAT("a","b")', "='Bob''s ! Sheet'!A1", '=SUM({1,2;3,4})'])(
-    'normalized expressions can be parsed again: %s', (source) => {
+    'normalized expressions can be parsed again: %s',
+    (source) => {
       const result = parseFormula(source, { sheetId: 'one', row: 5, col: 4 }, data());
       expect(result.expressionStr).toBeDefined();
       expect(evaluate(result.expressionStr!)).toEqual(result.result);
@@ -244,10 +270,16 @@ describe('Excel formula regressions', () => {
     expect(parseReference('A1:B2:C3')).toBeUndefined();
     expect(parseReference('Sheet1!A1:Sheet2!B2')).toBeUndefined();
     const cells: string[] = [];
-    iterateRange(parseReference('A:B')!, 3, 4, (row, col) => { cells.push(`${row},${col}`); return false; });
+    iterateRange(parseReference('A:B')!, 3, 4, (row, col) => {
+      cells.push(`${row},${col}`);
+      return false;
+    });
     expect(cells).toEqual(['0,0', '0,1', '1,0', '1,1', '2,0', '2,1']);
     cells.length = 0;
-    iterateRange(parseReference('1:2')!, 3, 2, (row, col) => { cells.push(`${row},${col}`); return false; });
+    iterateRange(parseReference('1:2')!, 3, 2, (row, col) => {
+      cells.push(`${row},${col}`);
+      return false;
+    });
     expect(cells).toEqual(['0,0', '0,1', '1,0', '1,1']);
     expect(getFunction('NORM.DIST')(0, 0, 1, true)).toBe(0.5);
     expect(parseReference('Other!A1:B2', (name) => name || 'Current')?.sheetId).toBe('Other');
@@ -267,7 +299,9 @@ describe('Excel formula regressions', () => {
   test('IFERROR never hides programming/storage failures', () => {
     const map = data();
     const handle = map.handleCell;
-    map.getCell = () => { throw new Error('storage unavailable'); };
+    map.getCell = () => {
+      throw new Error('storage unavailable');
+    };
     expect(() => evaluate('=IFERROR(A1,42)', map)).toThrow('storage unavailable');
     expect(() => evaluate('=ISERROR(A1)', map)).toThrow('storage unavailable');
     expect(map.handleCell).toBe(handle);
@@ -275,37 +309,46 @@ describe('Excel formula regressions', () => {
 
   test('worker computation evaluates all sheets using each formula cell context', () => {
     const request: RequestFormulas = {
-      currentSheetId: 'one', workbook: sheets, definedNames: {},
+      currentSheetId: 'one',
+      workbook: sheets,
+      definedNames: {},
       worksheets: {
-        one_0_0: { value: 1 }, one_1_0: { value: 3 },
+        one_0_0: { value: 1 },
+        one_1_0: { value: 3 },
         one_0_1: { value: '', formula: '=RC[-1]' },
         one_1_1: { value: '', formula: '=RC[-1]' },
-        two_0_0: { value: 10 }, two_0_1: { value: '', formula: '=A1+1' },
+        two_0_0: { value: 10 },
+        two_0_1: { value: '', formula: '=A1+1' },
       },
     };
     const callback = vi.fn(() => true);
     expect(computeFormulas(request, callback)).toBe(true);
-    expect(callback).toHaveBeenCalledWith({ list: [
-      { key: 'one_0_1', sheetId: 'one', newValue: 1 },
-      { key: 'one_1_1', sheetId: 'one', newValue: 3 },
-      { key: 'two_0_1', sheetId: 'two', newValue: 11 },
-    ] });
+    expect(callback).toHaveBeenCalledWith({
+      list: [
+        { key: 'one_0_1', sheetId: 'one', newValue: 1 },
+        { key: 'one_1_1', sheetId: 'one', newValue: 3 },
+        { key: 'two_0_1', sheetId: 'two', newValue: 11 },
+      ],
+    });
   });
 
   test('worker computation preserves sheet IDs containing underscores', () => {
     const callback = vi.fn(() => true);
-    computeFormulas({
-      currentSheetId: 'sheet_one',
-      workbook: [{ ...sheets[0], sheetId: 'sheet_one' }],
-      definedNames: {},
-      worksheets: {
-        sheet_one_0_0: { value: 7 },
-        sheet_one_0_1: { value: '', formula: '=A1+1' },
+    computeFormulas(
+      {
+        currentSheetId: 'sheet_one',
+        workbook: [{ ...sheets[0], sheetId: 'sheet_one' }],
+        definedNames: {},
+        worksheets: {
+          sheet_one_0_0: { value: 7 },
+          sheet_one_0_1: { value: '', formula: '=A1+1' },
+        },
       },
-    }, callback);
-    expect(callback).toHaveBeenCalledWith({ list: [
-      { key: 'sheet_one_0_1', sheetId: 'sheet_one', newValue: 8 },
-    ] });
+      callback,
+    );
+    expect(callback).toHaveBeenCalledWith({
+      list: [{ key: 'sheet_one_0_1', sheetId: 'sheet_one', newValue: 8 }],
+    });
   });
 
   test('worker computation handles a 1000-cell dependency chain', () => {
@@ -316,12 +359,17 @@ describe('Excel formula regressions', () => {
     worksheets.one_0_0 = { value: 0 };
     const callback = vi.fn((_result: ResponseFormulas) => true);
 
-    expect(() => computeFormulas({
-      currentSheetId: 'one',
-      workbook: [{ ...sheets[0], rowCount: 1001 }],
-      definedNames: {},
-      worksheets,
-    }, callback)).not.toThrow();
+    expect(() =>
+      computeFormulas(
+        {
+          currentSheetId: 'one',
+          workbook: [{ ...sheets[0], rowCount: 1001 }],
+          definedNames: {},
+          worksheets,
+        },
+        callback,
+      ),
+    ).not.toThrow();
     expect(callback.mock.calls[0]?.[0]?.list).toContainEqual({
       key: 'one_1000_0',
       sheetId: 'one',
@@ -337,12 +385,17 @@ describe('Excel formula regressions', () => {
     worksheets.one_0_0 = { value: 0 };
     const callback = vi.fn((_result: ResponseFormulas) => true);
 
-    expect(() => computeFormulas({
-      currentSheetId: 'one',
-      workbook: [{ ...sheets[0], rowCount: 10001 }],
-      definedNames: {},
-      worksheets,
-    }, callback)).not.toThrow();
+    expect(() =>
+      computeFormulas(
+        {
+          currentSheetId: 'one',
+          workbook: [{ ...sheets[0], rowCount: 10001 }],
+          definedNames: {},
+          worksheets,
+        },
+        callback,
+      ),
+    ).not.toThrow();
     expect(callback.mock.calls[0]?.[0]?.list).toContainEqual({
       key: 'one_10000_0',
       sheetId: 'one',

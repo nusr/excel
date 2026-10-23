@@ -74,24 +74,19 @@ describe('MainCanvas.test.ts', () => {
         currentSheetInfo: { ...resultData.currentSheetInfo!, sheetId: c.getCurrentSheetId() },
         range: { ...resultData.range, sheetId: c.getCurrentSheetId() },
       };
-      expect(mockWorker.render).toHaveBeenCalledWith(
-        result,
-        expect.any(Function),
-      );
+      expect(mockWorker.render).toHaveBeenCalledWith(result, expect.any(Function));
     });
     test('render callback ok', async () => {
       // @ts-ignore
       hooks.worker.render = vi
         .fn()
-        .mockImplementation(
-          (_data: RequestRender, cb: (data: ResponseRender) => void) => {
-            cb({
-              rowMap: { 1: 300 },
-              colMap: { 1: 600 },
-            });
-            return Promise.resolve();
-          },
-        );
+        .mockImplementation((_data: RequestRender, cb: (data: ResponseRender) => void) => {
+          cb({
+            rowMap: { 1: 300 },
+            colMap: { 1: 600 },
+          });
+          return Promise.resolve();
+        });
       const c = initController(hooks);
       c.addSheet();
       const instance = new MainCanvas(c, {} as HTMLCanvasElement);
@@ -103,15 +98,13 @@ describe('MainCanvas.test.ts', () => {
       // @ts-ignore
       hooks.worker.render = vi
         .fn()
-        .mockImplementation(
-          (_data: RequestRender, cb: (data: ResponseRender) => void) => {
-            cb({
-              rowMap: {},
-              colMap: {},
-            });
-            return Promise.resolve();
-          },
-        );
+        .mockImplementation((_data: RequestRender, cb: (data: ResponseRender) => void) => {
+          cb({
+            rowMap: {},
+            colMap: {},
+          });
+          return Promise.resolve();
+        });
       const c = initController(hooks);
       c.addSheet();
       const instance = new MainCanvas(c, {} as HTMLCanvasElement);

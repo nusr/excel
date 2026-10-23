@@ -116,14 +116,22 @@ describe('model review regressions', () => {
     const { colCount, rowCount } = model.getSheetInfo()!;
     model.setActiveRange({ ...range, row: rowCount - 1, col: colCount - 1 });
     expect(model.pasteRange({ ...range, rowCount: 2, colCount: 2 }, false)).toMatchObject({
-      rowCount: 1, colCount: 1,
+      rowCount: 1,
+      colCount: 1,
     });
   });
 
   test('bulk cell writes clip at the last row and column', () => {
     const { model, range } = setup();
     const edge = { ...range, row: 199, col: 29 };
-    model.setCell([[1, 2], [3, 4]], [], edge);
+    model.setCell(
+      [
+        [1, 2],
+        [3, 4],
+      ],
+      [],
+      edge,
+    );
     expect(model.getCell(edge)?.value).toBe(1);
     expect(model.getWorksheet()).toHaveLength(1);
   });
@@ -160,10 +168,20 @@ describe('model review regressions', () => {
   test('drawing import skips invalid entries and accepts zero-valued data on a nonactive sheet', () => {
     const { model, range } = setup();
     const chart: DrawingElement = {
-      uuid: 'chart', type: 'chart', title: 'chart', sheetId: range.sheetId,
-      fromRow: 199, fromCol: 29, width: 100, height: 100,
-      originHeight: 100, originWidth: 100, marginX: 0, marginY: 0,
-      chartType: 'line', chartRange: range,
+      uuid: 'chart',
+      type: 'chart',
+      title: 'chart',
+      sheetId: range.sheetId,
+      fromRow: 199,
+      fromCol: 29,
+      width: 100,
+      height: 100,
+      originHeight: 100,
+      originWidth: 100,
+      marginX: 0,
+      marginY: 0,
+      chartType: 'line',
+      chartRange: range,
     };
     const json = model.toJSON();
     json.drawings = { invalid: { ...chart, uuid: '' }, chart };
@@ -179,9 +197,19 @@ describe('model review regressions', () => {
   test('drawing anchors follow insertions at the last row and column', () => {
     const { model, range } = setup();
     model.addDrawing({
-      uuid: 'picture', type: 'floating-picture', title: 'picture', sheetId: range.sheetId,
-      fromRow: 199, fromCol: 29, width: 100, height: 100,
-      originHeight: 100, originWidth: 100, marginX: 0, marginY: 0, imageSrc: 'data:image/png;base64,',
+      uuid: 'picture',
+      type: 'floating-picture',
+      title: 'picture',
+      sheetId: range.sheetId,
+      fromRow: 199,
+      fromCol: 29,
+      width: 100,
+      height: 100,
+      originHeight: 100,
+      originWidth: 100,
+      marginX: 0,
+      marginY: 0,
+      imageSrc: 'data:image/png;base64,',
     });
     model.addRow(199, 2, true);
     model.addCol(29, 2);
@@ -232,14 +260,22 @@ describe('model review regressions', () => {
     const { model, hooks, range } = setup();
     model.setCellValue(42, range);
     const before = model.toJSON();
-    const invalid = { ...before, workbook: {
-      [range.sheetId]: { ...before.workbook[range.sheetId], rowCount: 0 },
-    } };
+    const invalid = {
+      ...before,
+      workbook: {
+        [range.sheetId]: { ...before.workbook[range.sheetId], rowCount: 0 },
+      },
+    };
     expect(() => hydrateDocument(hooks.doc, invalid)).toThrow('Invalid worksheet dimensions');
     expect(model.toJSON()).toEqual(before);
-    expect(() => hydrateDocument(hooks.doc, { ...before, customHeight: {
-      missing_0: { len: 30, isHide: false },
-    } })).toThrow('Invalid custom size');
+    expect(() =>
+      hydrateDocument(hooks.doc, {
+        ...before,
+        customHeight: {
+          missing_0: { len: 30, isHide: false },
+        },
+      }),
+    ).toThrow('Invalid custom size');
     expect(model.toJSON()).toEqual(before);
   });
 
@@ -247,10 +283,16 @@ describe('model review regressions', () => {
     const { model } = setup();
     const json: ModelJSON = {
       ...model.toJSON(),
-      workbook: { sheet_with_underscore: {
-        sheetId: 'sheet_with_underscore', name: 'Named', sort: 1,
-        isHide: false, rowCount: 3, colCount: 3,
-      } },
+      workbook: {
+        sheet_with_underscore: {
+          sheetId: 'sheet_with_underscore',
+          name: 'Named',
+          sort: 1,
+          isHide: false,
+          rowCount: 3,
+          colCount: 3,
+        },
+      },
       worksheets: { sheet_with_underscore_1_2: { value: 42 } },
       customHeight: { sheet_with_underscore_1: { len: 40, isHide: false } },
       customWidth: { sheet_with_underscore_2: { len: 100, isHide: false } },

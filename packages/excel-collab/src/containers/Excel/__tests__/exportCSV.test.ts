@@ -11,17 +11,21 @@ describe('exportToCsv.test.ts', () => {
         [[{}, {}, {}, {}]],
         { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
       );
-      expect(exportToCsv(controller)).toBe(
-        '"中文,标题","第一行\n第二行","他说""你好""","尾部 "',
-      );
+      expect(exportToCsv(controller)).toBe('"中文,标题","第一行\n第二行","他说""你好""","尾部 "');
     });
 
     test('uses CRLF records and trims unused trailing rows and columns', () => {
       const controller = initController();
       controller.addSheet();
       controller.setCell(
-        [['a', '', 'b'], ['tail', '', '']],
-        [[{}, {}, {}], [{}, {}, {}]],
+        [
+          ['a', '', 'b'],
+          ['tail', '', ''],
+        ],
+        [
+          [{}, {}, {}],
+          [{}, {}, {}],
+        ],
         { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
       );
       expect(exportToCsv(controller)).toBe('a,,b\r\ntail');
@@ -35,9 +39,7 @@ describe('exportToCsv.test.ts', () => {
         [[{}, {}, {}, {}, {}]],
         { row: 0, col: 0, rowCount: 1, colCount: 1, sheetId: '' },
       );
-      expect(exportToCsv(controller)).toBe(
-        "'+SUM(A1:A2),'-cmd,'@SUM(A1:A2),'  =literal,-5",
-      );
+      expect(exportToCsv(controller)).toBe("'+SUM(A1:A2),'-cmd,'@SUM(A1:A2),'  =literal,-5");
     });
   });
 });

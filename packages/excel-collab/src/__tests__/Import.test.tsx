@@ -50,9 +50,7 @@ describe('Import.test.tsx', () => {
         target: { files: [file] },
       });
       await waitFor(() => {
-        expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent(
-          'test',
-        );
+        expect(screen.getByTestId('formula-editor-trigger')).toHaveTextContent('test');
       });
     });
     test('empty', async () => {
@@ -65,9 +63,7 @@ describe('Import.test.tsx', () => {
         target: { files: [file] },
       });
 
-      expect(
-        await screen.findByTestId('formula-editor-trigger'),
-      ).toHaveTextContent('');
+      expect(await screen.findByTestId('formula-editor-trigger')).toHaveTextContent('');
     });
   });
   describe('upload xlsx', () => {
@@ -79,11 +75,12 @@ describe('Import.test.tsx', () => {
       fireEvent.change(await screen.findByTestId('menubar-import-input'), {
         target: { files: [fileData] },
       });
-      await waitFor(() => {
-        expect(
-          screen.getByTestId('sheet-bar-list').childNodes.length,
-        ).toBeGreaterThanOrEqual(5);
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('sheet-bar-list').childNodes.length).toBeGreaterThanOrEqual(5);
+        },
+        { timeout: 5000 },
+      );
     }, 10000);
     test('empty', async () => {
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
@@ -92,9 +89,7 @@ describe('Import.test.tsx', () => {
         target: { files: [] },
       });
 
-      expect(
-        await screen.findByTestId('formula-editor-trigger'),
-      ).toHaveTextContent('');
+      expect(await screen.findByTestId('formula-editor-trigger')).toHaveTextContent('');
     });
   });
 });

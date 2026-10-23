@@ -1,12 +1,6 @@
 import { initController } from '..';
-import { HTML_FORMAT, PLAIN_FORMAT } from '../../util';
-import {
-  ModelJSON,
-  EUnderLine,
-  ModelCellType,
-  WorksheetData,
-  IController,
-} from '../../types';
+import { HTML_FORMAT, PLAIN_FORMAT, CUSTOM_FORMAT, parseHTML } from '../../util';
+import { ModelJSON, EUnderLine, ModelCellType, WorksheetData, IController } from '../../types';
 import { waitFor } from '@testing-library/react';
 import { mergeCellKey } from '../../protocol';
 
@@ -18,6 +12,89 @@ describe('controller.test.ts', () => {
   });
 
   describe('paste', () => {
+    test('preserves leading empty cells and rows in plain text', async () => {
+      const event = {
+        clipboardData: {
+          getData: (format: string) => (format === PLAIN_FORMAT ? '\tA\n\nB\tC' : ''),
+        },
+      } as ClipboardEvent;
+      await controller.paste(event);
+      const range = controller.getActiveRange().range;
+      expect(range).toMatchObject({ row: 0, col: 0, rowCount: 3, colCount: 2 });
+      expect(controller.getCell({ ...range, col: 1 })?.value).toBe('A');
+      expect(controller.getCell({ ...range, row: 2 })?.value).toBe('B');
+    });
+    test('ignores malformed custom data and pastes plain text', async () => {
+      for (const custom of ['{', '{}', '{"type":"cut","range":null}']) {
+        const event = {
+          clipboardData: {
+            getData: (format: string) =>
+              format === CUSTOM_FORMAT ? custom : format === PLAIN_FORMAT ? 'safe' : '',
+          },
+        } as ClipboardEvent;
+        await expect(controller.paste(event)).resolves.toBeUndefined();
+        expect(controller.getCell(controller.getActiveRange().range)?.value).toBe('safe');
+      }
+    });
+    test('applies pasted dimensions relative to the destination', async () => {
+      const range = { ...controller.getActiveRange().range, row: 3, col: 4 };
+      controller.setActiveRange(range);
+      const originalHeight = controller.getRow(0).len;
+      const originalWidth = controller.getCol(0).len;
+      const event = {
+        clipboardData: {
+          getData: (format: string) =>
+            format === HTML_FORMAT
+              ? '<table><tr style="height:60px"><td style="width:180px">A</td></tr></table>'
+              : '',
+        },
+      } as ClipboardEvent;
+      await controller.paste(event);
+      expect(controller.getRow(3).len).toBe(60);
+      expect(controller.getCol(4).len).toBe(180);
+      expect(controller.getRow(0).len).toBe(originalHeight);
+      expect(controller.getCol(0).len).toBe(originalWidth);
+    });
+    test('consumes cut state without clearing clipboard data or cutting the source twice', async () => {
+      const source = controller.getActiveRange().range;
+      controller.setCellValue('original', source);
+      const data = new Map<string, string>();
+      const event = {
+        clipboardData: {
+          setData: (format: string, value: string) => data.set(format, value),
+          getData: (format: string) => data.get(format) || '',
+        },
+      } as unknown as ClipboardEvent;
+      await controller.cut(event);
+      controller.setActiveRange({ ...source, row: 1 });
+      await controller.paste(event);
+      expect(controller.getCell(source)).toBeUndefined();
+      expect(controller.getCopyRange()).toBeUndefined();
+      expect(data.get(PLAIN_FORMAT)).toBe('original\r\n');
+      controller.setCellValue('replacement', source);
+      controller.setActiveRange({ ...source, row: 2 });
+      await controller.paste(event);
+      expect(controller.getCell(source)?.value).toBe('replacement');
+      expect(controller.getCell({ ...source, row: 2 })?.value).toBe('original');
+    });
+    test('treats foreign cut metadata as content instead of deleting local cells', async () => {
+      const range = controller.getActiveRange().range;
+      controller.setCellValue('keep', range);
+      controller.setActiveRange({ ...range, row: 1 });
+      const event = {
+        clipboardData: {
+          getData: (format: string) =>
+            format === CUSTOM_FORMAT
+              ? JSON.stringify({ type: 'cut', range, floatElementUuid: '', clipboardId: 'foreign' })
+              : format === PLAIN_FORMAT
+                ? 'external'
+                : '',
+        },
+      } as ClipboardEvent;
+      await controller.paste(event);
+      expect(controller.getCell(range)?.value).toBe('keep');
+      expect(controller.getCell({ ...range, row: 1 })?.value).toBe('external');
+    });
     test('html', async () => {
       const mockHTML = `<html>
       <head>
@@ -133,9 +210,7 @@ describe('controller.test.ts', () => {
         },
       ];
       await waitFor(() => {
-        expect(controller.getWorksheet(controller.getCurrentSheetId())).toEqual(
-          result,
-        );
+        expect(controller.getWorksheet(controller.getCurrentSheetId())).toEqual(result);
       });
     });
   });
@@ -192,6 +267,19 @@ describe('controller.test.ts', () => {
   });
 
   describe('copy', () => {
+    test('writes event clipboard synchronously and preserves empty cells and literal HTML', async () => {
+      const range = { ...controller.getActiveRange().range, colCount: 3 };
+      controller.setCellValue('<b>A&B</b>', { ...range, col: 1 });
+      controller.setActiveRange(range);
+      const data = new Map<string, string>();
+      const event = {
+        clipboardData: { setData: (format: string, value: string) => data.set(format, value) },
+      } as unknown as ClipboardEvent;
+      const copied = controller.copy(event);
+      expect(data.get(PLAIN_FORMAT)).toBe('\t<b>A&B</b>\t\r\n');
+      expect(parseHTML(data.get(HTML_FORMAT)!).textList).toEqual([['', '<b>A&B</b>', '']]);
+      await copied;
+    });
     test('set', async () => {
       let text = '';
       const textFormat = 'text/plain';
@@ -232,10 +320,7 @@ describe('controller.test.ts', () => {
 
   describe('deleteAll', () => {
     test('normal', () => {
-      controller.setDefineName(
-        { row: 0, col: 0, sheetId: '', rowCount: 1, colCount: 1 },
-        'foo',
-      );
+      controller.setDefineName({ row: 0, col: 0, sheetId: '', rowCount: 1, colCount: 1 }, 'foo');
       controller.setCell([[1]], [[{ isBold: true }]], {
         row: 0,
         col: 0,
@@ -293,10 +378,7 @@ describe('controller.test.ts', () => {
   });
   describe('json', () => {
     test('toJSON', () => {
-      controller.setDefineName(
-        { row: 0, col: 0, sheetId: '', rowCount: 1, colCount: 1 },
-        'foo',
-      );
+      controller.setDefineName({ row: 0, col: 0, sheetId: '', rowCount: 1, colCount: 1 }, 'foo');
       controller.setCell([[1]], [[{ isBold: true }]], {
         row: 0,
         col: 0,

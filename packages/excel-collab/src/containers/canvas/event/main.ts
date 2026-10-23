@@ -1,8 +1,4 @@
-import {
-  type EventHandler,
-  type EventData,
-  EditorStatus,
-} from '../../../types';
+import { type EventHandler, type EventData, EditorStatus } from '../../../types';
 import { PointerEvent } from 'react';
 import { isSameRange } from '../../../util';
 import { useCoreStore } from '../../../containers/store';

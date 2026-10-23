@@ -6,11 +6,11 @@ import {
   type TagGroupProps as AriaTagGroupProps,
   TagList,
   type TagListProps,
-  type TagProps
+  type TagProps,
 } from 'react-aria-components/TagGroup';
-import {Description, Label} from './Form';
-import {Text} from './Content';
-import {X} from 'lucide-react';
+import { Description, Label } from './Form';
+import { Text } from './Content';
+import { X } from 'lucide-react';
 import './TagGroup.css';
 
 export interface TagGroupProps<T>
@@ -52,7 +52,7 @@ export function Tag({
   let textValue = typeof children === 'string' ? children : undefined;
   return (
     <AriaTag textValue={textValue} {...props} className="react-aria-Tag button-base">
-      {({allowsRemoving}) => (
+      {({ allowsRemoving }) => (
         <>
           {children}
           {allowsRemoving && (

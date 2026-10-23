@@ -16,17 +16,16 @@ describe('global keyboard editor activation', () => {
     useCoreStore.getState().setEditorStatus(EditorStatus.NONE);
   });
 
-  test.each(['Shift', 'Control', 'Alt', 'Escape', 'F1'])(
-    '%s does not start editing',
-    (key) => {
-      document.body.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
-      expect(useCoreStore.getState().editorStatus).toBe(EditorStatus.NONE);
-    },
-  );
+  test.each(['Shift', 'Control', 'Alt', 'Escape', 'F1'])('%s does not start editing', (key) => {
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+    expect(useCoreStore.getState().editorStatus).toBe(EditorStatus.NONE);
+  });
 
   test('a printable character starts editing', () => {
     const event = new KeyboardEvent('keydown', {
-      key: 'a', bubbles: true, cancelable: true,
+      key: 'a',
+      bubbles: true,
+      cancelable: true,
     });
     document.body.dispatchEvent(event);
     expect(useCoreStore.getState().editorStatus).toBe(EditorStatus.EDIT_CELL);

@@ -15,15 +15,7 @@ interface DialogProps {
 }
 
 export const Dialog: FunctionComponent<DialogProps> = memo((props) => {
-  const {
-    children,
-    title,
-    onOk,
-    onCancel,
-    isDismissable = true,
-    isOpen,
-    onOpenChange,
-  } = props;
+  const { children, title, onOk, onCancel, isDismissable = true, isOpen, onOpenChange } = props;
   return (
     <Modal isDismissable={isDismissable} isOpen={isOpen} onOpenChange={onOpenChange}>
       <AriaDialog>

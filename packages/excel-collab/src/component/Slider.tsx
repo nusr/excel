@@ -5,9 +5,9 @@ import {
   type SliderProps as AriaSliderProps,
   SliderThumb,
   SliderTrack,
-  SliderFill
+  SliderFill,
 } from 'react-aria-components/Slider';
-import {Label} from './Form';
+import { Label } from './Form';
 import './Slider.css';
 
 export interface SliderProps<T> extends AriaSliderProps<T> {
@@ -34,7 +34,7 @@ export function Slider<T extends number | number[]>({
       {label && <Label>{label}</Label>}
       <SliderOutput />
       <SliderTrack>
-        {({state, isDisabled}) => (
+        {({ state, isDisabled }) => (
           <>
             <div className="track inset" data-disabled={isDisabled || undefined}>
               <SliderFill offset={fillOffset} />

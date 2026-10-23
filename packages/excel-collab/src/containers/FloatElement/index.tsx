@@ -1,28 +1,10 @@
-import React, {
-  Fragment,
-  memo,
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-  useCallback,
-} from 'react';
+import React, { Fragment, memo, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { IWindowSize } from '../../types';
-import {
-  useCoreStore,
-  FloatElementItem,
-  useExcel,
-} from '../../containers/store';
+import { useCoreStore, FloatElementItem, useExcel } from '../../containers/store';
 import { FloatElement } from './FloatElement';
 import styles from './FloatElement.module.css';
 import { getHitInfo, classnames } from '../../util';
-import {
-  State,
-  ResizePosition,
-  FloatElementPosition,
-  INITIAL_STATE,
-  roundPosition,
-} from './util';
+import { State, ResizePosition, FloatElementPosition, INITIAL_STATE, roundPosition } from './util';
 
 interface Props {
   floatElementList: FloatElementItem[];
@@ -54,40 +36,24 @@ const FloatElementContainer: React.FunctionComponent<Props> = memo(
         setPosition((old) => {
           const p = state.current.resizePosition as ResizePosition;
           let { top, left, width, height } = old;
-          if (
-            [
-              ResizePosition.topRight,
-              ResizePosition.topLeft,
-              ResizePosition.top,
-            ].includes(p)
-          ) {
+          if ([ResizePosition.topRight, ResizePosition.topLeft, ResizePosition.top].includes(p)) {
             height -= deltaY;
             top += deltaY;
           } else if (
-            [
-              ResizePosition.bottomRight,
-              ResizePosition.bottom,
-              ResizePosition.bottomLeft,
-            ].includes(p)
+            [ResizePosition.bottomRight, ResizePosition.bottom, ResizePosition.bottomLeft].includes(
+              p,
+            )
           ) {
             height += deltaY;
           }
 
           if (
-            [
-              ResizePosition.topLeft,
-              ResizePosition.bottomLeft,
-              ResizePosition.left,
-            ].includes(p)
+            [ResizePosition.topLeft, ResizePosition.bottomLeft, ResizePosition.left].includes(p)
           ) {
             width -= deltaX;
             left += deltaX;
           } else if (
-            [
-              ResizePosition.topRight,
-              ResizePosition.bottomRight,
-              ResizePosition.right,
-            ].includes(p)
+            [ResizePosition.topRight, ResizePosition.bottomRight, ResizePosition.right].includes(p)
           ) {
             width += deltaX;
           }
@@ -187,9 +153,7 @@ const FloatElementContainer: React.FunctionComponent<Props> = memo(
         }
       };
       function toggleEvents(state?: boolean) {
-        const toggleEvent = state
-          ? document.addEventListener
-          : document.removeEventListener;
+        const toggleEvent = state ? document.addEventListener : document.removeEventListener;
         toggleEvent('pointerup', handlePointerUp);
         toggleEvent('pointermove', handlePointerMove);
       }
@@ -198,24 +162,21 @@ const FloatElementContainer: React.FunctionComponent<Props> = memo(
 
     useEffect(() => toggleEvents, [toggleEvents]);
 
-    const handleResizePointerDown = useCallback(
-      (event: React.PointerEvent<HTMLDivElement>) => {
-        event.stopPropagation();
-        event.preventDefault();
-        if (event.buttons <= 0) {
-          return;
-        }
+    const handleResizePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+      event.preventDefault();
+      if (event.buttons <= 0) {
+        return;
+      }
 
-        const p = event.currentTarget.dataset.position || '';
-        if (!p) {
-          return;
-        }
-        state.current.resizePosition = p;
-        state.current.moveStartX = event.clientX;
-        state.current.moveStartY = event.clientY;
-      },
-      [],
-    );
+      const p = event.currentTarget.dataset.position || '';
+      if (!p) {
+        return;
+      }
+      state.current.resizePosition = p;
+      state.current.moveStartX = event.clientX;
+      state.current.moveStartY = event.clientY;
+    }, []);
     const resetResize = useCallback((size: IWindowSize) => {
       setPosition((old) => ({ ...old, ...size }));
     }, []);

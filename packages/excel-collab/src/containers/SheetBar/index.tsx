@@ -13,17 +13,15 @@ import { Menu as MenuIcon, Plus } from 'lucide-react';
 import { MenuTrigger, Menu, MenuItem } from '../../component/Menu';
 import { TextField } from '../../component/TextField';
 
-export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren> =
-  memo(({ children }) => {
+export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren> = memo(
+  ({ children }) => {
     const { controller } = useExcel();
     const sheetList = useCoreStore((s) => s.sheetList);
     const realSheetList = useMemo(() => {
       return sheetList.filter((v) => !v.isHide);
     }, [sheetList]);
     const popupList = useMemo(() => {
-      return sheetList
-        .filter((v) => !v.isHide)
-        .map((v) => ({ value: v.sheetId, label: v.name }));
+      return sheetList.filter((v) => !v.isHide).map((v) => ({ value: v.sheetId, label: v.name }));
     }, [sheetList]);
 
     const currentSheetId = useCoreStore((s) => s.currentSheetId);
@@ -31,28 +29,22 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
     const [editing, setEditing] = useState(false);
     const renameInputRef = React.useRef<HTMLInputElement>(null);
 
-    const handleContextMenu = useCallback(
-      (event: React.MouseEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        const pos = event.clientX - 30;
-        setMenuPosition(pos);
-        return false;
-      },
-      [],
-    );
-    const handleKeyDown = useCallback(
-      (event: React.KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === 'Enter') {
-          const t = renameInputRef.current?.value ?? '';
-          setEditing(false);
-          if (!t) {
-            return;
-          }
-          controller.renameSheet(t);
+    const handleContextMenu = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const pos = event.clientX - 30;
+      setMenuPosition(pos);
+      return false;
+    }, []);
+    const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'Enter') {
+        const t = renameInputRef.current?.value ?? '';
+        setEditing(false);
+        if (!t) {
+          return;
         }
-      },
-      [],
-    );
+        controller.renameSheet(t);
+      }
+    }, []);
     const addSheet = useCallback(() => {
       controller.addSheet();
     }, []);
@@ -146,10 +138,7 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
                         data-testid="sheet-bar-tab-color-item"
                       />
                     )}
-                    <span
-                      className={styles['sheet-bar-item-text']}
-                      data-testid={testId}
-                    >
+                    <span className={styles['sheet-bar-item-text']} data-testid={testId}>
                       {item.name}
                     </span>
                   </React.Fragment>
@@ -178,7 +167,8 @@ export const SheetBarContainer: React.FunctionComponent<React.PropsWithChildren>
         {children}
       </div>
     );
-  });
+  },
+);
 SheetBarContainer.displayName = 'SheetBarContainer';
 
 export default SheetBarContainer;

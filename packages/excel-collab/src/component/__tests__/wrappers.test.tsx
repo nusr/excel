@@ -18,9 +18,7 @@ afterEach(cleanup);
 
 describe('component prop and interaction regressions', () => {
   it.each([16, 32])('uses numeric SVG geometry for a %spx progress circle', (size) => {
-    const { container } = render(
-      <ProgressCircle aria-label="Loading" value={50} size={size} />,
-    );
+    const { container } = render(<ProgressCircle aria-label="Loading" value={50} size={size} />);
     expect(screen.getByRole('progressbar', { name: 'Loading' })).toHaveStyle({
       width: `${size}px`,
       height: `${size}px`,
@@ -36,15 +34,12 @@ describe('component prop and interaction regressions', () => {
   });
 
   it('preserves indeterminate progress animation with valid SVG geometry', () => {
-    const { container } = render(
-      <ProgressCircle aria-label="Loading" isIndeterminate />,
-    );
+    const { container } = render(<ProgressCircle aria-label="Loading" isIndeterminate />);
     expect(screen.getByRole('progressbar')).not.toHaveAttribute('aria-valuenow');
-    expect(container.querySelector('circle:last-child')).toHaveAttribute(
-      'stroke-dashoffset', '75',
-    );
+    expect(container.querySelector('circle:last-child')).toHaveAttribute('stroke-dashoffset', '75');
     expect(container.querySelector('animateTransform')).toHaveAttribute(
-      'repeatCount', 'indefinite',
+      'repeatCount',
+      'indefinite',
     );
   });
 
@@ -77,9 +72,7 @@ describe('component prop and interaction regressions', () => {
 
   it('names the command dialog and lets the open modal handle Escape', async () => {
     const onOpenChange = vi.fn();
-    render(
-      <CommandPalette isOpen onOpenChange={onOpenChange} aria-label="Actions" />,
-    );
+    render(<CommandPalette isOpen onOpenChange={onOpenChange} aria-label="Actions" />);
     expect(screen.getByRole('dialog', { name: 'Actions' })).toBeInTheDocument();
     await userEvent.setup().keyboard('{Escape}');
     expect(onOpenChange).toHaveBeenCalledExactlyOnceWith(false);
@@ -87,9 +80,7 @@ describe('component prop and interaction regressions', () => {
 
   it('respects an already handled command shortcut and removes its listener', () => {
     const onOpenChange = vi.fn();
-    const { unmount } = render(
-      <CommandPalette isOpen={false} onOpenChange={onOpenChange} />,
-    );
+    const { unmount } = render(<CommandPalette isOpen={false} onOpenChange={onOpenChange} />);
     const event = new KeyboardEvent('keydown', {
       key: 'j',
       ctrlKey: true,
@@ -160,38 +151,32 @@ describe('component prop and interaction regressions', () => {
     expect(onChange).toHaveBeenCalledWith('2');
   });
 
-  it.each(['string', 'function'] as const)(
-    'preserves %s Button class names',
-    (kind) => {
-      render(
-        <Button
-          aria-label="Save"
-          className={kind === 'string' ? 'save-action' : () => 'save-action'}
-        />,
-      );
-      expect(screen.getByRole('button', { name: 'Save' })).toHaveClass(
-        'react-aria-Button',
-        'button-base',
-        'save-action',
-      );
-    },
-  );
+  it.each(['string', 'function'] as const)('preserves %s Button class names', (kind) => {
+    render(
+      <Button
+        aria-label="Save"
+        className={kind === 'string' ? 'save-action' : () => 'save-action'}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Save' })).toHaveClass(
+      'react-aria-Button',
+      'button-base',
+      'save-action',
+    );
+  });
 
-  it.each(['object', 'function'] as const)(
-    'preserves %s ColorSwatch styles',
-    (kind) => {
-      render(
-        <ColorSwatch
-          color="#ff0000"
-          aria-label="Red"
-          style={kind === 'object' ? { opacity: 0.25 } : () => ({ opacity: 0.25 })}
-        />,
-      );
-      expect(screen.getByRole('img', { name: /Red/ })).toHaveStyle({
-        opacity: '0.25',
-      });
-    },
-  );
+  it.each(['object', 'function'] as const)('preserves %s ColorSwatch styles', (kind) => {
+    render(
+      <ColorSwatch
+        color="#ff0000"
+        aria-label="Red"
+        style={kind === 'object' ? { opacity: 0.25 } : () => ({ opacity: 0.25 })}
+      />,
+    );
+    expect(screen.getByRole('img', { name: /Red/ })).toHaveStyle({
+      opacity: '0.25',
+    });
+  });
 
   it('evaluates Popover className render props', async () => {
     render(

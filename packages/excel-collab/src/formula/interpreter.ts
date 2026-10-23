@@ -1,17 +1,8 @@
-import {
-  SheetRange,
-  mergeRange,
-  parseReference,
-  parseR1C1,
-} from '../util';
+import { SheetRange, mergeRange, parseReference, parseR1C1 } from '../util';
 import { TokenType } from '../types';
 
 import type { CellDataMap, ResultType, IRange } from '../types';
-import type {
-  Visitor,
-  Expression,
-  PostUnaryExpression,
-} from './expression';
+import type { Visitor, Expression, PostUnaryExpression } from './expression';
 import {
   BinaryExpression,
   UnaryExpression,
@@ -113,7 +104,18 @@ export class Interpreter implements Visitor {
     if (name === 'INDEX') return this.index(expr);
     if (name === 'OFFSET') return this.offset(expr);
     if (name === 'INDIRECT') return this.indirect(expr);
-    if (['ISERROR', 'ISERR', 'ISNA', 'ISBLANK', 'ISLOGICAL', 'ISNONTEXT', 'ISNUMBER', 'ISTEXT'].includes(name)) {
+    if (
+      [
+        'ISERROR',
+        'ISERR',
+        'ISNA',
+        'ISBLANK',
+        'ISLOGICAL',
+        'ISNONTEXT',
+        'ISNUMBER',
+        'ISTEXT',
+      ].includes(name)
+    ) {
       this.checkArity(expr, 1, 1);
       let value: Scalar | Error;
       try {
@@ -147,12 +149,9 @@ export class Interpreter implements Visitor {
     }
     let range: SheetRange | undefined;
     if (
-      [
-        TokenType.DEFINED_NAME,
-        TokenType.CELL,
-        TokenType.COLUMN,
-        TokenType.R1C1,
-      ].includes(data.value.type)
+      [TokenType.DEFINED_NAME, TokenType.CELL, TokenType.COLUMN, TokenType.R1C1].includes(
+        data.value.type,
+      )
     ) {
       const defined = this.cellDataMap.getDefinedName(data.value.value);
       if (defined) range = SheetRange.makeRange(defined);
@@ -170,7 +169,8 @@ export class Interpreter implements Visitor {
     if (sheetId) {
       range.sheetId = sheetId;
     }
-    if (!range.sheetId) range.sheetId = this.currentCoord.sheetId || this.cellDataMap.getSheetInfo()?.sheetId || '';
+    if (!range.sheetId)
+      range.sheetId = this.currentCoord.sheetId || this.cellDataMap.getSheetInfo()?.sheetId || '';
     return range;
   }
   visitLiteralExpression(expr: LiteralExpression) {
@@ -214,8 +214,12 @@ export class Interpreter implements Visitor {
       case TokenType.COLON: {
         const a = this.evaluate(expr.left);
         let b: Value;
-        if (expr.right instanceof CellExpression && !expr.right.sheetName &&
-          !this.cellDataMap.getDefinedName(expr.right.value.value) && a instanceof SheetRange) {
+        if (
+          expr.right instanceof CellExpression &&
+          !expr.right.sheetName &&
+          !this.cellDataMap.getDefinedName(expr.right.value.value) &&
+          a instanceof SheetRange
+        ) {
           b = this.visitCellExpression(expr.right);
           b.sheetId = a.sheetId;
         } else {
@@ -239,7 +243,8 @@ export class Interpreter implements Visitor {
     const result = expr.value.map((item) => this.getOneValue(this.evaluate(item)));
     if (expr.rowWidth === result.length) return result;
     const rows: Scalar[][] = [];
-    for (let i = 0; i < result.length; i += expr.rowWidth) rows.push(result.slice(i, i + expr.rowWidth));
+    for (let i = 0; i < result.length; i += expr.rowWidth)
+      rows.push(result.slice(i, i + expr.rowWidth));
     return rows;
   }
   visitMissingExpression() {
@@ -291,9 +296,16 @@ export class Interpreter implements Visitor {
     if (!sheet) throw getCustomError('#REF!');
     const rows = range.rowCount || sheet.rowCount;
     const cols = range.colCount || sheet.colCount;
-    if (![range.row, range.col, rows, cols].every(Number.isInteger) ||
-      range.row < 0 || range.col < 0 || rows <= 0 || cols <= 0 ||
-      range.row + rows > sheet.rowCount || range.col + cols > sheet.colCount) throw getCustomError('#REF!');
+    if (
+      ![range.row, range.col, rows, cols].every(Number.isInteger) ||
+      range.row < 0 ||
+      range.col < 0 ||
+      rows <= 0 ||
+      cols <= 0 ||
+      range.row + rows > sheet.rowCount ||
+      range.col + cols > sheet.colCount
+    )
+      throw getCustomError('#REF!');
     return { rows, cols };
   }
 
@@ -309,9 +321,12 @@ export class Interpreter implements Visitor {
     if (value instanceof SheetRange) {
       const { rows, cols } = this.dimensions(value);
       return Array.from({ length: rows }, (_, row) =>
-        Array.from({ length: cols }, (_, col) => this.getOneValue(this.readCell(
-          new SheetRange(value.row + row, value.col + col, 1, 1, value.sheetId),
-        ))));
+        Array.from({ length: cols }, (_, col) =>
+          this.getOneValue(
+            this.readCell(new SheetRange(value.row + row, value.col + col, 1, 1, value.sheetId)),
+          ),
+        ),
+      );
     }
     if (!Array.isArray(value)) return [[value]];
     return value.every(Array.isArray)
@@ -333,13 +348,20 @@ export class Interpreter implements Visitor {
   }
 
   private text(value: Scalar) {
-    return value === null ? '' : typeof value === 'boolean' ? String(value).toUpperCase() : String(value);
+    return value === null
+      ? ''
+      : typeof value === 'boolean'
+        ? String(value).toUpperCase()
+        : String(value);
   }
 
   private compare(left: Scalar, right: Scalar) {
-    if (left === null) left = typeof right === 'string' ? '' : typeof right === 'boolean' ? false : 0;
-    if (right === null) right = typeof left === 'string' ? '' : typeof left === 'boolean' ? false : 0;
-    const rank = (value: Scalar) => typeof value === 'number' ? 0 : typeof value === 'string' ? 1 : 2;
+    if (left === null)
+      left = typeof right === 'string' ? '' : typeof right === 'boolean' ? false : 0;
+    if (right === null)
+      right = typeof left === 'string' ? '' : typeof left === 'boolean' ? false : 0;
+    const rank = (value: Scalar) =>
+      typeof value === 'number' ? 0 : typeof value === 'string' ? 1 : 2;
     if (typeof left !== typeof right) return rank(left) - rank(right);
     const a = typeof left === 'string' ? left.toLowerCase() : Number(left);
     const b = typeof right === 'string' ? right.toLowerCase() : Number(right);
@@ -362,18 +384,33 @@ export class Interpreter implements Visitor {
     this.checkArity(expr, 2, 4);
     const source = this.evaluate(expr.params[0]);
     const matrix = source instanceof SheetRange ? undefined : this.matrix(source);
-    const { rows, cols } = source instanceof SheetRange
-      ? this.dimensions(source) : { rows: matrix!.length, cols: matrix![0]?.length ?? 0 };
+    const { rows, cols } =
+      source instanceof SheetRange
+        ? this.dimensions(source)
+        : { rows: matrix!.length, cols: matrix![0]?.length ?? 0 };
     let row = Math.trunc(this.parseNumber(this.getOneValue(this.evaluate(expr.params[1]))));
-    let col = expr.params.length >= 3
-      ? Math.trunc(this.parseNumber(this.getOneValue(this.evaluate(expr.params[2])))) : 1;
-    if (expr.params.length === 2 && rows === 1) { col = row; row = 1; }
-    if (expr.params.length === 4 &&
-      this.parseNumber(this.getOneValue(this.evaluate(expr.params[3]))) !== 1) throw getCustomError('#REF!');
+    let col =
+      expr.params.length >= 3
+        ? Math.trunc(this.parseNumber(this.getOneValue(this.evaluate(expr.params[2]))))
+        : 1;
+    if (expr.params.length === 2 && rows === 1) {
+      col = row;
+      row = 1;
+    }
+    if (
+      expr.params.length === 4 &&
+      this.parseNumber(this.getOneValue(this.evaluate(expr.params[3]))) !== 1
+    )
+      throw getCustomError('#REF!');
     if (row < 0 || col < 0 || row > rows || col > cols) throw getCustomError('#REF!');
     if (source instanceof SheetRange) {
-      return new SheetRange(source.row + Math.max(0, row - 1), source.col + Math.max(0, col - 1),
-        row === 0 ? rows : 1, col === 0 ? cols : 1, source.sheetId);
+      return new SheetRange(
+        source.row + Math.max(0, row - 1),
+        source.col + Math.max(0, col - 1),
+        row === 0 ? rows : 1,
+        col === 0 ? cols : 1,
+        source.sheetId,
+      );
     }
     if (row === 0 && col === 0) return matrix!;
     if (row === 0) return matrix!.map((values) => [values[col - 1]]);
@@ -385,11 +422,20 @@ export class Interpreter implements Visitor {
     const source = this.evaluate(expr.params[0]);
     if (!(source instanceof SheetRange)) throw getCustomError('#VALUE!');
     const { rows, cols } = this.dimensions(source);
-    const number = (index: number) => Math.trunc(this.parseNumber(this.getOneValue(this.evaluate(expr.params[index]))));
-    const height = expr.params[3] && !(expr.params[3] instanceof MissingExpression) ? number(3) : rows;
-    const width = expr.params[4] && !(expr.params[4] instanceof MissingExpression) ? number(4) : cols;
+    const number = (index: number) =>
+      Math.trunc(this.parseNumber(this.getOneValue(this.evaluate(expr.params[index]))));
+    const height =
+      expr.params[3] && !(expr.params[3] instanceof MissingExpression) ? number(3) : rows;
+    const width =
+      expr.params[4] && !(expr.params[4] instanceof MissingExpression) ? number(4) : cols;
     if (height <= 0 || width <= 0) throw getCustomError('#REF!');
-    const range = new SheetRange(source.row + number(1), source.col + number(2), height, width, source.sheetId);
+    const range = new SheetRange(
+      source.row + number(1),
+      source.col + number(2),
+      height,
+      width,
+      source.sheetId,
+    );
     this.dimensions(range);
     return range;
   }
@@ -397,14 +443,17 @@ export class Interpreter implements Visitor {
   private indirect(expr: CallExpression): SheetRange {
     this.checkArity(expr, 1, 2);
     const text = this.text(this.getOneValue(this.evaluate(expr.params[0])));
-    const a1 = expr.params.length === 1 || this.boolean(this.getOneValue(this.evaluate(expr.params[1])));
+    const a1 =
+      expr.params.length === 1 || this.boolean(this.getOneValue(this.evaluate(expr.params[1])));
     try {
       const expression = new Parser(new Scanner(text).scan()).parse()[0];
       const valid = (node: Expression): boolean => {
         if (node instanceof CellRangeExpression) return valid(node.left) && valid(node.right);
-        return node instanceof CellExpression &&
+        return (
+          node instanceof CellExpression &&
           (Boolean(this.cellDataMap.getDefinedName(node.value.value)) ||
-            (a1 ? node.value.type !== TokenType.R1C1 : node.value.type === TokenType.R1C1));
+            (a1 ? node.value.type !== TokenType.R1C1 : node.value.type === TokenType.R1C1))
+        );
       };
       if (!valid(expression)) throw getCustomError('#REF!');
       const range = this.evaluate(expression);

@@ -21,7 +21,9 @@ export interface File {
 }
 
 // Database connection
-const db = new sqlite3.Database(path.resolve(__dirname, './dev.db'), (err) => {
+const databasePath =
+  process.env.NODE_ENV === 'test' ? ':memory:' : path.resolve(__dirname, './dev.db');
+const db = new sqlite3.Database(databasePath, (err) => {
   if (err) {
     console.error('Error opening database:', err);
     throw err;
@@ -60,8 +62,18 @@ function allAsync<T>(sql: string, params: any[] = []): Promise<T[]> {
   });
 }
 
-// Initialize database schema
-export async function initDatabase(): Promise<void> {
+let initialization: Promise<void> | undefined;
+
+export function initDatabase(): Promise<void> {
+  if (!initialization) {
+    initialization = initializeSchema().finally(() => {
+      initialization = undefined;
+    });
+  }
+  return initialization;
+}
+
+async function initializeSchema(): Promise<void> {
   await runAsync(`
     CREATE TABLE IF NOT EXISTS document (
       id TEXT PRIMARY KEY,
@@ -71,9 +83,7 @@ export async function initDatabase(): Promise<void> {
       y_state BLOB
     )
   `);
-  const columns = await allAsync<{ name: string }>(
-    'PRAGMA table_info(document)',
-  );
+  const columns = await allAsync<{ name: string }>('PRAGMA table_info(document)');
   if (!columns.some((column) => column.name === 'y_state')) {
     await runAsync('ALTER TABLE document ADD COLUMN y_state BLOB');
   }
@@ -89,25 +99,18 @@ export async function initDatabase(): Promise<void> {
   `);
 
   // Add indexes for better performance
-  await runAsync(
-    `CREATE INDEX IF NOT EXISTS idx_document_create_time ON document(create_time)`,
-  );
+  await runAsync(`CREATE INDEX IF NOT EXISTS idx_document_create_time ON document(create_time)`);
   await runAsync(`CREATE INDEX IF NOT EXISTS idx_file_name ON file(name)`);
-  await runAsync(
-    `CREATE INDEX IF NOT EXISTS idx_file_last_modified ON file(last_modified)`,
-  );
+  await runAsync(`CREATE INDEX IF NOT EXISTS idx_file_last_modified ON file(last_modified)`);
 }
 
 export async function createDocument(data: Document): Promise<Document> {
-  await runAsync(
-    'INSERT INTO document (id, name, content, create_time) VALUES (?, ?, ?, ?)',
-    [
-      data.id,
-      data.name ?? '',
-      data.content ?? '',
-      data.create_time ?? new Date().toISOString(),
-    ],
-  );
+  await runAsync('INSERT INTO document (id, name, content, create_time) VALUES (?, ?, ?, ?)', [
+    data.id,
+    data.name ?? '',
+    data.content ?? '',
+    data.create_time ?? new Date().toISOString(),
+  ]);
   const result = await getAsync<Document>(
     'SELECT id, name, create_time, content FROM document WHERE id = ?',
     [data.id],
@@ -126,9 +129,7 @@ export async function findDocument(id: string): Promise<Document | null> {
   return result || null;
 }
 
-export async function findAllDocuments(
-  orderBy: 'asc' | 'desc' = 'desc',
-): Promise<Document[]> {
+export async function findAllDocuments(orderBy: 'asc' | 'desc' = 'desc'): Promise<Document[]> {
   const order = orderBy === 'desc' ? 'DESC' : 'ASC';
   return allAsync<Document>(
     `SELECT id, name, create_time, content FROM document ORDER BY create_time ${order}`,
@@ -175,10 +176,7 @@ export async function updateDocument(
   }
 
   params.push(id);
-  await runAsync(
-    `UPDATE document SET ${updates.join(', ')} WHERE id = ?`,
-    params,
-  );
+  await runAsync(`UPDATE document SET ${updates.join(', ')} WHERE id = ?`, params);
 
   const result = await findDocument(id);
   if (!result) {
@@ -196,16 +194,15 @@ export async function deleteDocument(id: string): Promise<Document> {
   return doc;
 }
 
-export async function upsertDocument(
-  id: string,
-  data: Document,
-): Promise<Document> {
-  const existing = await findDocument(id);
-  if (existing) {
-    return updateDocument(id, { content: data.content });
-  } else {
-    return createDocument({ id, content: data.content });
-  }
+export async function upsertDocument(id: string, data: Document): Promise<Document> {
+  await runAsync(
+    `INSERT INTO document (id, name, content, create_time) VALUES (?, '', ?, ?)
+     ON CONFLICT(id) DO UPDATE SET content = COALESCE(?, document.content)`,
+    [id, data.content ?? '', new Date().toISOString(), data.content ?? null],
+  );
+  const result = await findDocument(id);
+  if (!result) throw new Error('Document not found after upsert');
+  return result;
 }
 
 export async function createFile(data: File): Promise<File> {
@@ -219,9 +216,7 @@ export async function createFile(data: File): Promise<File> {
       data.last_modified ?? new Date().toISOString(),
     ],
   );
-  const file = await getAsync<File>('SELECT * FROM file WHERE id = ?', [
-    result.lastID,
-  ]);
+  const file = await getAsync<File>('SELECT * FROM file WHERE id = ?', [result.lastID]);
   if (!file) {
     throw new Error('Failed to create file');
   }
@@ -271,10 +266,7 @@ export async function seedDatabase() {
     try {
       await createDocument(doc);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes('UNIQUE constraint failed')
-      ) {
+      if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
         console.log(`Document with id ${doc.id} already exists`);
       } else {
         throw error;
@@ -287,10 +279,7 @@ export async function seedDatabase() {
     try {
       await createFile(file);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes('UNIQUE constraint failed')
-      ) {
+      if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
         console.log(`File with id ${file.id} already exists`);
       } else {
         throw error;

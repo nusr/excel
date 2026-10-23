@@ -9,8 +9,7 @@ import { initController } from '../../../controller';
 
 const { mockSaveAs } = vi.hoisted(() => ({ mockSaveAs: vi.fn() }));
 vi.mock('../../../util', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('../../../util')>();
+  const actual = await importOriginal<typeof import('../../../util')>();
   return {
     ...actual,
     saveAs: (...args: unknown[]) => mockSaveAs(...args),
@@ -54,8 +53,9 @@ describe('exportExcel.download.test.ts', () => {
   });
 
   test('unknown extension is rejected without downloading a mislabeled file', async () => {
-    await expect(exportExcel('book', makeController(), 'unknown' as ExportExtension))
-      .rejects.toThrow('Unsupported export format');
+    await expect(
+      exportExcel('book', makeController(), 'unknown' as ExportExtension),
+    ).rejects.toThrow('Unsupported export format');
     expect(mockSaveAs).not.toHaveBeenCalled();
   });
 

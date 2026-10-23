@@ -19,7 +19,5 @@ export const lightColor = Object.freeze({
 });
 
 export const darkColor = Object.freeze(
-  Object.fromEntries(
-    Object.entries(lightColor).map(([k, v]) => [k, convertColorToDark(v)]),
-  ),
+  Object.fromEntries(Object.entries(lightColor).map(([k, v]) => [k, convertColorToDark(v)])),
 );

@@ -8,15 +8,15 @@ import {
   type ListBoxItemProps,
   type ListBoxLoadMoreItemProps,
   type ListBoxProps,
-  type ListBoxSectionProps
+  type ListBoxSectionProps,
 } from 'react-aria-components/ListBox';
-import {composeRenderProps} from 'react-aria-components/composeRenderProps';
-import {Check} from 'lucide-react';
-import {Text} from './Content';
-import {ProgressCircle} from './ProgressCircle';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { Check } from 'lucide-react';
+import { Text } from './Content';
+import { ProgressCircle } from './ProgressCircle';
 import './ListBox.css';
 
-export function ListBox<T>({children, ...props}: ListBoxProps<T>) {
+export function ListBox<T>({ children, ...props }: ListBoxProps<T>) {
   return <AriaListBox {...props}>{children}</AriaListBox>;
 }
 
@@ -25,8 +25,8 @@ export function ListBoxItem(props: ListBoxItemProps) {
     props.textValue || (typeof props.children === 'string' ? props.children : undefined);
   return (
     <AriaListBoxItem {...props} textValue={textValue}>
-      {composeRenderProps(props.children, children =>
-        typeof children === 'string' ? <Text slot="label">{children}</Text> : children
+      {composeRenderProps(props.children, (children) =>
+        typeof children === 'string' ? <Text slot="label">{children}</Text> : children,
       )}
     </AriaListBoxItem>
   );
@@ -53,7 +53,7 @@ export function DropdownItem(props: ListBoxItemProps) {
     props.textValue || (typeof props.children === 'string' ? props.children : undefined);
   return (
     <ListBoxItem {...props} textValue={textValue} className="dropdown-item">
-      {composeRenderProps(props.children, (children, {isSelected}) => (
+      {composeRenderProps(props.children, (children, { isSelected }) => (
         <>
           {isSelected && <Check />}
           {typeof children === 'string' ? <Text slot="label">{children}</Text> : children}
@@ -63,4 +63,4 @@ export function DropdownItem(props: ListBoxItemProps) {
   );
 }
 
-export {Text, Header};
+export { Text, Header };

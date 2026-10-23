@@ -12,9 +12,7 @@ test('apply bold formatting', async ({ page }) => {
 
   // Verify cell is selected and has content
   await expect(page.getByTestId('formula-bar-name-input')).toHaveValue('A1');
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    'Bold Text',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Bold Text');
 });
 
 test('apply italic formatting', async ({ page }) => {
@@ -28,9 +26,7 @@ test('apply italic formatting', async ({ page }) => {
   await sleep(50);
 
   await expect(page.getByTestId('formula-bar-name-input')).toHaveValue('A1');
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    'Italic Text',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Italic Text');
 });
 
 test('apply strike formatting', async ({ page }) => {
@@ -44,9 +40,7 @@ test('apply strike formatting', async ({ page }) => {
   await sleep(50);
 
   await expect(page.getByTestId('formula-bar-name-input')).toHaveValue('A1');
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    'Strike Text',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Strike Text');
 });
 
 test('change font size', async ({ page }) => {

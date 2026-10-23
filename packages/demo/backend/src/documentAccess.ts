@@ -17,7 +17,9 @@ class ContentWriteConflict extends Error {
 export async function withDocumentLock<T>(id: string, operation: () => Promise<T>): Promise<T> {
   const previous = operations.get(id) ?? Promise.resolve();
   let release!: () => void;
-  const current = new Promise<void>((resolve) => { release = resolve; });
+  const current = new Promise<void>((resolve) => {
+    release = resolve;
+  });
   operations.set(id, current);
   await previous;
   try {

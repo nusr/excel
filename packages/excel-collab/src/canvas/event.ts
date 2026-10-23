@@ -1,12 +1,5 @@
 import { IController, KeyboardEventItem, EditorStatus, IRange } from '../types';
-import {
-  isTestEnv,
-  throttle,
-  CUSTOM_FORMAT,
-  deepEqual,
-  paste,
-  reactLog,
-} from '../util';
+import { isTestEnv, throttle, CUSTOM_FORMAT, deepEqual, paste, reactLog } from '../util';
 import { keyboardEventList, scrollBar } from './shortcut';
 import { useCoreStore } from '../containers/store';
 import { flushSync } from 'react-dom';
@@ -21,15 +14,11 @@ function isInputEvent(event: any): boolean {
   const targetName = event?.target?.tagName || '';
   const currentTargetName = event?.currentTarget?.tagName || '';
   return (
-    ['INPUT', 'TEXTAREA'].includes(targetName) ||
-    ['INPUT', 'TEXTAREA'].includes(currentTargetName)
+    ['INPUT', 'TEXTAREA'].includes(targetName) || ['INPUT', 'TEXTAREA'].includes(currentTargetName)
   );
 }
 
-export function registerGlobalEvent(
-  controller: IController,
-  resizeWindow: () => void,
-) {
+export function registerGlobalEvent(controller: IController, resizeWindow: () => void) {
   function handleKeydown(event: KeyboardEvent) {
     if (isInputEvent(event)) {
       return;
@@ -106,8 +95,7 @@ export function registerGlobalEvent(
       let newRange: IRange | undefined = undefined;
       if (result[CUSTOM_FORMAT]) {
         const data = result[CUSTOM_FORMAT];
-        newRange =
-          !data.floatElementUuid && data.range ? data.range : undefined;
+        newRange = !data.floatElementUuid && data.range ? data.range : undefined;
         controller.setFloatElementUuid(data.floatElementUuid);
       } else {
         controller.setFloatElementUuid('');

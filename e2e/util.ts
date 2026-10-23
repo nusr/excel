@@ -1,18 +1,15 @@
 import { Page, expect, test as base } from '@playwright/test';
 
-const clearTable = async (page: Page) => {
-  await page.evaluate(() => {
-    sessionStorage.clear();
-    localStorage.clear();
-  });
-};
-
 export const MAIN_CANVAS = 'canvas-main';
 
 const baseURL = process.env.BASE_URL ?? '';
 
 const isWhiteList = (text: string) => {
-  const whiteList = ['due to access control checks', 'ingest.us.sentry.io'];
+  const whiteList = [
+    'due to access control checks',
+    'ingest.us.sentry.io',
+    'has been classified as a bounce tracker',
+  ];
   return whiteList.some((item) => text.includes(item));
 };
 
@@ -36,9 +33,7 @@ export async function gotoHomePage(page: Page) {
     if (isWhiteList(req.url())) {
       return;
     }
-    throw new Error(
-      `Request failed: ${req.url()} - ${req.failure()?.errorText}`,
-    );
+    throw new Error(`Request failed: ${req.url()} - ${req.failure()?.errorText}`);
   });
 
   page.on('response', (res) => {
@@ -51,9 +46,7 @@ export async function gotoHomePage(page: Page) {
     throw new Error('process.env.BASE_URL is not defined');
   }
 
-  await page.goto(baseURL);
-
-  await clearTable(page);
+  await page.goto(baseURL, { waitUntil: 'domcontentloaded' });
 
   await expect(page.getByTestId(MAIN_CANVAS)).toBeVisible({
     timeout: 10 * 1000,
@@ -85,8 +78,6 @@ export const test = base.extend({
     await gotoHomePage(page);
 
     await use(page);
-
-    await clearTable(page);
   },
 });
 

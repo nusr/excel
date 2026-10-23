@@ -22,9 +22,17 @@ export const IMPORT_ACCEPT = '.xlsx,.xlsm,.xlam,.xltm,.xltx,.csv';
 
 function emptyModel(): ModelJSON {
   return {
-    workbook: {}, mergeCells: {}, customHeight: {}, customWidth: {},
-    definedNames: {}, currentSheetId: '', drawings: {}, rangeMap: {},
-    worksheets: {}, autoFilter: {}, scroll: {},
+    workbook: {},
+    mergeCells: {},
+    customHeight: {},
+    customWidth: {},
+    definedNames: {},
+    currentSheetId: '',
+    drawings: {},
+    rangeMap: {},
+    worksheets: {},
+    autoFilter: {},
+    scroll: {},
   };
 }
 
@@ -53,22 +61,38 @@ function coordinates(reference: string): { row: number; col: number } {
   return { row: range.row, col: range.col };
 }
 
-function readCell(file: NewFile, api: Excelize, sheet: string, axis: string, mergedFollower: boolean): ModelCellType | undefined {
-  const raw = mergedFollower ? '' : checkExcelize(file.GetCellValue(sheet, axis, { RawCellValue: true })).value;
+function readCell(
+  file: NewFile,
+  api: Excelize,
+  sheet: string,
+  axis: string,
+  mergedFollower: boolean,
+): ModelCellType | undefined {
+  const raw = mergedFollower
+    ? ''
+    : checkExcelize(file.GetCellValue(sheet, axis, { RawCellValue: true })).value;
   const formula = mergedFollower ? '' : checkExcelize(file.GetCellFormula(sheet, axis)).formula;
   const styleId = checkExcelize(file.GetCellStyle(sheet, axis)).style;
   if (raw === '' && !formula && !styleId) return undefined;
   const type = checkExcelize(file.GetCellType(sheet, axis)).cellType;
   let value: ModelCellType['value'] = raw;
   if (type === api.CellTypeBool) value = raw === '1' || raw.toLowerCase() === 'true';
-  else if ((type === api.CellTypeNumber || type === api.CellTypeUnset ||
-    type === api.CellTypeDate || type === api.CellTypeFormula) && raw !== '' && Number.isFinite(Number(raw))) {
+  else if (
+    (type === api.CellTypeNumber ||
+      type === api.CellTypeUnset ||
+      type === api.CellTypeDate ||
+      type === api.CellTypeFormula) &&
+    raw !== '' &&
+    Number.isFinite(Number(raw))
+  ) {
     value = Number(raw);
   }
   return {
     value,
     ...(styleId ? fromExcelizeStyle(checkExcelize(file.GetStyle(styleId)).style) : {}),
-    ...(formula ? { formula: formula.startsWith(FORMULA_PREFIX) ? formula : FORMULA_PREFIX + formula } : {}),
+    ...(formula
+      ? { formula: formula.startsWith(FORMULA_PREFIX) ? formula : FORMULA_PREFIX + formula }
+      : {}),
   };
 }
 
@@ -84,8 +108,10 @@ export function convertWorkbookToModel(file: NewFile, api: Excelize): ModelJSON 
     const end = coordinates(dimension.split(':').at(-1) || 'A1');
     const props = checkExcelize(file.GetSheetProps(name)).props;
     let rowCount = Math.max(DEFAULT_ROW_COUNT, rows.length, end.row + 1);
-    let colCount = rows.reduce((count, row) => Math.max(count, row.length),
-      Math.max(DEFAULT_COL_COUNT, end.col + 1));
+    let colCount = rows.reduce(
+      (count, row) => Math.max(count, row.length),
+      Math.max(DEFAULT_COL_COUNT, end.col + 1),
+    );
     const merges = checkExcelize(file.GetMergeCells(name, true)).mergeCells;
     const mergedRanges: Array<{ row: number; col: number; endRow: number; endCol: number }> = [];
     for (const merge of merges) {
@@ -93,8 +119,11 @@ export function convertWorkbookToModel(file: NewFile, api: Excelize): ModelJSON 
       const finish = coordinates(merge.GetEndAxis());
       mergedRanges.push({ ...start, endRow: finish.row, endCol: finish.col });
       result.mergeCells[`${name}!${merge.GetStartAxis()}:${merge.GetEndAxis()}`] = {
-        row: start.row, col: start.col, rowCount: finish.row - start.row + 1,
-        colCount: finish.col - start.col + 1, sheetId,
+        row: start.row,
+        col: start.col,
+        rowCount: finish.row - start.row + 1,
+        colCount: finish.col - start.col + 1,
+        sheetId,
       };
       rowCount = Math.max(rowCount, finish.row + 1);
       colCount = Math.max(colCount, finish.col + 1);
@@ -102,7 +131,11 @@ export function convertWorkbookToModel(file: NewFile, api: Excelize): ModelJSON 
     rowCount = Math.min(rowCount, XLSX_MAX_ROW_COUNT);
     colCount = Math.min(colCount, XLSX_MAX_COL_COUNT);
     result.workbook[sheetId] = {
-      sheetId, name, sort: index, rowCount, colCount,
+      sheetId,
+      name,
+      sort: index,
+      rowCount,
+      colCount,
       isHide: !checkExcelize(file.GetSheetVisible(name)).visible,
       tabColor: props.TabColorRGB ? `#${props.TabColorRGB.slice(-6)}` : undefined,
     };
@@ -111,13 +144,20 @@ export function convertWorkbookToModel(file: NewFile, api: Excelize): ModelJSON 
       const visible = checkExcelize(file.GetRowVisible(name, row + 1)).visible;
       if (height !== (props.DefaultRowHeight || 15) || !visible) {
         result.customHeight[getCustomWidthOrHeightKey(sheetId, row)] = {
-          len: Math.round(height * 96 / 72), isHide: !visible,
+          len: Math.round((height * 96) / 72),
+          isHide: !visible,
         };
       }
       const usedCols = Math.max(rows[row]?.length ?? 0, row <= end.row ? end.col + 1 : 0);
       for (let col = 0; col < Math.min(usedCols, colCount); col++) {
-        const mergedFollower = mergedRanges.some((range) => row >= range.row && row <= range.endRow &&
-          col >= range.col && col <= range.endCol && (row !== range.row || col !== range.col));
+        const mergedFollower = mergedRanges.some(
+          (range) =>
+            row >= range.row &&
+            row <= range.endRow &&
+            col >= range.col &&
+            col <= range.endCol &&
+            (row !== range.row || col !== range.col),
+        );
         const cell = readCell(file, api, name, `${intToColumnName(col)}${row + 1}`, mergedFollower);
         if (cell) result.worksheets[getWorksheetKey(sheetId, row, col)] = cell;
       }
@@ -128,7 +168,8 @@ export function convertWorkbookToModel(file: NewFile, api: Excelize): ModelJSON 
       const visible = checkExcelize(file.GetColVisible(name, column)).visible;
       if (width !== (props.DefaultColWidth || 9.140625) || !visible) {
         result.customWidth[getCustomWidthOrHeightKey(sheetId, col)] = {
-          len: Math.round(width * 7), isHide: !visible,
+          len: Math.round(width * 7),
+          isHide: !visible,
         };
       }
     }
@@ -152,8 +193,10 @@ function parseCsv(text: string): string[][] {
   for (let index = 0; index < text.length; index++) {
     const char = text[index];
     if (char === '"') {
-      if (quoted && text[index + 1] === '"') { field += '"'; index++; }
-      else quoted = !quoted;
+      if (quoted && text[index + 1] === '"') {
+        field += '"';
+        index++;
+      } else quoted = !quoted;
     } else if (!quoted && (char === ',' || char === '\r' || char === '\n')) {
       row.push(field);
       field = '';
@@ -165,7 +208,10 @@ function parseCsv(text: string): string[][] {
     } else field += char;
   }
   if (quoted) throw new Error('Unclosed quoted CSV field');
-  if (field || row.length) { row.push(field); rows.push(row); }
+  if (field || row.length) {
+    row.push(field);
+    rows.push(row);
+  }
   return rows;
 }
 
@@ -174,17 +220,26 @@ function importCsv(text: string): ModelJSON {
   const rows = parseCsv(text);
   result.currentSheetId = '1';
   result.workbook['1'] = {
-    sheetId: '1', name: 'Sheet1', isHide: false, sort: 0,
+    sheetId: '1',
+    name: 'Sheet1',
+    isHide: false,
+    sort: 0,
     rowCount: Math.max(DEFAULT_ROW_COUNT, rows.length),
     colCount: rows.reduce((count, row) => Math.max(count, row.length), DEFAULT_COL_COUNT),
   };
-  rows.forEach((row, r) => row.forEach((raw, c) => {
-    if (!raw) return;
-    let value: ModelCellType['value'] = raw;
-    if (/^(true|false)$/i.test(raw)) value = raw.toLowerCase() === 'true';
-    else if (/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(raw) && Number.isFinite(Number(raw))) value = Number(raw);
-    result.worksheets[getWorksheetKey('1', r, c)] = { value };
-  }));
+  rows.forEach((row, r) =>
+    row.forEach((raw, c) => {
+      if (!raw) return;
+      let value: ModelCellType['value'] = raw;
+      if (/^(true|false)$/i.test(raw)) value = raw.toLowerCase() === 'true';
+      else if (
+        /^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(raw) &&
+        Number.isFinite(Number(raw))
+      )
+        value = Number(raw);
+      result.worksheets[getWorksheetKey('1', r, c)] = { value };
+    }),
+  );
   return result;
 }
 

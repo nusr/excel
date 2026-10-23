@@ -1,10 +1,5 @@
 import { initController } from '..';
-import {
-  EHorizontalAlign,
-  EMergeCellType,
-  ModelCellType,
-  IController,
-} from '../../types';
+import { EHorizontalAlign, EMergeCellType, ModelCellType, IController } from '../../types';
 import { MERGE_CELL_LINE_BREAK } from '../../util';
 
 describe('mergeCell.test.ts', () => {
@@ -22,9 +17,7 @@ describe('mergeCell.test.ts', () => {
         colCount: 2,
         sheetId: controller.getCurrentSheetId(),
       });
-      expect(
-        controller.getMergeCellList(controller.getCurrentSheetId()),
-      ).toHaveLength(1);
+      expect(controller.getMergeCellList(controller.getCurrentSheetId())).toHaveLength(1);
     });
     test('merge and center', () => {
       controller.setCell(
@@ -48,9 +41,7 @@ describe('mergeCell.test.ts', () => {
         colCount: 2,
         sheetId: controller.getCurrentSheetId(),
       });
-      expect(
-        controller.getMergeCellList(controller.getCurrentSheetId()),
-      ).toHaveLength(1);
+      expect(controller.getMergeCellList(controller.getCurrentSheetId())).toHaveLength(1);
       const result: ModelCellType = {
         value: 1,
         horizontalAlign: EHorizontalAlign.CENTER,
@@ -90,9 +81,7 @@ describe('mergeCell.test.ts', () => {
         },
         EMergeCellType.MERGE_CONTENT,
       );
-      expect(
-        controller.getMergeCellList(controller.getCurrentSheetId()),
-      ).toHaveLength(1);
+      expect(controller.getMergeCellList(controller.getCurrentSheetId())).toHaveLength(1);
       const result: ModelCellType = {
         value: [1, 2, 3, 4].join(MERGE_CELL_LINE_BREAK),
         isWrapText: true,
@@ -117,9 +106,7 @@ describe('mergeCell.test.ts', () => {
         colCount: 2,
         sheetId: controller.getCurrentSheetId(),
       });
-      expect(
-        controller.getMergeCellList(controller.getCurrentSheetId()),
-      ).toHaveLength(1);
+      expect(controller.getMergeCellList(controller.getCurrentSheetId())).toHaveLength(1);
       controller.deleteMergeCell({
         row: 0,
         col: 0,
@@ -127,9 +114,7 @@ describe('mergeCell.test.ts', () => {
         colCount: 2,
         sheetId: controller.getCurrentSheetId(),
       });
-      expect(
-        controller.getMergeCellList(controller.getCurrentSheetId()),
-      ).toHaveLength(0);
+      expect(controller.getMergeCellList(controller.getCurrentSheetId())).toHaveLength(0);
     });
   });
   describe('undo redo', () => {
@@ -141,20 +126,14 @@ describe('mergeCell.test.ts', () => {
         colCount: 2,
         sheetId: controller.getCurrentSheetId(),
       });
-      expect(
-        controller.getMergeCellList(controller.getCurrentSheetId()),
-      ).toHaveLength(1);
+      expect(controller.getMergeCellList(controller.getCurrentSheetId())).toHaveLength(1);
       expect(controller.canUndo()).toEqual(true);
 
       controller.undo();
-      expect(
-        controller.getMergeCellList(controller.getCurrentSheetId()),
-      ).toHaveLength(0);
+      expect(controller.getMergeCellList(controller.getCurrentSheetId())).toHaveLength(0);
       expect(controller.canRedo()).toEqual(true);
       controller.redo();
-      expect(
-        controller.getMergeCellList(controller.getCurrentSheetId()),
-      ).toHaveLength(1);
+      expect(controller.getMergeCellList(controller.getCurrentSheetId())).toHaveLength(1);
     });
   });
 });

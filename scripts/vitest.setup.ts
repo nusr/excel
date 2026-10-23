@@ -1,11 +1,9 @@
 import { createRequire } from 'node:module';
 import { vi } from 'vitest';
-import '@testing-library/jest-dom/vitest'
+import '@testing-library/jest-dom/vitest';
 
 vi.mock('excelize-wasm/excelize.wasm.gz?no-inline&url', () => ({
-  default: createRequire(import.meta.url).resolve(
-    'excelize-wasm/excelize.wasm.gz',
-  ),
+  default: createRequire(import.meta.url).resolve('excelize-wasm/excelize.wasm.gz'),
 }));
 vi.mock('excelize-wasm/main.js?no-inline&url', () => ({
   default: 'excelize-wasm',
@@ -65,9 +63,7 @@ class WorkerMock {
     this.onmessage(message);
     Promise.resolve().then(() => {
       const list = this.listeners.get('message') || [];
-      list.forEach((/** @type {(arg0: { data: any; }) => any} */ fn) =>
-        fn({ data: message }),
-      );
+      list.forEach((/** @type {(arg0: { data: any; }) => any} */ fn) => fn({ data: message }));
     });
   }
   addEventListener(type: string, fn: (data: any) => void) {

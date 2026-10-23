@@ -308,36 +308,44 @@ import { useExcel } from 'excel-collab';
 
 // Get controller instance
 const { controller } = useExcel();
+const sheetId = controller.getCurrentSheetId();
+const range = { sheetId, row: 0, col: 0, rowCount: 1, colCount: 1 };
 
 // Cell operations
-controller.setCellValue(range, value);
-controller.getCellValue(range);
+controller.setCellValue('Hello', range);
+const value = controller.getCell(range)?.value;
 
 // Range operations
-controller.selectRange(range);
-controller.copyRange(range);
-controller.pasteRange(range);
+controller.setActiveRange(range);
+await controller.copy();
+controller.setActiveRange({ ...range, row: 1 });
+await controller.paste();
 
 // Worksheet operations
-controller.addSheet(name);
-controller.deleteSheet(sheetId);
-controller.renameSheet(sheetId, name);
+const addedSheet = controller.addSheet();
+if (addedSheet) {
+  controller.renameSheet('Data', addedSheet.sheetId);
+  controller.deleteSheet(addedSheet.sheetId);
+}
 
-// Formula operations
-controller.setCellFormula(range, formula);
-controller.computeFormulas();
+// Formula values are recomputed automatically
+controller.setCellValue('=SUM(1,2)', range);
 ```
 
 ### Event Handling
 
 ```tsx
-controller.on('change', (changeSet) => {
+const unsubscribeRender = controller.on('renderChange', ({ changeSet }) => {
   // Handle changes
 });
 
-controller.on('save', (json) => {
-  // Handle save
+const unsubscribeRange = controller.on('rangeChange', (range) => {
+  // Handle selection changes
 });
+
+// Remove listeners when no longer needed
+unsubscribeRender();
+unsubscribeRange();
 ```
 
 ## Acknowledgments

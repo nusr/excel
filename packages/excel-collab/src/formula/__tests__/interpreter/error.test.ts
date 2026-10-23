@@ -15,11 +15,7 @@ import { TokenType } from '../../../types';
 import { expectFormula } from './util';
 
 function interpret(list: Expression[]) {
-  return new Interpreter(
-    list,
-    { row: 0, col: 0, sheetId: '' },
-    new CellDataMapImpl(),
-  ).interpret();
+  return new Interpreter(list, { row: 0, col: 0, sheetId: '' }, new CellDataMapImpl()).interpret();
 }
 
 describe('error.test.ts', () => {
@@ -135,9 +131,7 @@ describe('error.test.ts', () => {
       expectFormula(`=RC${XLSX_MAX_COL_COUNT + 10}`, ['#REF!']);
     });
     it('all overflow', () => {
-      expectFormula(`=R${XLSX_MAX_ROW_COUNT + 10}C${XLSX_MAX_COL_COUNT + 10}`, [
-        '#REF!',
-      ]);
+      expectFormula(`=R${XLSX_MAX_ROW_COUNT + 10}C${XLSX_MAX_COL_COUNT + 10}`, ['#REF!']);
     });
   });
   describe('A1', () => {

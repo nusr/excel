@@ -44,9 +44,7 @@ test('input data and add new sheet', async ({ page }) => {
 
   // Verify current cell
   await page.keyboard.press('ArrowUp');
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    'Sheet 2 Data',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Sheet 2 Data');
 });
 
 test('switch between sheets maintains data', async ({ page }) => {
@@ -73,9 +71,7 @@ test('switch between sheets maintains data', async ({ page }) => {
 
   // Verify data in second sheet
   await page.keyboard.press('ArrowUp');
-  await expect(page.getByTestId('formula-editor-trigger')).toHaveText(
-    'Second Sheet',
-  );
+  await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Second Sheet');
 });
 
 test('sheet bar list is visible', async ({ page }) => {

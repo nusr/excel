@@ -12,10 +12,7 @@ describe('HorizontalAlign.test.tsx', () => {
 
       fireEvent.click(screen.getByTestId('toolbar-horizontal-left'));
 
-      expect(screen.getByTestId('toolbar-horizontal-left')).toHaveAttribute(
-        'aria-pressed',
-        'true',
-      );
+      expect(screen.getByTestId('toolbar-horizontal-left')).toHaveAttribute('aria-pressed', 'true');
     });
   });
   describe('center', () => {

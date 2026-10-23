@@ -124,9 +124,7 @@ export class CallExpression implements Expression {
     return visitor.visitCallExpression(this);
   }
   toString(): string {
-    return `${this.name.toString()}(${this.params
-      .map((item) => item.toString())
-      .join(',')})`;
+    return `${this.name.toString()}(${this.params.map((item) => item.toString()).join(',')})`;
   }
 }
 
@@ -143,9 +141,7 @@ export class CellRangeExpression implements Expression {
     return visitor.visitCellRangeExpression(this);
   }
   toString(): string {
-    return (
-      this.left.toString() + this.operator.toString() + this.right.toString()
-    );
+    return this.left.toString() + this.operator.toString() + this.right.toString();
   }
 }
 
@@ -164,15 +160,22 @@ export class GroupExpression implements Expression {
 
 export class ArrayExpression implements Expression {
   readonly value: Expression[];
-  constructor(value: Expression[], readonly rowWidth = value.length) {
+  constructor(
+    value: Expression[],
+    readonly rowWidth = value.length,
+  ) {
     this.value = value;
   }
   accept(visitor: Visitor) {
     return visitor.visitArrayExpression(this);
   }
   toString(): string {
-    const temp = this.value.map((v, index) =>
-      `${index === 0 ? '' : index % this.rowWidth === 0 ? ';' : ','}${v.toString()}`).join('');
+    const temp = this.value
+      .map(
+        (v, index) =>
+          `${index === 0 ? '' : index % this.rowWidth === 0 ? ';' : ','}${v.toString()}`,
+      )
+      .join('');
     return `{${temp}}`;
   }
 }

@@ -8,12 +8,7 @@ export function getHeaderStyle(
   theme?: ThemeType,
 ): Pick<
   CanvasRenderingContext2D,
-  | 'textAlign'
-  | 'textBaseline'
-  | 'font'
-  | 'fillStyle'
-  | 'lineWidth'
-  | 'strokeStyle'
+  'textAlign' | 'textBaseline' | 'font' | 'fillStyle' | 'lineWidth' | 'strokeStyle'
 > {
   return {
     textAlign: 'center',

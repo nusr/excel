@@ -2,9 +2,9 @@
 import {
   ColorWheel as AriaColorWheel,
   type ColorWheelProps as AriaColorWheelProps,
-  ColorWheelTrack
+  ColorWheelTrack,
 } from 'react-aria-components/ColorWheel';
-import {ColorThumb} from './ColorThumb';
+import { ColorThumb } from './ColorThumb';
 import './ColorWheel.css';
 export interface ColorWheelProps extends Omit<AriaColorWheelProps, 'outerRadius' | 'innerRadius'> {}
 

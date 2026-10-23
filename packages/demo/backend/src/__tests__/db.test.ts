@@ -47,22 +47,47 @@ describe('Database Operations', () => {
 
   // Document tests
   describe('Document Operations', () => {
+    it('uses an isolated in-memory database instead of the development database file', async () => {
+      const databases = await new Promise<Array<{ name: string; file: string }>>(
+        (resolve, reject) => {
+          db.all('PRAGMA database_list', (error, rows: Array<{ name: string; file: string }>) => {
+            if (error) reject(error);
+            else resolve(rows);
+          });
+        },
+      );
+      expect(databases.find((database) => database.name === 'main')?.file).toBe('');
+    });
     it('migrates an existing JSON-only document table without losing content', async () => {
       await new Promise<void>((resolve, reject) => {
-        db.exec(`
+        db.exec(
+          `
           DROP TABLE document;
           CREATE TABLE document (
             id TEXT PRIMARY KEY, name TEXT, create_time TEXT, content TEXT
           );
           INSERT INTO document (id, name, content) VALUES ('legacy', 'Legacy', '{"workbook":{}}');
-        `, (error) => error ? reject(error) : resolve());
+        `,
+          (error) => (error ? reject(error) : resolve()),
+        );
       });
-      await initDatabase();
+      const initialized = await Promise.allSettled([
+        initDatabase(),
+        initDatabase(),
+        initDatabase(),
+      ]);
+      expect(initialized.map((result) => result.status)).toEqual([
+        'fulfilled',
+        'fulfilled',
+        'fulfilled',
+      ]);
       expect(await findDocument('legacy')).toMatchObject({
-        name: 'Legacy', content: '{"workbook":{}}',
+        name: 'Legacy',
+        content: '{"workbook":{}}',
       });
       expect(await loadDocumentState('legacy')).toEqual({
-        state: null, content: '{"workbook":{}}',
+        state: null,
+        content: '{"workbook":{}}',
       });
     });
 
@@ -71,7 +96,8 @@ describe('Database Operations', () => {
       const binary = new Uint8Array([0, 1, 128, 255]);
       await saveDocumentState('collaborative', binary, '{"workbook":{}}');
       expect(await loadDocumentState('collaborative')).toEqual({
-        state: Buffer.from(binary), content: '{"workbook":{}}',
+        state: Buffer.from(binary),
+        content: '{"workbook":{}}',
       });
       const document = await findDocument('collaborative');
       expect(document?.name).toBe('Keep metadata');
@@ -222,15 +248,13 @@ describe('Database Operations', () => {
         };
         await createDocument(document);
 
-        await expect(updateDocument('no-update', {})).rejects.toThrow(
-          'No fields to update',
-        );
+        await expect(updateDocument('no-update', {})).rejects.toThrow('No fields to update');
       });
 
       it('should throw error when updating non-existent document', async () => {
-        await expect(
-          updateDocument('non-existent', { name: 'Test' }),
-        ).rejects.toThrow('Document not found after update');
+        await expect(updateDocument('non-existent', { name: 'Test' })).rejects.toThrow(
+          'Document not found after update',
+        );
       });
     });
 
@@ -251,13 +275,25 @@ describe('Database Operations', () => {
       });
 
       it('should throw error when deleting non-existent document', async () => {
-        await expect(deleteDocument('non-existent')).rejects.toThrow(
-          'Document not found',
-        );
+        await expect(deleteDocument('non-existent')).rejects.toThrow('Document not found');
       });
     });
 
     describe('upsertDocument', () => {
+      it('allows concurrent writes of the same new document without unique-constraint failures', async () => {
+        const results = await Promise.allSettled([
+          upsertDocument('concurrent', { id: 'concurrent', content: 'first' }),
+          upsertDocument('concurrent', { id: 'concurrent', content: 'second' }),
+          upsertDocument('concurrent', { id: 'concurrent', content: 'third' }),
+        ]);
+        expect(results.map((result) => result.status)).toEqual([
+          'fulfilled',
+          'fulfilled',
+          'fulfilled',
+        ]);
+        expect(await findAllDocuments()).toHaveLength(1);
+        expect(['first', 'second', 'third']).toContain((await findDocument('concurrent'))?.content);
+      });
       it('should create document when it does not exist', async () => {
         const document: Document = {
           id: 'upsert-new',
@@ -273,6 +309,8 @@ describe('Database Operations', () => {
       it('should update document when it exists', async () => {
         const document: Document = {
           id: 'upsert-existing',
+          name: 'Preserved name',
+          create_time: '2020-01-01T00:00:00.000Z',
           content: 'Original content',
         };
         await createDocument(document);
@@ -283,6 +321,8 @@ describe('Database Operations', () => {
         });
 
         expect(updated.content).toBe('Updated content');
+        expect(updated.name).toBe(document.name);
+        expect(updated.create_time).toBe(document.create_time);
       });
     });
   });
@@ -376,9 +416,7 @@ describe('Database Operations', () => {
         const createdFile = await createFile(fileData);
         const retrievedFile = await findFile(createdFile.id!);
 
-        expect(retrievedFile!.content.toString()).toBe(
-          originalContent.toString(),
-        );
+        expect(retrievedFile!.content.toString()).toBe(originalContent.toString());
       });
     });
   });

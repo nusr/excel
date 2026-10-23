@@ -33,18 +33,12 @@ describe('col.test.ts', () => {
   });
   describe('col', () => {
     test('add', () => {
-      const old = controller.getSheetInfo(
-        controller.getCurrentSheetId(),
-      )!.colCount;
+      const old = controller.getSheetInfo(controller.getCurrentSheetId())!.colCount;
       controller.addCol(20, 10);
-      expect(
-        controller.getSheetInfo(controller.getCurrentSheetId())!.colCount,
-      ).toEqual(old + 10);
+      expect(controller.getSheetInfo(controller.getCurrentSheetId())!.colCount).toEqual(old + 10);
 
       controller.addCol(20, 0);
-      expect(
-        controller.getSheetInfo(controller.getCurrentSheetId())!.colCount,
-      ).toEqual(old + 10);
+      expect(controller.getSheetInfo(controller.getCurrentSheetId())!.colCount).toEqual(old + 10);
     });
     test('add and delete do not modify cells on another sheet', () => {
       const firstSheetId = controller.getCurrentSheetId();
@@ -63,27 +57,23 @@ describe('col.test.ts', () => {
       controller.setCurrentSheetId(firstSheetId);
       controller.addCol(1, 1);
       expect(controller.getCell({ ...cell, col: 4 })?.value).toEqual(1);
-      expect(
-        controller.getCell({ ...cell, sheetId: secondSheetId })?.value,
-      ).toEqual(2);
+      expect(controller.getCell({ ...cell, sheetId: secondSheetId })?.value).toEqual(2);
 
       controller.deleteCol(1, 1);
       expect(controller.getCell(cell)?.value).toEqual(1);
-      expect(
-        controller.getCell({ ...cell, sheetId: secondSheetId })?.value,
-      ).toEqual(2);
+      expect(controller.getCell({ ...cell, sheetId: secondSheetId })?.value).toEqual(2);
     });
     test('delete', () => {
       const old = controller.getSheetInfo(controller.getCurrentSheetId())!;
       controller.deleteCol(20, 10);
-      expect(
-        controller.getSheetInfo(controller.getCurrentSheetId())!.colCount,
-      ).toEqual(old.colCount - 10);
+      expect(controller.getSheetInfo(controller.getCurrentSheetId())!.colCount).toEqual(
+        old.colCount - 10,
+      );
 
       controller.deleteCol(20, -1);
-      expect(
-        controller.getSheetInfo(controller.getCurrentSheetId())!.colCount,
-      ).toEqual(old.colCount - 10);
+      expect(controller.getSheetInfo(controller.getCurrentSheetId())!.colCount).toEqual(
+        old.colCount - 10,
+      );
     });
 
     test('undo redo', () => {

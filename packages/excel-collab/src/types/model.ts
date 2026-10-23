@@ -109,8 +109,7 @@ export interface Coordinate {
   row: number;
   col: number;
 }
-export type ModelCellValue = ModelCellType &
-  Pick<IRange, 'sheetId' | 'row' | 'col'>;
+export type ModelCellValue = ModelCellType & Pick<IRange, 'sheetId' | 'row' | 'col'>;
 
 export interface CustomItem {
   len: number; // width or height
@@ -138,12 +137,7 @@ export type DrawingElement = {
 };
 export type WorksheetData = ModelCellValue[];
 
-export type ChangeEventType =
-  | keyof ModelJSON
-  | 'cellStyle'
-  | 'antLine'
-  | 'redo'
-  | 'undo';
+export type ChangeEventType = keyof ModelJSON | 'cellStyle' | 'antLine' | 'redo' | 'undo';
 export interface EventType {
   changeSet: Set<ChangeEventType>;
 }
@@ -181,10 +175,41 @@ export type NormalFilter = {
   value: ResultType[];
 };
 
+export type FilterOperator =
+  | 'equal'
+  | 'notEqual'
+  | 'contains'
+  | 'notContains'
+  | 'startsWith'
+  | 'endsWith'
+  | 'greaterThan'
+  | 'greaterThanOrEqual'
+  | 'lessThan'
+  | 'lessThanOrEqual'
+  | 'between'
+  | 'notBetween'
+  | 'empty'
+  | 'notEmpty';
+
+export type FilterCondition = {
+  operator: FilterOperator;
+  value?: string | number;
+  value2?: string | number;
+};
+
+export type CustomFilter = {
+  type: 'custom';
+  operator: 'and' | 'or';
+  conditions: FilterCondition[];
+};
+
+export type FilterValue = NormalFilter | NumberFilter | TextFilter | ColorFilter | CustomFilter;
+
 export type AutoFilterItem = {
   range: IRange;
   col?: number;
-  value?: NormalFilter | NumberFilter | TextFilter | ColorFilter;
+  value?: FilterValue;
+  filters?: Record<string, FilterValue>;
 };
 
 export type DefinedNameItem = { range: IRange; name: string };
@@ -638,11 +663,7 @@ export interface IWorksheet extends IBaseManager {
    * @param {Array<Array<Partial<StyleType>>>} style - The styles to apply to the cells.
    * @param {IRange} range - The range of cells to set.
    */
-  setCell(
-    value: ResultType[][],
-    style: Array<Array<Partial<StyleType>>>,
-    range: IRange,
-  ): void;
+  setCell(value: ResultType[][], style: Array<Array<Partial<StyleType>>>, range: IRange): void;
 
   /**
    * Updates the style of a range of cells.
@@ -707,7 +728,8 @@ export interface IFilter extends IBaseManager {
 }
 
 export interface IBaseModel
-  extends Pick<
+  extends
+    Pick<
       IWorkbook,
       | 'setCurrentSheetId'
       | 'getCurrentSheetId'
@@ -725,11 +747,7 @@ export interface IBaseModel
     Pick<IRangeMap, 'setActiveRange' | 'getActiveRange' | 'validateRange'>,
     Pick<
       IDrawings,
-      | 'getDrawingList'
-      | 'addDrawing'
-      | 'updateDrawing'
-      | 'deleteDrawing'
-      | 'validateDrawing'
+      'getDrawingList' | 'addDrawing' | 'updateDrawing' | 'deleteDrawing' | 'validateDrawing'
     >,
     Pick<
       IDefinedName,
@@ -770,19 +788,10 @@ export interface IEventEmitter<
   EventType extends Record<string, unknown> = Record<string, unknown>,
 > {
   getEventLength<T extends keyof EventType>(name: T): number;
-  on<T extends keyof EventType>(
-    name: T,
-    callback: (data: EventType[T]) => void,
-  ): VoidFunction;
+  on<T extends keyof EventType>(name: T, callback: (data: EventType[T]) => void): VoidFunction;
   emit<T extends keyof EventType>(name: T, data: EventType[T]): void;
-  off<T extends keyof EventType>(
-    name: T,
-    callback?: (data: EventType[T]) => void,
-  ): void;
-  once<T extends keyof EventType>(
-    name: T,
-    callback: (data: EventType[T]) => void,
-  ): VoidFunction;
+  off<T extends keyof EventType>(name: T, callback?: (data: EventType[T]) => void): void;
+  once<T extends keyof EventType>(name: T, callback: (data: EventType[T]) => void): VoidFunction;
 }
 
 export type ModelEventEmitterType = {
@@ -802,7 +811,8 @@ export type ModelEventEmitterType = {
  *
  */
 export interface IModel
-  extends IBaseModel,
+  extends
+    IBaseModel,
     Pick<IScroll, 'getScroll' | 'setScroll'>,
     IEventEmitter<ModelEventEmitterType> {
   destroy(): void;
@@ -825,13 +835,7 @@ export interface IModel
   getRoot(): ModelRoot;
 }
 
-export type NumberFormatValue =
-  | number
-  | string
-  | boolean
-  | Date
-  | null
-  | undefined;
+export type NumberFormatValue = number | string | boolean | Date | null | undefined;
 
 export type UserItem = {
   range: IRange;

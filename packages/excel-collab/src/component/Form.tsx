@@ -1,11 +1,14 @@
 'use client';
-import {Form as RACForm, type FormProps} from 'react-aria-components/Form';
-import {type LabelProps, Label as RACLabel} from 'react-aria-components/Label';
-import {type FieldErrorProps, FieldError as RACFieldError} from 'react-aria-components/FieldError';
-import {type ButtonProps, Button} from 'react-aria-components/Button';
-import {type TextProps} from 'react-aria-components/Text';
+import { Form as RACForm, type FormProps } from 'react-aria-components/Form';
+import { type LabelProps, Label as RACLabel } from 'react-aria-components/Label';
+import {
+  type FieldErrorProps,
+  FieldError as RACFieldError,
+} from 'react-aria-components/FieldError';
+import { type ButtonProps, Button } from 'react-aria-components/Button';
+import { type TextProps } from 'react-aria-components/Text';
 import './Form.css';
-import {Text} from './Content';
+import { Text } from './Content';
 
 export function Form(props: FormProps) {
   return <RACForm {...props} />;

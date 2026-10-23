@@ -1,9 +1,9 @@
 'use client';
-import {composeRenderProps} from 'react-aria-components/composeRenderProps';
-import {Group, type GroupProps} from 'react-aria-components/Group';
-import {InputContext} from 'react-aria-components/Input';
-import {Label} from './Form';
-import {useId} from 'react';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { Group, type GroupProps } from 'react-aria-components/Group';
+import { InputContext } from 'react-aria-components/Input';
+import { Label } from './Form';
+import { useId } from 'react';
 import './InputGroup.css';
 
 interface InputGroupProps extends GroupProps {
@@ -22,11 +22,13 @@ export function InputGroup(props: InputGroupProps) {
       <Group
         {...props}
         aria-labelledby={
-          [props.label ? id : undefined, props['aria-labelledby']].filter(Boolean).join(' ') || undefined
+          [props.label ? id : undefined, props['aria-labelledby']].filter(Boolean).join(' ') ||
+          undefined
         }
-        className="react-aria-Group inset">
+        className="react-aria-Group inset"
+      >
         {composeRenderProps(props.children, (children, renderProps) => (
-          <InputContext.Provider value={{disabled: renderProps.isDisabled}}>
+          <InputContext.Provider value={{ disabled: renderProps.isDisabled }}>
             {children}
           </InputContext.Provider>
         ))}

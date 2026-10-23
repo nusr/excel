@@ -14,7 +14,9 @@ describe('convertWorkbookToModel', () => {
 
   test('preserves booleans, numbers, strings, errors and formula cached values', () => {
     const values = [true, 42, '007', '#DIV/0!', 'hello', 3];
-    values.forEach((value, index) => checkExcelize(file.SetCellValue('Sheet1', `A${index + 1}`, value)));
+    values.forEach((value, index) =>
+      checkExcelize(file.SetCellValue('Sheet1', `A${index + 1}`, value)),
+    );
     checkExcelize(file.SetCellFormula('Sheet1', 'A6', '=SUM(1,2)'));
     const model = convertWorkbookToModel(file, api);
     values.forEach((value, index) => {
@@ -27,33 +29,51 @@ describe('convertWorkbookToModel', () => {
     checkExcelize(file.SetCellFormula('Sheet1', 'B2', '=SUM(1,2)'));
     const model = convertWorkbookToModel(file, api);
     expect(model.worksheets[getWorksheetKey('1', 1, 1)]).toMatchObject({
-      value: '', formula: '=SUM(1,2)',
+      value: '',
+      formula: '=SUM(1,2)',
     });
   });
 
   test('imports fonts, fills, alignment, borders and custom number formats', () => {
     checkExcelize(file.SetCellValue('Sheet1', 'A1', 0.5));
-    const style = checkExcelize(file.NewStyle({
-      Font: { Size: 18, Family: 'Arial', Bold: true, Italic: true, Strike: true,
-        Underline: 'double', Color: '00FF00' },
-      Fill: { Type: 'pattern', Pattern: 1, Color: ['FFFF00'] },
-      Alignment: { Horizontal: 'center', Vertical: 'center', WrapText: true },
-      Border: [
-        { Type: 'left', Style: 1, Color: '000000' },
-        { Type: 'right', Style: 2, Color: '112233' },
-        { Type: 'top', Style: 5, Color: 'FF0000' },
-        { Type: 'bottom', Style: 6, Color: '445566' },
-      ],
-      CustomNumFmt: '0.00%',
-    })).style;
+    const style = checkExcelize(
+      file.NewStyle({
+        Font: {
+          Size: 18,
+          Family: 'Arial',
+          Bold: true,
+          Italic: true,
+          Strike: true,
+          Underline: 'double',
+          Color: '00FF00',
+        },
+        Fill: { Type: 'pattern', Pattern: 1, Color: ['FFFF00'] },
+        Alignment: { Horizontal: 'center', Vertical: 'center', WrapText: true },
+        Border: [
+          { Type: 'left', Style: 1, Color: '000000' },
+          { Type: 'right', Style: 2, Color: '112233' },
+          { Type: 'top', Style: 5, Color: 'FF0000' },
+          { Type: 'bottom', Style: 6, Color: '445566' },
+        ],
+        CustomNumFmt: '0.00%',
+      }),
+    ).style;
     checkExcelize(file.SetCellStyle('Sheet1', 'A1', 'A1', style));
     const cell = convertWorkbookToModel(file, api).worksheets[getWorksheetKey('1', 0, 0)];
     expect(cell).toMatchObject({
-      value: 0.5, fontSize: 18, fontFamily: 'Arial', isBold: true,
-      isItalic: true, isStrike: true, underline: EUnderLine.DOUBLE,
-      fontColor: '#00FF00', fillColor: '#FFFF00',
-      horizontalAlign: EHorizontalAlign.CENTER, verticalAlign: EVerticalAlign.MIDDLE,
-      isWrapText: true, numberFormat: '0.00%',
+      value: 0.5,
+      fontSize: 18,
+      fontFamily: 'Arial',
+      isBold: true,
+      isItalic: true,
+      isStrike: true,
+      underline: EUnderLine.DOUBLE,
+      fontColor: '#00FF00',
+      fillColor: '#FFFF00',
+      horizontalAlign: EHorizontalAlign.CENTER,
+      verticalAlign: EVerticalAlign.MIDDLE,
+      isWrapText: true,
+      numberFormat: '0.00%',
       borderLeft: { type: 'thin', color: '#000000' },
       borderRight: { type: 'medium', color: '#112233' },
       borderTop: { type: 'thick', color: '#FF0000' },
@@ -75,8 +95,14 @@ describe('convertWorkbookToModel', () => {
     checkExcelize(file.SetColVisible('Sheet1', 'B', false));
     checkExcelize(file.SetRowVisible('Sheet1', 2, false));
     const model = convertWorkbookToModel(file, api);
-    expect(model.customWidth[getCustomWidthOrHeightKey('1', 0)]).toEqual({ len: 120, isHide: false });
-    expect(model.customHeight[getCustomWidthOrHeightKey('1', 2)]).toEqual({ len: 60, isHide: false });
+    expect(model.customWidth[getCustomWidthOrHeightKey('1', 0)]).toEqual({
+      len: 120,
+      isHide: false,
+    });
+    expect(model.customHeight[getCustomWidthOrHeightKey('1', 2)]).toEqual({
+      len: 60,
+      isHide: false,
+    });
     expect(model.customWidth[getCustomWidthOrHeightKey('1', 1)].isHide).toBe(true);
     expect(model.customHeight[getCustomWidthOrHeightKey('1', 1)].isHide).toBe(true);
   });
@@ -113,7 +139,11 @@ describe('convertWorkbookToModel', () => {
     checkExcelize(file.MergeCell('Sheet1', 'A1', 'B2'));
     const model = convertWorkbookToModel(file, api);
     expect(model.worksheets[getWorksheetKey('1', 0, 0)].value).toBe('merged');
-    for (const [row, col] of [[0, 1], [1, 0], [1, 1]]) {
+    for (const [row, col] of [
+      [0, 1],
+      [1, 0],
+      [1, 1],
+    ]) {
       expect(model.worksheets[getWorksheetKey('1', row, col)]?.value ?? '').toBe('');
     }
   });
