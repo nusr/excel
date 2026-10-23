@@ -1,23 +1,35 @@
 {
-  "../../excel-collab/lib/Chart-8YOq8g0e.mjs": {
-    "file": "assets/Chart-8YOq8g0e-B0GyiGBo.js",
-    "name": "Chart-8YOq8g0e",
-    "src": "../../excel-collab/lib/Chart-8YOq8g0e.mjs",
+  "../../excel-collab/lib/Chart-1wiy_dKs.mjs": {
+    "file": "assets/Chart-1wiy_dKs-B45vl595.js",
+    "name": "Chart-1wiy_dKs",
+    "src": "../../excel-collab/lib/Chart-1wiy_dKs.mjs",
     "isDynamicEntry": true,
     "imports": [
       "index.html"
     ]
   },
+  "../../excel-collab/lib/excelize.wasm.gz": {
+    "file": "assets/excelize.wasm-C-38TlP1.gz",
+    "src": "../../excel-collab/lib/excelize.wasm.gz"
+  },
+  "../../excel-collab/lib/main.js": {
+    "file": "assets/main-CH8B9IBU.js",
+    "src": "../../excel-collab/lib/main.js"
+  },
   "index.html": {
-    "file": "assets/index-rjR9wZF7.js",
+    "file": "assets/index-XplzfFYp.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "dynamicImports": [
-      "../../excel-collab/lib/Chart-8YOq8g0e.mjs"
+      "../../excel-collab/lib/Chart-1wiy_dKs.mjs"
     ],
     "css": [
-      "assets/index-AqYxm9Z4.css"
+      "assets/index-dlLApw-o.css"
+    ],
+    "assets": [
+      "assets/excelize.wasm-C-38TlP1.gz",
+      "assets/main-CH8B9IBU.js"
     ]
   }
 }
