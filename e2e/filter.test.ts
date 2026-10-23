@@ -8,10 +8,13 @@ async function selectCell(page: Page, reference: string) {
 }
 
 async function prepareFilter(page: Page) {
-  await page.evaluate(async () => {
-    await navigator.clipboard.writeText('Name\tScore\nAlpha\t10\nBeta\t20\nAlpha\t30\nGamma\t40');
+  await page.getByTestId('menubar-excel-trigger').click();
+  await page.getByTestId('menubar-import-input').setInputFiles({
+    name: 'filter-data.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from('Name,Score\nAlpha,10\nBeta,20\nAlpha,30\nGamma,40'),
   });
-  await page.getByTestId('toolbar-paste').click();
+  await page.keyboard.press('Escape');
   await expect(page.getByTestId('formula-editor-trigger')).toHaveText('Name');
   await selectCell(page, 'A1:B5');
   await page.getByTestId('toolbar-filter').click();
