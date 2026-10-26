@@ -4626,9 +4626,9 @@ npm-run-path@^6.0.0:
     unicorn-magic "^0.3.0"
 
 numfmt@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-4.0.1.tgz#e10b24c06e44baf4465fad8433aadb7d10325d5e"
-  integrity sha512-P+C1JTxlTO0thySpEGxUR72Z7mnpIH73Dw2Xdw9QGhtlZdB4k1u0owNUTpNiT1dsw9jQCgpQa3gjRaXo8lhdXw==
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/numfmt/-/numfmt-4.1.0.tgz#a7d375408321b1de2cd831dbedd42a804824cc0e"
+  integrity sha512-KgmuD7miM07gxG9dFFm9DpAV1xMWtMPNu2YBcnUnQg4yMM5ynWAasxa4Y6H9diSVa2mNDfzOwTjHLaXxnY250w==
 
 "nx@>=23.1.0 < 24.0.0":
   version "23.1.2"
