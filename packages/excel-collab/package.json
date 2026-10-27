@@ -59,6 +59,7 @@
     "@formulajs/formulajs": "^4.6.1",
     "chart.js": "^4.5.1",
     "comlink": "^4.4.2",
+    "dompurify": "^3.4.17",
     "excelize-wasm": "^0.1.3",
     "fflate": "^0.8.3",
     "lucide-react": "^1.59.0",

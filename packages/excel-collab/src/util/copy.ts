@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import type { ClipboardData, CustomClipboardData } from '../types';
 
 export const PLAIN_FORMAT = 'text/plain';
@@ -7,6 +8,47 @@ export const IMAGE_FORMAT = 'image/png';
 
 const CUSTOM_START_FLAG = '<caption>';
 const CUSTOM_END_FLAG = '</caption>';
+const CLIPBOARD_HTML_CONFIG = {
+  ALLOWED_TAGS: [
+    'a',
+    'b',
+    'br',
+    'caption',
+    'col',
+    'colgroup',
+    'div',
+    'em',
+    'i',
+    'p',
+    's',
+    'span',
+    'strong',
+    'table',
+    'tbody',
+    'td',
+    'tfoot',
+    'th',
+    'thead',
+    'tr',
+    'u',
+  ],
+  ALLOWED_ATTR: [
+    'align',
+    'border',
+    'cellpadding',
+    'cellspacing',
+    'class',
+    'colspan',
+    'height',
+    'href',
+    'rowspan',
+    'scope',
+    'style',
+    'valign',
+    'width',
+  ],
+  ALLOW_DATA_ATTR: false,
+};
 
 function select(element: HTMLTextAreaElement) {
   const isReadOnly = element.hasAttribute('readonly');
@@ -150,6 +192,10 @@ export async function paste(): Promise<ClipboardData> {
 }
 
 export function generateHTML(style: string, content: string, customData: string = ''): string {
+  const safeTable = DOMPurify.sanitize(
+    `<table>${customData}${content}</table>`,
+    CLIPBOARD_HTML_CONFIG,
+  );
   const result = `
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
   <head>
@@ -159,7 +205,7 @@ export function generateHTML(style: string, content: string, customData: string 
     <style>${style.replaceAll('<', '\\3c ')}</style>
   </head>
     <body>
-      <table>${customData}${content}</table>
+      ${safeTable}
     </body>
   </html>`;
 
@@ -174,16 +220,19 @@ export function formatCustomData(customData: string) {
 export function extractCustomData(html: string): CustomClipboardData | null {
   const start = html.indexOf(CUSTOM_START_FLAG);
   const end = html.indexOf(CUSTOM_END_FLAG);
-  if (start >= 0 && end >= 0) {
-    const t = html.slice(start + CUSTOM_START_FLAG.length, end).trim();
-    if (!t || t[0] !== '{' || t[t.length - 1] !== '}') {
-      return null;
-    }
-    const element = document.createElement('template');
-    element.innerHTML = t;
-    return parseCustomData(element.content.textContent || '');
-  }
-  return null;
+  if (start < 0 || end < 0 || end <= start) return null;
+
+  const captionHtml = html.slice(start, end + CUSTOM_END_FLAG.length);
+  const fragment = DOMPurify.sanitize(`<table>${captionHtml}</table>`, {
+    ALLOWED_TAGS: ['caption', 'table'],
+    ALLOWED_ATTR: [],
+    RETURN_DOM_FRAGMENT: true,
+  });
+  const caption = fragment.querySelector('caption');
+  if (!caption) return null;
+  const text = caption.textContent?.trim() || '';
+  if (!text || text[0] !== '{' || text[text.length - 1] !== '}') return null;
+  return parseCustomData(text);
 }
 
 export function parseCustomData(text: string): CustomClipboardData | null {

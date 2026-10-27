@@ -29,7 +29,21 @@ describe('generateHTML', () => {
     const result = generateHTML(style, content);
 
     expect(result).toContain('<style>body { background-color: red; }</style>');
-    expect(result).toContain('<table><tr><td>Test</td></tr></table>');
+    expect(result).toContain('<table><tbody><tr><td>Test</td></tr></tbody></table>');
+  });
+
+  it('sanitizes untrusted cell content and custom data', () => {
+    const result = generateHTML(
+      '',
+      '<tr><td onclick="alert(1)">safe<img src=x onerror="alert(1)"></td></tr><script>alert(1)</script>',
+      '<caption onmouseover="alert(1)">safe metadata</caption>',
+    );
+    const template = document.createElement('template');
+    template.innerHTML = result;
+
+    expect(template.content.querySelector('td')?.textContent).toBe('safe');
+    expect(template.content.querySelector('img, script')).toBeNull();
+    expect(template.content.querySelector('[onclick], [onerror], [onmouseover]')).toBeNull();
   });
 
   it('should include custom data if provided', () => {
@@ -94,6 +108,16 @@ describe('extractCustomData', () => {
       '<html><caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption></html>';
     const result = extractCustomData(html);
     expect(result).toEqual({
+      range: { row: 1, col: 1, colCount: 1, rowCount: 1, sheetId: 'test' },
+      type: 'cut',
+    });
+  });
+
+  it('extracts metadata from untrusted HTML without preserving executable markup', () => {
+    const html =
+      '<html><caption>{"range":{"row":1,"col":1,"colCount":1,"rowCount":1,"sheetId":"test"},"type":"cut"}</caption><img src=x onerror="alert(1)"><script>alert(1)</script></html>';
+
+    expect(extractCustomData(html)).toEqual({
       range: { row: 1, col: 1, colCount: 1, rowCount: 1, sheetId: 'test' },
       type: 'cut',
     });
