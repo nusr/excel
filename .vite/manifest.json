@@ -1,8 +1,8 @@
 {
-  "../../excel-collab/lib/Chart-_owkIO7Z.mjs": {
-    "file": "assets/Chart-_owkIO7Z-Cf1tqliA.js",
-    "name": "Chart-_owkIO7Z",
-    "src": "../../excel-collab/lib/Chart-_owkIO7Z.mjs",
+  "../../excel-collab/lib/Chart-CKQ4HDdd.mjs": {
+    "file": "assets/Chart-CKQ4HDdd-DuEo1Vhb.js",
+    "name": "Chart-CKQ4HDdd",
+    "src": "../../excel-collab/lib/Chart-CKQ4HDdd.mjs",
     "isDynamicEntry": true,
     "imports": [
       "index.html"
@@ -17,12 +17,12 @@
     "src": "../../excel-collab/lib/main.js"
   },
   "index.html": {
-    "file": "assets/index-CwQYlECv.js",
+    "file": "assets/index-BFQ8PEpT.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "dynamicImports": [
-      "../../excel-collab/lib/Chart-_owkIO7Z.mjs"
+      "../../excel-collab/lib/Chart-CKQ4HDdd.mjs"
     ],
     "css": [
       "assets/index-dlLApw-o.css"
