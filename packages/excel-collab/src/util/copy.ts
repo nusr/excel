@@ -86,7 +86,7 @@ function createFakeElement(value: string) {
   return fakeElement;
 }
 
-function defaultCopy(value: string, type: 'copy' | 'cut') {
+function defaultCopy(value: string) {
   const activeElement = document.activeElement;
   const selection = document.getSelection();
   const ranges = selection
@@ -97,11 +97,11 @@ function defaultCopy(value: string, type: 'copy' | 'cut') {
   const fakeElement = createFakeElement(value);
   document.body.appendChild(fakeElement);
   try {
-    const selectedText = select(fakeElement);
-    if (typeof document.execCommand === 'function') {
-      document.execCommand(type);
+    select(fakeElement);
+    // Cutting worksheet cells is handled by the controller, not this readonly textarea.
+    if (typeof document.execCommand !== 'function' || !document.execCommand('copy')) {
+      throw new Error('Clipboard copying failed');
     }
-    return selectedText;
   } finally {
     fakeElement.remove();
     if (activeElement instanceof HTMLElement) activeElement.focus({ preventScroll: true });
@@ -128,7 +128,11 @@ async function copy(textData: ClipboardData) {
   await navigator.clipboard.write([new ClipboardItem(result)]);
 }
 
-export async function copyOrCut(textData: ClipboardData, type: 'copy' | 'cut'): Promise<void> {
+/**
+ * Writes clipboard data for either operation; the controller handles removing cut cells.
+ * Falls back to plain text and logs clipboard write failures.
+ */
+export async function copyOrCut(textData: ClipboardData): Promise<void> {
   try {
     await copy(textData);
     return;
@@ -136,7 +140,7 @@ export async function copyOrCut(textData: ClipboardData, type: 'copy' | 'cut'): 
     console.log(error);
   }
   try {
-    defaultCopy(textData[PLAIN_FORMAT], type);
+    defaultCopy(textData[PLAIN_FORMAT]);
   } catch (error) {
     console.log(error);
   }
@@ -151,21 +155,22 @@ async function pasteRichText() {
   };
   const list = (await navigator?.clipboard?.read()) || [];
   for (const item of list) {
-    if (item.types.includes(PLAIN_FORMAT)) {
-      const buf = await item.getType(PLAIN_FORMAT);
-      result[PLAIN_FORMAT] = (await buf?.text?.()) || '';
-    }
-    if (item.types.includes(HTML_FORMAT)) {
-      const buf = await item.getType(HTML_FORMAT);
-      result[HTML_FORMAT] = (await buf?.text?.()) || '';
-    }
-    if (item.types.includes(IMAGE_FORMAT)) {
-      const buf = await item.getType(IMAGE_FORMAT);
-      result[IMAGE_FORMAT] = buf;
+    for (const type of [PLAIN_FORMAT, HTML_FORMAT, IMAGE_FORMAT] as const) {
+      if (!item.types.includes(type)) continue;
+      try {
+        const buf = await item.getType(type);
+        if (type === IMAGE_FORMAT) {
+          result[type] = buf;
+        } else {
+          result[type] = await buf.text();
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
-  result[CUSTOM_FORMAT] = result[CUSTOM_FORMAT] || extractCustomData(result[HTML_FORMAT]);
+  result[CUSTOM_FORMAT] = extractCustomData(result[HTML_FORMAT]);
   return result;
 }
 
@@ -191,25 +196,34 @@ export async function paste(): Promise<ClipboardData> {
   return result;
 }
 
+/**
+ * Sanitizes clipboard markup and embeds CSS as text, not HTML.
+ * CSS rules are preserved; this does not sanitize the stylesheet itself.
+ */
 export function generateHTML(style: string, content: string, customData: string = ''): string {
-  const safeTable = DOMPurify.sanitize(
-    `<table>${customData}${content}</table>`,
-    CLIPBOARD_HTML_CONFIG,
-  );
-  const result = `
+  const safeTable = DOMPurify.sanitize(`<table>${customData}${content}</table>`, {
+    ...CLIPBOARD_HTML_CONFIG,
+    RETURN_DOM_FRAGMENT: true,
+  });
+  const htmlDocument = new DOMParser().parseFromString(
+    `
 <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="ProgId" content="Excel.Sheet" />
     <meta name="Generator" content="Microsoft Excel 15" />
-    <style>${style.replaceAll('<', '\\3c ')}</style>
   </head>
-    <body>
-      ${safeTable}
-    </body>
-  </html>`;
+  <body></body>
+</html>`,
+    HTML_FORMAT,
+  );
+  const styleElement = htmlDocument.createElement('style');
+  // Style text is serialized verbatim, so escape HTML delimiters before serialization.
+  styleElement.textContent = style.replaceAll('<', '\\3c ');
+  htmlDocument.head.appendChild(styleElement);
+  htmlDocument.body.appendChild(safeTable);
 
-  return result;
+  return htmlDocument.documentElement.outerHTML;
 }
 
 export function formatCustomData(customData: string) {

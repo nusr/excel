@@ -1052,7 +1052,7 @@ export class Controller extends EventEmitter<ControllerEventEmitterType> impleme
       );
       event.clipboardData?.setData(IMAGE_FORMAT, imageData);
     } else {
-      await copyOrCut(data, type);
+      await copyOrCut(data);
     }
     if (this.disposed || clipboardId !== this.clipboardId) return;
     this.changeSet.add('antLine');
