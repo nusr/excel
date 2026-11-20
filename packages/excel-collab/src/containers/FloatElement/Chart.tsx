@@ -20,7 +20,7 @@ import {
   Legend,
 } from 'chart.js';
 import type { ChartType, DefaultDataPoint, ChartComponentLike } from 'chart.js';
-import { COLOR_PICKER_COLOR_LIST, parseNumber, deepEqual } from '../../util';
+import { parseNumber, deepEqual } from '../../util';
 import { getThemeColor } from '../../theme';
 import type { FloatElementItem } from '../../containers/store';
 import styles from './chart.module.css';
@@ -150,11 +150,22 @@ const radarOptions = {
 };
 const radarPlugins = [Filler];
 
-const colorOffset = 5;
+const CHART_COLORS = [
+  '#4E79A7',
+  '#F28E2B',
+  '#E15759',
+  '#76B7B2',
+  '#59A14F',
+  '#EDC948',
+  '#B07AA1',
+  '#FF9DA7',
+  '#9C755F',
+  '#79706E',
+];
 
-function getColor(i: number): string {
-  const index = Math.floor(i) % COLOR_PICKER_COLOR_LIST.length;
-  return COLOR_PICKER_COLOR_LIST[index];
+function getColor(index: number): string {
+  const count = CHART_COLORS.length;
+  return CHART_COLORS[((Math.floor(index) % count) + count) % count];
 }
 
 const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
@@ -163,7 +174,8 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
     labels,
     datasets: datasets.map((v, i) => ({
       ...v,
-      backgroundColor: getColor(i * colorOffset),
+      backgroundColor: getColor(i),
+      borderColor: getColor(i),
     })),
   };
   const extra = {
@@ -198,21 +210,28 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
   } else if (chartType === 'bar') {
     node = <Bar {...extra} data={commonData} />;
   } else if (chartType === 'pie') {
-    node = <Pie {...extra} data={commonData} />;
+    const data = {
+      labels,
+      datasets: datasets.map((dataset) => ({
+        ...dataset,
+        backgroundColor: dataset.data.map((_, index) => getColor(index)),
+      })),
+    };
+    node = <Pie {...extra} data={data} />;
   } else if (chartType === 'radar') {
     const data = {
       labels,
       datasets: datasets.map((v, i) => {
-        const c = getColor(i * colorOffset + 4);
+        const color = getColor(i);
         return {
           ...v,
           fill: true,
-          borderColor: c,
-          pointBackgroundColor: c,
+          borderColor: color,
+          pointBackgroundColor: color,
           pointBorderColor: getThemeColor('white'),
           pointHoverBackgroundColor: getThemeColor('white'),
-          pointHoverBorderColor: c,
-          backgroundColor: getColor(i * colorOffset),
+          pointHoverBorderColor: color,
+          backgroundColor: `${color}33`,
         };
       }),
     };
@@ -223,7 +242,7 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
         return {
           label: v.label,
           data: v.data.map((t, i) => ({ y: t, x: parseNumber(labels[i])[1] })),
-          backgroundColor: getColor(i * colorOffset),
+          backgroundColor: getColor(i),
         };
       }),
     };
@@ -232,9 +251,7 @@ const Chart: React.FunctionComponent<FloatElementItem> = memo((props) => {
     const data = {
       labels,
       datasets: datasets.map((v) => {
-        const list = Array.from({ length: v.data.length })
-          .fill('')
-          .map((_, i) => getColor(i * colorOffset));
+        const list = v.data.map((_, index) => getColor(index));
         return {
           ...v,
           backgroundColor: list,

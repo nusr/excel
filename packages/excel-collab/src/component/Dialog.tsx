@@ -1,4 +1,3 @@
-'use client';
 import {
   Dialog as RACDialog,
   DialogTrigger as RACDialogTrigger,

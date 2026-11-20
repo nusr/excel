@@ -7,7 +7,7 @@ import { useExcel } from '../store';
 import { MenuTrigger, SubmenuTrigger, Menu, MenuItem } from '../../component/Menu';
 import { Button } from '../../component/Button';
 import { ChevronDown } from 'lucide-react';
-import { COLOR_PICKER_COLOR_LIST } from '../../util';
+import { ColorPicker } from '../../component/ColorPicker';
 
 type ShortCutType =
   | 'no-border'
@@ -239,23 +239,13 @@ export const BorderToolBar = memo(() => {
           >
             {i18n.t('right-border')}
           </MenuItem>
-          <SubmenuTrigger>
-            <MenuItem data-testid="toolbar-border-color-trigger" textValue={i18n.t('line-color')}>
-              {i18n.t('line-color')}
-            </MenuItem>
-            <Menu aria-label="Toolbar Border Color Menu">
-              {COLOR_PICKER_COLOR_LIST.map((item) => (
-                <MenuItem
-                  key={item}
-                  id={item}
-                  onPress={() => handleColorChange(item)}
-                  textValue={item}
-                >
-                  {item}
-                </MenuItem>
-              ))}
-            </Menu>
-          </SubmenuTrigger>
+          <MenuItem data-testid="toolbar-border-color-trigger" textValue={i18n.t('line-color')}>
+            <ColorPicker
+              label={i18n.t('line-color')}
+              onChange={(color) => handleColorChange(color.toString('hex'))}
+            />
+          </MenuItem>
+
           <SubmenuTrigger>
             <MenuItem data-testid="toolbar-border-style" textValue={i18n.t('line-style')}>
               {i18n.t('line-style')}

@@ -3,9 +3,9 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     projects: [
-      'packages/excel-collab/vitest.config.ts',
-      'packages/demo/frontend/vitest.config.ts',
-      'packages/demo/backend/vitest.config.ts',
+      'packages/excel-collab/vitest.config.mts',
+      'packages/demo/frontend/vitest.config.mts',
+      'packages/demo/backend/vitest.config.mts',
     ],
     maxWorkers: 2,
     coverage: {

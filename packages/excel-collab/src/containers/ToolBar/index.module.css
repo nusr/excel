@@ -35,3 +35,9 @@
 .wrap-text {
   text-wrap: nowrap;
 }
+
+.select-list {
+  display: flex;
+  align-items: center;
+  position: relative;
+}

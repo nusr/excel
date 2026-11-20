@@ -1,4 +1,3 @@
-'use client';
 import {
   Button,
   Tree as AriaTree,

@@ -1,4 +1,3 @@
-'use client';
 import {
   TimeField as AriaTimeField,
   type TimeFieldProps as AriaTimeFieldProps,

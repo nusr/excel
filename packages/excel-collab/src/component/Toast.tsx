@@ -1,4 +1,3 @@
-'use client';
 import {
   UNSTABLE_ToastRegion as ToastRegion,
   UNSTABLE_Toast as Toast,

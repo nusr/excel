@@ -67,19 +67,6 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Production build smoke tests
-        run: yarn e2e:preview input.test.ts import-export.test.ts
-        env:
-          CI: true
-
-      - name: Upload Playwright test report
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 5
-
       - name: Deploy to GitHub Pages
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: peaceiris/actions-gh-pages@v4

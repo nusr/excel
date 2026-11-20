@@ -1,4 +1,3 @@
-'use client';
 import { Modal, ModalOverlay, type ModalOverlayProps, Heading } from 'react-aria-components/Modal';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import clsx from 'clsx';

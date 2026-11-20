@@ -1,4 +1,3 @@
-'use client';
 import {
   ColorWheel as AriaColorWheel,
   type ColorWheelProps as AriaColorWheelProps,

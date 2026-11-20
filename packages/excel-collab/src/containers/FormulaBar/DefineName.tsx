@@ -7,8 +7,11 @@ import {
   DEFINED_NAME_REG_EXP,
 } from '../../util';
 import { scrollToView } from '../../canvas';
-import { SelectList } from '../../components';
 import { useCoreStore, useExcel } from '../store';
+import { TextField } from '../../component/TextField';
+import { Button } from '../../component/Button';
+import { Menu, MenuItem, MenuTrigger } from '../../component/Menu';
+import { ChevronDown } from 'lucide-react';
 
 interface Props {
   displayName: string;
@@ -20,6 +23,7 @@ export const DefineName: React.FunctionComponent<Props> = memo(({ displayName, d
   const ref = useRef<HTMLInputElement>(null);
 
   const [value, setValue] = useState(displayName);
+  const [selected, setSelected] = useState(defineName);
   const defineNameList = useCoreStore((s) => s.defineNames);
   const popupList = useMemo(() => {
     return defineNameList.map((v) => ({
@@ -30,6 +34,9 @@ export const DefineName: React.FunctionComponent<Props> = memo(({ displayName, d
   useEffect(() => {
     setValue(displayName);
   }, [displayName]);
+  useEffect(() => {
+    setSelected(defineName);
+  }, [defineName]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -71,10 +78,9 @@ export const DefineName: React.FunctionComponent<Props> = memo(({ displayName, d
     },
     [displayName],
   );
-  const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value);
-  }, []);
+  const handleChange = useCallback((nextValue: string) => setValue(nextValue), []);
   const handleSelect = useCallback((value: string) => {
+    setSelected(value);
     const range = controller.checkDefineName(value);
     if (!range) {
       return;
@@ -82,25 +88,44 @@ export const DefineName: React.FunctionComponent<Props> = memo(({ displayName, d
     scrollToView(controller, range!);
   }, []);
   return (
-    <SelectList
-      testId="formula-bar-name"
-      value={defineName}
-      data={popupList}
-      onChange={handleSelect}
-      className={styles['defined-name-select']}
-    >
-      <input
+    <div data-testid="formula-bar-name" className={styles['defined-name-select']}>
+      <TextField
+        className={styles['defined-name-field']}
+        inputClassName={styles['defined-name-editor']}
+        aria-label="Defined name"
         value={value}
-        ref={ref}
-        spellCheck
-        type="text"
         onChange={handleChange}
-        className={styles['defined-name-editor']}
-        onKeyDown={handleKeyDown}
-        maxLength={MAX_NAME_LENGTH * 8}
-        data-testid="formula-bar-name-input"
+        inputProps={{
+          'data-testid': 'formula-bar-name-input',
+          spellCheck: 'true',
+          onKeyDown: handleKeyDown,
+          maxLength: MAX_NAME_LENGTH * 8,
+        }}
+        inputRef={ref}
       />
-    </SelectList>
+      <MenuTrigger>
+        <Button data-testid="formula-bar-name-trigger" aria-label="Select list trigger">
+          <ChevronDown />
+        </Button>
+        <Menu
+          data-testid="formula-bar-name-popup"
+          selectionMode="single"
+          selectedKeys={[selected]}
+          onSelectionChange={(selection) => {
+            const selectedKey =
+              typeof selection === 'string' ? selection : Array.from(selection)[0];
+            if (selectedKey != null) handleSelect(String(selectedKey));
+          }}
+          aria-label="Select List"
+        >
+          {popupList.map((item) => (
+            <MenuItem id={item.value} key={item.value} textValue={item.label}>
+              {item.label}
+            </MenuItem>
+          ))}
+        </Menu>
+      </MenuTrigger>
+    </div>
   );
 });
 

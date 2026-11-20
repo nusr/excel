@@ -45,6 +45,8 @@ export default defineConfig((env) => {
       sourcemap: true,
       outDir: 'dist',
       manifest: true,
+      // The lazy-loaded editor chunk is ~457 kB gzipped; Vite measures its uncompressed size.
+      chunkSizeWarningLimit: 1800,
     },
     resolve: {
       alias,

@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig, mergeConfig } from 'vitest/config';
-import config from '../../scripts/vitest.config';
+import config from '../../scripts/vitest.config.mts';
 
 export default mergeConfig(
   config,

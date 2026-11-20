@@ -6,8 +6,8 @@ import { SheetItem, useExcel } from '../store';
 import i18n from '../../i18n';
 import { Select, SelectItem } from '../../component/Select';
 import { queue } from '../../component/Toast';
-import { COLOR_PICKER_COLOR_LIST } from '../../util';
-import { Menu, MenuItem, SubmenuTrigger } from '../../component/Menu';
+import { Menu, MenuItem } from '../../component/Menu';
+import { ColorPicker } from '../../component/ColorPicker';
 
 interface Props {
   position: number;
@@ -97,37 +97,16 @@ export const SheetBarContextMenu: React.FunctionComponent<Props> = memo(
             >
               {i18n.t('unhide')}
             </MenuItem>
-            <SubmenuTrigger>
-              <MenuItem
+            <MenuItem
+              data-testid="sheet-bar-context-menu-tab-color"
+              textValue={i18n.t('tab-color')}
+            >
+              <ColorPicker
+                onChange={(color) => handleTabColorChange(color.toString('hex'))}
+                label={i18n.t('tab-color')}
                 data-testid="sheet-bar-context-menu-tab-color"
-                textValue={i18n.t('tab-color')}
-              >
-                {i18n.t('tab-color')}
-              </MenuItem>
-              <Menu aria-label="Tab Color Menu">
-                {COLOR_PICKER_COLOR_LIST.map((color) => (
-                  <MenuItem
-                    key={color}
-                    id={color}
-                    onPress={() => handleTabColorChange(color)}
-                    textValue={color}
-                  >
-                    <span
-                      aria-hidden="true"
-                      style={{
-                        backgroundColor: color,
-                        border: '1px solid currentColor',
-                        display: 'inline-block',
-                        height: 14,
-                        marginRight: 8,
-                        width: 14,
-                      }}
-                    />
-                    {color}
-                  </MenuItem>
-                ))}
-              </Menu>
-            </SubmenuTrigger>
+              />
+            </MenuItem>
           </Menu>
         </div>
         <Dialog

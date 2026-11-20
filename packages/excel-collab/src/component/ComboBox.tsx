@@ -1,4 +1,3 @@
-'use client';
 import {
   ComboBox as AriaComboBox,
   type ComboBoxProps as AriaComboBoxProps,

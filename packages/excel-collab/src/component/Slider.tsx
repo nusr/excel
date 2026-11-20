@@ -1,4 +1,3 @@
-'use client';
 import {
   Slider as AriaSlider,
   SliderOutput,

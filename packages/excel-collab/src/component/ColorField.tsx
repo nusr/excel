@@ -1,4 +1,3 @@
-'use client';
 import {
   ColorField as AriaColorField,
   type ColorFieldProps as AriaColorFieldProps,

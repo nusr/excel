@@ -1,10 +1,11 @@
-import React, { useState, memo } from 'react';
+import { useState, memo } from 'react';
 import { Button } from '../../component/Button';
 import styles from './index.module.css';
 import { scrollBar } from '../../canvas';
 import i18n from '../../i18n';
 import { classnames, MAX_ADD_ROW_THRESHOLD } from '../../util';
 import { useExcel, useScrollStore } from '../store';
+import { TextField } from '../../component/TextField';
 
 const defaultData = 10;
 
@@ -14,9 +15,8 @@ export const BottomBar = memo(() => {
   const scrollTop = useScrollStore((s) => s.scrollTop);
   const canvasHeight = useScrollStore((s) => s.canvasHeight);
   const showBottomBar = scrollTop / canvasHeight >= 0.91;
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.stopPropagation();
-    const val = parseInt(event.target.value, 10);
+  const handleChange = (inputValue: string) => {
+    const val = parseInt(inputValue, 10);
     if (!isNaN(val)) {
       if (val < 1) {
         setValue(1);
@@ -44,14 +44,17 @@ export const BottomBar = memo(() => {
       data-testid="canvas-bottom-bar"
     >
       <div className={styles['bottom-bar-text']}>{i18n.t('add-at-the-bottom')}</div>
-      <input
-        value={value}
+      <TextField
+        value={String(value)}
         onChange={handleChange}
-        type="number"
-        min={1}
-        max={MAX_ADD_ROW_THRESHOLD}
-        data-testid="canvas-bottom-bar-input"
-        className={styles['bottom-bar-input']}
+        inputClassName={styles['bottom-bar-input']}
+        aria-label={i18n.t('rows')}
+        inputProps={{
+          'data-testid': 'canvas-bottom-bar-input',
+          type: 'number',
+          min: 1,
+          max: MAX_ADD_ROW_THRESHOLD,
+        }}
       />
       <div className={styles['bottom-bar-text']}>{i18n.t('rows')}</div>
       <Button

@@ -1,4 +1,3 @@
-'use client';
 import { Check, ChevronRight, Dot } from 'lucide-react';
 import {
   Menu as AriaMenu,

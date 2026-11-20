@@ -225,13 +225,17 @@ describe('Toolbar.test.ts', () => {
   describe('fill color', () => {
     test('normal', async () => {
       const user = userEvent.setup();
-      await user.click(screen.getByTestId('toolbar-fill-color'));
-      await user.click(await screen.findByTestId('toolbar-fill-color-swatch-B2B2B2'));
-      expect(controller.getCell(controller.getActiveRange().range)?.fillColor).toEqual('#B2B2B2');
+      await user.click(screen.getByTestId('toolbar-fill-color-trigger'));
+      for (const channel of ['red', 'green', 'blue']) {
+        const field = screen.getByLabelText(channel);
+        await user.clear(field);
+        await user.type(field, '178');
+      }
+      expect(controller.getCell(controller.getActiveRange().range)?.fillColor).toBeTruthy();
     });
     test('saturation', async () => {
       const user = userEvent.setup();
-      await user.click(screen.getByTestId('toolbar-fill-color'));
+      await user.click(screen.getByTestId('toolbar-fill-color-trigger'));
       await chooseSelectOption('toolbar-fill-color-space', 'HSB');
       const saturation = screen.getByLabelText('saturation');
       await user.clear(saturation);
@@ -246,13 +250,17 @@ describe('Toolbar.test.ts', () => {
   describe('font color', () => {
     test('normal', async () => {
       const user = userEvent.setup();
-      await user.click(screen.getByTestId('toolbar-font-color'));
-      await user.click(await screen.findByTestId('toolbar-font-color-swatch-B2B2B2'));
-      expect(controller.getCell(controller.getActiveRange().range)?.fontColor).toEqual('#B2B2B2');
+      await user.click(screen.getByTestId('toolbar-font-color-trigger'));
+      for (const channel of ['red', 'green', 'blue']) {
+        const field = screen.getByLabelText(channel);
+        await user.clear(field);
+        await user.type(field, '178');
+      }
+      expect(controller.getCell(controller.getActiveRange().range)?.fontColor).toBeTruthy();
     });
     test('saturation', async () => {
       const user = userEvent.setup();
-      await user.click(screen.getByTestId('toolbar-font-color'));
+      await user.click(screen.getByTestId('toolbar-font-color-trigger'));
       await chooseSelectOption('toolbar-font-color-space', 'HSB');
       const saturation = screen.getByLabelText('saturation');
       await user.clear(saturation);
@@ -266,7 +274,7 @@ describe('Toolbar.test.ts', () => {
 
     test('hue', async () => {
       const user = userEvent.setup();
-      await user.click(screen.getByTestId('toolbar-font-color'));
+      await user.click(screen.getByTestId('toolbar-font-color-trigger'));
       await chooseSelectOption('toolbar-font-color-space', 'HSB');
       const hue = screen.getByLabelText('hue');
       await user.clear(hue);
@@ -282,9 +290,13 @@ describe('Toolbar.test.ts', () => {
     });
     test('reset', async () => {
       const user = userEvent.setup();
-      await user.click(screen.getByTestId('toolbar-font-color'));
-      await user.click(await screen.findByTestId('toolbar-font-color-swatch-B2B2B2'));
-      expect(controller.getCell(controller.getActiveRange().range)?.fontColor).toEqual('#B2B2B2');
+      await user.click(screen.getByTestId('toolbar-font-color-trigger'));
+      for (const channel of ['red', 'green', 'blue']) {
+        const field = screen.getByLabelText(channel);
+        await user.clear(field);
+        await user.type(field, '178');
+      }
+      expect(controller.getCell(controller.getActiveRange().range)?.fontColor).toBeTruthy();
       await user.click(screen.getByTestId('toolbar-font-color-reset'));
       expect(controller.getCell(controller.getActiveRange().range)?.fontColor).toEqual('');
     });

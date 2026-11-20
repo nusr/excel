@@ -1,4 +1,3 @@
-'use client';
 import {
   Button,
   Tag as AriaTag,

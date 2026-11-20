@@ -1,4 +1,3 @@
-'use client';
 import {
   RadioGroup as AriaRadioGroup,
   RadioField,

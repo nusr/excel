@@ -1,4 +1,3 @@
-'use client';
 import {
   Autocomplete as AriaAutocomplete,
   type AutocompleteProps as AriaAutocompleteProps,

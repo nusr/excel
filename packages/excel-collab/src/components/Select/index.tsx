@@ -28,11 +28,7 @@ export const SelectList: FunctionComponent<React.PropsWithChildren<SelectListPro
       <div className={classnames(styles['select-list-container'], className)} data-testid={testId}>
         {children}
         <MenuTrigger>
-          <Button
-            className={styles['select-list-trigger']}
-            data-testid={`${testId}-trigger`}
-            aria-label="Select list trigger"
-          >
+          <Button data-testid={`${testId}-trigger`} aria-label="Select list trigger">
             <ChevronDown />
           </Button>
           <Menu

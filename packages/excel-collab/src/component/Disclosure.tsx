@@ -1,4 +1,3 @@
-'use client';
 import { Button } from 'react-aria-components/Button';
 import {
   Disclosure as AriaDisclosure,

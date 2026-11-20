@@ -1,4 +1,3 @@
-'use client';
 import { Meter as AriaMeter, type MeterProps as AriaMeterProps } from 'react-aria-components/Meter';
 import { Label } from './Form';
 import './Meter.css';

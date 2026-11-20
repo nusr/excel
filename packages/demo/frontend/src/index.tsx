@@ -1,15 +1,37 @@
 import { createRoot } from 'react-dom/client';
-import { StrictMode, useState } from 'react';
+import { lazy, StrictMode, Suspense, useState } from 'react';
 import 'excel-collab/style.css';
 import './sentry';
 import { WebsocketProvider } from 'y-websocket';
-import { Excel, Doc, type ExcelProps, Button } from 'excel-collab';
+import type { ExcelProps } from 'excel-collab';
+import { Doc } from 'yjs';
 import { PROTOCOL_VERSION } from 'excel-collab/protocol';
 import { getDocId, getProvider } from './util';
 import { VITE_WEBSOCKET_URL } from './constant';
 import { List } from './List';
 import { type IProvider } from './provider';
 import * as Sentry from '@sentry/react';
+
+const Excel = lazy(async () => {
+  const { Excel: ExcelComponent, Button } = await import('excel-collab');
+  return {
+    default: function ExcelWithHomeButton(props: ExcelProps & { onHome: () => void }) {
+      const { onHome, ...excelProps } = props;
+      return (
+        <ExcelComponent
+          {...excelProps}
+          menubarLeftChildren={
+            <div style={{ paddingLeft: 8 }}>
+              <Button onPress={onHome} aria-label="Home">
+                Home
+              </Button>
+            </div>
+          }
+        />
+      );
+    },
+  };
+});
 
 const callback = async (_: any, id: string) => {
   location.hash = `#${id}`;
@@ -30,16 +52,9 @@ function App(props: Omit<ExcelProps, 'provider'> & { provider: IProvider }) {
     );
   }
   return (
-    <Excel
-      {...props}
-      menubarLeftChildren={
-        <div style={{ paddingLeft: 8 }}>
-          <Button onPress={() => setIsList(true)} aria-label="Home">
-            Home
-          </Button>
-        </div>
-      }
-    />
+    <Suspense fallback={null}>
+      <Excel {...props} onHome={() => setIsList(true)} />
+    </Suspense>
   );
 }
 

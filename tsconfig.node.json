@@ -6,15 +6,16 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "strict": true
   },
   "include": [
-    "vitest.config.ts",
-    "scripts/vitest.config.ts",
+    "vitest.config.mts",
+    "scripts/vitest.config.mts",
     "packages/**/vite*.config.mts",
     "packages/**/package.json",
-    "packages/**/vitest.config.ts",
+    "packages/**/vitest.config.mts",
     "e2e",
     "playwright.config.ts"
   ]

@@ -1,4 +1,3 @@
-'use client';
 import { Form as RACForm, type FormProps } from 'react-aria-components/Form';
 import { type LabelProps, Label as RACLabel } from 'react-aria-components/Label';
 import {

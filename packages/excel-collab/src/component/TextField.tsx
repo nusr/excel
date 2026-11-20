@@ -1,4 +1,3 @@
-'use client';
 import {
   Input,
   TextField as AriaTextField,
@@ -9,6 +8,11 @@ import {
 import { Label, FieldError, Description } from './Form';
 import './TextField.css';
 import type React from 'react';
+import clsx from 'clsx';
+
+type TextInputProps<T> = T extends HTMLTextAreaElement
+  ? React.ComponentProps<typeof AriaTextArea>
+  : React.ComponentProps<typeof Input>;
 
 export interface TextFieldProps<T = HTMLInputElement> extends AriaTextFieldProps {
   label?: string;
@@ -16,6 +20,11 @@ export interface TextFieldProps<T = HTMLInputElement> extends AriaTextFieldProps
   errorMessage?: string | ((validation: ValidationResult) => string);
   placeholder?: string;
   inputRef?: React.Ref<T>;
+  inputClassName?: string;
+  inputProps?: TextInputProps<T> & {
+    'data-testid'?: string;
+    'data-role'?: string;
+  };
 }
 
 export function TextField({
@@ -24,12 +33,19 @@ export function TextField({
   errorMessage,
   placeholder,
   inputRef,
+  inputClassName,
+  inputProps,
   ...props
 }: TextFieldProps) {
   return (
     <AriaTextField {...props}>
       {label && <Label>{label}</Label>}
-      <Input ref={inputRef} className="react-aria-Input inset" placeholder={placeholder} />
+      <Input
+        {...inputProps}
+        ref={inputRef}
+        className={clsx('react-aria-Input inset', inputClassName, inputProps?.className)}
+        placeholder={placeholder ?? inputProps?.placeholder}
+      />
       {description && <Description>{description}</Description>}
       <FieldError>{errorMessage}</FieldError>
     </AriaTextField>
@@ -42,15 +58,18 @@ export function TextArea({
   errorMessage,
   placeholder,
   inputRef,
+  inputProps,
+  inputClassName,
   ...props
 }: TextFieldProps<HTMLTextAreaElement>) {
   return (
     <AriaTextField {...props}>
-      <Label>{label}</Label>
+      {label && <Label>{label}</Label>}
       <AriaTextArea
+        {...inputProps}
         ref={inputRef}
-        className="react-aria-TextArea inset"
-        placeholder={placeholder}
+        className={clsx('react-aria-TextArea inset', inputClassName, inputProps?.className)}
+        placeholder={placeholder ?? inputProps?.placeholder}
       />
       {description && <Description>{description}</Description>}
       <FieldError>{errorMessage}</FieldError>

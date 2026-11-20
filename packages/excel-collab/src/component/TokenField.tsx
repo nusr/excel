@@ -1,4 +1,3 @@
-'use client';
 import {
   TokenField as AriaTokenField,
   TokenInput as AriaTokenInput,

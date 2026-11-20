@@ -1,4 +1,5 @@
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
+import { act, screen, fireEvent, waitFor } from '@testing-library/react';
 import fs from 'fs/promises';
 import path from 'path';
 import './global.mock';
@@ -27,14 +28,17 @@ describe('Import.test.tsx', () => {
 
       expect(() => screen.getByTestId('float-element')).toThrow();
     });
-    test('empty file', () => {
+    test('empty file', async () => {
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));
       const file = new File([''], 'test.png', {
         type: 'image/png',
       });
 
-      fireEvent.change(screen.getByTestId('menubar-import-input'), {
-        target: { files: [file] },
+      await act(async () => {
+        fireEvent.change(screen.getByTestId('menubar-import-input'), {
+          target: { files: [file] },
+        });
+        await vi.waitFor(() => screen.getByText(/Import failed:/));
       });
 
       expect(() => screen.getByTestId('float-element')).toThrow();
@@ -72,15 +76,18 @@ describe('Import.test.tsx', () => {
       const fileData = await fs.readFile(
         path.join(import.meta.dirname, '../../../../scripts/origin.xlsx'),
       );
-      fireEvent.change(await screen.findByTestId('menubar-import-input'), {
-        target: { files: [fileData] },
+      const input = await screen.findByTestId('menubar-import-input');
+      await act(async () => {
+        fireEvent.change(input, { target: { files: [fileData] } });
+        await vi.waitFor(
+          () => {
+            expect(screen.getByTestId('sheet-bar-list').childNodes.length).toBeGreaterThanOrEqual(
+              5,
+            );
+          },
+          { timeout: 5000 },
+        );
       });
-      await waitFor(
-        () => {
-          expect(screen.getByTestId('sheet-bar-list').childNodes.length).toBeGreaterThanOrEqual(5);
-        },
-        { timeout: 5000 },
-      );
     }, 10000);
     test('empty', async () => {
       fireEvent.click(screen.getByTestId('menubar-excel-trigger'));

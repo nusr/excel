@@ -1,4 +1,3 @@
-'use client';
 import {
   ColorSwatch as AriaColorSwatch,
   type ColorSwatchProps,

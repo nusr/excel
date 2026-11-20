@@ -10,6 +10,7 @@ import React, {
 import { EditorStatus } from '../../types';
 import styles from './index.module.css';
 import { CellStoreType, useCoreStore, StyleStoreType, useExcel } from '../store';
+import { TextArea } from '../../component/TextField';
 import {
   MAX_NAME_LENGTH,
   FORMULA_EDITOR_ROLE,
@@ -137,18 +138,21 @@ export const MultipleLineEditor: React.FunctionComponent<MultipleLineEditorProps
       }
     }, []);
     return (
-      <textarea
-        spellCheck
-        autoFocus
-        ref={ref}
-        style={style}
-        maxLength={MAX_NAME_LENGTH * 100}
-        data-testid={testId}
-        data-role={FORMULA_EDITOR_ROLE}
-        onKeyDown={onKeyDown}
-        className={classnames(styles['formula-editor'], className)}
+      <TextArea
+        inputRef={ref}
+        inputClassName={classnames(styles['formula-editor'], className)}
+        aria-label="Formula editor"
         defaultValue={initValue}
-        rows={rowCount}
+        inputProps={{
+          spellCheck: true,
+          autoFocus: true,
+          style,
+          maxLength: MAX_NAME_LENGTH * 100,
+          'data-testid': testId,
+          'data-role': FORMULA_EDITOR_ROLE,
+          onKeyDown,
+          rows: rowCount,
+        }}
       />
     );
   },

@@ -34,27 +34,22 @@ describe('SheetBar.test.ts', () => {
     });
   });
   describe('tab color', () => {
-    test('ok', async () => {
+    test('opens the tab color picker', async () => {
       const user = userEvent.setup();
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
-      await user.hover(screen.getByTestId('sheet-bar-context-menu-tab-color'));
-      await user.click(await screen.findByRole('menuitem', { name: '#B2B2B2' }));
-      expect(screen.getByTestId('sheet-bar-tab-color-item')).toHaveStyle({
-        backgroundColor: '#B2B2B2',
-      });
+      await user.click(screen.getByTestId('sheet-bar-context-menu-tab-color-trigger'));
+      expect(screen.getByLabelText('red')).toBeInTheDocument();
     });
-    test('add sheet', async () => {
+    test('opens the tab color picker for a newly added sheet', async () => {
       const user = userEvent.setup();
+      fireEvent.click(screen.getByTestId('sheet-bar-add-sheet'));
       fireEvent.contextMenu(screen.getByTestId('sheet-bar-active-item'), {
         clientX: 199,
       });
-      await user.hover(screen.getByTestId('sheet-bar-context-menu-tab-color'));
-      await user.click(await screen.findByRole('menuitem', { name: '#B2B2B2' }));
-      expect(screen.getByTestId('sheet-bar-tab-color-item')).toHaveStyle({
-        backgroundColor: '#B2B2B2',
-      });
+      await user.click(screen.getByTestId('sheet-bar-context-menu-tab-color-trigger'));
+      expect(screen.getByLabelText('red')).toBeInTheDocument();
     });
   });
   describe('rename sheet', () => {

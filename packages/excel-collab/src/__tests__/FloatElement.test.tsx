@@ -4,6 +4,7 @@ import './global.mock';
 import { IController } from '../types';
 import { CHART_TYPE_LIST } from '../util';
 import i18n from '../i18n';
+import { Chart as ChartJS } from 'chart.js';
 
 describe('FloatElement.test.ts', () => {
   let controller: IController;
@@ -314,6 +315,20 @@ describe('FloatElement.test.ts', () => {
 
         fireEvent.click(screen.getByTestId('dialog-confirm-button'));
         expect(controller.getDrawingList()[0].chartType!).toEqual(item);
+        const canvas = await screen.findByTestId<HTMLCanvasElement>('float-element-chart');
+        await waitFor(() => {
+          const dataset = ChartJS.getChart(canvas)?.data.datasets[0];
+          expect(dataset).toBeDefined();
+          if (item === 'pie' || item === 'polarArea') {
+            expect(dataset?.backgroundColor).toEqual(['#4E79A7']);
+          } else if (item === 'radar') {
+            expect(dataset?.backgroundColor).toBe('#4E79A733');
+            expect(dataset?.borderColor).toBe('#4E79A7');
+          } else {
+            expect(dataset?.backgroundColor).toBe('#4E79A7');
+            if (item === 'line') expect(dataset?.borderColor).toBe('#4E79A7');
+          }
+        });
       });
     }
     test('cancel dialog', async () => {

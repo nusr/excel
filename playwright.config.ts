@@ -5,13 +5,8 @@ const isCI = Boolean(process.env.CI);
 const testEnv = process.env.TEST_ENV || 'local';
 
 const isLocal = testEnv === 'local';
-const isPreview = testEnv === 'preview';
 
-const baseURL = isPreview
-  ? `http://127.0.0.1:4176${process.env.ROOT_BASE_URL || '/'}?mode=e2e`
-  : isLocal
-    ? 'http://localhost:3000'
-    : 'https://nusr.github.io/excel?mode=e2e';
+const baseURL = isLocal ? 'http://localhost:3000' : 'https://nusr.github.io/excel?mode=e2e';
 
 process.env.BASE_URL = baseURL;
 
@@ -63,17 +58,14 @@ export default defineConfig({
       use: { ...devices['iPad Pro 11'], launchOptions: webkitLaunchOptions },
     },
   ],
-  webServer:
-    isLocal || isPreview
-      ? {
-          command: isPreview
-            ? 'yarn workspace frontend run vite preview --host 127.0.0.1 --port 4176 --strictPort'
-            : 'yarn start:e2e',
-          url: baseURL,
-          reuseExistingServer: !isCI && !isPreview,
-          timeout: 120 * 1000,
-        }
-      : undefined,
+  webServer: isLocal
+    ? {
+        command: 'yarn start:e2e',
+        url: baseURL,
+        reuseExistingServer: !isCI,
+        timeout: 120 * 1000,
+      }
+    : undefined,
   expect: {
     timeout: 10 * 1000,
   },

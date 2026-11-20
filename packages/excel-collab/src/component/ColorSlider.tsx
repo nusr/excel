@@ -1,4 +1,3 @@
-'use client';
 import {
   ColorSlider as AriaColorSlider,
   type ColorSliderProps as AriaColorSliderProps,

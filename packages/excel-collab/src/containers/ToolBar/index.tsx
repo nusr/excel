@@ -1,5 +1,4 @@
 import React, { useMemo, memo, useCallback, Key } from 'react';
-import { SelectList } from '../../components';
 import { FONT_SIZE_LIST, QUERY_ALL_LOCAL_FONT, LOCAL_FONT_KEY } from '../../util';
 import { EUnderLine, OptionItem, EHorizontalAlign, EVerticalAlign } from '../../types';
 import styles from './index.module.css';
@@ -10,12 +9,14 @@ import { BorderToolBar } from './Border';
 import { isSupportFontFamily } from '../canvas/isSupportFontFamily';
 import { numberFormatOptionList, underlineOptionList, mergeOptionList } from './constant';
 import { Select, SelectItem } from '../../component/Select';
-import { ColorPicker } from '../ColorPicker';
+import { ColorPicker, type ColorPickerProps } from '../../component/ColorPicker';
 import { ToggleButton } from '../../component/ToggleButton';
 import { Button } from '../../component/Button';
+import { Menu, MenuItem, MenuTrigger } from '../../component/Menu';
 import {
   ArrowUpToLine,
   Baseline,
+  ChevronDown,
   PaintBucket,
   Redo,
   TextAlignCenter,
@@ -40,12 +41,6 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
 
     const fontFamilyList = useCoreStore((s) => s.fontFamilies);
 
-    const fillStyle = useMemo(() => {
-      return { color: cellStyle.fillColor };
-    }, [cellStyle.fillColor]);
-    const fontStyle = useMemo(() => {
-      return { color: cellStyle.fontColor };
-    }, [cellStyle.fontColor]);
     const [numberFormatLabel, numberFormatValue] = useMemo(() => {
       let item: OptionItem = numberFormatOptionList[0];
       if (cellStyle.numberFormat) {
@@ -142,11 +137,17 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
       }
       controller.updateCellStyle({ underline }, controller.getActiveRange().range);
     }, []);
-    const setFillColor = useCallback((value: unknown) => {
-      controller.updateCellStyle({ fillColor: String(value) }, controller.getActiveRange().range);
+    const setFillColor: ColorPickerProps['onChange'] = useCallback((value) => {
+      controller.updateCellStyle(
+        { fillColor: value.toString('hex') },
+        controller.getActiveRange().range,
+      );
     }, []);
-    const setFontColor = useCallback((value: unknown) => {
-      controller.updateCellStyle({ fontColor: String(value) }, controller.getActiveRange().range);
+    const setFontColor: ColorPickerProps['onChange'] = useCallback((value) => {
+      controller.updateCellStyle(
+        { fontColor: value.toString('hex') },
+        controller.getActiveRange().range,
+      );
     }, []);
     const toggleWrapText = useCallback(() => {
       controller.updateCellStyle(
@@ -327,26 +328,23 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
           key="fill-color"
           value={cellStyle.fillColor}
           onChange={setFillColor}
-          data-testid="toolbar-fill-color-picker"
-        >
-          <Button style={fillStyle} data-testid="toolbar-fill-color" aria-label="Fill Color">
-            <PaintBucket />
-          </Button>
-        </ColorPicker>
+          data-testid="toolbar-fill-color"
+          label={<PaintBucket />}
+          addTriggerColor={true}
+        />
 
         <ColorPicker
           key="font-color"
           value={cellStyle.fontColor}
           onChange={setFontColor}
+          defaultValue="#000000"
           onReset={() =>
             controller.updateCellStyle({ fontColor: '' }, controller.getActiveRange().range)
           }
-          data-testid="toolbar-font-color-picker"
-        >
-          <Button style={fontStyle} data-testid="toolbar-font-color" aria-label="Font Color">
-            <Baseline />
-          </Button>
-        </ColorPicker>
+          data-testid="toolbar-font-color"
+          label={<Baseline />}
+          addTriggerColor={true}
+        />
         <ToggleButton
           isSelected={cellStyle.verticalAlign === EVerticalAlign.TOP}
           onClick={verticalTop}
@@ -404,12 +402,7 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
         >
           {i18n.t('wrap-text')}
         </ToggleButton>
-        <SelectList
-          data={mergeOptionList}
-          value={cellStyle.mergeType}
-          onChange={handleMergeCell}
-          testId="toolbar-merge-cell-select"
-        >
+        <div className={styles['select-list']}>
           <ToggleButton
             isSelected={cellStyle.isMergeCell}
             onClick={toggleMergeCell}
@@ -419,17 +412,61 @@ export const ToolbarContainer: React.FunctionComponent<React.PropsWithChildren> 
           >
             {i18n.t('merge-and-center')}
           </ToggleButton>
-        </SelectList>
-        <SelectList
-          data={numberFormatOptionList}
-          value={numberFormatValue}
-          onChange={handleNumberFormat}
-          testId="toolbar-number-format"
-        >
+          <MenuTrigger>
+            <Button data-testid="toolbar-merge-cell-select-trigger" aria-label="Merge cell options">
+              <ChevronDown />
+            </Button>
+            <Menu
+              data-testid="toolbar-merge-cell-select-popup"
+              selectionMode="single"
+              selectedKeys={[String(cellStyle.mergeType)]}
+              onSelectionChange={(selection) => {
+                const selectedKey =
+                  typeof selection === 'string' ? selection : Array.from(selection)[0];
+                if (selectedKey != null) handleMergeCell(String(selectedKey));
+              }}
+              aria-label="Merge cell options"
+            >
+              {mergeOptionList.map((item) => (
+                <MenuItem
+                  id={String(item.value)}
+                  key={item.value}
+                  textValue={item.label}
+                  isDisabled={item.disabled}
+                >
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Menu>
+          </MenuTrigger>
+        </div>
+        <div className={styles['select-list']}>
           <Button aria-label="Number Format" data-testid="toolbar-number-format-value">
             {numberFormatLabel}
           </Button>
-        </SelectList>
+          <MenuTrigger>
+            <Button data-testid="toolbar-number-format-trigger" aria-label="Number format options">
+              <ChevronDown />
+            </Button>
+            <Menu
+              data-testid="toolbar-number-format-popup"
+              selectionMode="single"
+              selectedKeys={[numberFormatValue]}
+              onSelectionChange={(selection) => {
+                const selectedKey =
+                  typeof selection === 'string' ? selection : Array.from(selection)[0];
+                if (selectedKey != null) handleNumberFormat(String(selectedKey));
+              }}
+              aria-label="Number format options"
+            >
+              {numberFormatOptionList.map((item) => (
+                <MenuItem id={String(item.value)} key={item.value} textValue={item.label}>
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Menu>
+          </MenuTrigger>
+        </div>
         <ToggleButton
           isSelected={isFilter}
           onClick={handleFilter}

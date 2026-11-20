@@ -17,6 +17,7 @@ import { Checkbox } from '../../../component/Checkbox';
 import { useExcel } from '../../../containers/store';
 import { TextField } from '../../../component/TextField';
 import { Select, SelectItem } from '../../../component/Select';
+import { ToggleButton } from '../../../component/ToggleButton';
 
 type FilterItem = {
   key: string;
@@ -439,18 +440,16 @@ export const FilterModal = ({ col, hide }: ModalProps) => {
           </Select>
           <div className={styles.filterColors} role="group" aria-label={i18n.t('filter-color')}>
             {colors[colorType].map((value) => (
-              <button
-                type="button"
+              <ToggleButton
                 key={value}
                 className={styles.filterSwatch}
+                isSelected={color === value}
                 aria-label={value || i18n.t('filter-no-color')}
-                aria-pressed={color === value}
-                title={value || i18n.t('filter-no-color')}
                 style={{ backgroundColor: value || 'transparent' }}
-                onClick={() => setColor(value)}
+                onPress={() => setColor(value)}
               >
                 {color === value && <span aria-hidden="true" className={styles.filterSwatchMark} />}
-              </button>
+              </ToggleButton>
             ))}
           </div>
         </div>

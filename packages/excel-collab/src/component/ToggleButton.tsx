@@ -1,4 +1,3 @@
-'use client';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import {
   ToggleButton as RACToggleButton,

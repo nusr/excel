@@ -1,4 +1,3 @@
-'use client';
 import {
   DateRangePicker as AriaDateRangePicker,
   type DateRangePickerProps as AriaDateRangePickerProps,

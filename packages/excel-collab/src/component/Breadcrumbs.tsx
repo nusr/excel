@@ -1,4 +1,3 @@
-'use client';
 import {
   Breadcrumbs as RACBreadcrumbs,
   type BreadcrumbsProps,

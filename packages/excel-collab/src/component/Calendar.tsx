@@ -1,4 +1,3 @@
-'use client';
 import {
   Calendar as AriaCalendar,
   CalendarCell as AriaCalendarCell,

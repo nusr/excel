@@ -17,6 +17,7 @@ import { File } from './File';
 import { v4 } from 'uuid';
 import { MenuTrigger, SubmenuTrigger, Menu, MenuItem } from '../../component/Menu';
 import { Button } from '../../component/Button';
+import { FileTrigger } from '../../component/FileTrigger';
 import { queue } from '../../component/Toast';
 
 type Props = {
@@ -29,6 +30,7 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
     const { controller, provider } = useExcel();
     const [visible, setVisible] = useState(false);
     const importVersion = useRef(0);
+    const importInput = useRef<HTMLInputElement>(null);
     useEffect(
       () => () => {
         importVersion.current++;
@@ -50,9 +52,8 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
       [controller],
     );
     const handleImportExcel = useCallback(
-      async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const input = event.currentTarget;
-        const file = input.files?.[0];
+      async (files: FileList | null) => {
+        const file = files?.[0];
         if (!file) {
           return;
         }
@@ -68,8 +69,10 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
               }),
             });
         } finally {
-          input.value = '';
-          input.blur();
+          if (importInput.current) {
+            importInput.current.value = '';
+            importInput.current.blur();
+          }
         }
       },
       [controller],
@@ -110,17 +113,10 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
 
               <MenuItem
                 data-testid="menubar-import-excel"
+                onAction={() => importInput.current?.click()}
                 textValue={i18n.t('import', { format: 'File' })}
               >
-                <input
-                  type="file"
-                  hidden
-                  onChange={handleImportExcel}
-                  accept={IMPORT_ACCEPT}
-                  data-testid="menubar-import-input"
-                  id="menubar-import-input"
-                />
-                <label htmlFor="menubar-import-input">{i18n.t('import', { format: 'File' })}</label>
+                {i18n.t('import', { format: 'File' })}
               </MenuItem>
               <SubmenuTrigger data-testid="menubar-export-more">
                 <MenuItem textValue={i18n.t('export', { format: '...' })}>
@@ -151,6 +147,14 @@ export const MenuBarContainer: React.FunctionComponent<Props> = memo(
               </SubmenuTrigger>
             </Menu>
           </MenuTrigger>
+          <FileTrigger
+            ref={importInput}
+            acceptedFileTypes={IMPORT_ACCEPT.split(',')}
+            onSelect={handleImportExcel}
+            data-testid="menubar-import-input"
+          >
+            <Button aria-label="Open file picker" style={{ display: 'none' }} />
+          </FileTrigger>
           {leftChildren}
         </div>
         {rightChildren}

@@ -1,4 +1,3 @@
-'use client';
 import {
   ProgressBar as AriaProgressBar,
   type ProgressBarProps as AriaProgressBarProps,

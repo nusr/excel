@@ -1,4 +1,3 @@
-'use client';
 import { Separator as RACSeparator, type SeparatorProps } from 'react-aria-components/Separator';
 
 import './Separator.css';
