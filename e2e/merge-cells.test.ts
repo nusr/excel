@@ -22,7 +22,7 @@ test('merge cell select dropdown exists', async ({ page }) => {
   await page.keyboard.press('Escape');
 
   // Check if merge cell select exists
-  const mergeSelect = page.getByTestId('toolbar-merge-cell-select');
+  const mergeSelect = page.getByTestId('toolbar-merge-cell-select-trigger');
   await expect(mergeSelect).toBeVisible();
 });
 
