@@ -1,6 +1,6 @@
 {
   "../../excel-collab/lib/Chart-nk48PcCZ.mjs": {
-    "file": "assets/Chart-nk48PcCZ-BruF4RMg.js",
+    "file": "assets/Chart-nk48PcCZ--cvGNBDw.js",
     "name": "Chart-nk48PcCZ",
     "src": "../../excel-collab/lib/Chart-nk48PcCZ.mjs",
     "isDynamicEntry": true,
@@ -14,7 +14,7 @@
     "src": "../../excel-collab/lib/excelize.wasm.gz"
   },
   "../../excel-collab/lib/index.es.js": {
-    "file": "assets/index.es-D9u-BBan.js",
+    "file": "assets/index.es-DUvuXC75.js",
     "name": "index.es",
     "src": "../../excel-collab/lib/index.es.js",
     "isDynamicEntry": true,
@@ -34,7 +34,7 @@
     "src": "../../excel-collab/lib/main.js"
   },
   "index.html": {
-    "file": "assets/index-BnJrEf9N.js",
+    "file": "assets/index-CVTjCksD.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
