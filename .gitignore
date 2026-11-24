@@ -13,7 +13,6 @@ port.txt
 test-results/
 playwright-report/
 blob-report/
-playwright
 report
 docs
 *.diff.png

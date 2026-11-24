@@ -1,0 +1,32 @@
+name: Install Playwright
+description: Install (and cache) a Playwright browser with its system dependencies
+
+inputs:
+  browser:
+    description: Browser to install (chromium, firefox or webkit)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Get Playwright version
+      id: version
+      shell: bash
+      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Playwright browsers
+      id: cache
+      uses: actions/cache@v6
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ inputs.browser }}-${{ steps.version.outputs.version }}
+
+    - name: Install browser
+      if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: yarn playwright install --with-deps ${{ inputs.browser }}
+
+    - name: Install system dependencies
+      if: ${{ steps.cache.outputs.cache-hit == 'true' }}
+      shell: bash
+      run: yarn playwright install-deps ${{ inputs.browser }}

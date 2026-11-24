@@ -7,6 +7,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   VITE_DEFAULT_EXCEL_ID: ${{ vars.VITE_DEFAULT_EXCEL_ID }}
@@ -14,28 +18,15 @@ env:
   COMMIT_ID: ${{ github.sha }}
 
 jobs:
-  CI:
+  check:
+    name: Check & unit test
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Set up Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: lts/*
-          cache: yarn
-
-      - name: Install font
-        run: sudo npm run install-font
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Install Playwright browsers
-        run: yarn playwright install --with-deps
+      - name: Setup
+        uses: ./.github/actions/setup
 
       - name: Type check
         run: yarn type-check
@@ -59,20 +50,56 @@ jobs:
           report_type: coverage
           token: ${{ secrets.CODECOV_TOKEN }}
 
+  e2e:
+    name: E2E (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { project: chromium, browser: chromium }
+          - { project: firefox, browser: firefox }
+          - { project: webkit, browser: webkit }
+          - { project: mobile-chrome, browser: chromium }
+          - { project: mobile-safari, browser: webkit }
+          - { project: ipad-pro, browser: webkit }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          browser: ${{ matrix.browser }}
+
       - name: E2E tests
-        run: yarn e2e
+        run: yarn e2e --project=${{ matrix.project }}
         env:
           CI: true
           TEST_ENV: local
 
       - name: Upload Playwright test report
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-e2e-report
+          name: playwright-e2e-report-${{ matrix.project }}
           path: |
             playwright-report/
             test-results/
           retention-days: 5
+
+  build:
+    name: Build & deploy
+    needs: [check, e2e]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup
+        uses: ./.github/actions/setup
 
       - name: Build
         run: yarn build
@@ -105,20 +132,41 @@ jobs:
           echo "✗ COMMIT_ID ($commit_id) verification failed after $max_retries attempts - commit ID not found in HTML!"
           exit 1
 
-      - name: production E2E tests
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          rm -rf playwright-report test-results
-          yarn e2e
+  prod-e2e:
+    name: Production E2E (${{ matrix.project }})
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { project: chromium, browser: chromium }
+          - { project: firefox, browser: firefox }
+          - { project: webkit, browser: webkit }
+          - { project: mobile-chrome, browser: chromium }
+          - { project: mobile-safari, browser: webkit }
+          - { project: ipad-pro, browser: webkit }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          browser: ${{ matrix.browser }}
+
+      - name: Production E2E tests
+        run: yarn e2e --project=${{ matrix.project }}
         env:
           CI: true
           TEST_ENV: production
 
       - name: Upload Prod Playwright test report
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-prod-e2e-report
+          name: playwright-prod-e2e-report-${{ matrix.project }}
           path: |
             playwright-report/
             test-results/

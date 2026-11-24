@@ -1,0 +1,49 @@
+name: Setup
+description: Install Node, fonts, dependencies and (optionally) a Playwright browser
+
+inputs:
+  browser:
+    description: Playwright browser to install (chromium, firefox, webkit). Empty to skip.
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v7
+      with:
+        node-version: lts/*
+        cache: yarn
+
+    - name: Install font
+      shell: bash
+      run: sudo npm run install-font
+
+    - name: Install dependencies
+      shell: bash
+      run: yarn install --frozen-lockfile
+
+    - name: Get Playwright version
+      if: ${{ inputs.browser != '' }}
+      id: pw
+      shell: bash
+      run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Playwright browser
+      if: ${{ inputs.browser != '' }}
+      id: pw-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}-${{ inputs.browser }}
+
+    - name: Install Playwright browser
+      if: ${{ inputs.browser != '' && steps.pw-cache.outputs.cache-hit != 'true' }}
+      shell: bash
+      run: yarn playwright install --with-deps ${{ inputs.browser }}
+
+    - name: Install Playwright system dependencies
+      if: ${{ inputs.browser != '' && steps.pw-cache.outputs.cache-hit == 'true' }}
+      shell: bash
+      run: yarn playwright install-deps ${{ inputs.browser }}
