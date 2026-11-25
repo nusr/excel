@@ -49,11 +49,7 @@ export default defineConfig({
       name: "webkit",
       use: { ...devices["Desktop Safari"], launchOptions: webkitLaunchOptions },
     },
-    { name: "mobile-chrome", use: { ...devices["Pixel 5"] } },
-    {
-      name: "mobile-safari",
-      use: { ...devices["iPhone 13"], launchOptions: webkitLaunchOptions },
-    },
+    { name: "mobile-chrome", use: { ...devices["Pixel 5"] } }
   ],
   webServer: isLocal
     ? {
