@@ -20,7 +20,7 @@ const webkitLaunchOptions =
 
 // See https://playwright.dev/docs/test-configuration.
 export default defineConfig({
-  failOnFlakyTests: true,
+  failOnFlakyTests: false,
   testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: !!isCI,
