@@ -1,20 +1,20 @@
 {
-  "../../excel-collab/lib/Chart-nk48PcCZ.mjs": {
-    "file": "assets/Chart-nk48PcCZ-BruF4RMg.js",
-    "name": "Chart-nk48PcCZ",
-    "src": "../../excel-collab/lib/Chart-nk48PcCZ.mjs",
+  "../../excel-collab/lib/Chart-DhW5SHlI.mjs": {
+    "file": "assets/Chart-DhW5SHlI-BLhd898F.js",
+    "name": "Chart-DhW5SHlI",
+    "src": "../../excel-collab/lib/Chart-DhW5SHlI.mjs",
     "isDynamicEntry": true,
     "imports": [
-      "index.html",
-      "../../excel-collab/lib/index.es.js"
+      "../../excel-collab/lib/index.es.js",
+      "index.html"
     ]
   },
   "../../excel-collab/lib/excelize.wasm.gz": {
-    "file": "assets/excelize.wasm-C-38TlP1.gz",
+    "file": "assets/excelize.wasm-BckPoObZ.gz",
     "src": "../../excel-collab/lib/excelize.wasm.gz"
   },
   "../../excel-collab/lib/index.es.js": {
-    "file": "assets/index.es-D9u-BBan.js",
+    "file": "assets/index.es-BsjaHt9d.js",
     "name": "index.es",
     "src": "../../excel-collab/lib/index.es.js",
     "isDynamicEntry": true,
@@ -22,19 +22,19 @@
       "index.html"
     ],
     "dynamicImports": [
-      "../../excel-collab/lib/Chart-nk48PcCZ.mjs"
+      "../../excel-collab/lib/Chart-DhW5SHlI.mjs"
     ],
     "assets": [
-      "assets/excelize.wasm-C-38TlP1.gz",
-      "assets/main-CH8B9IBU.js"
+      "assets/excelize.wasm-BckPoObZ.gz",
+      "assets/main-D-lEG2va.js"
     ]
   },
   "../../excel-collab/lib/main.js": {
-    "file": "assets/main-CH8B9IBU.js",
+    "file": "assets/main-D-lEG2va.js",
     "src": "../../excel-collab/lib/main.js"
   },
   "index.html": {
-    "file": "assets/index-BnJrEf9N.js",
+    "file": "assets/index-CQY0z7LU.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
